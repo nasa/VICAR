@@ -1,0 +1,6 @@
+.Title
+[4mVIKING - SEDR LISTINGS Menu[0m                           (page 1 of 1)
+.Proc VOLSTSDR
+[1mVOLSTSDR[0m  - Lists the Viking Orbiter SEDR data for a specified FSC
+            time.
+.END

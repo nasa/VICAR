@@ -1,0 +1,452 @@
+/* Processes the ALLOC, DEALLOC, and REWIND tape commands.		*/
+
+#include "stdh.inp"		/* system standard  (REQUIRED)		*/
+#include "taeconf.inp"		/* TAE configuration (REQUIRED)		*/
+#include "symtab.inc"		/* TM symbol table			*/
+#include "tmhost.inp"		/* TM host-dependent definitions	*/
+#include "tminc.inc"		/* TM definitions			*/
+
+#include "vicartae.inc"		/* VICAR-specific definitions		*/
+
+#include <ssdef.h>
+#include <iodef.h>
+#include <descrip.h>
+#include <psldef.h>
+#include <dvidef.h>
+#include <devdef.h>
+#include <fibdef.h>
+
+/*
+    TCL globals for tape handling:
+
+    $TAPES, $TFILE, and $TREC are columns of a table for allocated
+    and/or mounted tapes.  Each element of $TAPES is of form 
+    "symbolicname=devicename".  $TFILE is the current physical position,
+    zero if position unknown, and -1 if the tape is not mounted.
+    $TREC is the record position.
+
+    The globals are implicitly passed to every process so the process
+    knows the tape position.  The globals are returned as output
+    values from each process.
+
+    At BOT, $TFILE is 1 and $TREC is 1.
+
+ */
+
+    GLOBAL struct VARIABLE *tapes_gbl;
+    GLOBAL struct VARIABLE *tfile_gbl;
+    GLOBAL struct VARIABLE *trec_gbl;
+
+    TEXT *hostmsg();
+
+
+/*	alloc_do.  Intrinsic processing for the ALLOCATE command.
+ *
+ *	Allocate must be done in TM; if done outboard by a program,
+ *	the allocate goes away upon image exit; if done outboard by
+ *	a DCL command, there is no way to get hold of the exact
+ *	device allocated.
+ */
+
+    FUNCTION CODE alloc_do(procctx, cmdctx)
+
+    struct CONTXT *procctx;	/* in/out: enclosing proc contxt	*/
+    struct CONTXT *cmdctx;	/* in/out: command contxt		*/
+
+    {
+    struct VARIABLE *d, *n;	/* variables for DEVICE and NAME	*/
+    TEXT  full_name[TAPEDEVSIZE+1];	/* full device name allocated	*/
+    COUNT i, index;
+    CODE code;
+    TEXT **tapes_cvp, string[STRINGSIZ+1];
+    struct VARIABLE *lookex();
+    TEXT	*s_save();
+    TEXT *skey_vv[1];
+    IMPORT struct VARIABLE *skey_gbl;
+    TEXT alloc_msg[STRINGSIZ+1];
+
+    d = lookex(&(*cmdctx).parmst, "DEVICE");
+    n = lookex(&(*cmdctx).parmst, "NAME");
+    tapes_cvp = (TEXT **) (*tapes_gbl).v_cvp;	/* $TAPES value pointer	*/
+    i = i_search_name (tapes_cvp, (*tapes_gbl).v_count, SVAL(*n,0));
+    if (i >= 0)
+        {
+    	tmmsg(PROCFAIL, "Symbolic name '%s' in use.", "TAE-INUSE", 
+              SVAL(*n,0));
+        return (DO_CHECK);
+        }
+    for (i = 0; i < (*d).v_count; i++)	/* Try each device until successful */
+	{
+	code = alloc_dev(SVAL(*d,i), full_name, alloc_msg);
+	if (code == SUCCESS)
+	    break;
+	}
+    if (code != SUCCESS)	/* Don't print err mess unless all devs fail */
+	{
+	tmmsg(PROCFAIL, alloc_msg, "TAE-NOTAVAIL");
+        return (DO_CHECK);
+	}
+    i = i_search_device (tapes_cvp, (*tapes_gbl).v_count, full_name);
+    if (i >= 0)
+        {
+	tmmsg(PROCFAIL, "'%s' already allocated.", "TAE-ALLOC", full_name);
+	return (DO_CHECK);
+	}
+
+/*	Define a logical with the same logical name as the symbolic name */
+
+    code = deflog_job(SVAL(*n,0), full_name);
+    if (code != SUCCESS)
+	{
+	tmmsg(PROCFAIL, "Unable to define logical name '%s'.  %s.",
+			"TAE-ALLOCLOG", SVAL(*n,0), hostmsg(code));
+	return (DO_CHECK);
+	}
+
+/*	add new entry to tape tables		*/
+
+    s_copy (SVAL(*n,0), string);		/* build $TAPE entry	*/
+    s_append("=", string);
+    s_append(full_name, string);
+    index = (*tapes_gbl).v_count;		/* current table count	*/
+    if (index >= (*tapes_gbl).v_maxc)		/* if no room in table	*/
+        {
+	tmmsg(PROCFAIL, "More than %d tapes in use.", "TAE-MANYTAPES", 
+	      (*tapes_gbl).v_maxc);
+	return (DO_CHECK);
+	}
+    (*tapes_gbl).v_count ++;
+    SVAL(*tapes_gbl, index) = s_save(string);
+    index = (*tfile_gbl).v_count;
+    if (index < (*tfile_gbl).v_maxc)
+        {
+        (*tfile_gbl).v_count++;
+        IVAL(*tfile_gbl, index) = -1;		/* flag: not mounted	*/
+        }
+    index = (*trec_gbl).v_count;
+    if (index < (*trec_gbl).v_maxc)
+        {
+        (*trec_gbl).v_count++;
+        IVAL(*trec_gbl, index) = 1;		/* initial record pos	*/
+        }
+
+    /* note that $SKEY is set to device name */
+
+    skey_vv[0] = full_name;			/* value vector	for...  */
+    set_value (skey_gbl, (GENPTR)skey_vv, 1);	/* set $SKEY		*/
+    return (DO_CHECK);				/* already written 	*/
+    }						/* success message	*/
+
+/*	alloc_dev.	    Allocate device.
+ *
+ *	Under VMS version 4, the device must be allocated by the parent
+ *	TM process in order for the subprocess to access it properly.
+ *
+ *	Since the allocation is done in user mode, it should go away
+ *	upon image exit from the TM.
+ */
+
+    FUNCTION CODE alloc_dev (name, device, msg)
+
+    TEXT	name[];			/* in: device to be allocated	*/
+    TEXT	device[TAPEDEVSIZE+1];	/* out: device allocated	*/
+    TEXT	msg[STRINGSIZ+1];	/* out: error message if needed	*/
+
+    {
+    CODE			code;
+    short			len;
+    struct dsc$descriptor	devnam_dsc, physnam_dsc;
+
+    devnam_dsc.dsc$w_length = strlen(name);	/* Input to $alloc --	*/
+    devnam_dsc.dsc$b_dtype = DSC$K_DTYPE_T;	/* descriptor pointing	*/
+    devnam_dsc.dsc$b_class = DSC$K_CLASS_S;	/* to logical device	*/
+    devnam_dsc.dsc$a_pointer = name;		/* name.		*/
+
+    physnam_dsc.dsc$w_length = TAPEDEVSIZE+1;	/* Output from $alloc	*/
+    physnam_dsc.dsc$b_dtype = DSC$K_DTYPE_T;	/* descriptor pointing	*/
+    physnam_dsc.dsc$b_class = DSC$K_CLASS_S;	/* to physical device	*/
+    physnam_dsc.dsc$a_pointer = device;		/* name			*/
+
+    code = sys$alloc(&devnam_dsc, &len, &physnam_dsc, 0, 0);
+
+    if ((code == SS$_NORMAL) || (code == SS$_BUFFEROVF))
+	{
+	if (len >= TAPEDEVSIZE) len = TAPEDEVSIZE;
+	device[len] = '\0';
+	sprintf(msg, "Device %s allocated.", device);
+	put_stdout(msg);
+	code = SUCCESS;
+	}
+    else
+	{
+	strcpy(msg, hostmsg(code));
+	}
+    return (code);
+    }
+
+/*	dealloc_do.  Intrinsic processing for deallocation.
+ */
+
+    FUNCTION CODE dealloc_do (procctx, cmdctx)    
+    struct CONTXT *procctx;	/* in/out: enclosing proc contxt	*/
+    struct CONTXT *cmdctx;	/* in/out: command contxt		*/
+
+    {
+
+    struct VARIABLE *d, *n;	/* variables for DEVICE and NAME	*/
+    TEXT  full_name[TAPEDEVSIZE+1];	/* full device name allocated	*/
+    COUNT i, index, n_index, d_index;
+    CODE code;
+    TEXT **tapes_cvp, string[STRINGSIZ+1], e_name[TAPENAMESIZE+1];
+    struct VARIABLE *lookex();
+    BOOL ansi_tape;
+
+    ansi_tape = FALSE;
+
+    d = lookex(&(*cmdctx).parmst, "DEVICE");
+    n = lookex(&(*cmdctx).parmst, "NAME");
+    tapes_cvp = (TEXT **) (*tapes_gbl).v_cvp;	/* $TAPES value pointer	*/
+    if ((*d).v_count != 0)			/* DEVICE present	*/
+        {
+	code = i_full_name(SVAL(*d,0), full_name);
+	if ((code&1) != 1) 
+	    {
+	    tmmsg(PROCFAIL, "Unknown device '%s'.", "TAE-BADDEV", 
+	          SVAL(*d,0));
+	    return (DO_CHECK);
+	    }
+	d_index = i_search_device (tapes_cvp, (*tapes_gbl).v_count, full_name);
+	if (d_index < 0)
+	    ansi_tape = TRUE;
+        }
+    if ((*n).v_count != 0)			/* NAME present		*/
+	{
+        n_index = i_search_name (tapes_cvp, (*tapes_gbl).v_count,
+			         SVAL(*n,0));
+	if (n_index < 0)
+	    {
+	    tmmsg (PROCFAIL, "Undefined symbolic device '%s'.", "TAE-SYMBOL", 
+	    	   SVAL(*n,0));
+	    return (DO_CHECK);
+	    }
+	i_crack (tapes_cvp[n_index], e_name, full_name);    /* get device */
+	}
+    if ((*d).v_count != 0  &&  (*n).v_count != 0)	/* NAME and DEVICE 	 */
+        {
+	if (n_index != d_index)
+	    {
+	    tmmsg(PROCFAIL, "Inconsistent NAME and DEVICE.", "TAE-INCONS");
+	    return (DO_CHECK);
+	    }
+	index = n_index;
+	}
+    else if ((*d).v_count == 0  &&  (*n).v_count == 0) /* neither present	*/
+        {
+        tmmsg(PROCFAIL, "No device identified.", "TAE-NODEVID");
+	return (DO_CHECK);
+	}
+    else if ((*d).v_count != 0)			/* DEVICE only present	*/
+        index = d_index;
+    else 					/* NAME only present	*/
+        index = n_index;			    
+    if (!ansi_tape && IVAL(*tfile_gbl, index) >= 0)
+	{
+	tmmsg(PROCFAIL, "Device '%s' is currently mounted.", 
+	      "TAE-MOUNTED", full_name);
+	return (DO_CHECK);
+	}
+    code = dealloc_dev(full_name);
+
+/*	remove entry from tape tables	*/
+
+    if (!ansi_tape)
+	{
+	tae_free(SVAL(*tapes_gbl, index));
+	for (i=index; i < (*tapes_gbl).v_count - 1; i++)
+            {
+            SVAL(*tapes_gbl, i) = SVAL(*tapes_gbl, i+1);
+            IVAL(*tfile_gbl, i) = IVAL(*tfile_gbl, i+1);
+            IVAL(*trec_gbl, i) = IVAL(*trec_gbl, i+1);
+            }
+	(*tapes_gbl).v_count--;
+	(*tfile_gbl).v_count--;
+	(*trec_gbl).v_count--;
+	}
+    return (DO_CHECK);
+    }
+
+/*	dealloc_dev.    Deallocate a device.
+ */
+
+    FUNCTION CODE dealloc_dev (device)
+
+    TEXT	device[];	/* in: device to deallocate	*/
+
+    {
+    CODE			code;
+    TEXT 			msg[STRINGSIZ+1];
+    short			len;
+    struct dsc$descriptor	devnam_dsc;
+
+    devnam_dsc.dsc$w_length = strlen(device);	/* Input to $dalloc --	*/
+    devnam_dsc.dsc$b_dtype = DSC$K_DTYPE_T;	/* descriptor pointing	*/
+    devnam_dsc.dsc$b_class = DSC$K_CLASS_S;	/* to logical device	*/
+    devnam_dsc.dsc$a_pointer = device;		/* name.		*/
+
+    code = sys$dalloc(&devnam_dsc, PSL$C_SUPER);
+    if (code == SS$_NORMAL)
+	{
+	sprintf(msg, "Device %s deallocated.", device);
+	put_stdout(msg);
+	code = SUCCESS;
+	}
+    else
+	{
+	tmmsg(PROCFAIL, hostmsg(code), "TAE-NOTDEALL");
+	code = DO_CHECK;
+	}
+    return (code);
+    }
+
+/*	rewind_do -- rewind a tape for REWIND command
+ */
+
+    FUNCTION CODE rewind_do(procctx, cmdctx)
+
+    struct CONTXT *procctx;	/* in/out: enclosing proc contxt	*/
+    struct CONTXT *cmdctx;	/* in/out: command contxt		*/
+
+    {
+    TEXT		*device, **tapes_cvp;
+    TEXT		e_name[STRINGSIZ+1], full_name[TAPEDEVSIZE+1];
+    CODE		code;
+    COUNT		index;
+    TAEINT		i;
+    short		chan, len;
+    struct VARIABLE	*v;
+    struct VARIABLE	*lookex();
+    struct fibdef1 fib;
+    struct dsc$descriptor fibdesc;
+    struct dsc$descriptor dev_nam;
+    long devchar;
+    struct itmlst dvilist[] =
+		{ sizeof(devchar), DVI$_DEVCHAR, &devchar, 0,
+		  0, 0, 0, 0
+		};
+    struct
+	{
+	short status;
+	short transfer;
+	long dviinfo;
+	} iosb;
+
+    v = lookex(&(*cmdctx).parmst, "DEVICE");
+    device = SVAL(*v,0);
+
+    tapes_cvp = (TEXT **) (*tapes_gbl).v_cvp;	/* $TAPES value pointer	*/
+
+    code = i_full_name(device, full_name);
+    if ((code&1) != 1) 
+	{
+	tmmsg(PROCFAIL, "Unknown device '%s'.", "TAE-BADDEV", device);
+	    return (DO_CHECK);
+	}
+    index = i_search_device (tapes_cvp, (*tapes_gbl).v_count, full_name);
+
+    dev_nam.dsc$w_length = strlen(full_name);
+    dev_nam.dsc$b_dtype = DSC$K_DTYPE_T;
+    dev_nam.dsc$b_class = DSC$K_CLASS_S;
+    dev_nam.dsc$a_pointer = full_name;
+
+    code = sys$assign(&dev_nam, &chan, 0, 0);
+    if ((code & 1) != SS$_NORMAL)
+	{
+	tmmsg(PROCFAIL, hostmsg(code), "TAE-ASGNFAIL");
+	return (DO_CHECK);
+	}
+
+    code = sys$getdviw(0,chan,0,&dvilist,0,0,0,0);
+    if ((code & 1) != SS$_NORMAL)
+	{
+	sys$dassgn(chan);
+	tmmsg(PROCFAIL, hostmsg(code), "TAE-REWFAIL");
+	return (DO_CHECK);
+	}
+
+    if ((devchar & DEV$M_FOR) != 0)		/* Foreign tape */
+	{
+	if (index < 0)
+	    {
+	    sys$dassgn(chan);
+	    tmmsg(PROCFAIL, "Undefined symbolic device name '%s'.",
+		     "TAE-SYMBOL", device);
+	    return (DO_CHECK);
+	    }
+	code = sys$qiow(0, chan, IO$_REWIND, &iosb, 0,0,0,0,0,0,0,0);
+	if ((code & 1) != SS$_NORMAL || (iosb.status & 1) != SS$_NORMAL)
+	    {
+	    sys$dassgn(chan);
+	    tmmsg(PROCFAIL, hostmsg(code), "TAE-REWFAIL");
+	    return (DO_CHECK);
+	    }
+	IVAL(*tfile_gbl, index) = 1;
+	IVAL(*trec_gbl, index) = 1;
+	}
+    else					/* ANSI tape */
+	{
+	fibdesc.dsc$w_length = sizeof(fib);
+	fibdesc.dsc$a_pointer = &fib;
+
+	for (i=0; i<sizeof(fib); i++)
+	    *(((char *)&fib) + i) = 0;
+	fib.fib$w_cntrlfunc = FIB$C_REWINDVOL;
+
+	code = sys$qiow(0, chan, IO$_ACPCONTROL,
+			&iosb,0,0,&fibdesc,0,0,0,0,0);
+	if ((code & 1) != SS$_NORMAL || (iosb.status & 1) != SS$_NORMAL)
+	    {
+	    sys$dassgn(chan);
+	    tmmsg(PROCFAIL, hostmsg(code), "TAE-REWFAIL");
+	    return (DO_CHECK);
+	    }
+	}
+
+    code = sys$dassgn(chan);
+    if ((code & 1) != SS$_NORMAL)
+	{
+	tmmsg(PROCFAIL, hostmsg(code), "TAE-REWFAIL");
+	return(DO_CHECK);
+	}
+
+    return (DO_CHECK);
+    }
+
+/*	deflog_job -- defines a logical name in the job table
+ */
+
+    FUNCTION CODE deflog_job(lognam, value)
+
+    TEXT lognam[];
+    TEXT value[];
+
+    {
+    int stat;
+    TEXT table[] = "LNM$JOB";
+    TEXT logname[STRINGSIZ+1];
+
+    $DESCRIPTOR(name_field, logname);
+    $DESCRIPTOR(value_field, value);
+    $DESCRIPTOR(table_field, table);
+
+    make_upper_case(logname, lognam);
+
+    name_field.dsc$w_length = strlen(logname);
+    value_field.dsc$w_length = strlen(value);
+    table_field.dsc$w_length = strlen(table);
+
+    stat = lib$set_logical(&name_field, &value_field, &table_field);
+    if (stat != SS$_NORMAL && stat != SS$_SUPERSEDE)
+	return stat;
+
+    return SUCCESS;
+    }

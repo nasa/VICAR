@@ -1,0 +1,10 @@
+/**/ #
+/**/ # Makefile for checkhost program
+/**/ #
+
+CINCLUDES = -I$(TINC)
+DEPLIBS =
+LINKLIBS =
+LIBSEARCHPATH =
+
+SingleCProgramTarget(checkhost)

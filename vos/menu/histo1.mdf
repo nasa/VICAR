@@ -1,0 +1,34 @@
+.Title
+[4mHISTOGRAM GENERATION Menu[0m                             (page 1 of 1)
+.Proc FIT
+fit      - Performs automatic linear stretches on halfword images,
+           based on histogram. Can convert halfword to byte format.
+.Proc HIST
+[1mHIST[0m     - Prints DN-frequency histogram of all or portions of an 
+           image along with image statistics.
+.Proc HISTGEN
+[1mHISTGEN[0m  - Generates histogram dataset of an image.
+.Proc IDX
+idx      - Displays VICAR images interactively.(Optional histograms)
+.Proc MASKV
+maskv    - Formats any image for film recording by placing an 
+           information mask around the image. Labels and histograms optional.
+.Proc MULTOVLY
+multovly - IBIS program performing image overlay to produce a table 
+           of DN-combination counts vs. DN-combinations (histogram of DN-
+           combinations) in sorted order in an interface file.
+.Proc SHIST
+[1mSHIST[0m    - Produces a simple histogram on terminal screen.
+.Proc VGRMASK
+vgrmask  - Formats processd Voyager images into the Voyager 
+           Systematic format with an information mask for film recorder
+           display. (Optional histograms).
+.help
+
+The HISTOGRAM GENERATION section contains those programs which allow the 
+user to generate a histogram of a dataset. These programs include:
+
+fit                HIST               HISTGEN            idx
+maskv              multovly           SHIST              vgrmask
+
+.end

@@ -1,0 +1,37 @@
+.Title
+[4mFILTER Menu[0m                                           (page 1 of 2)
+.Proc BOXFLT2
+[1mBOXFLT2[0m  - Applies either a highpass or lowpass filter to a dataset.
+.Proc CONCOMP1
+[1mCONCOMP1[0m - Removes high frequency noise components from an image.
+           Typically used on classified or stratified images produced by 
+           FASTCLAS or USTATS.
+.Proc FIL2
+[1mFIL2[0m     - Computes filter weights from various functions for input
+           to FILTER.
+.Proc FILTER
+[1mFILTER[0m   - Filters images using user-specified weights.
+.Proc FILTER2
+[1mFILTER2[0m  - Procedure which calculates filter weights from various 
+           functions and then applies weights in the spacial domain. (Calls 
+           FIL2 and FILTER.)
+.Proc MEDIAN
+[1mMEDIAN[0m   - Performs nonlinear spatial filtering (highpass or 
+           lowpass) based upon the median DN of a rectangle window.
+.Proc SBOXFLT
+[1mSBOXFLT[0m  - Performs 2-D highpass box filter with all filter weights in box
+           in box equal to 1.
+
+.Menu FILTER2.MDF
+[7mAdditional FILTER Menu Selections[0m
+
+.help
+
+The FILTERING section contains those programs which allow the user to perform
+a filtering operation on an image. These programs include:
+
+BOXFLT2             CONCOMP1            FIL2                FILTER
+FILTER2             MEDIAN              SBOXFLT             SHADY
+SHADY2              SIMPLIFY            TFILT               WIENER
+
+.end

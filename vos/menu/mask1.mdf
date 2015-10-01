@@ -1,0 +1,21 @@
+.Title
+[4mMASK GENERATION Menu[0m                                   (page 1 of 1)
+.Proc GPWSMASK
+[1mGPWSMASK[0m  - Formats the Galileo PWS data for hardcopy display.
+.Proc MASKV
+[1mMASKV[0m     - Formats any image for film recording by placing an 
+            information mask around the image. Labels & histograms optional.
+.Proc VGRMASK
+[1mVGRMASK[0m   - Formats processed Voyager images into the Voyager 
+            Systematic format with information mask for film recorder 
+            display.
+.help
+
+
+The MASK GENERATION section consists of those programs which allow the user 
+to reformat VICAR data and generate a mask around the data suitable for film 
+recorder display. These programs include:
+
+GPWSMASK           MASKV              VGRMASK
+
+.end

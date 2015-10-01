@@ -1,0 +1,37 @@
+.Title
+[4mPLOTTER DISPLAY Menu[0m                                  (page 1 of 2)
+.Proc IMP
+[1mIMP[0m      - Plots multispectral image data interactively on a display 
+           device.
+.Proc OTF1
+otf1     - Performs 1-dimensional FFT's to compute Optical Transfer 
+           Function from degraded edges in images, or from a line spread 
+           function or tabular real function.
+.Proc PLOT3D
+[1mPLOT3D[0m   - IBIS program plots perspective view 3-D Graphics-1 files.
+.Proc PLOTINT
+[1mPLOTINT[0m  - IBIS program plotting columns of an interface file.
+.Proc PLOTTING
+[1mPLOTTING[0m - Selects (allocates) a plotting device for use with the 
+           device-independent plotting system.
+.Proc PLTGRAF
+[1mPLTGRAF[0m  - IBIS program plots Graphics-1 file inside a labeled box.
+.Proc PLTSYM
+[1mPLTSYM[0m   - IBIS program plots CALCOMP special characters on the 
+           plotting device via a 3-D graphics file.
+.Proc POWER
+[1mPOWER[0m    - Computes 1-dimensional power spectrum of specified area 
+           in an image using FFT.
+
+.Menu PLOT2.MDF
+[7mAdditional PLOTTER DISPLAY Menu Selections[0m
+.help
+
+The PLOTTER DISPLAYS section contains those programs which allow the user 
+to generate different types of plots. These programs include:
+
+IMP                otf1               PLOT3D             PLOTINT
+PLOTTING           PLTGRAF            PLTSYM             POWER
+QPLOT              rg                 STATPLT            TIEPLOT
+
+.End

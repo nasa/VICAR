@@ -1,0 +1,8 @@
+# Imakefile for P1 Subroutines and Applications
+#
+
+all:  make_sub 
+
+make_sub: 
+	($(CD) sub; $(V2UTIL)/bldcomfiles.csh $(R1LIB))
+

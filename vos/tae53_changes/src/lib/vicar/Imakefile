@@ -1,0 +1,33 @@
+/**/ #
+/**/ #	vicartmlib - sources for libtaevicar.a
+/**/ #
+
+LIBRARY = taevicar
+
+CINCLUDES = -I. -I$(TAEINC)
+
+SRCS = $(TAESRC)/lib/vicar//**/*.c
+
+/**/ # old version follows:
+/**/ # SRCS = \
+/**/ # flag.c \
+/**/ # listproc.c \
+/**/ # make_upper_case.c \
+/**/ # mount_unix.np.c \
+/**/ # passthru.c \
+/**/ # prstyle.c \
+/**/ # tapesubs.c
+
+OBJS = \
+ flag.o \
+ listproc.o \
+ make_upper_case.o \
+ mount_unix.np.o \
+ passthru.o \
+ prstyle.o \
+ rm_unix.np.o \
+ tapesubs.o
+
+SimpleLibraryTarget($(LIBRARY),$(OBJS))
+
+DependCTarget()

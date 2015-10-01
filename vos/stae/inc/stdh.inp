@@ -1,0 +1,101 @@
+/******************************************************************************
+ *	Copyright (c) 1990, 1991, 1992,
+ *	National Aeronautics and Space Administration
+ *	ALL RIGHTS RESERVED
+ *
+ *	The software (programs, data bases and/or documentation) on or in
+ *	any media can not be reproduced, disclosed or used except under
+ *	terms of the license between COSMIC and your organization.
+ *****************************************************************************/
+
+/*>>BSD UNIX<<	*/
+/*	THE STANDARD HEADER
+ *
+ *      11-AUG-87 Added COMPACT_UCOUNT...tpl
+ *	07-apr-88 Made NULL define conditional...ljn
+ *	08-jun-88 Remove ascii dependency:...tp
+ *		  1. replace character classification and case conversion
+ *		     macros with 'chartype.inc' and 'chartype.c'.
+ * 02-aug-89	PS/2 port...ljn
+ * 24-feb-92	Removed abs() macro (causes too many problems)...ljn
+ * 05-oct-92	IBM RS/6000 port...rt
+ *
+ */
+
+#ifndef I_STDH			/* prevent double include		*/
+#define I_STDH	0
+
+
+#include 	"sitedef.inp"
+
+/* the pseudo storage classes
+ */
+#define FAST	register
+#define GLOBAL	
+#define IMPORT	extern
+#define INTERN	static
+
+/*	The pseudo types:
+ *
+ *	A COUNT is used when you need only 16 bits of precision and you
+ *	prefer compact object code on a 32 bit machine.  COMPACT_COUNT
+ *	is used when you need only 16 bits of precision and you do not
+ *	want to waste data space.
+ *
+ *	Generally, COUNT is used for non-repeated (e.g., scalar) 
+ *	counters.  COMPACT_COUNT is used for counters in tables.
+ */
+
+typedef char TEXT;
+#ifdef AIX386
+typedef short TINY;		/* 'char' is unsigned on PS/2 		*/
+#ifdef VOID			/* VOID is defined in /usr/include  	*/
+#undef VOID
+#endif
+#else
+#ifdef AIX
+typedef short TINY;             /* 'char' is unsigned on RS/6000        */
+#else
+typedef char TINY;
+#endif
+#endif
+typedef double DOUBLE;
+typedef int BOOL;
+typedef void VOID;
+typedef long LONG;
+typedef int COUNT;
+typedef short COMPACT_COUNT;
+typedef short BITS; 
+typedef unsigned BYTES;
+typedef unsigned char UTINY;
+typedef unsigned long ULONG;
+typedef unsigned int UCOUNT;
+typedef unsigned short COMPACT_UCOUNT;
+
+/* system parameters
+ */
+#define STDIN	0
+#define STDOUT	1
+#define STDERR	2
+#ifndef NULL
+#ifdef __cplusplus
+#define NULL	0
+#else
+#define NULL ((void *)0)
+#endif
+#endif
+#define READ	0
+#define WRITE	1
+#define UPDATE	2
+#define BYTMASK	0377
+
+/*	macros
+ */
+#define max(x, y)	(((x) < (y)) ? (y) : (x))
+#define min(x, y)	(((x) < (y)) ? (x) : (y))
+#define gtc(pf)	(0 < (pf)->_nleft ? (--(pf)->_nleft, *(pf)->_pnext++ & BYTMASK) \
+	: getc(pf))
+#define ptc(pf, c) ((pf)->_nleft < 512 ? (pf)->_buf[(pf)->_nleft++] = (c) \
+	: putc(pf, c))
+
+#endif

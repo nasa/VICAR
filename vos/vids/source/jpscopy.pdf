@@ -1,0 +1,61 @@
+procedure help=* options=nointerrupt
+parm plane1 string count=1 default=bw
+parm plane2 string count=1 default=bw
+parm device string count=0:1 default=--
+body
+chkvids1
+sendvar (_proc,plane1,plane2,device) job=VIDSJOB
+chkvids2
+end-proc
+.title
+VIDS command JPSCOPY
+.help
+The current pseudocolor tables being used are saved according to
+the planes viewed; that is, every plane has its own table.  The
+JPSCOPY command is used to copy the pseudocolor table being applied
+to one plane to another plane.  JPSCOPY does not copy the stretch;
+only the pseudocolor table.  Use JSTRETCH-COPY to copy the stretch.
+
+Examples:
+
+JPSCOPY BW 3			! Apply the current BW table to plane 3
+JPSCOPY RED BW			! Use the table for the RED plane on the BW
+				! plane; if RED and BW are the same,
+				! nothing will happen.
+JPSCOPY 2 3			! Copy the table on plane 2 to plane 3
+.level1
+.vari plane1
+Plane of source
+pseudocolor table
+.vari plane2
+Plane of destination
+pseudo table
+.vari device
+Name of device to use
+.level2
+.vari plane1
+The PLANE1 parameter specifies the plane whose pseudocolor table is to be
+copied.  The entire table is copied directly to the pseudocolor table
+for the plane PLANE2.
+
+PLANE1 behaves the same as the standard VIDS plane parameter.  It 
+may be either a plane name or an integer.  See HELP PLANENAMES
+for details of how to use plane names.
+.vari plane2
+The PLANE2 parameter specifies the plane to which the pseudocolor table
+of PLANE1 is to be copied.  The entire table is copied directly.
+
+PLANE2 behaves the same as the standard VIDS plane parameter.  It 
+may be either a plane name or an integer.  See HELP PLANENAMES
+for details of how to use plane names.
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

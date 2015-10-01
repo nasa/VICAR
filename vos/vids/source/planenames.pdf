@@ -1,0 +1,83 @@
+procedure help=* options=nointerrupt
+body
+help planenames
+end-proc
+.title
+Referring to Image Planes
+.help
+Every display device has a certain number of image memory planes
+which may be referred to by number from one up to the maximum available
+for that device.  Each plane is eight bits deep;  see the "Virtual
+Raster Display Interface User's Guide" for details of what an image
+memory plane is.  Whenever a VIDS command needs one or more image memory
+planes as a parameter, the parameter is always given with the parameter
+PLANE (if only one is allowed) or PLANES (if multiple planes are allowed).
+The PLANE parameter is a string parameter, thus allowing the user to refer
+to a plane either by the plane number or by means of a plane name.
+
+A plane name may refer to a single plane or a collection of planes.  The
+user may define his/her own plane names with the JDEF-PLANE command.  In
+addition, when a display device is grabbed, certain special plane names
+are pre-defined automatically by VIDS.  They follow on the next pages.
+.page
+	o  RED: The image memory plane to use for displaying the red
+	   plane of a color image; i.e., the plane to connect to the red
+	   lookup table when in color mode.  Initially, after a JGRAB
+	   command, RED=1.
+
+	o  GREEN: The image memory plane to use for displaying the green
+	   plane of a color image; i.e., the plane to connect to the green
+	   lookup table when in color mode.  Initially, after a JGRAB
+	   command, GREEN=2 if two or more planes are available.
+
+	o  BLUE: The image memory plane to use for displaying the blue
+	   plane of a color image; i.e., the plane to connect to the blue
+	   lookup table when in color mode.  Initially, after a JGRAB
+	   command, BLUE=3 if three or more planes are available.
+
+	o  BW:  The image memory plane to use for displaying black and
+	   white images in black and white mode.  Initially, after a
+	   JGRAB command, BW=1.
+.page
+	o  GRAPHICS:  The graphics overlay plane.
+
+	o  ALL:  All image memory planes available.  The number of planes
+	   is different for different display devices.
+
+	o  COLOR:  The collection (RED, GREEN, BLUE).
+
+	o  IMAGE:  The collection of image planes being viewed.  If the
+	   device is in black and white mode, IMAGE is equivalent to BW.
+	   If it is in color mode, IMAGE is equivalent to COLOR.
+
+	o  VISIBLE:  The collection of all planes currently visible to
+	   the user.  If the graphics overlay is turned on and available,
+	   and the display device is in black and white mode, this name
+	   is equivalent to (BW,GRAPHICS).  If the display device is in
+	   color mode, this name would be equivalent to (COLOR,GRAPHICS).
+	   If an image plane has been turned off with the JOFF command,
+	   that plane is not included.
+.page
+Note that the plane names listed here are special, because they are
+pre-defined by VIDS for each active display device, and because their
+meaning may change as the device configuration changes.  A user defined
+plane name always points to the same image plane number, regardless of
+the configuration of the device.
+
+Thus, user defined plane names could be useful for defining virtual planes
+or unchanging color names in a procedure, as in the following example, where
+the user defined name OLDBW is used to save the original black and white
+plane.
+.page
+procedure			! loop through all planes once,
+parm i integer default=4	! from back to front
+body
+jdef-plane oldbw bw
+loop
+  jbw &i
+  let i = i - 1
+  if (i <= 0) break
+end-loop
+jbw oldbw
+end-proc
+.end

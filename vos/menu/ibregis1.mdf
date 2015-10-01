@@ -1,0 +1,38 @@
+.Title           ! IBREGIS1.MDF
+[4mIBIS REGISTRATION/MOSAICKING/MAP PROJECTION Menu[0m   (page 1 of 4)
+.Proc CORNER
+[1mCORNER[0m    - Finds good tiepoint locations by looking for corners
+            or features in the image.
+.Proc EDIBIS
+[1mEDIBIS[0m    - Interactive program for editing interface files.
+.Proc GETZVAL
+[1mGETZVAL[0m   - Extracts brightness values in an image from points 
+            specified in an interface file.
+.Proc IBISREGR
+[1mIBISREGR[0m  - Performs series of multiple linear regression analyses
+            on tabular files, searching for a best fit.
+.Proc OMC
+[1mOMC[0m       - Converts camera pointing matrices and spacecraft
+            vectors between Earth coordinates and planet coordinates.
+.Proc OMCOR
+[1mOMCOR[0m     - Corrects the OM matrices for a set of image frames in
+            a planetary mosaic.  For Viking Orbiter data only.
+.Proc PHOTFIT2
+[1mPHOTFIT2[0m  - Determines the coefficients of various photometric
+            functions.
+
+.Menu IBREGIS2.mdf
+[7mAdditional REGISTRATION/MOSAICKING/MAP PROJECTION Selections[0m
+.Help
+
+The REGISTRATION/MOSAICKING/MAP PROJECTION section contains those programs 
+which allow the user to register the data, create a mosaic of the data and 
+map project the data.  The programs include:
+
+CORNER             EDIBIS             GETZVAL            IBISREGR
+OMC                OMCOR              PHOTFIT2           PICMATCH
+PLANETCNV          POLYCLIP           POLYGEOM           POLYMAP
+POLYMASK           POLYPMAP           POLYREG            RAPIDMOS
+TIECONM            TIEPARM            TIEPLOT
+
+.END

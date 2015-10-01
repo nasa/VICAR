@@ -1,0 +1,18 @@
+.TITLE
+EMACS
+.HELP
+			Function and Format
+
+
+	Function:
+
+	   EMACS invokes the Emacs editor.  If a Kept Emacs
+	   subprocess exists, the terminal is attached to 
+	   it.  If it does not exist, a new Kept Emacs process
+	   is spawned.
+
+
+	Format:
+
+	   EMACS      (no parameters allowed)
+.END

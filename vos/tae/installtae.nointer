@@ -1,0 +1,745 @@
+NOOP=noop	# MAC doesn't understand #! /bin/sh
+#
+#		TAE/UNIX INSTALLATION COMMAND PROCEDURE
+#	
+#  NOTE: Keep a record of the installation by using 'tee':
+#
+#		installtae |& tee install.log
+#
+#  REQUIREMENTS:
+#	Before starting this file, be sure your environment is set
+#	up as follows:
+#	    1. This file must be located in the top of the TAE tree.
+#	    2. The environment variable TAE must be set to the full
+#	       path name of the top of the TAE tree.
+#
+#  CHANGE LOG:
+#  23-jul-88	(LJN)	Apollo has problems when it sees foreign binaries 
+#			and objects during builds. We delete them up front.
+#  12-jan-89	(LJN)   Apollo doesn't have 'find' with '-prune' option.
+#			Someone (HP?) doesn't have grep -s.
+#  28-aug-89    (DAB)   Xos.h on a Mac expects a -DmacII and not a -DSYSV --
+#			that's what caused so many 'macII' changes.
+#   9-Sep-90	(BAW)	Using new reorganized tree and imake rules.
+#   9-Dec-90	(BAW)	Modifications for final layout of tae distrib tree
+#  12-dec-90	(LJN)	New Ada directories...ljn
+#  20-dec-90	(CW+KS) Remove . from PATHDIRS...cew,ks
+#  05-oct-92	(KBS)	Added man pages iff LOCAL install...kbs
+#  05-oct-92	(RT)	Changed V5.2 Beta to V5.2...rt
+#  06-oct-92	(KBS)	No more "default" demo building of "states"; iff LOCAL,
+#          		ensure UNBUILT demos get pulled from SCCS...kbs
+#  07-oct-92	(KBS)	Added timerdemo.cc to UNBUILT list...kbs
+#  09-oct-92	(KBS)	Add $TAEDEMOSRC to sccs get, no UNBUILT list...kbs
+#  12-oct-92	(RT)	Changed taemwm to mwm1.1.4...rt
+#  29-oct-92	(KBS)	Handle top of $TAEMAN for shell scripts, *README...kbs
+#  10-nov-92	(KBS)	Run catman iff $LOCAL...kbs
+#  11-nov-092	(RT)	UNBUILT_DEMOS brought back because codedemo and
+#			presdemo where being built against old libraries...rt
+#  12-nov-92	(RT)	$(UNBUILT) should be $UNBUILT...rt
+#  12-nov-92	(RT)	took out references to 1.1.3 and taemwm...rt
+#  29-jan-93	(RT)	Need to modify wb.rfg for IBM RS/6000...rt
+#  24-mar-93	(RT)	Use vuewm instead of mwm1.1.4 for HPs...rt
+#
+#==============================================================================
+#  SET UP SECTION.
+#  This section asks the user to define the desired configuration
+#  for this installation of TAE.
+#==============================================================================
+#
+# Define method for withholding NEWLINE from output of 'echo'.
+# See if 'echo -n' echoes the -n. If so, use 'echo "\c"'.
+if test `echo -n "" | awk '$1=="-n" {print "foobar"}'`
+then
+    CC1=
+    CC2='\c'
+else
+    CC1='-n'
+    CC2=
+fi
+
+VERSION="V5.2b"
+
+echo ""
+echo "      ***  INSTALLATION PROCEDURE FOR TAE PLUS $VERSION  ***"
+#------------------------------------------------------------------------------
+#----------------  Check For Correct Current Environment  ---------------------
+#------------------------------------------------------------------------------
+
+if test $TAE && test -d $TAE && (cd / ; test -f $TAE/installtae ) then
+
+    echo ""
+    echo "	** The top of the TAE tree is $TAE **"
+
+else
+    echo " "
+    echo "	The symbol TAE must be set to the full path name of "
+    echo "	the top of the TAE tree."
+    echo " "
+    echo "	This script file ($0) must be in the directory"
+    echo "	pointed to by TAE."
+    echo " "
+    echo "	Make the assignment and restart install procedure."
+    exit
+fi
+
+# assign basic TAE symbols
+. $TAE/bin/sh/taesetupall
+# extend path as per TAE user
+PATH="$PATH:$TAEBIN/$TAEPLAT:$TAEBIN/all"
+export PATH
+
+if test "$IS_SOL" = yes
+then
+    IMAKE="tae.mkmf -DSOL"
+else
+    IMAKE="tae.mkmf"
+fi
+ADAIMAKE="tae.mkmf"
+MAKE_STD_MACRO="TAE=$TAE"
+PATHDIRS="`echo $PATH | sed 's/:/ /g' | sed 's/ . / /g'`"
+#PATHDIRS="`echo $PATH | sed 's/:/ /g'`"
+
+# Numerous config requirements are in the .cf and .tmpl files. If this shell 
+# script were a Makefile instead, we would have these settings available.
+# We can still make them available by ECHOing the assignments from 
+# a generated Makefile into a dummy file containing the assignments. This
+# file can then be read into the environment.
+#
+# NOTE that one such variable that gets set here is MAKE. This allows
+# that MAKE can be defined in .tmpl file.
+$IMAKE
+make info $MAKE_STD_MACRO >tae.req
+. ./tae.req		# read in host platform config requirements
+rm -f tae.req
+
+# If there is a record of the previous installation options, ask
+# whether these should be used. If so, read them into the shell.
+USEPREVIOUS=no
+OPTFILE=$TAE/install.opt
+if test -f $OPTFILE
+then
+    echo ""
+    grep = $OPTFILE
+    echo ""
+# This is my modification.  This completely bypasses all interactive parts
+# of the installation.  Most of the code remains, but I just forced the
+# user to accept the install.opt options (easily edited) -STEVE
+ANS=yest
+    if test `expr $ANS : q.*` -gt 0
+    then
+      echo " "
+      echo "      Installation terminated at user request."
+      exit
+    fi
+    test `expr $ANS : y.*` -gt 0 && USEPREVIOUS=yes && . $OPTFILE
+fi
+
+#------------------------------------------------------------------------------
+#----------------  Ask What TAE Options Are To Be Installed  ------------------
+#------------------------------------------------------------------------------
+#
+if test $USEPREVIOUS = no
+then
+  echo ""
+  echo "	You are going to be asked to select various TAE options."
+  echo ""
+  echo "	After you answer all the questions, your responses will"
+  echo "	be displayed so that you can check them and correct any"
+  echo "	errors before the installation proceeds. "
+  echo ""
+  echo $CC1 "OK to continue? ([Yes]/No): $CC2"
+  read ANS; test $ANS || ANS=yes; ANS=`echo $ANS | tr [A-Z] [a-z]`
+  until test `expr $ANS : [yn].*` -gt 0
+      do
+          echo $CC1 "Enter Yes or No (or RETURN for default): $CC2"
+          read ANS; test $ANS || ANS=yes
+          ANS=`echo $ANS | tr [A-Z] [a-z]`
+      done
+  if test `expr $ANS : n.*` -gt 0
+  then
+      echo " "
+      echo "      Installation terminated at user request."
+      exit
+  fi
+
+#
+#  Options Question Loop.
+#  Parameters to aquire are:
+#    WINDOWS - is the graphics protion of TAE Plus desired?
+#    DEMOS - build TAE Plus demos?
+#    ADABIND - Ada bindings desired (Verdix compiler required)?
+#    CLFORTBIND - Classic Fortran Bindings?
+#
+  ACCEPT=no
+  until test `expr yes : $ACCEPT` -gt 0
+  do
+  {
+    #
+    #-- Is windowing portion of TAE Plus desired? ----------------------------
+    #
+    echo ""
+    echo "      To answer yes to the following question, you must have"
+    echo "      the following installed on your system:"
+    echo ""
+    echo "          X Windows Version 11 Release 4 (w/ fixes 1-18)"
+    echo "          Motif 1.1 -- 1.1.4"
+    echo "          C++ compiler"
+    echo ""
+    echo $CC1 \
+      "Install TAE Plus with graphics support? ([Yes]/No): $CC2"
+    read WINDOWS; test $WINDOWS || WINDOWS=yes
+    WINDOWS=`echo $WINDOWS | tr [A-Z] [a-z]`
+    until test `expr $WINDOWS : [yn].*` -gt 0
+       do
+         echo $CC1 "Enter Yes or No (or RETURN for default): $CC2"
+         read WINDOWS; test $WINDOWS || WINDOWS=yes
+         WINDOWS=`echo $WINDOWS | tr [A-Z] [a-z]`
+       done
+    if test `expr $WINDOWS : y.*` -gt 0
+    then
+      WINDOWS=yes
+    else
+      WINDOWS=no
+    fi
+
+    # See if this is a change from the last installation.
+    WINCVT=true
+    if [ -f $OPTFILE ]
+    then
+      PREVREC="`grep WINDOWS $OPTFILE`"
+      test -n "$PREVREC" && RESPONSE=`echo $PREVREC | awk -F= '{ print $2 }'`
+      test $WINDOWS = "$RESPONSE" && WINCVT=false
+    fi
+
+    # These are the defaults.
+    DEMOS=no
+    ADABIND=no
+
+    if test $WINDOWS = yes
+    then
+      #
+      #-- Build TAE Plus Demos? ---------------------------------------
+      #
+      echo ""
+      echo $CC1 \
+        "Build TAE Plus demonstration programs? (Yes/[No]): $CC2"
+      read DEMOS; test $DEMOS || DEMOS=no
+      DEMOS=`echo $DEMOS | tr [A-Z] [a-z]`
+      until test `expr $DEMOS : [yn].*` -gt 0
+         do
+           echo $CC1 "Enter Yes or No (or RETURN for default): $CC2"
+           read DEMOS; test $DEMOS || DEMOS=no
+           DEMOS=`echo $DEMOS | tr [A-Z] [a-z]`
+         done
+      if test `expr $DEMOS : y.*` -gt 0
+      then
+        DEMOS=yes
+      fi
+
+      #
+      #-------- Are Ada bindings desired? --------------------------------
+      #
+      echo ""
+      echo "      Installation of the TAE Plus Ada bindings requires a"
+      echo "      Verdix Ada compiler."
+      echo ""
+      echo "      You must also know the location of the Verdix"
+      echo "      Ada compiler on your system."
+      echo ""
+      echo $CC1 "Install Ada bindings? (Yes/[No]): $CC2"
+      read ANS
+      test $ANS || ANS=no; ANS=`echo $ANS | tr [A-Z] [a-z]`
+      until test `expr $ANS : [yn].*` -gt 0
+        do
+        echo $CC1 "Enter Yes or No (or RETURN for default): $CC2"
+        read ANS; test $ANS || ANS=no
+        ANS=`echo $ANS | tr [A-Z] [a-z]`
+        done
+      if test `expr $ANS : y.*` -gt 0
+      then
+        ADABIND=yes
+      fi
+    fi
+ 
+    #
+    #-- Are Classic Fortran bindings desired? --------------------------------
+    #
+    CLFORTBIND=no
+    echo " "
+    echo $CC1  "Install Classic TAE Fortran bindings? (Yes/[No]): $CC2"
+    read ANS
+    test $ANS || ANS=no
+    ANS=`echo $ANS | tr [A-Z] [a-z]`
+    until test `expr $ANS : [yn].*` -gt 0
+        do
+        echo $CC1 "Enter Yes or No (or RETURN for default): $CC2"
+        read ANS; test $ANS || ANS=no
+        ANS=`echo $ANS | tr [A-Z] [a-z]`
+        done
+    test `expr $ANS : y.*` -gt 0 && CLFORTBIND=yes
+
+    # See if this is a change from the last installation.
+    CLFORTCVT=true
+    if [ -f $OPTFILE ]
+    then
+      PREVREC="`grep CLFORTBIND $OPTFILE`"
+      test -n "$PREVREC" && RESPONSE=`echo $PREVREC | awk -F= '{ print $2 }'`
+      test $CLFORTBIND = "$RESPONSE" && CLFORTCVT=false
+    fi
+
+    #
+    #   Display all current option flags.
+    #
+    echo " "
+    echo "        Verify the Following Options Selected:"
+    echo ""
+    echo "	** Building graphics portion of TAE Plus: $WINDOWS **"
+    if test $WINDOWS = yes
+    then
+      echo "	** Installing TAE Plus demonstration programs: $DEMOS **"
+      echo "	** Installing Ada bindings:  $ADABIND **"
+    fi
+    echo "	** Installing Classic TAE Fortran bindings:  $CLFORTBIND **"
+  
+    echo " "
+    echo $CC1 "Is the above information correct? $CC2"
+    echo $CC1 "([Yes]/No/Quit): $CC2"
+    read ANS
+    test $ANS || ANS=yes; ANS=`echo $ANS | tr [A-Z] [a-z]`
+    until test `expr $ANS : [ynq].*` -gt 0
+      do
+        echo $CC1 "Enter Yes, No, or Quit (or RETURN for default): $CC2"
+        read ANS; test $ANS || ANS=yes
+        ANS=`echo $ANS | tr [A-Z] [a-z]`
+      done
+    if test `expr $ANS : q.*` -gt 0
+    then
+      echo " "
+      echo "      Installation terminated at user request."
+      exit
+    fi
+    ACCEPT=no; test `expr $ANS : y.*` -gt 0 && ACCEPT=yes
+  }
+  done
+
+  # Crack a file for maintaining TAE configuration options.
+  rm -f $OPTFILE
+  echo "#" >$OPTFILE
+  echo "# $OPTFILE." >>$OPTFILE
+  echo "#" >>$OPTFILE
+  echo "# Record of choices for most recent TAE installation." >>$OPTFILE
+  echo "# DO NOT DELETE THIS FILE." >>$OPTFILE 
+  echo "#" >>$OPTFILE
+
+  echo "	WINDOWS=$WINDOWS" >>$OPTFILE
+  echo "	DEMOS=$DEMOS" >>$OPTFILE
+  echo "	ADABIND=$ADABIND" >>$OPTFILE
+  echo "	CLFORTBIND=$CLFORTBIND" >>$OPTFILE
+fi
+
+CONFIGERR=false
+if test $TAEPLAT = UNKNOWN
+then
+  echo  "     Can't find the description of your host platform."
+  echo "      Consult the file $TAE/bin/all/platform for more information."
+  CONFIGERR=true
+fi
+
+if test $ADABIND = yes
+then
+  FOUND=false
+  echo ""
+  echo "  A check will now be made for the Ada compiler."
+  if whereis -bB $PATHDIRS -f ada | grep /ada
+  then
+    FOUND=true
+  fi
+  if test $FOUND = true
+  then
+    cd $TAEADA
+    # Do the Ada library directory creation now rather than during
+    # the processing phase since it requires a user response.
+    echo ""
+    echo "  In order to create an Ada library directory, you are asked"
+    echo "  next to enter the selection for the desired Ada compiler."
+    echo ""
+    $ADAIMAKE
+    $MAKE mklib $MAKE_STD_MACRO
+  else
+    echo ""
+    echo "  The Ada compiler was not found in any \$PATH"
+    echo "  directories."
+    CONFIGERR=true
+  fi
+fi
+  
+if test $CONFIGERR = true
+then
+  echo ""
+  echo "        Installation terminating."
+  exit
+fi
+
+#==============================================================================
+#  PROCESSING SECTION.
+#  Set up is complete at this point.  No more input is required.
+#  Messages will be output to the terminal to inform the user
+#  of progress.
+#  Processing proceeds in the following steps:
+#     Extraneous file cleanup
+#     Platform preparation
+#     Make Makefiles
+#     Make all
+#     Message file
+#==============================================================================
+#
+echo " "
+echo "  -------------------------------------------------------------------"
+echo "  There will be no more questions.  Installation processing starting."
+if test $WINDOWS = yes
+then
+  echo "      A first-time installation takes 30 minutes to an hour."
+else
+ echo "       A first-time installation takes 10 minutes to an hour."
+fi
+echo "                 `date`"
+echo "  -------------------------------------------------------------------"
+echo " "
+#
+if test $USEPREVIOUS = no
+then
+  if test $WINCVT = true
+  # This is a conversion from classic to plus (or vice versa).
+  then
+    rm -f $TAETM/tclwindows.o
+  fi
+  if test $CLFORTCVT = true
+  # Remove Fortran objs in TGENLIB; we are adding or deleting Fortran bindings.
+  then
+    rm -f $TAETAELIB/wrtstd.o
+    rm -f $TAETAELIB/xt.o
+    rm -f $TAETAELIB/xzcall.o
+    rm -f $TAETAELIB/xzinit.o
+  fi
+fi
+
+#
+#------------------------------------------------------------------------------
+#--------------------------  Update Files from SCCS  --------------------------
+#------------------------------------------------------------------------------
+#
+# Update tree with checked-in PDF's, shell scripts, TAE scripts and other
+# files that are not loaded into TM. (Only applies to Century.)
+#
+LOCAL=no
+if  [ -f /bin/hostname ]
+then
+  (test "`hostname`" = bat) && LOCAL=yes
+fi
+
+if test $LOCAL = yes
+then
+UNBUILT_DEMOS="\
+bounce2.c \
+minwpt.c \
+modaltest.c \
+setget.c \
+states.c \
+timerdemo.cc \
+timerdemo.c"
+
+	cd $TAEADA; $MAKE update
+	cd $TAEBIN/all; $MAKE *
+	cd $TAEBIN/csh; $MAKE *
+	cd $TAEBIN/sh; $MAKE *
+	cd $TAEPDF; $MAKE *
+	cd $TAETOOLS; $MAKE *
+	cd $TAEHELPWB; $MAKE *
+	cd $TAEDEMO/help; $MAKE *
+	cd $TAEDEMOSRC; $MAKE $UNBUILT_DEMOS
+	cd $THELP; $MAKE *
+	cd $TAE/env; $MAKE *
+	cd $TAE/config; $MAKE *
+	cd $TAE/menu; $MAKE *
+	cd $TAEDEMO/ps; $MAKE *
+	cd $TAE; $MAKE *
+        # Update all header files and Imakefiles before makedepend runs.
+	$MAKE `find $TAE \( -name SCCS -prune -o -name IV\* -prune \) -o  \
+	   \( -name \*.h -o \
+	      -name \*.inc -o \
+              -name \*.inp -o \
+              -name Imakefile \) -print`
+fi
+
+#
+#----------------------------  Create Include Files  --------------------------
+#------------------------------------------------------------------------------
+#        *********** CREATE INCLUDE FILE  $TAEINC/sitedef.inp ********** 
+#
+# Some compilers don't define these for the pre-processor pass.
+if test $TAEPLAT = MACII 
+then
+  echo " "
+  echo "	Create include file $TAEINC/sitedef.inp."
+
+  cd $TAEINC
+  chmod +w sitedef.inp
+  echo "/* define the host architecture 		*/" >sitedef.inp
+  if test $TAEPLAT = MACII
+  then
+    echo "#ifndef macII" >>sitedef.inp
+    echo "#define macII" >>sitedef.inp
+  fi
+  echo "#endif" >>sitedef.inp
+  echo "	Done."
+fi
+
+#
+#------------------------------------------------------------------------------
+#----------------  Create Platform Specific Sub-directories  ------------------
+#------------------------------------------------------------------------------
+#
+# Note: Some directories were already created by the InterViews build.
+test ! -d $TAEBIN/$TAEPLAT && mkdir -p  $TAEBIN/$TAEPLAT
+test ! -d $TAELIB && mkdir -p $TAELIB
+if test $WINDOWS = yes
+then
+    test ! -d $TAERES && mkdir -p $TAERES
+    test ! -d $TAEDEMOBIN && mkdir -p $TAEDEMOBIN
+    test ! -d $TAEDEMORES && mkdir -p $TAEDEMORES
+    test ! -d $TAEADALIB && mkdir -p $TAEADALIB
+fi
+test ! -d $TAEHELPINX && mkdir -p $TAEHELPINX
+
+#
+#------------------------------------------------------------------------------
+#--------------------------  Build the Makefiles  -----------------------------
+#------------------------------------------------------------------------------
+#
+cd $TAE
+echo " "
+echo "  Building all Makefiles for TAE source tree..."
+
+# do some special stuff if WINDOWS are not used
+if test $WINDOWS = yes 
+then
+    $MAKE Makefiles
+else
+    $IMAKE
+    (cd $TAESRCTAE; \
+      $IMAKE -DSRC_SUBDIRS="lib bin tm")
+    (cd $TAESRCTAE/lib; \
+      $IMAKE -DOLB_SUBDIRS="taec tae vicar")
+    (cd $TAESRCTAE/lib/taec; $IMAKE)
+    (cd $TAESRCTAE/lib/tae; $IMAKE)
+    (cd $TAESRCTAE/lib/vicar; $IMAKE)
+    (cd $TAESRCTAE/bin; \
+      $IMAKE -DBIN_SUBDIRS="checkhost convert msgbld") 
+    (cd $TAESRCTAE/bin/checkhost; $IMAKE)
+    (cd $TAESRCTAE/bin/convert; $IMAKE)
+    (cd $TAESRCTAE/bin/msgbld; $IMAKE)
+    (cd $TAETM; $IMAKE)
+fi
+
+# do some special stuff for FORTRAN
+    (cd $TAESRCTAE/lib/tae; \
+    $IMAKE -DCLFORTBIND="$CLFORTBIND")
+
+if test $LOCAL = yes && test $WINDOWS = yes
+then
+    $MAKE depend
+fi
+
+#
+#------------------------------------------------------------------------------
+#--------------------------  Clean Previous Install  --------------------------
+#------------------------------------------------------------------------------
+#
+if test -f install.platform ; then
+	PLATPREV=`cat install.platform`
+else
+	PLATPREV="*** no plat ***"
+fi
+
+if test "$PLATPREV" = "`platform`" ; then
+	echo " "
+	echo "  Continuing with build of platform:" `platform`
+else
+	echo " "
+	echo "  Cleaning files generated from previous installation..."
+	$MAKE clean
+	(cd $TAEDEMO; find . -name \*.o -exec rm -f {} \;)
+	rm -f $TAEDEMO/src/codedemo/Makefile.codedemo
+fi
+rm -f install.platform
+platform > install.platform
+
+#
+#------------------------------------------------------------------------------
+#--------------------------  Build the Libraries  -----------------------------
+#------------------------------------------------------------------------------
+#
+echo " "
+echo "  Building and installing the libraries..."
+(cd $TAESRCTAE/lib; $MAKE install)
+
+
+#
+#------------------------------------------------------------------------------
+#--------------------------  Install Ada Bindings  ----------------------------
+#------------------------------------------------------------------------------
+#
+if test $ADABIND = yes
+then
+  echo ""
+  echo "	Create Ada bindings."
+  cd $TAEADA
+  $MAKE build $MAKE_STD_MACRO
+fi
+
+#------------------------------------------------------------------------------
+#-----------------------------  Build programs  -------------------------------
+#------------------------------------------------------------------------------
+#
+#****************** CODE GENERATOR ***********************
+#
+if test $WINDOWS = yes
+then
+    echo " "
+    echo "	Building the code generator."
+    (cd $TAECG; $MAKE version install VERSION="$VERSION")
+fi
+
+#
+#****************** WorkBench ***********************
+#
+if test $WINDOWS = yes
+then
+	echo ""
+	echo "  Building the Workbench..."
+	(cd $TAEWB; $MAKE version install VERSION="$VERSION")
+fi
+
+#
+#************** mwm (mwm1.1.4) ******************
+#
+if test $WINDOWS = yes && test ! -f $TAEBIN/$TAEPLAT/mwm1.1.4
+then
+if test $TAEPLAT = sun4 || test $TAEPLAT = mipsel
+then
+	echo ""
+	echo "  Installing mwm1.1.4..."
+	(cd $TAEBIN/$TAEPLAT; cp $TAE/src/mwm/mwm1.1.4.$TAEPLAT mwm1.1.4)
+fi
+fi
+
+#
+#*************** Bin PROGRAMS ***********************
+#
+echo ""
+echo "	Create Bin programs."
+cd $TAESRCTAE/bin; $MAKE install
+
+#
+#**********  BUILD THE TAE MONITOR  *****************
+#
+echo ""
+echo "	Building the TAE Monitor program (TM)."
+
+if test $WINDOWS = yes
+then
+    WINLIB_MACRO=""
+    XWINDOWS=-DXWINDOWS
+else
+    WINLIB_MACRO="WPTDEPLIBS= WPTLINKLIBS= XWINLIBS= IVLIBS="
+    XWINDOWS=""
+fi
+(cd $TAETM 
+$MAKE version install $WINLIB_MACRO XWINDOWS=$XWINDOWS VERSION="$VERSION")
+
+#
+#------------------------------------------------------------------------------
+#---------------------  Convert resource (.res) files -------------------------
+#------------------------------------------------------------------------------
+#
+
+echo ""
+echo "	Rebuilding message file for the Applications Executive."
+cd $TAEHELPMSG; $IMAKE $MAKE
+
+
+if test $WINDOWS = yes
+then
+    echo ""
+    echo "	Converting all TAE resource files to host machine format."
+    # The Courier Bold fonts are too big on the IBM RS/6000
+    cd $TAERFG
+    if test $TAEPLAT = rs6000
+    then
+        if [ ! -f $TAERFG/wbbase.rfg ]
+        then
+            sed 's/("courB/("courR/g' $TAERFG/wb.rfg > $TAERFG/wbrs.rfg
+            mv $TAERFG/wb.rfg $TAERFG/wbbase.rfg
+            mv $TAERFG/wbrs.rfg $TAERFG/wb.rfg
+        fi
+    fi
+    cd $TAERFG; $IMAKE; $MAKE
+    cd $TAEDEMORFG; $IMAKE; $MAKE
+fi
+
+#
+#****************** MAN PAGES ***********************
+#
+if test $LOCAL = yes
+then
+  cd $TAEMAN
+  echo " "
+  echo "        Updating Top of Man Pages: $TAEMAN."
+  make *
+  for dir in man?
+  do
+	cd $dir
+  	echo " "
+  	echo "        Updating Man Pages in $TAEMAN/$dir."
+	make *
+	cd $TAEMAN
+  done
+  # Removing cat versions guarantees files which use .so (includes)
+  # will be updated if their .so file changed.
+  echo " "
+  echo "        Removing old cat versions of Man Pages...."
+  mv $TAEMAN/whatis $TAEMAN/whatis.save
+  rm -r $TAEMAN/cat?
+  echo " "
+  echo "        Running catman for Man Pages...please wait."
+  /usr/etc/catman -M . 135
+  echo "        catman completed (fails on whatis write if NOT tae)."
+fi
+
+#
+#****************** DEMO PROGRAMS ***********************
+#
+# Only build classic demos for local consumption.
+if test $LOCAL = yes
+then
+  echo " "
+  echo "	Building TAE Classic Demonstration programs."
+  (cd $TAEDEMOCLASSIC/ctests; $IMAKE; $MAKE version install VERSION="$VERSION")
+  if test $CLFORTBIND = yes
+  then
+    (cd $TAEDEMOCLASSIC/ftests; $IMAKE; $MAKE VERSION="$VERSION") 
+  fi
+fi
+
+if test $DEMOS = yes
+then
+    echo " "
+    echo "	Building TAE Plus Demonstration programs."
+    (cd $TAEDEMOSRC; $IMAKE; $MAKE install)
+fi
+
+echo "	***** TAE INSTALLATION COMPLETED `date` ****"
+echo ""
+echo "	Check above for possible installation errors."
+echo "	If any are found, correct them and re-run $0."
+exit

@@ -1,0 +1,71 @@
+procedure help=* options=nointerrupt
+parm planes string count=(0,3) default=--
+parm device string count=0:1 default=--
+body
+chkvids1
+sendvar (_proc,planes,device) job=VIDSJOB
+chkvids2
+end-proc
+.title
+VIDS command JCOLOR
+.help
+JCOLOR is used to put the display device into color mode.  The
+image planes used for the three colors red, green, and blue, respectively,
+may be specified positionally with the PLANES parameter.  If nothing is
+specified for PLANES, the current red, green, and blue planes
+are used.  The current planes are initialized to the first three
+image planes of the device if 3 or more are available.
+
+Note that JCOLOR changes the meaning of the plane names RED, GREEN,
+and BLUE to reflect the new color planes, so that each color name
+always refers to the plane which is being viewed in that color.
+Thus, regardless of which image planes are currently used to view
+color, the command
+
+JCOLOR (RED,GREEN,BLUE) 
+
+would have no effect.  The sequence of the commands:
+
+JCOLOR (RED,BLUE,GREEN)
+JCOLOR (RED,BLUE,GREEN)
+
+would swap the green and blue planes with each command, resulting
+in returning to the original display.
+
+Examples:
+	JCOLOR			! go into color mode, default planes
+	JCOLOR (3,2,4)		! Color mode, plane 3 as red, 
+				! 2 as green, and 4 as blue
+	JCOLOR (RED,BLUE,GREEN)	! swap green and blue
+	JCOLOR (RED,BLUE,GREEN)	! swap green and blue again.
+.level1
+.vari planes
+(red,green,blue) planes
+.vari device
+Name of device to use
+.level2
+.vari planes
+The PLANES parameter is used to specify which planes to view 
+as red, green, and blue, respectively.  Any valid plane names
+or numbers may be given, such as RED, GREEN, BLUE, COLOR, GRAPHICS,
+or VISIBLE.  See HELP PLANENAMES for details.
+
+The plane names RED, GREEN, and BLUE are redefined to correspond
+with the first, second, and third names given, respectively.  Thus,
+the command:
+
+JCOLOR (RED,GREEN,BLUE) 
+
+will never produce any change (except, of course, to put the device
+into color mode if it is not already).
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

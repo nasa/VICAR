@@ -1,0 +1,38 @@
+.Title
+[4m[1mVIKING PROJECT Program Menu[0m                   (page 1 of 1)
+.Menu VIK1.MDF
+BLEMISH, RESEAU and FIDUCIAL  - Programs which locate and remove blemishes,
+MARK REMOVAL                    reseau marks and fiducial marks.
+
+.Menu VIK2.MDF
+CAMERA SHADING REMOVAL        - Programs which remove camera shading.
+
+.Menu VIK3.MDF
+CONVERSIONS                   - Programs which change line/sample to
+                                lat/long and vice versa.
+.Menu VIK4.MDF
+EDR LOGGING                   - Programs which log EDR tapes.
+
+.Menu VIK5.MDF
+MISSING LINES/PIXELS REPAIRS  - Programs which locate and repair missing
+                                lines and bad pixels.
+.Menu VIK6.MDF
+SEDR CATALOG                  - Programs using the SEDR catalog.
+
+.Menu VIK7.MDF
+SEDR LISTINGS                 - Programs allowing SEDR data to be listed.
+
+.help
+
+The VIKING section contains those programs written specifically to handle 
+Viking data. These programs include:
+
+   Blemish, Reseau and Fiducial Mark Removal : BLEMVORB, RESLOCVO, RESSAR75
+   Camera Shading Removal                    : SOS
+   Conversions                               : OMCOR, PLANETCNV
+   EDR Logging                               : VOLOG
+   Missing Lines/Pixels Repairs              : DROPOUT
+   SEDR Catalog                              : VOSDRIBIS
+   SEDR Listings                             : VOLSTSDR
+
+.End

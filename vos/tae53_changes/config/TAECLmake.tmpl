@@ -1,0 +1,498 @@
+/**/#
+/**/#  IMAKE_TEMPLATE - imake template customized for TAE
+/**/#
+
+/*
+ *               *****TAE INSTALLERS TAKE NOTE*****
+ * YOU SHOULD ADD PLATFORM-SPECIFIC PARAMETERS IN THE APPROPRIATE .CF FILE
+ * OR IN SITE.DEF IN THIS DIRECTORY.
+ *
+ * If you have installed supporting software in NON-DEFAULT places, or if you 
+ * are porting TAE Classic to a new platform, you may want to review all 
+ * parameters below, BUT ADD THE PARAMETERS IN EITHER site.def OR THE 
+ * APPROPRIATE .cf FILE.
+ */
+
+/*
+ * Change Log:
+ *  06-apr-94 TAE Classic Only version. Adapted from the TAE Plus
+ *	      TAEmake.tmpl...krw
+ */
+#define YES      1
+#define NO       0
+#define TAECLASSIC 1
+
+/* 
+ * Change the define of UseGnu to YES if building a tree for use by
+ * gnu C developers.
+ */
+#ifndef UseGnu
+#define UseGnu NO
+#endif
+
+/*
+ * Identify our current platform.
+ */
+
+#include "TAEplat.c"
+
+/*
+ * Include the platform-specific .cf file.
+ */
+
+#include MacroIncludeFile
+
+/*
+ * Definitions needed to build TAE Classic from source code.
+ */
+
+#include <buildtree.def>
+
+/*
+ * Site-specific configuration parameters.
+ */
+
+#include <site.def>
+
+/*
+ * Define any generic build parameters not already set by the platform
+ * or site configuration files.
+ */
+
+#ifndef GnuLibs
+#define GnuLibs -lgcc
+#endif /* GnuLibs */
+
+#ifndef SystemV
+#ifdef SYSV
+#define SystemV YES
+#else
+#define SystemV NO
+#endif
+#endif
+#ifndef BourneShell                     /* to force shell in makefile */
+#define BourneShell /bin/sh
+#endif
+#ifndef OptimizedCDebugFlags
+#define OptimizedCDebugFlags -g
+#endif
+#ifndef DebuggableCDebugFlags
+#define DebuggableCDebugFlags -g
+#endif
+#ifndef NoOpCDebugFlags
+#define NoOpCDebugFlags /* as nothing */
+#endif
+#ifndef DefaultCDebugFlags
+#define DefaultCDebugFlags OptimizedCDebugFlags
+#endif
+#ifndef DefaultLdDebugFlags
+#define DefaultLdDebugFlags 
+#endif
+#ifndef ArCmd
+#define ArCmd ar cq
+#endif
+#ifndef BootstrapCFlags
+#define BootstrapCFlags /**/
+#endif
+#ifndef AnsiCCmd
+#define AnsiCCmd acc
+#endif
+#ifndef CcCmd
+#define CcCmd cc 
+#endif
+#ifdef ANSIC
+#undef CcCmd
+#define CcCmd AnsiCCmd
+#endif
+#ifndef AsCmd
+#define AsCmd as
+#endif
+#ifndef CcOpts
+#define CcOpts /**/
+#endif
+#ifndef CppCmd
+#define CppCmd /lib/cpp
+#endif
+#ifndef DependCFlags
+#define DependCFlags $(CFLAGS)
+#endif
+#ifndef DependCmd
+#define DependCmd makedepend
+#endif
+#ifndef CLibrary
+#define CLibrary -lc
+#endif
+#ifndef ExtraCFlags
+#define ExtraCFlags
+#endif
+
+/* You can override these in your $TAEPLAT.cf or site.def file if necessary. */
+
+#ifndef MotifCFlags
+#define MotifCFlags             /* -I /usr/include assumed */
+#endif
+#ifndef X11CFlags
+#define X11CFlags               /* -I /usr/include assumed */
+#endif
+
+#ifndef AppCFlags
+#define AppCFlags
+#endif
+#ifndef FortranCmd
+#define FortranCmd f77
+#endif
+#ifndef FortranLibrary
+#define FortranLibrary -lU77 -lF77
+#endif
+#ifndef FortObjNameSuffix
+#define FortObjNameSuffix .o
+#endif
+#ifndef PreProcessCmd
+#define PreProcessCmd CcCmd -E       /* run cpp with defines */
+#endif
+#ifndef Have68KAssembler
+#define Have68KAssembler false
+#endif
+#ifndef LdCmd
+#define LdCmd CcCmd
+#endif
+#ifndef LnCmd
+#if SystemV
+#define LnCmd ln              /* or even cp */
+#else
+#define LnCmd ln -s
+#endif
+#endif
+#ifndef RanlibCmd
+#if SystemV
+#define RanlibCmd /bin/true
+#else
+#define RanlibCmd ranlib
+#endif
+#endif
+#ifndef RmCmd
+#define RmCmd rm -f
+#endif
+#ifndef StandardCppDefines
+#if SystemV
+#define StandardCppDefines -DSYSV 
+#else
+#define StandardCppDefines /**/
+#endif
+#endif
+#ifndef StandardCDefines
+#if SystemV
+#define StandardCDefines -DSYSV
+#else
+#define StandardCDefines /**/
+#endif
+#endif
+#ifndef StandardAnsiCDefines
+#if SystemV
+#define StandardAnsiCDefines -DSYSV
+#else
+#define StandardAnsiCDefines
+#endif
+#endif
+
+#ifndef StandardCFlags
+#define StandardCFlags
+#endif
+#ifndef StandardAnsiCFlags
+#define StandardAnsiCFlags
+#endif
+
+#ifdef ANSIC
+#undef StandardCDefines
+#define StandardCDefines StandardAnsiCDefines
+#undef StandardCFlags
+#define StandardCFlags StandardAnsiCFlags
+#endif
+#ifndef ExtraLibraries
+#define ExtraLibraries  /**/
+#endif
+#ifndef AppLibraries
+#define AppLibraries /**/
+#endif
+#ifndef ExtraLoadFlags
+#define ExtraLoadFlags /**/
+#endif
+#ifndef AppLoadFlags
+#define AppLoadFlags
+#endif
+
+/* You can override these in your $TAEPLAT.cf or site.def file if necessary. */
+
+#ifndef ExtraLibPath
+#if SystemV
+#define ExtraLibPath /**/
+#else
+#define ExtraLibPath /**/
+#endif
+#endif
+
+#ifndef TAELibPath
+#if SystemV
+#define TAELibPath -L $$TAELIB
+#else
+#define TAELibPath -L$$TAELIB
+#endif
+#endif
+
+#ifndef LibSearchPath
+#define LibSearchPath TAELibPath
+#endif
+
+#ifndef HaveTerminalLibrary
+#define HaveTerminalLibrary YES
+#endif
+#if HaveTerminalLibrary
+#ifndef TerminalLibrary
+#if SystemV
+#define TerminalLibrary -lcurses
+#else
+#define TerminalLibrary -ltermlib
+#endif
+#endif
+#else
+#define TerminalLibrary /**/
+#endif
+
+#ifndef BigEndianMachine
+#define BigEndianMachine false
+#endif
+#ifndef ExtraCDefines
+#define ExtraCDefines
+#endif
+/*
+ * Stuff added by baw@fox 31-Aug-1990 for v5.0 from old TAEmake.tmpl
+ */
+#ifndef RmFileTypes
+#define RmFileTypes .emacs_* *.CKP *.ln *.BAK *.a *.o *..c ,* *~ \
+                    a.out core errs tags TAGS make.log make.out
+#endif
+/*
+ * code generator removes these files
+ * 12-Nov-1990 baw & cew
+ * tmp == generated by workbench rehearse
+ * rehearse.pdf == generated by workbench rehearse
+ * ?log == log of code generator session (.alog, .clog, ...)
+ * par == TAE par blocks
+ */
+#ifndef CGRmFileTypes
+#define CGRmFileTypes *.tmp *.?log *.par rehearse.pdf
+#endif
+
+#ifndef RemoveAfterInstall
+#define RemoveAfterInstall YES    /* to conserve disk space */
+#endif
+#ifndef StripInstalledExecutable
+#define StripInstalledExecutable YES   /* to conserve disk space */
+#endif
+#ifndef InstallExecutableFlags
+#if StripInstalledExecutable
+#define InstallExecutableFlags -s
+#else
+#define InstallExecutableFlags
+#endif
+#endif
+#ifndef AfterInstallCmd
+#if RemoveAfterInstall
+#define AfterInstallCmd $(RM)
+#else
+#define AfterInstallCmd /bin/true
+#endif
+#endif
+#ifndef InstallCmd
+#if SystemV
+#define InstallCmd bsdinstall
+#else
+#define InstallCmd install
+#endif
+#endif
+
+#ifndef CpCmd
+#define CpCmd cp
+#endif
+#ifndef MvCmd
+#define MvCmd mv
+#endif
+
+#ifndef MakeCmd
+#define MakeCmd make
+#endif
+#ifndef ImakeCmd
+#define ImakeCmd imake
+#endif
+#ifndef ImakeOpts
+#ifdef UseInstalled
+#define ImakeOpts -T$(IMAKETMPL) -I$(TAECONFIGDIR) -DUseInstalled
+#else
+#define ImakeOpts -T$(IMAKETMPL) -I$(TAECONFIGDIR)
+#endif
+#endif
+#ifndef TAEConfigDir
+#define TAEConfigDir $$TAE/config
+#endif
+#ifndef ImakeFlags
+#define ImakeFlags
+#endif
+
+#ifndef SortCmd
+#define SortCmd sort -u
+#endif
+
+
+/**/#
+/**/# System directories.
+/**/#
+
+          SYSINC = /usr/include
+
+/**/#
+/**/# Libraries.
+/**/#
+
+          TERMLIB = TerminalLibrary
+             CLIB = CLibrary
+             FLIB = FortranLibrary
+
+/**/#
+/**/# Generic make variables
+/**/#
+
+            SHELL = BourneShell
+               AR = ArCmd
+  BOOTSTRAPCFLAGS = BootstrapCFlags     /* set if cpp doesn't have uniq sym */
+         ASSEMBLE = Have68KAssembler
+      HAVETERMLIB = HaveTerminalLibrary
+               CC = CcCmd
+           CCOPTS = CcOpts
+              CPP = CppCmd $(STD_CPP_DEFINES)              /* simple filters */
+           DEPEND = DependCmd
+     DEPENDCFLAGS = DependCFlags
+             FORT = FortranCmd
+       FORTOBJEXT = FortObjNameSuffix
+    PREPROCESSCMD = PreProcessCmd $(STD_CPP_DEFINES)       /* prefered; mdep */
+               LD = LdCmd
+               LN = LnCmd
+           RANLIB = RanlibCmd
+               RM = RmCmd
+  STD_CPP_DEFINES = StandardCppDefines 
+     STD_CDEFINES = StandardCDefines 
+   EXTRA_CDEFINES = ExtraCDefines
+       STD_CFLAGS = StandardCFlags 
+     EXTRA_CFLAGS = ExtraCFlags
+ EXTRA_LOAD_FLAGS = ExtraLoadFlags
+        EXTRALIBS = ExtraLibraries
+       APP_CFLAGS = AppCFlags
+   APP_LOAD_FLAGS = AppLoadFlags
+     APP_LINKLIBS = AppLibraries
+          SYSLIBS = $(TERMLIB)
+      CDEBUGFLAGS = DefaultCDebugFlags
+     LDDEBUGFLAGS = DefaultLdDebugFlags
+           CFLAGS = $(STD_CFLAGS) $(CDEBUGFLAGS) $(CINCLUDES) $(APP_CINCLUDES) \
+                    $(EXTRA_CFLAGS) $(APP_CFLAGS) $(STD_CDEFINES) \
+                    $(EXTRA_CDEFINES) $(CCOPTS)
+          LDFLAGS = $(LDDEBUGFLAGS) $(EXTRA_LOAD_FLAGS) $(APP_LOAD_FLAGS)
+            SPARC = SparcMachine
+        BIGENDIAN = BigEndianMachine
+       WITH_START = WithStart
+
+        MACROFILE = MacroFile
+
+/*
+ * Stuff added by baw@fox 31-Aug-1990 for v5.0 from old TAEmake.tmpl
+ * also, code generator stuff 12-Nov-1990 baw & cew
+ */
+    RM_FILE_TYPES = RmFileTypes
+ CG_RM_FILE_TYPES = CGRmFileTypes
+     AFTERINSTALL = AfterInstallCmd
+          INSTALL = InstallCmd
+    INST_LIBFLAGS = -m 644
+      INST_LIBDIR = $$TAELIB
+ INST_RANLIBFLAGS =
+   INST_EXECFLAGS = InstallExecutableFlags
+      INST_BINDIR = $$TAEBIN
+               CP = CpCmd
+               MV = MvCmd
+             MAKE = MakeCmd
+            IMAKE = ImakeCmd
+        IMAKETMPL = IMAKE_TEMPLATE
+        IMAKEOPTS = ImakeOpts
+       IMAKEFLAGS = ImakeFlags
+        IMAKE_CMD = $(IMAKE) $(IMAKEOPTS)
+     TAECONFIGDIR = TAEConfigDir
+       TAECDEPLIB = $(TAELIB)/libtaec.a
+        TAEDEPLIB = $(TAELIB)/libtae.a
+       TAEDEPLIBS = $(TAECDEPLIB) $(TAEDEPLIB)
+/* Pseudo-library to get around FORTRAN/C conflict */
+      TAECLINKLIB = -ltaec
+/* For creating TAE C or FORTRAN applications */
+       TAELINKLIB = -ltae
+      TAELINKLIBS = $(TAECLINKLIB) $(TAELINKLIB)
+         LINKLIBS = $(TAELINKLIBS) $(EXTRALIBS) $(APP_LINKLIBS) $(SYSLIBS)
+
+   TAEVERSIONFILE = .version.o
+          SORTCMD = SortCmd
+    LIBSEARCHPATH = LibSearchPath
+             SCCS = sccs
+             PERL = perl
+
+/*
+ * Include the project-specific rules file.
+ */
+
+#include "TAErules.def"
+
+
+/*
+ * Include the local Imakefile.
+ */
+
+#include INCLUDE_IMAKEFILE
+
+#ifndef GeneratedApplication
+/**/#
+/**/# common rules for all Makefiles
+/**/#
+
+#ifdef IHaveSubdirs
+#ifndef DontMakeAllInSubdirs
+MakeAllInSubdirs($(SUBDIRS))
+#endif
+DummyAllTarget()
+#endif
+
+
+#ifdef IHaveSubdirs
+MakeMakefilesInSubdirs($(SUBDIRS))
+#endif
+#ifndef GeneratedImake
+MakeMakefileTarget(-Ddummy)
+#endif
+
+
+#ifndef IHaveSubdirs
+#ifndef GeneratedImake
+CleanTarget()
+#endif
+#else
+CleanSubdirs($(SUBDIRS))
+#endif
+
+
+#ifndef IHaveSubdirs
+DummyMakeDepend()
+#else
+MakeDependInSubdirs($(SUBDIRS))
+#endif
+
+#ifdef IHaveSubdirs
+MakeInstallInSubdirs($(SUBDIRS))
+#endif
+#endif
+
+/**/#
+/**/# dependencies generated by makedepend
+/**/#

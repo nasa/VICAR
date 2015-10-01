@@ -1,0 +1,31 @@
+.Title           ! IBGISDISP1.MDF
+[4mIBIS MAP & GRAPHICS DISPLAY Menu[0m       (page 1 of 1)
+.Proc GRAFIMG
+[1mGRAFIMG[0m   - Transforms interface file into a user specified 
+            output file for transfer to other data centers.
+.Proc MAPGEN
+[1mMAPGEN[0m    - Takes an image divided into polygon regions and
+            assigns a grey value to each region according to information in
+            an interface file, or by user specified input parameters.
+.Proc PLOT3D
+[1mPLOT3D[0m    - Plots 3-D Graphics-1 files in perspective view.
+.Proc PLOTINT
+[1mPLOTINT[0m   - Plots columns of an interface file.
+.Proc PLTGRAF
+[1mPLTGRAF[0m   - Plots a Graphics-1 file inside a labeled box.
+.Proc PLTSYM
+[1mPLTSYM[0m    - Plots CALCOMP special characters on the plotting device
+            via a 3-D graphics file.
+.Proc TIEPLOT
+[1mTIEPLOT[0m   - Plots tiepoints in an interface file by drawing vectors 
+            indicating direction & amount of shift between old & new pixels.
+
+.Help
+
+The IBIS MAP & GRAPHICS DISPLAY section contains those programs which allow 
+the user to create either a graphics or map display of the data.  These 
+programs include:
+
+GRAFIMG            MAPGEN             PLOT3D             PLOTINT            
+PLTGRAF            PLTSYM             TIEPLOT            
+.End

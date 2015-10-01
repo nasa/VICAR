@@ -1,0 +1,645 @@
+/* MOUNT/DISMOUNT processing main routines				*/
+/*									*/
+/* Tape mounts must be done by the TM process because of problems VMS	*/
+/* has with allocating/mounting tapes in subprocesses.			*/
+
+#include "stdh.inp"		/* system standard  (REQUIRED)		*/
+#include "taeconf.inp"		/* TAE configuration (REQUIRED)		*/
+
+#include "parblk.inc"		/* parameter block definitions		*/
+#include "symtab.inc"		/* TM symbol table			*/
+#include "tmhost.inp"		/* TM host-dependent definitions	*/
+#include "tminc.inc"		/* TM definitions			*/
+
+#include "vicartae.inc"		/* VICAR-specific definitions		*/
+
+#include <dvidef.h>		/* VMS device information		*/
+#include <descrip.h>		/* VMS c descriptor macros		*/
+#include <iodef.h>		/* VMS i/o codes			*/
+#include <opcdef.h>		/* VMS operator message definitions	*/
+#include <ssdef.h>		/* VMS status code definitions		*/
+#include <mntdef.h>		/* VMS mount definitions		*/
+#include <mtdef.h>		/* VMS tape definitions			*/
+
+#define KILL(x,y,z) {tmmsg(PROCFAIL,y,x,z); return(DO_CHECK);}
+
+GLOBAL struct VARIABLE *tapes_gbl;
+GLOBAL struct VARIABLE *tfile_gbl;
+GLOBAL struct VARIABLE *trec_gbl;
+
+static TEXT **tapes_cvp;
+static BOOL must_deall[MAXTAPES];	/* dealloc upon dismount? */
+
+TEXT *hostmsg();
+
+
+/************************************************************************
+ *	mount_do.   Intrinsic mount processing.
+ ************************************************************************
+ */
+
+    FUNCTION CODE mount_do (procctx, cmdctx)
+    
+    struct CONTXT *procctx;	/* in/out: proc context		*/
+    struct CONTXT *cmdctx;	/* in/out: command context	*/
+
+    {
+    struct VARIABLE	*v;
+    CODE code;
+
+/* Check for ANSI or foreign tape and call the appropriate mount routine */
+
+    v = lookex(&(*cmdctx).parmst, "LABEL");
+    if ((*v).v_count == 0)
+	code = mount_foreign(procctx, cmdctx);
+    else
+	code = mount_ansi(procctx, cmdctx);
+
+    return (code);
+    }
+
+
+/***************************************************************************
+ *	mount_foreign.   Mounts a foreign (old VICAR style) tape
+ ***************************************************************************
+ */
+
+    FUNCTION CODE mount_foreign (procctx, cmdctx)
+    
+    struct CONTXT *procctx;	/* in/out: proc context		*/
+    struct CONTXT *cmdctx;	/* in/out: command context	*/
+
+    {
+    TAEINT		density;
+    static TAEINT	blocking[2] = {8192, 0};
+    TEXT		*comment, *device, *name, *protect;
+    COUNT   		count, index, d_index, n_index;
+    BOOL		new_entry,we_allocated;
+    COUNT		dev_count, name_count;
+    TEXT		e_name[STRINGSIZ+1], e_device[STRINGSIZ+1],
+			string[STRINGSIZ+1];
+    TEXT		*s_save();
+    CODE		alloc_dev(),dealloc_dev();
+    CODE		code;
+    TEXT		full_name[TAPEDEVSIZE+1];	/* full device name */
+    struct VARIABLE	*v;
+    TEXT		alloc_msg[STRINGSIZ+1];
+
+    int     class;
+    int     class_len;
+    int     status;
+
+    struct item_list
+	{
+	unsigned short buflen;
+	unsigned short code;
+	unsigned       bufadr;
+	unsigned       retlenadr;
+	unsigned       endlist;
+	}  dvi_list = { 4,
+			DVI$_DEVDEPEND,
+			&class,
+			&class_len,
+			0
+		      };
+
+    $DESCRIPTOR( devicen, full_name );
+
+    v = lookex(&(*cmdctx).parmst, "DEVICE");
+    device = SVAL(*v,0);
+    dev_count = (*v).v_count;
+
+    v = lookex(&(*cmdctx).parmst, "NAME");
+    name = SVAL(*v,0);
+    name_count = (*v).v_count;
+
+    v = lookex(&(*cmdctx).parmst, "DENSITY");
+    density = IVAL(*v, 0);
+
+    v = lookex(&(*cmdctx).parmst, "BLOCKING");
+    if ((*v).v_count == 2)
+	{
+	blocking[0] = IVAL(*v, 0);
+	blocking[1] = IVAL(*v, 1);
+	}
+    else if ((*v).v_count == 1)
+	blocking[0] = IVAL(*v, 0);
+
+    v = lookex(&(*cmdctx).parmst, "COMMENT");
+    comment = SVAL(*v, 0);
+
+    v = lookex(&(*cmdctx).parmst, "PROTECT");
+    protect = SVAL(*v, 0);
+
+    tapes_cvp = (TEXT **) (*tapes_gbl).v_cvp;	/* $TAPES value pointer	*/
+
+    new_entry = FALSE;
+    we_allocated = FALSE;
+    if (name_count != 0 &&  dev_count == 0)	/* NAME present; DEVICE not	*/
+	{
+	index = i_search_name(tapes_cvp, (*tapes_gbl).v_count, name);
+	if (index < 0)
+	    KILL("TAE-SYMBOL", "Undefined symbolic device name '%s'.", name)
+	i_crack (SVAL(*tapes_gbl,index), e_name, full_name);
+	}
+    else if (name_count == 0  &&  dev_count != 0) /* NAME omitted; DEVICE present*/
+	{
+	code = i_full_name (device, full_name);
+	if ((code&1) != 1)
+            KILL("TAE-BADDEV", "Unknown device '%s'.", device)
+        index = i_search_device (tapes_cvp, (*tapes_gbl).v_count, full_name);
+	if (index < 0)
+            KILL("TAE-NOSYMNAM", "Symbolic device name (NAME) required.", "")
+	}
+    else if (name_count == 0  &&  dev_count == 0)	/* both NAME and DEVICE omitted	*/
+        KILL("TAE-NODEVID", "No device identified for MOUNT.", "")
+    else if (name_count != 0  &&  dev_count != 0) /* both NAME and DEVICE present*/
+	{
+	code = i_full_name (device, full_name);
+	if ((code&1) != 1)
+            KILL("TAE-BADDEV", "Unknown device '%s'.", device)
+        n_index = i_search_name (tapes_cvp, (*tapes_gbl).v_count, name);
+	d_index = i_search_device (tapes_cvp, (*tapes_gbl).v_count, full_name);
+	if (n_index != d_index)		/* inconistent NAME/DEVICE	*/
+	    KILL("TAE-INCONS", "Inconsistent NAME and DEVICE.", "")
+	index = n_index;
+	if (index < 0)			/* new entry needed?		*/
+	    {
+	    if ((*tapes_gbl).v_count >= MAXTAPES)	/* allocate new $TAPE entry	*/
+		KILL("TAE-MANYTAPES", "More than '%d' tapes in use.", MAXTAPES)
+
+	    if (! i_allocated(full_name))
+		{					/* alloc if new entry */
+		code = alloc_dev(device,full_name,alloc_msg);
+		if (code != SUCCESS)
+		    KILL("TAE-NOTAVAIL", alloc_msg, "");
+		we_allocated = TRUE;
+		}
+	    index = (*tapes_gbl).v_count;	/* allocated index in $TAPE	*/
+	    (*tapes_gbl).v_count++;		/* allocate new entry		*/
+	    (*tfile_gbl).v_count++;		/* allocate new entry		*/
+	    (*trec_gbl).v_count++;		/* allocate new entry		*/
+	    s_copy (name, string);
+	    s_append("=", string);
+	    s_append(full_name, string);	
+	    SVAL(*tapes_gbl, index) = s_save(string);
+	    IVAL(*tfile_gbl, index) = -1;		/* mark not mounted		*/
+	    IVAL(*trec_gbl, index) = 1;
+	    new_entry = TRUE;
+	    }
+	}
+    if (IVAL(*tfile_gbl, index) >= 0)
+        KILL("TAE-MOUNTED", "Device '%s' already mounted.", full_name)
+    code = i_mount(full_name, s_equal(protect,"READ"), comment, density,
+		     blocking[0], blocking[1]);
+    if ((code&1) != 1)
+	{
+	if (new_entry)
+	    {				/* if fail, de-allocate new entry*/
+	    if (we_allocated) dealloc_dev(full_name);
+	    (*tapes_gbl).v_count--;
+	    (*tfile_gbl).v_count--;
+	    (*trec_gbl).v_count--;
+	    }
+	KILL("TAE-NOMOUNT", hostmsg(code), "")
+	}
+
+    if ( s_equal(protect,"WRITE" ) )	/* if tape needs a ring */
+	{
+	do  {    			/* until tape gets a ring put in */
+
+/* request device information */
+	    status = sys$getdviw(0,0,&devicen,&dvi_list,0,0,0,0);
+        
+/* if the write ring is out */
+	    if (class & MT$M_HWL)   
+		{
+
+/* dismount the tape */
+		status = i_dismou(full_name,1);
+
+/* Tell operator to put a ring in the tape and wait for response */
+		if (status == SUCCESS)
+		    code = ring_request(full_name);
+
+/* If the operator aborted the request, die */
+		if (code != SUCCESS || status != SUCCESS)
+		    {
+		    if (new_entry)
+			{		/* if aborted, deallocate new entry*/
+			if (we_allocated) dealloc_dev(full_name);
+		        (*tapes_gbl).v_count--;
+			(*tfile_gbl).v_count--;
+			(*trec_gbl).v_count--;
+			}
+		    if (status != SUCCESS)
+			KILL("TAE-DISMNTFAIL", hostmsg(status), "");
+		    if (code != SUCCESS)
+			KILL("TAE-NOMOUNT",
+			     "MOUNT failure. No write ring in tape %s",
+                             full_name)
+		    }
+
+/* try to mount the tape again */
+		    code = i_mount(full_name, s_equal(protect,"READ"),
+			comment, density, blocking[0], blocking[1]);
+		    if ((code&1) != 1)
+			{
+			if (new_entry)
+			    {		/* if fail, de-allocate new entry*/
+			    if (we_allocated) dealloc_dev(full_name);
+			    (*tapes_gbl).v_count--;
+			    (*tfile_gbl).v_count--;
+			    (*trec_gbl).v_count--;
+			    }
+			KILL("TAE-NOMOUNT", hostmsg(code), "")
+			}
+		}
+	    } while (class & MT$M_HWL);
+	}
+
+    must_deall[index] = we_allocated;	/* if allocated here, we must   */
+					/* deall upon dismount		*/
+    IVAL(*tfile_gbl, index) = 1;	/* set entry "mounted"		*/
+    IVAL(*trec_gbl, index) = 1;		/* positioned before first rec	*/
+    return (SUCCESS);
+    }
+
+
+/***************************************************************************
+ *	mount_ansi.   Mount ANSI-labeled tapes (may be a volume set).
+ ***************************************************************************
+ */
+
+    FUNCTION CODE mount_ansi (procctx, cmdctx)
+    
+    struct CONTXT *procctx;	/* in/out: proc context		*/
+    struct CONTXT *cmdctx;	/* in/out: command context	*/
+
+    {
+    TAEINT		density;
+    TAEINT		blocksize = 0, recsize = 0;
+    struct VARIABLE	*device, *label;
+    TEXT		*name, *comment, *protect;
+    COUNT		dev_count, label_count, name_count;
+    int			i;
+    CODE		code;
+    struct VARIABLE	*v;
+    int			class;
+    int			class_len;
+    TEXT		full_name[TAPEDEVSIZE+1];	/* full device name */
+    int			name_len;
+    long		flags;
+    int			item;
+
+    struct itmlst dvi_list[] = {     4, DVI$_DEVDEPEND, &class, &class_len,
+				TAPEDEVSIZE, DVI$_DEVNAM, full_name, &name_len,
+				0, 0, 0, 0
+				};
+
+/* change mntlist size if more items are added */
+
+    struct itmlst mntlist[MAXTAPES+MAXTAPEDEVS+7];
+
+    $DESCRIPTOR( devicen, full_name );
+
+    device = lookex(&(*cmdctx).parmst, "DEVICE");
+    dev_count = (*device).v_count;
+    if (dev_count == 0)
+	KILL("TAE-NODEVID", "No device identified for MOUNT.", "")
+
+    label = lookex(&(*cmdctx).parmst, "LABEL");
+    label_count = (*label).v_count;
+
+    v = lookex(&(*cmdctx).parmst, "NAME");
+    name = SVAL(*v,0);
+    name_count = (*v).v_count;
+
+    v = lookex(&(*cmdctx).parmst, "DENSITY");
+    density = IVAL(*v, 0);
+
+    v = lookex(&(*cmdctx).parmst, "BLOCKING");
+    if ((*v).v_count >= 1)
+	blocksize = IVAL(*v, 0);
+    if ((*v).v_count == 2)
+	recsize = IVAL(*v, 1);
+
+    v = lookex(&(*cmdctx).parmst, "COMMENT");
+    comment = SVAL(*v, 0);
+
+    v = lookex(&(*cmdctx).parmst, "PROTECT");
+    protect = SVAL(*v, 0);
+
+    v = lookex(&(*cmdctx).parmst, "INIT");
+    if (s_equal(SVAL(*v, 0), "INIT"))
+	{
+	if (s_equal(protect, "READ"))
+	    KILL("TAE-NOWRITE",
+		 "Can't initialize tape without WRITE access", "");
+
+	code = init_tapes(procctx, device, label, density, comment);
+	if (code != SUCCESS)
+	    return (code);	/* message already printed */
+	}
+
+/* Fill up the item list for the $mount call */
+
+    item = 0;
+
+    for (i=0; i < dev_count; i++)		/* Device names */
+	{
+	mntlist[item].code = MNT$_DEVNAM;
+	mntlist[item].buffer = SVAL(*device, i);
+	mntlist[item].length = strlen(mntlist[item].buffer);
+	mntlist[item].retlen = 0;	/* probably not really necessary */
+	item++;
+	}
+
+    for (i=0; i < label_count; i++)		/* Volume names */
+	{
+	mntlist[item].code = MNT$_VOLNAM;
+	mntlist[item].buffer = SVAL(*label, i);
+	mntlist[item].length = strlen(mntlist[item].buffer);
+	mntlist[item].retlen = 0;
+	item++;
+	}
+
+    if (name_count != 0)			/* Logical name */
+	{
+	mntlist[item].code = MNT$_LOGNAM;
+	mntlist[item].buffer = name;
+	mntlist[item].length = strlen(name);
+	mntlist[item].retlen = 0;
+	item++;
+	}
+
+    flags = MNT$M_MESSAGE | MNT$M_INIT_CONT;	/* Flags */
+    if (s_equal(protect, "READ"))
+	flags |= MNT$M_NOWRITE;
+    mntlist[item].code = MNT$_FLAGS;
+    mntlist[item].buffer = &flags;
+    mntlist[item].length = sizeof(flags);
+    mntlist[item].retlen = 0;
+    item++;
+
+    if (blocksize != 0)				/* Block size */
+	{
+	mntlist[item].code = MNT$_BLOCKSIZE;
+	mntlist[item].buffer = &blocksize;
+	mntlist[item].length = sizeof(blocksize);
+	mntlist[item].retlen = 0;
+	item++;
+	}
+
+    mntlist[item].code = MNT$_DENSITY;		/* Density */
+    mntlist[item].buffer = &density;
+    mntlist[item].length = sizeof(density);
+    mntlist[item].retlen = 0;
+    item++;
+
+    if (recsize != 0)				/* Record size */
+	{
+	mntlist[item].code = MNT$_RECORDSIZ;
+	mntlist[item].buffer = &recsize;
+	mntlist[item].length = sizeof(recsize);
+	mntlist[item].retlen = 0;
+	item++;
+	}
+
+    if (strlen(comment) != 0)			/* Comment for operator */
+	{
+	mntlist[item].code = MNT$_COMMENT;
+	mntlist[item].buffer = comment;
+	mntlist[item].length = strlen(comment);
+	mntlist[item].retlen = 0;
+	item++;
+	}
+
+    mntlist[item].code = 0;			/* Terminator is all 0's */
+    mntlist[item].buffer = 0;
+    mntlist[item].length = 0;
+    mntlist[item].retlen = 0;
+
+    code = sys_mount(mntlist);
+
+    if ((code&1) != 1)
+	KILL("TAE-NOMOUNT", hostmsg(code), "")
+
+    if ( s_equal(protect,"WRITE" ) )	/* if tape needs a ring */
+	{
+	for (i=0; i<dev_count; i++)
+	    {
+	    do  {    			/* until tape gets a ring put in */
+
+/* request device information */
+		devicen.dsc$a_pointer = SVAL(*device, i);
+		devicen.dsc$w_length = strlen(devicen.dsc$a_pointer);
+		code = sys$getdviw(0,0,&devicen,&dvi_list,0,0,0,0);
+        
+/* if the write ring is out */
+		if (class & MT$M_HWL)   
+		    {
+
+/* Dismount the tape.  If there's only one device, we can unload it for the */
+/* operator.  If there's multiple devices, don't unload so the op doesn't   */
+/* have to remount all the other tapes in the set.			    */
+
+		    if (dev_count > 1)
+			code = i_dismou (full_name, 0);		/* NOUNLOAD */
+		    else
+			code = i_dismou (full_name, 1);		/* UNLOAD */
+		    if (code != SUCCESS)
+			KILL("TAE-DISMNTFAIL", hostmsg(code), "");
+
+/* Tell operator to put a ring in the tape and wait for response */
+		    code = ring_request(full_name);
+
+/* If the operator aborted the request, die */
+		    if (code != SUCCESS)
+			{
+			KILL("TAE-NOMOUNT",
+			     "MOUNT failure. No write ring in tape %s",
+                             full_name)
+			}
+
+/* try to mount the tape again */
+		    code = sys_mount(mntlist);
+		    if ((code&1) != 1)
+			{
+			KILL("TAE-NOMOUNT", hostmsg(code), "")
+			}
+		    }
+		} while (class & MT$M_HWL);
+	    }
+	}
+    return (SUCCESS);
+    }
+
+
+/***************************************************************************
+ *	dismount_do.   Performs intrinsic dismount processing.
+ *	Note:  ANSI-labeled tapes have the DEVICE param only, not NAME.
+ ***************************************************************************
+*/
+    FUNCTION CODE dismount_do (procctx, cmdctx)
+    
+    struct CONTXT *procctx;	/* in/out: proc context		*/
+    struct CONTXT *cmdctx;	/* in/out: command context	*/
+
+    {
+    TEXT		*device, *name, *option;
+    COUNT   		index, d_index, n_index, i;
+    COUNT		dev_count, name_count;
+    TEXT		e_name[STRINGSIZ+1];
+    CODE		code;
+    TEXT		full_name[TAPEDEVSIZE+1];	/* full device name */
+    struct VARIABLE	*v;
+    CODE		dealloc_dev();
+    BOOL		ansi_tape;
+
+    v = lookex(&(*cmdctx).parmst, "DEVICE");
+    device = SVAL(*v,0);
+    dev_count = (*v).v_count;
+
+    v = lookex(&(*cmdctx).parmst, "NAME");
+    name = SVAL(*v,0);
+    name_count = (*v).v_count;
+
+    v = lookex(&(*cmdctx).parmst, "OPTION");
+    option = SVAL(*v,0);
+
+    tapes_cvp = (TEXT **) (*tapes_gbl).v_cvp;	/* $TAPES value pointer	*/
+
+    ansi_tape = FALSE;
+
+    if (name_count != 0 &&  dev_count == 0)	/* NAME present; DEVICE not	*/
+	{
+	index = i_search_name(tapes_cvp, (*tapes_gbl).v_count, name);
+	if (index < 0)
+	    KILL("TAE-SYMBOL", "Undefined symbolic device name '%s'.", name)
+	i_crack  (SVAL(*tapes_gbl, index), e_name, full_name);
+	}
+    else if (name_count == 0  &&  dev_count != 0) /* NAME omitted; DEVICE present*/
+	{
+	code = i_full_name (device, full_name);
+	if ((code&1) != 1)
+	    KILL("TAE-BADDEV", "Unknown device '%s'.", device)
+	index = i_search_device (tapes_cvp, (*tapes_gbl).v_count, full_name);
+	if (index < 0)
+	    ansi_tape = TRUE;	/* not in table, so it better be ANSI */
+	}
+    else if (name_count == 0  &&  dev_count == 0)	/* both NAME and DEVICE omitted	*/
+	KILL("TAE-NODEVID", "No device identified for DISMOUNT.", "")
+    else if (name_count != 0  &&  dev_count != 0) /* both NAME and DEVICE present*/
+	{					  /* so check consistency	 */
+	code = i_full_name (device, full_name);
+	if ((code&1) != 1)
+	    KILL("TAE-BADDEV", "Unknown device '%s'.", device)
+	n_index = i_search_name (tapes_cvp, (*tapes_gbl).v_count, name);
+	d_index = i_search_device (tapes_cvp, (*tapes_gbl).v_count, full_name);
+	if (n_index != d_index)		/* inconistent NAME/DEVICE	*/
+	    KILL("TAE-INCONS", "Inconsistent NAME and DEVICE.", "")
+	index = n_index;
+	if (index < 0)
+	    KILL("TAE-NOTMOUNT", "Device '%s' not currently mounted.", full_name)
+	}
+    if (index >= 0)
+	if (IVAL(*tfile_gbl, index) < 0)
+	    ansi_tape = TRUE;	/* flag says not mounted, it's probably ANSI */
+
+    code = i_dismou (full_name, s_equal(option, "UNLOAD"));
+
+    if (!ansi_tape)
+	{
+	if (i_allocated(full_name) && !must_deall[index]) /* still allocated?		*/
+	    IVAL(*tfile_gbl, index) = -1;	/* keep in table; not mounted	*/
+	else
+	    {					/* remove entry from table	*/
+	    if (must_deall[index]) dealloc_dev(full_name);
+	    tae_free (SVAL(*tapes_gbl, index));	/* delete string		*/
+	    for  (i=index; i < (*tapes_gbl).v_count-1; i++)
+		{				/* move everything down		*/
+		SVAL(*tapes_gbl, i) = SVAL(*tapes_gbl, i+1);
+		IVAL(*tfile_gbl, i) = IVAL(*tfile_gbl, i+1);
+		IVAL(*trec_gbl, i) = IVAL(*trec_gbl, i+1);
+		}
+	    (*tapes_gbl).v_count--;
+	    (*tfile_gbl).v_count--;
+	    (*trec_gbl).v_count--;
+	    }
+	}
+
+    if ((code & 1) != SS$_NORMAL)
+	{
+	KILL("TAE-DISMNTFAIL", hostmsg(code), "");
+	}
+
+    return (SUCCESS);
+    }
+
+
+/***************************************************************************
+ *	ring_request.   Request the operator to put a write ring on
+ *      a tape.
+ ***************************************************************************
+ */
+
+    FUNCTION CODE ring_request (full_name)
+
+    TEXT *full_name;		/* full device name */
+
+    {
+
+    CODE    code;
+
+    int     status;
+    int     mbx_chan;
+    int     iosb[2];
+
+    unsigned inbuf[64];
+    unsigned inlen;
+
+    struct opr_msg
+	{
+	unsigned char  request;
+	unsigned       target : 24;
+	unsigned       message_id;
+	char           message[132];
+	}  opcom;
+
+    struct dsc$descriptor_s ring_message = { 0,
+					     DSC$K_DTYPE_T,
+					     DSC$K_CLASS_S,
+					     &opcom
+					   };
+
+/* Create a mailbox for operator response */
+    status = sys$crembx(0,&mbx_chan,0,0,0,0,0);
+
+/* Tell the user what is going on */
+    tmmsg(SUCCESS, " Tape has no write ring, awaiting operator reply.",
+          "TAE-NOWRTRNG");
+
+/* Set the message to the correct tape drive */
+    sprintf(opcom.message,
+	    "%s NEEDS A WRITE RING. * REPLY REQUIRED *",full_name);
+    opcom.request = OPC$_RQ_RQST;
+    opcom.target  = OPC$M_NM_CENTRL | OPC$M_NM_TAPES;
+    opcom.message_id = 1;
+    ring_message.dsc$w_length = 9 + strlen(opcom.message);
+
+/* Tell operator to put a ring in the tape */
+    status = sys$sndopr(&ring_message,mbx_chan);
+
+/* wait for operator to respond */
+    inlen = 64;
+    status = sys$qiow(0,mbx_chan,IO$_READVBLK,&iosb,0,0,
+                      inbuf,inlen,0,0,0,0);
+
+/* Check if the operator aborted the request */
+    code = SUCCESS;
+    if (((*inbuf & 0xffff0000) >> 16) == (OPC$_RQSTABORT & 0x0000ffff))
+	code = DO_CHECK;
+    status = sys$dassgn(mbx_chan);
+    return (code);
+    }

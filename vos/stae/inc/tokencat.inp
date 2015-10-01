@@ -1,0 +1,16 @@
+/****************************************************************************
+ *      Copyright (c) 1993, 1994
+ *      Century Computing, Inc.
+ *      ALL RIGHTS RESERVED
+ *
+ *      The software (programs, data bases and/or documentation) on or in
+ *      any media can not be reproduced, disclosed, or used except under
+ *      the terms of the TAE Plus Software License Agreement.
+ *
+ ***************************************************************************/
+
+
+
+#define NAME2(a,b) 	a##b
+#define NAME3(a,b,c) 	a##b##c
+#define NAME4(a,b,c,d) 	a##b##c##d

@@ -1,0 +1,27 @@
+.Title
+[4mAdditional CATALOG & DATABASE MANAGEMENT Selections[0m   (page 2 of 3)
+.Proc CNT
+[1mCNT[0m      - Returns into local variables the number of files in a 
+           SRCH list.
+.Proc COUNT 
+[1mCOUNT[0m    - Types the number of files in a list created by SRCH.
+.Proc DTRTAE
+[1mDTRTAE[0m   - Allows user to run Datatrieve commands from within VICAR 
+           procedures.
+.Proc EDRVAL
+[1mEDRVAL[0m   - Validates Voyager EDR taoes.
+.Proc LISTSEDR
+[1mLISTSEDR[0m - Computes geometric parameters from the Voyager SEDR.
+.Proc NXT
+[1mNXT[0m      - Returns into local variables information about the next
+           file in a SRCH list.
+.Proc PPLOAD
+[1mPPLOAD[0m   - Reads a special database file containing predict PRA/PWS
+           data into the Voyager Image Catalog.
+.Proc RESET
+[1mRESET[0m    - Resets the next file pointer in the list of files
+           output from the program SRCH.
+
+.Menu db3.mdf
+[7mAdditional CATALOG & DATABASE MANAGEMENT Selections[0m
+.End

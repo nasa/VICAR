@@ -1,0 +1,551 @@
+.TITLE
+FLAG
+.HELP
+			Function and Format
+
+	Function:
+	   The FLAG command is used to symbolically set various flags in
+	   the $SWITCH global TAE variable which is implicitly passed to
+	   all procs.  It may be used with various subcommands as outlined
+	   below to perform different functions.  SWITCH may be used in
+	   place of the FLAG command to set the values in $SWITCH
+	   numerically instead of symbolically, although FLAG is the
+	   preferred method.  See HELP SWITCH.
+
+	Format:
+	    VICAR>FLAG-SET FLAGS=flag-list    (-SET is the default)
+	    VICAR>FLAG-ADD FLAGS=flag-list
+	    VICAR>FLAG-DELETE FLAGS=flag-list
+	    VICAR>FLAG-SHOW
+.PAGE
+			Usage Notes
+
+
+	o  $SWITCH  is  used  by  programmers to pass special
+	   test  flags  to application programs.  The $SWITCH
+	   global  is  implicitly referenced by every PDF, so
+	   the  value  may  be  obtained  from any program by
+	   calling xvparm/zvparm.
+
+.if VAX_VMS
+.PAGE
+			Usage Notes (continued)
+
+
+	o  Currently, the DEBUG flag means "run all application
+	   programs using the VMS /DEBUG qualifier".  Thus,
+	   a programmer may always LINK with the debugger and
+	   enable the debugger only when needed.
+
+	   To enable the debugger, use:
+
+		VICAR>FLAG-ADD DEBUG
+
+	o  To produce full async logging, use:
+ 
+		VICAR>FLAG-ADD LOGGING
+.PAGE
+			Usage Notes (continued)
+
+	
+	o  The ADEBUG option is used for debugging async jobs:
+	   If this flag is set the asynchronous TAE Monitor uses
+	   the file ASYNC.COM as its JOB file, rather than the proc
+	   job file.  You can edit ASYNC.COM, adding host debug
+	   commands for example, and then run with the ADEBUG flag set.
+
+.ifend
+.if UNIX
+.PAGE
+			Usage Notes (continued)
+
+
+	o  Currently, the DEBUG flag means "run all application
+	   programs under the debugger."  The debugger defined
+	   by the shell environment variable DEBUGGER then gets
+	   control at process activation time.  Thus, a programmer
+	   may always load an application with the debugger and
+	   enable the debugger only when needed.
+
+	   To enable the debugger, use:
+
+		VICAR>FLAG-ADD DEBUG
+
+.ifend
+	o  To see the library of the proc in dynamic tutor, use:
+
+		VICAR>FLAG-ADD TUTLIB
+.PAGE
+			Usage Notes (Cont.)
+
+
+	o  To run in syntax check mode, use:
+
+		VICAR>FLAG-ADD SYNTAX
+
+	   This is a VICAR-specific flag bit which causes the
+	   TAE monitor to treat commands as follows:
+
+	    - Primary level (e.g., interactive level) commands
+	      are executed normally.
+
+	    - Intrinsic declaration and proc introductory
+	      commands (e.g., PARM, LOCAL, SUBCMD, PROCESS),
+	      as well as commands which invoke procs, are
+	      executed normally.
+.PAGE
+
+	    - Intrinsic commands that do not use proc invocation
+	      syntax (e.g. FOR, LET, and GOTO) are ignored.
+
+	    - All other intrinsic commands are processed through
+	      substitution and syntax checking but are never
+	      actually executed.
+
+	    - Processes have the capability to check the SYNTAX
+	      bit and may avoid all or part of their execution
+	      if the bit is set.  All standard VICAR programs
+	      check this bit and are therefore not executed.
+	      The programs are actually loaded into the machine,
+	      so they must be present and executable, and all
+	      parameters and syntax must be correct, but they
+	      terminate immediately and produce no output.
+.page
+			Usage Notes (Cont.)
+
+
+	o  To suppress the message "Beginning VICAR task ..."
+	   at the beginning of program execution, use:
+
+		VICAR>FLAG-ADD NOMESSAGE
+
+	   This is a VICAR-specific flag which causes the above
+	   message to be suppressed at program invocation time.
+
+.page
+			Usage Notes (Cont.)
+
+
+	o  To set the flags in the programmer's byte of the $SWITCH
+	   word, use as appropriate:
+
+		VICAR>FLAG-ADD P0
+		VICAR>FLAG-ADD P1
+		VICAR>FLAG-ADD P2
+		VICAR>FLAG-ADD P3
+		VICAR>FLAG-ADD P4
+		VICAR>FLAG-ADD P5
+		VICAR>FLAG-ADD P6
+		VICAR>FLAG-ADD P7
+
+	   CAUTION: The effect of these flags is application
+	   dependent.  Carefully read the reference guide for
+	   the particular application BEFORE using these flags.
+!
+.level1
+.subcmd SET
+Set flags to specific values
+.subcmd ADD
+Add flags to current flag list
+.subcmd DELETE
+Delete flags from current list
+.subcmd SHOW
+Show flags currently activated
+.variable FLAGS -SET
+All flags to be set
+in $switch.
+.variable FLAGS -ADD
+Flags to be added to
+$switch.
+.variable FLAGS -DELETE
+Flags to be removed
+from $switch.
+!
+.level2
+.subcmd SET
+	   FLAG-SET, or FLAG, is used to set the $SWITCH global
+	   to a specific list of options.  Any options in existence
+	   before FLAG-SET is used are cleared, so that only the
+	   options selected are in effect.  For this reason, FLAG-ADD
+	   is more generally used to add an option.
+
+	Format:
+
+	   VICAR> FLAG-SET FLAGS=options
+
+		or
+
+	   VICAR> FLAG FLAGS=options
+
+	   The available options and examples are given on the
+	   following pages.
+.page
+
+	    o DEBUG     - Enable the debugger for the application
+			  process.
+
+.if VAX_VMS
+	    o LOGGING   - Produce  full async logging. All output
+			  to  sys$output  is placed in a LOG file
+			  and debugger output in a TML file.
+.ifend
+.if1 UNIX
+	    o LOGGING   - No effect under Unix.
+
+.if VAX_VMS
+	    o ADEBUG    - Activate async TM through ASYNC.COM, a
+			  user modified JOB file. Modified to use
+			  the debugger for an async job.
+.ifend
+.if1 UNIX
+	    o ADEBUG    - No effect under Unix.
+			 
+	    o TUTLIB    - Request  for display of library for the
+			  proc in dynamic tutor.
+.page			 
+	    o SYNTAX    - Run  in  syntax  check mode (details in
+			  HELP FLAG or HELP * from TUTOR).
+			 
+	    o NOMESSAGE - Suppress  "Beginning  VICAR  task ..."
+			  message.
+
+	    o P0	- Set bit 0 of the programmer's byte
+	    o P1	- Set bit 1 of the programmer's byte
+	    o P2	- Set bit 2 of the programmer's byte
+	    o P3	- Set bit 3 of the programmer's byte
+	    o P4	- Set bit 4 of the programmer's byte
+	    o P5	- Set bit 5 of the programmer's byte
+	    o P6	- Set bit 6 of the programmer's byte
+	    o P7	- Set bit 7 of the programmer's byte
+.page
+
+				Examples
+
+
+VICAR> FLAG-SET (LOGGING,NOMESS)   Enables logging and suppresses beginning
+				   task message.
+
+VICAR> FLAG-ADD DEBUG		   Enables program debug mode in addition
+				   to above options.
+
+VICAR> FLAG LOGGING		   Enables logging flag only, clearing
+				   others.
+
+.subcmd ADD
+	   FLAG-ADD is used to set a list of options in the
+	   $SWITCH global.  Unlike FLAG-SET or just FLAG,
+	   FLAG-ADD simply adds the named options to the
+	   list already in use.  Options in existence
+	   before FLAG-ADD is used are not affected.
+
+	Format:
+
+	   VICAR> FLAG-ADD FLAGS=options
+
+	   The  available options and examples are given on
+	   the following pages.
+.page
+
+	    o DEBUG     - Enable the debugger for the application
+			  process.
+
+.if VAX_VMS
+	    o LOGGING   - Produce  full async logging. All output
+			  to  sys$output  is placed in a LOG file
+			  and debugger output in a TML file.
+.ifend
+.if1 UNIX
+	    o LOGGING   - No effect under Unix.
+
+.if VAX_VMS
+	    o ADEBUG    - Activate async TM through ASYNC.COM, a
+			  user modified JOB file. Modified to use
+			  the debugger for an async job.
+.ifend
+.if1 UNIX
+	    o ADEBUG    - No effect under Unix.
+			 
+	    o TUTLIB    - Request  for display of library for the
+			  proc in dynamic tutor.
+.page			 
+	    o SYNTAX    - Run  in  syntax  check mode (details in
+			  HELP FLAG or HELP * from TUTOR).
+			 
+	    o NOMESSAGE - Suppress  "Beginning  VICAR  task ..."
+			  message.
+
+	    o P0	- Set bit 0 of the programmer's byte
+	    o P1	- Set bit 1 of the programmer's byte
+	    o P2	- Set bit 2 of the programmer's byte
+	    o P3	- Set bit 3 of the programmer's byte
+	    o P4	- Set bit 4 of the programmer's byte
+	    o P5	- Set bit 5 of the programmer's byte
+	    o P6	- Set bit 6 of the programmer's byte
+	    o P7	- Set bit 7 of the programmer's byte
+.page
+
+				Examples
+
+
+VICAR> FLAG-SET (LOGGING,NOMESS)   Enables logging and suppresses beginning
+				   task message.
+
+VICAR> FLAG-ADD DEBUG		   Enables program debug mode in addition
+				   to above options.
+
+VICAR> FLAG-DEL (DEBUG,NOMES)	   Clears the debug and nomessage flags,
+				   leaving logging enabled.
+
+.subcmd DELETE
+
+
+	   FLAG-DELETE is used to clear a list of options in
+	   the $SWITCH global.  FLAG-DELETE clears only the
+	   options named; other options remain unaffected.
+
+	Format:
+
+	   VICAR> FLAG-DELETE FLAGS=options
+
+	   The available options and examples are given on
+	   the following pages.
+.page
+
+	    o DEBUG     - Enable the debugger for the application
+			  process.
+
+.if VAX_VMS
+	    o LOGGING   - Produce  full async logging. All output
+			  to  sys$output  is placed in a LOG file
+			  and debugger output in a TML file.
+.ifend
+.if1 UNIX
+	    o LOGGING   - No effect under Unix.
+
+.if VAX_VMS
+	    o ADEBUG    - Activate async TM through ASYNC.COM, a
+			  user modified JOB file. Modified to use
+			  the debugger for an async job.
+.ifend
+.if1 UNIX
+	    o ADEBUG    - No effect under Unix.
+			 
+	    o TUTLIB    - Request  for display of library for the
+			  proc in dynamic tutor.
+.page			 
+	    o SYNTAX    - Run  in  syntax  check mode (details in
+			  HELP FLAG or HELP * from TUTOR).
+			 
+	    o NOMESSAGE - Suppress  "Beginning  VICAR  task ..."
+			  message.
+
+	    o P0	- Set bit 0 of the programmer's byte
+	    o P1	- Set bit 1 of the programmer's byte
+	    o P2	- Set bit 2 of the programmer's byte
+	    o P3	- Set bit 3 of the programmer's byte
+	    o P4	- Set bit 4 of the programmer's byte
+	    o P5	- Set bit 5 of the programmer's byte
+	    o P6	- Set bit 6 of the programmer's byte
+	    o P7	- Set bit 7 of the programmer's byte
+.page
+
+				Examples
+
+
+VICAR> FLAG-SET (LOGGING,NOMESS)   Enables logging and suppresses beginning
+				   task message.
+
+VICAR> FLAG-ADD DEBUG		   Enables program debug mode in addition
+				   to above options.
+
+VICAR> FLAG-DEL (DEBUG,NOMES)	   Clears the debug and nomessage flags,
+				   leaving logging enabled.
+.subcmd SHOW
+
+	   FLAG-SHOW will show what options are currently
+	   set in the $SWITCH global variable.  A brief
+	   description is given with each flag name.  
+
+	   There are no arguments for this command.
+
+	   For more information, ask for help on FLAG,
+	   FLAG-ADD, or FLAG-DELETE.
+
+.variable FLAGS -SET
+
+	   FLAGS is a list of flags which are to be set in the global
+	   variable $switch.  They can be referenced only by symbolic
+	   name.  The $switch global is set to only the values given,
+	   any previous values are cleared.  To add a flag without
+	   clearing the $switch global, use the command FLAG-ADD.
+
+	   For example, to have only the LOGGING flag set, use
+ 
+		VICAR>FLAG LOGGING
+
+	   To  suppress  the "Beginning VICAR task" message and allow
+	   program debugging, use
+
+		VICAR>FLAG (NOMESSAGE,DEBUG)
+	   
+.PAGE
+	   Following  are  the  current  flags  supported  for use by
+	   VICAR.
+
+	    o DEBUG     - Enable the debugger for the application
+			  process.
+
+.if VAX_VMS
+	    o LOGGING   - Produce  full async logging. All output
+			  to  sys$output  is placed in a LOG file
+			  and debugger output in a TML file.
+.ifend
+.if1 UNIX
+	    o LOGGING   - No effect under Unix.
+
+.if VAX_VMS
+	    o ADEBUG    - Activate async TM through ASYNC.COM, a
+			  user modified JOB file. Modified to use
+			  the debugger for an async job.
+.ifend
+.if1 UNIX
+	    o ADEBUG    - No effect under Unix.
+			 
+	    o TUTLIB    - Request  for display of library for the
+			  proc in dynamic tutor.
+.page			 
+	    o SYNTAX    - Run  in  syntax  check mode (details in
+			  HELP FLAG or HELP * from TUTOR).
+			 
+	    o NOMESSAGE - Suppress  "Beginning  VICAR  task ..."
+			  message.
+
+	    o P0	- Set bit 0 of the programmer's byte
+	    o P1	- Set bit 1 of the programmer's byte
+	    o P2	- Set bit 2 of the programmer's byte
+	    o P3	- Set bit 3 of the programmer's byte
+	    o P4	- Set bit 4 of the programmer's byte
+	    o P5	- Set bit 5 of the programmer's byte
+	    o P6	- Set bit 6 of the programmer's byte
+	    o P7	- Set bit 7 of the programmer's byte
+
+.variable FLAGS -ADD
+
+	   FLAGS is a list of flags which are to be set in the
+	   global variable $switch.  They can be referenced only
+	   by symbolic name.  The values indicated by FLAGS are
+	   added to the $switch global, and any previous values
+	   remain set.  To supercede the $switch global completely,
+	   use FLAG-SET.  To remove a flag from the $switch global,
+	   use FLAG-DELETE.
+
+	   For example, to add the LOGGING flag to those set, use
+
+		VICAR>FLAG-ADD LOGGING
+.PAGE
+	   To suppress the "Beginning VICAR task" message and
+	   allow program debugging in addition to the logging,
+	   you may then use
+
+		VICAR>FLAG-ADD (NOMESSAGE,DEBUG)
+	   
+.PAGE
+	   Following are the current flags supported for use by
+	   VICAR.
+
+	    o DEBUG     - Enable the debugger for the application
+			  process.
+
+.if VAX_VMS
+	    o LOGGING   - Produce  full async logging. All output
+			  to  sys$output  is placed in a LOG file
+			  and debugger output in a TML file.
+.ifend
+.if1 UNIX
+	    o LOGGING   - No effect under Unix.
+
+.if VAX_VMS
+	    o ADEBUG    - Activate async TM through ASYNC.COM, a
+			  user modified JOB file. Modified to use
+			  the debugger for an async job.
+.ifend
+.if1 UNIX
+	    o ADEBUG    - No effect under Unix.
+			 
+	    o TUTLIB    - Request  for display of library for the
+			  proc in dynamic tutor.
+.page			 
+	    o SYNTAX    - Run  in  syntax  check mode (details in
+			  HELP FLAG or HELP * from TUTOR).
+			 
+	    o NOMESSAGE - Suppress  "Beginning  VICAR  task ..."
+			  message.
+
+	    o P0	- Set bit 0 of the programmer's byte
+	    o P1	- Set bit 1 of the programmer's byte
+	    o P2	- Set bit 2 of the programmer's byte
+	    o P3	- Set bit 3 of the programmer's byte
+	    o P4	- Set bit 4 of the programmer's byte
+	    o P5	- Set bit 5 of the programmer's byte
+	    o P6	- Set bit 6 of the programmer's byte
+	    o P7	- Set bit 7 of the programmer's byte
+
+.variable FLAGS -DELETE
+
+	   FLAGS is a list of flags which are to be cleared in
+	   the global variable $switch.  They can be referenced
+	   only by symbolic name.  The values indicated by FLAGS
+	   are removed from the $switch global.   All other
+	   values remain unchanged.   To supercede the $switch
+	   global completely, use FLAG-SET.  To add a flag to
+	   the $switch global, use FLAG-ADD.
+
+	   For example, to disable asynchronous job logging, use
+
+		VICAR>FLAG-DELETE LOGGING
+
+	   To stop suppressing the "Beginning VICAR task"
+	   message and disable program debugging, you may use
+
+		VICAR>FLAG-DELETE (NOMESSAGE,DEBUG)
+.PAGE
+	   Following  are the current flags supported for use by
+	   VICAR.
+
+	    o DEBUG     - Enable the debugger for the application
+			  process.
+
+.if VAX_VMS
+	    o LOGGING   - Produce  full async logging. All output
+			  to  sys$output  is placed in a LOG file
+			  and debugger output in a TML file.
+.ifend
+.if1 UNIX
+	    o LOGGING   - No effect under Unix.
+
+.if VAX_VMS
+	    o ADEBUG    - Activate async TM through ASYNC.COM, a
+			  user modified JOB file. Modified to use
+			  the debugger for an async job.
+.ifend
+.if1 UNIX
+	    o ADEBUG    - No effect under Unix.
+			 
+	    o TUTLIB    - Request  for display of library for the
+			  proc in dynamic tutor.
+.page			 
+	    o SYNTAX    - Run  in  syntax  check mode (details in
+			  HELP FLAG or HELP * from TUTOR).
+			 
+	    o NOMESSAGE - Suppress  "Beginning  VICAR  task ..."
+			  message.
+
+	    o P0	- Set bit 0 of the programmer's byte
+	    o P1	- Set bit 1 of the programmer's byte
+	    o P2	- Set bit 2 of the programmer's byte
+	    o P3	- Set bit 3 of the programmer's byte
+	    o P4	- Set bit 4 of the programmer's byte
+	    o P5	- Set bit 5 of the programmer's byte
+	    o P6	- Set bit 6 of the programmer's byte
+	    o P7	- Set bit 7 of the programmer's byte
+.END

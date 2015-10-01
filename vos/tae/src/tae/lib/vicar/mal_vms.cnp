@@ -1,0 +1,208 @@
+#include <descrip.h>
+#include <ssdef.h>
+#include <secdef.h>
+
+#include "stdh.inp"		/* system standard  (REQUIRED)		*/
+#include "taeconf.inp"		/* TAE configuration (REQUIRED)		*/
+	
+#include "symtab.inc"		/* TM symbol table			*/
+#include "tminc.inc"
+
+#include "vicartae.inc"		/* VICAR-specific definitions		*/
+
+#define LABEL_SPACE 4096
+#define MAX_MEM_FILES 20
+
+GLOBAL CODE run_type;
+GLOBAL COUNT total_mem_files_allocated = 0;
+GLOBAL COUNT mem_file_top = 0;	/* top member of mem_files array	*/
+GLOBAL struct			/* Table of allocated global sections	*/
+    {
+	char gsd_name[20]; 	/* name of global section descriptor	*/
+	char *gs_addr[2];	/* address array of global section	*/
+    } mem_files[MAX_MEM_FILES];
+
+/* MAL allocates a global page file section to be used as an image
+ * file. Simply, the primary file name entered on the command is
+ * appended to the identifier V2$ to form the section name. The file
+ * name is used as a vms logical name to identify the file among
+ * programs using it. Once the section name has been composed, the
+ * vms service, CRMPSC is used to create the section. The size is
+ * determined from the command line parameters, NL, NS, FORMAT.
+ */
+
+FUNCTION CODE mal_do ( procctx, cmdctx)
+
+    struct CONTXT *procctx;
+    struct CONTXT *cmdctx;
+
+    {
+
+    struct dsc$descriptor_s section;
+    int stat, channel, unit;
+    char lock[3][512];
+    int size, nl, ns, pixel_size;
+    short count;
+    int flags,i;
+    char section_name[100];
+    char *format;
+    char *s[2], *r[2];
+    char *f_parm, file_parm[STRINGSIZ];
+
+    struct VARIABLE *v;
+    struct VARIABLE *integer;
+    struct VARIABLE *format_parm;
+ 
+    if (total_mem_files_allocated >= MAX_MEM_FILES)
+	{
+	tmmsg(PROCFAIL, "Maximum number of memory files exceeded.",
+		"TAE-MAXMEM");
+	return;
+	}
+
+    v = lookex (&(*cmdctx).parmst, "FILE" );
+    f_parm = SVAL(*v, 0);
+    make_upper_case(file_parm, f_parm);
+
+/* Flag duplicate allocation as an error to avoid multiple mapping */
+    for (i = 0; i < mem_file_top; i++)
+	{
+	if (s_equal(mem_files[i].gsd_name, file_parm))
+	    {
+	    tmmsg(PROCFAIL, "Memory file already exists.  Not superceded.",
+		"TAE-MEMEXIST");
+	    return;
+	    }
+	}
+
+    section_name[0] = '\0';         /* Form the global section name. */
+    strcpy(section_name,"V2$");
+    strcat(section_name, file_parm);
+
+    section.dsc$w_length = strlen(section_name);    
+    section.dsc$b_class = DSC$K_CLASS_S;
+    section.dsc$b_dtype = DSC$K_DTYPE_T;
+    section.dsc$a_pointer = section_name;
+
+    integer = lookex(&(*cmdctx).parmst, "NL");
+    nl = IVAL(*integer, 0 );
+    integer = lookex(&(*cmdctx).parmst, "NS");
+    ns = IVAL(*integer, 0 );
+
+/* Use NL, NS and FORMAT to determine the size of the memory file.	*/
+
+    format_parm = lookex( &(*cmdctx).parmst, "FORMAT");
+    format = SVAL(*format_parm, 0);
+    make_upper_case(format,format);
+
+    switch(format[0])
+	{
+	case 'B': pixel_size = sizeof(unsigned char); break;
+	case 'H': pixel_size = sizeof(short int); break;
+	case 'F': pixel_size = sizeof(float); break;
+	case 'R': pixel_size = sizeof(float); break;
+	case 'D': pixel_size = sizeof(double); break;
+	case 'C': pixel_size = 2*sizeof(float); break;
+	default:  pixel_size = sizeof(unsigned char);
+	}
+
+    size = (nl*ns*pixel_size + LABEL_SPACE)/512 + 1;  /* Compute size w/label */
+
+    r[0] = lock[1];	/* Allocate in program space (not system) */
+    r[1] = lock[1];
+
+    flags = SEC$M_WRT | SEC$M_EXPREG | SEC$M_GBL | SEC$M_PAGFIL;
+
+    stat = sys$crmpsc(r,s,0,flags,&section,0,0,0,size,0,0,0);
+
+    if ((stat == SS$_NORMAL) || (stat == SS$_CREATED))
+	{
+	for (i = 0; i < mem_file_top; i++)
+	    if (mem_files[i].gsd_name[0] == '\0') break;
+	strcpy(mem_files[i].gsd_name, file_parm);
+	mem_files[i].gs_addr[0] = s[0];
+	mem_files[i].gs_addr[1] = s[1];
+	total_mem_files_allocated++;
+	if (i == mem_file_top) mem_file_top++;
+	put_stdout("Memory file allocated and mapped.");
+	}
+    else
+	{
+	section.dsc$w_length = 100;
+	stat = sys$getmsg( stat, &count, &section, 0, 0);
+	section_name[count] = '\0';
+	tmmsg(PROCFAIL, section_name, "TAE-MALFAIL");
+	return;
+	}   
+
+    return;
+
+    }
+
+
+
+/************************************************************************/
+/* DAL deallocates a global page file section used as an image
+ * file. The primary file name entered on the command is
+ * appended to the identifier V2$ to form the section name. The file
+ * name is used as a vms logical name to identify the file among
+ * programs using it. Once the section name has been composed, the
+ * vms service, MGBLSC is used to MAP the section. Then the service,
+ * DGBLSC, is called to delete it.
+ */
+
+FUNCTION CODE dal_do (procctx, cmdctx)
+
+    struct CONTXT *procctx;
+    struct CONTXT *cmdctx;
+
+    {
+
+    struct dsc$descriptor_s section;
+    int stat;
+    short count;
+    int flags, i;
+    char section_name[200];
+    char *s[2], *r[2];
+
+    char *f_parm, file_parm[STRINGSIZ];
+    struct VARIABLE *v;
+
+    v = lookex (&(*cmdctx).parmst, "FILE");
+    f_parm = SVAL(*v,0);
+    make_upper_case(file_parm,f_parm);
+
+/* find the entry in the table for the requested memory file */
+
+    for (i = 0; i < mem_file_top; i++)
+	if (s_equal(mem_files[i].gsd_name, file_parm)) break;
+
+    if (i == mem_file_top)	/* entry not found */
+	{
+	tmmsg(PROCFAIL, "No such memory file", "TAE-NOMEMFIL");
+	return;
+	}
+
+    stat = sys$deltva(mem_files[i].gs_addr, 0, 0);
+
+    if (stat == SS$_NORMAL)
+	{
+	mem_files[i].gsd_name[0] = '\0'; /* Flag space as free	*/
+	mem_files[i].gs_addr[0] = mem_files[i].gs_addr[1] = 0;
+	total_mem_files_allocated--;
+	if (i == (mem_file_top - 1)) mem_file_top--;
+	put_stdout("Memory file deleted.");
+	}
+    else  
+	{
+	section.dsc$w_length = 100;
+	i = sys$getmsg( stat, &count, &section, 0, 0);
+	if (i != SUCCESS)
+	    sprintf(section_name, "System service failed, code = %d", stat);
+	else
+	    section_name[count] = '\0';
+	tmmsg(PROCFAIL, section_name, "TAE-DALFAIL");
+	}   
+
+    return;
+    }

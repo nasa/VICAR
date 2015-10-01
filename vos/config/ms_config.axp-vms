@@ -1,0 +1,121 @@
+//////////////////////////////////////////////////////////////////////////////
+//
+// configuration file for MipsSpice application. This file is read by
+// MsEnv class to retrieve information (such as KDB, SPICE kernels
+// directories, SCLK, LEAPSECONDS, CONSTANTS, etc.
+//
+// Entries in the file follow simple Keyword-value format. For a typical
+// entry:
+//
+//      SPICEKER /home/svl/rt/ds1/dev (anything out here is ignore)
+//      ^        ^
+//      |        |
+//      key     value
+//
+// Lines started with the '//' sequence are treated as comments.
+//
+// Up to this point, the following keys are defined:
+//
+//      CAS_KDB, CAS_SPICEKER, CAS_MIPSKER,
+//              CAS_SCLK, CAS_LEAPSECONDS,
+//              CAS_CONSTANTS, CAS_BODY_IDS.
+//
+//      SIM_KDB, SIM_SPICEKER, SIM_MIPSKER,
+//              SIM_SCLK, SIM_LEAPSECONDS,
+//              SIM_CONSTANTS, SIM_BODY_IDS
+//
+//      GLL_KDB, GLL_SPICEKER, GLL_MIPSKER,
+//              GLL_SCLK, GLL_LEAPSECONDS,
+//              GLL_CONSTANTS, GLL_BODY_IDS
+//
+//      VGR1_KDB, VGR1_SPICEKER, VGR1_MIPSKER,
+//              VGR1_SCLK, VGR1_LEAPSECONDS,
+//              VGR1_CONSTANTS, VGR1_BODY_IDS
+//
+//      VGR2_KDB, VGR2_SPICEKER, VGR2_MIPSKER
+//              VGR2_SCLK, VGR2_LEAPSECONDS,
+//              VGR2_CONSTANTS, VGR2_BODY_IDS
+//
+//      VKG_KDB, VKG_SPICEKER, VKG_MIPSKER,
+//              VKG_SCLK, VKG_LEAPSECONDS,
+//              VKG_CONSTANTS, VKG_BODY_IDS
+//
+// Keyword name: xxx_KDB, xxx_SPICEKER, xxx_MIPSKER, etc.
+// Where xxx are mission names (CAS, SIM, GLL, VGR1, VGR2, VKG), etc.
+//
+// Entries with invalid keywords are ignored.
+//
+// xxx_KDB: file name of kernel db table. Entries in this table determine
+//	where MS software should look & what file to search to retrieve
+//	SPICE data
+// xxx_SPICEKER: Directory where NAIF (or non-update-able SPICEKER are
+//	stored) - in VMS syntax
+// xxx_MIPSKER: Directory where updated SPICE kernels are stored
+// xxx_SCLK: name of sclk file
+// xxx_LEAPSECONDS: name of leapseconds file
+// xxx_CONSTANTS: name of constant file
+// xxx_BODY_IDS: name of body ids file
+//
+//
+// **** You can have more (or less, but at least 1) SERVER_HOST entry,
+//	so your client will know where to go to connect to msserver.
+//
+//	Current supported projects are: GLL, VGR1, VGR2, VKG.
+// created	: Fri Mar  7 11:27:32 PST 1997
+// programmer	: Sam Le
+//
+//////////////////////////////////////////////////////////////////////////////
+SPICE_TCP_PORT	2501
+
+SERVER_HOST	mipl4.jpl.nasa.gov
+
+SPICE_LOG	USER:[SPICE]msserver_axp-vms.log
+
+GLL_KDB         USER:[SPICE]kdb.gll
+GLL_SPICEKER    USER:[SPICE.gll]
+GLL_MIPSKER     USER:[SPICE.gll]
+GLL_SCLK        USER:[SPICE]sclk.ker
+GLL_CONSTANTS   USER:[SPICE]p_constants.ker
+GLL_BODY_IDS    USER:[SPICE]bodid.dat
+GLL_LEAPSECONDS	USER:[SPICE]leapseconds.ker
+
+VGR1_KDB         USER:[SPICE]kdb.vgr1
+VGR1_SPICEKER    USER:[SPICE.vgr1]
+VGR1_MIPSKER     USER:[SPICE.vgr1]
+VGR1_SCLK        USER:[SPICE]vg100004.tsc
+VGR1_CONSTANTS   USER:[SPICE]p_constants.ker
+VGR1_BODY_IDS    USER:[SPICE]bodid.dat
+VGR1_LEAPSECONDS USER:[SPICE]leapseconds.ker
+
+VGR2_KDB         USER:[SPICE]kdb.vgr2
+VGR2_SPICEKER    USER:[SPICE.vgr2]
+VGR2_MIPSKER     USER:[SPICE.vgr2]
+VGR2_SCLK        USER:[SPICE]vgr2_sclk.ker
+VGR2_CONSTANTS   USER:[SPICE]p_constants.ker
+VGR2_BODY_IDS    USER:[SPICE]bodid.dat
+VGR2_LEAPSECONDS USER:[SPICE]leapseconds.ker
+
+VO1_KDB		USER:[SPICE]kdb.vo1
+VO1_SPICEKER    USER:[SPICE.vo1]
+VO1_MIPSKER     USER:[SPICE.vo1]
+VO1_SCLK        USER:[SPICE]vo1_fict.tsc
+VO1_CONSTANTS   USER:[SPICE]p_constants.ker
+VO1_BODY_IDS    USER:[SPICE]bodid.dat
+VO1_LEAPSECONDS USER:[SPICE]leapseconds.ker
+
+VO2_KDB         USER:[SPICE]kdb.vo2
+VO2_SPICEKER    USER:[SPICE.vo2]
+VO2_MIPSKER     USER:[SPICE.vo2]
+VO2_SCLK        USER:[SPICE]vo2_sclk.ker
+VO2_CONSTANTS   USER:[SPICE]p_constants.ker
+VO2_BODY_IDS    USER:[SPICE]bodid.dat
+VO2_LEAPSECONDS USER:[SPICE]leapseconds.ker
+
+CAS_KDB		USER:[SPICE]kdb.cas
+CAS_SPICEKER	USER:[SPICE.cas]
+CAS_MIPSKER	USER:[SPICE.cas]
+CAS_SCLK	USER:[SPICE]cas_sclk.ker
+CAS_CONSTANTS	USER:[SPICE]p_constants.ker
+CAS_BODY_IDS	USER:[SPICE]bodid.dat
+CAS_LEAPSECONDS	USER:[SPICE]leapseconds.ker
+

@@ -1,0 +1,17 @@
+PROCEDURE help=* options=nointerrupt
+refgbl $vidsflg
+BODY
+let _onfail="continue"
+jdrop all
+chkvids1
+let $vidsflg="NOVIDS"
+ABORT-ASYNC VIDSJOB
+REMOVE VIDSJOB
+DISABLE-RECVAR
+END-PROC
+.title
+VIDS command JSTOP
+.help
+JSTOP is used to abort a VIDS session.  It stops the VIDS process, and
+re-initializes everything to enable you to start another VIDS session.
+.end

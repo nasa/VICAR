@@ -1,0 +1,33 @@
+/*
+ * SET VERSION NUMBERS BEFORE MAKING MAKEFILES
+ */
+/*
+ * Change Log
+ * 13-oct-92	Changed CplusplusLdCmd to cc...rt
+ * 14-oct-92	Changed CplusplusCcCmd and CplusplusLdCmd.  ExtraCFlags was
+ *		not picked up by the Makefile so eliminated...rt
+ */
+
+#define SystemV           YES
+
+#define OSName            IRIX
+#define OSMajorVersion    4
+#define OSMinorVersion    0
+
+
+/**/# platform:  $XConsortium: generic.cf,v 1.2 89/01/11 14:58:19 jim Exp $
+/**/# operating system:  OSName
+
+/*****************************************************************************
+ *			  Platform-specfic parameters                        *
+ *****************************************************************************/
+
+#define  CplusplusCcCmd		CC -cckr -G 0 -signed -Dwchar_t=long
+#define  CplusplusCmd		CC -cckr -G 0 -signed -Dwchar_t=long
+#define  CplusplusLdCmd		cc
+#define  ExtraLibraries 	-lbsd -lPW -lsun
+#define  LnCmd 			ln -s
+#define  StandardDefines	-Dsgi -DSVR3 -DSYSV
+#define  UNCOMPRESSPATH 	/usr/bsd/uncompress
+#define  InstallCmd		$$TAEBIN/all/bsdinst_sgi
+#define  RanlibCmd		/bin/true

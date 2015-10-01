@@ -1,0 +1,168 @@
+PROCEDURE  help=*        !  INTRO.PDF
+BODY
+HELP TAE$MENU:intro
+END-PROC
+
+.HELP
+Welcome to the VICAR Menu System.  This menu system was created in order to 
+meet two objectives. First, to assist the new VICAR user in locating 
+appropriate programs and second, to act as a reference for the advanced user.
+
+When a new user is faced with the multitude of the VICAR application programs,
+it is very easy to become disoriented and frustrated trying to locate that one 
+unknown program that will accomplish the desired task. The VICAR Menu has
+been designed so that the new user will be guided through a series of menu
+screens in order to easily locate the desired program.
+.page
+Once the user has located the desired program, you need only select the
+program and you are automatically put into Tutor mode.  The Tutor mode
+helps the user to actually execute the program.  The program parameter
+names are listed and defined, and if there are default values for the 
+parameters they are indicated.  
+
+In addition, the Tutor screen also indicates the class of program.  On the 
+top line of the Tutor screen, the LIBRARY of the program is indicated.  If 
+the program is in either R1LIB or R2LIB, these are normal programs and they 
+are fully supported and tested. The R3LIB programs are a special set of 
+programs which have not been tested, they are not supported and they may 
+not even have a help file associated with them. PLEASE BE AWARE OF THIS 
+AND USE THE R3LIB PROGRAMS AT YOUR OWN RISK.
+.page 
+Once you have selected the appropriate parameters, Tutor will execute the 
+program when you enter the command RUN.  Once the program has been executed, 
+the user is returned to the menu.  The user can then locate the next program 
+they wish to execute or exit from the menu. 
+.page
+
+                           HELP INFORMATION
+
+
+
+
+In order to learn how to use the menu system, please type HELP when you are 
+in the menu. This command will put you in the help mode which then defines:
+how to use the menu, what the commands mean, and how to obtain 
+additional help information at each level of the menu.
+
+
+.page
+             SPECIAL INFORMATION ABOUT USING THE VICAR MENU
+
+
+
+1) The Menu System is composed of a series of menu screens. The initial 
+   screen displayed when the menu system is first entered is called the 
+   Root Menu screen.  The Menu system then proceeds through a series of 
+   lower level screens.
+
+2) In the upper right corner of each lower level menu screen, there is an 
+   indication of what page you are on, and how many pages are associated with 
+   that category.
+.page
+
+             SPECIAL INFORMATION ABOUT USING THE VICAR MENU
+
+3) In the lower level menu screens, the program names will be shown in 
+   either BOLD/CAPITAL letters, or in non-bold/small letters. The 
+   bold/capital letters indicate that this category is a primary usage of 
+   that program. The non-bold/small letters indicate that the program 
+   accomplishes the task defined in the category, but that this task is 
+   not the primary usage of the program. 
+
+   USERS ARE ADVISED TO SCAN THE BOLD/CAPITAL PROGRAMS FIRST SINCE A 
+   MAJORITY OF THE TIME THE PROGRAM YOU ARE INTERESTED IN WILL BE IN THE 
+   BOLD/CAPITAL CLASSIFICATION.
+
+4) Programs may be located under several categories. Since most programs 
+   can accomplish more than one function, the programs will be listed  
+   under several menu categories.
+.PAGE
+                             SUGGESTIONS
+
+
+
+Before you start using the menu, please take the time to do the following:
+
+
+1) Type HELP while in the menu, in order to learn how to use the menu.
+
+2) Explore the New User Tutorial if you have not yet had the opportunity.
+
+3) Explore the Sample Procedures section of the menu. If you are not 
+   familiar with the flow of VICAR or IBIS program processing, you will 
+   appreciate the examples in this section.
+
+.page
+                          MENU CATEGORIES
+
+The Root Menu (or the top level menu screen) has been divided into 3 main 
+categories: VICAR Help Information, Image Processing Selections and Special 
+Processing. 
+
+Within the VICAR Help Information Sections there are 3 types of online
+help information available.
+
+          1)  INTRODUCTION TO THE VICAR MENU SYSTEM
+          2)  NEW VICAR USER TUTORIAL
+          3)  VICAR SAMPLE PROCEDURES
+
+The new user is advised to make use of the tools available within the
+VICAR Help Information section.   
+.page
+The INTRODUCTION TO THE VICAR MENU SYSTEM selection contains basic 
+information about the VICAR Menu System. (What you are currently 
+reading). If this is the first time you have used the menu, please take the 
+time to finish reading this section.
+
+The NEW VICAR USER TUTORIAL selection executes the online tutorial which 
+teaches the new user about VICAR.  If you are a new user, or if you would 
+like a brief refresher about the use of VICAR, please take the time to explore 
+this level of the menu.  The exact same tutorial may also be accessed 
+outside of the menu by typing NUT at the VICAR prompt.
+
+                        VICAR>NUT
+.page
+The SAMPLE PROCEDURES selection provides the user with examples how to use 
+VICAR and IBIS programs.  If a new user is not quite sure what a typical
+VICAR flow should look like, an example of a procedure definition file has 
+been included.  In addition, typical IBIS job flows have also been 
+included.
+.page
+
+The IMAGE PROCESSING SELECTIONS contain those selections which allow the 
+user to modify or act upon image data. The selections available include:
+
+             IMAGE DISPLAY, ANNOTATION & GRAPHICS
+             IMAGE DISTORTION, MEASUREMENT and CORRECTION
+             MATHEMATICAL FUNCTIONS
+             SCIENCE APPLICATIONS
+             UTILITIES
+
+
+The SPECIAL PROCESSING section contains the Flight Projects Specific 
+Software and the IBIS programs.
+.PAGE
+
+
+
+Well, now you know the basics of the VICAR MENU SYSTEM. Please take the 
+time to take advantage of the help information available for the system.
+Hopefully you will find this menu system to be a useful tool to help guide 
+you through the many innovative programs available within the VICAR System.
+.page
+                           HISTORY
+
+
+
+ 1 Nov  1988      L.A. WAINIO       Version 2 - updated,IBIS,procs
+ 3 May  1987      L.A. WAINIO       INITIAL RELEASE
+
+
+Any comments or suggestions on improving the menu should be sent to:
+
+                        Lisa Wainio
+                        Jet Propulsion Laboratory
+                        4800 Oak Grove Drive
+                        Pasadena, CA 91109
+                        MS 168-514
+.END

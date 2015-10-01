@@ -1,0 +1,282 @@
+c   
+c   Public Defines for Photometric Function Package
+c
+c   History:
+c	05jan94 -lwk- initial version
+c	March '94 F. Oschuetz : completed
+c
+
+	integer pho_max_keywd_length, pho_max_func_name_length
+	integer pho_max_param_func, pho_max_arguments_per_func
+	integer pho_max_param_cols
+
+	character*(22) 	phoLAMBERT 
+	character*(22) 	phoMINNAERT
+	character*(22) 	phoIRVINE
+	character*(22) 	phoSQUE_VEV
+	character*(22) 	phoVEVERKA
+	character*(22) 	phoBURATTI1
+	character*(22) 	phoBURATTI2
+	character*(22) 	phoBURATTI3
+	character*(22) 	phoMOSHER
+	character*(22) 	phoLUMME_BOWEL_HG1
+	character*(22) 	phoHAPKE_81_LE2
+	character*(22) 	phoHAPKE_81_COOK
+	character*(22) 	phoHAPKE_86_HG1
+	character*(22) 	phoHAPKE_86_HG2
+	character*(22) 	phoHAPKE_86_LE2
+	character*(22) 	phoHAPKE_HG1_DOM
+	character*(22) 	phoREGNER_HAPKE_HG1
+	character*(22)  phoATMO_CORR_REGNER
+
+	character*(11)	phoALBEDO
+	character*(11)	phoEXPONENT
+	character*(11)	phoA_VEVERKA
+	character*(11)	phoB_VEVERKA
+	character*(11)	phoC_VEVERKA
+	character*(11)	phoD_VEVERKA
+	character*(11)	phoMO_EXP1
+	character*(11)	phoMO_EXP2
+	character*(11)	phoE_BURATTI
+	character*(11)	phoDEN_SOIL
+	character*(11)	phoW_SOIL
+	character*(11)	phoHG1_SOIL
+	character*(11)	phoHG2_SOIL
+	character*(11)	phoHG_ASY_SOIL
+	character*(11)	phoLE1_SOIL
+	character*(11)	phoLE2_SOIL
+	character*(11)	phoH_SHOE
+	character*(11)	phoB_SHOE
+	character*(11)	phoH_CBOE
+	character*(11)	phoB_CBOE
+	character*(11)	phoTHETA
+	character*(11)	phoCOOK
+	character*(11)	phoTAU_ATM
+	character*(11)	phoW_ATM
+	character*(11)	phoHG1_ATM
+	character*(11)	phoIRV_EXP1
+	character*(11)	phoIRV_EXP2
+
+
+	integer illEllCos
+	integer illDTMCos
+	integer illEllDir
+	integer illDTMDir
+
+	integer illShadow
+	integer illNoShadow
+
+	integer	phoSUCCESS
+	integer	phoFUNC_CHANGED
+	integer	phoKEYWD_CHANGED
+	integer	phoFAILURE
+	integer	phoFUNC_NOT_SET
+	integer	phoKEYWD_NOT_SET
+	integer	phoINVALID_FUNCTION
+	integer	phoINVALID_KEYWD
+	integer	phoFUNC_NOT_SPECIFIED
+	integer	phoKEYWD_NOT_SPECIFIED
+	integer	phoINV_ILLU_FUNCTION_SET
+	integer	phoILLU_SET_MIX
+	integer	phoINVALID_ILL_MODE
+	integer	phoARGUMENT_OUT_OF_RANGE
+	integer	phoCLASS_DOUBLING
+	integer	phoROW_OUT_OF_RANGE
+		
+
+	double precision pi, rad_deg
+
+
+
+c general parameters :
+
+	parameter (pho_max_keywd_length = 11)	! max # char's per keyword
+
+	parameter (pho_max_func_name_length = 22) !max # char's per func keyword
+
+	parameter (pho_max_param_func = 8)	! max # params per function
+
+	parameter (pho_max_arguments_per_func = 5) !max # arguments per function
+
+c The following parameter is the maximum number of columns allocated
+c to parameters in the photometric parameter file -- this is intended
+c to be the maximum value that phoMAX_PARAM_PER_FUNC might attain
+c in future extensions 
+
+	parameter (pho_max_param_cols = 15) !max # of coloums in the phopar file
+
+
+c photometric function names :
+
+	parameter ( phoLAMBERT		='LAMBERT' )
+	parameter ( phoMINNAERT		='MINNAERT' )
+	parameter ( phoSQUE_VEV		='SQUE_VEV' )
+	parameter ( phoIRVINE		='IRVINE' )
+	parameter ( phoVEVERKA		='VEVERKA' )
+	parameter ( phoBURATTI1		='BURATTI1' )
+	parameter ( phoBURATTI2		='BURATTII' )
+	parameter ( phoBURATTI3		='BURATTI3' )
+	parameter ( phoMOSHER		='MOSHER' )
+	parameter ( phoLUMME_BOWEL_HG1	='LUMME_BOWEL_HG1' )
+	parameter ( phoHAPKE_81_LE2	='HAPKE_81_LE2' )
+	parameter ( phoHAPKE_81_COOK	='HAPKE_81_COOK' )
+	parameter ( phoHAPKE_86_HG1	='HAPKE_86_HG1' )
+	parameter ( phoHAPKE_86_HG2	='HAPKE_86_HG2' )
+	parameter ( phoHAPKE_86_LE2	='HAPKE_86_LE2' )
+	parameter ( phoHAPKE_HG1_DOM	='HAPKE_HG1_DOM' )
+	parameter ( phoREGNER_HAPKE_HG1	='REGNER_HAPKE_HG1' )
+	parameter ( phoATMO_CORR_REGNER	='ATMO_CORR_REGNER' )
+
+
+c keywords for photometric function parameters : 
+
+	parameter ( phoALBEDO		='ALBEDO' )
+	parameter ( phoEXPONENT		='EXPONENT' )
+	parameter ( phoA_VEVERKA	='A_VEVERKA' )
+	parameter ( phoB_VEVERKA	='B_VEVERKA' )
+	parameter ( phoC_VEVERKA	='C_VEVERKA' )
+	parameter ( phoD_VEVERKA	='D_VEVERKA' )
+	parameter ( phoMO_EXP1		='MO_EXP1' )
+	parameter ( phoMO_EXP2		='MO_EXP2' )
+	parameter ( phoE_BURATTI	='E_BURATTI' )
+	parameter ( phoDEN_SOIL		='DEN_SOIL' )
+	parameter ( phoW_SOIL		='W_SOIL' )
+	parameter ( phoHG1_SOIL		='HG1_SOIL' )
+	parameter ( phoHG2_SOIL		='HG2_SOIL' )
+	parameter ( phoHG_ASY_SOIL	='HG_ASY_SOIL' )
+	parameter ( phoLE1_SOIL		='LE1_SOIL' )
+	parameter ( phoLE2_SOIL		='LE2_SOIL' )
+	parameter ( phoH_SHOE		='H_SHOE' )
+	parameter ( phoB_SHOE		='B_SHOE' )
+	parameter ( phoH_CBOE		='H_CBOE' )
+	parameter ( phoB_CBOE		='B_CBOE' )
+	parameter ( phoTHETA		='THETA' )
+	parameter ( phoCOOK		='COOK' )
+	parameter ( phoTAU_ATM		='TAU_ATM' )
+	parameter ( phoW_ATM		='W_ATM' )
+	parameter ( phoHG1_ATM		='HG1_ATM' )
+	parameter ( phoIRV_EXP1		='IRV_EXP1' )
+	parameter ( phoIRV_EXP2		='IRV_EXP2' )
+
+
+c illMode :
+
+	parameter ( illEllCos	=1 )	! illumination conditions given by 	
+					! cosine of the incidence, emission 
+					! and phase angles related to the
+					! ellipsoid (or surface) normal
+
+	parameter ( illDTMCos	=2 )	! illumination conditions given by 	
+					! cosine of the incidence, emission 
+					! and phase angles related to the
+					! ellipsoid and surface normals
+	
+
+	parameter ( illEllDir	=3 )	! illumination conditions given by 
+					! incidence, emission and ellipsoid (or 
+					! surface) direction
+
+	parameter ( illDTMDir	=4 ) 	! illumination conditions given by 
+					! incidence, emission and ellipsoid and 
+					! surface direction
+ 
+	
+	parameter ( illShadow	=1 )	! the pixel is in the sun or visibility 
+					! shadow
+	
+	parameter ( illNoShadow	=0 )	! the pixel is not in the sun or 
+					! visibility shadow
+	
+
+c error codes : 
+
+	parameter ( phoSUCCESS			=1 )	! Default success
+
+	parameter ( phoFUNC_CHANGED		=2 )	! Success:
+							! Photometric function
+							! set in the pho_object
+							! but function had been 
+							! set previously and has
+							! now been changed 
+
+	parameter ( phoKEYWD_CHANGED		=3 )	! Success:
+							! Parameter set in the 
+							! pho_object but 
+							! parameter had been set
+							! previously and now has
+							! been changed 
+
+	parameter ( phoFAILURE			=0 )	! Failure: 
+							! Without a 
+							! specification 
+
+	parameter ( phoFUNC_NOT_SET		=-1001) ! Failure:
+							! Photometric function
+							! not set in the 
+							! pho_object 
+
+	parameter ( phoKEYWD_NOT_SET		=-1002) ! Failure: 
+							! Parameter keyword not 
+							! set in the pho_object 
+
+	parameter ( phoINVALID_FUNCTION		=-1003)	! Failure: 
+							! Invalid photometric 
+							! function name has been
+							! passed 
+
+	parameter ( phoINVALID_KEYWD		=-1004) ! Failure: 
+							! Invalid keyword has 
+							! been passed 
+
+	parameter ( phoFUNC_NOT_SPECIFIED	=-1005) ! Failure: 
+							! No photometric 
+							! function specified 
+							! in the PDF 
+
+	parameter ( phoKEYWD_NOT_SPECIFIED	=-1006) ! Failure: 
+							! A parameter of the 
+							! photometric function 
+							! was not specified by 
+							! the PDF 
+
+	parameter ( phoINV_ILLU_FUNCTION_SET	=-1007) ! Failure : 
+							! The sets of 
+							! illumination and 
+							! viewing conditions 
+							! are invalid for the 
+							! current photometric 
+							! function 
+
+	parameter ( phoILLU_SET_MIX		=-1008) ! Failure: 
+							! This is an invalid 
+							! representation of the 
+							! illumination and 
+							! viewing conditions 
+
+	parameter ( phoINVALID_ILL_MODE		=-1009)	! Failure : 
+							! The illMode is invalid
+
+	parameter ( phoARGUMENT_OUT_OF_RANGE	=-1010)	! Failure : 
+							! One of the arguments 
+							! is out of the valid 
+							! range 
+
+	parameter ( phoCLASS_DOUBLING		=-1011) ! Failure: 
+							! This class-Id exists 
+							! in the photometric 
+							! parameter file jet 
+
+	parameter ( phoROW_OUT_OF_RANGE		=-1012) ! Failure: 
+							! This row number is not
+							! in the current 
+							! interface file 
+							! (parameter or	
+							! catalog file) 
+
+
+
+c miscellaneous : 
+
+	parameter (pi = 3.14159265358979323846)
+
+	parameter (rad_deg = pi/180.0)

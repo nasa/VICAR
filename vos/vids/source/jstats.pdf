@@ -1,0 +1,73 @@
+procedure help=* options=nointerrupt
+parm planes (string,20) count=0:100 default=IMAGE
+parm region string count=0:1 default=--
+parm device string count=0:1 default=--
+local i integer
+local oplanes integer count=0:100
+local nplanes integer
+local p integer
+body
+jget-planes @planes oplanes=oplanes nplanes=nplanes 'noprint device=@device
+let i=1
+loop
+  if (i>nplanes) break
+  let p = oplanes(i)
+  jget-stats &p @region 'print
+  let i = i + 1
+end-loop
+end-proc
+.title
+VIDS command JSTATS
+.help
+JSTATS calculates and displays on the terminal various statistics
+on a given region and image plane.  The statistics collected are:
+  o Minimum pixel value
+  o Maximum pixel value
+  o Number of pixels
+  o Median pixel value
+  o Mean (average) pixel value
+  o Standard deviation of pixel values
+
+If you want the statistics returned in TCL variables, use
+JGET-STATS instead.
+.page
+Statistics are calculated using the histogram.  VIDS tries to keep
+histograms valid as much as possible; however, it sometimes is
+necessary for the histogram to be collected again.  If the histogram
+needs to be collected, you will notice a short delay.  This will most
+often happen if you are collecting over regions other than the default.
+It will also happen the first time you use a histogram, automatic
+stretch, or statistics command on a particular image.
+.level1
+.variable planes
+Planes to collect statistics on.
+.variable region
+Region used to collect
+statistics
+.vari device
+Name of device to use
+.level2
+.variable planes
+The PLANES parameter specifies the planes to collect the
+statistics on.
+
+See HELP PLANENAMES for more information on plane names.
+.variable region
+The REGION parameter specifies the region on the screen over which to
+collect the statistics.  Only points inside the region are used to
+calculate the statistics.  The region may be any arbitrary shape.
+Regions are defined using JDEF-REGION.
+
+The default is to use the area in which you last displayed an image,
+using JDISP or JLOAD-IMAGE.
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

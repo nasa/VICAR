@@ -1,0 +1,803 @@
+/* Imake rules for TAE builds
+ *
+ * Century Computing, Inc.
+ * 31-Aug-90 baw
+ * 14-dec-90 updated CApplication...cew
+ * 15-feb-91 added APP_DEPLIBS to CApplication macro...cew
+ * 06-apr-92 added CPlusPlusApplication macro...tpl
+ * 01-oct-92 added StatCtorTarget for taemunch...ljn/rt
+ * 05-oct-92 added CFLAGS to SpecialApolloTarget & SpecialFortBindTarget macros
+ *	     changed the leading spaces (blanks) to tabs in the macros.
+ *	     DependCTarget, DependCplusplusTarget, ComplexDependTarget,
+ *	     and CPlusPlusApplication...bth/rt
+ * 13-oct-92 Forgot to bring over the CFLAGS change in one line...rt
+ * 11-nov-92 DependCTarget, DependCplusplusTarget, and ComplexDependTarget
+ *	     were including the sources as dependencies, so the sources
+ *	     were being built when a make depend was executed...rt
+ * 25-may-93 $TAEBIN changed with bin/all linked to it...kbs
+ * 26-may-93 Added XtaeLibraryTarget, BuildXtaeLibraryTarget,
+ *           InstallXtaeLibraryTarget...kbs
+ * 22-jun-93 Modified CPlusPlusApplication (TAECXXLINKLIB)...ljn
+ * 10-jul-93 CPlusPlusApplication now uses CXXLIBSEARCHPATH...ljn
+ * 14-jul-93 Added CPlusPlusSFileApplication for single file applications...ljn
+ * 15-jul-93 Removed TBDs; distinguish C and C++ builds...kbs
+ * 20-aug-93 PR1989: Modified BuildCPlusPlusProgram and
+ *           CPlusPlusSFileApplication.  Note that BuildCPlusPlusProgram
+ *           refers to TAE+ C++ (not TAE+ C++ application) programs.  Remember
+ *           that TAE+ programs are linked with the C linker and not the
+ *           C++ linker, so the C linker needs to know where the C++ library
+ *           is...rt
+ * 24-aug-93 CPlusPlusSFileApplication needed AllTarget()...rt
+ * 24-aug-93 CPlusPlusSFileApplication did not need AllTarget().  The
+ *           $TAEDEMOSRC/Imakefile did...rt
+ * 10-dec-93 PR2518: Removed StatCtorTarget because we do not need
+ *           taemunch anymore...rt
+ */
+
+/*
+ * ======================================================================
+ * general use stuff
+ */
+
+
+.SUFFIXES: .cc .C
+.C.o:
+	$(C++) -c $(C++FLAGS) $<
+.cc.o:
+	$(C++) -c $(C++FLAGS) $<
+
+/* Deal with true stupidity in handling token pasting.  Mac doesn't handle
+ * it properly with # # if -traditional is turned on, doesn't work with / * * /
+ * at all (inserts a space always, even with -traditional), and you can't turn
+ * off -traditional because it complains about all the # being unknown
+ * directives.
+ * So for mac, imake has been modified to replace # # (no spaces) with null.
+ * On other platforms, use / * * / as usual.
+ */
+
+#ifdef IMAKE_TOKEN_PASTING_HACK
+#define liblibname(libname) lib##libname
+#else
+#define liblibname(libname) lib/**/libname
+#endif
+
+
+/*
+ * Make the given dependencies during a make all
+ * NOTE: Doing a recursive `make' gives us nice `target-up-to-date' messages.
+ */
+#ifndef AllTarget
+#define AllTarget(dependencies)     @@\
+all::				    @@\
+	@$(MAKE) -e dependencies
+#endif /* AllTarget */
+
+
+/*
+ * dummy all target
+ */
+#ifndef DummyAllTarget
+#define DummyAllTarget()     @@\
+all::
+#endif /* DummyAllTarget */
+
+/*
+ * Clean the directory. The #* is here instead of in the definition
+ * of RM_CMD because System V will treat the pound sing in the RM_CMD
+ * variable as a comment.
+ */
+#ifndef CleanTarget
+#define CleanTarget()                             @@\
+clean::                                           @@\
+	@echo "     Cleaning directory..."            @@\
+	@$(RM) $(RM_FILE_TYPES) \#*                   @@\
+	@echo "     Finished cleaning directory."     @@\
+	@echo " "
+#endif /* CleanTarget */
+
+
+/*
+ * make makefile in current directory
+ */
+#ifndef MakeMakefileTarget
+#define MakeMakefileTarget(imakeflags)     @@\
+Makefiles::                                @@\
+	-@if [ -f Makefile ]; then \           @@\
+		$(RM) Makefile.bak; \              @@\
+		$(MV) Makefile Makefile.bak; \     @@\
+	else exit 0; fi                        @@\
+	@$(IMAKE_CMD) imakeflags
+#endif /* MakeMakefileTarget */
+
+
+/*
+ * ======================================================================
+ * Macros for libraries
+ */
+
+/*
+ * Make a library archive from a list of objects
+ */
+#ifndef BuildSimpleLibraryTarget
+#define BuildSimpleLibraryTarget(libname,objlist)     @@\
+liblibname(libname).a::                                    @@\
+	@echo "     Building library libname..."          @@\
+                                                      @@\
+liblibname(libname).a:: objlist                            @@\
+	$(RM) $@                                          @@\
+	$(AR) $@ objlist                                  @@\
+	$(RANLIB) $@                                      @@\
+	@echo "     Finished building library libname."
+#endif /* BuildSimpleLibraryTarget */
+
+/*
+ * Xtae: Make a library archive from a list of objects
+ *
+ * NOTE: For now this is identical to BuildSimpleLibraryTarget.
+ *       Separated out for symmetry and possible change.
+ */
+#ifndef BuildXtaeLibraryTarget
+#define BuildXtaeLibraryTarget(libname,objlist)     @@\
+liblibname(libname).a::                                    @@\
+	@echo "     Building Xtae library libname..."          @@\
+                                                      @@\
+liblibname(libname).a:: objlist                            @@\
+	$(RM) $@                                          @@\
+	$(AR) $@ objlist                                  @@\
+	$(RANLIB) $@                                      @@\
+	@echo "     Finished building library libname."
+#endif /* BuildXtaeLibraryTarget */
+
+
+/*
+ * Installs a library into the specified location
+ */
+#ifndef InstallSimpleLibraryTarget
+#define InstallSimpleLibraryTarget(libname)                            @@\
+install:: liblibname(libname).a                                             @@\
+	@echo "     Installing library libname..."                         @@\
+	$(INSTALL) -c $(INST_LIBFLAGS) liblibname(libname).a $(INST_LIBDIR)     @@\
+	$(RANLIB) $(INST_RANLIBFLAGS) $(INST_LIBDIR)/liblibname(libname).a      @@\
+	@echo "     Finished installing library libname."
+#endif /* InstallSimpleLibraryTarget */
+
+/*
+ * Installs a Xtae library into the specified location (diff. dir.)
+ */
+#ifndef InstallXtaeLibraryTarget
+#define InstallXtaeLibraryTarget(libname)                            @@\
+install:: liblibname(libname).a                                             @@\
+	@echo "     Installing Xtae library libname..."                         @@\
+	$(INSTALL) -c $(INST_LIBFLAGS) liblibname(libname).a $(INST_XTAELIBDIR)     @@\
+	$(RANLIB) $(INST_RANLIBFLAGS) $(INST_XTAELIBDIR)/liblibname(libname).a      @@\
+	@echo "     Finished installing library libname."
+#endif /* InstallXtaeLibraryTarget */
+
+
+/*
+ * Build and Install a simple library
+ */
+#ifndef SimpleLibraryTarget
+#define SimpleLibraryTarget(libname,objlist)            @@\
+all::                                                   @@\
+	@echo " "                                           @@\
+	@echo "     Creating library libname..."            @@\
+AllTarget(liblibname(libname).a)                             @@\
+BuildSimpleLibraryTarget(libname,objlist)               @@\
+InstallSimpleLibraryTarget(libname)                     @@\
+all::                                                   @@\
+	@echo "     Finished creating library libname."     @@\
+	@echo " "                                           @@\
+clean::                                                 @@\
+	@echo " "                                           @@\
+	@echo "     Cleaning libname library..."            @@\
+CleanProgram(liblibname(libname).a)                          @@\
+clean::                                                 @@\
+	@echo "     Finished cleaning libname."             @@\
+	@echo " "
+#endif /* SimpleLibraryTarget */
+
+
+/*
+ * Build and Install a Xtae library (for $TAE/Xtae/lib/$TAEPLAT)
+ */
+#ifndef XtaeLibraryTarget
+#define XtaeLibraryTarget(libname,objlist)            @@\
+all::                                                   @@\
+	@echo " "                                           @@\
+	@echo "     Creating library libname..."            @@\
+AllTarget(liblibname(libname).a)                             @@\
+BuildXtaeLibraryTarget(libname,objlist)               @@\
+InstallXtaeLibraryTarget(libname)                     @@\
+all::                                                   @@\
+	@echo "     Finished creating library libname."     @@\
+	@echo " "                                           @@\
+clean::                                                 @@\
+	@echo " "                                           @@\
+	@echo "     Cleaning libname library..."            @@\
+CleanProgram(liblibname(libname).a)                          @@\
+clean::                                                 @@\
+	@echo "     Finished cleaning libname."             @@\
+	@echo " "
+#endif /* XtaeLibraryTarget */
+
+/*
+ * Make a pseudo-library, really just a copy of a .o file
+ */
+#ifndef BuildPseudoLibraryTarget
+#define BuildPseudoLibraryTarget(libname,object)     @@\
+liblibname(libname).a:: object.o                          @@\
+	@echo "     Building library libname..."         @@\
+	$(RM) liblibname(libname).a                           @@\
+	$(CP) object.o liblibname(libname).a                  @@\
+	$(CP) object.o liblibname(libname).o                  @@\
+	@echo "     Finished building library libname."
+#endif /* BuildPseudoLibraryTarget */
+
+
+/*
+ * Install a pseudo-library
+ */
+#ifndef InstallPseudoLibraryTarget
+#define InstallPseudoLibraryTarget(libname)                            @@\
+install:: liblibname(libname).a                                             @@\
+	@echo "     Installing library libname..."                         @@\
+	$(INSTALL) -c $(INST_LIBFLAGS) liblibname(libname).a $(INST_LIBDIR)     @@\
+	$(INSTALL) -c $(INST_LIBFLAGS) liblibname(libname).o $(INST_LIBDIR)     @@\
+	@echo "     Finished installing library libname."
+#endif /* InstallPseudoLibraryTarget */
+
+
+/*
+ * Build and install a pseudo library
+ */
+#ifndef PseudoLibraryTarget
+#define PseudoLibraryTarget(libname,objfile)            @@\
+all::                                                   @@\
+	@echo " "                                           @@\
+	@echo "     Creating library libname..."            @@\
+AllTarget(liblibname(libname).a)                             @@\
+BuildPseudoLibraryTarget(libname,objfile)               @@\
+InstallPseudoLibraryTarget(libname)                     @@\
+all::                                                   @@\
+	@echo "     Finished creating library libname."     @@\
+	@echo " "                                           @@\
+clean::                                                 @@\
+	@echo " "                                           @@\
+	@echo "     Cleaning libname directory..."          @@\
+CleanTarget()                                           @@\
+CleanProgram(liblibname(libname).a)                          @@\
+clean::                                                 @@\
+	@echo "     Finished cleaning."                     @@\
+	@echo " "
+#endif /* PseudoLibraryTarget */
+
+	
+/*
+ * ======================================================================
+ * Special Language/Architecture macros
+ */
+
+/*
+ * special Apollo builds, needed in taelib
+ */
+#ifndef SpecialApolloTarget
+#define SpecialApolloTarget(file)                                           @@\
+file.o: file.c                                                              @@\
+	-@if test $(ASSEMBLE) = true; then \                                    @@\
+		(set -x; $(CC) -E $(CFLAGS) -I$(TINC) -DASSEMBLE file.c >tmp.s; \             @@\
+			$(CC) -c tmp.s; $(RM) tmp.s); \                                 @@\
+	else \                                                                  @@\
+		(set -x; $(CC) -E $(CFLAGS) -I$(TINC) file.c | awk '$$1 != "#"' >tmp.c; \     @@\
+			$(CC) $(CFLAGS) -c tmp.c; rm tmp.c); \                                    @@\
+	fi                                                                      @@\
+	mv tmp.o file.o
+#endif /* SpecialApolloTarget */
+
+
+/*
+ * special Fortran binding target, needed in taelib
+ */
+#ifndef SpecialFortBindTarget
+#define SpecialFortBindTarget(file)                             @@\
+file.o: file.c                                                  @@\
+	-@if test $(CLFORT) = yes; then \                       @@\
+		(set -x; \                                              @@\
+			$(CC) -E $(CFLAGS) -DFORTRAN -I$(TINC) file.c | \             @@\
+				awk '$$1 != "#"' >tmp.f; \                      @@\
+			$(FORT) -c tmp.f; mv tmp$(FORTOBJEXT) file.o; \     @@\
+			$(RM) tmp.f); \                                     @@\
+	else \                                                      @@\
+		(set -x; $(CC) $(CFLAGS) -c -I$(TINC) file.c); \                  @@\
+	fi
+#endif /* SpecialFortBindTarget */
+
+
+/*
+ * ======================================================================
+ * Programs
+ */
+
+/*
+ * Clean the specified program
+ */
+#ifndef CleanProgram
+#define CleanProgram(program)                   @@\
+clean::                                         @@\
+	@echo "     Cleaning program..."            @@\
+	@$(RM) program                              @@\
+	@echo "     Finished cleaning program."
+#endif /* CleanProgram */
+
+
+
+/*
+ * Build a TAE+ (not TAE+ application) C++ Program
+ */
+#ifndef BuildCPlusPlusProgram
+#define BuildCPlusPlusProgram(program,objlist)     @@\
+program::                                          @@\
+	@echo "     Building C++ program..."               @@\
+                                                   @@\
+program:: objlist $(DEPLIBS)                       @@\
+	$(RM) program                                  @@\
+	$(LD++) $(LD++FLAGS) $(LIBSEARCHPATH) \        @@\
+		-o program objlist $(LINKLIBS)  @@\
+	@echo "     Finished building program."
+#endif /* BuildCPlusPlusProgram */
+
+
+/*
+ * Install a program
+ */
+#ifndef InstallProgram
+#define InstallProgram(program)                                @@\
+install install.program:: program                              @@\
+	@echo "     Installing program..."                         @@\
+	$(INSTALL) -c $(INST_EXECFLAGS) program $(INST_BINDIR)     @@\
+	$(AFTERINSTALL) program                                    @@\
+	@echo "     Finished installing program."
+#endif /* InstallProgram */
+
+
+/*
+ * Build and install a simple C++ Program target
+ */
+#ifndef SimpleCPlusPlusProgramTarget
+#define SimpleCPlusPlusProgramTarget(program,objlist)     @@\
+all::                                                     @@\
+	@echo " "                                             @@\
+	@echo "     Creating program..."                      @@\
+AllTarget(program)                                        @@\
+BuildCPlusPlusProgram(program,objlist)                    @@\
+InstallProgram(program)                                   @@\
+all::                                                     @@\
+	@echo "     Finished creating program."               @@\
+	@echo " "                                             @@\
+clean::                                                   @@\
+	@echo " "                                             @@\
+	@echo "     Cleaning program..."                      @@\
+CleanProgram(program)                                     @@\
+clean::                                                   @@\
+	@echo "     Finished cleaning program."               @@\
+	@echo " "
+#endif /* SimpleCPlusPlusProgramTarget */
+
+
+/*
+ * Build a C Program
+ */
+#ifndef BuildCProgram
+#define BuildCProgram(program,objlist)      @@\
+program::                                   @@\
+	@echo "     Building C program..."        @@\
+	                                        @@\
+program:: objlist $(DEPLIBS)                @@\
+	$(RM) program                           @@\
+	$(LD) $(LDFLAGS) $(LIBSEARCHPATH) \     @@\
+		-o program objlist $(LINKLIBS)      @@\
+	@echo "     Finished building program."
+#endif /* BuildCProgram */
+
+
+/*
+ * Build and install a simple C program
+ */
+#ifndef SimpleCProgramTarget
+#define SimpleCProgramTarget(program,objlist)     @@\
+all::                                             @@\
+	@echo " "                                     @@\
+	@echo "     Creating program..."              @@\
+AllTarget(program)                                @@\
+BuildCProgram(program,objlist)                    @@\
+InstallProgram(program)                           @@\
+all::                                             @@\
+	@echo "     Finished creating program."       @@\
+	@echo " "                                     @@\
+clean::                                           @@\
+	@echo " "                                     @@\
+	@echo "     Cleaning program..."              @@\
+CleanProgram(program)                             @@\
+clean::                                           @@\
+	@echo "     Finished cleaning program."       @@\
+	@echo " "
+#endif /* SimpleCProgramTarget */
+
+
+/*
+ * single program target
+ */
+#ifndef SingleCProgramTarget
+#define SingleCProgramTarget(program)     @@\
+SimpleCProgramTarget(program,program.o)
+#endif
+
+
+/*
+ * single program target
+ */
+#ifndef SingleCPlusPlusProgramTarget
+#define SingleCPlusPlusProgramTarget(program)     @@\
+SimpleCPlusPlusProgramTarget(program,program.o)
+#endif
+
+
+/*
+ * fortran program
+ */
+
+#ifndef BuildFortranProgram
+#define BuildFortranProgram(program,objlist)               @@\
+program::                                                  @@\
+	@echo " "                                              @@\
+	@echo "     Building program..."                       @@\
+	                                                       @@\
+program:: objlist $(DEPLIBS)                               @@\
+	@-if test '$(FORT)' = ftn; then \                      @@\
+		echo "ld objlist $(LINKLIBS) -o program..."; \     @@\
+		ld objlist $(LINKLIBS) -o program; \               @@\
+	else \                                                 @@\
+		echo "$(FORT) objlist $(TAELINKLIB)..."; \         @@\
+		echo "$(FLIB) $(TERMLIB) -o program..."; \         @@\
+		$(FORT) objlist $(TAELINKLIB) ; \                  @@\
+		$(FLIB) $(TERMLIB) -o program ; \                  @@\
+	fi                                                     @@\
+	@echo "     Finished building program."                @@\
+	@echo " "
+#endif /* BuildFortranProgram */
+
+
+#ifndef SimpleFortranProgramTarget
+#define SimpleFortranProgramTarget(program,objlist)     @@\
+all::                                                   @@\
+	@echo " "                                           @@\
+	@echo "     Creating program..."                    @@\
+AllTarget(program)                                      @@\
+BuildFortranProgram(program,objlist)                    @@\
+InstallProgram(program)                                 @@\
+all::                                                   @@\
+	@echo "     Finished creating program."             @@\
+	@echo " "                                           @@\
+clean::                                                 @@\
+	@echo " "                                           @@\
+	@echo "     Cleaning program..."                    @@\
+CleanProgram(program)                                   @@\
+clean::                                                 @@\
+	@echo "     Finsihed cleaning program."             @@\
+	@echo " "
+#endif /* SimpleFortranProgramTarget */
+
+
+/*
+ * ======================================================================
+ * Resource File Generation Rule
+ */
+
+/*
+ * HP Port: Short filename madness! 
+ */
+#ifndef SimpleResTarget
+#define SimpleResTarget(dest,basename)     @@\
+dest/basename.res::                @@\
+	@echo ""						@@\
+	@echo "	Generating resource file dest/basename.res..."    @@\
+                                                      @@\
+dest/basename.res:: basename.rfg                     @@\
+	-@test -f $@ && $(CP) $@ dest/basename.bak                   @@\
+	@(rfg2res basename.rfg)				  @@\
+	-@if test -f basename.res; then \				@@\
+	    test $(BIGENDIAN) = true && iconconvert basename.res; \ @@\
+	    $(INSTALL) -c  basename.res dest; \	  	@@\
+	    $(RM) dest/basename.bak; \				@@\
+	    $(RM) basename.res; \				@@\
+	    echo "	Finished generating resource file $@."; \ @@\
+	else \						@@\
+	    test -f dest/basename.bak && $(MV) dest/basename.bak $@; \	@@\
+	    echo "	Resource file generation failed for $@."; \  @@\
+	fi 
+#endif /* SimpleResTarget */
+
+/*
+ * ======================================================================
+ * TAE  Classic Index File Generation Rule
+ */
+
+#ifndef SimpleInxTarget
+#define SimpleInxTarget(dest,basename)     @@\
+dest/basename.inx::                @@\
+	@echo ""						@@\
+	@echo "	Generating index file dest/basename.inx..."    @@\
+                                                      @@\
+dest/basename.inx:: basename.msg                     @@\
+	-@test -f $@ && $(CP) $@ $@.bak                   @@\
+	@(taetm "msgbld basename.msg")				  @@\
+	-@if test -f basename.inx; then \				@@\
+	    $(INSTALL) -c  basename.inx dest; \	  	@@\
+	    $(RM) $@.bak; \				@@\
+	    $(RM) basename.inx; \				@@\
+	    echo "	Finished generating index file $@."; \ @@\
+	else \						@@\
+	    test -f $@.bak && $(MV) $@.bak $@; \		@@\
+	    echo "	Index file generation failed for $@."; \  @@\
+	fi 
+#endif /* SimpleInxTarget */
+
+
+/*
+ * ======================================================================
+ * Find dependencies in the SRCS and add them to the Makefile.
+ */
+
+#ifndef DependCTarget
+#define DependCTarget()                                          @@\
+depend::                                              @@\
+	@echo " "                                                        @@\
+	@echo "     Making depends..."                                   @@\
+	$(DEPEND) -s "# DO NOT DELETE" -- $(DEPENDCFLAGS) -- $(SRCS)    @@\
+	@echo "     Finished making depends."                            @@\
+	@echo " "
+#endif /* DependCTarget */
+
+#ifndef DependCplusplusTarget
+#define DependCplusplusTarget()                                          @@\
+depend::                                               @@\
+	@echo " "                                                        @@\
+	@echo "     Making depends..."                                   @@\
+	$(DEPEND) -s "# DO NOT DELETE" -- $(DEPENDC++FLAGS) -- $(C++SRCS) @@\
+	@echo "     Finished making depends."                            @@\
+	@echo " "
+#endif /* DependCplusplusTarget */
+
+#ifndef ComplexDependTarget
+#define ComplexDependTarget()                                          @@\
+depend::                                            @@\
+	@echo " "                                                        @@\
+	@echo "     Making depends..."                                   @@\
+	$(DEPEND) -s "# DO NOT DELETE" -- $(DEPENDC++FLAGS) -- $(C++SRCS) @@\
+	$(DEPEND) -s "# EXTRA DEPENDENCIES" -- $(DEPENDCFLAGS) -- $(CSRCS)  @@\
+	@echo "     Finished making depends."                            @@\
+	@echo " "
+#endif /* ComplexDependTarget */
+
+
+/*
+ * dummy make depend
+ */
+#ifndef DummyMakeDepend
+#define DummyMakeDepend()     @@\
+depend::
+#endif	/* DummyMakeDepend */
+
+
+/*
+ * ======================================================================
+ * Subdirectories
+ */
+
+/*
+ * Call "make target" in each subdirectory.
+ */
+#ifndef IntoSubdirs
+#define IntoSubdirs(name,dirs,verb,flags)           @@\
+name::                                              @@\
+	@echo " "                                       @@\
+	-@for i in dirs; \                              @@\
+	do \                                            @@\
+		if [ -d $$i ]; then ( \                     @@\
+			cd $$i; \                               @@\
+			echo "     verb in $$i..."; \           @@\
+			$(MAKE) flags name; \                   @@\
+			echo "     Finished" verb in $$i. \     @@\
+		) else continue; fi; \                      @@\
+	done                                            @@\
+	@echo " "
+#endif /* IntoSubdirs */
+
+
+/*
+ * make all in subdirectories
+ */
+#ifndef MakeAllInSubdirs
+#define MakeAllInSubdirs(subdirs)     @@\
+IntoSubdirs(all,subdirs,"Making All",)
+#endif /* MakeAllInSubdirs */
+
+
+/*
+ * make install in subdirs
+ */
+#ifndef MakeInstallInSubdirs
+#define MakeInstallInSubdirs(subdirs)     @@\
+IntoSubdirs(install,subdirs,"Installing",)
+#endif /* MakeInstallInSubdirs */
+
+
+/*
+ * Clean subdirectories
+ */
+#ifndef CleanSubdirs
+#define CleanSubdirs(subdirs)     @@\
+IntoSubdirs(clean,subdirs,"Cleaning subdirectories",)
+#endif
+
+
+/*
+ * Make Makefiles in each subdirectory.
+ */
+#ifndef BuildMakefilesInSubdirs
+#define BuildMakefilesInSubdirs(subdirs,imakeflags)                @@\
+Makefiles::                                                        @@\
+	@echo " "                                                      @@\
+	@echo "     Making Makefiles in subdirectories..."             @@\
+	-@for i in subdirs; \                                          @@\
+	do \                                                           @@\
+		if [ -d $$i ]; then ( \                                    @@\
+			echo "     Making Makefiles in $$i..."; \              @@\
+			if [ -f $$i/Makefile ]; then \                         @@\
+				$(RM) $$i/Makefile.bak; \                          @@\
+				$(MV) $$i/Makefile $$i/Makefile.bak; \             @@\
+			fi; \                                                  @@\
+			$(IMAKE_CMD) -s $$i/Makefile imakeflags; \             @@\
+			cd $$i; \                                              @@\
+			$(MAKE) Makefiles; \                                   @@\
+		) else continue; fi; \                                     @@\
+		echo "     Finished making Makefiles in $$i."; \           @@\
+	done                                                           @@\
+	@echo "     Finished making Makefiles in subdirectories."      @@\
+	@echo " "
+#endif /* BuildMakefilesSubdirs */
+
+
+/*
+ * make makefiles
+ */
+#ifndef MakeMakefilesInSubdirs
+#define MakeMakefilesInSubdirs(subdirs)         @@\
+BuildMakefilesInSubdirs(subdirs,-f $$i/Imakefile)
+#endif /* MakeMakefilesInSubdirs */
+
+
+/*
+ * make depend in subdirectories
+ */
+#ifndef MakeDependInSubdirs
+#define MakeDependInSubdirs(subdirs)     @@\
+IntoSubdirs(depend,subdirs,"Making depend in subdirectories",)
+#endif	/* MakeDependInSubdirs */
+
+
+/*
+ * ======================================================================
+ * Versions
+ */
+
+
+/*
+ * version rule
+ * Note that versionnumber is always `date` so we use that directly
+ * since mac won't do macro substitution inside quotes (e.g. "versionnumber").
+ */
+#ifndef VersionTarget
+#define VersionTarget(versionnumber,versionvariable)              @@\
+all:: version                                                     @@\
+                                                                  @@\
+version::                                                         @@\
+	@echo " "                                                     @@\
+	@echo "     Setting version..."                               @@\
+	$(RM) .version*                                               @@\
+	@$(TAEBIN)/cversion "`date`" versionvariable     @@\
+	@echo "     Finished setting version."                        @@\
+	@echo " "
+#endif /* VersionTarget */
+
+
+#ifndef FortranVersionTarget
+#define FortranVersionTarget(versionnumber)     @@\
+all:: version                                   @@\
+                                                @@\
+version::                                       @@\
+	@echo " "                                   @@\
+	@echo "     Setting version.."              @@\
+	$(RM) .version*                             @@\
+	@$(TAEBIN)/fversion "versionnumber"     @@\
+	@echo "     Finished setting version."      @@\
+	@echo " "
+#endif /* FortranVersionTarget */
+
+
+/*
+ * targets for C application writers
+ */
+#ifndef CApplication
+#define CApplication(program)                                             @@\
+AllTarget(program)                                                        @@\
+                                                                          @@\
+program:: $(GENOBJS) $(APPOBJS) $(APP_DEPLIBS)                            @@\
+	@echo ""                                                          @@\
+	@echo "     Building application (program)..."                    @@\
+	$(RM) program                                                     @@\
+	$(LD) $(LDFLAGS) $(LIBSEARCHPATH) \                               @@\
+		-o program $(GENOBJS) $(APPOBJS) $(LINKLIBS)              @@\
+	@echo "     Building application (program)...done."               @@\
+	@echo ""                                                          @@\
+                                                                          @@\
+clean::                                                                   @@\
+	@echo ""                                                          @@\
+	@echo "     Cleaning..."                                          @@\
+	$(RM) $(RM_FILE_TYPES) \#*                                        @@\
+	$(RM) $(CG_RM_FILE_TYPES)                                         @@\
+	@echo "     Cleaning...done."                                     @@\
+	@echo ""                                                          @@\
+                                                                          @@\
+distclean:: clean                                                         @@\
+	@echo ""                                                          @@\
+	@echo "     Cleaning for distribution (program)..."               @@\
+	$(RM) program *.gen *.bak Makefile.program M.*                    @@\
+	@echo "     Cleaning for distribution (program)...done."          @@\
+	@echo ""
+#endif /* CApplication */
+
+/*
+ * targets for C++ application writers
+ */
+#ifndef CPlusPlusApplication
+#define CPlusPlusApplication(program)                                     @@\
+AllTarget(program)                                                        @@\
+                                                                          @@\
+program:: $(GENOBJS) $(APPOBJS) $(APP_DEPLIBS)                            @@\
+	@echo ""                                                          @@\
+	@echo "     Building application (program)..."                    @@\
+	$(RM) program                                                     @@\
+	$(LD++) $(LD++FLAGS) $(CXXLIBSEARCHPATH) \                           @@\
+	    -o program $(GENOBJS) $(APPOBJS) $(TAECXXLINKLIB) $(C++LINKLIBS) @@\
+	@echo "     Building application (program)...done."               @@\
+	@echo ""                                                          @@\
+                                                                          @@\
+clean::                                                                   @@\
+	@echo ""                                                          @@\
+	@echo "     Cleaning..."                                          @@\
+	$(RM) $(RM_FILE_TYPES) \#*                                        @@\
+	$(RM) $(CG_RM_FILE_TYPES)                                         @@\
+	@echo "     Cleaning...done."                                     @@\
+	@echo ""                                                          @@\
+                                                                          @@\
+distclean:: clean                                                         @@\
+	@echo ""                                                          @@\
+	@echo "     Cleaning for distribution (program)..."               @@\
+	$(RM) program *.gen *.bak Makefile.program M.*                    @@\
+	@echo "     Cleaning for distribution (program)...done."          @@\
+	@echo ""
+#endif /* CPlusPlusApplication */
+
+/*
+ * Targets for single-file C++ application writers
+ */
+#ifndef CPlusPlusSFileApplication
+#define CPlusPlusSFileApplication(program)     @@\
+program:: program.o $(DEPLIBS)                       @@\
+	$(RM) program                                  @@\
+	@echo "     Building program..."               @@\
+	$(LD++) $(LD++FLAGS) $(CXXLIBSEARCHPATH) \        @@\
+		-o program program.o $(TAECXXLINKLIB) $(C++LINKLIBS)  @@\
+	@echo "     Finished building program."
+#endif /* BuildCPlusPlusProgram */

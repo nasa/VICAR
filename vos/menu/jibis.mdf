@@ -1,0 +1,24 @@
+.Title
+VIDS IBIS File Menu
+
+.proc jgrdisp
+JGRDISP   - Displays an IBIS Graphics-1 format file on the graphics plane.
+
+.proc jload-stretch
+JLOAD-STRETCH - Loads a stretch table from an IBIS Tabular file.
+.proc jsave-stretch
+JSAVE-STRETCH - Saves a stretch table to an IBIS Tabular file.
+
+.proc jload-pseudo
+JLOAD-PSEUDO - Loads a pseudocolor table from an IBIS Tabular file.
+.proc jsave-pseudo
+JSAVE-PSEUDO - Saves a pseudocolor table to an IBIS Tabular file.
+
+.help
+
+The VIDS IBIS File Menu lists all the VIDS commands which use IBIS files
+in their operation.  There are only two kinds of IBIS files used by VIDS:
+Graphics-1 files, which are displayed by JGRDISP, and Tabular files,
+which are used to load/save stretch and pseudocolor tables.  Stretch and
+pseudocolor tables are compatible with each other, and may be interchanged.
+.end

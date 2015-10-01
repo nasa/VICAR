@@ -1,0 +1,50 @@
+.Title
+[4m[1mDATA TRANSFER AND TAPE UTILITIES Menu[0m
+.Menu TRANS1.MDF
+DATA TRANSFER         - Transfer VICAR data from one storage medium 
+                        to another (e.g., tape to disk, disk to disk).
+
+.Menu FOREN1.MDF
+FOREIGN DATA TRANSFER - Transform or log foreign data to or from the 
+                        VICAR format.
+
+.Menu FORENI1.MDF
+IBIS DATA TRANSFER    - Transform or log IBIS data to or from the
+                        VICAR format.
+
+.Menu FORENP1.MDF
+PLANETARY DATA        - Transform or log planetary data to or from 
+TRANSFER                the VICAR format (e.g., Voyager, Viking).
+
+.help
+The DATA TRANSFER section contains those programs which allow the user to 
+transfer VICAR data from one storage medium to another (e.g., from tape to
+disk, disk to disk). These programs include:
+
+COPY                label              TAPES               vsar
+
+
+The FOREIGN DATA TRANSFER section contains those programs which allow the 
+user to transform or log foreign data to or from VICAR format. These 
+programs include:
+
+AFEWCLOG            AVHRRLOG           CONR4FIL            CONVIM
+DEMLOGA             DTTLOGA            GRAF2DGN            SWAPPER           
+TOXYZ               VDEMLOG            VERTSLOG            VFITS2             
+VGOES               VSAR               XSECT
+.page
+The IBIS DATA TRANSFER sections contains those programs which allow the 
+user to transform or log IBIS data to or from VICAR format. These 
+programs include:
+
+INTCON              VCOPOUT            VMDPIN              VQUIC
+VWRIS               WRISOUT
+
+
+The PLANETARY DATA TRANSFER section contains those program which allow the 
+user to transform or log planetary data to or from VICAR format. These 
+programs include:
+
+EDRGEN              VEDR               VGEDR               VGLLOG
+VGRLOG              VGSDR              VOLOG
+.end

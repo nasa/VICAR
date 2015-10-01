@@ -1,0 +1,39 @@
+.Title           ! IBMATH1.MDF
+[4mIBIS MATHEMATICAL FUNCTIONS & STATISTICS Menu[0m       (page 1 of 3)
+.Proc CLUSAN
+[1mCLUSAN[0m   - Creates a statistics file using the simulated annealing 
+           optimization technique to find the best cluster partition 
+           for MSS data.
+.Proc CLUSTEST
+[1mCLUTEST[0m -  Determines the statistical significance of clusters in a
+           statistics file.
+.Proc DENDSTAT
+[1mDENDSTAT[0m - Produces a dendrogram for classification statistics 
+           files produced by STATS and USTATS.
+.Proc EDIBIS
+[1mEDIBIS[0m   - Interactive program for editing interface files.
+.Proc EDIMAGE
+[1mEDIMAGE[0m  - Allows interactive image editing and annotating.
+.Proc GAUSNOIS
+[1mGAUSNOIS[0m - Generates a random DN (noise) image using a Gaussian 
+           probability distribution.
+.Proc IBISLSQ
+[1mIBISLSQ[0m  - Performs least-squares fit on columns of a tabular file,
+           placing them in a column of the tabular file.
+
+.Menu IBMATH2.mdf
+[7mAdditional MATHEMATICAL FUNCTIONS & STATISTICS Selections[0m
+
+.Help
+
+The MATHEMATICAL FUNCTIONS & STATISTICS section contains those programs 
+which allow the users to perform mathematical functions on the data or 
+perform statistical analyses on the data.  These programs include:
+
+CLUSAN             CLUTEST            DENDSTAT           EDIBIS
+EDIMAGE            GAUSNOIS           IBISLSQ            IBISNBR
+IBISREGR           IBISSTAT           LINEMTCH           LOS2DEM
+MF                 MSSVIEW            PICMATCH           PIXGRAD
+PIXSTAT            SDSIBIS
+
+.end

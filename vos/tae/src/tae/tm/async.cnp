@@ -1,0 +1,526 @@
+/******************************************************************************
+ *	Copyright (c) 1990, 1991, National Aeronautics and Space Administration
+ *	ALL RIGHTS RESERVED
+ *
+ *	The software (programs, data bases and/or documentation) on or in
+ *	any media can not be reproduced, disclosed or used except under
+ *	terms of the license between COSMIC and your organization.
+ *****************************************************************************/
+
+/* >>VAX/VMS<< */
+/*	Non-portable Async Processing Routines
+ *	--------------------------------------
+ *
+ * CHANGE LOG:
+ *
+ *	01-mar-84	split async port and non-port...ne
+ *	15-mar-84	delete ASY file on abort...ne
+ *	04-may-84	change asy_snds calling seq...dm
+ *	04-may-84	VALUE_x to xVAL ... ces
+ *	07-may-84	Move the IMPORT declarations...lim
+ *	17-may-84	New f_crack calling sequence...palm
+ *	06-aug-84	New async activation strategy...palm
+ *	08-aug-84	Fix PR 685...jtm
+ *	26-sep-84	Add RCJM changes...nhe
+ *	02-nov-84	Put in additional RCJM changes...dm
+ *
+ ****************************************************************************
+ * CHANGES MADE IN THE RCJM TREE:
+ *
+ *	28-jan-85	Update for aborting remote jobs...dm 
+ *	22-feb-85	Update remote_abort()...dm 
+ *	05-mar-85	Add abort_agent() for aborting rcjm agent, 
+ *			additional argument to host_job for enable-path...dm
+ *	17-mar-85	Release resources when rcjm agent dies...dm
+ *	18-mar-85	Use int_chan as 'short' word...dm
+ *	16-apr-85	Assign 'PATHID' as a logical name for the agent...dm
+ *	29-apr-85	New logic for remote proc abort confirmation...dm
+ *	29-may-85	Fix bug in asy_recs call from abort_remote()...dm
+ *
+ ****************************************************************************
+ *
+ *	14-jun-85	Add args to create_mon for unix compatibility...dm
+ *	30-jul-85	Fix RCJM compilation error on 'ecbint'...dm
+ *	15-jul-86	ASYNC-PROCESS; not checked out; changes against
+ *			30-JUL-1985 11:51 version...palm
+ *	22-sep-86	Change HNAMESIZ to FSPECSIZ...palm
+ *	01-feb-89	Delete #ifdef TAE_RCJM's...ljn
+ *	02-apr-91	Use old TAE_RCJM's to get rid of RCJM code...ljn
+ *	25-apr-91	tae$app_input is now $taeapp_input...ljn
+ */
+
+#include	"taeconf.inp"	/* TAE configuration definitions	    */
+#include	"tminc.inc"	/* TM-only host-independent definitions	    */
+#include 	"terminc.inc"	/* terminal package definitions		    */
+#include 	descrip		/* VAX/VMS descriptor include 		    */
+#include 	jpidef		/* VAX/VMS $GETJPI definitions	            */
+#include	ssdef		/* VAX/VMS system service status values	    */
+#include 	iodef		/* VAX/VMS I/O definitions		    */
+#include 	"tmhost.inp"	
+#include 	"taskinc.inp"	/* task manipulation definitions	    */
+#include	"asyncinc.inc"	/* async processing definitions		    */
+
+    GLOBAL	v41async = 0;	/* source version			    */
+
+#define STAT_MASK	0xFFFFFFF	/* mask for status bits in iosb	*/
+
+    static TAEINT	parent_pid;	/* pid of parent tm		*/
+
+/*  abort_acb - Abort the monitor associated with an acb and release associated
+ *		resources
+ *		
+ *		We also reset the async_request flag if necessary.  Note that
+ *		there's a race condition here (a new request comes in after
+ *		the call to find_oldest but before async_request is reset)
+ *		that we're ignoring.
+ */
+    FUNCTION VOID abort_acb(acb)
+
+    struct ACB		*acb;		/* in: the acb			    */
+
+    {
+    IMPORT BOOL		async_request;		/* TRUE if requests waiting */
+
+    CODE		code;
+    struct ACB		*find_oldest();
+    struct SFILE	f;
+
+
+    if ((*acb).waiting)				/* delete the comm file	    */
+	{
+    	code = f_opnspc(&f, SAVELUN, (*acb).requ_file, "", "", 
+		    ASY_TYPE, F_READ);
+    	if (code == SUCCESS) f_close (&f, F_DELETE);
+	}
+    (*acb).waiting = (*acb).active = FALSE;
+    if (find_oldest() == NULL)			/* reset if no others waiting */
+    	async_request = FALSE;			/* otherwise leave it in current state */
+    
+    if (!(*acb).remote)				/* if a local job		*/
+	{
+	code = sys$resume (&(*(*acb).atcb).pid, 0);   /* resume if suspended */
+    	code = sys$forcex (&(*(*acb).atcb).pid, 0, 1);	/* force exit	    */
+	rel_rsrc ((*acb).atcb);			/* release resources	    */
+	}
+    return;
+    }
+    
+
+/*  asy_recs - Receive a message in association with an AST
+ *
+ *		Note that this routine is a simple mod to c_recs
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Data successfully received into the specified block.
+ *			  (Actual character count is in the tcb.)
+ *		FAIL	- Data could not be read (host error code in tcb)
+ *
+ *	asy_recs receives data from the sub-task implied by the tcb.
+ *
+ *	asy_recs does not wait on I/O completion; an AST is triggered and 
+ *    	the event associated with the ecb in the tcb is set upon completion.
+ *
+ */
+
+    FUNCTION CODE asy_recs(tcb, block, blksize, actadr, actparm)
+
+    struct TCB		*tcb;		/* in: task control block	    */
+    GENPTR		block;		/* in: addr of receive block 	    */
+    FUNINT		blksize;	/* in: number of bytes expected	    */
+    VOID		(*actadr)();	/* in: address of an action routine */
+    GENPTR		actparm;	/* in: parm for action routine	    */
+
+    {
+    LONG		size;
+    CODE		code;
+
+
+    if (!(*tcb).mb_idle)			/* mailbox tied up...error	*/
+    	{
+    	(*tcb).rcviosb[0] = 0;
+        (*tcb).hostcode = 0;		/* no host error code		*/
+	return(FAIL);
+    	}
+    (*tcb).ecbrcv.comp_fn = NULL;
+    (*tcb).ecbrcv.ctxptr = (GENPTR)tcb;		/* context is the tcb		*/
+    sys$clref((*tcb).ecbrcv.efn);		/* clear the receive efn	*/
+    size = ((*tcb).size < blksize)? (*tcb).size : blksize;	/* use min of user, mb size */
+    code = sys$qio((*tcb).ecbrcv.efn, (*tcb).msgchan, IO$_READVBLK,
+    			(*tcb).rcviosb, actadr, actparm, block, size, 0,0,0,0);
+    (*tcb).hostcode = (code&STAT_MASK);
+    if (!((*tcb).hostcode & 1))
+    	return(FAIL);
+    (*tcb).mb_idle = FALSE;			/* we've tied up the mailbox	*/
+    return(SUCCESS);
+    }
+
+/*  asy_snds - 	Send a message in an asynchronous environment
+ *
+ *		Note that this routine is a simple mod of c_snds
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Successful initiation of transmission
+ *		FAIL - Data transmission could not be initiated
+ *			  (The host error code is saved in the tcb.)
+ *
+ *	asy_snds sends a data block to the sub-task implied by the tcb.
+ *
+ *	asy_snds does not wait on I/O completion.
+ *
+ */
+
+    FUNCTION CODE asy_snds(tcb, block, blksize)
+
+    struct TCB		*tcb;		/* in: task control block	*/
+    GENPTR		block;		/* in: data block to send	*/
+    FUNINT		blksize;	/* in: number of bytes to send	*/
+
+    {
+
+    CODE		code;
+
+    if (!(*tcb).mb_idle)
+    	{
+    	(*tcb).sendiosb[0] = 0;		/* Msg mailbox is tied up	*/
+  	(*tcb).hostcode = 0;		/* put no hostcode		*/
+   	return (FAIL);
+    	}
+    (*tcb).ecbsnd.comp_fn = NULL;	/* Set completion routine to 'none' */
+    (*tcb).ecbsnd.ctxptr = (GENPTR)tcb;
+    sys$clref((*tcb).ecbsnd.efn);	/* clear the efn we're using	*/
+    code = sys$qio((*tcb).ecbsnd.efn, (*tcb).msgchan,
+    		      IO$_WRITEVBLK, (*tcb).sendiosb, 0, 0, 
+    		      block, blksize, 0,0,0,0);   /* send block	*/
+    (*tcb).hostcode = (code&STAT_MASK);
+    if (!((*tcb).hostcode&1))
+    	return(FAIL);
+    (*tcb).mb_idle = FALSE;
+    return(SUCCESS);
+    }
+
+
+/*	build_name.  Build VMS process name for ASYNC job.
+ *
+ *	The name must be unique in the group and we would like
+ *	to see the proc name in there also, but we only get
+ *	15 characters.  Also, we must allow several jobs
+ *	with same proc name to be active at once.  Also we limit
+ *	ourselves to 14 characters so that spawned monitors can
+ *	create unique subprocess names.
+ *
+ *	We go to so much trouble here so that a VMS $SHOW
+ *	SYSTEM command will help us see what is really running.
+ *
+ *	The process name generated here is not the job name
+ *	that the TAE user knows about.  The TAE user can't
+ *	see ASYNCs from other TMs, so he doesn't want the
+ *	TM PID field, nor does he want the restriction that
+ *	only a part of the proc name is in the job name.
+ *
+ */
+    FUNCTION static VOID build_name (pid, proc, seq, name)
+
+    TEXT	pid[];		/* in: process ID of TM		*/
+    TEXT	proc[];		/* in: proc name (not file spec)*/
+    				/* (we use as much of this as possible) */
+    FUNINT	seq;		/* in: 1-99 sequence number	*/
+    TEXT	name[];		/* out: process name		*/
+
+    {
+    COUNT	i, j;
+    TEXT	seqstr[10];	/* TBD: [seqstrSIZ+1]		*/
+
+    s_copy (pid, name);
+    i = s_append (proc, name);
+    name [PNAMESIZ-3] = EOS;		/* clip if too long	*/
+    sprintf (seqstr, "%02x", seq);	/* get sequence as ascii*/
+    for (i = 0, j = s_length(seqstr)-1; i < j; i++)
+    	{
+    	if (seqstr[0] != '0' ) break;
+        s_shift (seqstr, 1);		/* delete leading zeros	*/
+    	}
+    s_append (seqstr, name);		/* add in sequence nr	*/
+    return;
+    }
+
+/*  create_async - Spawn a monitor (or a ASYNC-PROCESS process)
+ *		 and intialize a tcb
+ *
+ *  returns SUCCESS or FAIL, and a host-dependent error in tcb
+ *
+ *	Creates a message mbx, then spawns the 
+ *	new terminal monitor/ parent agent.  
+ *
+ */
+    FUNCTION CODE create_async (atcb, mb_size, procname, job_type, job_spec, log_name)
+
+    FAST struct ATCB	*atcb;		/* in/out: address of an atcb	      */
+    FUNINT		mb_size;	/* in: size to use for mailbox	      */
+    TEXT		procname[];	/* in: proc name being executed	      */
+    FUNINT		job_type;	/* in: ASYNC, ASYNC_PROCESS, REMOTE   */
+    TEXT		job_spec[];	/* in: ASYNC or REMOTE: .job filespec */
+					/*     ASYNC_PROCESS: exe filespec    */
+    TEXT		log_name[];	/* in: ASYNC: log file name           */
+					/*     ASYNC_PROCESS: SYS$OUTPUT file */
+
+    {
+    CODE		code;
+    struct TCB		*tc;
+    static COUNT 	seq_num = 0;		/* for build_name	*/
+    static int		pidlen;
+    static struct JPI 	itmlst[] =		/* jpi list for sending program	*/
+    	     {
+    	      {4, JPI$_PID, &parent_pid, &pidlen},  /* proc name */
+    	      {0, 0, 0, 0}		/*required   terminator		*/
+             };
+#ifdef BUG_FIXES
+    TEXT        txtname[STRINGSIZ+1];           /* new process name          */
+/* Must be bigger than PNAMESIZ because it's strcat'ed to and THEN truncated */
+#else
+    TEXT	txtname[PNAMESIZ+1];		/* new process name		*/
+#endif
+    TEXT	pid_name[PNAMESIZ+1];	
+    TEXT	msgname[FSPECSIZ+1];		/* name of msg mailbox		*/
+    static struct dsc$descriptor_s dmsgname = 
+    	  {0, DSC$K_DTYPE_T,DSC$K_CLASS_S,0};  	/* descriptor for mbx		*/
+    TEXT	trunc_proc[FNAMESIZ+1];		/* process name truncated	*/
+
+/*   generate VMS name for new monitor process   */
+
+    tc = (*atcb).tcb;					/* point to tcb		*/
+    (*tc).hostcode = sys$getjpi( 0, 0, 0, &itmlst, 0, 0, 0); 	/* get parent process data */
+    int2aschex(parent_pid, pid_name);			/* convert to ascii/hex		*/
+    build_name(pid_name, procname, seq_num, txtname);	/* build new process name 	*/
+    s_copy (txtname, (*tc).subnam);			/* basis for mbx name		*/
+    s_copy (txtname, (*atcb).session_id);		/* is also session_id		*/
+
+/*   Create a message mailbox    */
+
+    (*tc).size = mb_size;				/* mailbox size	*/
+    c_concat(2, msgname, (*tc).subnam, "_M");		/* build name for msg mbx:	*/
+						    	/* subproc//"_M"		*/
+    set_descr(&dmsgname, msgname);			/* make it a host-dependent string */
+    (*tc).hostcode = sys$crembx(0, &(*atcb).send_chan, (*tc).size, 
+    		(*tc).size, 0, 0, &dmsgname); 		/* create mb			*/
+    if ( (*tc).hostcode != SS$_NORMAL)		
+	return(FAIL);
+    (*tc).msgchan = (*atcb).send_chan;			/* for asy_ protocol		*/
+    (*tc).hostcode = lib$get_ef(&(*tc).ecbsnd.efn);	/* for the msg send	*/
+    if ((*tc).hostcode != SS$_NORMAL)
+    	goto undo_mbx;
+    (*tc).hostcode = lib$get_ef (&(*tc).ecbrcv.efn);	/* for the receive	*/
+    if ((*tc).hostcode != SS$_NORMAL)
+    	{
+    	lib$free_ef(&(*tc).ecbsnd.efn);
+    	goto undo_mbx;
+    	}
+    e_clear(&(*tc).ecbrcv);
+    e_clear(&(*tc).ecbsnd);
+
+/*   Spawn a copy of the monitor or an ASYNC-PROCESS process  */
+
+    if (job_type == ASYNC_PROCESS)
+	code = spawn_process (atcb, txtname, job_spec, log_name);
+    else
+	code = spawn_mon (atcb, txtname, job_spec);
+    if (code != SUCCESS)
+    	goto undo_mbx;				
+    if (++seq_num == MAXACB) seq_num = 0;
+    (*tc).mb_idle = TRUE;			/* asy_snds requires this		*/
+    return(SUCCESS);
+
+undo_mbx: 	
+    code = sys$dassgn ((*tc).msgchan);		/* delete mailbox	    */
+    return(FAIL);
+    }
+
+
+/*	host_job.     Write the host part of an ASYNC .job file
+ *
+ *	Note that for a remote job we run an AGENT rather than TM.
+ */
+    FUNCTION host_job (job, cmdctx, user_proc)
+
+    struct SFILE	*job;		/* in/out: SFILE opened to job file   */
+    struct CONTXT	*cmdctx;	/* in: command context		      */
+    FUNINT		user_proc;	/* in: TRUE if job file for user proc */
+
+    {
+    CODE		code;
+    struct FSBLOCK	job_block;
+    TEXT		file_spec[FSPECSIZ+1];
+    COUNT		lun;		/* not used in VMS		*/
+    TEXT		img_name[140];
+    TEXT		record[STRINGSIZ+1];
+#ifdef BATCH_FIXES
+    TEXT                *tp;
+#endif
+
+    s_copy ("[]", job_block.libr);		/* File created in def dir   */
+
+    s_copy ((*cmdctx).pdf.name, job_block.name);/* Use proc name as filename */
+    s_copy (JOB_TYPE, job_block.type);		/* Extension is "JOB" 	    */
+    job_block.attr[0] = EOS;
+    code = f_opnblk (job, lun, &job_block, F_WRITE);
+    if (code != SUCCESS)
+	{
+	f_spec (&job_block, file_spec);
+	tmmsg (PROCFAIL, "Unable to create job file '%s'. %s",
+	       "TAE-JOBOPN", file_spec, (*job).errmsg);
+        return (FAIL);
+	}
+    code = assign_log (job, &job_block, cmdctx);   /* assignments */
+    if (code != SUCCESS)
+        goto write_err;
+
+    get_image(img_name);			/* get name of current image */
+#ifdef BATCH_FIXES
+    tp = strrchr(img_name, ';');                /* strip off version number  */
+    if (tp != NULL)
+        *tp = '\0';
+#endif
+    s_copy("$ RUN/NODEBUG ", record);		/* generate RUN command	     */
+    s_append(img_name, record);			/* get current TM image name */
+    code = f_write (job, record);	
+    if (code != SUCCESS)
+	goto write_err;
+    return (SUCCESS);
+
+write_err:
+    f_close (job, F_DELETE);
+    tmmsg (PROCFAIL, "Error writing job file. %s", "TAE-JOBWRT",
+	       (*job).errmsg);
+    return (FAIL);
+
+    }
+
+/* rel_rsrc - Release VMS resources of an async task (subprocess)
+ *
+ */
+    FUNCTION VOID rel_rsrc (atcb)
+
+    struct ATCB		*atcb;
+
+    {
+    struct TCB		*tc;
+    CODE		code;
+
+    tc = (*atcb).tcb;
+    lib$free_ef (&(*tc).ecbrcv.efn);		/* receive ef		*/
+    lib$free_ef (&(*tc).ecbsnd.efn);		/* send ef		*/
+    					/* note: we don't release ecbtsk */
+    					/* here because it's needed for */
+    					/* wait				*/
+    code = sys$dassgn ((*tc).msgchan);		/* message mailbox	*/
+    return;
+    }
+
+/*
+ *	spawn_mon - Spawn a copy of the monitor
+ *
+ *  returns SUCESS or FAIL; failure code in tcb
+ *
+ */
+    FUNCTION static CODE spawn_mon (atcb, name, job_spec)
+
+    FAST struct ATCB	*atcb;		/* in/out: address of an atcb	*/
+    					/* ( (*atcb).pid is an output)	*/
+    TEXT		name[];		/* in: VMS name of process	*/
+    TEXT		job_spec[];	/* in: name of .job file	*/
+    
+    {
+    IMPORT struct VARIABLE *switch_gbl;		/* points to $SWITCH	*/
+
+    static	$DESCRIPTOR (nl, "NL:");		/* null device	*/
+    static struct dsc$descriptor_s job_desc =
+    	  {0,DSC$K_DTYPE_T, DSC$K_CLASS_S, NULL};  	/* command string*/
+    static struct dsc$descriptor_s sysout = 
+    	  {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, NULL};  	/* sys$output	 */
+    static struct dsc$descriptor_s process = 
+    	  {PNAMESIZ, DSC$K_DTYPE_T, DSC$K_CLASS_S, NULL}; /* process	*/
+    long		nowait = 1;			/* lib$spawn flag*/
+    TEXT		cmdtxt[FSPECSIZ + 3];	
+    struct TCB		*tc;
+    struct FSBLOCK	job_fs;
+    TEXT		sysout_spec[FSPECSIZ+1], errstr[STRINGSIZ+1];
+    
+    set_descr (&process, name);
+    tc = (*atcb).tcb;
+    if (IVAL(*switch_gbl, 0) & SW_SYSOUTS)		
+	{						/* user wants *.TML */
+	f_crack (job_spec, "", "", "", &job_fs, errstr); 
+	s_copy (TML_TYPE, job_fs.type);			/* use "proc.TML"   */
+	job_fs.attr[0] = EOS;				/* default attr	    */
+	f_spec (&job_fs, sysout_spec);
+	set_descr (&sysout, sysout_spec);
+	}
+    else
+	set_descr (&sysout, "NL:");			/* ignore SYS$OUTPUT */
+    if (IVAL(*switch_gbl, 0) & SW_ASYNC_CMD)
+	set_descr (&job_desc, "ASYNC");			/* for de-bug */
+    else
+    	set_descr (&job_desc, job_spec);
+    (*tc).hostcode = lib$spawn (0, &job_desc, &sysout, &nowait, &process, 
+    			&(*atcb).pid);
+    if ((*tc).hostcode != SS$_NORMAL)
+	return(FAIL);
+    return(SUCCESS);
+    }
+
+/*	spawn_process.  Start an ASYNC-PROCESS.
+ *
+ *	We use LIB$SPAWN rather than $CREPRC so we can get 
+ *	transfer of logical names, etc.
+ *
+ *	If you want to debug an ASYNC-PROCESS job, do "SWITCH 1"
+ *	and assign $TAEAPP_INPUT to your file of DEBUG commands.
+ *	The DEBUG output will go to your |STDOUT=| file.
+ */
+
+    FUNCTION static CODE spawn_process (atcb, name, exe_spec, stdout_file)
+
+    FAST struct ATCB	*atcb;		/* in/out: address of an atcb	*/
+    					/* ( (*atcb).pid is an output)	*/
+    TEXT		name[];		/* in: VMS name of process	*/
+    TEXT		exe_spec[];	/* in: executable file		*/
+    TEXT		stdout_file[];	/* in: name for SYS$OUTPUT	*/
+					/* (NULL means use NL:)		*/
+    
+    {
+    IMPORT struct VARIABLE *switch_gbl;		/* points to $SWITCH	*/
+
+    static	$DESCRIPTOR (nl, "NL:");		/* null device	*/
+    static	$DESCRIPTOR (input, "$TAEAPP_INPUT");	/* dbg commands	*/
+    static struct dsc$descriptor_s job_desc =
+    	  {0,DSC$K_DTYPE_T, DSC$K_CLASS_S, NULL};  	/* command string*/
+    static struct dsc$descriptor_s sysout = 
+    	  {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, NULL};  	/* sys$output	 */
+    static struct dsc$descriptor_s runcmd = 
+    	  {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, NULL};  	/* run command 	 */
+    static struct dsc$descriptor_s process = 
+    	  {PNAMESIZ, DSC$K_DTYPE_T, DSC$K_CLASS_S, NULL}; /* process	*/
+    long		nowait = 1;			/* lib$spawn flag*/
+    struct TCB		*tc;
+    TEXT		errstr[STRINGSIZ+1];
+    TEXT		cmdstr[FSPECSIZ+10];
+    
+    set_descr (&process, name);
+    if (stdout_file == NULL)
+        set_descr(&sysout, "NL:");
+    else
+        set_descr (&sysout, stdout_file);
+    if (IVAL(*switch_gbl, 0) & SW_DEBUG)
+        s_copy ("$RUN/DEBUG ", cmdstr);		/* use something for input? */
+    else
+        s_copy ("$RUN/NODEBUG ", cmdstr);
+    s_append (exe_spec, cmdstr);		/* build run command */	
+    set_descr (&runcmd, cmdstr);
+    tc = (*atcb).tcb;
+    (*tc).hostcode = lib$spawn (&runcmd, &input, &sysout, &nowait, &process, 
+    			&(*atcb).pid);
+    if ((*tc).hostcode != SS$_NORMAL)
+	return(FAIL);
+    return(SUCCESS);
+    }

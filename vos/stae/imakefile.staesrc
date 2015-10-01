@@ -1,0 +1,31 @@
+# Imakefile for the VICAR Run-Time Library source directory
+#
+
+#include "Imakefile_obj.stae"		/* Object list */
+
+#if ALLIANT_ARCH
+#define OTHEROBJS $(ALLIANTOBJS)
+#endif
+#if MAC_MPW_ARCH
+#define OTHEROBJS $(MAC_MPWOBJS)
+#endif
+#ifndef OTHEROBJS
+#define OTHEROBJS
+#endif
+
+OBJS = $(COMOBJS) $(FTNOBJS)
+
+all: $(STAELIB) $(STAECLIB)
+
+$(STAELIB): $(OBJS)
+	$(RANLIB) $(STAELIB)		/* AR done by compiles */
+	cp $(STAELIB) $(V2OLB)
+
+$(STAECLIB): $(COBJS)
+	$(RANLIB) $(STAECLIB)	/* AR done by compiles */
+	cp $(STAECLIB) $(V2OLB)
+
+#define Library3 $(STAELIB)
+#define Library4 $(STAECLIB)
+
+#include "Imakefile_targ.stae"		/* Target list */

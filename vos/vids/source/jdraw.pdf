@@ -1,0 +1,130 @@
+procedure help=* options=nointerrupt
+parm shape keyword valid=(LINE,SEGMENTS,POLYGON,RECT,SQUARE,OVAL,CIRCLE,ARROW) +
+		default=LINE
+parm points integer count=(0,2:600) default=--
+parm fill keyword valid=(FILL,NOFILL) default=NOFILL
+parm device string count=0:1 default=--
+body
+chkvids1
+sendvar (_proc,shape,points,fill,device) job=VIDSJOB
+chkvids2
+end-proc
+.title
+VIDS Command JDRAW
+.help
+The JDRAW command is used to draw objects in the graphics plane.
+The objects may be defined either interactively with the cursor, or
+via the command line.
+
+The available shapes are LINE, SEGMENTS, POLYGON, RECT, SQUARE, OVAL,
+CIRCLE, and ARROW.  These shapes are described under the help for the
+SHAPE parameter.
+
+Shapes are defined interactively with the cursor unless the POINTS
+parameter is given.  For rectangles, squares, circles, and ovals,
+two points must be specified, representing two opposite corners of
+a rectangle bounding the required shape.  For polygons and segments
+(a non-closed polygon), each vertex must be specified.  For lines
+and arrows, the two endpoints are specified.
+.page
+The color used to draw the shapes is defined with the JSET-COLOR
+command.  See the help for JSET-COLOR for more on setting the color.
+
+Most shapes can optionally be filled with the 'FILL keyword.  The entire
+interior of the shape is filled with the color defined in JSET-COLOR.
+Shapes that don't have an interior, like LINE, SEGMENTS, and ARROW, can
+not be filled.
+
+It is important to note that anything drawn in the graphics plane will
+totally obscure the image pixels underneath.  There is no way to blend
+the image with the graphics.  You may see the obscured parts of the image
+by turning the graphics plane off (JOFF GRAPHICS) or by drawing over parts
+of the image with the special graphics color TRANSPARENT (set with
+JSET-COLOR), which erases the graphics.
+.page
+There is no connection between JDRAW and JDEF-REGION, despite some
+similarites in what shapes are available and how they are defined.
+You cannot use JDRAW to define a region, and it is not recommended
+to use JDEF-REGION to draw graphics, because you can't control the
+color, and the available shapes are more limited.
+
+Examples:
+
+JDRAW SQUARE			- Draws a square interactively
+JDRAW OVAL (10,10,50,90) 'FILL	- Draws and fills an oval at the given location
+JDRAW ARROW (1,1,256,256)	- Draws an arrow with the tail in the upper
+				- left and the head in the middle of the screen
+.level1
+.vari shape
+Shape desired. See HELP
+SHAPE for valid shapes.
+.vari points
+List of points in shape
+(Use cursor if not given;
+see also SHAPE)
+.vari fill
+Fills the shape with color
+.vari device
+Name of device to use
+.level2
+.vari shape
+The SHAPE parameter defines the shape to use for the graphic
+object.
+
+The next page describes the allowed shapes.
+.page
+   LINE:     A single line.  This is the default.
+   RECT:     A rectangle.
+   SQUARE:   A square.  Identical to RECT except that it will be restricted
+             to a square, so that the longer of the two dimensions is
+             shortened to equal the shorter.
+   OVAL:     An ellipse.  The ellipse will touch the bounding rectangle of
+             the object in the center of each of the four sides.
+   CIRCLE:   A circle.  Identical to OVAL except that it will be restricted
+             to a circle in the same fashion that a SQUARE shape will be
+             restricted from a rectangle.
+   POLYGON:  An irregular polygon.  A polygon is any list of points defining
+             vertices;  it may cross itself, be concave, convex, etc.  For
+             example, an hourglass would be a valid polygon.
+   SEGMENTS: A series of connected lines.  Identical to POLYGON except the
+             end is not connected to the beginning.
+   ARROW:    An arrow.  Identical to LINE except the second endpoint has
+             an arrowhead drawn at it.  The first point is always the tail;
+             the second point is always the head of the arrow.
+.vari points
+The POINTS parameter is used to specify a list of points in the shape.
+The points are given in terms of graphics plane coordinates.  If no
+points are given by the POINTS parameter, you must trace out the 
+shape interactively on the display device.
+
+For all shapes except polygons and segments, two points should be
+specified, defining two opposite corners of the rectangle bounding
+the shape, in the format points=(l1,s1,l2,s2), where (l1,s1) defines
+the line and sample coordinates of one point, and (l2,s2) defines the
+line and sample coordinates of the opposite corner.  In the case of lines
+and arrows, the two points are the endpoints of the line.  If the shape
+is a polygon or a segment, then POINTS specifies the list of points
+defining the vertices of the shape, points=(l1,s1,l2,s2,...,ln,sn).
+Each point on the list will be connected to the next point on the list.
+For polygons only, the last point, (ln,sn), is connected to the first
+point (l1,s1) to close the polygon.
+.vari fill
+The FILL keyword parameter allows you to easily fill the shape with the
+current color.  The default is no fill, in which case only the outline
+of the shape is drawn.  The interior is left blank.  If you specify
+'FILL, however, the interior is filled with the current graphics color
+(defined with JSET-COLOR).
+
+Shapes that don't have an interior, like LINE, SEGMENTS, and ARROW,
+can not be filled.
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

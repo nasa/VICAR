@@ -1,0 +1,17 @@
+.Title
+VIDS Image Display Menu
+
+.proc jdisp
+JDISP       - Performs a quick display of an image.
+.proc jload-image
+JLOAD-IMAGE - Loads a single band of an image into a single plane.
+
+.proc jgrdisp
+JGRDISP    - Displays an IBIS Graphics-1 format file on the graphics plane.
+
+.help
+
+The VIDS Image Display Menu lists all the VIDS commands that display
+an image from a disk file.  Included also is JGRDISP, which displays
+an IBIS Graphics-1 format file.
+.end

@@ -1,0 +1,38 @@
+.Title
+[4mMODIFICATION OF IMAGE AREAS Menu[0m                      (page 1 of 2)
+.Proc EDIMAGE
+[1mEDIMAGE[0m  - Allows interactive image editing and annotating.
+.PROC FMASK
+[1mFMASK[0m    - Replaces any pixel in an image with the specified DN if
+           the corresponding pixel in the second input "mask" file has DN=0.
+.Proc MAPGEN
+[1mMAPGEN[0m   - IBIS program taking an image divided into polygon
+           regions, and assigning a grey value to each region according to
+           info in an interface file, or by user defined input parameters.
+.Proc PAINT
+[1mPAINT[0m    - IBIS program which takes an image divided into regions
+           and "paints" (assigns DN values to) each region.
+.Proc PAINTG3
+[1mPAINTG3[0m  - IBIS program which takes a Graphics-3 image divided into
+           regions and "paints" (assigns DN values to) each region.
+.Proc POLYMASK
+[1mPOLYMASK[0m - IBIS program cutting the portion of an image delineated
+           by a set of polygons contained in a Graphics-1 file, setting the
+           data on the inside or outside of the polygons to a specified
+           DN number.
+
+.Menu MODIF2.MDF
+[7mAdditional MODIFICATION Menu Selections[0m
+
+.help
+
+The MODIFICATION section contains those programs which allow the user to 
+modify or operate on subareas of an image. (e.g., painting a region, 
+zeroing out a region, filling in void regions.)
+
+EDIMAGE             FMASK               MAPGEN              PAINT               
+PAINTG3             POLYMASK            QSAR                SARGON              
+SARGONB             STRPMTCH            XYZPIC              ZCIRCLE             
+ZFILL
+
+.end

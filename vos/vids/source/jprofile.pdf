@@ -1,0 +1,281 @@
+procedure help=* options=nointerrupt
+parm planes (string,20) count=0:100 default="IMAGE"
+parm points integer count=(0,2:600) default=--
+parm disprgn (string,20) count=1 default="PRO1"
+parm color (string,20) count=0:100 +
+		valid=(RED,GREEN,BLUE,WHITE, CYAN,MAGENTA,YELLOW,BLACK) +
+		default=--
+parm stretch keyword valid=(STRETCHED,UNSTRETCHED) default=UNSTRETCHED
+parm range integer count=(0,2) default=--
+parm scale keyword valid=(SCALE,NOSCALE) default=SCALE
+parm last keyword valid=(NEW,LAST) default=NEW
+parm rotate keyword valid=(RTOP, RBOTTOM, HORIZONTAL) default=HORIZONTAL
+parm device string count=0:1 default=--
+body
+chkvids1
+sendvar (_proc, planes, points, disprgn, color, +
+         stretch, range, scale, last, rotate, device) job=VIDSJOB
+chkvids2
+end-proc
+.title
+VIDS command JPROFILE
+.help
+JPROFILE plots DN profiles on the graphics plane.  A profile is a plot
+of DN values along a line, called the profile path, versus the position
+along the line.  In effect, it is a cross-section of the image along
+the path.
+
+The profile for any number of planes may be plotted at once.  The default
+is IMAGE, which is the BW plane in black-and-white mode, and a collection
+of the three color planes in color mode.
+
+The profile path may be a single line, or it can be a series of connected
+line segments of any length.  The DN values are collected along the path,
+which may have many bends, and then "straightened out" into a single line
+for the plot.  You may notice a delay between issuing the command (or
+finishing the path with the cursor) and the plotting of the profile.  This
+is caused by the collection of the profile from the image memory planes.
+.page
+The path can be specified in several ways.  By default, the path is
+gathered interactively, using the cursor.  Position the cursor at one end
+of the path, and press button 1.  Then position the cursor at all the
+other vertices in the path and press button 1 each time.  When you are
+done, press button 3.  You specify the path in the same way that you define
+a polygonal region.  The only difference is that the profile path is not
+closed, meaning the ending point is not connected to the starting point.
+
+You may also specify the path using the POINTS parameter, in which case
+you list all the vertices of the path.
+
+The final method for specifying the path is the 'LAST keyword parameter.
+'LAST means the path taken is the same path used by the last JPROFILE
+command you executed (in this session).  If this is the first JPROFILE
+command of the session, the 'LAST keyword is ignored.
+.page
+There are two ways to display the profile.  The default is horizontal
+mode.  In this mode, the X-axis (the axis that measures distance down
+the path) is horizontal, and the DN-axis is vertical.  The profile is
+displayed in the rectangular region given in the DISPRGN parameter.
+Two default regions are provided: PRO1 and PRO2.  PRO1 is at the top of
+the screen, and PRO2 is at the bottom.  See the help for the DISPRGN
+parameter for more details.
+
+The other display method is called a rotated profile.  In this mode,
+the path may be only one line segment (i.e., no bends).  The X-axis
+coincides with the path, and the DN-axis is perpendicular to it.
+This means the entire plot is rotated to match the slope of the path
+line, and is positioned on the path line.  Features in the image are
+thus easily matched with the corresponding points in the profile.
+Rotated mode is specified using the ROTATE parameter.  'RTOP means
+the plot is above the line, and 'RBOTTOM means it is below the line.
+See the help for the ROTATE parameter for more information.
+.page
+The color of the plots can be changed using the COLOR parameter.  See
+the help for COLOR.
+
+By default, the raw data from the image memory plane is used for the
+profile.  If you want to take into account the current stretch for
+each plane, use the 'STRETCHED keyword.
+
+The DN axis is normally automatically scaled so the minimum DN value
+in the plot is at the bottom of the axis, and the maximum DN value is
+at the top.  This gives the maximum range for the data.  You may change
+this with the RANGE parameter, which is useful for comparing two profiles
+or expanding a certain DN range.
+
+The 'NOSCALE keyword also affects the DN range.  'NOSCALE causes the
+scaling factors from the last JPROFILE command you issued to be used.
+This affects not only the DN-axis, but also the X-axis.  Use of 'NOSCALE
+and RANGE may cause clipping of your data at the edges of the plot.
+.page
+Examples:
+
+    JPROFILE			! plot profile for interactive path
+    JPROFILE POINT=(1,1,256,256,256,1) ! profile of predefined path
+    JPROFILE GREEN 'LAST	! use previous path, only the green plane
+    JPROFILE DISPRGN=PRO2	! plot at the bottom of the screen
+    JPROFILE COLOR=(MAG,YEL,CYAN) D=MYRGN ! plot in MYRGN with different colors
+    JPROFILE 'STRETCH		! profile of stretched data
+    JPROFILE 'RTOP		! rotated profile above the path
+    JPROFILE 'RT 'L 'ST C=(M,Y,C) ! using same path, plot rotated profile of
+				  the stretched data, using different colors,
+				  overlaid on the previous plot
+    JPROFILE 'RBOT 'L		! rotated profile below the same path
+    JPROFILE 'RTOP PO=(1,1,256,256,1,256) ! ***ERROR*** since rotated profiles
+				  can only have one line segment
+    JPROFILE 'RTOP PO=(1,1,256,256) ! this is ok
+.level1
+.vari planes
+Image planes to use for profile
+.vari points
+Points defining profile path;
+use cursor if not given
+.vari disprgn
+Rectangular region used to
+display profile
+.vari color
+Colors to use for profile plot
+valid: RED,GREEN,BLUE,WHITE,
+       CYAN,MAGENTA,YELLOW,BLACK
+.vari stretch
+Pass profile through LUT
+valid: STRETCHED, UNSTRETCHED
+.vari range
+Range of DN values on vertical
+axis
+.vari scale
+Use new or old scaling factor
+valid: SCALE, NOSCALE
+.vari last
+Use new or previous profile path
+(overrides POINTS)
+valid: NEW, LAST
+.vari rotate
+Sets rotation of profile
+valid: HORIZONTAL,
+       RTOP, RBOTTOM
+.vari device
+Name of device to use
+.level2
+.vari planes
+The PLANES parameter lists the image planes to be used for the profiles.
+Any number of planes may be specified.  Each plane gets its own profile
+in the display area.  The default is IMAGE, which means one profile
+is plotted in black and white mode, and three profiles are plotted in
+color mode (one each for the red, green, and blue planes).
+
+Any valid plane names or numbers may be given, such as RED, GREEN, BLUE,
+COLOR, GRAPHICS, or VISIBLE.  See HELP PLANENAMES for details.
+.vari points
+The POINTS parameter is used to specify the path over which the profile
+is taken.  The points are given in terms of graphics plane coordinates.
+If no points are given by the POINTS parameter, you must trace out the
+path interactively on the display device.
+
+POINTS specifies the list of points defining the vertices of the polygon
+that defines the path, points=(l1,s1,l2,s2,...,ln,sn).  Each point on the
+list will be connected to the next point on the list, with the last point,
+(ln,sn), being unconnected.  The path is not closed, unlike a polygonal
+region.
+
+If 'LAST is specified, the path used is the same path used with the
+previous JPROFILE command.  In this case, the POINTS parameter is
+ignored.
+.vari disprgn
+DISPRGN specifies the area on the screen in which the profiles are
+plotted.  Any rectangular region may be used to display the profiles,
+which are scaled to fit in the region.  If a non-rectangular region
+is given, the bounding rectangle is used.  Regions are defined using
+JDEF-REGION.  The profile for all the planes is displayed in the same
+region.
+
+There are two pre-defined regions you can use with JPROFILE.  They
+are PRO1 and PRO2.  PRO1 is centered in the top half of the screen,
+and PRO2 is centered in the bottom half.  You may, of course, use your
+own regions, or even redefine PRO1 and PRO2.  They are provided merely
+as a convenience.  The default if no region is given is PRO1.
+
+If either 'RTOP or 'RBOTTOM is given to make a "rotated" profile,
+then DISPRGN is ignored.  See the ROTATE parameter for more details
+on 'RTOP and 'RBOTTOM.
+.vari color
+COLOR specifies the graphics colors to use in plotting each profile.
+COLOR only controls the actual data plot; the axis, labeling, path,
+and markers are always plotted in WHITE.  The valid colors are:
+RED, GREEN, BLUE, WHITE, CYAN, MAGENTA, YELLOW, and BLACK.
+
+Each individual plane uses its own display color.  That means if you give,
+for example, COLOR as a plane name, it will actually take three display
+colors, since COLOR is a collection of the red, green, and blue planes.
+
+If you don't give enough colors for all the planes, then the last color
+you give will be used for all the other planes.  This allows you to say,
+for example, COLOR=BLACK and have all the profiles plotted in black.
+.page
+If you don't specify any colors, defaults will be assigned.  If the plane
+is the current red plane, the color RED will be used.  Likewise, the green
+plane will use GREEN and the blue plane will use BLUE.  The bw plane uses
+RED.  If the plane is not one of those four, then the color used cycles
+between MAGENTA, YELLOW, and CYAN.
+.vari stretch
+STRETCH controls whether or not to use the look-up table (LUT) for the
+planes.  If 'NOSTRETCHED is given, the raw data from the image memory is
+used.  If 'STRETCHED is given, the raw data is passed through the LUT
+before being plotted.  This allows you to see the effect of your contrast
+enhancement on the data.
+.vari range
+RANGE defines the minimum and maximum DN values to use in the profile
+plot.  For example, RANGE=(100,150) would make the bottom of the DN
+axis have the value 100, and the top of the axis have 150.  Any DN
+values outside of the range are clipped to the minimum or maximum
+value.
+
+If RANGE is not given, then the range is automatically set to the
+minimum and maximum DN values in the data.  So, normally, you can
+default this parameter.  RANGE is mainly used for comparing two
+profiles, or for expanding a range of interest so it can be seen better.
+
+The RANGE parameter overrides the 'NOSCALE keyword for the DN axis.
+.vari scale
+SCALE controls the automatic scaling of the profile plot.
+
+If 'SCALE is given (the default), then the range of the DN axis is
+automatically set to the minimum and maximum values in the data (unless
+the RANGE parameter is given), and the X-axis (horizontal) scale is
+set to the profile with the most points.  This lets you see the profile
+the best, with minimal loss of precision.
+
+If 'NOSCALE is given, then the scale is not re-computed for this particular
+profile.  The scale from the previous JPROFILE command is used instead.
+This can cause clipping of the data.  'NOSCALE is used in comparing two
+or more profiles.  The RANGE parameter will override 'NOSCALE in the DN
+axis, but the X-axis will still be set to the previous command's scale.
+When comparing two profiles like this, you should use the same, or at least
+the same-sized, display region.  If you don't, the plots will be sized
+differently despite the 'NOSCALE keyword.
+.vari last
+If 'LAST is given, then the profile path from the previous JPROFILE
+command is used.  This is useful if the screen is too cluttered to see
+the profile.  Just erase the graphics plane (or any part of it, such
+as your display region), and re-issue the JPROFILE command with the
+'LAST parameter.  It is also useful to see the same profile before
+and after a stretch.
+
+If 'NEW is given instead (the default), then a new profile path is
+used, either from the POINTS parameter (if given) or interactively
+using the cursor.
+.vari rotate
+ROTATE allows you to make a 'rotated' profile.  This means that the
+X-axis, instead of being horizontal, is coincident with the profile
+path.  The DN axis is perpendicular to the profile path, and the
+entire plot is rotated to the angle of the path line.  This allows
+easy matches to be made between features on the image and the
+profile at that same point, since each point on the profile is
+directly above its location in the image.
+
+There are some restrictions on rotated profiles.  Most important is
+that there must be only one line segment in the profile path.  If you
+want a profile of a complex path, the profile cannot be rotated.
+Also, there is no control on the height of the profile; it is set to
+half the length.
+.page
+You have two choices for where to put the plot.  'RTOP means that the
+data goes above the line, regardless of its orientation.  This is the
+method you will normally choose.  However, if the data goes off the top
+of the screen, you may want to use 'RBOTTOM instead.  This causes the
+data to go below the line instead of above it.
+
+The DISPRGN parameter is ignored if 'RTOP or 'RBOTTOM is given.
+The X-axis scaling from 'NOSCALE is also ignored, but the DN-axis
+scaling from either 'NOSCALE or RANGE are used.
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

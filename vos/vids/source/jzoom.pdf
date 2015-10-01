@@ -1,0 +1,150 @@
+procedure help=* options=nointerrupt
+parm factor	integer count=0:1 default=--
+parm planes	(string,20) count=1:100 default=IMAGE
+parm location	integer	count=(0,2)	default=--
+parm region	(string,20) count=0:1 default=--
+parm source	keyword	valid=(DISPLAY,FILE,BEST) default=BEST
+parm referenc	keyword valid=(CENTER,HOME) default=CENTER
+parm device string count=0:1 default=--
+body
+chkvids1
+sendvar (_proc,factor,planes,location,source,referenc,region,device) job=VIDSJOB
+chkvids2
+end-proc
+.title
+VIDS command JZOOM
+.help
+The JZOOM command will zoom (magnify) image planes to the factor
+specified.  By default, the zoom will be centered on the current
+cursor position.  If a region name is supplied, then JZOOM will
+zoom the image planes so that the data within the region fills
+the screen.
+
+A location is always used to position the zoom.  If the REFERENC
+parameter is CENTER, the zoom is centered on the location.  If
+REFERENC is HOME, the location will be the new upper left corner.
+
+If the LOCATION parameter is given, that location is used to position
+the zoom.  If a region is given, then the region location is used.
+Otherwise, the current cursor position is used.
+.page
+When the SOURCE parameter is BEST, JZOOM will give the fastest zoom
+available at the best resolution possible.  In this case, the zoom
+factor refers to an absolute zoom relative to the image file.
+
+See the examples on the next page.
+.page
+Examples:
+
+JZOOM 2				- Magnify 2 times relative to image file
+
+JZOOM 2 'DISP			- Perform a hardware zoom of 2, regardless
+				- of current magnification
+
+JZOOM REG=FOO			- Magnify the region FOO to fit on the screen
+
+JZOOM 3 LOC=(50,50) 'FIL 'HO	- Equivalent to: JDISP SL=50 SS=50 ZOOM=3
+
+JZOOM 6 RED			- Zoom red plane by 6, centered on cursor
+
+JZOOM -9			- Reload image files at -9 magnification
+.level1
+.vari factor
+Magnification factor
+.vari planes
+Image planes to zoom
+.vari location
+Location about which to
+zoom (see also REFERENC).
+.vari region
+Name of region on
+which to zoom
+.vari source
+DISPLAY (hardware), FILE
+(software), or BEST
+.vari referenc
+Zoom about center (CENTER)
+or top left (HOME)?
+.vari device
+Name of device to use
+.level2
+.vari factor
+FACTOR is the  magnification factor to be applied to the image.   If
+SOURCE is  BEST or FILE, then  FACTOR is relative  to the image file
+itself.  If SOURCE is DISPLAY, then FACTOR is a hardware zoom factor
+to be applied.
+
+Note that only positive zooms up to a certain number (such as 8 or 16)
+are available in hardware (SOURCE=DISPLAY).
+
+A negative zoom factor indicates that the picture will be shrunk by
+that factor; for example, FACTOR=-3 would cause every third pixel in
+the input image to be displayed (starting with 1).
+
+The FACTOR parameter overrides the automatic zoom calculated from the
+REGION parameter.  If neither FACTOR nor REGION is given, the zoom factor
+defaults to 1.
+.vari planes
+The PLANES parameter can be used to specify a list of planes to be
+zoomed.  The planes need not be visible to be zoomed.
+PLANES is the standard VIDS plane parameter, which can be
+either a name of a plane (such as RED, GREEN, COLOR, etc.) or an
+actual plane number (1,2,3...).  See HELP PLANENAMES for detail.
+
+Many devices will not allow image planes to be zoomed independently
+of one another.  In this case, VIDS will inform you that all planes
+must be zoomed together and will zoom all planes.
+.vari location
+The LOCATION parameter specifies a location about which to zoom.
+The REFERENC parameter specifies whether this location is to be
+interpreted as the center (REFERENC=CENTER) or the upper left
+(REFERENC=HOME) of the area.
+
+If LOCATION is not specified, the current cursor location is
+used; that is, the image will be zoomed centered on the current
+cursor position.
+
+Unless the zoom is forced to be local to the display (SOURCE=DISPLAY),
+the LOCATION is in image file coordinates.
+.vari region
+REGION specifies the name of a region on which to zoom.  The zoom
+is centered on that region, and a factor is calculated to zoom the
+region as large as possible and still fit on the screen.  If FACTOR
+is specified, that factor will override the calculated factor for
+the zoom.  If REFERENC=HOME is specified, the upper left of the 
+region will be panned to the upper left of the display.
+
+If neither FACTOR nor REGION is given, the zoom factor defaults to 1.
+.vari source
+The SOURCE parameter specifies whether the zoom should be performed
+from the image file (FILE), local to the hardware (DISPLAY), or an
+optimal combination of the two (BEST).  If SOURCE=BEST, the zoom
+factor is interpreted in reference to the image file, so that a 
+zoom of one would always load each pixel up to the size of the image
+plane with no subsampling (if a load were necessary).
+
+By default, an "optimal" zoom will be performed.  If the zoom is 
+negative (zooming out) or greater than the hardware will support,
+then the hardware zoom will be reset to a zoom of one, and the image
+will be redisplayed at the requested zoom factor.  If the zoom is
+positive and within the range of the hardware capability, the image
+will be redisplayed at a zoom of one if necessary and a hardware zoom
+applied.
+.vari referenc
+The REFERENC parameter indicates whether the location for the zoom
+(the cursor position, the region location, or the LOCATION parameter)
+is to be centered on the screen (REFERENC=CENTER) or positioned in
+the upper left corner of the screen (REFERENC=HOME).  By default the
+point of interest (usually the cursor location) will be centered on
+the screen after zooming.
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

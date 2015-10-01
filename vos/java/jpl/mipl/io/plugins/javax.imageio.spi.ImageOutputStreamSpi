@@ -1,0 +1,3 @@
+# @(#)javax.imageio.spi.ImageOutputStreamSpi	1.1 00/10/25
+com.sun.imageio.spi.FileImageOutputStreamSpi
+com.sun.imageio.spi.OutputStreamImageOutputStreamSpi

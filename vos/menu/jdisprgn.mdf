@@ -1,0 +1,34 @@
+.Title
+VIDS Display Region Menu
+
+.proc jdef-region
+JDEF-REGION     - Defines a named region.
+.proc jshow-region
+JSHOW-REGION    - Prints information about one or more regions.
+
+.proc jhist
+JHIST           - Displays histogram of planes or region of interest.
+.proc jprofile
+JPROFILE        - Plots a DN profile on the graphics plane.
+.proc jdtf
+JDTF            - Displays and optionally edits the current look-up tables.
+.proc jstretch-show
+JSTRETCH-SHOW   - Displays current look-up tables on graphics plane.
+
+.proc jpsedit
+JPSEDIT         - Allows the pseudocolor table to be edited.
+.proc jstretch-cursor
+JSTRETCH-CURSOR - Interactively change brightness and contrast.
+.proc jstretch-edit
+JSTRETCH-EDIT   - Interactively edit look-up tables using cursor.
+
+.proc jwedge
+JWEDGE          - Draws a gray-scale wedge in the image planes.
+
+.help
+
+The VIDS Display Region Menu lists all the VIDS commands that
+use or define a region as a display region.  This does not include
+commands that use regions as regions of interest; there is another
+category for those.
+.end

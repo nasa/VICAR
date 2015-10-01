@@ -1,0 +1,49 @@
+/******************************************************************************
+ *	Copyright (c) 1990, 1991, 1992,
+ *	National Aeronautics and Space Administration
+ *	ALL RIGHTS RESERVED
+ *
+ *	The software (programs, data bases and/or documentation) on or in
+ *	any media can not be reproduced, disclosed or used except under
+ *	terms of the license between COSMIC and your organization.
+ *****************************************************************************/
+
+/*>>UNIX<<								*/
+/*
+ *	EVENTINC - 'include' file for the EVENT package
+ *
+ */
+/* Change log:
+ * 		9/5/82 - Inserted e_ prefix...NHE
+ *		11/5/82- Removed e_ prefix...PEB
+ *		1/24/83- Changed tcbptr to ctxptr...nhe
+ *		04-oct-83	UNIX implementation
+ */
+
+#ifndef	I_EVENTINC		/* prevent double include		*/
+#define I_EVENTINC
+
+/*
+ *	Note on UNIX Event Package:  the event package does not really
+ *	exist under the UNIX implementation of TAE.  The only real
+ *	need for events is the process control function ("process")
+ *	and this has been coded with UNIX-specific logic, avoiding the
+ *	event package.  The terminal package does support t_attn 
+ * 	and e_occur for operator attention.
+ *
+ *
+ *	ecb structure
+ *
+ *	An ecb is the event control block.  It contains data 
+ *	necessary for use of the event package.  The contents of the ecb
+ *	are, by convention, hidden from the user.
+ */
+
+    struct ECB
+    	{
+	int flag;		/* TRUE when event has occurred	    */
+   	};
+
+#define	NOEFN	257		/* value for 'efn' if there is none */
+
+#endif

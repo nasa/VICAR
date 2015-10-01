@@ -1,0 +1,132 @@
+PROCEDURE HELP=*
+!
+refgbl ($MESSAGE, $SYSCHAR)
+refgbl ($ECHO, $BECHO, $AECHO)
+refgbl ($PROMPT, $DYNTUT)
+!
+local vic2log type=string initial=""
+local gblfile type=string initial=""
+!
+BODY
+!
+let _onfail = "continue"
+let $echo = "NO"
+let $becho = "NO"
+let $aecho = "NO"
+let $prompt = "VICAR"
+let $dyntut = "SCREEN"
+let $message = "BELL"
+!
+! Force command names to lower case so old mixed-case PDFs will work
+!
+enable-force_lower
+!
+if ($syschar(1) = "UNIX")
+  defcmd cat  "ush cat"		!define shell command equivalents
+  defcmd more "ush more"
+  defcmd pr   "ush pr"
+  defcmd ls   "ush ls"
+  setlib ($V2LIB, $VIDSLIB, $R1LIB, $R2LIB, $CASLIB, $GLLLIB, $TAEBIN/$TAEPLAT, $R3LIB, $GUILIB, $MARSLIB, $UPLINKLIB, $UPLINKTOURLIB, $VSLLIB, $HWLIB)
+  defcmd use*disp "ush $VRDILIB/usedisp a"
+  defcmd free*disp "ush $VRDILIB/usedisp d"
+else-if ($syschar(1) = "VAX_VMS")
+  dcl $tae == "write sys$output ""Use VICAR or EXIT to exit."""
+  dcl $vic*ar :== exit
+  defcmd ty*pe "dcl $type"
+  defcmd pr*int "dcl $print"
+  defcmd dir*ect "dcl $directory"
+  setlib (liblst:-cpd, liblst:-pdf, r3lib:-cpd, r3lib:-pdf)
+end-if
+!
+defcmd showdisp "showdisp-s"
+defcmd helpdisp "showdisp-h"
+!
+! Deassign VRDI device logical so that users can't use device if it's
+! not allocated.  User mode to allow running USEDISP from outside of VICAR.
+!
+if ($syschar(1) = "VAX_VMS")
+  if ($RUNTYPE = "INTERACTIVE")		! So ASYNC doesn't do the deassign
+    dcl if (f$trnlnm("XDDEVICE","LNM$JOB",0,"USER",,"ACCESS_MODE").eqs."USER") +
+		then deassign/user/job XDDEVICE
+  end-if
+end-if
+!
+! Restore global variables from last run
+!
+if ($syschar(1) = "VAX_VMS")
+  if ($runtype = "BATCH") dcl @v2$lib:getpid	! Get v2$pidcode
+  flag-set nomess			! turn off message for translog
+  translog vic2$globalsav vic2log
+  if (vic2log = "") goto NOREST		! Don't restore globals if new login
+  translog v2$pidcode vic2log
+  let gblfile = "sys$login:vicar2globals.z" // "&vic2log"
+  restore &gblfile
+end-if
+!
+if ($RUNTYPE = "BATCH")
+  let $tapes = --
+  let $tfile = --
+  let $trec = --
+end-if
+!
+NOREST>
+!
+! Initialize global variables for VIDS
+!
+vidsglob
+!
+! print VICAR version number
+!
+v2version
+!
+write "      ***********************************************************"
+write "      *                                                         *"
+write "      * VICAR Supervisor version 5C, TAE V5.2                   *"
+write "      *   Debugger is now supported on all platforms            *"
+write "      *   USAGE command now implemented under Unix              *"
+write "      *                                                         *"
+write "      * VRDI and VIDS now support X-windows and Unix            *"
+write "      * New X-windows display program: xvd (for all but VAX/VMS)*"
+write "      *                                                         *"
+write "      * VICAR Run-Time Library version 16C                      *"
+write "      *   '+' form of temp filename now avail. on all platforms *"
+write "      *   ANSI C now fully supported                            *"
+write "      *                                                         *"
+write "      * See B.Deen(RGD059) with problems                        *"
+write "      *                                                         *"
+write "      ***********************************************************"
+write ""
+write "  --- Type NUT for the New User Tutorial ---"
+write ""
+write "  --- Type MENU for a menu of available applications ---"
+write ""
+
+flag-set logging		! full logging for async
+
+let $becho = ("YES","NO")
+let $aecho = ("YES","NO")
+ulogon
+END-PROC
+
+.TITLE
+
+		TAE SYSTEM-WIDE LOGON PROCEDURE
+.HELP
+
+.if UNIX
+	    This proc is automatically invoked upon user 
+	    logon, unless an overriding slogon proc 
+	    exists in the proc search hierarchy (i.e. either 
+	    in the user library or in one of the application
+	    libraries).
+.elseif VAX_VMS
+This procedure is executed upon activating TAE unless the user
+has:
+
+	a.) a version of SLOGON.PDF in the VMS default directory
+	    upon TAE activation, or
+
+	b.) a logical name SLOGON equating SLOGON to a file other
+	    than this one.
+
+.ifend

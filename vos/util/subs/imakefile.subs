@@ -1,0 +1,41 @@
+#
+# Imakefile for Subroutines
+#
+
+all: make_subs
+
+make_marssub: 
+	-($(CD) $(MARSSUB); $(V2UTIL)/bldcomfiles.csh $(MARSLIB))
+make_p1sub:
+	($(CD) $(P1SUB); $(V2UTIL)/bldcomfiles.csh $(R1LIB))
+make_guisub:
+	($(CD) $(GUISUB)/gui; $(V2UTIL)/bldcomfiles.csh $(GUILIB))
+make_p2sub:
+	($(CD) $(P2SUB); $(V2UTIL)/bldcomfiles.csh $(R2LIB))
+make_p3sub:
+	($(CD) $(P3SUB); $(V2UTIL)/bldcomfiles.csh $(R3LIB))
+make_cassub:
+	($(CD) $(CASSUB); $(V2UTIL)/bldcomfiles.csh $(CASLIB))
+make_tlmsub:
+	($(CD) $(TLMSUB); $(V2UTIL)/bldcomfiles.csh $(TLMLIB))
+make_uplinktoursub:
+	-($(CD) $(UPLINKTOURSUB); $(V2UTIL)/bldcomfiles.csh $(UPLINKTOURLIB))
+make_divsub:
+	-($(CD) $(DIVSUB); $(V2UTIL)/bldcomfiles.csh $(DIVLIB))
+make_neatsub:
+	-($(CD) $(NEATSUB); $(V2UTIL)/bldcomfiles.csh $(NEATLIB))
+make_ssvsub:
+	-($(CD) $(SSVSUB); $(V2UTIL)/bldcomfiles.csh $(SSVLIB))
+
+make_subs: 
+	-($(CD) $(P1SUB); $(V2UTIL)/bldcomfiles.csh $(R1LIB)) 
+	-($(CD) $(GUISUB)/gui; $(V2UTIL)/bldcomfiles.csh $(GUILIB))
+	-($(CD) $(P2SUB); $(V2UTIL)/bldcomfiles.csh $(R2LIB))
+	-($(CD) $(CASSUB); $(V2UTIL)/bldcomfiles.csh $(CASLIB))	
+	-($(CD) $(UPLINKTOURSUB); $(V2UTIL)/bldcomfiles.csh  $(UPLINKTOURLIB))
+	-($(CD) $(MARSSUB); $(V2UTIL)/bldcomfiles.csh $(MARSLIB)) 
+	-($(CD) $(TLMSUB); $(V2UTIL)/bldcomfiles.csh $(TLMLIB))
+	-($(CD) $(DIVSUB); $(V2UTIL)/bldcomfiles.csh $(DIVLIB))	
+	-($(CD) $(SSVSUB); $(V2UTIL)/bldcomfiles.csh $(SSVLIB))
+	-($(CD) $(NEATSUB); $(V2UTIL)/bldcomfiles.csh $(NEATLIB))
+	-($(CD) $(P3SUB); $(V2UTIL)/bldcomfiles.csh $(R3LIB))	

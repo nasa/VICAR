@@ -1,0 +1,1642 @@
+procedure help=* options=nointerrupt
+subcmd CURSOR
+  parm planes (string,20) count=1:100 default="ALL"
+  parm cursor int default=1
+  parm from keyword valid=(DISPLAY,FILE,BOTH) default=BOTH
+  !
+  ! Default variables for output parameters
+  !
+  local drawsamp int
+  local drawline int
+  local dimpsamp int count=0:100
+  local dimpline int count=0:100
+  local dimpdn int count=0:100
+  local dfsamp int count=0:100
+  local dfline int count=0:100
+  local dfdn real count=0:100
+  local dfidn real count=0:100
+  !
+  !
+  ! Output parameters (optional)
+  !
+  parm rawsamp  name default=drawsamp
+  parm rawline  name default=drawline
+  parm impsamp  name default=dimpsamp
+  parm impline  name default=dimpline
+  parm impdn    name default=dimpdn
+  parm filesamp name default=dfsamp
+  parm fileline name default=dfline
+  parm filedn   name default=dfdn
+  parm fileidn  name default=dfidn
+  !
+  ! Parameters for recvar call (since it won't take NAME parameters!)
+  !
+  local prawsamp int
+  local prawline int
+  local pimpsamp int count=0:100
+  local pimpline int count=0:100
+  local pimpdn int count=0:100
+  local pfsamp int count=0:100
+  local pfline int count=0:100
+  local pfdn real count=0:100
+  local pfidn real count=0:100
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subcmd DEVICE
+  !
+  ! Default variables for output parameters
+  !
+  local ddevname (string,20)
+  local dfullnam (string,20)
+  local dnimps int
+  local dnl int
+  local dns int
+  local dvnl int
+  local dvns int
+  local dmode (string,20) valid=(COLOR,PSEUDO,BW)
+  !
+  ! Output parameters (optional)
+  !
+  parm devname	name default=ddevname
+  parm fullname	name default=dfullnam
+  parm nimps	name default=dnimps
+  parm nl	name default=dnl
+  parm ns	name default=dns
+  parm vnl	name default=dvnl
+  parm vns	name default=dvns
+  parm mode	name default=dmode
+  !
+  ! Parameters for recvar call (since it won't take NAME parameters!)
+  !
+  local pdevname (string,20)
+  local pfullnam (string,20)
+  local pnimps int
+  local pnl int
+  local pns int
+  local pvnl int
+  local pvns int
+  local pmode (string,20) valid=(COLOR,PSEUDO,BW)
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subcmd DEVLIST
+  !
+  ! Default variables for output parameters
+  !
+  local dodev (string,20) count=(0:100)
+  local dndev int count=1
+  !
+  ! Output parameters (optional)
+  !
+  parm odev name default=dodev
+  parm ndev name default=dndev
+  !
+  ! Parameters for recvar call (since it won't take NAME parameters!)
+  !
+  local podev (string,20) count=(0:100)
+  local pndev int count=1
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subcmd PLANES
+  parm planes (string,20) count=(0:100) default=VISIBLE
+  parm dup keyword valid=(DUP,NODUP) default=NODUP
+  !
+  ! Default variables for output parameters
+  !
+  local doplanes int count=(0:100)
+  local dnplanes int count=1
+  !
+  ! Output parameters (optional)
+  !
+  parm oplanes name default=doplanes
+  parm nplanes name default=dnplanes
+  !
+  ! Parameters for recvar call (since it won't take NAME parameters!)
+  !
+  local poplanes int count=(0:100)
+  local pnplanes int count=1
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subcmd PLINFO
+  parm plane (string,20) count=1
+  parm header keyword valid=(HEADER,NOHEADER) default=HEADER
+  !
+  ! Default variables for output parameters
+  !
+  local dfile    integer count=4
+  local dloction integer count=2
+  local dpan     integer count=2
+  local ddspzoom integer
+  local dfilzoom integer
+  local dband    integer
+  local dfilenam string
+  !
+  ! Output parameters (optional)
+  !
+  parm file     name default=dfile
+  parm location name default=dloction
+  parm pan      name default=dpan
+  parm dispzoom name default=ddspzoom
+  parm filezoom name default=dfilzoom
+  parm band     name default=dband
+  parm filename name default=dfilenam
+  !
+  ! Parameters for recvar call (since it won't take NAME parameters!)
+  !
+  local pfile    integer count=4
+  local ploction integer count=2
+  local ppan     integer count=2
+  local pdspzoom integer
+  local pfilzoom integer
+  local pband    integer
+  local pfilenam string
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subcmd REGION
+  parm region (string,20) count=1 default="CURRENT"
+  parm prtpts keyword valid=(PRTPTS,NOPRTPTS) default=PRTPTS
+  !
+  ! Default variables for output parameters
+  !
+  local dname    string
+  local dshape   string valid=(RECT,OVAL,CIRCLE,POLYGON,SQUARE)
+  local dbounds  integer count=4
+  local dpoints  integer count=(0,2:600)
+  !
+  ! Output parameters (optional)
+  !
+  parm name	name default=dname
+  parm shape	name default=dshape
+  parm bounds	name default=dbounds
+  parm points	name default=dpoints
+  !
+  ! Parameters for recvar call (since it won't take NAME parameters!)
+  !
+  local pname    string
+  local pshape   string valid=(RECT,OVAL,CIRCLE,POLYGON,SQUARE)
+  local pbounds  integer count=4
+  local ppoints  integer count=(0,2:600)
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subcmd RGNLIST
+  !
+  ! Default variables for output parameters
+  !
+  local dorgn (string,20) count=(0:100)
+  local dnrgn int count=1
+  !
+  ! Output parameters (optional)
+  !
+  parm orgn name default=dorgn
+  parm nrgn name default=dnrgn
+  !
+  ! Parameters for recvar call (since it won't take NAME parameters!)
+  !
+  local porgn (string,20) count=(0:100)
+  local pnrgn int count=1
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subcmd STATS
+  parm plane (string,20) count=1
+  parm region string count=0:1 default=--
+  !
+  ! Default variables for output parameters
+  !
+  local dmin    int
+  local dmax    int
+  local dnpix   int
+  local dmedian int
+  local dmean   real
+  local dstddev real
+  !
+  !
+  ! Output parameters (optional)
+  !
+  parm min    name default=dmin
+  parm max    name default=dmax
+  parm npix   name default=dnpix
+  parm median name default=dmedian
+  parm mean   name default=dmean
+  parm stddev name default=dstddev
+  !
+  ! Parameters for recvar call (since it won't take NAME parameters!)
+  !
+  local pmin    int
+  local pmax    int
+  local pnpix   int
+  local pmedian int
+  local pmean   real
+  local pstddev real
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subcmd TRANSLATE
+  parm in integer count=2
+  parm plane (string,20) count=1
+  parm plane2 (string,20) count=0:1 default=--
+  parm trans keyword valid=(RAW2IMP,IMP2FILE,FILE2IMP,IMP2RAW,IMP2IMP)
+  !
+  ! Default variables for output parameters
+  !
+  local dout int count=2
+  !
+  ! Output parameters (optional)
+  !
+  parm out name default=dout
+  !
+  ! Parameters for recvar call (since it won't take NAME parameters!)
+  !
+  local pout int count=2
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+parm print keyword valid=(PRINT,NOPRINT) default=NOPRINT
+parm device string count=0:1 default=--
+!
+local _job string
+local message string
+local key string
+local type string
+local stat integer
+refgbl $vidsflg
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+body
+chkvids1
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if (_subcmd = "CURSOR")
+  sendvar (_proc,_subcmd,planes,cursor,from,print,device) job=VIDSJOB
+  let $vidsflg="READY"
+  loop
+    recvar (_job,stat,message,key,type,prawsamp,prawline,pimpsamp,pimpline, +
+	    pimpdn,pfsamp,pfline,pfdn,pfidn) job=VIDSJOB
+    if (type <> "MESSAGE")
+      break
+    end-if
+    putmsg "&message" "&key"
+  end-loop
+  if (stat <> 1)
+    chkvids3 "&message" "&key" "&type"
+    return &stat "&key"
+  end-if
+  let rawsamp = prawsamp
+  let rawline = prawline
+  let impsamp = pimpsamp
+  let impline = pimpline
+  let impdn = pimpdn
+  let filesamp = pfsamp
+  let fileline = pfline
+  let filedn = pfdn
+  let fileidn = pfidn
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+else-if (_subcmd = "DEVICE")
+  sendvar (_proc,_subcmd,print,device) job=VIDSJOB
+  let $vidsflg="READY"
+  loop
+    recvar (_job,stat,message,key,type,pdevname,pfullnam,pnimps,pnl,pns, +
+	    pvnl,pvns,pmode) job=VIDSJOB
+    if (type <> "MESSAGE")
+      break
+    end-if
+    putmsg "&message" "&key"
+  end-loop
+  if (stat <> 1)
+    chkvids3 "&message" "&key" "&type"
+    return &stat "&key"
+  end-if
+  let devname = pdevname
+  let fullname = pfullnam
+  let nimps = pnimps
+  let nl = pnl
+  let ns = pns
+  let vnl = pvnl
+  let vns = pvns
+  let mode = pmode
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+else-if (_subcmd = "DEVLIST")
+  sendvar (_proc,_subcmd,print,device) job=VIDSJOB
+  let $vidsflg="READY"
+  loop
+    recvar (_job,stat,message,key,type,podev,pndev) job=VIDSJOB
+    if (type <> "MESSAGE")
+      break
+    end-if
+    putmsg "&message" "&key"
+  end-loop
+  if (stat <> 1)
+    chkvids3 "&message" "&key" "&type"
+    return &stat "&key"
+  end-if
+  let odev = podev
+  let ndev = pndev
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+else-if (_subcmd = "PLANES")
+  sendvar (_proc,_subcmd,planes,dup,print,device) job=VIDSJOB
+  let $vidsflg="READY"
+  loop
+    recvar (_job,stat,message,key,type,poplanes,pnplanes) job=VIDSJOB
+    if (type <> "MESSAGE")
+      break
+    end-if
+    putmsg "&message" "&key"
+  end-loop
+  if (stat <> 1)
+    chkvids3 "&message" "&key" "&type"
+    return &stat "&key"
+  end-if
+  let oplanes = poplanes
+  let nplanes = pnplanes
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+else-if (_subcmd = "PLINFO")
+  sendvar (_proc,_subcmd,plane,header,print,device) job=VIDSJOB
+  let $vidsflg="READY"
+  loop
+    recvar (_job,stat,message,key,type,pfile,ploction,ppan,pdspzoom,pfilzoom, +
+		pband,pfilenam) job=VIDSJOB
+    if (type <> "MESSAGE")
+      break
+    end-if
+    putmsg "&message" "&key"
+  end-loop
+  if (stat <> 1)
+    chkvids3 "&message" "&key" "&type"
+    return &stat "&key"
+  end-if
+  let file = pfile
+  let location = ploction
+  let pan = ppan
+  let dispzoom = pdspzoom
+  let filezoom = pfilzoom
+  let band = pband
+  let filename = pfilenam
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+else-if (_subcmd = "REGION")
+  sendvar (_proc,_subcmd,region,prtpts,print,device) job=VIDSJOB
+  let $vidsflg="READY"
+  loop
+    recvar (_job,stat,message,key,type,pname,pshape,pbounds,ppoints) job=VIDSJOB
+    if (type <> "MESSAGE")
+      break
+    end-if
+    putmsg "&message" "&key"
+  end-loop
+  if (stat <> 1)
+    chkvids3 "&message" "&key" "&type"
+    return &stat "&key"
+  end-if
+  let name = pname
+  let shape = pshape
+  let bounds = pbounds
+  let points = ppoints
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+else-if (_subcmd = "RGNLIST")
+  sendvar (_proc,_subcmd,print,device) job=VIDSJOB
+  let $vidsflg="READY"
+  loop
+    recvar (_job,stat,message,key,type,porgn,pnrgn) job=VIDSJOB
+    if (type <> "MESSAGE")
+      break
+    end-if
+    putmsg "&message" "&key"
+  end-loop
+  if (stat <> 1)
+    chkvids3 "&message" "&key" "&type"
+    return &stat "&key"
+  end-if
+  let orgn = porgn
+  let nrgn = pnrgn
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+else-if (_subcmd = "STATS")
+  sendvar (_proc,_subcmd,plane,region,print,device) job=VIDSJOB
+  let $vidsflg="READY"
+  loop
+    recvar (_job,stat,message,key,type,pmin,pmax,pnpix,pmedian,pmean,pstddev) +
+			job=VIDSJOB
+    if (type <> "MESSAGE")
+      break
+    end-if
+    putmsg "&message" "&key"
+  end-loop
+  if (stat <> 1)
+    chkvids3 "&message" "&key" "&type"
+    return &stat "&key"
+  end-if
+  let min = pmin
+  let max = pmax
+  let npix = pnpix
+  let median = pmedian
+  let mean = pmean
+  let stddev = pstddev
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+else-if (_subcmd = "TRANSLATE")
+  sendvar (_proc,_subcmd,in,plane,plane2,trans,print,device) job=VIDSJOB
+  let $vidsflg="READY"
+  loop
+    recvar (_job,stat,message,key,type,pout) job=VIDSJOB
+    if (type <> "MESSAGE")
+      break
+    end-if
+    putmsg "&message" "&key"
+  end-loop
+  if (stat <> 1)
+    chkvids3 "&message" "&key" "&type"
+    return &stat "&key"
+  end-if
+  let out = pout
+end-if
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+end-proc
+
+.title
+VIDS command JGET
+.help
+The JGET command is used to get information from VIDS and put it
+in TCL variables.  JGET should not normally be called from outside
+a PDF; use JSHOW instead.  JGET takes subcommands to describe the
+type of information desired, so the command takes the form:
+
+JGET-subcmd parms
+
+where "subcmd" describes the type of information, and "parms"
+indicates additional parameters which vary among the subcommands.
+For further information on a given subcommand, type "HELP JGET-subcmd",
+or, for a list of subcommands available and help on each, "TUTOR JGET-".
+.page
+JGET is intended to be called from procedure PDF's, in order to get
+information into TCL variables.  Each subcommand does have a 'PRINT
+keyword, though, which will cause JGET to print the results on the
+terminal screen.  However, it is recommended that you use JSHOW
+instead of JGET for displaying the information.  Most of the JGET
+subcommands have a corresponding JSHOW subcommand.
+
+
+Examples:
+
+JGET-PLANES IMAGE OPLANE=OUTPLANES NPLANE=N	! returns a list of plane
+		! numbers corresponding to the planelist IMAGE in the TCL
+		! variable OUTPLANES.  The number of planes is returned in N.
+
+JGET-CURSOR RAWSAMP=X RAWLINE=Y 'PRINT	! returns raw cursor coordinates
+		! in X and Y, and prints all the cursor information.
+.level1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd cursor
+Returns cursor coordinates and
+value of sample under cursor.
+.variable planes -cursor
+Plane numbers to use
+.variable cursor -cursor
+Cursor number to use
+.variable from -cursor
+Valid: DISPLAY,
+FILE, BOTH
+.variable rawsamp -cursor
+Returns raw
+sample number
+.variable rawline -cursor
+Returns raw
+line number
+.variable impsamp -cursor
+Returns IMP
+sample numbers
+.variable impline -cursor
+Returns IMP
+line numbers
+.variable impdn -cursor
+Returns IMP
+pixel values
+.variable filesamp -cursor
+Returns file
+sample numbers
+.variable fileline -cursor
+Returns file
+line numbers
+.variable filedn -cursor
+Returns file
+pixel values
+(real part)
+.variable fileidn -cursor
+Returns file
+pixel values
+(imaginary part)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd device
+Returns information about
+the display device.
+.variable devname -device
+Returns the device name.
+.variable fullname -device
+Returns the full name of the
+device (make/model).
+.variable nimps -device
+Returns the number of image
+planes on the device.
+.variable nl -device
+Returns the number of lines
+in each image plane.
+.variable ns -device
+Returns the number of samples
+in each image plane.
+.variable vnl -device
+Returns the number of lines
+in the video display.
+.variable vns -device
+Returns the number of samples
+in the video display.
+.variable mode -device
+Returns the current display
+mode of the device.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd devlist
+Returns all device names
+that are currently in use
+in this VIDS session
+.variable odev -devlist
+Returns the device names
+.variable ndev -devlist
+Returns the number of
+devices in ODEV
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd planes
+Returns plane numbers associated
+with a plane name list.
+.variable planes -planes
+The input plane list
+(as a string)
+.variable dup -planes
+'DUP allows duplicates in list
+'NODUP (default) eliminates them
+.variable oplanes -planes
+Returns the plane numbers
+.variable nplanes -planes
+Returns the number of planes
+in OPLANES
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd plinfo
+Returns information about
+a single plane.
+.variable plane -plinfo
+Plane to get info for.
+(Only one plane allowed)
+.variable header -plinfo
+Whether or not to print header
+(ignored unless 'PRINT given).
+.variable file -plinfo
+Returns the coordinates in the
+file being displayed.
+.variable location -plinfo
+Returns the location in the
+plane that the image is loaded.
+.variable pan -plinfo
+Returns the value of the
+display (hardware) pan.
+.variable dispzoom -plinfo
+Returns the value of the
+display (hardware) zoom.
+.variable filezoom -plinfo
+Returns the value of the
+file (software) zoom.
+.variable band -plinfo
+Returns the band number being
+displayed.
+.variable filename -plinfo
+Returns the full name of the
+file being displayed.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd region
+Returns information about
+a single region.
+.variable region -region
+Region to get info for.
+Abbreviations are ok.
+(Only one region allowed)
+.variable prtpts -region
+Controls printing of point
+list for polygons
+(ignored unless 'PRINT given).
+.variable name -region
+Returns the full name of
+the region.
+.variable shape -region
+Returns the shape of the
+region.
+.variable bounds -region
+Returns the coordinates of
+the bounding rectangle.
+.variable points -region
+Returns the list of points
+making up a polygonal region
+(not used if not a polygon).
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd rgnlist
+Returns all region names
+that are currently defined.
+.variable orgn -rgnlist
+Returns the region names
+.variable nrgn -rgnlist
+Returns the number of
+regions in ORGN
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd stats
+Returns various statistics
+on a region
+.variable plane -stats
+Plane to collect statistics on.
+Only one plane is allowed.
+.variable region -stats
+Region used to collect
+statistics
+.variable min -stats
+Returns minimum pixel value
+in region
+.variable max -stats
+Returns maximum pixel value
+in region
+.variable npix -stats
+Returns number of pixels
+in region
+.variable median -stats
+Returns median pixel value
+in region
+.variable mean -stats
+Returns average pixel value
+in region
+.variable stddev -stats
+Returns standard deviation
+of pixels in region
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd translate
+Translates between Raw, IMP,
+and File coordinate systems.
+.variable in -translate
+Input coordinate (line,samp).
+.variable plane -translate
+Plane coords are relative to
+(input plane for IMP2IMP).
+.variable plane2 -translate
+For IMP2IMP only, plane output
+coords are relative to.
+.variable trans -translate
+Coordinate transform desired.
+Valid: RAW2IMP, IMP2FILE,
+       FILE2IMP, IMP2RAW,
+       IMP2IMP
+.variable out -translate
+Returns the transformed
+coordinates (line,samp).
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.variable print
+Valid: PRINT, NOPRINT
+.vari device
+Name of device to use
+.level2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd cursor
+JGET-CURSOR reports the position of the display device's cursor and the
+value of the pixel under the cursor.  It can report the position relative
+to both the display device and the file being displayed.  It also reports
+the pixel values from both the display and the file.  The FROM parameter
+controls whether the display, the file, or both are used.
+
+The reports can be printed to the terminal screen, or they can be
+returned in TAE variables for use by other PDF's, or both.  The PRINT
+parameter tells whether or not to print the results. However, the
+JSHOW-CURSOR command is recommended to display the results on the
+terminal instead of JGET-CURSOR.  JGET-CURSOR should be used mainly
+by procedure PDF's.
+
+Any set of image planes may be selected via the PLANES parameter,
+and you can pick the cursor number to use with the CURSOR parameter.
+.page
+COORDINATES
+-----------
+
+There are three different coordinate systems that the cursor
+position can be reported in.  In the simplest case they are
+all equivalent, but they can be different.
+
+RAW:  This is the cursor position relative to the display
+      screen.  It is called "RAW" because this is what the
+      hardware returns.  The upper left corner is always 1,1.
+      The bottom right corner is always whatever the resolution
+      of the device is, such as (512,512) or (1024,1024).
+.page
+IMP:  This is the cursor position relative to the image memory
+      plane.  It may be different from the RAW position if there
+      is a hardware zoom or pan in effect.  Any commands that
+      draw into the image plane (such as the LOCATION parameter
+      of JDISP) will use these coordinates.  The IMP coordinates
+      may be different for each plane.
+
+FILE: This is the cursor position relative to the file (or a
+      single band of the file) associated with the image memory
+      plane.  It may differ from the IMP coordinates if there
+      is a software zoom or pan in effect, or if you are
+      displaying only a portion of the file, such as with the
+      AREA parameter on JLOAD-IMAGE (which is effectively a
+      software pan).  The FILE coordinates may be different for
+      each file.
+.variable planes -cursor
+Specifies which image plane(s) to get pixel values from.
+
+Default:  "ALL"
+.variable cursor -cursor
+Specifies which cursor number to read.  This should normally
+be defaulted, but is available for special situations.
+
+Default:  1
+.variable from -cursor
+The FROM parameter specifies whether to read the display,
+the file, or both to get pixel values.  It is a keyword
+parameter, so you may say, for example, 'DISPLAY or 'BOTH
+or even just 'D or 'F instead of FROM=DISPLAY.
+
+If 'DISPLAY is given, then all the FILE-related return
+parameters (FILESAMP, FILEIDN, etc.) are undefined.
+Likewise, if 'FILE is given, then all the IMP-related
+return parameters (IMPLINE, IMPDN, etc.) are undefined.
+
+Valid values are DISPLAY, FILE, and BOTH.
+
+Default:  BOTH
+.variable rawsamp -cursor
+A parameter that returns the sample number part of
+the RAW cursor position.  See the top-level help
+for an explanation of RAW coordinates.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.  It is always available.
+
+Example:
+
+LOCAL RS INTEGER
+JGET-CURSOR RAWSAMP=RS
+DISP RS
+.variable rawline -cursor
+A parameter that returns the line number part of
+the RAW cursor position.  See the top-level help
+for an explanation of RAW coordinates.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.  It is always available.
+
+Example:
+
+LOCAL RL INTEGER
+JGET-CURSOR RAWLINE=RL
+DISP RL
+.variable impsamp -cursor
+A parameter that returns the sample number part of
+the IMP cursor position for each image plane.  The
+IMP position may be different for every plane, so
+you will get as many values as you have planes (see
+the PLANES parameter).  See the top-level help for
+an explanation of IMP coordinates.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.  It is available unless
+the 'FILE keyword is specified.
+
+Example:
+
+LOCAL IS INTEGER COUNT=0:100
+JGET-CURSOR ALL IMPSAMP=IS
+DISP IS
+.variable impline -cursor
+A parameter that returns the line number part of
+the IMP cursor position for each image plane.  The
+IMP position may be different for every plane, so
+you will get as many values as you have planes (see
+the PLANES parameter).  See the top-level help for
+an explanation of IMP coordinates.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.  It is available unless
+the 'FILE keyword is specified.
+
+Example:
+
+LOCAL IL INTEGER COUNT=0:2
+JGET-CURSOR (RED,GREEN) 'NOPRINT IMPLINE=IL
+DISP IL
+.variable impdn -cursor
+A parameter that returns the pixel value for each
+image plane underneath the cursor.  The pixel value
+may be different for every plane, so you will get
+as many values as you have planes (see the PLANES
+parameter).  See the top-level help for an
+explanation of IMP coordinates.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.  It is available unless
+the 'FILE keyword is specified.
+
+Example:
+
+LOCAL DN INTEGER COUNT=0:100
+JGET-CURSOR 'DISPLAY 'NOPR IMPDN=DN
+DISP DN
+.variable filesamp -cursor
+A parameter that returns the sample number part of
+the FILE cursor position for the file associated with
+each image plane.  The FILE position may be different
+for every file, so you will get as many values as you
+have planes (see the PLANES parameter).  See the
+top-level help for an explanation of FILE coordinates.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.  It is available unless
+the 'DISPLAY keyword is specified.
+
+Example:
+
+LOCAL FS INTEGER COUNT=0:100
+JGET-CURSOR FILESAMP=FS
+DISP FS
+.variable fileline -cursor
+A parameter that returns the line number part of the
+FILE cursor position for the file associated with
+each image plane.  The FILE position may be different
+for every file, so you will get as many values as you
+have planes (see the PLANES parameter).  See the
+top-level help for an explanation of FILE coordinates.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.  It is available unless
+the 'DISPLAY keyword is specified.
+
+Example:
+
+LOCAL FL INTEGER COUNT=0:100
+JGET-CURSOR FILELINE=FL
+DISP FL
+.variable filedn -cursor
+A parameter that returns the real part of the pixel
+value from each file at the cursor location.  The
+pixel values may be different for every file, so
+you will get as many values as you have planes (see
+the PLANES parameter).  See the top-level help for
+an explanation of FILE coordinates.
+
+This parameter is always of type REAL, no matter what
+the actual file type is.  Any necessary type conversion
+is performed before the value is returned.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.  It is available unless
+the 'DISPLAY keyword is specified.
+.page
+Example:
+
+LOCAL FDN REAL COUNT=0:100
+JGET-CURSOR FILEDN=FDN
+DISP FDN
+.variable fileidn -cursor
+A parameter that returns the imaginary part of the pixel
+value from each file at the cursor location.  The
+pixel values may be different for every file, so
+you will get as many values as you have planes (see
+the PLANES parameter).  See the top-level help for
+an explanation of FILE coordinates.
+
+This parameter is always of type REAL, no matter what
+the actual file type is.  Any necessary type conversion
+is performed before the value is returned.  Unless the
+file is of type COMPLEX, this value will be 0.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.  It is available unless
+the 'DISPLAY keyword is specified.
+.page
+Example:
+
+LOCAL FDN REAL COUNT=0:100
+LOCAL FIDN REAL COUNT=0:100
+JGET-CURSOR 'FILE FILEDN=FDN FILEIDN=FIDN
+WRITE "Real part:"
+DISP FDN
+WRITE "Imaginary part:"
+DISP FIDN
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd device
+JGET-DEVICE returns various pieces of information about the current
+display device.
+
+The available items are the device name, the full name of the device
+(make/model), the number of image planes, the number of lines and
+samples in both the image plane and the video display, and the display
+mode (color/pseudocolor/bw).
+
+Note:  If you use the DEVICE parameter, it does change the current device,
+even though you are only getting information about it.
+
+Example:
+
+LOCAL DEVN (STRING,20)
+LOCAL (MYNL,MYNS) INTEGER
+JGET-DEVICE DEVNAME=DEVN NL=MYNL NS=MYNS
+.variable devname -device
+A parameter that returns the device name.  This name is the
+actual physical name of the device on the host system, for
+example EPA3 or IKA0.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL NAME (STRING,20)
+JGET-DEVICE DEVNAME=NAME
+DISP NAME
+.variable fullname -device
+A parameter that returns the full name of the device.
+This name is the make and/or model of the device, such as
+"DeAnza IP-8500" or "IIS IVAS".
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL NAME (STRING,20)
+JGET-DEVICE FULLNAME=NAME
+DISP NAME
+.variable nimps -device
+A parameter that returns the number of image planes in the
+current device configuration.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL IMP INTEGER
+JGET-DEVICE NIMPS=IMP
+DISP IMP
+.variable nl -device
+A parameter that returns the number of lines per image
+plane in the current device configuration.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL NLINES INTEGER
+JGET-DEVICE NL=NLINES
+DISP NLINES
+.variable ns -device
+A parameter that returns the number of samples per image
+plane in the current device configuration.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL NSAMPS INTEGER
+JGET-DEVICE NS=NSAMPS
+DISP NSAMPS
+.variable vnl -device
+A parameter that returns the number of lines in
+the video display in the current device configuration.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL VLINES INTEGER
+JGET-DEVICE VNL=VLINES
+DISP VLINES
+.variable vns -device
+A parameter that returns the number of samples in
+the video display in the current device configuration.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL VSAMPS INTEGER
+JGET-DEVICE VNS=VSAMPS
+DISP VSAMPS
+.variable mode -device
+A parameter that returns the current display mode as a string.
+The string is either "COLOR", "PSEUDO", or "BW".
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL MODE (STRING,20) VALID=(COLOR,PSEUDO,BW)
+JGET-DEVICE MODE=MODE
+DISP MODE
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd devlist
+JGET-DEVLIST will return a list of names in TCL variables of all the
+devices that are active in this VIDS session.  Only devices that have been
+JGRAB'ed will show up.  Devices that have been allocated (USE) but not
+grabbed by JGRAB will not appear.
+
+The first device listed is always the current device.
+
+Example:
+
+LOCAL OD (STRING,20) COUNT=0:100
+LOCAL ND INTEGER
+JGET-DEVLIST ODEV=OD NDEV=ND
+.variable odev -devlist
+A string parameter that returns the names of all devices currently
+active in this VIDS session.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL OUTDEV (STRING,20) COUNT=0:100
+JGET-DEVLIST ODEV=OUTDEV
+DISP OUTDEV
+.variable ndev -devlist
+A parameter that returns the number of regions in ODEV.
+NDEV can be given without using ODEV.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL N INT
+JGET-DEVLIST NDEV=N
+DISP N
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd PLANES
+JGET-PLANES will return the plane numbers associated with a list
+of plane names in TCL variables.  It translates plane names into
+the corresponding number, and expands multi-plane names such as
+COLOR into all the associated plane numbers.
+
+This command is useful in procedure PDF's, so you can loop through
+the planes the user specifies.  This is not possible using the plane
+names directly, as some names refer to more than one plane.  See
+the JSTATS command PDF for an example of using JGET-PLANES in this
+manner.  Type HELP PLANENAMES for more on naming planes.
+
+Example:
+
+LOCAL OP INTEGER COUNT=0:100
+JGET-PLANES IMAGE OPLANE=OP		! OP gets the value (1,2,3)
+JGET-PLANES (RED,BLUE,COLOR) OP=OP 'DUP	! OP gets (1,3,1,2,3)
+.variable planes -planes
+The list of input plane names.  Any number of plane names may
+be specified.
+
+Type HELP PLANENAMES for more information on naming planes.
+.variable dup -planes
+By default, duplicates are eliminated from the list.  For example,
+if the input plane list is (RED,COLOR), then the red plane is given
+twice (once by RED, once as part of COLOR).  Only one instance of
+the red plane will be returned by default.
+
+If you want the duplicates, specify the 'DUP keyword.
+.variable oplanes -planes
+A parameter that returns the integer plane numbers
+corresponding to the input plane names.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL OUTPLANE INT COUNT=0:100
+JGET-PLANES OPLANES=OUTPLANE
+DISP OUTPLANE
+.variable nplanes -planes
+A parameter that returns the number of planes in OPLANES.
+NPLANES can be given without using OPLANES.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL N INT
+JGET-PLANES NPLANES=N
+DISP N
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd plinfo
+JGET-PLINFO will return various items of information about a single
+image plane.  Only one image plane may be used at a time.
+
+The information available includes the filename of the displayed image,
+the band of the file that is loaded, the display (hardware) and file
+(software) zoom factors, the device (hardware) pan location, the
+location in the image plane the file is loaded, and the portion of the
+file being viewed.
+
+Example:
+
+LOCAL FN STRING
+LOCAL BAND INTEGER
+LOCAL SIZE INTEGER COUNT=4
+JGET-PLINFO RED FILE=SIZE BAND=BAND FILENAME=FN
+.variable plane -plinfo
+The PLANE parameter specifies the plane to get information for.
+Only one plane is allowed.  If you need more than one plane,
+either call JGET-PLINFO more than once, or use JSHOW-PLANES.
+
+See HELP PLANENAMES for more information on plane names.
+.variable header -plinfo
+The HEADER keyword parameter specifies whether or not to print out
+the column headers.  It is ignored unless 'PRINT is also specified.
+'HEADER allows you to call JGET-PLINFO for several different planes
+and generate a formatted table.
+.variable file -plinfo
+A parameter that returns the coordinates of the part of the file
+currently being displayed, in file coordinates.  It is a standard
+VICAR size field, in the order (SL, SS, NL, NS).
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL SIZE INTEGER COUNT=4
+JGET-PLINFO FILE=SIZE
+DISP SIZE
+.variable location -plinfo
+A parameter that returns the location in the image plane where the
+top left corner of the file is loaded, in image plane coordinates.
+It is part of a standard VICAR size field, in the order (SL, SS).
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL LOC INTEGER COUNT=2
+JGET-PLINFO LOCATION=LOC
+DISP LOC
+.variable pan -plinfo
+A parameter that returns the value of the display (hardware)
+pan.  This is the coordinates (in image plane coordinates) of
+the pixel in the image plane that is currently being displayed
+in the top left corner of the screen.  It is part of a standard
+VICAR size field, in the order (SL, SS).
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL PAN INTEGER COUNT=2
+JGET-PLINFO PAN=PAN
+DISP PAN
+.variable dispzoom -plinfo
+A parameter that returns the value of the display (hardware)
+zoom factor.  Positive numbers indicate magnification, and
+negative numbers indicate reduction of the image.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL HWZOOM INTEGER
+JGET-PLINFO DISPZOOM=HWZOOM
+DISP HWZOOM
+.variable filezoom -plinfo
+A parameter that returns the value of the file (software)
+zoom factor.  Positive numbers indicate magnification, and
+negative numbers indicate reduction of the image.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL SWZOOM INTEGER
+JGET-PLINFO FILEZOOM=SWZOOM
+DISP SWZOOM
+.variable band -plinfo
+A parameter that returns the band number of the file being
+displayed in this plane.
+
+This parameter is not printed, even if 'PRINT is specified.
+JSHOW-PLANES prints this value itself.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL BANDNO INTEGER
+JGET-PLINFO BAND=BANDNO
+DISP BANDNO
+.variable filename -plinfo
+A parameter that returns the full name of the file being
+displayed in this plane.  It is a complete file specification,
+including directory.
+
+This parameter is not printed, even if 'PRINT is specified.
+JSHOW-PLANES prints this value itself.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL FN STRING
+JGET-PLINFO FILENAME=FN
+DISP FN
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd region
+JGET-REGION will return various items of information about a single
+region.  Only one region may be used at a time.
+
+The information available includes the full name of the region,
+the shape of the region (RECT, SQUARE, CIRCLE, OVAL, or POLYGON),
+the bounding rectangle of the region, and the point list if the
+region is a polygon.
+
+Example:
+
+LOCAL RGNNAME STRING
+LOCAL RGNSHAPE INTEGER
+LOCAL BOUNDRECT INTEGER COUNT=4
+JGET-REGION CURRENT NAME=RGNNAME SHAPE=RGNSHAPE BOUNDS=BOUNDRECT
+.variable region -region
+The REGION parameter specifies the region to get information for.
+Only one region is allowed.  If you need more than one region,
+either call JGET-REGION more than once, or use JSHOW-REGIONS.
+
+Abbreviations are acceptable for the REGION parameter, just like
+any other time you use a region.  However, the abbreviation must
+be unique.
+.variable prtpts -region
+The PRTPTS keyword parameter controls whether or not to print out
+the list of points for a polygonal region.  It is ignored unless
+'PRINT is also specified.  It is also ignored for non-polygonal
+regions.  'NOPRTPTS allows you to suppress the sometimes rather
+long list of points for polygons.
+.variable name -region
+A parameter that returns the full name of the region.  If you give
+an abbreviation in the REGION parameter, the abbreviation will be
+expanded here.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL RGNNAME STRING
+JGET-REGION NAME=RGNNAME
+DISP RGNNAME
+.variable shape -region
+A parameter that returns the shape of the region.  The value
+returned will be RECT, SQUARE, OVAL, CIRCLE, or POLYGON.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL SH STRING
+JGET-REGION SHAPE=SH
+DISP SH
+.variable bounds -region
+A parameter that returns the bounding rectangle of the
+region.  The rectangle is a list of four integers in the
+order (top, left, bottom, right).  It is NOT a size field -
+the last two numbers are coordinates instead of counts.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL RECT INTEGER COUNT=4
+JGET-REGION BOUNDS=RECT
+DISP RECT
+.variable points -region
+A parameter that returns the list of points making up the
+vertices of a polygonal region.  If the region is not a
+polygon, POINTS is returned empty.
+
+POINTS is defined the same way that the POINTS parameter on
+JDEF-REGION is.  That is, it is returned in the format
+points=(l1,s1,l2,s2,...,ln,sn) where (l1,s1) defines the line
+and sample coordinates of the first point, (l2,s2) defines the
+second point, and so on.  Each point is connected to the next
+point on the list, with the last point, (ln,sn) being connected
+to the first point (l1,s1) to close the polygon.
+.page
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL PTS INTEGER COUNT=(0,2:600)
+JGET-REGION POINTS=PTS
+DISP PTS
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd rgnlist
+JGET-RGNLIST will return a list of names in TCL variables of all the
+regions currently defined, in the order they were first defined.
+
+Example:
+
+LOCAL OR (STRING,20) COUNT=0:100
+LOCAL NR INTEGER
+JGET-RGNLIST ORGN=OR NRGN=NR
+.variable orgn -rgnlist
+A string parameter that returns the names of all regions
+currently defined.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL OUTRGN (STRING,20) COUNT=0:100
+JGET-RGNLIST ORGN=OUTRGN
+DISP OUTRGN
+.variable nrgn -rgnlist
+A parameter that returns the number of regions in ORGN.
+NRGN can be given without using ORGN.
+
+This parameter is passed by name, so you must give
+a TAE variable here, not a constant or an expression.
+It may be omitted if you wish.
+
+Example:
+
+LOCAL N INT
+JGET-RGNLIST NRGN=N
+DISP N
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd stats
+JGET-STATS calculates various statistics on a given region and image
+plane.  The statistics collected are:
+  o Minimum pixel value
+  o Maximum pixel value
+  o Number of pixels
+  o Median pixel value
+  o Mean (average) pixel value
+  o Standard deviation of pixel values
+
+The statistics can be printed to the terminal screen, or they can be
+returned in TAE variables for use by other PDF's, or both.  The PRINT
+parameter tells whether or not to print the results. However, the
+JSTATS command is recommended to display the results on the terminal
+instead of JGET-CURSOR.  JSTATS can handle multiple planes, whereas
+JGET-STATS only works with one plane.  JGET-STATS should be used mainly
+by procedure PDF's.
+.page
+Statistics are calculated using the histogram.  VIDS tries to keep
+histograms valid as much as possible; however, it sometimes is
+necessary for the histogram to be collected again.  If the histogram
+needs to be collected, you will notice a short delay.  This will most
+often happen if you are collecting over regions other than the default.
+It will also happen the first time you use a histogram, automatic
+stretch, or statistics command on a particular image.
+.variable plane -stats
+The PLANE parameter specifies the plane to collect the statistics
+on.  Only one plane is allowed.  If you need more than one plane,
+either call JGET-STATS more than once, or use JSTATS.
+
+See HELP PLANENAMES for more information on plane names.
+.variable region -stats
+The REGION parameter specifies the region on the screen over which to
+collect the statistics.  Only points inside the region are used to
+calculate the statistics.  The region may be any arbitrary shape.
+Regions are defined using JDEF-REGION.
+
+The default is to use the area in which you last displayed an image,
+using JDISP or JLOAD-IMAGE.
+.variable min -stats
+A parameter that returns the minimum pixel value in the region.
+
+This parameter is passed by name, so you must give a TAE
+variable here, not a constant or an expression.  It may be
+omitted if you wish.
+
+Example:
+
+LOCAL MINPIX INT
+JGET-STATS MIN=MINPIX
+DISP MINPIX
+.variable max -stats
+A parameter that returns the maximum pixel value in the region.
+
+This parameter is passed by name, so you must give a TAE
+variable here, not a constant or an expression.  It may be
+omitted if you wish.
+
+Example:
+
+LOCAL MAXPIX INT
+JGET-STATS MAX=MAXPIX
+DISP MAXPIX
+.variable npix -stats
+A parameter that returns the number of pixels in the region.
+
+This parameter is passed by name, so you must give a TAE
+variable here, not a constant or an expression.  It may be
+omitted if you wish.
+
+Example:
+
+LOCAL N INT
+JGET-STATS NPIX=N
+DISP N
+.variable median -stats
+A parameter that returns the median value of the pixels
+in the region.
+
+This parameter is passed by name, so you must give a TAE
+variable here, not a constant or an expression.  It may be
+omitted if you wish.
+
+Example:
+
+LOCAL MED REAL
+JGET-STATS MEDIAN=MED
+DISP MED
+.variable mean -stats
+A parameter that returns the mean, or average, value of the
+pixels in the region.
+
+This parameter is passed by name, so you must give a TAE
+variable here, not a constant or an expression.  It may be
+omitted if you wish.
+
+Example:
+
+LOCAL AVG REAL
+JGET-STATS MEAN=AVG
+DISP AVG
+.variable stddev -stats
+A parameter that returns the standard deviation of the pixels
+in the region.
+
+This parameter is passed by name, so you must give a TAE
+variable here, not a constant or an expression.  It may be
+omitted if you wish.
+
+Example:
+
+LOCAL SIGMA REAL
+JGET-STATS STDDEV=SIGMA
+DISP SIGMA
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd translate
+JGET-TRANSLATE translates an input coordinate between the
+Raw, IMP, and File coordinate systems, and returns the result
+in a TCL variable.
+
+All the translations are relative to an image plane, which is
+given in the PLANE parameter.  Translations between IMP and
+File always use the file that is displayed on the selected
+plane.
+
+For 'IMP2IMP, two image planes are needed.  The second plane
+(the plane the output coordinates are relative to) is given
+with the PLANE2 parameter.
+
+The available translations are:
+RAW2IMP, IMP2FILE, FILE2IMP, IMP2RAW, and IMP2IMP.
+.page
+The three different coordinate systems are described below.
+
+RAW:  This is the cursor position relative to the display
+      screen.  It is called "RAW" because this is what the
+      hardware returns.  The upper left corner is always 1,1.
+      The bottom right corner is always whatever the resolution
+      of the device is, such as (512,512) or (1024,1024).
+
+IMP:  This is the cursor position relative to the image memory
+      plane.  It may be different from the RAW position if there
+      is a hardware zoom or pan in effect.  Any commands that
+      draw into the image plane (such as the LOCATION parameter
+      of JDISP) will use these coordinates.  The IMP coordinates
+      may be different for each plane.
+.page
+FILE: This is the cursor position relative to the file (or a
+      single band of the file) associated with the image memory
+      plane.  It may differ from the IMP coordinates if there
+      is a software zoom or pan in effect, or if you are
+      displaying only a portion of the file, such as with the
+      AREA parameter on JLOAD-IMAGE (which is effectively a
+      software pan).  The FILE coordinates may be different for
+      each file.
+
+Example:
+
+LOCAL BCOORD INT COUNT=2
+JGET-TRANSLATE (100,200) GREEN BLUE 'IMP2IMP OUT=BCOORD
+.variable in -translate
+IN specifies the input coordinates, in the form (line, sample).
+They should be in RAW coordinates for RAW2IMP, FILE coordinates
+for FILE2IMP, and IMP coordinates for all the others (IMP2RAW,
+IMP2FILE, and IMP2IMP).
+.variable plane -translate
+The PLANE parameter specifies the plane that the coordinates are
+relative to.  Any file coordinates are relative to the file displayed
+on this plane.
+
+For the 'IMP2IMP translation, PLANE specifies the plane of the
+input coordinates.
+
+See HELP PLANENAMES for more information on plane names.
+.variable plane2 -translate
+The PLANE2 parameter specifies the plane that the output coordinates
+are relative to for the 'IMP2IMP translation.
+
+PLANE2 is ignored for any translation other than 'IMP2IMP, but it
+is required for 'IMP2IMP.
+
+See HELP PLANENAMES for more information on plane names.
+.variable trans -translate
+The TRANS keyword parameter specifies the coordinate transformation
+desired.  It is required.
+
+The valid transformations are:
+
+RAW2IMP  - Translates RAW coordinates to IMP coordinates.
+IMP2FILE - Translates IMP coordinates to FILE coordinates.
+FILE2IMP - Translates FILE coordinates to IMP coordinates.
+IMP2RAW  - Translates IMP coordinates to RAW coordinates.
+IMP2IMP  - Translates IMP coordinates from one plane to another.
+.variable out -translate
+A parameter that returns the result of the transformation.
+It is in the form (line, sample).  It is in RAW coordinates
+for IMP2RAW, FILE coordinates for IMP2FILE, and IMP coordinates
+for all the other transformations (RAW2IMP, FILE2IMP, and IMP2IMP).
+
+This parameter is passed by name, so you must give a TAE
+variable here, not a constant or an expression.  It may be
+omitted if you wish.
+
+Example:
+
+LOCAL RAW INT COUNT=2
+JGET-TRANSLATE (100,200) RED 'IMP2RAW OUT=RAW
+DISP RAW
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.variable print
+Controls whether or not to print the results to the
+terminal screen.  If 'NOPRINT is given, the only way
+to get the information out of JGET is via the return
+parameters.  However, the return parameters are always
+available, even if 'PRINT is given.
+
+In general, the use of 'PRINT is discouraged.  If you
+want to display information from VIDS, use JSHOW instead.
+
+Valid values are PRINT and NOPRINT.
+
+Default:  PRINT
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

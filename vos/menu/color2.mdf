@@ -1,0 +1,23 @@
+.Title
+[4mAdditional COLOR PROCESSING Menu Selections[0m           (page 2 of 2)
+.Proc LOOKUP
+[1mLOOKUP[0m   - Maps input DN values to red, green, blue output files 
+           using user-supplied pseudo color lookup table, such as from IDX.
+.Proc MAPGEN
+[1mMAPGEN[0m   - Takes an image divided into polygon regions, and 
+           assigns a grey value to each region according to info in an 
+           interface file, or by user defined input parameters.
+.Proc PAINT
+[1mPAINT[0m    - IBIS program taking an image divided into regions and 
+           painting (assigning DN values to) each region.
+.Proc PAINTG3
+[1mPAINTG3[0m  - IBIS program taking a Graphics-3 image divided into 
+           regions and painting (assigning DN values to) each region.
+.Proc RGB
+[1mRGB[0m      - Merges the red, green and blue images into one file 
+           (band interleaved by line format) for the MDA film recorder.
+           (Generally used by the operations staff only.)
+.Proc TRISTIM
+[1mTRISTIM[0m  - Computes tristimulus values and chromaticity coordinates
+           for a spectrum in order to perform color reconstruction.
+.END

@@ -1,0 +1,25 @@
+#include "IVconfig/sgi.cf"
+
+/*
+ * Until TAE+ is more ANSI compatible, compile with traditional K&R extensions
+ * and declarations
+ */
+
+#undef   ExtraCFlags
+#undef   ExtraCplusplusFlags
+
+#define  ExtraCFlags		-cckr -G 0 -signed -woff 1116,1174,1009,1552,1077,1233
+#define  ExtraCplusplusFlags  	-cckr -G 0 -signed -DPRE_MWM_1_1_4
+
+#ifdef CplusplusLdCmd
+#undef CplusplusLdCmd
+#define  CplusplusLdCmd         CC
+#else
+#endif
+
+/* PR 1732: SGI's termcap emulation is faulty.  Can't background in csh */
+#define  HaveTerminalLibrary	no
+
+/* PR 1734: SGI needs /usr/lib/libmalloc_G0.a before libc.a */
+#define CLibrary -lmalloc -lc
+

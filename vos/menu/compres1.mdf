@@ -1,0 +1,28 @@
+.Title
+[4mDATA COMPRESSION and DECOMPRESSION Menu[0m               (page 1 of 1)
+.Proc DEBARC
+[1mDEBARC[0m   - Decompresses a Galileo image output from the Block
+           Adaptive Rate Compressor.
+.Proc HUFFCODE
+[1mHUFFCODE[0m - Compresses or decompresses VICAR images using Huffman 
+           coding.
+.Proc RUNCODE
+[1mRUNCODE[0m  - IBIS program compressing or decompressing VICAR images 
+           using run length coding.
+.Proc STRPMTCH
+[1mSTRPMTCH[0m - Extracts an area from a raw image, producing a compressed
+           image of that area.
+.Proc VGRPWS
+[1mVGRPWS[0m   - Decompresses 4-bit Voyager PWS data to 8-bit data using
+           a lookup table.
+
+.help
+
+The DATA COMPRESSION or DECOMPRESSION section contains those programs which
+allow the user to either compress or decompress the data. These programs 
+include:
+
+DEBARC             HUFFCODE           RUNCODE            STRPMTCH           
+VGRPWS
+
+.END

@@ -1,0 +1,29 @@
+procedure help=*
+body
+write "                          Welcome to VIDS!"
+write "                             Version 4B"
+write " What's New:"
+write "        Menu is available; type 'MENU VIDS' or look in VICAR menu"
+write "        Reference card (orange card) and version 2D manual are available"
+!write "   2E - VIDS output now goes into session log"
+!write "   2F - JBLINK command; fixes to JMOVIE-RUN"
+!write "   3A - Multiple simultaneous display devices are now supported."
+!write "        See help for JGRAB, JDROP.  New commands: JDROP, JGET-DEVLIST"
+!write "   3C,3D - Interprocess communication"
+!write "   3D - JSET-COLOR RGB, JGET-DEVICE MODE"
+!write "   3E - Internal changes (move to VRDI C-language interface)"
+!write "   3F - Cursor color may now be changed on some devices (jset-cursor)."
+!write "   3G,3B - Minor bug fixes"
+write "   3H - New 'FILE and 'IMP options on JSET-CURSOR"
+write "   3I,3J - JSET-SIZE changed again"
+write "   3K - Ctrl-C no longer confuses VIDS (although it still doesn't abort)"
+write "   4A - Support for X-windows and Unix"
+write "   4B - Ported to Alpha/VMS and Sun/Solaris"
+end-proc
+.title
+VIDSVERSION
+.help
+VIDSVERSION is a procedure that prints out the VIDS greeting message
+and the current version number.  It should not normally be executed
+directly by the user.
+.end

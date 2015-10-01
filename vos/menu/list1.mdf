@@ -1,0 +1,40 @@
+.Title
+[4mLISTINGS Menu[0m                                          (page 1 of 2)
+.Proc BWSEND
+[1mBWSEND[0m   - Generates ASCII file representing a grey scale image or 
+           pseudo color image in a compressed format to be downloaded to 
+           a Rainbow PC with a graphics board.
+.Proc CSEND
+[1mCSEND[0m    - Downloads color images to a Rainbow PC graphics board in
+           16 color steps.
+.Proc DISPARMS
+[1mDISPARMS[0m - Reads and displays the contents of VICAR parameter files.
+.Proc DNSYMBOL
+[1mDNSYMBOL[0m - Converts DN values into symbols and shading.
+.Proc G3LIST
+[1mG3LIST[0m   - IBIS program producing a listing of a Graphics-3 file.
+.Proc GR2REP
+[1mGR2REP[0m   - IBIS program producing a listing of a Graphics-2 file.
+.Proc GRLIST
+[1mGRLIST[0m   - IBIS program producing a line/sample listing of a 2-D or
+           3-D Graphics-1 file.
+.Proc IDX
+idx      - Displays VICAR images interactively.
+.Proc LIST
+[1mLIST[0m     - Lists the DN values of specified regions within an image.
+
+.Menu LIST2.MDF
+[7mAdditional LISTINGS MENU Selections[0m
+.help
+
+The LISTINGS section contains those programs which allow the user to examine
+the data values within a file (e.g., to examine the DN's).  This section also
+contains those programs which allow the user to transfer data to a DEC 
+Rainbow PC. These programs include:
+
+BWSEND             CSEND              DISPARMS           DNSYMBOL
+G3LIST             GR2REP             GRLIST             idx                
+LIST               PRINTPIX           PRNTIM             QREP               
+REPORT             XVPLIST
+
+.end

@@ -1,0 +1,553 @@
+procedure help=* options=nointerrupt
+subcmd frameload
+  parm inp	string	count=1:3
+  parm frame	integer count=0:1	default=--
+  parm bands	integer count=1:3	default=1
+  parm area	int	count=(0,4)	default=--
+  parm zoom	int	count=0:1	default=--
+  parm scale	keyword valid=(NONE,FIT) default=FIT
+end-subcmd
+subcmd load
+  parm inp	string	count=1:3
+  parm frame	integer count=1		default=1
+  parm area	int	count=(0,4)	default=--
+  parm zoom	int	count=0:1	default=--
+  parm scale	keyword valid=(NONE,FIT) default=FIT
+  parm start	integer			default=1
+  parm inc	integer			default=1
+  parm nframes	integer			default=32767
+  parm digits	integer			default=1
+
+  local fil string count=1:3
+  local (i,j,curframe,end) integer
+  local (numstr) string
+end-subcmd
+subcmd run
+  parm start	integer			default=1
+  parm nframes	integer	count=0:1	default=--
+  parm directn	keyword valid=(FORWARD,REVERSE)	default=FORWARD
+  parm rate	real			default=30
+  parm nskip	integer			default=0
+  parm loops	integer	count=1		default=32767
+  parm zoom	integer count=0:1	default=--
+end-subcmd
+subcmd set
+  parm nlframe	integer	count=0:1	default=--
+  parm nframes	integer count=0:1	default=--
+  parm reverse	(string,1)		default=R
+  parm faster	(string,1)		default=2
+  parm slower	(string,1)		default=1
+  parm pause	(string,1)		default=P
+end-subcmd
+subcmd show
+  parm frame	integer
+end-subcmd
+parm device string count=0:1 default=--
+body
+if (_subcmd = "LOAD")
+  jzoom 1 all 'disp device=@device
+  let curframe = FRAME
+  let i = START
+  let end = FRAME + NFRAMES - 1
+  loop
+    let j = 1
+    loop
+      let numstr = "&i"
+      loop
+        if ($strlen(numstr) >= DIGITS) break
+        let numstr = "0" // numstr
+      end-loop
+      let fil(j) = INP(j) // "." // numstr
+      if (j >= $count(INP)) break
+      let j = j + 1
+    end-loop
+    jmovie-FRAMELOAD &fil &curframe area=@area zoom=@zoom scale=@scale
+    let i = i + INC
+    let curframe = curframe + 1
+    if (curframe > end) break
+  end-loop
+else
+  chkvids1
+  if (_subcmd = "FRAMELOAD")
+    sendvar (_proc,_subcmd,inp,frame,bands,area,zoom,scale,device) job=VIDSJOB
+  else-if (_subcmd = "RUN")
+    sendvar (_proc,_subcmd,start,nframes,directn,rate,nskip,loops,zoom,device) +
+						job=VIDSJOB
+  else-if (_subcmd = "SET")
+    sendvar (_proc,_subcmd,nlframe,nframes,reverse,faster,+
+             slower,pause,device) job=VIDSJOB
+  else-if (_subcmd = "SHOW")
+    sendvar (_proc,_subcmd,frame,device) job=VIDSJOB
+  end-if
+  chkvids2
+end-if
+end-proc
+.title
+VIDS command JMOVIE
+.help
+The JMOVIE command is used to set up and run animations interactively
+on the display device.  It uses the concept of "frames", which are the
+individual frames which comprise the animation to be viewed.  The size
+and number of frames can be selected with the JMOVIE-SET command.  Then
+the JMOVIE-LOAD or JMOVIE-FRAMELOAD command may be used to load images
+into the individual frames, and the movie may be viewed with the 
+JMOVIE-RUN command.
+
+JMOVIE consists of five separate subcommands, whose use is described
+on the following page.
+.page
+	JMOVIE-SET	  - Set up movie settings, such as frame size,
+			  - number of frames, interactive keys to use.
+
+	JMOVIE-LOAD	  - Load a series of frames onto the display
+			  - device.  Assumes files named X.n, where
+			  - X is an arbitrary name, and n is a
+			  - sequence number.
+
+	JMOVIE-FRAMELOAD  - Load a single frame onto the display device.
+
+	JMOVIE-RUN	  - Run an animation.  Allows interactive control
+			  - via the keyboard.
+
+	JMOVIE-SHOW	  - Show an individual frame from the movie.
+
+Each command is described in more detail under its own help section.
+.page
+A typical animation session is outlined in the following example.
+(Lines with asterisks are comments, not actual messages.)
+
+*********** First set up the frame size and number of frames ***********
+VICAR> JMOVIE-SET 256
+	Available frame size is 256 lines by 256 samples
+	192 frames are available in black and white,
+	64 frames are available in color.
+	192 b&w (64 color) frames are currently in use
+***** Before loading frames, put in proper mode (color,bw,pseudo) ******
+VICAR> JCOLOR
+******* Now load all the frames.  All 64 frames will be loaded,   ******
+******* starting with the color triplet (VENUSR.2100,VENUSG.2100, ******
+******* VENUSB.2100), incrementing every five file numbers (i.e., ******
+******* the next red file will be VENUSR.2105, etc.)              ******
+VICAR> JMOVIE-LOAD (VENUSR,VENUSG,VENUSB) START=2100 NFRAM=64 INC=5
+************************ Now run the movie *****************************
+VICAR> JMOVIE-RUN
+.level1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd frameload
+Load a single movie frame
+onto display
+.vari inp -frameload
+Input file name
+.vari frame -frameload
+Frame number to load
+.vari bands -frameload
+Band(s) to load
+.vari area -frameload
+Area in file to load
+.vari zoom -frameload
+Zoom factor to apply
+.vari scale -frameload
+Scale image to fit?
+(FIT or NONE)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd load
+Load a sequence of images
+X.n, where X is INP,
+and n starts at START
+.vari inp -load
+Base of input file name
+.vari frame -load
+First frame number to load
+.vari area -load
+Area in files to load
+.vari zoom -load
+Zoom factor to apply
+.vari scale -load
+Scale image to fit?
+(FIT or NONE)
+.vari start -load
+Starting file number
+(see help)
+.vari inc -load
+Increment to file number
+.vari nframes -load
+Number of frames to load
+.vari digits -load
+Minimum digits in file
+number
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd run
+Run a loaded movie
+.vari start -run
+Starting frame of loop
+.vari nframes -run
+Number of frames in loop
+.vari directn -run
+FORWARD or REVERSE
+.vari rate -run
+Frames per second
+.vari nskip -run
+Number of frames
+to skip over
+.vari loops -run
+Number of loops to run
+.vari zoom -run
+Hardware zoom factor
+(Default: fill screen)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd set
+Set movie parameters
+(size, no. frames, etc.)
+.vari nlframe -set
+Lines per frame
+.vari nframes -set
+Number of frames
+.vari reverse -set
+Key to reverse direction
+while running movie
+.vari faster -set
+Key to increase speed
+while running movie
+.vari slower -set
+Key to decrease speed
+while running movie
+.vari pause -set
+Key to pause
+while running movie
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd show
+Show a single frame
+.vari frame -show
+Number of frame to
+be shown
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.vari device
+Name of device to use
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.level2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd frameload
+The JMOVIE-FRAMELOAD command will load a single image into the
+given frame of a movie or animation sequence.  The frame size
+and number of frames to use for the movie should have already
+been established with the JMOVIE-SET command.  If no frame
+number is given, the next frame in the movie loop beyond that
+last loaded will be loaded.
+
+If the display device is currently in color mode, then color
+frames will be loaded.  Thus, if in color mode, the INP parameter
+should either have three files or a single multiband file.  If
+the input file has more than 3 bands, the BANDS parameter may
+be used to select the bands to load.  If the device is in black
+and white mode, only one band from the first input will be
+loaded.
+
+A specific area of the input file may be selected for loading
+with the AREA parameter, and the zoom factor applied while
+loading may be controled with the ZOOM and SCALE parameters.
+
+By default, the input image(s) will be scaled to fit the frame.
+.vari inp -frameload
+The INP parameter is a string specifying the input file or files
+to load.  If the device is in black and white mode, then only 
+one band from the first file will be loaded.  Additional files
+will be ignored.
+
+For color frames, INP may take up to three files.  For three
+single band files, they will be used as red, green, and blue
+respective to the input order.  For a single multi-band file,
+by default the first three bands will be used, but the actual
+bands used may also be selected with the BANDS parameter.
+.vari frame -frameload
+FRAME is an integer specifying the frame number to be loaded.
+If it is not specified, then the next frame in the movie loop
+beyond the last loaded will be loaded.
+
+The number of frames available is given when JMOVIE-SET is used
+to set up the frame size for the animation.
+.vari bands -frameload
+The BANDS parameter allows specific bands to be selected from the
+input files for loading.  It is an integer parameter which may
+have a count up to 3 for color images.  If the device is in 
+black and white mode, only the first band number is used.
+
+By default, for black and white, BANDS=1.  For color, if one input
+file is given, the first three frames will be loaded, so BANDS=(1,2,3).
+If three inputs are given, BANDS=(1,1,1).  If only two inputs are
+given, the default is BANDS=(1,1,2) (the first band of file 1, and the
+first 2 bands of file 2).
+.vari area
+The AREA parameter is a set of four integers specifying the area of
+the input file to be loaded.  It is of the form AREA=(sl,ss,nl,ns),
+where the fields are as follows:
+
+	sl:	Starting line of input image to load
+	ss:	Starting sample of input image to load
+	nl:	Number of lines to load
+	ns:	Number of samples to load
+.vari zoom
+The ZOOM parameter specifies a software zoom factor to be used when
+displaying the image.  The requested zoom factor is always used, and
+thus overrides the SCALE parameter if it is given.  Note also that
+regardless of the zoom factor chosen, the image will only display
+inside the current movie frame.
+.vari scale
+The SCALE parameter is a keyword parameter, and may have either of two
+values: FIT or NONE.  If SCALE=FIT (the default), then the image is
+scaled so that the entire image will fit in the movie frame.  If
+SCALE=NONE, then only the portion of the image starting at the
+location given by the area parameter (or (1,1) by default) which
+will fit within the movie frame without scaling is displayed.
+
+Note that if the ZOOM parameter is specified, SCALE is ignored.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd load
+The JMOVIE-LOAD command is used to load a series of frames for an
+animation onto the display device.  The JMOVIE-SET command should
+be used first to determine the size and number of frames to be
+used for the animation.
+
+JMOVIE-LOAD assumes the file name(s) will be of the format "X.n",
+where X is the name of the file before the period, and n is a
+number, such as "MIRANDA.1200".  Only the "X" part of the name
+is specified for the INP parameter.  The "n" part is then determined
+according to the START, INC, DIGITS, and NFRAMES parameters.
+
+Thus, to load the frames MARS.050, MARS.100, MARS.150, and MARS.200 
+into the next four frames of the animation, one could use the command:
+
+JMOVIE-LOAD MARS START=50 DIGITS=3 INC=50 NFRAMES=4
+
+Or, if the frames were in color, and were in three files named, 
+for example, RMARS.050, GMARS.050, and BMARS.050, the following
+command could be used:
+
+JMOVIE-LOAD (RMARS,GMARS,BMARS) START=50 DIGITS=3 INC=50 NFRAMES=4
+
+
+NOTE:  Whether the device is in color, black and white, or pseudocolor
+affects how the frames are loaded, so be sure to be in the proper 
+mode before giving the JMOVIE-LOAD command.
+
+See the help for the individual parameters for further details on 
+their use.
+.vari inp -load
+The INP parameter is used to specify the base part of the input file 
+names.  JMOVIE-LOAD assumes the file name(s) will be of the format "X.n",
+where X is the name of the file before the period, and n is a
+number, such as "MIRANDA.1200".  Only the "X" part of the name
+is specified for the INP parameter.  The "n" part is then determined
+according to the START, INC, DIGITS, and NFRAMES parameters.
+
+Thus, to load the frames MARS.050, MARS.100, MARS.150, and MARS.200 
+into the next four frames of the animation, one could use the command:
+
+JMOVIE-LOAD INP=MARS START=50 DIGITS=3 INC=50 NFRAMES=4
+
+Or, if the frames were in color, and were in three files named, 
+for example, RMARS.050, GMARS.050, and BMARS.050, the following
+command could be used:
+
+JMOVIE-LOAD INP=(RMARS,GMARS,BMARS) START=50 DIGITS=3 INC=50 NFRAMES=4
+.vari frame -load
+The FRAME parameter is an integer specifying the movie frame number into
+which the first frame is to be loaded.  Successive frames will be loaded
+into successive frames on the movie loop.
+
+To skip frames in the loop when loading, use separate JMOVIE-LOAD or
+JMOVIE-FRAMELOAD commands.
+.vari start -load
+The START parameter is an integer specifying the first file number to
+be loaded.  The file number is the "extension" of the file name, or
+the part after the period.  JMOVIE-LOAD assumes the file name(s) will
+be of the format "X.n", where X is the name of the file before the
+period, and n is a number, such as "MIRANDA.1200".  START determines
+the first number to be used, in this case, 1200.
+
+Thus, to load the frames MARS.050, MARS.100, MARS.150, and MARS.200 
+into the next four frames of the animation, one could use the command:
+
+JMOVIE-LOAD INP=MARS START=50 DIGITS=3 INC=50 NFRAMES=4
+.vari inc -load
+The INC parameter is an integer giving an increment to add to the
+file number for each success load.  For example, if the files 
+LA.1000, LA.1020, LA.1040, etc. were to be loaded, then you would
+need to say INC=20.  
+
+The default is 1.
+.vari nframes -load
+NFRAMES is an integer specifying the number of frames which are to
+be loaded.  If NFRAMES is not specified, JMOVIE-LOAD will continue
+to load frames until an error occurs, such as running out of frames
+or running out of files.
+.vari digits -load
+The DIGITS parameter is an integer which determines the minimum number
+of digits in the number part of a file name.  If the number of digits
+is fewer than DIGITS, then the number is padded with zeros on the 
+left.  See the table below for specific examples.  Default is 1.
+
+	DIGITS	  10		100	  1000		10000
+	---------------------------------------------------------
+	1	MARS.10	    MARS.100	MARS.1000    MARS.10000
+	2	MARS.10	    MARS.100	MARS.1000    MARS.10000
+	3	MARS.010    MARS.100	MARS.1000    MARS.10000
+	4	MARS.0010   MARS.0100	MARS.1000    MARS.10000
+	5	MARS.00010  MARS.00100	MARS.01000   MARS.10000
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd run
+JMOVIE-RUN is used to run a movie which as been loaded with the
+JMOVIE-LOAD or JMOVIE-FRAMELOAD command.  By default, it zooms 
+the frames to fill the screen of the display device, and cycles
+through the frames at 30 frames per second.  Note that if the 
+machine is currently busy with multiple users, it may have
+difficulty maintaining such a fast rate and the speed of the
+movie may become erratic.  (If it is essential to run the movie
+smoothly, see your system manager about raising your processing
+priority.  Note, however, that such a priority boost could have
+severely adverse effects on other users.)
+.page
+While the movie is running, certain keys on the keyboard may be used
+to control the movement.  The keys to use may be specified in the
+JMOVIE-SET command.  By default, these keys are:
+
+R	reverse direction (toggles)
+P	pause (any key will restart)
+1	slow down by factor of two (slowest speed is .5 frames/second)
+2	double speed (limited only be the speed of the computer)
+
+Any other key terminates the movie.
+
+The initial values for any of these may be given on the JMOVIE-RUN
+command line.  In addition, frames may be skipped (NSKIP), and a
+section of the movie loop may be selected for repitition (START,NFRAMES).
+Also the intitial rate of running may be selected (RATE) in frames
+per second, the total number of loops to run may be selected (LOOPS), 
+and a specific hardware zoom factor to be used may be specified (ZOOM).
+.vari start -run
+The START parameter determines the starting frame at which to begin
+the loop.  The total size of the loop is determined with the NFRAMES
+parameter to the JMOVIE-SET command, but a subsection may be selected
+at run time starting at START and continuing for NFRAMES frames.
+.vari nframes -run
+The NFRAMES parameter is an integer specifying the number of frames
+to be displayed in the current movie loop.  It overrides the number
+of frames specified with JMOVIE-SET for the duration of the run.
+
+Note that NFRAMES is the total number of frames displayed, not the
+ending frame number.  It takes into account the skip given by NSKIP.
+So, if you have NSKIP=1 (every other frame), START=1, and NFRAMES=4,
+then frames 1, 3, 5, and 7 will be shown.
+.vari directn -run
+The DIRECTN parameter is a keyword specifying an initial direction
+for the movie to run.  By default, the movie will run forward, but
+if 'REVERSE is specified, it will start running backwards.  In 
+addition, the direction may be changed interactively using the keyboard
+while the movie is running (See HELP *).
+.vari rate -run
+The RATE parameter is a real number specifying the rate in frames per
+second at which the movie is to be run.  The rate may also be changed
+interactively using the keyboard while the movie is running (See HELP *).
+
+Examples:
+
+RATE=30		30 frames per second (video rates)
+RATE=2		2 frames per second
+RATE=.25	1 frame per four seconds
+
+Default=30.
+.vari nskip -run
+The NSKIP parameter is an integer specifying the number of frames
+which should be skipped over each time a new frame is displayed.
+By default, NSKIP=0, that is, no frames are skipped.  To see only
+every other frame, use NSKIP=1.
+.vari loops -run
+The LOOPS parameter is an integer specifying the number of loops 
+or complete revolutions of the movie to be shown.  That is, if
+LOOPS=10, the movie will loop through only 10 times.
+
+Default is 32767; that is, a very long time, allowing you to 
+control the movie with interactive keys.
+.vari zoom -run
+The ZOOM parameter is an integer specifying a hardware zoom
+factor at which to run the movie.  By default, the image planes
+are zoomed so that a single frame fills the screen.  Often, 
+however, the movie may be easier to comprehend if it is not 
+zoomed to severely, so this parameter allows the hardware
+zoom factor to be overridden.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd set
+The JMOVIE-SET command is used to set the various parameters to 
+be used for movies.  The most important parameters are NLFRAME,
+the number of lines per frame, and NFRAMES, the number of frames
+in a loop.
+
+It is important to give NLFRAME with JMOVIE-SET before loading 
+the movie frames or running the movie, to ensure that the movie
+is loaded and run correctly.
+
+In addition, the keys used to control movies run with JMOVIE-RUN
+interactively may be changed.
+.vari nlframe -set
+The NLFRAME parameter is used to specify the number of lines in the
+image planes to use for each frame.  The actual number made available
+is modified to allow for integer zoom factors, and the actual number
+available is printed to the user terminal.  
+
+The number of samples per frame is not specified, because it is 
+pre-determined by the aspect ratio of the display device.
+.vari nframes -set
+The NFRAMES parameter is an integer specifying the number of frames
+to be viewed in a loop.  It may be smaller than the actual number of
+frames available, and restricts the running of the movie to take place
+within the first NFRAMES frames.
+.vari reverse -set
+The REVERSE parameter is a single character string indicating which
+key on the keyboard is to be used to reverse direction while running
+a movie with JMOVIE-RUN.  It is not case sensitive.
+
+By default, the "R" key is used to reverse direction.
+.vari faster -set
+The FASTER parameter is a single character string indicating which
+key on the keyboard is to be used to increase speed while running
+a movie with JMOVIE-RUN.  It is not case sensitive.
+
+By default, the "2" key is used to increase speed.
+.vari slower -set
+The SLOWER parameter is a single character string indicating which
+key on the keyboard is to be used to decrease speed while running
+a movie with JMOVIE-RUN.  It is not case sensitive.
+
+By default, the "1" key is used to decrease speed.
+.vari pause -set
+The PAUSE parameter is a single character string indicating which
+key on the keyboard is to be used to pause the movie while running
+it with JMOVIE-RUN.  It is not case sensitive.
+
+By default, the "P" key is used to pause.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd show
+The JMOVIE-SHOW command is used to show a single given frame of a
+loaded movie.  The movie's parameters should already have been 
+established with JMOVIE-SET, and the movie loaded with JMOVIE-LOAD
+or JMOVIE-FRAMELOAD.  
+
+The named frame number will be displayed and zoomed to fill the 
+screen on the display device.
+.vari frame -show
+The FRAME parameter is an integer specifying the frame to be 
+displayed on the display device.  The contents of the indicated
+frame will be displayed and zoomed to fill the screen on the
+display device.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.end

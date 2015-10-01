@@ -1,0 +1,37 @@
+.Title
+VIDS Alphabetic Menu                                        (page 3 of 3)
+
+.proc jpseudo
+JPSEUDO    - Sets the current display device to pseudocolor mode.
+.proc jsave
+JSAVE      - Saves an image, pseudocolor table, or stretch table to disk.
+.proc jset
+JSET       - Sets various options and values for VIDS.
+.proc jshow
+JSHOW      - Prints various information about VIDS to the terminal.
+.proc jstats
+JSTATS     - Calculates various statistics on a plane or region.
+.proc jstop
+JSTOP      - Stops the VIDS process.
+.proc jstretch
+JSTRETCH   - Performs many types of contrast enhancement on the image.
+.proc jtext
+JTEXT      - Draws text in the graphics plane.
+.proc jwedge
+JWEDGE     - Draws a gray-scale wedge in the image planes.
+.proc jzoom
+JZOOM      - Zooms in (magnifies) or zooms out (shrinks) the image.
+.command help planenames
+PLANENAMES - Help on the naming of image planes.
+.proc showdisp
+SHOWDISP   - Shows the status of all display devices.
+.proc use
+USE        - Uses (allocates) a display device.
+.proc vids
+VIDS       - Starts up a VIDS session.
+
+.help
+
+The VIDS Alphabetic Menu lists all the VIDS commands in alphabetical
+order.
+.end

@@ -1,0 +1,22 @@
+# Imakefile for VICAR Shell VICAR Library
+# Copies error and make files to the appropriate places, then calls the
+# makefiles for each subdirectory.
+#
+
+all: make_source
+
+make_source: Imakefile_obj.shvic Imakefile_targ.shvic
+	-mkdir -p source/$(VICCPU)
+	-mkdir -p $(SHVLIBDIR)
+	$(VSYSIMAKE) -f imakefile.shvicsrc -s source/Makefile.$(VICCPU)
+	($(CD) source; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.shvic: imake_src.shell_vicar
+	-PERL($(V2UTIL)/create_Imake.perl, imake_src.shell_vicar, Imakefile_obj.shvic,"")
+
+Imakefile_targ.shvic: imake_src.shell_vicar
+	-PERL($(V2UTIL)/create_Imake.perl, imake_src.shell_vicar, Imakefile_targ.shvic,"")
+
+imake_src.shell_vicar:
+	SED($(V2UTIL)/objlist.sed, imake_obj.shvic, Imakefile_obj.shvic)
+	SED($(V2UTIL)/targlist.sed, imake_targ.shvic, Imakefile_targ.shvic)

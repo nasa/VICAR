@@ -1,0 +1,9 @@
+#
+# Imakefile for Generated Files 
+#
+
+all: make_gens 
+
+make_gens:
+	-($(CD) $(V2TOP)/tlm/gen; $(V2UTIL)/bldcomfiles.csh $(TLMLIB))
+

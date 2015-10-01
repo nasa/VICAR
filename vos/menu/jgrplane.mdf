@@ -1,0 +1,38 @@
+.Title
+VIDS Write to Graphics Plane Menu
+
+.proc jdtf
+JDTF            - Displays and optionally edits the current look-up tables.
+.proc jhist
+JHIST           - Displays histogram of planes or region of interest.
+.proc jprofile
+JPROFILE        - Plots a DN profile on the graphics plane.
+.proc jstretch-show
+JSTRETCH-SHOW   - Displays the current look-up tables.
+
+.proc jdraw
+JDRAW           - Draws various shapes in the graphics plane.
+.proc jtext
+JTEXT           - Draws text in the graphics plane.
+
+.proc jgrdisp
+JGRDISP         - Displays an IBIS Graphics-1 format file.
+
+.proc jdef-region
+JDEF-REGION     - Defines a named region.
+.proc jlist
+JLIST           - Displays pixel values on the terminal screen.
+.proc jstretch-cursor
+JSTRETCH-CURSOR - Interactively changes brightness and contrast.
+.proc jstretch-edit
+JSTRETCH-EDIT   - Displays and edits the current look-up tables.
+
+.help
+
+The VIDS Write to Graphics Plane menu lists all the VIDS commands that
+can write to the graphics plane as graphics, i.e. to plot histograms,
+profiles, region boundaries, etc.  Other commands can write to the
+graphics plane by treating it as an image plane, such as JERASE or
+JWEDGE, but they are not listed here.  There is another category that
+lists commands that write to an image plane.
+.end

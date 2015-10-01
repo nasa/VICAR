@@ -1,0 +1,14 @@
+.Title
+[4mAdditional CONTRAST ENHANCEMENT Menu Selections[0m      (page 2 of 2)
+.Proc SSTRETCH
+[1mSSTRETCH[0m - Performs simple linear stretch between user-specified 
+           limits.
+.Proc STRETCH
+[1mSTRETCH[0m  - Performs 7 types of contrast enhancements on an image 
+           (adaptive law, complement, contrast, cube root, linear, power law 
+            and table).
+.Proc STRETVAR
+[1mSTRETVAR[0m - Performs a linear contrast enhancement such that the 
+           high and low stretch limits vary as a function of line number.
+
+.end

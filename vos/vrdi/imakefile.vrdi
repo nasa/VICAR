@@ -1,0 +1,46 @@
+# Imakefile for VRDI
+# Copies make files to the appropriate places, then calls the
+# makefiles for each subdirectory.
+#
+
+all: bld_dirs $(VRDILIB)/xddevice.dib errors make_inc make_source usedisp
+
+bld_dirs:
+	-mkdir -p lib/$(VICCPU)
+	-mkdir -p source/adage/$(VICCPU)
+	-mkdir -p source/common/$(VICCPU)
+	-mkdir -p source/dummy/$(VICCPU)
+	-mkdir -p source/ip85hi/$(VICCPU)
+	-mkdir -p source/ip85lo/$(VICCPU)
+	-mkdir -p source/ivas/$(VICCPU)
+	-mkdir -p source/jup/$(VICCPU)
+	-mkdir -p source/ramtek/$(VICCPU)
+	-mkdir -p source/tek/$(VICCPU)
+	-mkdir -p source/xdisplay/$(VICCPU)
+
+
+$(VRDILIB)/xddevice.dib: xddevice.dib
+	$(CP) xddevice.dib $(VRDILIB)/xddevice.dib
+
+errors: 
+	$(CP) vrdierrors.c lib/$(VICCPU)
+	$(CP) vrdierrs.dat lib/$(VICCPU)
+	$(CD) lib/$(VICCPU); cc vrdierrors.c -o vrdierrors; ./vrdierrors; rm -f vrdierrors vrdierrors.c vrdierrs.dat
+	$(CP) lib/$(VICCPU)/verrdefs.h inc/verrdefs.h
+	$(CP) lib/$(VICCPU)/verrdefs.fin inc/verrdefs.fin
+	$(CP) lib/$(VICCPU)/vrdifac.msg $(V2LIB)/vrdifac.msg
+	-($(CD) $(V2LIB); $(RUN_TM) '$(MSGBLD) vrdifac.msg')
+
+
+make_inc:
+	$(VSYSIMAKE) -f imakefile.vrdiinc -s inc/Makefile.$(VICCPU)
+	($(CD) inc; $(MAKE) Makefile.$(VICCPU))
+
+make_source: make_inc inc/verrdefs.h
+	$(VSYSIMAKE) -f imakefile.vrdisrc -s source/Makefile.$(VICCPU)
+	($(CD) source; $(MAKE) Makefile.$(VICCPU))
+
+usedisp: make_source $(VRDI_LIB)
+	-$(V2UTIL)/makeapp.sys usedisp $$VRDILIB
+	$(CP) $(VRDILIB)/showdisp.pdf $(V2LIB)/showdisp.pdf
+

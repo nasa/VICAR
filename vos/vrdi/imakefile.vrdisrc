@@ -1,0 +1,162 @@
+# Imakefile for VRDI source tree
+# Copies make files to the appropriate places, then calls the
+# makefiles for each subdirectory.
+#
+
+all: make_adage make_common make_dummy make_ip85hi make_ip85lo make_ivas
+all: make_jupiter make_ramtek make_tek make_xdisplay
+all: $(VRDI_LIB)
+
+make_adage: Imakefile_obj.adage Imakefile_targ.adage
+	$(VSYSIMAKE) -f ../imakefile.vrdiadage -s adage/Makefile.$(VICCPU)
+	($(CD) adage; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.adage: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_obj.adage,adage)
+
+Imakefile_targ.adage: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_targ.adage,adage)
+
+make_common: Imakefile_obj.common Imakefile_targ.common
+	$(VSYSIMAKE) -f ../imakefile.vrdicommon -s common/Makefile.$(VICCPU)
+	($(CD) common; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.common: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_obj.common,com)
+
+Imakefile_targ.common: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_targ.common,com)
+
+make_dummy: Imakefile_obj.dummy Imakefile_targ.dummy
+	$(VSYSIMAKE) -f ../imakefile.vrdidummy -s dummy/Makefile.$(VICCPU)
+	($(CD) dummy; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.dummy: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_obj.dummy,\/dummy)
+
+Imakefile_targ.dummy: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_targ.dummy,\/dummy)
+
+make_ip85hi: Imakefile_obj.ip85hi Imakefile_targ.ip85hi
+	$(VSYSIMAKE) -f ../imakefile.vrdiip85hi -s ip85hi/Makefile.$(VICCPU)
+	($(CD) ip85hi; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.ip85hi: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_obj.ip85hi,ip85hi)
+
+Imakefile_targ.ip85hi: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_targ.ip85hi,ip85hi)
+
+make_ip85lo: Imakefile_obj.ip85lo Imakefile_targ.ip85lo
+	$(VSYSIMAKE) -f ../imakefile.vrdiip85lo -s ip85lo/Makefile.$(VICCPU)
+	($(CD) ip85lo; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.ip85lo: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_obj.ip85lo,ip85lo)
+
+Imakefile_targ.ip85lo: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_targ.ip85lo,ip85lo)
+
+make_ivas: Imakefile_obj.ivas Imakefile_targ.ivas
+	$(VSYSIMAKE) -f ../imakefile.vrdiivas -s ivas/Makefile.$(VICCPU)
+	($(CD) ivas; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.ivas: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_obj.ivas,ivas)
+
+Imakefile_targ.ivas: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_targ.ivas,ivas)
+
+make_jupiter: Imakefile_obj.jupiter Imakefile_targ.jupiter
+	$(VSYSIMAKE) -f ../imakefile.vrdijupiter -s jup/Makefile.$(VICCPU)
+	($(CD) jup; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.jupiter: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_obj.jupiter,jup)
+
+Imakefile_targ.jupiter: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_targ.jupiter,jup)
+
+make_ramtek: Imakefile_obj.ramtek Imakefile_targ.ramtek
+	$(VSYSIMAKE) -f ../imakefile.vrdiramtek -s ramtek/Makefile.$(VICCPU)
+	($(CD) ramtek; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.ramtek: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_obj.ramtek,ramtek)
+
+Imakefile_targ.ramtek: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_targ.ramtek,ramtek)
+
+make_tek: Imakefile_obj.tek Imakefile_targ.tek
+	$(VSYSIMAKE) -f ../imakefile.vrditek -s tek/Makefile.$(VICCPU)
+	($(CD) tek; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.tek: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_obj.tek,\/tek)
+
+Imakefile_targ.tek: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_targ.tek,\/tek)
+
+make_xdisplay: Imakefile_obj.xdisplay Imakefile_targ.xdisplay
+	$(VSYSIMAKE) -f ../imakefile.vrdixdisplay -s xdisplay/Makefile.$(VICCPU)
+	($(CD) xdisplay; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.xdisplay: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_obj.xdisplay,xdisplay)
+
+Imakefile_targ.xdisplay: ../imake_src.vrdi
+	-PERL($(V2UTIL)/create_Imake.perl, ../imake_src.vrdi, Imakefile_targ.xdisplay,xdisplay)
+
+../imake_src.vrdi:
+	SED($(V2UTIL)/objlist.sed, ../imake_obj.adage, Imakefile_obj.adage)
+	SED($(V2UTIL)/targlist.sed, ../imake_targ.adage, Imakefile_targ.adage)
+	SED($(V2UTIL)/objlist.sed, ../imake_obj.common, Imakefile_obj.common)
+	SED($(V2UTIL)/targlist.sed, ../imake_targ.common, Imakefile_targ.common)
+	SED($(V2UTIL)/objlist.sed, ../imake_obj.dummy, Imakefile_obj.dummy)
+	SED($(V2UTIL)/targlist.sed, ../imake_targ.dummy, Imakefile_targ.dummy)
+	SED($(V2UTIL)/objlist.sed, ../imake_obj.ip85hi, Imakefile_obj.ip85hi)
+	SED($(V2UTIL)/targlist.sed, ../imake_targ.ip85hi, Imakefile_targ.ip85hi)
+	SED($(V2UTIL)/objlist.sed, ../imake_obj.ip85lo, Imakefile_obj.ip85lo)
+	SED($(V2UTIL)/targlist.sed, ../imake_targ.ip85lo, Imakefile_targ.ip85lo)
+	SED($(V2UTIL)/objlist.sed, ../imake_obj.ivas, Imakefile_obj.ivas)
+	SED($(V2UTIL)/targlist.sed, ../imake_targ.ivas, Imakefile_targ.ivas)
+	SED($(V2UTIL)/objlist.sed, ../imake_obj.jupiter, Imakefile_obj.jupiter)
+	SED($(V2UTIL)/targlist.sed, ../imake_targ.jupiter, Imakefile_targ.jupiter)
+	SED($(V2UTIL)/objlist.sed, ../imake_obj.ramtek, Imakefile_obj.ramtek)
+	SED($(V2UTIL)/targlist.sed, ../imake_targ.ramtek, Imakefile_targ.ramtek)
+	SED($(V2UTIL)/objlist.sed, ../imake_obj.tek, Imakefile_obj.tek)
+	SED($(V2UTIL)/targlist.sed, ../imake_targ.tek, Imakefile_targ.tek)
+	SED($(V2UTIL)/objlist.sed, ../imake_obj.xdisplay, Imakefile_obj.xdisplay)
+	SED($(V2UTIL)/targlist.sed, ../imake_targ.xdisplay, Imakefile_targ.xdisplay)
+
+DEVLIBS = $(ADAGELIB) $(COMMONLIB) $(DUMMYLIB) $(IP85HILIB) $(IP85LOLIB) \
+	  $(IVASLIB) $(JUPITERLIB) $(RAMTEKLIB) $(TEKLIB) $(XDISPLAYLIB)
+
+$(VRDI_LIB): $(DEVLIBS)
+	-rm -f $(VRDI_LIB)
+	-mkdir $(V2OLB)/tmpdir
+	(cd $(V2OLB)/tmpdir; ar x $(ADAGELIB))
+	(cd $(V2OLB)/tmpdir; chmod 777 *)
+	(cd $(V2OLB)/tmpdir; ar x $(COMMONLIB))
+	(cd $(V2OLB)/tmpdir; chmod 777 *)
+	(cd $(V2OLB)/tmpdir; ar x $(DUMMYLIB))
+	(cd $(V2OLB)/tmpdir; chmod 777 *)
+	(cd $(V2OLB)/tmpdir; ar x $(IP85HILIB))
+	(cd $(V2OLB)/tmpdir; chmod 777 *)
+	(cd $(V2OLB)/tmpdir; ar x $(IP85LOLIB))
+	(cd $(V2OLB)/tmpdir; chmod 777 *)
+	(cd $(V2OLB)/tmpdir; ar x $(IVASLIB))
+	(cd $(V2OLB)/tmpdir; chmod 777 *)
+	(cd $(V2OLB)/tmpdir; ar x $(JUPITERLIB))
+	(cd $(V2OLB)/tmpdir; chmod 777 *)
+	(cd $(V2OLB)/tmpdir; ar x $(RAMTEKLIB))
+	(cd $(V2OLB)/tmpdir; chmod 777 *)
+	(cd $(V2OLB)/tmpdir; ar x $(TEKLIB))
+	(cd $(V2OLB)/tmpdir; chmod 777 *)
+	(cd $(V2OLB)/tmpdir; ar x $(XDISPLAYLIB))
+	(cd $(V2OLB)/tmpdir; chmod 777 *)
+	(cd $(V2OLB)/tmpdir; $(AR) $(VRDI_LIB) *)
+	$(RANLIB) $(VRDI_LIB)
+	-(cd $(V2OLB)/tmpdir; rm -f *)
+	-rmdir $(V2OLB)/tmpdir
+

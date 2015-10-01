@@ -1,0 +1,6 @@
+# Imakefile for VRDI includes
+# Doesnt do much at the present time.
+#
+
+all:
+

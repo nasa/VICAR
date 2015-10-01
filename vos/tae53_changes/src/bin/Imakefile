@@ -1,0 +1,16 @@
+/**/ #
+/**/ # Imakefile for bin source directory
+/**/ # HISTORY
+/**/ #
+/**/ # 18-jul-94 Added TAE Classic support...krw
+/**/ #
+
+#ifdef TAECLASSIC
+#define BIN_SUBDIRS checkhost convert msgbld parupgrade
+#else
+#define BIN_SUBDIRS checkhost convert generate iconconvert msgbld parupgrade
+#endif
+
+SUBDIRS = BIN_SUBDIRS
+
+#define IHaveSubdirs

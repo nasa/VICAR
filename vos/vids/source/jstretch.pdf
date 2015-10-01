@@ -1,0 +1,1155 @@
+procedure help=* options=nointerrupt
+subcmd alarm
+  parm range1 integer count=1:2
+  parm (range2,range3,range4,range5,range6) integer count=0:2 default=--
+  parm (range7,range8,range9,range10) integer count=0:2 default=--
+  parm value integer default=255
+  parm planes string count=1:100 default=IMAGE
+end-subcmd
+subcmd complement
+  parm planes string count=1:100 default=IMAGE
+end-subcmd
+subcmd contour
+  parm start integer default=0
+  parm interval integer default=16
+  parm (end,maxnum,value) integer default=255
+  parm planes string count=1:100 default=IMAGE
+  parm stretch keyword valid=(STRETCHED,NOSTRETCH) default=STRETCHED
+end-subcmd
+subcmd copy
+  parm (plane1,plane2) string count=1 default=IMAGE
+end-subcmd
+subcmd cursor
+  parm planes string count=1:100 default=IMAGE
+  parm disprgn string count=1 default=DTF
+  parm color (string,8) count=1 default=RED +
+                valid=(RED,GREEN,BLUE,WHITE, CYAN,MAGENTA,YELLOW,BLACK)
+  parm dtf keyword valid=(SHOW,NOSHOW) default=SHOW
+end-subcmd
+subcmd edit
+  parm planes (string,20) count=1:100 default=IMAGE
+  parm disprgn (string,20) count=1 default=DTF
+  parm color (string,8) count=0:100 +
+		valid=(RED,GREEN,BLUE,WHITE, CYAN,MAGENTA,YELLOW,BLACK) +
+		default=--
+  parm label keyword valid=(LABEL,NOLABEL) default=LABEL
+end-subcmd
+subcmd function
+  parm function string
+  parm planes string count=1:100 default=IMAGE
+end-subcmd
+subcmd gauss
+  parm gsigma real count=1 default=3.0
+  parm mean real count=1 default=127.5
+  parm planes string count=1:100 default=IMAGE
+  parm range integer count=2 default=(1,254)
+  parm region string count=0:1 default=--
+end-subcmd
+subcmd linear
+  parm low real default=0
+  parm high real default=255
+  parm planes string count=1:100 default=IMAGE
+end-subcmd
+subcmd logarithm
+  parm low real default=0
+  parm high real default=255
+  parm curve real default=1.0
+  parm planes string count=1:100 default=IMAGE
+end-subcmd
+subcmd percent
+  parm low real default=6.0
+  parm high real count=0:1 default=--
+  parm planes string count=1:100 default=IMAGE
+  parm range integer count=2 default=(1,254)
+  parm region string count=0:1 default=--
+end-subcmd
+subcmd periodic
+  parm frequ real default=1.0
+  parm amplitud real default=255.0
+  parm phi real default=0.0
+  parm mean real default=127.5
+  parm planes string count=1:100 default=IMAGE
+end-subcmd
+subcmd shift
+  parm nbits integer count=1 default=1
+  parm planes string count=1:100 default=IMAGE
+end-subcmd
+subcmd show
+  parm planes (string,20) count=1:100 default=IMAGE
+  parm disprgn (string,20) count=1 default=DTF
+  parm color (string,8) count=0:100 +
+		valid=(RED,GREEN,BLUE,WHITE, CYAN,MAGENTA,YELLOW,BLACK) +
+		default=--
+  parm label keyword valid=(LABEL,NOLABEL) default=LABEL
+end-subcmd
+subcmd smooth
+  parm planes string count=1:100 default=IMAGE
+  parm range integer count=2 default=(1,254)
+  parm region string count=0:1 default=--
+end-subcmd
+subcmd table
+  parm p1 integer count=2
+  parm (p2,p3,p4,p5,p6,p7,p8,p9,p10) integer count=(0,2) default=--
+  parm (p11,p12,p13,p14,p15,p16,p17,p18,p19,p20) integer count=(0,2) default=--
+  parm planes string count=1:100 default=IMAGE
+end-subcmd
+parm device string count=0:1 default=--
+body
+chkvids1
+if (_subcmd = "ALARM")
+  sendvar (_proc,_subcmd,planes,value,range1,range2,range3,range4,+
+           range5,range6,range7,range8,range9,range10,device) job=VIDSJOB
+else-if (_subcmd = "COMPLEMENT")
+  sendvar (_proc, _subcmd, planes,device) job=VIDSJOB
+else-if (_subcmd = "CONTOUR")
+  sendvar (_proc, _subcmd, planes,start,end,interval,maxnum,value,stretch, +
+					device) job=VIDSJOB
+else-if (_subcmd = "COPY")
+  sendvar (_proc,_subcmd,plane1,plane2,device) job=VIDSJOB
+else-if (_subcmd = "CURSOR")
+  sendvar (_proc,_subcmd,planes,disprgn,color,dtf,device) job=VIDSJOB
+else-if (_subcmd = "EDIT")
+  sendvar (_proc,_subcmd,planes,disprgn,color,label,device) job=VIDSJOB
+else-if (_subcmd = "FUNCTION")
+  sendvar (_proc,_subcmd,planes,function,device) job=VIDSJOB
+else-if (_subcmd = "GAUSS")
+  sendvar (_proc,_subcmd,gsigma,mean,range,region,planes,device) job=VIDSJOB
+else-if (_subcmd = "LINEAR")
+  sendvar (_proc,_subcmd,low,high,planes,device) job=VIDSJOB
+else-if (_subcmd = "LOGARITHM")
+  sendvar (_proc,_subcmd,low,high,curve,planes,device) job=VIDSJOB
+else-if (_subcmd = "PERCENT")
+  sendvar (_proc,_subcmd,low,high,range,region,planes,device) job=VIDSJOB
+else-if (_subcmd = "PERIODIC")
+  sendvar (_proc,_subcmd,planes,frequ,amplitud,phi,mean,device) job=VIDSJOB
+else-if (_subcmd = "SHIFT")
+  sendvar (_proc, _subcmd, nbits, planes, device) job=VIDSJOB
+else-if (_subcmd = "SHOW")
+  sendvar (_proc,_subcmd,planes,disprgn,color,label,device) job=VIDSJOB
+else-if (_subcmd = "SMOOTH")
+  sendvar (_proc,_subcmd,range,region,planes,device) job=VIDSJOB
+else-if (_subcmd = "TABLE")
+  sendvar (_proc,_subcmd,planes,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,+
+           p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,device) job=VIDSJOB
+end-if
+chkvids2
+end-proc
+.title
+VIDS command JSTRETCH
+.help
+The JSTRETCH command is used to modify the display device output
+lookup-tables in order to apply contrast enhancements to the displayed
+image.  JSTRETCH takes subcommands to describe the type of stretch
+desired, so the command takes the form:
+
+JSTRETCH-subcmd parms
+
+where "subcmd" describes the type of stretch (which function) to be
+applied, and "parms" indicates additional parameters which vary 
+among the subcommands.  For further information on a given subcommand,
+type "HELP JSTRETCH-subcmd", or, for a list of subcommands available
+and help on each, "TUTOR JSTRETCH-".
+
+See the examples on the following page.
+.page
+Examples:
+
+JSTRETCH-LINEAR	40 60 RED	- Linear stretch on red, (40,60)->(0,255)
+
+JSTRETCH-GAUSS GSIG=2		- Gaussian auto stretch
+
+JSTRETCH-PERC .1 .5		- Linear auto stretch, sat. .1% low, .5% high
+.level1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd alarm
+Alarm values in LUT by changing
+them to another value.
+.vari range1 -alarm
+Single value or range of
+values to alarm.
+.vari range2 -alarm
+Single value or range of
+values to alarm.
+.vari range3 -alarm
+Single value or range of
+values to alarm.
+.vari range4 -alarm
+Single value or range of
+values to alarm.
+.vari range5 -alarm
+Single value or range of
+values to alarm.
+.vari range6 -alarm
+Single value or range of
+values to alarm.
+.vari range7 -alarm
+Single value or range of
+values to alarm.
+.vari range8 -alarm
+Single value or range of
+values to alarm.
+.vari range9 -alarm
+Single value or range of
+values to alarm.
+.vari range10 -alarm
+Single value or range of
+values to alarm.
+.vari value -alarm
+New value to be used in place
+of those given by RANGE parms
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd complement
+Complement (invert) lookup
+tables
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd contour
+Use lookup table to provide
+DN contours
+.vari start -contour
+DN at which to start contour
+.vari interval -contour
+Size of contour interval
+.vari end -contour
+DN at which to end contour
+.vari maxnum -contour
+Maximum number of contours
+.vari value -contour
+Value to place in lookup table
+for each contour line
+.vari stretch -contour
+Operate on stretched or
+unstretched data?
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd copy
+Copy one lookup table to another
+.vari plane1 -copy
+Plane of source lookup table
+.vari plane2 -copy
+Plane of destination lookup table
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd cursor
+Interactive linear stretch
+controlled with the cursor
+.vari dtf -cursor
+Show display transfer function?
+(SHOW, NOSHOW)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd edit
+Edit the lookup table using the cursor
+.vari label -edit
+LABEL or NOLABEL
+Controls labeling of axes
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd function
+Set display transfer function
+to an arbitrary mathematical 
+function
+.vari function -function
+Function for lookup table
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd gauss
+Fit histogram to a gaussian
+curve
+.vari gsigma -gauss
+Number of standard deviations
+across half of gaussian curve.
+.vari mean -gauss
+Mean (center) of gaussian curve.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd linear
+Manual linear contrast stretch
+.vari low -linear
+Bottom of range:
+Maps to 0
+.vari high -linear
+Top of range:
+Maps to 255
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd logarithm
+Logarithmic stretch
+.vari low -logarithm
+Bottom of range:
+Maps to 0
+.vari high -logarithm
+Top of range:
+Maps to 255
+.vari curve -logarithm
+Specify curvature of curve.
+Close to zero--sharp bend
+Close to infinity--straight line
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd percent
+Automatic stretch to saturate a
+percentage of the histogram
+.vari low -percent
+Percentage of histogram to be
+below zero.
+.vari high -percent
+Percentage of histogram to be
+above 255.  Default is LOW.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd periodic
+Periodic stretch
+.vari frequ -periodic
+Frequency of periodic function
+.vari amplitud -periodic
+Amplitude of periodic function
+.vari phi -periodic
+Phase shift of periodic function
+.vari mean -periodic
+Mean of periodic function
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd shift
+Perform bit shift on lookup
+table
+.vari nbits -shift
+Number of bits to shift
+If > 0, shift left
+if < 0, shift right
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd show
+Display the lookup table
+.vari label -show
+LABEL or NOLABEL
+Controls labeling of axes
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd smooth
+Make histogram flat
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd table
+Map a set of input values to a
+set of output values with linear
+interpolation between them.
+.vari p1 -table
+Single (input,output) pair
+.vari p2 -table
+Single (input,output) pair
+.vari p3 -table
+Single (input,output) pair
+.vari p4 -table
+Single (input,output) pair
+.vari p5 -table
+Single (input,output) pair
+.vari p6 -table
+Single (input,output) pair
+.vari p7 -table
+Single (input,output) pair
+.vari p8 -table
+Single (input,output) pair
+.vari p9 -table
+Single (input,output) pair
+.vari p10 -table
+Single (input,output) pair
+.vari p11 -table
+Single (input,output) pair
+.vari p12 -table
+Single (input,output) pair
+.vari p13 -table
+Single (input,output) pair
+.vari p14 -table
+Single (input,output) pair
+.vari p15 -table
+Single (input,output) pair
+.vari p16 -table
+Single (input,output) pair
+.vari p17 -table
+Single (input,output) pair
+.vari p18 -table
+Single (input,output) pair
+.vari p19 -table
+Single (input,output) pair
+.vari p20 -table
+Single (input,output) pair
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.vari range
+Data range to include in
+histogram (exclude numbers
+outside this range)
+.vari region
+Region on which to collect
+histogram.  Default is to
+use area of last displayed
+image.
+.vari planes
+Image plane whose lookup
+table is to be modified.
+.vari disprgn
+Rectangular region used to
+display the stretch
+.vari color
+Colors to use for plot
+valid: RED,GREEN,BLUE,WHITE,
+       CYAN,MAGENTA,YELLOW,BLACK
+.vari device
+Name of device to use
+.level2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd alarm
+The JSTRETCH-ALARM command is used to "alarm" values in the lookup table
+by setting them to a specified grey level (DN).  By default, all of the
+specified values in the lookup table are set to a value of 255, but
+the new value can be changed to anything (0 - 255) with the VALUE
+parameter.
+
+The entries in the lookup table which are to be alarmed are given by
+the RANGE parameters, RANGE1 through RANGE10.  Each parameter may be
+given either as a single value to be alarmed, or as a pair of numbers
+specifying a range to be alarmed.  See the examples below.
+
+Examples:
+
+JSTRETCH-ALARM 35 (64,90) 147	- Set DNs 35, 64-90, and 147 to 255 in LUT
+
+JSTRETCH-ALARM (25,50) VAL=128	- Set DNs 25 - 50 to a value of 128 in LUT
+.vari range1 -alarm
+The RANGE1 - RANGE10 parameters are used to determine which values in the
+output lookup table are to modified.  Each parameter may take either one
+or two values.
+
+If only one value is specified for a given parameter (e.g., RANGE2=55),
+then that single value will be "alarmed".  If two values are given,
+(e.g., RANGE2=(50,60)) then the entire range bounded by (and including)
+the two specified values will be alarmed.
+.vari range2 -alarm
+See the help for RANGE1.
+.vari range3 -alarm
+See the help for RANGE1.
+.vari range4 -alarm
+See the help for RANGE1.
+.vari range5 -alarm
+See the help for RANGE1.
+.vari range6 -alarm
+See the help for RANGE1.
+.vari range7 -alarm
+See the help for RANGE1.
+.vari range8 -alarm
+See the help for RANGE1.
+.vari range9 -alarm
+See the help for RANGE1.
+.vari range10 -alarm
+See the help for RANGE1.
+.vari value -alarm
+The VALUE parameter is used to determine an output value which will be
+put into the output lookup tables in place of the values specified with
+the range parameters.  For example, in the following command,
+
+JSTRETCH-ALARM 43 (50,90) VALUE=100 
+
+all pixels which have a value in the image plane of 43 or in the range 
+from 50 to 90 would be displayed as having a value of 100.
+
+By default, VALUE=255 (white).
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd complement
+The JSTRETCH-COMPLEMENT command can be used to invert the lookup
+tables or stretches of any image planes.  The image will appear
+as the negative of what was already being viewed.
+
+Examples:
+
+JSTRETCH-COMP RED	- Invert the red plane
+
+JSTRETCH-COMP		- Invert all visible image planes
+
+JSTRETCH-COMP ALL	- Invert all image planes, visible or not
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd contour
+The JSTRETCH-CONTOUR command can be used to quickly generate a contour plot
+for an image.  It is particularly useful for data such as elevation data.
+
+The contour is generated by setting up a contour interval with the INTERVAL
+parameter, and setting the displayed DN in the lookup table to that specified
+with the value parameter (default is 255 or white) each time the contour
+interval is crossed in the display transfer function.
+
+If the STRETCHED keyword is used (default), then the contour is done on the
+stretched data, using the current display transfer function.  If NOSTRETCH
+is specified, the contour is performed on the raw data in the image plane
+(i.e., using a ramp transfer function).
+
+The contour can be performed on only a limited range of DN values, by using
+the START (minimum DN to contour) and END (maximum DN to contour) parameters.
+
+The total number of contours entered into the lookup table can be limited with
+the MAXNUM parameter.
+
+Note that the contour modifies the lookup table and thus the display transfer
+function, so that if the contour is performed on the stretched data successive
+contours will act differently.
+.vari start -contour
+The START parameter specifies the lowest DN at which the contours are to start.
+A contour will be generated in the lookup table for each pixel value with an
+output value (input value if NOSTRETCH is given) of START, and every INTERVAL
+pixels after START.
+
+For example, if START=30 and INTERVAL=16, then each time the transfer function 
+crossed 30, 46, 62, etc. a contour would be generated.
+.vari interval -contour
+The INTERVAL parameter is an integer specifying the size of the contour interval.
+A contour will be generated in the lookup table for each pixel value with an
+output value (input value if NOSTRETCH is given) of START, and every INTERVAL
+pixels after START.
+
+For example, if START=30 and INTERVAL=16, then each time the transfer function 
+crossed 30, 46, 62, etc. a contour would be generated.
+.vari end -contour
+The END parameter is an integer specifying a maximum DN at which to generate
+contours.  For example, if END=128, then no entries in the lookup table would
+be alarmed if their output value (input value if NOSTRETCH is given) is greater
+than 128.
+.vari maxnum -contour
+The MAXNUM parameter is an integer specifying the maximum number of contours
+to be generated.  The contour is generated in the normal fashion according to
+all other parameters, but as soon as MAXNUM entries in the lookup table have 
+been modified, the contour is halted.
+.vari value -contour
+The VALUE parameter is used to determine an output value which will be
+put into the output lookup tables at each location which is to receive
+a contour.  That is, it is the grey level of each contour line.
+
+By default, VALUE=255 (white).
+.vari stretch -contour
+The STRETCH parameter is a keyword which may be either STRETCHED or NOSTRETCH.
+It controls whether the contour is applied to the current transer function
+in the lookup table(s), or to a linear ramp transfer function.  The default
+is STRETCHED, so that contours are generated on what is actually visible on 
+the screen at the time.  NOSTRETCH will generate contours based on the actual
+DN values in the image plane.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd copy
+The current stretches or output lookup tables being used are saved
+according to the planes viewed; that is, every plane has its own
+stretch.  The JSTRETCH-COPY command is used to copy the stretch
+being applied to one plane to another plane.
+
+Examples:
+
+JSTRETCH-COPY RED GREEN		- Apply the current red stretch to green
+
+JSTRETCH-COPY RED BW		- Use the current red stretch on the bw
+				- plane; if RED and BW are the same,
+				- nothing will happen.
+
+JSTRETCH-COPY 2 3		- Copy the stretch on plane 2 to plane 3
+.vari plane1 -copy
+The PLANE1 parameter specifies the plane whose lookup table is to be
+copied.  The entire lookup table is copied directly to lookup table
+for the plane PLANE2.
+
+PLANE1 behaves the same as the standard VIDS plane parameter.  It 
+may be either a plane name or an integer.  See HELP PLANENAMES
+for details of how to use plane names.
+.vari plane2 -copy
+The PLANE2 parameter specifies the plane to which the lookup table
+of PLANE1 is to be copied.  The entire lookup table is copied directly.
+
+PLANE2 behaves the same as the standard VIDS plane parameter.  It 
+may be either a plane name or an integer.  See HELP PLANENAMES
+for details of how to use plane names.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd cursor
+The JSTRETCH-CURSOR command is used to interactively vary a linear stretch
+on the specified image planes using the cursor position (i.e., trackball,
+mouse, or tablet motion).  Moving the cursor verticaly changes the contrast,
+and horizontally changes the brightness.
+
+By default, the display transfer function (DTF) is displayed in the center
+of the screen on the graphics plane, to use as a guide in controlling the 
+stretch.  Note that increasing contrast (moving the cursor up on the screen)
+causes the slope of the DTF to increase, and changing brightness (brighter 
+to the right of the screen, dimmer to the left) causes the line to shift
+with a constant slope.
+
+The full range of the screen should allow for the full range of linear
+stretches to be achieved.
+.vari dtf -cursor
+The DTF parameter is a keyword used to control whether or not to display the
+display transfer function (DTF) interactively as the cursor is moved.  By 
+default, DTF=SHOW, which causes the DTF to be continually updated during the
+cursor stretch.  If DTF=NOSHOW, it is not displayed or updated.
+
+The location of the DTF may be changed with the DISPRGN parameter, and the 
+color of the function may be changed with the COLOR parameter.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd edit
+JSTRETCH-EDIT allows you to interactively edit lookup tables using
+the cursor.  It displays the lookup tables in the same manner,
+using the same options, as JSTRETCH-SHOW.
+
+The planes are edited in sequence, one plane at a time.  The border
+of the plot indicates which color is currently being edited.
+
+The first button is used to edit the stretch.  You edit by creating line
+segments.  Position the cursor to one end of the line segment you want
+and press the button.  This establishes one end of the segment.  Move the
+cursor around, and a rubber-band line will follow it.  Press the button
+again, and the lookup table will be updated with a linear stretch between
+the two points.  You are then ready to select the first point of another
+segment.  So, pressing button 1 alternates between selecting the first
+point and the last point of a linear segment.  To make a single point,
+simply press the button twice without moving the cursor.
+.page
+The second button will cancel the changes to the current lookup table
+and move on to the next image plane.  To cancel the entire operation,
+you may have to press the button several times to cycle through all the
+planes.
+
+The third button accepts the changes to the current lookup table
+and moves on to the next image plane.
+
+JSTRETCH-EDIT is identical to JDTF with the 'EDIT option.
+
+Examples:
+
+JSTRETCH-EDIT			 - edit the LUTs
+JSTRETCH-EDIT DISPRGN=FULLSCREEN - edit the LUTs using the full screen
+.vari label -edit
+The LABEL keyword parameter specifies whether or not to plot labels
+for the axes.  If 'LABEL is given (the default), then a scale of
+DN values is plotted on each axis, and tic marks are drawn on the axes.
+Text labels identifying the input and output for the transfer function
+are also plotted.  The size of the area used to plot the data is reduced
+to make room for these items.  The labels are always plotted inside the
+display region.
+
+If 'NOLABEL is given, then neither the scale, the tic marks, nor the
+text are drawn.  Instead, the data area takes up the entire display
+region.  This is useful to get a full-resolution display of the
+transfer function.  For example, if you want a one-to-one correspondence
+between pixels and DN values, you need a display region that is 256
+pixels on a side.  If you define a region 256 pixels on a side, then
+plot the labels, the data area will be shrunk to make room, and some
+of the DN values will not be plotted.  If you give 'NOLABEL, the data
+area is not shrunk and you can see every DN value.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd function
+The JSTRETCH-FUNCTION command is used to specify an arbitrary mathematical
+function which is to be used for the display transfer function (DTF),
+mapping the actual pixel values in the image memory planes to their
+displayed values in the output lookup tables.
+
+The function is given with the function parameter, and is in the form
+of a Fortran IV type syntax.  The word DN is used to represent the pixel
+value, or display number.  For example, to multiply all pixel values by
+two, the function "DN * 2" could be used.
+
+The following operators are supported:
+
+  *	multiply
+  +	add
+  - 	subtract
+  /  	divide
+  **	"to the power of" (eg., 2**3 = 8)
+  .AND.	logical AND
+  .OR.	logical OR
+  .XOR.	exclusive OR
+  .NOT.	logical complement
+  
+In addition, the following Fortran-type functions are supported:
+
+  SQRT, ALOG, ALOG10, AINT, SIN, COS, TAN, ASIN, ACOS, ATAN, ATAN2, ABS,
+  MIN or AMIN1, MAX or AMAX1, and MOD or AMOD.
+
+Examples:
+
+JSTRETCH-FUNC "DN + SQRT(DN - 2)"
+JSTRETCH-FUNC "DN*2-128"
+
+.vari function -function
+The FUNCTION parameter is a string used to specify a function to apply to
+the DN values in the lookup table.  The string "DN" is used to represent 
+the pixel value in the equation.  For example, to multiply all pixel values by
+two, the function "DN * 2" could be used.
+
+The following operators are supported:
+
+  *	multiply
+  +	add
+  - 	subtract
+  /  	divide
+  **	"to the power of" (eg., 2**3 = 8)
+  .AND.	logical AND
+  .OR.	logical OR
+  .XOR.	exclusive OR
+  .NOT.	logical complement
+  
+In addition, the following Fortran-type functions are supported:
+
+  SQRT, ALOG, ALOG10, AINT, SIN, COS, TAN, ASIN, ACOS, ATAN, ATAN2, ABS,
+  MIN or AMIN1, MAX or AMAX1, and MOD or AMOD.
+
+Examples:
+
+JSTRETCH-FUNC "DN + SQRT(DN - 2)"
+JSTRETCH-FUNC "DN*2-128"
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd gauss
+JSTRETCH-GAUSS will take a histogram and try to fit it to a
+gaussian normal curve of the shape specified by the GSIGMA and
+MEAN parameters.  That is, a stretch is applied so that the
+area under the stretched histogram is as close to the area under
+the gaussian curve as possible.
+
+The gaussian curve is described by the equation
+
+                           2            2
+                -(x - mean) / (2 * sigma )
+          y = e
+
+which is the standard normal curve.  The curve is scaled so that the
+area under it is the same as the size of the input histogram (minus
+any excluded values), then a lookup table is generated which gives
+the best approximation to the gaussian curve.
+
+The MEAN parameter can be used to set "mean" in the above equation,
+which simply defines the center of the curve where the peak lies.
+By default, the curve will be centered at 127.5.
+
+The GSIGMA parameter may be used to change the value of sigma in
+the above equation.  They are related by the equation:
+
+          sigma = 127.5 / GSIGMA
+
+GSIGMA is the number of sigmas or standard deviations which are to
+be contained in half of the range of the histogram from 0 - 255.
+Thus, GSIGMA can be used to describe how "fat" the curve is to
+be.  As GSIGMA approaches infinity, the curve approaches a single
+spike at the mean value.  As GSIGMA approaches zero, the curve
+approaches a flat line.
+.vari gsigma -gauss
+The GSIGMA parameter may be used to change the value of sigma in
+the gaussian equation.  They are related by the equation:
+
+          sigma = 127.5 / GSIGMA
+
+GSIGMA is the number of sigmas or standard deviations which are to
+be contained in half of the range of the histogram from 0 - 255.
+Thus, GSIGMA can be used to describe how "fat" the curve is to
+be.  As GSIGMA approaches infinity, the curve approaches a single
+spike at the mean value, decreasing the contrast.  As GSIGMA
+approaches zero, the curve approaches a flat line, increasing
+contrast.
+.vari mean -gauss
+The MEAN parameter can be used to set the mean of the gaussian equation,
+which simply defines the center of the curve where the peak lies.
+By default, the curve will be centered at 127.5.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd linear
+JSTRETCH-LINEAR is used to apply a manual linear stretch to the given
+output lookup tables, thus modifying the contrast in the image.  The
+image data in the image planes are not modified.
+
+The stretch is specified by giving a pair of numbers which will be
+mapped to the full data range of zero to 255 .  The LOW parameter
+specifies the number to be mapped to zero, and the HIGH parameter
+specifies the number to be mapped to 255.  Thus the displayed DN
+will be determined by the function:
+
+DNdisp = MAX(0,MIN(255,DNraw * 255/(HIGH-LOW) - LOW * 255/(HIGH-LOW)))
+
+where DNdisp is the stretched, displayed grey level, DNraw is the
+actual grey level in the image memory plane, and HIGH and LOW are
+the values of the HIGH and LOW parameters.
+
+Note that values below zero are displayed as zero (black), and 
+values above 255 are displayed as 255 (full intensity).
+
+See examples on following page.
+.page
+Examples:
+
+JSTRETCH-LIN 30 200	 - Stretch all visible planes from 30 to 200
+
+JSTRETCH-LIN PLA=RED	 - Reset the red plane to a linear ramp
+
+JSTRETCH-LIN 255 0 (G,B) - Invert the green and blue planes
+.vari low -linear
+The LOW parameter indicates what DN value is to be mapped to an
+output value of zero.  It is used in conjunction with the HIGH parameter
+to determine a mapping where (LOW,HIGH) is mapped linearly to (0,255).
+.vari high -linear
+The HIGH parameter indicates what DN value is to be mapped to an
+output value of 255.  It is used in conjunction with the LOW parameter
+to determine a mapping where (LOW,HIGH) is mapped linearly to (0,255).
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd logarithm
+The JSTRETCH-LOGARITHM command is used to perform a "logarithmic" stretch,
+wherein the lookup table transfer function is fit to a logarithmic curve
+of the form:
+
+  DN(out) = A * ln(DN(in) + C) + B
+  
+The CURVE parameter is used to specify C in the above equation, and A and
+B are calculated based on the LOW and HIGH parameters, which specify which
+pixel values are to be mapped to 0 and to 255, respectively.
+
+Intuitively, the log stretch allows the easy specification of a stretch
+wherein the display transfer function rises very sharply at the low end,
+and changes slower at the high end, thus raising the contrast of the
+dimmer pixels, and decreasing contrast (but increasing brightness) of
+the brighter pixels.
+
+See the examples on the next page.
+.page
+Examples:
+
+JSTRETCH-LOG		- default logarithmic stretch
+
+JSTRETCH-LOG 32 200	- log stretch, map 32->0, 200->255
+
+JSTRETCH-LOG CUR=20	- default log stretch, with shallow curvature
+.vari low -logarithm
+The LOW parameter is used to specify a pixel value which will be mapped
+to zero in the transfer function for the lookup table.  It is used with
+the HIGH parameter to specify the bounds of the logarithmic curve.
+.vari high -logarithm
+The HIGH parameter is used to specify a pixel value which will be mapped
+to 255 in the transfer function for the lookup table.  It is used with
+the LOW parameter to specify the bounds of the logarithmic curve.
+.vari curve -logarithm
+The CURVE parameter is used to specify a curvature for the logarithmic
+curve.  It may be any value greater than zero, up to the maximum floating
+point value for the maching you are using.  As CURVE approaches zero,
+the angle of the logarithmic curve becomes closer to a right angle.  As
+CURVE approaches infinity, the curve approaches (on the range 0-255)
+a straight line.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd percent
+JSTRETCH-PERCENT is used to automatically calculate a stretch based
+on the histogram of the data.  If no histogram has been collected,
+one will be collected on the last area displayed.
+
+JSTRETCH-PERCENT will find the first grey level (DN) in the histogram
+below which the percentage of pixels given by the LOW parameter lies
+and map that value to zero.  Likewise for the HIGH parameter will be 
+used to find a value to map to 255.
+
+The FUNCTION parameter may be used to define the method of traversing
+between the two points calculated via the LOW and HIGH parameters.
+By default, a linear interpolation (i.e., a linear automatic stretch)
+will be performed.
+
+The RANGE parameter may be used to specify a range of interest in the
+histogram.  Values outside of this range will be ignored.
+
+The REGION parameter may be used to specify a region on which to
+collect the histogram.  The default is to use the area in which
+you last displayed an image, using JDISP or JLOAD-IMAGE.
+
+See the examples on the next page.
+.page
+Examples:
+
+JSTRETCH-PERC .1 .5	 - Saturate .1% of the pixels below 0, .5% above 255
+
+JSTRETCH-PERC .1 REG=CUR - Collect a hist on the current region, and
+			 - saturate .1% of the pixels on both ends
+
+JSTRETCH-PERC 1 RANG=(10,128)	- Ignore histogram outside of range (10,128),
+				- and saturate 1% of the remaining pixels on
+				- both ends.
+.vari low -percent
+The LOW parameter is used to specify a percentage of the total pixels
+in the histogram (on the range specified by the RANGE parameter) to
+be saturated to zero on the low end of the histogram.  That is, the
+data value at which LOW percent of the pixels have lesser values will
+be mapped to zero in the stretch.
+
+In addition, the LOW parameter is used as the default for the HIGH
+parameter, so that if HIGH is not specified, then the value for LOW
+will also be used at the high end of the histogram.
+
+See also the HIGH parameter.
+.vari high -percent
+The HIGH parameter is used to specify a percentage of the total pixels
+in the histogram (on the range specified by the RANGE parameter) to
+be saturated to 255 on the high end of the histogram.  That is, the
+data value at which HIGH percent of the pixels have greater values will
+be mapped to 255 in the stretch.
+
+If HIGH is not specified, then the value for LOW will also be used at
+the high end of the histogram.
+
+See also the LOW parameter.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd periodic
+JSTRETCH-PERIODIC is used to apply a periodic function in the form
+of a generalized sine wave to the lookup table.  The individual 
+characteristics of the wave can be modified with the FREQU (frequency),
+AMPLITUD (amplitude), PHI (phase shift) and MEAN (center height of the
+wave) parameters.
+
+The displayed grey level (DN) from the lookup table is given by:
+
+        AMPLITUD       2 * pi * FREQU * DNin
+DNout = -------- * sin(--------------------- + PHI) + MEAN
+           2                   255
+
+One use of the PERIODIC stretch would be to specify a non-linear stretch
+wherein the DN changes slowly around zero, climbs steeply, and changes
+slowly around 255.  This could be done by using a frequency of 0.5 (so
+that one half wavelength will occur on the range 0-255) and a phase 
+shift of -pi/2 radians, such as:
+
+JSTRETCH-PERIODIC FRE=0.5 PHI=-1.57
+.vari frequ -periodic
+The FREQU parameter is used to specify the frequency of the sine wave
+being applied to the lookup table.  A frequency of 1 will give one
+wavelength over the entire 0 - 255 DN range.  Thus, you can think of
+the FREQU parameter as being the number of wavelengths over the
+range of the lookup table.
+.vari amplitud -periodic
+The AMPLITUD parameter is used to specify the amplitude of the sine
+wave being applied to the lookup table.  It simply scales the vertical
+size of the sine wave.  It is given in terms of DN, thus a value of
+255 for AMPLITUD will cause the entire sine wave to fit in a 255 DN
+range, thus, if MEAN=127.5, it will go from 0 to 255 (the default).
+
+.vari phi -periodic
+The PHI parameter is used to specify a phase shift for the sine wave
+being applied to the lookup table.  By default, with a zero phase
+shift, a DN of zero will be mapped to the MEAN value, which by default
+is 127.5.  A positive phase shift will shift the sine wave to the left,
+and a negative phase shift will shift the wave to the right.  A shift of
+2 * pi will of course return to the original wave form.
+.vari mean -periodic
+The MEAN parameter is used to specify the vertical center point of the
+sine wave being applied to the lookup table.  A mean of zero would
+be the normal sine wave ranging below zero and above zero.  The default
+is a mean of 127.5, thus allowing the entire range of the periodic
+function to fit within the lookup table.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd shift
+JSTRETCH-SHIFT will perform a bit shift on each pixel value in order
+to determine the output pixel value.  The NBITS parameter indicates
+how many bits to shift.  The pixel value is shifted NBITS to the left,
+and the upper order bits are discarded.
+
+When pixel values are shifted, the net result is to show smaller
+differences in pixel values clearer, sometimes bringing out very
+low contrast features which would otherwise remain hidden.
+
+If NBITS is negative, the values are shifted to the right, thereby
+showing only the larger changes in pixel value.
+.vari nbits -shift
+The NBITS parameter indicates by how many bits the pixel values
+are to be shifted.  The pixel value is shifted NBITS to the left,
+and the upper order bits are discarded.
+
+If NBITS is negative, the values are shifted to the right, thereby
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd show
+JSTRETCH-SHOW displays the current lookup tables on the graphics plane.
+It displays a plot of the input DN (pixel value) versus the output DN.
+This gives a graphical representation of the contrast stretch currently
+in use.
+
+The lookup tables for any number of image planes may be displayed at
+once.  The default is IMAGE, which is the BW plane in black-and-white
+mode, and a collection of the three color planes in color mode.
+
+The location of the plots on the display is controlled via the
+DISPRGN parameter.  The lookup tables for all the planes get plotted
+in the same display area.  See the help for DISPRGN for more details.
+
+The color of the plots can be changed using the COLOR parameter.  See
+the help for COLOR.
+.page
+Axis labeling, including tic marks and a DN value scale, is controlled
+by the LABEL parameter.  The default is to plot the labels.
+
+JSTRETCH-SHOW is the same as JDTF without the 'EDIT parameter.
+
+Examples:
+
+JSTRETCH-SHOW				- display LUT for IMAGE planes
+JSTRETCH-SHOW DISPRGN=A			- display in different location
+JSTRETCH-SHOW D=FULLSCREEN 'NOLABELS	- no labels, full-screen plot
+JSTRETCH-SHOW RED			- display LUT for red plane only
+JSTRETCH-SHOW COLOR=(MAG,YEL,CYA)	- display in different colors
+JSTRETCH-SHOW PLANE=COLOR COLOR=BLACK	- display the R,G,B planes in black
+.vari label -show
+The LABEL keyword parameter specifies whether or not to plot labels
+for the axes.  If 'LABEL is given (the default), then a scale of
+DN values is plotted on each axis, and tic marks are drawn on the axes.
+Text labels identifying the input and output for the transfer function
+are also plotted.  The size of the area used to plot the data is reduced
+to make room for these items.  The labels are always plotted inside the
+display region.
+
+If 'NOLABEL is given, then neither the scale, the tic marks, nor the
+text are drawn.  Instead, the data area takes up the entire display
+region.  This is useful to get a full-resolution display of the
+transfer function.  For example, if you want a one-to-one correspondence
+between pixels and DN values, you need a display region that is 256
+pixels on a side.  If you define a region 256 pixels on a side, then
+plot the labels, the data area will be shrunk to make room, and some
+of the DN values will not be plotted.  If you give 'NOLABEL, the data
+area is not shrunk and you can see every DN value.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd smooth
+JSTRETCH-SMOOTH tries to make the stretched histogram of the
+given planes as close to a constant, smooth histogram.  It
+is identical to a JSTRETCH-GAUSS command with GSIGMA=.0001 and
+MEAN=127.5.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd table
+The JSTRETCH-TABLE command is used to provide a means of specifying
+a number of individual points in the lookup table(s) to be modified
+manually, with a linear interpolation between each point specified
+and the next.  (Note: for interactive users, an easier way to 
+accomplish this is to use the JSTRETCH-EDIT command.)
+
+Each parameter P1 - P20 may be used to specify a point (for example,
+P1=(40,90)) where the first number is mapped to the second in the
+lookup table(s).  A linear interpolation will be performed between
+each successive point to provide a piecewise continuous lookup table.
+The first numbers (input values) of all points need to be in ascending
+order.  There is no restriction on the second numbers (output values).
+
+Any numbers outside the range of points given are left untouched;
+thus in order to be piecewise linear over the entire lookup table
+the list of points should begin with a value for zero (such as
+(0,0)) and end with a value for 255 (such as (255,255)).
+
+See the example on the next page.
+.page
+Examples:
+
+JSTRETCH-TABLE (35,90) (128,128) (160,90) PLANE=GREEN
+
+This command would set the value of 35 in the lookup table to 90, 
+128 to 128, and 160 to 90, with a straight linear interpolation
+filling in the space between each of the three points.  Thus,
+all values between 35 and 160 would be modified.  Note that
+values from 0 to 34 and from 161 to 255 would not be modified.
+
+As an alternative, in order to specify the entire lookup table,
+the two end points could be given, as in:
+
+JSTRETCH-TABLE (0,0) (35,90) (128,128) (160,90) (255,255) PLANE=GREEN
+
+.vari p1 -table
+Each parameter P1 - P20 may be used to specify a point (for example,
+P1=(40,90)) where the first number is mapped to the second in the
+lookup table(s).  A linear interpolation will be performed between
+each successive point to provide a piecewise continuous lookup table.
+The first numbers (input values) of all points need to be in ascending
+order.  There is no restriction on the second numbers (output values).
+
+Any numbers outside the range of points given are left untouched;
+thus in order to be piecewise linear over the entire lookup table
+the list of points should begin with a value for zero (such as
+(0,0)) and end with a value for 255 (such as (255,255)).
+.vari p2 -table
+See the help for the P1 parameter.
+.vari p3 -table
+See the help for the P1 parameter.
+.vari p4 -table
+See the help for the P1 parameter.
+.vari p5 -table
+See the help for the P1 parameter.
+.vari p6 -table
+See the help for the P1 parameter.
+.vari p7 -table
+See the help for the P1 parameter.
+.vari p8 -table
+See the help for the P1 parameter.
+.vari p9 -table
+See the help for the P1 parameter.
+.vari p10 -table
+See the help for the P1 parameter.
+.vari p11 -table
+See the help for the P1 parameter.
+.vari p12 -table
+See the help for the P1 parameter.
+.vari p13 -table
+See the help for the P1 parameter.
+.vari p14 -table
+See the help for the P1 parameter.
+.vari p15 -table
+See the help for the P1 parameter.
+.vari p16 -table
+See the help for the P1 parameter.
+.vari p17 -table
+See the help for the P1 parameter.
+.vari p18 -table
+See the help for the P1 parameter.
+.vari p19 -table
+See the help for the P1 parameter.
+.vari p20 -table
+See the help for the P1 parameter.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.vari range
+The RANGE parameter may be used to specify a range of interest in the
+histogram.  Values outside of this range will be ignored.  For
+example, the command
+
+JSTRETCH-PERC 0 RANG=(100,128) 
+
+will map the first entry in the histogram with 1 or more pixels that
+is greater than or equal to a data value of 100 to zero, and the first
+entry with 1 or more pixels that is less than or equal to 128 to 255.
+
+Thus, RANGE ensures that the applied stretch will be at least as
+narrow as the range specified.
+.vari region
+The REGION parameter may be used to specify a region on which to
+collect the histogram.  The default is to use the area in which
+you last displayed an image, using JDISP or JLOAD-IMAGE.  Regions
+are defined using JDEF-REGION.
+.vari planes
+The PLANES parameter is used to indicate which image planes are
+to be stretched.  Each image plane has its own independent stretch.
+
+PLANES is the standard VIDS PLANES parameter which may be either 
+a plane name (such as IMAGE, RED, etc.) or an integer.  For details
+on how to use plane names, type HELP PLANENAMES.
+.vari disprgn
+DISPRGN specifies the area on the screen in which the stretches are
+plotted.  Any rectangular region may be used to display the stretch,
+which are scaled to fit in the region.  If a non-rectangular region
+is given, the bounding rectangle is used.  Regions are defined using
+JDEF-REGION.  The stretches for all the planes are displayed in the
+same region.
+
+The default for DISPRGN is a pre-defined region called DTF (for
+Display Transfer Function).  This region is centered in the middle
+of the screen, and is sized such that the data area (not including
+the labels) is 256 X 256 pixels on a 512 X 512 display.  You may
+use your own display region, or even redefine DTF if you wish.
+.vari color
+COLOR specifies the graphics colors to use in plotting the stretch.
+COLOR only controls the actual data plot; the axes and labeling are
+always plotted in WHITE.  The valid colors are:
+RED, GREEN, BLUE, WHITE, CYAN, MAGENTA, YELLOW, and BLACK.
+
+For JSTRETCH-CURSOR, only one display color is used, since the planes
+all have the same stretch.  The default is RED.
+.page
+For JSTRETCH-SHOW and -EDIT, each individual plane uses its own display
+color.  That means if you give, for example, COLOR as a plane name, it
+will actually take three display colors, since COLOR is a collection of
+the red, green, and blue planes.
+
+If you don't give enough colors for all the planes, then the last color
+you give will be used for all the other planes.  This allows you to say,
+for example, COLOR=BLACK and have all the stretches plotted in black.
+
+If you don't specify any colors, defaults will be assigned.  If the plane
+is the current red plane, the color RED will be used.  Likewise, the green
+plane will use GREEN and the blue plane will use BLUE.  The bw plane uses
+RED.  If the plane is not one of those four, then the color used cycles
+between MAGENTA, YELLOW, and CYAN.
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

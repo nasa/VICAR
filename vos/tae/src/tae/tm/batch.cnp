@@ -1,0 +1,835 @@
+/******************************************************************************
+ *	Copyright (c) 1990, 1991, National Aeronautics and Space Administration
+ *	ALL RIGHTS RESERVED
+ *
+ *	The software (programs, data bases and/or documentation) on or in
+ *	any media can not be reproduced, disclosed or used except under
+ *	terms of the license between COSMIC and your organization.
+ *****************************************************************************/
+
+/*	Batch Processing Routines
+ *	-------------------------
+ *
+ * CHANGE LOG:
+ *
+ *	11-jul-83	Purged change log, deleted checkout records,
+ *			and audited global definitions...jtm
+ *
+ *	14-jul-83	Added logic to generate VALID list on user
+ *			defined globals...jtm
+ *
+ *	26-jul-83	Changed VMS error code outputs to decimal (%d)...jtm
+ *	25-aug-83	Updated for implementing NULLABLES,
+ *			used same formatting function (m_fp...) as session log,
+ *			moved dblquote() to fmtval...dm 
+ *	02-sep-83	Run current image of TM for batch...dm
+ *	06-sep-83	Output reference name to job file for NAME params...dm
+ *	15-sep-83	Implement NORUN option, fix for type = FILE...dm
+ *	28-oct-83	Added full file spec on PDF name in job file...jtm
+ *	26-dec-83	Seggregate portable code to a different module...dm
+ *	02-feb-84	Add job_ins() istallation exit...peb
+ *	22-feb-84	Remove "cmdstr" arg from run_batch() calling seq...peb
+ *	01-mar-84	Add get_runtype ...palm
+ *	06-mar-84	Check count for STDOUT qualifier...peb
+ *	09-mar-84	Change BATCH_SUB_LOG to ALT_SUB_LOG
+ *	22-mar-84	Convert batch queue name to upper case...dm
+ *	04-may-84	VALUE_x to xVAL ... ces
+ *	07-may-84	Move the IMPORT declarations...lim
+ *	17-may-84	New f_crack calling sequence...palm
+ *	3-jul-84	Put jobid into skey...palm
+ *	03-aug-84	New .job file format...palm
+ *	02-nov-84	Updates to assign_log for RCJM (remote) jobs...dm
+ *	09-dec-84	Conditionalize assign_log for remote agent use...dm
+ *	13-jun-91	Update for new 5.1 tree structure...ljn
+ *
+ ***************************************************************************
+ * CHANGES MADE IN THE RCJM TREE
+ *
+ *	16-feb-85	Add 'define TAE_ACTMODE as local' for RCJM...dm
+ *
+ *      04-mar-85       Updates for VMS 4.0, specifically, replace
+ *  			sys$sndsmb with sys$sndjbc (sent to job 
+ *			controller)...nf
+ *      05-mar-85       Merge source for VMS 3.5 and VMS 4.0 versions 
+ *			with conditional compilation using flag VMS_V3
+ *			to determine which version to compiler...nf
+ *	26-may-85	Cleanup w.r.t. no more remote agent...dm
+ *
+ *****************************************************************************
+ * MERGE WITH THE FOLLOWING TAE-V1.3 CHANGES...dm (26-may-85)
+ *
+ *	08-may-85       Update to assign_log for VMS 4.0 $trnlnm...joh
+ *
+ *****************************************************************************
+ *
+ *	30-aug-85	Call a new routine trans_log() to translate logical
+ *			name...joh
+ *	22-SEP-86	Change HNAMESIZ to FSPECSIZ...palm
+ *	02-apr-91	Used old TAE_RCJM's to remove RCJM code...ljn
+ *      03-may-93       Removed reference to nam block in bld_msg since not
+ *                      being used and caused compile error for V5.2...ws
+ */
+
+/* 	The following define removes the globalrefs to cc$rms_rab, etc.
+ *	which occur in the rms include files.  This is done to avoid
+ *	LINKer warnings when using the shared C library.  (The LINKer
+ *	complains about such refs not being general addressing.)
+ */
+
+#define  globalref  static
+
+#include	"taeconf.inp"	/* TAE configuration definitions	    */
+#include	"tminc.inc"	/* TM-only host-independent definitions	    */
+#include	"fileinc.inp"	/* File handling structures and definitions */
+#include	"terminc.inc"	
+#include 	descrip		/* VAX/VMS descriptor include */
+#include 	"tmhost.inp"	
+#include 	"parblk.inc"
+#include	iodef
+#include	rms		/* Definition of NAM block offsets 	    */
+
+    GLOBAL	v35bch = 0;	/* source version			    */
+
+#define NO_RUN	2	/* do not submit the job to batch queue	 */
+#define ENDCOL  STRINGSIZ
+#define STDCOL  79
+#define GOOD(code) (code & 1)
+
+    static	TEXT	vmsmsg [] = "VMS error code =";
+
+#ifdef VMS_V3
+/****************************************************************************/
+/*                       V M S   3.x   D E F I N I T I O N S                */
+/****************************************************************************/
+
+#define SMO$K_DELETE 1		/* Delete job file after printing */
+#define SMO$K_LOGFNAM 48	/* Job option to identify log file name */
+#define SMO$K_NOSPOOL 51	/* Job option to disable print of log file */
+#define SMR$K_ENTER 8		/* Job msg type for submission of one file */
+
+
+    struct JOB {
+	short 	req_type;
+	TINY	q_namlen;
+	TEXT	q_name [15];
+	TEXT	dev_name [16];
+	TINY	file_id [6];
+	TINY	dir_id [6];
+	TINY	f_namlen;
+	TEXT	f_name [19];
+	TINY	jobdel_opt;		/* Delete job file after processing */
+	TINY	nologpr_opt;		/* Don't print log file */
+	TINY	logname_opt;		/* Always going to specify log file 
+ *					   name */
+	TINY	l_namlen;		/* Log file name length */
+	TEXT	l_name [FSPECSIZ+1];	/* Log file name */
+	};
+
+    struct	MSG {		/* Buffer to receive submission status from 
+ *				   symbiont manager */
+	short 	msgtype;
+	short 	jobid;
+	TAEINT	status;
+	};
+
+#else
+/****************************************************************************/
+/*                       V M S   4.0   D E F I N I T I O N S                */
+/****************************************************************************/
+#include	"sjcdef.inp"	/* Send to Job Controller definitions       */
+
+/****************************************************************************
+             Sent to Job Controller (SNDJBC) Data
+*****************************************************************************/
+#define	MAX_ITEMS  10			/* Maximum items sent to SNDJBC     */
+
+static 	long	sjc_efn;		/* Event flag for SNDJBC call	    */
+static  TAEINT	sjc_iosb[2];		/* IOSB for SNDJBC call		    */
+
+static	char	sjc_filename[STRINGSIZ+1];	/* Job file name	    */
+static 	char	sjc_qname[STRINGSIZ+1];		/* Queue name		    */
+static  char	sjc_logfn[STRINGSIZ+1];		/* Log file name	    */
+static 	long	job_id;				/* Entry number in queue    */
+
+struct	ITEM_DESCRIPTOR	{
+	short	buffer_length;			/* Length of buffer	    */
+	short	item_code;			/* SJC Item code	    */
+	char    *buffer;			/* buffer address	    */
+	long	*ret_length;			/* Length of returned buffer*/
+	};
+
+static struct ITEM_DESCRIPTOR itemlist[MAX_ITEMS];
+
+			/* position in Send to Job Controller itemlist 	    */
+static	short	sjc_queue;			/* SJC$_QUEUE		    */
+static  short	sjc_filespec;			/* SJC$_FILE_SPECIFICATION  */
+static  short   sjc_logspec;			/* SJC$_LOG_SECIFICATION    */
+
+/****************************************************************************/
+#endif
+
+
+/*
+ * assign_log: Assigns logical names for a batch/async job:
+ *
+ *	1.) Obtains the logical name translation of "TAE" at the time of 
+ *	    submission of the batch job and constructs a DCL $ASSIGN 
+ *	    command in the job file to maintain the same context.
+ *	
+ *	2.) Based on the value of the STDOUT qualifier, create a logical
+ *	    name assignment which assigns TAE_JOB_LOG to:
+ *	
+ *		- "proc.LOG" if the STDOUT qualifier is null, where 
+ *		  "proc" is the name of the proc being submitted to batch, or
+ *
+ *		- "name.LOG", where "name" is the name of the STDOUT file 
+ *		  specified by the user.
+ *
+ *	    TM will open the TAE_JOB_LOG filespec upon activation in batch 
+ *	    mode.
+ *
+ *	3.) Based on the value of the $SWITCH global, create a logical name
+ *	    to be used for the assignmentof the sys$output of the subprocess
+ *	    to the batch version of tm.
+ */
+
+    FUNCTION  CODE  assign_log (b, b_block, cmdctx)
+
+    struct	SFILE	*b;		/* IN/OUT: job SFILE structure 	*/
+    struct	FSBLOCK	*b_block;	/* IN: job FSBLOCK structure */
+    struct	CONTXT	*cmdctx;	/* IN: Context block of TCL command */
+
+    {
+    IMPORT 	struct VARIABLE *switch_gbl;
+
+    static	TEXT	tae_name[] = "$TAE";
+    $DESCRIPTOR (tae_desc, tae_name);
+    static 	TEXT	tae_trans [FSPECSIZ+1];
+    $DESCRIPTOR (trans_desc, tae_trans);
+    FAST	CODE	code;
+    short 	len;
+    TEXT	record [STRINGSIZ+1];	
+    TEXT	file_spec [FSPECSIZ+1];
+    struct	FSBLOCK	out_file;
+    struct	VARIABLE 	*v;
+    TEXT	errstr[STRINGSIZ+1];
+
+    tae_desc.dsc$w_length = s_length (tae_name);
+    len = FSPECSIZ+1;
+    code = trans_log(&tae_desc, &trans_desc, len);	/* translate TAE */
+    if (!GOOD(code))
+	{
+	tmmsg (PROCFAIL, "Error translating the '$TAE' logical name. %s %d.",
+	"TAE-TRANSFAIL", vmsmsg, code);
+	return (FAIL);
+	}
+    s_copy ("$ ASSIGN ", record);
+    tae_trans [trans_desc.dsc$w_length] = EOS;
+    s_append (tae_trans, record);
+    s_append (" $TAE", record);
+    code = f_write (b, record);			
+    if (code != SUCCESS) goto writerr;
+    v = lookex(&(*cmdctx).qualst, "STDOUT");	/* Get the STDOUT qualifier */
+    if (v == NULL)
+	{
+	tmierr (1001);				/* Can't find STDOUT qualifier in submit */
+	return (FAIL);
+	}
+    if ((*v).v_count != 0)			/* User specify log filename? */
+	code = f_crack (SVAL (*v, 0), "",
+    			"", BLOG_TYPE, &out_file, errstr);
+    else
+	code = f_crack ("", "", (*b_block).name,
+			BLOG_TYPE, &out_file, errstr);	
+    f_spec (&out_file, file_spec);
+    s_copy ("$ ASSIGN ", record);
+#ifdef VICAR_BATCH_LOG
+    s_append ("sys$output", record);
+#else
+    s_append (file_spec, record);
+#endif
+    s_append (" TAE_JOB_LOG", record);
+    code = f_write (b, record);
+    if (code != SUCCESS) goto writerr;
+    if (IVAL(*switch_gbl, 0) & SW_SYSOUTS)
+	{
+	code = f_crack ("","", (*b_block).name,
+			SPL_TYPE, &out_file, errstr);
+	f_spec (&out_file, file_spec);
+	}
+    else
+	s_copy (NULL_OUTPUT, file_spec);
+    s_copy ("$ ASSIGN ", record);
+    s_append (file_spec, record);
+    s_append (" ALT_SUB_LOG", record);
+    code = f_write (b, record);
+    if (code != SUCCESS) goto writerr;
+    return (SUCCESS);
+
+writerr:
+    len = f_spec (b_block, file_spec);
+    tmmsg (PROCFAIL, "Error writing to job file '%s'. %s",
+    	   "TAE-JOBWRT", file_spec, (*b).errmsg);
+    return (DO_CHECK);
+    }
+#ifdef VMS_V3
+
+/****************************************************************************/
+/*                       V M S   3.x   V E R S I O N                        */
+/****************************************************************************/
+/*
+ * bld_msg: 	Build message to send to the symbiont manager for submission 
+ *		of a batch job.
+ *
+ * Return codes:
+ * 
+ *	SUCCESS
+ *	NO_RUN
+ *	FAIL
+ */
+ 
+    FUNCTION CODE bld_msg (f, blk, j, cmdctx)
+
+    struct	SFILE	*f;	/* IN: Pointer to SFILE of batch job file */
+    struct	FSBLOCK	*blk;	/* IN: Pointer to fsblock for the job file name */
+    struct	JOB	*j;	/* IN/OUT: Pointer to job message structure */
+    struct	CONTXT	*cmdctx;/* IN: Pointer to context block */
+
+    {
+    IMPORT	struct	VARIABLE *switch_gbl;
+
+    struct	NAM	*nam;
+    struct 	VARIABLE *v;
+    short 		len, i;
+    FAST	CODE	code;
+    struct	FSBLOCK	logfile;
+    TEXT	errstr[STRINGSIZ+1];
+    TEXT		def_libr[FSPECSIZ+1];
+
+    nam = &(*f).nam;				/* Get pointer to nam block */
+
+    (*j).req_type = SMR$K_ENTER;			/* Req. to enter a single job */
+    bytmov (&(*nam).nam$t_dvi, (*j).dev_name, 16);/* Put dev id in job buffer */
+    
+    bytmov (&(*nam).nam$w_fid, (*j).file_id, 6);	/* Get file id field */
+    bytmov (&(*nam).nam$w_did, (*j).dir_id, 6);	/* Get directory id field */
+
+/*		PUT IN KNOWN OPTIONS 		*/
+
+    (*j).nologpr_opt = SMO$K_NOSPOOL;		/* Don't print log file */
+    (*j).logname_opt = SMO$K_LOGFNAM;		/* Specify log file */
+    (*j).jobdel_opt = SMO$K_DELETE;		/* Delete job file after processing */
+
+    code = SUCCESS;				/* assume success	*/
+    v = lookex((*cmdctx).qualst, "RUNTYPE");	/* Get the RUNTYPE qualifier */
+    if (v == NULL)
+	{
+	tmierr (1000);				/* Can't find runtype qualifier in submit */
+	return (FAIL);
+	}
+    if ((*v).v_count == 2)			/* Queue specified? */
+	{
+	len = s_length (SVAL (*v, 1));		/* Yes... */
+	if (len > 15)
+	    {
+	    tmmsg (PROCFAIL, "Batch queue name too long.",
+	    	   "TAE-LONGQNAME");
+	    return (FAIL);
+	    }
+	if (s_equal(SVAL(*v, 1), "NORUN"))	/* do not submit the job */
+	    {
+	    len = s_length ("SYS$BATCH");
+	    s_copy ("SYS$BATCH", (*j).q_name);	/* Default is batch que */
+	    code = NO_RUN;
+	    }
+	else
+	    s_copy (SVAL (*v,1), (*j).q_name);
+	(*j).q_namlen = len;
+	}
+    else
+	{
+	len = s_length ("SYS$BATCH");
+	s_copy ("SYS$BATCH", (*j).q_name);	/* Default is batch que */
+	(*j).q_namlen = len;
+	}
+    for (i=len; i<=14; (*j).q_name[i++] = ' ');	/* Buffer must be blank filled */
+
+    len = f_spec (blk, (*j).f_name);		/* Get job file name */
+    s_copy (&(*j).f_name[2], (*j).f_name);
+    len = s_length ((*j).f_name);
+    if (len > 19)
+	{
+	tmmsg (PROCFAIL, "Batch job file name too long.  Cannot exceed 19 bytes.",
+	       "TAE-LONGJOBFILE");
+	return (FAIL);
+	}
+    (*j).f_namlen = len;				
+    for (i=len; i<=18; (*j).f_name[i++] = ' ');	/* Blank fill */
+
+/* 	BUILD BATCH JOB LOG OUTPUT FILE (I.E. WHERE SYS$OUTPUT IS ASSIGNED TO */
+
+    if (IVAL(*switch_gbl, 0) & SW_SYSOUTS)	/* If user wants output */
+	{
+	getulib(def_libr); 
+	f_crack ("", def_libr, 
+    	       (*blk).name, TML_TYPE, &logfile, errstr);
+	f_spec (&logfile, (*j).l_name);		/* Get full file spec */
+	}
+    else
+	s_copy (NULL_OUTPUT, (*j).l_name);		/* No output requested */
+    
+
+
+/*
+ *		NOTE: The following code utilizes a "trick".
+ *		The message requires a byte of zero at the end
+ *		representing a "terminator option".
+ *		The following code places the log file name option at the 
+ *		end of the message buffer using the f_spec function.
+ *		f_spec copies a "C" string, which is terminated with 
+ *		a zero into the buffer. Therefore, the zero byte serves as
+ *		the terminator of the string as well as the msg buffer.
+ */
+
+    (*j).l_namlen = s_length ((*j).l_name);	/* Put length in msg */
+    return (code);	
+    }
+
+/*    submit -  Submit the batch job using the SYS$SNDSMB system service.
+ *
+ *		This function performs the following functions:
+ *	
+ *			o constructs a job creation mailbox message 
+ *
+ *			o creates a temporary mailbox for the receipt
+ *			  of submission status from the symbiont manager
+ *	
+ *			o sends the message to the VMS symbiont manager
+ *
+ *			o waits for completion status from the symbiont 
+ *			  manager
+ *
+ *			o deletes the temporary mailbox.
+ *
+ *	Function return codes:
+ *		
+ *		SUCCESS
+ *		FAIL
+ */
+    FUNCTION CODE submit (f, blk, cmdctx, jobid)
+
+    struct	SFILE	*f;		/* IN: Contains job file ids */
+    struct 	FSBLOCK	*blk;		/* IN: Contains name of batch file */
+    struct	CONTXT	*cmdctx;	/* IN: Contains runtype qualifiers */
+    CODE		*jobid;		/* OUT: job id			*/
+
+    {
+    TEXT	succ_msg [STRINGSIZ+1];
+    TEXT	que [16];
+    static TEXT	dummy [1];
+    static struct JOB	j;
+    struct	MSG	smb_msg;
+    struct	NAM	*nam;
+
+    $DESCRIPTOR (j_descr, dummy);
+    struct 	VARIABLE *v;
+    short 		len, i;
+    FAST	CODE	code;
+    short 		mbxchan;
+    TAEINT		iosb[2];
+    TINY		device [16];
+    CODE		status;
+
+    j_descr.dsc$a_pointer = &j;			/* Initialize the descriptor */
+
+    code = bld_msg (f, blk, &j, cmdctx);	/* Build the message 	     */
+    if (code == FAIL )
+	return (FAIL);
+    else if (code == NO_RUN)
+	{
+	sprintf (succ_msg, "Created batch job file '%s.%s'.",
+		(*blk).name, (*blk).type);
+	put_stdout(succ_msg);
+	return (SUCCESS);
+	}
+
+    for (i=0; i < j.q_namlen; i++)
+	{
+	que[i] = UPPER(j.q_name[i]);		/* convert name to upper case*/
+	j.q_name[i] = que[i];			/* copy back		     */
+	}
+    que[j.q_namlen] = EOS;
+
+    j_descr.dsc$w_length = sizeof (struct JOB)-
+    		FSPECSIZ + s_length (j.l_name);	/* Compute message length    */
+
+    code = sys$crembx (0, &mbxchan,0,0,0,0,0);
+    if (!(GOOD(code)))
+	{
+	tmmsg (PROCFAIL, "Unable to receive batch job status. %s %d.",
+	       "TAE-BCHSTAT", vmsmsg, code);
+	return(FAIL);
+	}
+    code = sys$sndsmb (&j_descr, mbxchan);	/* Finally, submit job       */
+    if (!(GOOD(code)))
+	{
+	tmmsg (PROCFAIL, "Batch job submission failure. VMS error code = %d.",
+	       "TAE-NOBATCH", code);
+	code = FAIL;
+	goto cleanup;
+	}
+    code = sys$qiow(0, mbxchan, IO$_READVBLK, 
+    	   &iosb, 0, 0, &smb_msg, 
+	   sizeof (struct MSG), 0, 0, 0, 0);	/* Wait for message from symbiont
+ *						   manager */
+    if (!(GOOD(code)))
+	{
+	tmmsg (PROCFAIL, "Error reading batch job submission status. %s %d.",
+	       "TAE-NOBCHSTA", vmsmsg, code);
+	code = FAIL;
+	goto cleanup;
+	}    
+    if (!(GOOD(smb_msg.status)))
+	{
+	tmmsg (PROCFAIL, "Batch job submission failure. VMS error code = %d.",
+	       "TAE-NOBATCH", smb_msg.status);
+	code = FAIL;
+	goto cleanup;
+	}    
+    sprintf (succ_msg, "Job %d submitted to queue %s", smb_msg.jobid, que);
+    code = SUCCESS;
+    put_stdout (succ_msg);			/* Output success message    */
+    *jobid = smb_msg.jobid;
+cleanup:
+    status = sys$dassgn (mbxchan);		/* Delete the mbx 	     */
+    return (code);
+    }
+#else
+/****************************************************************************/
+/*            		V M S   4.0   V E R S I O N                         */
+/****************************************************************************/
+/*
+ * bld_msg: 	Build message to send to the job controller for submission 
+ *		of a batch job.
+ *
+ * Return codes:
+ * 
+ *	SUCCESS
+ *	NO_RUN
+ *	FAIL
+ */
+ 
+    FUNCTION CODE bld_msg (f, blk, cmdctx)
+
+    struct	SFILE	*f;	/* IN: Pointer to SFILE of batch job file */
+    struct	FSBLOCK	*blk;	/* IN: Pointer to fsblock for the job file name */
+    struct	CONTXT	*cmdctx;/* IN: Pointer to context block */
+
+    {
+    IMPORT	struct	VARIABLE *switch_gbl;
+
+    struct 	VARIABLE *v;
+    short 		len, i,n;
+    FAST	CODE	code;
+    struct	FSBLOCK	logfile;
+    TEXT	errstr[STRINGSIZ+1];
+    TEXT	def_libr[FSPECSIZ+1];
+
+						/* Initialize SNDJBC itemlist */
+    for (i = 0;  i < MAX_ITEMS;  i++)
+        {
+   	itemlist[i].item_code 	  = 0;
+	itemlist[i].buffer_length = 0;
+	itemlist[i].buffer	  = 0;
+	itemlist[i].ret_length    = 0;
+	}
+
+    n = 0;					/* Queue name		      */
+    sjc_queue = n;
+    itemlist[sjc_queue].item_code = SJC$_QUEUE;
+    itemlist[sjc_queue].buffer    = sjc_qname;
+
+    n++;					/* Job file name              */
+    sjc_filespec = n;
+    itemlist[sjc_filespec].item_code = SJC$_FILE_SPECIFICATION;
+    itemlist[sjc_filespec].buffer    = sjc_filename;
+
+    n++;					/* Log file name	      */
+    sjc_logspec = n;
+    itemlist[sjc_logspec].item_code = SJC$_LOG_SPECIFICATION;
+    itemlist[sjc_logspec].buffer    = sjc_logfn;
+
+    n++;					/* Entry Number returned      */
+    itemlist[n].item_code     = SJC$_ENTRY_NUMBER_OUTPUT;
+    itemlist[n].buffer_length = 4;
+    itemlist[n].buffer        = &job_id;
+
+    n++;					/* Delete job file	      */
+    itemlist[n].item_code = SJC$_DELETE_FILE;
+
+    n++;					/* Do not spool log file      */
+    itemlist[n].item_code = SJC$_NO_LOG_SPOOL;
+#ifdef VICAR_BATCH_LOG
+    n++;                                     /* Do not delete log file     */
+    itemlist[n].item_code = SJC$_NO_LOG_DELETE;
+
+    n++;                                     /* Notify user of completion  */
+    itemlist[n].item_code = SJC$_NOTIFY;
+#endif
+
+    		       /****    SET UP QUEUE NAME     ****/
+    code = SUCCESS;				/* assume success	      */
+    v = lookex((*cmdctx).qualst, "RUNTYPE");	/* Get the RUNTYPE qualifier  */
+    if (v == NULL)
+	{
+	tmierr (1000);				/* Can't find runtype qualifier in submit */
+	return (FAIL);
+	}
+    if ((*v).v_count == 2)			/* Queue specified?           */
+	{
+	len = s_length (SVAL (*v, 1));		/* Yes...                     */
+	if (len > 15)
+	    {
+	    tmmsg (PROCFAIL, "Batch queue name too long.",
+	    	   "TAE-LONGQNAME");
+	    return (FAIL);
+	    }
+	if (s_equal(SVAL(*v, 1), "NORUN"))	/* do not submit the job      */
+	    {
+	    len = s_length ("SYS$BATCH");
+	    s_copy ("SYS$BATCH", sjc_qname);	/* Default is batch que       */
+	    code = NO_RUN;
+	    }
+	else
+	    s_copy (SVAL (*v,1), sjc_qname);
+	itemlist[sjc_queue].buffer_length = len;
+	}
+    else
+	{
+	len = s_length ("SYS$BATCH");
+	s_copy ("SYS$BATCH", sjc_qname);	/* Default is batch que       */
+	itemlist[sjc_queue].buffer_length = len;
+	}
+    for (i=len; i<=14; sjc_qname[i++] = ' ');	/* Blank fill buffer          */
+
+    		     /****    SET UP JOB FILE NAME     ****/
+    len = f_spec (blk, sjc_filename);		/* Get job file name          */
+    s_copy (&sjc_filename[2], sjc_filename);
+    len = s_length (sjc_filename);
+    if (len > 19)
+	{
+	tmmsg (PROCFAIL, "Batch job file name too long.  Cannot exceed 19 bytes.",
+	       "TAE-LONGJOBFILE");
+	return (FAIL);
+	}
+    itemlist[sjc_filespec].buffer_length = len;
+    for (i=len; i<=18; sjc_filename[i++] = ' ');	/* Blank fill buffer  */
+
+    		     /****    SET UP LOG FILE NAME     ****/
+/* 	Build batch job log output file (i.e. where SYS$OUTPUT is assigned to */
+
+#ifdef VICAR_BATCH_LOG
+    getulib(def_libr);
+    v = lookex((*cmdctx).qualst, "STDOUT");	/* Get the STDOUT qualifier  */
+    if (v == NULL)
+	{
+	tmierr (1001);
+	return (FAIL);
+	}
+
+    if ((*v).v_count != 0)		/* User specified log filename? */
+	f_crack (SVAL(*v,0), def_libr, "", BLOG_TYPE, &logfile, errstr);
+    else				/* No, use job file name */
+	f_crack ("", def_libr, (*blk).name, BLOG_TYPE, &logfile, errstr);
+
+    f_spec(&logfile, sjc_logfn);	/* Get full file spec */
+#else
+    if (IVAL(*switch_gbl, 0) & SW_SYSOUTS)	/* If user wants output       */
+	{
+	getulib(def_libr); 
+	f_crack ("", def_libr, 
+    	       (*blk).name, TML_TYPE, &logfile, errstr);
+	f_spec (&logfile, sjc_logfn);		/* Get full file spec         */
+	}
+    else
+	s_copy (NULL_OUTPUT, sjc_logfn);	/* No output requested        */
+#endif
+    
+						/* Put length in msg 	      */
+    itemlist[sjc_logspec].buffer_length = s_length(sjc_logfn);
+    return (code);	
+    }
+
+
+/*    submit -  Submit the batch job using the SYS$SNDSMB system service.
+ *
+ *		This function performs the following functions:
+ *	
+ *			o sends the message to the VMS job controller
+ *
+ *			o waits for completion status from the job controller 
+ *
+ *	Function return codes:
+ *		
+ *		SUCCESS
+ *		FAIL
+ */
+    FUNCTION CODE submit (f, blk, cmdctx, jobid)
+
+    struct	SFILE	*f;		/* IN: Contains job file ids */
+    struct 	FSBLOCK	*blk;		/* IN: Contains name of batch file */
+    struct	CONTXT	*cmdctx;	/* IN: Contains runtype qualifiers */
+    CODE		*jobid;		/* OUT: job id			*/
+
+    {
+    TEXT	succ_msg [STRINGSIZ+1];
+    TEXT	que [16];
+    struct	NAM	*nam;
+
+    struct 	VARIABLE *v;
+    short 		len, i;
+    FAST	CODE	code;
+    TAEINT		iosb[2];
+    TINY		device [16];
+    CODE		status;
+
+    code = bld_msg (f, blk, cmdctx);		/* Build the message 	     */
+    if (code == FAIL )
+	return (FAIL);
+    else if (code == NO_RUN)
+	{
+	sprintf (succ_msg, "Created batch job file '%s.%s'.",
+		(*blk).name, (*blk).type);
+	put_stdout(succ_msg);
+	return (SUCCESS);
+	}
+
+    for (i=0; i < itemlist[sjc_queue].buffer_length; i++)
+	{
+	que[i] = UPPER(sjc_qname[i]);		/* convert name to upper case*/
+	sjc_qname[i] = que[i];			/* copy back		     */
+	}
+    que[itemlist[sjc_queue].buffer_length] = EOS;
+
+    lib$get_ef(&sjc_efn);			/* Allocate an event flag    */
+    code = sys$sndjbcw (sjc_efn, SJC$_ENTER_FILE, NULL, &itemlist,&sjc_iosb,
+			NULL, NULL);
+    lib$free_ef(&sjc_efn);			/* Done with event flag      */
+
+    if (!(GOOD(code)))
+	{
+	tmmsg (PROCFAIL, "Batch job submission failure. VMS error code = %d.",
+	       "TAE-NOBATCH", code);
+	code = FAIL;
+	goto cleanup;
+	}
+    sprintf (succ_msg, "Job %d submitted to queue %s", job_id, que);
+    code = SUCCESS;
+    put_stdout (succ_msg);			/* Output success message    */
+    *jobid = job_id;
+cleanup:
+    return (code);
+    }
+#endif
+
+    
+/*    run_batch - Processes a TCL command when the runtype is BATCH.
+ *
+ *	Function return codes:
+ *		
+ *		DO_SUCCESS
+ *		DO_CHECK
+ *
+ */
+    FUNCTION CODE run_batch (procctx, cmdctx)
+
+    struct	CONTXT	*procctx;		/* IN: Containing proc */
+    struct	CONTXT	*cmdctx;		/* IN: proc with batch qualifier */
+
+    {
+    IMPORT struct VARIABLE *skey_gbl;
+
+    TEXT	job_string[STRINGSIZ+1];
+    CODE	jobid;
+    struct	SFILE	bch_file;
+    struct	FSBLOCK	bch_block;
+    TAEINT		lun = 2;
+    FAST	CODE	code;
+    CODE		disp;			/* job file disposition 	*/
+    TEXT		file_spec[FSPECSIZ+1];
+    short 		spec_len;
+    TEXT		set_def [FSPECSIZ + 15];
+    struct	VARIABLE *v;
+    TEXT		record [STRINGSIZ+1];
+    TEXT		user_dir [FSPECSIZ+1];
+    TEXT		img_name[128];		/* current image file name */
+#ifdef BATCH_FIXES
+    TEXT                *tp;
+#endif
+
+    s_copy ("[]", bch_block.libr);		/* File created in def dir */
+    s_copy ((*cmdctx).pdf.name, bch_block.name);/* Use proc name as filename */
+    s_copy (JOB_TYPE, bch_block.type);		/* Extension is "JOB" */
+    bch_block.attr[0] = EOS;
+    
+    code = f_opnblk (&bch_file, lun, &bch_block, F_WRITE);
+    if (code != SUCCESS)
+	goto openerr;
+    getulib(user_dir); 				/* Get default directory */
+#ifdef VICAR_BATCH_LOG
+    code = f_write(&bch_file, "$ SET VERIFY=NOIMAGE");
+    if (code != SUCCESS)
+        goto writerr;           
+#endif
+    s_copy ("$ SET DEFAULT ", set_def);
+    s_append (user_dir, set_def);
+    code = f_write (&bch_file, set_def);	/* default for job	 */
+    if (code != SUCCESS)
+	goto writerr;		
+    code = assign_log (&bch_file, &bch_block, cmdctx);   /* assign TAE	*/
+    if (code != SUCCESS)
+	return (DO_CHECK);
+    code = f_write (&bch_file, "$ @$TAE:TAESETUP");
+    if (code != SUCCESS)
+	goto writerr;
+    get_image(img_name);			/* get name of TM image	     */
+#ifdef BATCH_FIXES
+    tp = strrchr(img_name, ';');                /* strip off version number  */
+    if (tp != NULL)
+        *tp = '\0';
+#endif
+    s_copy("$ RUN/NODEBUG ", record);		/* generate RUN command	     */
+    s_append(img_name, record);			/* get current TM image name */
+    code = f_write (&bch_file, record);	
+    if (code != SUCCESS)
+	goto writerr;
+    code = job_ins (&bch_file, cmdctx);			/* installation exit*/
+    if (code != SUCCESS) 
+	{
+	f_close (&bch_file, F_DELETE);
+        return (DO_CHECK);
+	}
+    code = bld_tcl (cmdctx, &bch_file, BATCH);	/* write TCL commands*/
+    if (code != SUCCESS)
+	{
+	f_close (&bch_file, F_DELETE);
+        return (DO_CHECK);
+	}
+    code = submit (&bch_file, &bch_block, cmdctx, &jobid);
+    disp = (code == FAIL) ? F_DELETE : F_KEEP;
+    f_close (&bch_file, disp);
+    s_i2s (jobid, job_string);
+    set_string (skey_gbl, job_string);			/* return job id */
+    return (SUCCESS);
+
+openerr:
+    spec_len = f_spec (&bch_block, file_spec);	/* Build file spec opened */
+    tmmsg (PROCFAIL, "Unable to create batch job file (%s). %s",
+    	   "TAE-BCHOPN",file_spec, bch_file.errmsg);
+    return (DO_CHECK);
+writerr:
+    spec_len = f_spec (&bch_block, file_spec);	/* Build file spec opened */
+    tmmsg (PROCFAIL, "Error writing to batch job file '%s'. %s",
+    	   "TAE-BCHWRT",file_spec, bch_file.errmsg);
+    return (DO_CHECK);
+    }

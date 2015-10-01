@@ -1,0 +1,96 @@
+.Title              !  LEVEL8.MDF
+[4m[1mIMAGE UTILITIES Menu[0m
+.Menu DB1.MDF
+CATALOG & DATABASE MANAGEMENT - Manipulate or modify a catalog or database.
+
+.Menu COMPRES1.MDF
+DATA COMPRESSION           - Compress or decompress data.
+
+.Menu FORMAT1.MDF
+DATA FORMAT MANIPULATION   - Change data from one data format to another
+                             (e.g., halfword to byte).
+.Menu LEVEL8T.MDF
+DATA TRANSFER  (logging)   - Transfer data from one type of data to another.
+                             (e.g. from non-VICAR to VICAR format or vice 
+                             versa, or from tape to disk etc.)
+.Menu SYNTH1.MDF
+SYNTHETIC DATA GENERATION  - Generate synthetic or simulated data.
+
+.Menu TAPES1.MDF
+TAPE UTILITIES             - Performs magnetic tape functions.
+
+.Menu UTIL1.MDF
+UTILITIES MISCELLANEOUS    - Misc Utilities, (e.g., parameter passing, 
+                             sending messages to system operator, current 
+                             time and date etc.)
+.help
+The CATALOG and DATABASE MANAGEMENT section contains those programs which 
+allow the user to manipulate or modify a catalog or database. These 
+programs include:
+
+AGGRG              AGGRG2             CAMPARAM           CATIMAGE           
+CATLIST            CATSLIST           CNT                COUNT              
+DTRTAE             EDRVAL             LISTSEDR           NXT                
+PPLOAD             RESET              SRCH               SRCHGEN            
+VOLSTSDR           VOSDRIBIS
+
+.PAGE
+The DATA COMPRESSION or DECOMPRESSION section contains those programs which
+allow the user to either compress or decompress the data. These programs 
+include:
+
+DEBARC             HUFFCODE           RUNCODE            STRPMTCH           
+VGRPWS
+
+
+The DATA FORMAT MANIPULATION section contains those programs which allow 
+the user to change the data from one data format to another (e.g., halfword 
+to byte). These programs include:
+
+C                  CCOMP              fit                
+
+.PAGE
+The DATA TRANSFER section allows the user to transfer data from one type of
+data to another.  This section is composed of the following subsections:
+
+      Data Transfer      - Transfers data from one storage medium
+                           to another (e.g., tape to disk, disk to disk)
+
+      Foreign Transfer   - transforms or logs foreign data to or from the 
+                           VICAR format.
+
+      IBIS Transfer      - transforms or logs IBIS data to or from the VICAR 
+                           format.
+
+      Planetary Transfer - transforms or logs planetary data to or from the 
+                           VICAR format (e.g., Viking, Voyager etc.)
+
+.page
+The SYNTHETIC DATA GENERATION section contains those programs which allow 
+the user to generate synthetic or simulated data. These programs include:
+
+CELLGEN            FRACGEN            GAUSNOIS           GEN
+GENTHIS            POLYNOIS           RADAGEN            SPOT               
+TESTGEN
+
+
+The TAPE UTILITIES section contains those programs which allow the user to
+access the magnetic tape drives.  These program include:
+
+ADDON              ALLOC              COPY               DEALLOC
+DISMOUNT           MOUNT              MTCLEAR            SFDULOG
+TAPES              REWIND
+
+.page
+The MISCELLANEOUS UTILITIES section contains those programs which allow the 
+user to do miscellaneous things like: send messages to the system operator, 
+find out the date and time, pass parameters to pdf's etc.  These programs 
+include: 
+
+AP                 APFLAG             CAMPARAM           DATETIME           
+DTRTAE             FORM               GETLAB             IBIS2TCL
+LAB2TCL            MAXMIN             MENUTREE           REQUEST            
+SYNTAX             TRANSLOG           USERNAME           V2VERSION          
+WILDCARD
+
+.END

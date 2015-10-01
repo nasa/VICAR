@@ -1,0 +1,39 @@
+.Title
+[4mGRAPHICS Menu[0m                                         (page 1 of 2)
+.Proc ADL
+[1mADL[0m      - Adds a line to an image by adding a constant value to
+           pixels specified by endpoints.
+.Proc BOXGEN
+[1mBOXGEN[0m   - Generates a step wedge series of discrete blocks arranged
+           horizontally in a big "box". Used in legends and keys.
+.Proc CONTOUR
+[1mCONTOUR[0m  - IBIS program creating a Graphics-1 file of isolines.
+.Proc GRID
+[1mGRID[0m     - Superimposes user defined reference grid on a byte image.
+.Proc IDX
+[1mIDX[0m      - Displays VICAR image interactively and permits graphics 
+           to be overlayed onto the image.
+.Proc MAPGRID
+[1mMAPGRID[0m  - Superimposes a 25x25 pixel reference grid on an image.
+.Proc MARK
+[1mMARK[0m     - Scribes rectangles about specified pixel locations.
+.Proc OVERLAY
+[1mOVERLAY[0m  - Superimposes a user defined latitude-longitude grid over
+           an image space, object space or cartographically projected 
+           image.
+
+.Menu graph2.mdf
+[7mAdditional GRAPHICS Menu Selections[0m
+.help
+
+The GRAPHICS section contains those programs which allow the user to 
+superimpose graphics on or around an image. This includes adding a grid, 
+contour lines, or other graphics within the borders of the image. These 
+programs include:
+
+ADL                BOXGEN             CONTOUR            GRID
+IDX                MAPGRID            MARK               OVERLAY
+POLYSCRB           SHADY              STERMAP            UVECTOR
+UVFMAP
+
+.end

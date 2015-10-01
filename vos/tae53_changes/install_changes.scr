@@ -1,0 +1,65 @@
+#!/bin/csh
+# Copies VICAR TAE changes to the appropriate TAE directories.
+# The TAE environment variable must have already been set, and the
+# TAE tree must already exist.
+#
+cp -r * $TAE
+#
+# Added 3/2/15 for Mac OS build
+rm $TAE/include/PGMINC.FIN
+rm $TAE/include/XIINC.FIN
+rm $TAE/include/pgminc.fin
+rm $TAE/include/xiinc.fin
+cp include/pgminc.fin $TAE/include/pgminc.fin
+cp include/xiinc.fin $TAE/include/xiinc.fin
+(cd $TAE/include; ln -s pgminc.fin PGMINC.FIN)
+(cd $TAE/include; ln -s xiinc.fin XIINC.FIN)
+#
+chmod +x $TAE/build_tae.csh
+chmod +x $TAE/installtae.nointer
+mkdir $TAE/src/lib/vicar
+chmod +x $TAE/bin/all/platform
+chmod +x $TAE/bin/all/bsdinst_sgi
+chmod +x $TAE/bin/all/bsdinst_hp800
+
+cp $TAE/include/unix/taeconf.inp $TAE/include
+cp $TAE/include/unix/tmhost.inp $TAE/include
+
+# Mac OS X (or at least its HFS+ file system) is only sort-of case sensitive.
+# The softlink of e.g. PGMINC.FIN to pgminc.fin is problematic; they appear to
+# be the same file.  A tar transfer can pick up the symlink instead of the
+# file; the symlink then appears to point to itself.  So, we simply make a
+# copy instead of a link.  This way, no matter which one is actually picked
+# up, we get a valid file.  This should not hurt other platforms as long as
+# the two are kept in sync (which should not be a problem since this copy is
+# made during the build).
+# For the Mac itself, the tar might have given us just the upper-case version.
+# So we do some shuffling around to make sure the lower-case one is there.
+# Because some Mac file systems are normal, we also copy back to the upper-case
+# one, just in case.
+
+if ("$TAEPLAT" != "mac_osx" && "$TAEPLAT" != "x86_macosx") then
+   rm $TAEINC/PGMINC.FIN
+   cp $TAEINC/pgminc.fin $TAEINC/PGMINC.FIN
+   rm $TAEINC/XIINC.FIN
+   cp $TAEINC/xiinc.fin $TAEINC/XIINC.FIN
+else
+   cp $TAEINC/PGMINC.FIN $TAEINC/pgminc.fin.x
+   cp $TAEINC/pgminc.fin $TAEINC/pgminc.fin.x
+   rm $TAEINC/PGMINC.FIN $TAEINC/pgminc.fin
+   mv $TAEINC/pgminc.fin.x $TAEINC/pgminc.fin
+   cp $TAEINC/pgminc.fin $TAEINC/PGMINC.FIN
+
+   cp $TAEINC/XIINC.FIN $TAEINC/xiinc.fin.x
+   cp $TAEINC/xiinc.fin $TAEINC/xiinc.fin.x
+   rm $TAEINC/XIINC.FIN $TAEINC/xiinc.fin
+   mv $TAEINC/xiinc.fin.x $TAEINC/xiinc.fin
+   cp $TAEINC/xiinc.fin $TAEINC/XIINC.FIN
+endif
+
+# why is this file here?
+
+if (-f $TAE/include/ipc.h) then
+  mv $TAE/include/ipc.h $TAE/include/tae_ipc.h
+endif
+

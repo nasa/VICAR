@@ -1,0 +1,42 @@
+/******************************************************************************
+ *	Copyright (c) 1990, 1991, 1992,
+ *	National Aeronautics and Space Administration
+ *	ALL RIGHTS RESERVED
+ *
+ *	The software (programs, data bases and/or documentation) on or in
+ *	any media can not be reproduced, disclosed or used except under
+ *	terms of the license between COSMIC and your organization.
+ *****************************************************************************/
+
+/*
+ *	INCLUDE FILE FOR TASK PACKAGE		
+ */
+
+#include "stdh.inp" 
+
+#define ACKN_CODE 	0x1717			/* acknowledgement data	  */
+#define	ACKN_SIZE	sizeof(LONG)		/* size in bytes	  */
+#define	SIGREAD		16	/* signal to read message from subprocess */
+
+#define	ABORT		1
+#define CONT		2
+#define HELP		3
+
+/* 	The following struct is used for async jobs only	*/
+
+    struct TCB
+	{
+	TAEINT	child_pid;			/* id of child  	   */
+	TAEINT	send_chan;			/* send channel to child   */
+	BOOL	msgheld;			/* TRUE if msg arrived     */
+	LONG	hostcode;
+	};
+
+    struct      JPI             /* structure for $GETJPI items  */
+        {
+        short   buflen;                 /* length of buffer             */
+        short   itmcod;                 /* code for 'get process name'  */
+        long    *bufadr;                /* buffer address               */
+        long    *lenadr;                /* address of var to get length */
+        };
+

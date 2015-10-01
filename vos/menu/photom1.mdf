@@ -1,0 +1,24 @@
+.Title
+[4mPHOTOMETRIC FUNCTIONS Menu[0m                            (page 1 of 1)
+.Proc PHOTFIT2
+[1mPHOTFIT2[0m - IBIS program determining the coefficients of various 
+           photometric functions.
+.Proc PHOTFUNC
+[1mPHOTFUNC[0m - Compensates an image for variations in apparent 
+           brightness due to illumination, viewing geometry and target
+           properties.
+.Proc PHOTOM
+[1mPHOTOM[0m   - Produces a photometric catalog from which the photometric 
+           function of a planet can be evaluated using PHOTFIT2.
+.Proc PHOTTEST
+[1mPHOTTEST[0m - Generates synthetic photometric data to test PHOTFIT2.
+
+.help
+
+The PHOTOMETRIC FUNCTIONS section contains those programs which allow the 
+user to create or manipulate photometric function catalogs or remove the 
+photometric function from an image.  These programs include:
+
+PHOTFIT2            PHOTFUNC            PHOTOM              PHOTTEST
+
+.end

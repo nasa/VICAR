@@ -1,0 +1,9 @@
+#!/bin/csh
+foreach i (*.cc *.c)
+   ln -s ../$i $VICCPU/$i
+end
+foreach i (*.h)
+   ln -s ../$i $VICCPU/$i
+end
+ln -s ../Makefile.$VICCPU $VICCPU/Makefile
+

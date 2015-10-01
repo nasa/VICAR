@@ -1,0 +1,37 @@
+/**/ #
+/**/ #	clib.a - source for the c bridge library
+/**/ #
+/**/ #	This library actually consists of a single
+/**/ #	object module 'cmput.o' which must be included by the
+/**/ #	C application programs before the TAE library lib.a,
+/**/ # 	to replace the module p_mput in that library. The lib.a 
+/**/ #	version of p_mput is refenced by FORTRAN application
+/**/ #	programs and it invokes other modules that need routines
+/**/ #	from the system FORTRAN library. 
+/**/ #
+/**/ #	NOTE: clib.a is a copy of cmput.o. We ONCE did this with
+/**/ #	symbolic links. But when we deliver TAE, we deliver it without
+/**/ #	object modules. Furthermore, we do not require users on SUN 3
+/**/ #	systems to run the installation procedure. Therefore, if clib.a
+/**/ #	is a link to cmput.o, and cmput.o does not get delivered, this
+/**/ #	produces problems. So instead we have taken this route of copying
+/**/ #	cmput.o to clib.a.
+/**/ #
+/**/ #   Change Log:
+/**/ #	13-jul-93 Added depend target...kbs,sd
+/**/ #	13-jul-93 Added srcs target so depend works...kbs,cew
+/**/ #	14-jul-93 $TINC is now $TAEINC...kbs
+/**/ #
+
+LIBRARY = taec
+
+CINCLUDES = -I$(TAEINC)
+
+OBJECT = cmput
+
+SRCS = cmput.c
+
+PseudoLibraryTarget($(LIBRARY),$(OBJECT))
+
+DependCTarget()
+

@@ -1,0 +1,14 @@
+# Imakefile for V2UTIL directory
+# Also builds the packer/unpacker programs, and the standalone v2param
+# (if needed).
+#
+
+all: vpack v2param
+
+vpack:
+	$(MAKE) vpack.make
+
+v2param:
+	chmod +x build_v2param_standalone.csh
+	./build_v2param_standalone.csh
+

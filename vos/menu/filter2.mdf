@@ -1,0 +1,19 @@
+.Title
+[4mAdditional FILTER Menu Selections[0m                    (page 2 of 2)
+.Proc SHADY
+[1mSHADY[0m    - Superimposes user defined contour lines and/or shading
+           on an image.
+.Proc SHADY2
+[1mSHADY2[0m   - Shades image as if image was illuminated by a source at
+           a given azimuth and elevation.
+.Proc SIMPLIFY
+[1mSIMPLIFY[0m - Removes high frequency components from images, especially
+           from classified or stratified data.
+.Proc TFILT
+[1mTFILT[0m    - Performs convolution filtering (divide, highpass, 
+           lowpass, or scene dependent filter) by averaging pixels in the 
+           neighborhood above a threshold value.
+.Proc WIENER
+[1mWIENER[0m   - Restores a Fourier transform image using the Wiener 
+           Noise additive model.
+.END

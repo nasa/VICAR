@@ -1,0 +1,13 @@
+#!/bin/sh
+# Replacement for 'ar' command for Mac AUX.  Required because the 'ar' command
+# apparently can't handle object files on a remote NFS-mounted disk!
+#
+lib=$1
+shift 1
+tar cf - $* | (cd /tmp; tar xf -)
+cd /tmp
+ar ru ${lib} $*
+rm $*
+if [ -d ${VICCPU} ]; then
+  rmdir ${VICCPU}
+fi

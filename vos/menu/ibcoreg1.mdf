@@ -1,0 +1,37 @@
+.Title           ! IBGEOREF1.MDF
+[4mIBIS TIEPOINT and COREGISTRATION Menu[0m                                     (page 1 of 4)
+.Proc CTRMATCH
+[1mCTRMATCH[0m  - Matches an image produced by PAINT with information
+            contained within a Graphics-1 file.
+.Proc EDIBIS
+[1mEDIBIS[0m    - Interactive program for editing interface files.
+.Proc GEOMA
+[1mGEOMA[0m     - Performs geometric transformations on images using
+            quadrilaterals.
+.Proc IGENER
+[1mIGENER[0m    - Creates an interface file from user parameters.
+.Proc MGEOM
+[1mMGEOM[0m     - Performs geometric transformations on images.
+.Proc PICMATCH
+[1mPICMATCH[0m  - Correlation  routine for matching images or ground
+            control points datasets to an image.
+.Proc PICREG
+[1mPICREG[0m    - Allows interactive registration of 2 images, 
+            generates the tiepoint and/or geometric transformation file.
+.Proc PLOTTING
+[1mPLOTTING[0m  - Selects a plotting device for use with the device
+            independent plotting system.
+
+.Menu IBCOREG2.MDF
+[7mAdditional IBIS TIEPOINT & COREGISTRATION Menu Selections[0m
+
+.HELP
+The IBIS TIEPOINT & COREGISTRATION section contains those program which 
+allow the user to generate tiepoint files and to register images.  These 
+programs include:
+
+CTRMATCH           EDIBIS             GEOMA              IGENER
+MGEOM              PICMATCH           PICREG             PLOTTING
+POLYGEOM           TIECONM            TIEPARM            TIEPLOT
+
+.End

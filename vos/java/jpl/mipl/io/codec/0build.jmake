@@ -1,0 +1,3 @@
+jar_file = vicario.jar
+services_files = javax.media.jai.OperationRegistrySpi
+

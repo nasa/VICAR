@@ -1,0 +1,14 @@
+# Imakefile for the Ramtek backend for the VRDI
+#
+
+#include "Imakefile_obj.ramtek"		/* Object list */
+
+all: $(RAMTEKLIB)
+
+$(RAMTEKLIB): $(OBJS)
+	$(RANLIB) $(RAMTEKLIB)		/* AR done by compiles */
+
+#define Library $(RAMTEKLIB)
+
+#include "Imakefile_targ.ramtek"	/* Target list */
+

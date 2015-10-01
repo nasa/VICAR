@@ -1,0 +1,122 @@
+//////////////////////////////////////////////////////////////////////////////
+//
+// configuration file for MipsSpice application. This file is read by
+// MsEnv class to retrieve information (such as KDB, SPICE kernels
+// directories, SCLK, LEAPSECONDS, CONSTANTS, etc.
+//
+// Entries in the file follow simple Keyword-value format. For a typical
+// entry:
+//
+//      SPICEKER /home/svl/rt/ds1/dev (anything out here is ignore)
+//      ^        ^
+//      |        |
+//      key     value
+//
+// Lines started with the '//' sequence are treated as comments.
+//
+// Up to this point, the following keys are defined:
+//
+//      CAS_KDB, CAS_SPICEKER, CAS_MIPSKER,
+//              CAS_SCLK, CAS_LEAPSECONDS,
+//              CAS_CONSTANTS, CAS_BODY_IDS.
+//
+//      SIM_KDB, SIM_SPICEKER, SIM_MIPSKER,
+//              SIM_SCLK, SIM_LEAPSECONDS,
+//              SIM_CONSTANTS, SIM_BODY_IDS
+//
+//      GLL_KDB, GLL_SPICEKER, GLL_MIPSKER,
+//              GLL_SCLK, GLL_LEAPSECONDS,
+//              GLL_CONSTANTS, GLL_BODY_IDS
+//
+//      VGR1_KDB, VGR1_SPICEKER, VGR1_MIPSKER,
+//              VGR1_SCLK, VGR1_LEAPSECONDS,
+//              VGR1_CONSTANTS, VGR1_BODY_IDS
+//
+//      VGR2_KDB, VGR2_SPICEKER, VGR2_MIPSKER
+//              VGR2_SCLK, VGR2_LEAPSECONDS,
+//              VGR2_CONSTANTS, VGR2_BODY_IDS
+//
+//      VKG_KDB, VKG_SPICEKER, VKG_MIPSKER,
+//              VKG_SCLK, VKG_LEAPSECONDS,
+//              VKG_CONSTANTS, VKG_BODY_IDS
+//
+// Keyword name: xxx_KDB, xxx_SPICEKER, xxx_MIPSKER, etc.
+// Where xxx are mission names (CAS, SIM, GLL, VGR1, VGR2, VKG), etc.
+//
+// Entries with invalid keywords are ignored.
+//
+// xxx_KDB: file name of kernel db table. Entries in this table determine
+//	where MS software should look & what file to search to retrieve
+//	SPICE data
+// xxx_SPICEKER: Directory where NAIF (or non-update-able SPICEKER are
+//	stored) - requires trailing /
+// xxx_MIPSKER: Directory where updated SPICE kernels are stored (requires
+//               trailing /)
+// xxx_SCLK: name of sclk file
+// xxx_LEAPSECONDS: name of leapseconds file
+// xxx_CONSTANTS: name of constant file
+// xxx_BODY_IDS: name of body ids file
+//
+//
+// **** You can have more (or less, but at least 1) SERVER_HOST entry,
+//	so your client will know where to go to connect to msserver.
+//
+//	Current supported projects are: GLL, VGR1, VGR2, VKG.
+// created	: Fri Mar  7 11:27:32 PST 1997
+// programmer	: Sam Le
+//
+//////////////////////////////////////////////////////////////////////////////
+SPICE_TCP_PORT	2501
+
+SERVER_HOST	mipl4.jpl.nasa.gov
+
+SPICE_LOG	/usr/local/spice/msserver_sgi.log
+
+GLL_KDB         /usr/local/spice/kdb.gll
+GLL_SPICEKER    /usr/local/spice/sgi/
+GLL_MIPSKER     /usr/local/spice/sgi/
+GLL_SCLK        /usr/local/spice/sclk.ker
+GLL_CONSTANTS   /usr/local/spice/p_constants.ker
+GLL_BODY_IDS    /usr/local/spice/bodid.dat
+GLL_LEAPSECONDS	/usr/local/spice/leapseconds.ker
+
+VGR1_KDB         /usr/local/spice/vgr1/kdb.vgr1
+VGR1_SPICEKER    /usr/local/spice/vgr1/sgi/
+VGR1_MIPSKER     /usr/local/spice/vgr1/sgi/
+VGR1_SCLK        /usr/local/spice/vgr1/vg100004.tsc
+VGR1_CONSTANTS   /usr/local/spice/vgr1/p_constants.ker
+VGR1_BODY_IDS    /usr/local/spice/bodid.dat
+VGR1_LEAPSECONDS /usr/local/spice/vgr1/leapseconds.ker
+
+VGR2_KDB         /usr/local/spice/vgr2/kdb.vgr2
+VGR2_SPICEKER    /usr/local/spice/vgr2/sgi/
+VGR2_MIPSKER     /usr/local/spice/vgr2/sgi/
+VGR2_SCLK        /usr/local/spice/vgr2/vgr2_sclk.ker
+VGR2_CONSTANTS   /usr/local/spice/vgr2/p_constants.ker
+VGR2_BODY_IDS    /usr/local/spice/bodid.dat
+VGR2_LEAPSECONDS /usr/local/spice/vgr2/leapseconds.ker
+
+VO1_KDB		/usr/local/spice/vo1/kdb.vo1
+VO1_SPICEKER    /usr/local/spice/vo1/sgi/
+VO1_MIPSKER     /usr/local/spice/vo1/sgi/
+VO1_SCLK        /usr/local/spice/vo1/vo1_fict.tsc
+VO1_CONSTANTS   /usr/local/spice/vo1/p_constants.ker
+VO1_BODY_IDS    /usr/local/spice/bodid.dat
+VO1_LEAPSECONDS /usr/local/spice/vo1/leapseconds.ker
+
+VO2_KDB         /usr/local/spice/vo2/kdb.vo2
+VO2_SPICEKER    /usr/local/spice/vo2/sgi/
+VO2_MIPSKER     /usr/local/spice/vo2/sgi/
+VO2_SCLK        /usr/local/spice/vo2/vo2_sclk.ker
+VO2_CONSTANTS   /usr/local/spice/vo2/p_constants.ker
+VO2_BODY_IDS    /usr/local/spice/bodid.dat
+VO2_LEAPSECONDS /usr/local/spice/vo2/leapseconds.ker
+
+CAS_KDB		/usr/local/spice/cas/kdb.cas
+CAS_SPICEKER	/usr/local/spice/cas/sgi/
+CAS_MIPSKER	/usr/local/spice/cas/sgi/
+CAS_SCLK	/usr/local/spice/cas/cas_sclk.ker
+CAS_CONSTANTS	/usr/local/spice/cas/p_constants.ker
+CAS_BODY_IDS	/usr/local/spice/bodid.dat
+CAS_LEAPSECONDS	/usr/local/spice/cas/leapseconds.ker
+

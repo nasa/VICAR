@@ -1,0 +1,82 @@
+#-----------------------------------------------------------------------
+# Sybase interfaces file for MIPS UNIX/non-Solaris platforms
+#       4/24/00 P. Woncik
+#
+# External Distribution includes the required information for
+# querying servers
+#-----------------------------------------------------------------------
+
+##################################################################
+## MIPS Operational servers 
+##	Host:		miplsybase.jpl.nasa.gov
+##			(floating host between mipl3 and mipl4)
+##                      moved from coda4.jpl.nasa.gov 8/00
+##	Admin Contact: Pam Woncik 818-354-4714
+##	Services:
+##              query   tcp     (port 1040)
+##################################################################
+
+MIPS1
+	query tcp ether miplsybase.jpl.nasa.gov 1040
+
+##################################################################
+## MIPS Test servers 
+##      Host:           mt-pig.jpl.nasa.gov
+##                      (moved from mt-pig.jpl.nasa.gov 4100)
+##                      (moved from mipl8.jpl.nasa.gov 1040)
+##      Admin Contact:  Hyun Lee 818-354-8466
+##      Services:
+##                      query   tcp     (port 1040)
+##################################################################
+
+miplTest
+	query tcp ether mt-pig.jpl.nasa.gov 1040
+
+##################################################################
+## MIPS Development servers
+##      Host:           porky.jpl.nasa.gov
+##                      (moved from mt-pig.jpl.nasa.gov 4/00)
+##      Admin Contact:   Hyun Lee 818-354-8466
+##      Services:
+##                      query   tcp     (port 1040)
+##################################################################
+
+miplDev
+	query tcp ether porky.jpl.nasa.gov 1040
+
+MIPSDB1
+	query tcp ether porky.jpl.nasa.gov 1040
+
+##################################################################
+## Development/prototype servers
+##      Host:           blue.jpl.nasa.gov
+##      Admin Contact:  Pam Woncik 818-354-4714
+##      Services:
+##                      query   tcp     (port 1040)
+##################################################################
+
+DEV
+	query tcp ether blue.jpl.nasa.gov 1040
+
+##################################################################
+## PDS ImageNode
+##      Host:           charlotte.jpl.nasa.gov
+##      Admin Contact:  Pam Woncik 818-354-4714
+##      Services:
+##                      query tcp (port 1040)
+##################################################################
+
+IMGNODE 1 2
+	query tcp ether charlotte.jpl.nasa.gov 1040
+
+##################################################################
+## DIAL SSV server 
+##      Host:           ssvus1.jpl.nasa.gov
+##      Admin Contact:  Pam Woncik 818-354-4714
+##      Services:
+##                      query tcp (port 1040)
+##################################################################
+
+SSV1
+	query tcp ether ssvus1.jpl.nasa.gov 1040
+

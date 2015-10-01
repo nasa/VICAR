@@ -1,0 +1,26 @@
+.Title           ! IBVARIATE1.MDF
+[4mIBIS MULTIVARIATE ANALYSIS Menu[0m       (page 1 of 1)
+.PROC IBISLSQ
+[1mIBISLSQ[0m   - Performs least-squares fit on columns of a 
+            tabular file, placing them in a column of the tabular file.
+.Proc IBISSTAT
+[1mIBISSTAT[0m  - Performs statistical analyses (e.g., multiple
+            regression, factor analysis, correlation) on tabular files.
+.Proc MF
+[1mMF[0m        - Allows use of Fortran-like expressions to perform
+            general arithmetic functions on interface files.
+.Proc MSS
+[1mMSS[0m       - Concatenates up to 30 images horizontally.
+.Proc MSSIBIS
+[1mMSSIBIS[0m   - Converts MSS formatted data into an interface file.
+
+.Help
+
+The IBIS MULTIVARIATE ANALYSIS section contains those programs which allow 
+the user to perform multivariate analyses upon the data.  These programs 
+include:
+
+IBISLSQ            IBISSTAT           MF                 MSS
+MSSIBIS
+
+.END

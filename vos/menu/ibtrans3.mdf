@@ -1,0 +1,30 @@
+.Title           ! IBTRANS3.MDF
+[4mAdditional IBIS FILE TRANSFER & UTILITIES Menu[0m  (page 3 of 6)
+.Proc IGENER
+[1mIGENER[0m   - Creates an interface file from user parameters.
+.Proc INTCON
+[1mINTCON[0m   - Converts IBM VICAR interface files into VAX VICAR.
+.Proc MSSIBIS
+[1mMSSIBIS[0m  - Converts MSS formatted data into an interface file.
+.Proc PAINTG3
+[1mPAINTG3[0m  - Takes a Graphics-3 image divided into regions and paints
+           (assigns DN values to) each region.
+.Proc PCOPIN
+[1mPCOPIN[0m   - Generates an interface file from a Graphics-1 file.
+.Proc PCOPOUT
+[1mPCOPOUT[0m  - Generates a Graphics-1 file from an interface file.
+.Proc POLYCON
+[1mPOLYCON[0m  - Converts Graphics-1 file to Graphics-2 file and vice 
+           versa or copies Graphics-2 file to Graphics-2 file.
+.Proc POLYGEN
+[1mPOLYGEN[0m  - Creates a Graphics-1 file.
+.Proc POLYMASK
+[1mPOLYMASK[0m - Cuts the portion of an image delineated by a set of
+           polygons contained in a Graphics-1 file, setting the data on the 
+           inside or outside of the polygons to a specified DN level.
+.Proc POLYPNT
+[1mPOLYPNT[0m  - Transforms standard polygon files into an image file of 
+           polygon borders each painted a unique DN level.
+.Menu IBTRANS4.MDF
+[7mAdditional IBIS FILE TRANSFER & UTILITIES Menu Selections[0m
+.END

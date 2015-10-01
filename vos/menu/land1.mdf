@@ -1,0 +1,6 @@
+.Title
+[4mLANDSAT  - BLEMISH REMOVAL Menu[0m                        (page 1 of 1)
+.Proc DS4
+[1mDS4[0m  - Removes 6-line striping from LANDSAT imagery by performing 
+       localized histogram matching of the 6 sensors.
+.END

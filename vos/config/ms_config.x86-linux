@@ -1,0 +1,129 @@
+//////////////////////////////////////////////////////////////////////////////
+//
+// Lines started with the '//' sequence are treated as comments.
+//
+// We no longer need to have MIPSKER, SPICEKER, etc. environment variables
+// for SPICE to work. Make sure that SPICE_CONFIG_FILE is set before running
+// any of these SPICE APIs. When setting up the new SPICE on a new machine,
+// just set SPICE_CONFIG_FILE, and edit the entries below to point to
+// appropriate directory.
+//
+// The VICAR system contains applications that require this
+// configuration file for MipsSpice applications. This file is read by
+// MsEnv class to retrieve information (such as KDB, SPICE kernels
+// directories, SCLK, LEAPSECONDS, CONSTANTS, etc.
+//
+// Entries in the file follow simple Keyword-value format. For a typical
+// entry:
+//
+//      SPICEKER /home/sle/rt/ds1/dev (anything out here is ignore)
+//      ^        ^
+//      |        |
+//      key     value
+//
+//
+// Up to this point, the following keys are defined:
+//
+//      XXX_KDB, XXX_SPICEKER, XXX_MIPSKER, XXX_SCLK
+//              XXX_LEAPSECONDS, XXX_CONSTANTS,
+//              XXX_BODY_IDS, XXX_FRAMES.
+//
+// Keyword name: xxx_KDB, xxx_SPICEKER, xxx_MIPSKER, etc.
+// Where xxx are mission names (CAS, SIM, GLL, VGR1, VGR2, VKG), etc.
+//
+// Entries with invalid keywords are ignored.
+//
+// xxx_KDB: file name of kernel db table. Entries in this table determine
+//	where MS software should look & what file to search to retrieve
+//	SPICE data
+// xxx_SPICEKER: Directory where NAIF (or non-update-able SPICEKER are
+//	stored)
+// xxx_MIPSKER: Directory where updated SPICE kernels are stored
+// xxx_SCLK: name of sclk file
+// xxx_LEAPSECONDS: name of leapseconds file
+// xxx_CONSTANTS: name of constant file
+// xxx_BODY_IDS: name of body ids file
+// xxx_FRAMES: ?????
+//
+//
+// **** You can have more (or less, but at least 1) SERVER_HOST entry,
+//	so your client will know where to go to connect to msserver.
+//	There is no limitation on how many SERVER_HOST to choose from.
+//	But notice that the more host entry you have the slower the
+//	parsing of this file will be......There is the standard server
+//	host count.
+//
+//      Current supported projects are: CAS, GLL, VGR1, VGR2, VKG.
+//      Possible new project SIM.
+//
+// created	: Fri Mar  7 11:27:32 PST 1997
+// programmer	: Sam Le
+//
+// history      :
+//    Mar 21, 2002 (Hyun Lee) - Added CAS.
+//    Aug 05, 2003 (H. Mortensen) - Changed from mipl4 to miplspice (mipl9), updated cassini
+//                    sclk and frames kernels
+//////////////////////////////////////////////////////////////////////////////
+SPICE_TCP_PORT	2501
+
+SERVER_HOST     miplspice.jpl.nasa.gov
+
+SPICE_LOG	/usr/local/spice/msserver_x86-linux.log
+
+CAS_KDB         /usr/local/spice/cas/kdb.cas
+CAS_SPICEKER    /usr/local/spice/cas/x86-linux/
+CAS_MIPSKER     /usr/local/spice/cas/x86-linux/
+CAS_SCLK        /usr/local/spice/cas/cas00083.tsc
+CAS_CONSTANTS   /usr/local/spice/cas/p_constants.ker
+CAS_BODY_IDS    /usr/local/spice/cas/bodid.dat
+CAS_LEAPSECONDS /usr/local/spice/leapseconds.ker
+CAS_FRAMES      /usr/local/spice/cas/cas_v36.tf
+
+GLL_KDB         /usr/local/spice/kdb.gll
+GLL_SPICEKER    /usr/local/spice/x86-linux/
+GLL_MIPSKER     /usr/local/spice/x86-linux/
+GLL_SCLK        /usr/local/spice/sclk.ker
+GLL_CONSTANTS   /usr/local/spice/p_constants.ker
+GLL_BODY_IDS    /usr/local/spice/bodid.dat
+GLL_LEAPSECONDS	/usr/local/spice/leapseconds.ker
+
+VGR1_KDB         /usr/local/spice/kdb.vgr1
+VGR1_SPICEKER    /usr/local/spice/vgr1/x86-linux/
+VGR1_MIPSKER     /usr/local/spice/vgr1/x86-linux/
+VGR1_SCLK        /usr/local/spice/vgr1/vg100004.tsc
+VGR1_CONSTANTS   /usr/local/spice/vgr1/p_constants.ker
+VGR1_BODY_IDS    /usr/local/spice/bodid.dat
+VGR1_LEAPSECONDS /usr/local/spice/vgr1/leapseconds.ker
+
+VGR2_KDB         /usr/local/spice/kdb.vgr2
+VGR2_SPICEKER    /usr/local/spice/vgr2/x86-linux/
+VGR2_MIPSKER     /usr/local/spice/vgr2/x86-linux/
+VGR2_SCLK        /usr/local/spice/vgr2/vg200004.tsc
+VGR2_CONSTANTS   /usr/local/spice/vgr2/p_constants.ker
+VGR2_BODY_IDS    /usr/local/spice/bodid.dat
+VGR2_LEAPSECONDS /usr/local/spice/vgr2/leapseconds.ker
+
+VO1_KDB		/usr/local/spice/kdb.vo1
+VO1_SPICEKER    /usr/local/spice/vo1/x86-linux/
+VO1_MIPSKER     /usr/local/spice/vo1/x86-linux/
+VO1_SCLK        /usr/local/spice/vo1/vo1_fict.tsc
+VO1_CONSTANTS   /usr/local/spice/vo1/p_constants.ker 
+VO1_BODY_IDS    /usr/local/spice/bodid.dat 
+VO1_LEAPSECONDS /usr/local/spice/vo1/leapseconds.ker 
+
+VO2_KDB         /usr/local/spice/kdb.vo2
+VO2_SPICEKER    /usr/local/spice/vo2/x86-linux/
+VO2_MIPSKER     /usr/local/spice/vo2/x86-linux/
+VO2_SCLK        /usr/local/spice/vo2/vo2_fict.tsc 
+VO2_CONSTANTS   /usr/local/spice/vo2/p_constants.ker 
+VO2_BODY_IDS    /usr/local/spice/bodid.dat 
+VO2_LEAPSECONDS /usr/local/spice/vo2/leapseconds.ker 
+
+//SIM_KDB		/home/sle/ms/lcl/data/sim/kdb.sim
+//SIM_SPICEKER	/home/sle/ms/lcl/data/sim/spiceker/x86-linux/
+//SIM_MIPSKER	/home/sle/ms/lcl/data/sim/mipsker/x86-linux/
+//SIM_SCLK	/home/sle/ms/lcl/data/sim/sim_sclk.ker
+//SIM_CONSTANTS	/usr/local/spice/p_constants.ker
+//SIM_BODY_IDS	/usr/local/spice/bodid.dat
+//SIM_LEAPSECONDS	/project/ORT/spice/ops/leapseconds.ker
+

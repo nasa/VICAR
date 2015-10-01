@@ -1,0 +1,262 @@
+#Imakefile for VICAR
+# Creates makefiles for each subdirectory, then calls them.
+#
+# The alternate target "Makefile" will rebuild the makefile from the imakefile.
+# This target may be used by feeding this imake file directly to make - it
+# looks enough like a makefile that make will accept it.  Do not use any
+# other targets in this manner.
+#
+# The target "tae" can be used to install the VICAR changes in the TAE tree
+# (version 5.2 only) and rebuild it.  The "tae" target is not included in
+# the "all" target, as TAE does not typically have to be built as often and
+# its not convenient to have make figure out what to do.
+# Note that the TAE base into which the VICAR changes will be installed must
+# already exist and $TAE must point at it before the "tae" target can be used.
+# The target "tae53" is similarly used to install the VICAR changes in the
+# TAE version 5.3 tree, which is currently only used for axp-unix and all
+# flavors of Linux.
+#
+#
+#   Targets for Integrated VICAR Build
+#
+all: make_dirs make_util make_stae make_shvic make_rtl make_vrdi make_motifapp
+all: make_mdms make_fei5 make_gens make_subs make_progs make_crumbs make_vids make_done 
+
+# split build into two builds because java has to be built after rtl and before gui 
+# Java can be built on solr or linux platforms. 
+# uplinktour and tlm are solaris only
+
+v1: make_dirs make_util make_docs make_stae make_shvic make_rtl
+v2: make_vrdi make_motifapp make_mdms make_fei5 make_gens make_subs make_progs make_vids make_done
+
+#
+# Target for Open Source Build 
+#
+
+opens1: make_dirs make_util make_docs make_stae make_shvic make_rtl
+opens2: make_vrdi make_motifapp make_opensubs make_opensprogs make_vids make_done
+
+opensall: make_dirs make_util make_stae make_shvic make_rtl make_vrdi make_motifapp
+opensall: make_opensubs make_opensprogs make_vids make_done
+
+#
+# Target for Build CORE
+#
+
+core1: make_dirs make_util make_docs make_stae make_shvic make_rtl
+core2: make_vrdi make_motifapp make_mdms make_fei5 make_gens make_coresubs make_coreprogs make_vids make_done
+
+coreall: make_dirs make_util make_stae make_shvic make_rtl make_vrdi make_motifapp
+coreall: make_mdms make_fei5 make_gens make_coresubs make_coreprogs make_vids make_done        
+
+# Targets for Project Specific Builds
+#
+
+cas1:  make_dirs make_util make_docs make_stae make_shvic make_rtl
+cas2:  make_vrdi make_motifapp make_mdms make_fei5 make_subs make_progs make_done
+
+caslinux:  make_dirs make_util make_stae make_shvic make_rtl make_vrdi make_motifapp
+caslinux:  make_mdms make_fei5 make_subs make_progs make_done
+
+div1:  make_dirs make_util make_stae make_shvic make_rtl
+div2:  make_motifapp make_mdms make_p1 make_p2 make_div make_done
+
+divall:  make_dirs make_util make_stae make_shvic make_rtl 
+divall:  make_motifapp make_mdms make_p1 make_p2 make_div make_done
+
+mars1:  make_dirs make_util make_docs make_stae make_shvic make_rtl
+mars2:  make_vrdi make_motifapp make_mdms make_marssubs make_marsprogs make_crumbs make_vids make_done
+
+marsall:  make_dirs make_util make_stae make_shvic make_rtl make_vrdi make_motifapp
+marsall:  make_mdms make_marssubs make_marsprogs make_vids make_done
+
+phx1:  make_dirs make_util make_docs make_stae make_shvic make_rtl
+phx2:  make_vrdi make_motifapp make_mdms make_marssubs make_marsprogs make_vids make_done
+
+phxlinux: make_dirs make_util make_stae make_shvic make_rtl make_vrdi make_motifapp
+phxlinux: make_mdms make_marssubs make_marsprogs make_vids make_done
+
+mro1: make_dirs make_util 
+mro2: make_motifapp make_mdms make_done
+
+mrolinux: make_dirs make_util make_motifapp make_mdms make_done
+
+sirtf1: make_dirs make_util make_stae make_shvic make_rtl 
+sirtf2: make_motifapp make_mdms make_tlm make_sirtf make_done
+
+sirtflinux:  make_dirs make_util make_stae make_shvic make_rtl make_motifapp make_mdms make_tlm make_sirtf make_done
+
+dlr: make_dirs make_util make_stae make_shvic make_rtl make_motifapp
+dlr: make_subs make_progs make_done
+
+nsyt1: make_dirs make_util make_docs make_stae make_shvic make_rtl
+nsyt2: make_vrdi make_motifapp make_fileservice make_marssubs make_marsprogs make_vids make_done
+
+nsytall: make_dirs make_util make_stae make_shvic make_rtl make_vrdi make_motifapp
+nsytall: make_fileservice make_marssubs make_marsprogs make_vids make_done
+  
+#
+ 
+make_gens:
+	($(CD) $(V2UTIL)/gens; $(VSYSIMAKE) -f imakefile.gens -s Makefile.$(VICCPU))
+	($(CD) $(V2UTIL)/gens; $(MAKE) Makefile.$(VICCPU))
+
+make_subs:
+	($(CD) $(V2UTIL)/subs; $(VSYSIMAKE) -f imakefile.subs -s Makefile.$(VICCPU))
+	($(CD) $(V2UTIL)/subs; $(MAKE) Makefile.$(VICCPU))
+
+make_progs:
+	($(CD) $(V2UTIL)/progs; $(VSYSIMAKE) -f imakefile.progs -s Makefile.$(VICCPU))
+	($(CD) $(V2UTIL)/progs; $(MAKE) Makefile.$(VICCPU))
+
+make_coresubs:
+	($(CD) $(V2UTIL)/coresubs; $(VSYSIMAKE) -f imakefile.coresubs -s Makefile.$(VICCPU))
+	($(CD) $(V2UTIL)/coresubs; $(MAKE) Makefile.$(VICCPU))
+
+make_coreprogs:
+	($(CD) $(V2UTIL)/coreprogs; $(VSYSIMAKE) -f imakefile.coreprogs -s Makefile.$(VICCPU))
+	($(CD) $(V2UTIL)/coreprogs; $(MAKE) Makefile.$(VICCPU))
+
+make_opensubs:
+	($(CD) $(V2UTIL)/opensubs; $(VSYSIMAKE) -f imakefile.opensubs -s Makefile.$(VICCPU))
+	($(CD) $(V2UTIL)/opensubs; $(MAKE) Makefile.$(VICCPU))
+
+make_opensprogs:
+	($(CD) $(V2UTIL)/opensprogs; $(VSYSIMAKE) -f imakefile.opensprogs -s Makefile.$(VICCPU))
+	($(CD) $(V2UTIL)/opensprogs; $(MAKE) Makefile.$(VICCPU))
+
+make_crumbs:
+	-($(CD) $(V2TOP)/crumbs; make)
+
+make_dirs:
+	-$(CHMOD) +x $(V2UTIL)/mkmachdir.csh
+	-$(V2UTIL)/mkmachdir.csh
+
+make_docs:
+	-($(CD) $(V2DOCSOURCE); tar cf - . | (cd $(V2HTML); tar xvBfp -) )
+
+make_util:
+	($(CD) $(V2UTIL); $(VSYSIMAKE) -f imakefile.util -s Makefile.$(VICCPU))
+	($(CD) $(V2UTIL); $(MAKE) Makefile.$(VICCPU))
+
+make_shvic:
+	($(CD) $(V2TOP)/shell_vicar; $(VSYSIMAKE) -f imakefile.shvic -s Makefile.$(VICCPU))
+	($(CD) $(V2TOP)/shell_vicar; $(MAKE) Makefile.$(VICCPU))
+        
+make_stae:
+	($(CD) $(V2TOP)/stae; $(VSYSIMAKE) -f imakefile.stae -s Makefile.$(VICCPU))
+	($(CD) $(V2TOP)/stae; $(MAKE) Makefile.$(VICCPU))
+        
+make_rtl:
+	($(CD) $(V2TOP)/rtl; $(VSYSIMAKE) -f imakefile.rtl -s Makefile.$(VICCPU))
+	($(CD) $(V2TOP)/rtl; $(MAKE) Makefile.$(VICCPU))
+
+make_vrdi:
+	($(CD) $(V2TOP)/vrdi; $(VSYSIMAKE) -f imakefile.vrdi -s Makefile.$(VICCPU))
+	($(CD) $(V2TOP)/vrdi; $(MAKE) Makefile.$(VICCPU))
+
+make_marssubs:
+	($(CD) $(V2UTIL)/marssubs; $(VSYSIMAKE) -f imakefile.marssubs -s Makefile.$(VICCPU))
+	($(CD) $(V2UTIL)/marssubs; $(MAKE) Makefile.$(VICCPU))
+
+make_marsprogs:
+	($(CD) $(V2UTIL)/marsprogs; $(VSYSIMAKE) -f imakefile.marsprogs -s Makefile.$(VICCPU))
+	($(CD) $(V2UTIL)/marsprogs; $(MAKE) Makefile.$(VICCPU))
+
+make_motifapp:
+	($(CD) $(V2TOP)/MotifApp; make)
+
+make_mdms:
+	-($(CD) $(V2TOP)/mdms/source/umake; make -f  makefile.mdms $(VICCPU))
+
+make_fei5:
+	-($(CD) $(V2TOP)/fei5; $(VSYSIMAKE) -f imakefile.fei5 -s Makefile.$(VICCPU))
+	-($(CD) $(V2TOP)/fei5; $(MAKE) Makefile.$(VICCPU))
+
+make_fileservice:
+	-($(CD) $(V2TOP)/mdms/source/FileService; make -f makefile.FileService)
+
+make_gui:
+	($(CD) $(V2TOP)/gui; $(VSYSIMAKE) -f imakefile.gui -s Makefile.$(VICCPU))
+	($(CD) $(V2TOP)/gui; $(MAKE) Makefile.$(VICCPU))
+
+make_tlm: 
+	($(CD) $(V2TOP)/tlm; $(VSYSIMAKE) -f imakefile.tlm -s Makefile.$(VICCPU))
+	-($(CD) $(V2TOP)/tlm; $(MAKE) Makefile.$(VICCPU))
+
+make_uplinktour:
+	($(CD) $(V2TOP)/uplinktour; $(VSYSIMAKE) -f imakefile.uplinktour -s Makefile.$(VICCPU))
+	-($(CD) $(V2TOP)/uplinktour; $(MAKE) Makefile.$(VICCPU))
+
+make_p1:
+	($(CD) $(V2TOP)/p1; $(VSYSIMAKE) -f imakefile.p1 -s Makefile.$(VICCPU))
+	($(CD) $(V2TOP)/p1; $(MAKE) Makefile.$(VICCPU))
+
+make_p2:
+	($(CD) $(V2TOP)/p2; $(VSYSIMAKE) -f imakefile.p2 -s Makefile.$(VICCPU))
+	($(CD) $(V2TOP)/p2; $(MAKE) Makefile.$(VICCPU))
+
+make_cas:
+	($(CD) $(V2TOP)/cas; $(VSYSIMAKE) -f imakefile.cas -s Makefile.$(VICCPU))
+	($(CD) $(V2TOP)/cas; $(MAKE) Makefile.$(VICCPU))
+make_p3:
+	($(CD) $(V2TOP)/p3; $(VSYSIMAKE) -f imakefile.p3 -s Makefile.$(VICCPU))
+	($(CD) $(V2TOP)/p3; $(MAKE) Makefile.$(VICCPU))
+
+make_vids:
+	($(CD) $(V2TOP)/vids; $(VSYSIMAKE) -f imakefile.vids -s Makefile.$(VICCPU))
+	($(CD) $(V2TOP)/vids; $(MAKE) Makefile.$(VICCPU))
+
+make_mars:
+	($(CD) $(V2TOP)/mars; $(VSYSIMAKE) -f imakefile.mars -s Makefile.$(VICCPU))
+	($(CD) $(V2TOP)/mars; $(MAKE) Makefile.$(VICCPU))
+
+make_ssv:
+	($(CD) $(V2TOP)/ssv; $(VSYSIMAKE) -f imakefile.ssv -s Makefile.$(VICCPU))
+	-($(CD) $(V2TOP)/ssv; $(MAKE) Makefile.$(VICCPU))
+
+make_sirtf: 
+	($(CD) $(V2TOP)/sirtf; $(VSYSIMAKE) -f imakefile.sirtf -s Makefile.$(VICCPU))
+	-($(CD) $(V2TOP)/sirtf; $(MAKE) Makefile.$(VICCPU))
+
+make_space:
+	-($(CD) $(V2TOP)/space; $(VSYSIMAKE) -f imakefile.space -s Makefile.$(VICCPU))
+	-($(CD) $(V2TOP)/space; $(MAKE) Makefile.$(VICCPU))
+
+make_div:
+	-($(CD) $(V2TOP)/div; $(VSYSIMAKE) -f imakefile.div -s Makefile.$(VICCPU))
+	-($(CD) $(V2TOP)/div; $(MAKE) Makefile.$(VICCPU))
+
+Makefile: Makefile.$(VICCPU)
+
+Makefile.sun-solr:
+	imake -D__sparc -D$(VICAR_SOLARIS) -T$$V2UTIL/vicsys.tmpl -I$$V2INC -f imakefile.vicar -s Makefile.$(VICCPU)
+
+Makefile.x86-linux: Makefile.std
+
+Makefile.x86-64-linx: Makefile.std
+
+Makefile.mac-osx: Makefile.std
+
+Makefile.x86-macosx: Makefile.std
+
+Makefile.std:
+	imake -D$(VICAR_SOLARIS) -T$$V2UTIL/vicsys.tmpl -I$$V2INC -f imakefile.vicar -s Makefile.$(VICCPU)
+
+tae: install_tae build_tae
+
+tae53: install_tae53 build_tae
+
+install_tae:
+	-$(CHMOD) +x $(V2TOP)/tae52_changes/install_changes.scr
+	($(CD) $(V2TOP)/tae52_changes; ./install_changes.scr)
+
+install_tae53:
+	-$(CHMOD) +x $(V2TOP)/tae53_changes/install_changes.scr
+	($(CD) $(V2TOP)/tae53_changes; ./install_changes.scr)
+
+build_tae:
+	($(CD) $(TAE); ./build_tae.csh)
+
+make_done:
+	(echo "THE BUILD IS FINISHED!")

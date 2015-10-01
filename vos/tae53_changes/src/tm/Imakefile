@@ -1,0 +1,131 @@
+/**/ #
+/**/ #	source for TM program (taetm)
+/**/ #
+/**/ # Change Log:
+/**/ # 03-jan-92	New -I entries; new depend target...ljn
+/**/ # 30-oct-92	Target needed for process.np.c on Ultrix 4.3...rt
+/**/ # 24-mar-93 Optimized taetm files causes problems on HP-UX 9.0...rt
+/**/ # 29-mar-93 CLIB cannot include libmalloc_G0 due to classic failure...rt
+/**/ # 03-nov-93 HP needs libBSD to link taetm.  __hpux should be
+/**/ #           HPArchitecture...rt
+/**/ # 18-jul-94 Added TAECLASSIC conditionals to support TAE Classic 
+/**/ # 		extraction...krw
+PROG = taetm
+VERSION = `date`
+VERSION_VAR = vrsion
+
+#ifdef HPArchitecture
+EXTRALIBS = -lBSD
+#endif
+
+#ifdef UMipsArchitecture
+CINCLUDES = -I. -I$(TAETM) -I$(TAEINC) -I/usr/ucbinclude
+#else
+CINCLUDES = -I. -I$(TAETM) -I$(TAEINC) 
+#endif
+
+#ifdef SGIArchitecture
+CLIB = -lc
+#endif
+
+#ifdef HPArchitecture
+CDEBUGFLAGS =
+#endif
+
+SRCS = $(TAETM)//**/*.c
+
+#ifndef TAECLASSIC
+# default to X Window System support
+XWINDOWS = -DXWINDOWS
+#endif
+
+# TAE developers un-comment the next line.
+#OBJDIR = $(TAETM)/
+# TAE developers remove the "$(OBJDIR)" prefix from your test object names.
+OBJS = \
+	$(OBJDIR)$(TAEVERSIONFILE) \
+	$(OBJDIR)action.o \
+	$(OBJDIR)async.np.o \
+	$(OBJDIR)asyncport.o  \
+	$(OBJDIR)batch.np.o  \
+	$(OBJDIR)bldjob.o \
+	$(OBJDIR)cmdfield.o  \
+	$(OBJDIR)compile.o  \
+	$(OBJDIR)declare.o  \
+	$(OBJDIR)dynamic.o  \
+	$(OBJDIR)editor.o \
+	$(OBJDIR)evalexp.o  \
+	$(OBJDIR)exits.o  \
+	$(OBJDIR)fileins.o  \
+	$(OBJDIR)globals.o   \
+	$(OBJDIR)greet.o  \
+	$(OBJDIR)help.o \
+	$(OBJDIR)hardcopy.o  \
+	$(OBJDIR)helpsubs.o  \
+	$(OBJDIR)hostcmd.np.o  \
+	$(OBJDIR)if.o  \
+	$(OBJDIR)intlin.o  \
+	$(OBJDIR)intrinsic.o \
+	$(OBJDIR)let.o  \
+	$(OBJDIR)log.o  \
+	$(OBJDIR)logsubs.o  \
+	$(OBJDIR)loops.o  \
+	$(OBJDIR)menuport.o  \
+	$(OBJDIR)misccmd.o  \
+	$(OBJDIR)movest.o \
+	$(OBJDIR)package.o  \
+	$(OBJDIR)parser.o  \
+	$(OBJDIR)pdfprc.o  \
+	$(OBJDIR)process.np.o  \
+	$(OBJDIR)qualif.o \
+	$(OBJDIR)saveres.o  \
+	$(OBJDIR)sendvar.o  \
+	$(OBJDIR)setcheck.o  \
+	$(OBJDIR)setshow.o  \
+	$(OBJDIR)specvcopy.o \
+	$(OBJDIR)terminal.np.o \
+	$(OBJDIR)tclwindows.o \
+	$(OBJDIR)subcmd.o  \
+	$(OBJDIR)symbol.o  \
+	$(OBJDIR)tclfunc.o  \
+	$(OBJDIR)tm.o  \
+	$(OBJDIR)tminit.o  \
+	$(OBJDIR)tmsubs.o  \
+	$(OBJDIR)tmutil.o  \
+	$(OBJDIR)tutcmd.o  \
+	$(OBJDIR)tutdisp.o  \
+	$(OBJDIR)tutglobs.o  \
+	$(OBJDIR)tuthelp.o  \
+	$(OBJDIR)tutorport.o  \
+	$(OBJDIR)tutselect.o  \
+	$(OBJDIR)tutsubs.o \
+	$(OBJDIR)util.o  \
+	$(OBJDIR)valid.o  \
+	$(OBJDIR)vcopy.o  \
+	$(OBJDIR)wrtmsg.o
+
+
+DEPLIBS = $(TAELIB)/libtaevicar.a $(TAEDEPLIBS)
+APP_LINKLIBS = -ltaevicar
+
+VersionTarget($(VERSION),$(VERSION_VAR))
+
+SimpleCProgramTarget($(PROG),$(OBJS))
+
+DependCTarget()
+
+terminal.np.o: $(TAETAELIB)/terminal.np.c
+	$(CC) -c -DTERMINAL_TOL $(CFLAGS) $(TAETAELIB)/terminal.np.c
+
+#ifndef TAECLASSIC
+tclwindows.o:
+	$(CC) -c $(XWINDOWS) $(CFLAGS) $*.c
+#endif
+
+#ifdef ULTRIX_43_CC_ERROR
+# process.np.c is optimized incorrectly by cc in Ultrix 4.3.
+# The previous define is defined in $TAE/config/ultrix.cf
+process.np.o:
+	$(CC) -c -O0 $(CINCLUDES) $(APP_CINCLUDES) $(EXTRA_CFLAGS)\
+		$(APP_CFLAGS) $(STD_CDEFINES) $(CCOPTS) $(TAETM)/process.np.c
+#endif

@@ -1,0 +1,22 @@
+.Title
+[4mSTEREO PROCESSING Menu[0m                                (page 1 of 1)
+.Proc STEREO
+[1mSTEREO[0m  - Produces stereoscopic image pairs from an image 
+          corresponding to the "right eye" image and "depth" image for each
+          point in order to produce a "left eye" image.
+.Proc STERGEN
+[1mSTERGEN[0m - Generates correlation tiepoint file from a stereo pair
+          of images, based on interactive user input.
+.Proc STERMAP
+[1mSTERMAP[0m - Displays the tiepoint info produced by STERGEN as either
+          a map of detrended vectors, an elevation map, map of quality or a 
+          listing of tiepoint data.
+.help
+
+
+The STEREO section contains those programs which allow the user to create or 
+process stereoscopic image pairs.  These programs include:
+
+STEREO              STERGEN             STERMAP
+
+.END

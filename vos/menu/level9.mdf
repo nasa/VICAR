@@ -1,0 +1,27 @@
+.Title                ! LEVEL9.MDF
+[4m[1mPROJECT SPECIFIC PROGRAMS[0m
+.Menu GALILEO.MDF
+GALILEO PROJECT     - Programs used to process Jupiter and other 
+                      data acquired by the Galileo Flight Project.
+
+.Menu LANDSAT.MDF
+LANDSAT             - Programs used to process LANDSAT Earth data.
+
+.Menu VIKING.MDF
+VIKING PROJECT      - Programs used to process Mars data acquired by the
+                      Viking Flight Project.
+
+.Menu VOYAGER.MDF
+VOYAGER PROJECT     - Programs used to process Jupiter, Saturn, Uranus and
+                      Neptune data acquired by the Voyager Flight Project.
+
+.HELP
+
+The FLIGHT PROJECT section of the menu contains programs supporting
+the following flight projects: GALILEO, LANDSAT, VIKING and VOYAGER. 
+Note that this section only contains project specific software and not
+all the programs which may be used on the data. Additional general
+purpose programs may be found in the Image Processing Section of the 
+Root (Top level) Menu.  
+
+.End

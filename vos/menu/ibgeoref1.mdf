@@ -1,0 +1,31 @@
+.Title           ! IBGEOREF1.MDF
+[4mIBIS GEOREFERENCE MENU[0m                           (page 1 of 1)
+.Proc CTRMATCH
+[1mCTRMATCH[0m  - Matches an image produced by PAINT with info
+            contained in a Graphics-1 file.
+.Proc EDIMAGE
+[1mEDIMAGE[0m   - Allows interactive image editing and annotating.
+.Proc MAPGEN
+[1mMAPGEN[0m    - Takes an image divided into polygon regions, and
+            assigns a grey value to each region according to info in an
+            interface file or by user defined input parameters.
+.Proc PAINT
+[1mPAINT[0m     - Takes image divided into regions and "paints" (assigns
+            specific DN values to) each region.
+.Proc PCOPOUT
+[1mPCOPOUT[0m   - Generates a Graphics-1 file from an interface file.
+.Proc POLYSCRB
+[1mPOLYSCRB[0m  - Transforms Graphics-1 files into image file containing 
+            polygon borders drawn on a uniform background.
+.Proc VQUIC
+[1mVQUIC[0m     - Converts VAX ASCII Edit file into an interface file.
+
+.Help
+
+The GIS GEOREFERENCE is a managerial regions image or reference image used 
+in GIS polygon overlay.  This section includes the following programs:
+
+CTRMATCH           EDIMAGE            MAPGEN             PAINT
+PCOPOUT            POLYSCRB           VQUIC
+
+.End

@@ -1,0 +1,39 @@
+# Imakefile for the X Display Device backend for the VRDI
+#
+
+#include "Imakefile_obj.xdisplay"	/* Object list */
+
+all: $(XDISPLAYLIB) $(VRDILIB)/x11_device
+
+$(XDISPLAYLIB): $(LIBOBJS)
+	$(RANLIB) $(XDISPLAYLIB)	/* AR done by compiles */
+
+$(VRDILIB)/x11_device: $(DEVOBJS) $(VICCPU)/shmem_unix.o $(VICCPU)/socket.o $(VICCPU)/xd_read_dibs.o
+	$(LINK.c) -o $(VRDILIB)/x11_device $(LDFLAGS) $(DEVOBJS) $(VICCPU)/shmem_unix.o $(VICCPU)/socket.o $(VICCPU)/xd_read_dibs.o $(X11LIB)
+
+#define Library $(XDISPLAYLIB)
+
+#include "Imakefile_targ.xdisplay"	/* Target list */
+
+# shmem_unix, xd_read_dibs, and socket are treated specially because they are
+# actually symlinked from the common dir (so the x11_device program can get
+# at them).
+
+$(VICCPU)/shmem_unix.o: shmem_unix.c
+	compile_vrdixd(shmem_unix)
+
+shmem_unix.c: ../common/shmem_unix.c
+	$(SYMLINK) ../common/shmem_unix.c shmem_unix.c
+
+$(VICCPU)/xd_read_dibs.o: xd_read_dibs.c
+	compile_vrdixd(xd_read_dibs)
+
+xd_read_dibs.c: ../common/xd_read_dibs.c
+	$(SYMLINK) ../common/xd_read_dibs.c xd_read_dibs.c
+
+$(VICCPU)/socket.o: socket.c
+	compile_vrdixd(socket)
+
+socket.c: ../common/socket.c
+	$(SYMLINK) ../common/socket.c socket.c
+

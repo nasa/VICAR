@@ -1,0 +1,213 @@
+PROCEDURE HELP=*
+body
+help vicar
+end-proc
+.help
+			Getting Started
+			---------------
+
+VICAR (Video Image Communication and Retrieval) is an image processing
+system maintained and used by JPL's Multimission Image Processing
+Laboratory (MIPL).  Vicar consists of an executive (consisting of the
+user interface (TAE) and a run-time library) and a collection of image
+processing programs (the applications, called "procs") that together
+provide both general and flight-project-specific image processing capability.
+
+As a user, almost all of your interaction with Vicar will be through
+a program called TAE.  TAE (Transportable Applications Executive) is a
+user interface program developed by the Goddard Space Flight Center.
+Anytime you see the "VICAR>" prompt, TAE is in control.  TAE watches
+what you type, provides help and tutoring, and runs the programs you
+request.  For example, TAE took your request "HELP VICAR", interpreted
+it, and brought up this help file.
+.page
+			Getting Started (continued)
+			---------------
+
+Vicar is built on top of TAE, and includes several modifications to
+TAE.  The prompt from TAE says "VICAR>".  For these reasons, many
+people refer to the user interface as Vicar instead of TAE.  This is
+fine, however, you should be aware that TAE is present, since many
+documents refer to it.
+
+If you are just starting with VICAR, you'll probably want to go
+through the New User Tutorial.  This tutorial will give you a better
+introduction to Vicar than this help file does.  To run the tutorial,
+simply type "NUT" at the Vicar prompt:
+
+VICAR> NUT
+.page
+			Getting Started (continued)
+			---------------
+
+After looking at the tutorial, you'll be ready to use the system.
+Vicar consists of many separate programs that do different things.
+Until you know your way around, you may want to use the menu system.
+The menus help you find the program that you need to run.  They guide
+you through from a general idea of what you want to do to actually
+running the specific program that does what you want.  Menus are useful
+for more experienced users, too, as there are a lot of programs to
+remember.  To get into menu mode, simply type "MENU" at the prompt:
+
+VICAR> MENU
+
+then select from the choices that will appear on your screen.  You
+can stay in menu mode for the entire session if you like.  If you
+want to get back to command mode (which is where you started), type
+"COMMAND" at the menu prompt.
+.page
+			Getting Started (continued)
+			---------------
+
+A "Tutor" mode is also available.  If you remember the name of the
+program, but not what it's parameters are, you can use the tutor mode.
+To do this, simply put the word "TUTOR" in front of the program name
+on the command line.  Note that this is only effective for command
+mode, since menu mode automatically uses tutor.  In the example below,
+"GEN" is an application program that you don't know the parameters for.
+
+VICAR> TUTOR GEN
+
+For general help on any specific program, type "HELP" followed by the
+name of the program:
+
+VICAR> HELP GEN
+
+This will tell you the purpose, operation, and history of the program.
+.page
+			Documentation
+			-------------
+
+To make efficient use of the system, you'll need to refer to the manuals.
+The "Vicar User's Guide" is probably the most useful manual available.
+It has sections that bring a beginner up to speed, and other sections for
+the intermediate and advanced users.  For most image processing work,
+it's all you'll need.
+
+For more information on the user interface, you'll need the "TAE User's
+Reference Manual".  Keep in mind, though, that Vicar includes some
+modifications to TAE, so things might not be exactly as that manual
+states.  But, they will be close enough for most purposes.
+
+A list of the built-in TAE commands, and a description of all command
+qualifiers is available on-line by typing "HELP" with no parameters
+from the "VICAR>" prompt.
+.page
+			Documentation (continued)
+			-------------
+
+TAE contains a powerful language called the TAE Command Language (TCL).
+TCL allows you to write your own procedures to do common tasks.  TCL
+is covered (along with lots of other stuff) in the "Vicar User's Guide".
+If you need more detailed information, see the "Application Programmer's
+Reference Manual for the Transportable Applications Executive".
+
+If you want to program your own applications, read the "VICAR Run-Time
+Library Reference Manual".
+.page
+			Running Programs
+			----------------
+
+Below is some general information about using VICAR.  It is not meant
+to be a replacement for the New User's Tutorial or the Vicar User's
+Guide, but it may be useful for reference.
+
+Vicar programs can be run using standard TAE syntax:
+
+VICAR> pgm [parameters]
+
+where "pgm" is the program name and zero or more parameters may
+be specified. The parameters may be specified in any of three ways:
+by the "name=value" form, positionally, or (if of keyword type),
+by the "'value" form.  Parameters may be separated by either blanks
+or commas. For example:
+
+VICAR> STRETCH INP=A.DAT OUT=B.DAT SIZE=(1,1,100,100) FORMAT=HALF
+.page
+			Positional Parameters
+			---------------------
+
+Since Vicar programs generally have many parameters, whose order would
+be difficult to remember, we have adopted the convention that most
+programs have the same initial three parameters, which can then always
+be specified positionally:
+
+INP:  one or more strings specifying input files.
+OUT:  one or more strings specifying output files.
+SIZE: four integers specifying starting line, starting sample, number
+      of lines, and number of samples.  These parameters can also be
+      specified separately as SL, SS, NL, and NS; but then the
+      parameter-name must be used.  These numbers specify the portion
+      of the input image to use, and the size of the output image.
+
+Example:
+VICAR> STRETCH A.DAT B.DAT (1,1,100,100) FORMAT=HALF
+.page
+			Positional Parameters (continued)
+			---------------------
+
+Note that a few programs have no input file (such as GEN, AL) or output
+file (such as LIST) and therefore form exceptions to this rule.
+Also, because starting line and sample are meaningless when there is
+no input file, GEN and AL do not have the SIZE parameter; instead,
+NL and NS follow OUT and can be specifed positionally, e.g.:
+
+VICAR> GEN A 512 512
+
+Of course, if you don't remember the parameters for a program, you
+can always use TUTOR.
+.page
+			Filenames
+			---------
+
+Filenames in Vicar are standard VMS file names.  See the VMS
+documentation for more details.
+
+The filetype (the part of the filename after the period '.') may be
+omitted, in which case VICAR will supply a default filetype which
+will be valid as long as you are logged in.  VICAR will automatically
+delete these files when you log out.  When you log in again, the
+default filetype will be different.  Example:
+
+VICAR> STRETCH A B (1,1,100,100) FORMAT=HALF
+
+This expects an input file named "A.Z42" in the current directory and
+creates an output file named "B.Z42" or something similar.  The last
+two digits will change under different logins, but the 'Z' is always
+present.
+.page
+			Keyword Parameters
+			------------------
+
+For these parameters the value alone may be specified on the
+command line, flagged by a single quote ('). The parameter is
+indicated as Keyword in the TUTOR display and the list of valid
+values is given there.
+
+An example is the FORMAT parameter, which by convention means
+the same for all programs that use it: data format (BYTE, HALF,
+REAL, etc.; of course, not all programs allow all possible values.)
+For example:
+
+VICAR> STRETCH A B (1,1,100,100) 'HALF
+.page
+			Application Programs
+			--------------------
+
+Vicar programs are available on the MIPL system in three software
+classes:
+
+Class 1: executive and system software.
+Class 2: applications that are tested and officially supported by MIPL.
+Class 3: applications that are not officially
+         supported by MIPL, and are not tested by MIPL.
+
+The applications are many and varied.  There are applications available
+for almost all of the image processing tasks you'll need.  To find
+out what's available, use the Menu system (accessed by typing "MENU"
+at the "VICAR>" prompt).  Many of the applications are also listed in
+the "VICAR User's Guide".
+
+Enjoy your use of VICAR!
+.end
+end-proc

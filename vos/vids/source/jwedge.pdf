@@ -1,0 +1,87 @@
+procedure help=* options=nointerrupt
+parm planes (string,20) count=0:100 default="IMAGE"
+parm region (string,20) count=1 default=WEDGE
+parm min integer count=1 default=0
+parm max integer count=1 default=255
+parm nsteps integer count=1 default=256
+parm device string count=0:1 default=--
+body
+chkvids1
+sendvar (_proc,planes,region,min,max,nsteps,device) job=VIDSJOB
+chkvids2
+end-proc
+.title
+VIDS command JWEDGE
+.help
+JWEDGE allows you to draw a gray-scale "wedge" in the image planes.
+A wedge is a rectangle of pixels that starts at black (or a dim value)
+on one end and gradually increases to white (or a brighter value) on
+the other end.
+
+You can control the planes the wedge is drawn in, the region on the
+screen it's drawn in, the starting pixel value, the ending pixel
+value, and the number of steps in the wedge by using the various
+parameters.
+.level1
+.vari PLANES
+Image planes to draw the
+wedge in.
+.vari REGION
+Display region for the wedge.
+.vari MIN
+Minimum pixel value
+(on the left side)
+.vari MAX
+Maximum pixel value
+(on the right side)
+.vari NSTEPS
+Number of discrete steps
+to put in the wedge.
+.vari device
+Name of device to use
+.level2
+.vari PLANES
+The PLANES parameter lists the image planes to draw the wedge in.  Any
+number of planes may be specified.  The default is IMAGE, so the wedge
+will end up as a gray scale even in color mode (since the same wedge is
+drawn for each color).
+
+Any valid plane names or numbers may be given, such as RED, GREEN, BLUE,
+COLOR, VISIBLE.  See HELP PLANENAMES for details.
+.vari REGION
+REGION defines the display region to use for the wedge.  If you specify
+a non-rectangular region, the bounding rectangle of the region is used.
+
+The default for REGION is the predefined region "WEDGE".  You may
+redefine "WEDGE" to change the default position using JDEF-REGION
+if you wish.
+.vari MIN
+MIN is the minimum (dimmest) pixel value to use for the wedge.  The
+leftmost pixel in the region gets the value specified.
+
+The default is 0.
+.vari MAX
+MAX is the maximum (brightest) pixel value to use for the wedge.  The
+rightmost pixel in the region gets the value specified.
+
+The default is 255.
+.vari NSTEPS
+NSTEPS specifies how many discrete steps to put in the wedge.  The wedge
+is broken up into NSTEPS equal areas.  Each area has a constant pixel
+value throughout the area, while different areas have different pixel
+values.  The net result with small values for NSTEPS is a "staircase"
+effect in the wedge.
+
+The default is 256, which is the smoothest wedge possible (since there
+are only 256 possible pixel values).
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

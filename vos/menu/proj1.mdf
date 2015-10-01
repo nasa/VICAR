@@ -1,0 +1,33 @@
+.Title
+[4mMAP PROJECTION Menu[0m                                   (page 1 of 1)
+.Proc MAP2
+[1mMAP2[0m     - Generates map projections by rubber-sheeting methods.
+.Proc MAPTRANS
+[1mMAPTRANS[0m - Transforms an image from one map projection to
+           another.
+.Proc POLARECT
+[1mPOLARECT[0m - Performs rectangular to polar coordinates transformation 
+           (or vice versa) on an image with respect to an origin.
+.Proc POLYMAP
+[1mPOLYMAP[0m  - IBIS program converting Graphics-1 files from one Earth
+           oriented map projection to another.
+.Proc POLYPMAP
+[1mPOLYPMAP[0m - IBIS program performing plane-wide map projections
+           on Graphics-1 files, between latitude/longitude space and 
+           line/sample space.
+.Proc PTP
+[1mPTP[0m      - Projects a Voyager planetary or a satellite image to a
+           different perspective.
+.Proc RING
+[1mRING[0m     - Projects a planet's ring plane onto a radius-azimuth grid
+           for Voyager images (e.g., to straighten the rings).
+.help
+
+The MAP PROJECTION section contains those programs which allow the user to 
+project an image in a specific map projection, or allow the user to change 
+the map projection to another type. These programs include:
+
+MAP2                MAPTRANS            POLARECT            POLYMAP
+POLYPMAP            PTP                 RING
+
+.end

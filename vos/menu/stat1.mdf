@@ -1,0 +1,40 @@
+.Title
+[4mSTATISTICS Menu[0m                                       (page 1 of 4)
+.Proc CLUSAN
+[1mCLUSAN[0m    - Creates statistics file using the simulated annealing 
+            optimization technique to find the best cluster partition for
+            MSS data.
+.Proc CLUSTEST
+[1mCLUSTEST[0m  - Determines statistical significance of clusters in a 
+            statistics file.
+.Proc DENDSTAT
+[1mDENDSTAT[0m  - Produces a dendrogram for classification statistics
+            files produced by STATS and USTATS.
+.Proc DIFPIC
+[1mDIFPIC[0m    - Differences two images, outputs a difference image and 
+            reports statistics.
+.Proc EDSTATS
+[1mEDSTATS[0m   - Allows editing of classification statistics files 
+            created by STATS and USTATS.
+.Proc EIGEN
+[1mEIGEN[0m     - Procedure computing the principal component
+            transformation matrix of up to 32 input channels. Also contains 
+            the color decorrelation stretch algorithm.
+
+.Menu STAT2.MDF
+[7mAdditional STATISTICS Menu Selections[0m
+
+.help
+
+The STATISTICS section contains those programs which allow the user to 
+collect, extract and/or display statistical information about a specific 
+dataset. These programs include:
+
+CLUSAN             CLUSTEST           DENDSTAT           DIFPIC
+EDSTATS            EIGEN              F2                 FASTCLAS           
+HIST               HISTGEN            IBISLSQ            IBISREGR
+IBISSTAT           IMP                LAVE               LIST               
+MAXMIN             MF                 MSSVIEW            PIXGRAD            
+PIXSTAT            SDSIBIS            SLIST              SPAM               
+STATPLT            STATS              USTATS             UVFSTATS
+.END

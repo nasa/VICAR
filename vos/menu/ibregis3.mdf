@@ -1,0 +1,23 @@
+.Title           ! IBREGIS3.MDF
+[4mREGISTRATION/MOSAICKING/MAP PROJECTION Menu[0m    (page 3 of 4)
+.Proc POLYMASK
+[1mPOLYMASK[0m  - Cuts the portion of an image delineated by a set of
+            polygons contained in a Graphics-1 file, setting the data on 
+            the inside or outside of the polygons to a specified DN level.
+.Proc POLYPMAP
+[1mPOLYPMAP[0m  - Performs planet-wide map projections on Graphics-1 files, 
+            between latitude/longitude space and line/sample space.
+.Proc POLYREG
+[1mPOLYREG[0m   - Rigidly transforms polygon dataset to correct for 
+            differences in size, rotation, aspect or skew.
+.Proc RAPIDMOS
+[1mRAPIDMOS[0m  - Mosaics up to 40 byte images into one image.  Similar to
+            FASTMOS but with reduced functionality.
+.Proc TIECONM
+[1mTIECONM[0m   - Prepares a gridded dataset for POLYGEOM, GEOMA, LGEOM,
+            MGEOM or GEOMZ transformations using paired sets of tiepoints,
+            applying the finite element method (triangulation) for surface 
+            fitting. 
+.Menu IBREGIS4.mdf
+[7mAdditional REGISTRATION/MOSAICKING/MAP PROJECTION Selections[0m
+.END

@@ -1,0 +1,18 @@
+.Title
+[4mROTATION Menu[0m                                         (page 1 of 1)
+.Proc FLOT
+[1mFLOT[0m     - "Flips" or rotates images by 90 degrees.
+.Proc ROTATE
+[1mROTATE[0m   - Procedure rotating an image about a specified point by
+           some angle.
+.Proc XLOCUS
+xlocus   - Applies LOCUS rotation and offset transformation matrix to the
+           Galileo Theodolite data.
+.help
+
+The ROTATION section contains those programs which allow the user to
+rotate either the planet or the image.  These programs include:
+
+FLOT                ROTATE              xlocus
+
+.end

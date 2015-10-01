@@ -1,0 +1,16 @@
+# Imakefile for the common routines for the VRDI
+#
+
+#include "Imakefile_obj.common"		/* Object list */
+
+OBJS = $(COMOBJS) $(FTNOBJS)
+
+all: $(COMMONLIB)
+
+$(COMMONLIB): $(OBJS)
+	$(RANLIB) $(COMMONLIB)		/* AR done by compiles */
+
+#define Library $(COMMONLIB)
+
+#include "Imakefile_targ.common"	/* Target list */
+

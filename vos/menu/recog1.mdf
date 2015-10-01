@@ -1,0 +1,25 @@
+.Title
+[4mPATTERN RECOGNITION and LOCATION Menu[0m                (page 1 of 1)
+.Proc CORNER
+[1mCORNER[0m   - IBIS program finding good tiepoint locations by looking 
+           for corners or features in the image.
+.Proc FASTCLAS
+[1mFASTCLAS[0m - Classifies multispectral images using
+           parallelepiped algorithm and Bayesian Maximum Likelihood method. 
+.Proc GRIDLOCB
+[1mGRIDLOCB[0m - Locates grid intersections to sub-pixel accuracy.
+.Proc INTERLOC
+[1mINTERLOC[0m - Roughly locates grid intersections in byte data.
+.Proc STARCAT
+[1mSTARCAT[0m  - Locates and integrates features above specified DN 
+           threshold values into a catalog entry.
+.help
+
+The PATTERN RECOGNITION and LOCATION section contains those programs 
+which allow the user to identify and locate objects within an image
+(e.g., grid intersections, corners, features). These programs include:
+
+CORNER             FASTCLAS           GRIDLOCB           INTERLOC           
+STARCAT
+
+.END

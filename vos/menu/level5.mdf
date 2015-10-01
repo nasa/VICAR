@@ -1,0 +1,78 @@
+.TITLE          ! LEVEL5.MDF
+[4m[1mIMAGE DISTORTION, MEASUREMENT AND CORRECTION MENU[0m
+
+.Menu BLEM1.MDF
+BLEMISH, NOISE &          - Programs which locate, remove or classify
+ARTIFACT REMOVAL            or modify blemishes, noise or artifacts.
+
+.Menu BRIGHT1.MDF
+BRIGHTNESS CORRECTIONS    - Programs which perform brightness correction.
+
+.Menu CALIB1.MDF
+CALIBRATION               - Programs generating and/or removing intrinsic 
+                            transfer functions.
+
+.Menu GEOM1.MDF
+GEOMETRIC                 - Programs which change the spacial characteristics 
+TRANSFORMATIONS             of an image (e.g., the shape).
+
+.Menu RESEAU1.MDF
+RESEAU LOCATION &         - Programs which locate and remove reseau and 
+REMOVAL                     fiducial marks from Voyager and Viking Orbiter 
+                            images.
+
+.HELP
+
+The BLEMISH, NOISE AND ARTIFACT REMOVAL section contains those programs 
+which allow the user to locate, remove, classify or modify blemishes, noise 
+or artifacts. These programs include:
+
+ADESPIKE            BLEMFIX             BLEMGEN             BLEMPIC             
+BLEMVORB            CONCOMP1            DROPOUT             DS4                 
+INSERT              lave                MERGE               OSBLEMLOC           
+REPAIR              RESSAR75            RESSAR77            sargon              
+sargonb             SIMPLIFY            VGRBLEM             VGRFILLIN
+
+
+.page
+The BRIGHTNESS CORRECTIONS section contains those programs which allow the 
+user to perform brightness corrections on the image. These programs include:
+
+GEOMZ               GETZVAL             GRADREM             GRAFIMG
+
+
+The CALIBRATION section contains those programs which allow the user to 
+generate and/or remove intrinsic transfer functions (e.g. to remove camera 
+distortions). These programs include:
+
+CCDNOISE            CCDRECIP            CCDSLOPE            DC
+FICOR77             FICOR86             FICORGEN            FIXLOC
+FIXVGR              GALGEN              GALSOS              GETLOC
+GLLPFCF             GRIDGEN             GRIDLOCB            INTERLOC
+LTGEN               MJSPFCF             MOMGEN              otf1
+PICSUM              SOS                 SPLITCAL            XLOCUS
+
+.page
+
+The GEOMETRIC TRANSFORMATION section contains those programs which allow 
+the user to change the spacial characteristics of images (e.g. to reproject 
+a series of images in order to make a mosaic).
+
+ARDREC              C130RECT            FLOT                GEOM
+GEOMA               GEOMREC             KEPLER              LGEOM            
+map2                maptrans            MGEOM               MZGEOM
+POLARECT            POLYGEOM            POLYREG             PTP                 
+RING                ROTATE              size          
+
+.page
+
+The RESEAU LOCATION and REMOVAL section contains those programs which
+allow the user to locate and remove reseau marks and fiducial marks from 
+Voyager and Viking Orbiter images.
+
+FIXLOC              RES77               RESLGEN             RESLOC
+RESLOCVO            RESSAR75            RESSAR77
+
+.End
+
+

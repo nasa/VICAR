@@ -1,0 +1,10 @@
+! Device-specific libraries for the VRDI
+	v2$olb:vrdi_adage/lib		! Ikonas
+	v2$olb:vrdi_dummy/lib		! Dummy device
+	v2$olb:vrdi_ip85hi/lib		! Deanza IP8500 hi-res
+	v2$olb:vrdi_ip85lo/lib		! Deanza
+	v2$olb:vrdi_ivas/lib		! Ivas
+	v2$olb:vrdi_jup/lib		! Jupiter
+	v2$olb:vrdi_ramtek/lib		! Ramtek
+	v2$olb:vrdi_tek/lib		! Tektronix stereo
+	v2$olb:vrdi_xdisplay/lib	! X-windows display

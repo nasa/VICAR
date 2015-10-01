@@ -1,0 +1,131 @@
+procedure help=* options=nointerrupt
+parm plane1	string
+parm plane2	string
+parm rate	real			default=30
+parm loops	integer	count=1		default=32767
+parm faster	(string,1)		default=2
+parm slower	(string,1)		default=1
+parm pause	(string,1)		default=P
+parm device string count=0:1 default=--
+
+local nl integer
+local (plan1,plan2) integer
+local (start,skip,end) integer
+body
+!
+! *** NOTE ***  JBLINK assumes there is a one-to-one correspondence between
+!   frame numbers and plane numbers when the frame fills the entire plane.
+!   While this is true at present, it's a no-no and is *NOT* something other
+!   applications should depend on, since it may change in the future!
+!   Kids, don't try this at home!
+!
+jget-device nl=nl device=@device
+jget-planes @plane1 oplane=plan1
+jget-planes @plane2 oplane=plan2
+jmovie-set nlframe=@nl faster=@faster slower=@slower pause=@pause
+if (plan1 = plan2)
+  putmsg "Sorry, the two planes to blink must not be the same" "VIDS-NOTEQL"
+  goto end
+end-if
+let start = plan1
+let end = plan2
+if (plan1 > plan2)
+  let start = plan2
+  let end = plan1
+end-if
+let skip = end - start - 1
+jbw &start
+jmovie-run start=@start nframes=2 rate=@rate nskip=@skip loops=@loops
+end>
+end-proc
+.title
+VIDS command JBLINK
+.help
+JBLINK will blink back and forth between two image planes in black
+and white mode.  Only two image planes may be specified.
+
+JBLINK is actually a special case of JMOVIE, so if you need more
+flexibility than JBLINK provides, you can use JMOVIE.
+
+In addition to specifying the two image planes, you can also select
+the number of loops, the display rate, and the keys used for interactive
+control.  Since JBLINK uses JMOVIE-RUN, you can look at the help for
+JMOVIE-RUN for more details on speed limitations and how the interactive
+keys operate.
+.level1
+.vari plane1
+First image plane to blink
+.vari plane2
+Second image plane to blink
+.vari rate
+Frames per second
+.vari loops
+Number of loops to run
+.vari faster
+Key to increase speed
+while running movie
+.vari slower
+Key to decrease speed
+while running movie
+.vari pause
+Key to pause
+while running movie
+.vari device
+Name of device to use
+.level2
+.vari plane1
+PLANE1 is a standard VIDS plane parameter that specifies the first image
+plane to use for the blink.  Only one plane may be specified, i.e. no
+multiple plane names such as COLOR.  See HELP PLANENAMES for more details.
+.vari plane2
+PLANE2 is a standard VIDS plane parameter that specifies the second image
+plane to use for the blink.  Only one plane may be specified, i.e. no
+multiple plane names such as COLOR.  See HELP PLANENAMES for more details.
+.vari rate
+The RATE parameter is a real number specifying the rate in frames per
+second at which the movie is to be run.  The rate may also be changed
+interactively using the keyboard while the movie is running (See HELP *).
+
+Examples:
+
+RATE=30		30 frames per second (video rates)
+RATE=2		2 frames per second
+RATE=.25	1 frame per four seconds
+
+Default=30.
+.vari loops
+The LOOPS parameter is an integer specifying the number of loops 
+or complete revolutions of the movie to be shown.  That is, if
+LOOPS=10, the movie will blink only 10 times.
+
+Default is 32767; that is, a very long time, allowing you to 
+control the movie with interactive keys.
+.vari faster
+The FASTER parameter is a single character string indicating which
+key on the keyboard is to be used to increase speed while running
+a movie with JBLINK.  It is not case sensitive.
+
+By default, the "2" key is used to increase speed.
+.vari slower
+The SLOWER parameter is a single character string indicating which
+key on the keyboard is to be used to decrease speed while running
+a movie with JBLINK.  It is not case sensitive.
+
+By default, the "1" key is used to decrease speed.
+.vari pause
+The PAUSE parameter is a single character string indicating which
+key on the keyboard is to be used to pause the movie while running
+it with JBLINK.  It is not case sensitive.
+
+By default, the "P" key is used to pause.
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

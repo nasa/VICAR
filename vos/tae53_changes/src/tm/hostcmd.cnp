@@ -1,0 +1,314 @@
+/******************************************************************************
+ *	Copyright (c) 1990, 1991, National Aeronautics and Space Administration
+ *	ALL RIGHTS RESERVED
+ *
+ *	The software (programs, data bases and/or documentation) on or in
+ *	any media can not be reproduced, disclosed or used except under
+ *	terms of the license between COSMIC and your organization.
+ *****************************************************************************/
+
+/*<<VAX/VMS>>*/
+/*
+ *	hostcmd.   Host-dependent TCL intrinsic commands.
+ *
+ *	CHANGE LOG:
+ *
+ *	11-jul-83	Purged change log, deleted checkout records,
+ *			and audited global definitions...jtm
+ *	25-oct-83	Add host_init...palm
+ *	14-jan-84	Fix DCL command before it gets into $LASTCMD...palm
+ *	05-feb-84	Don't allow DCL when in dyn. cmd. or int'pt mode...nhe
+ *	07-feb-84	Y_BATCH-->Y_ABI...nhe
+ *	15-feb-84	Set menu_screen...palm
+ *	27-feb-84	New HI002 to display dm_bytes...palm
+ *	04-may-84	VALUE_x to xVAL ... ces
+ *	07-may-84	Move the IMPORT declarations...lim
+ *			No more dyncmd mode and don't set menu_screen if
+ *			first time...nhe
+ *	14-jun-84	DCL-INTERRUPT and DCL-NOINTERRUPT...palm
+ *	13-jul-84	New process() calling sequence...nhe
+ *	22-jul-85	New HI004 to display page faults...palm
+ *	29-jul-85	Remove exit(40) from test_handler because it
+ *			prevents other exit handlers from running
+ *			and it produces a strange "SYSTEM-W abort" 
+ *			message...palm
+ *
+ ****************************************************************************
+ * CHANGES MADE IN THE RCJM TREE:
+ *
+ *	05-apr-85	Add exit handler...nhe
+ *	21-apr-85	Include ASYNCINC  conditionally...dm
+ ****************************************************************************
+ *
+ *	08-aug-85	Make pagefalult command conditional for vms 4.n...dm
+ *	17-feb-86	Honor host_enable flag in dcl_do.
+ *	22-jul-87	Add get_hostcmd() as part of effort to force TM 
+ *			into libraries...ljn
+ *	09-aug-87	Make cmd table GLOBAL; see explanation in
+ *			intrinsic.c...palm
+ *	01-feb-89	Delete TAE_RCJM conditionals...ljn
+ *	31-jan-89	from hi002, call delete_ivp_pool to clean
+ *			things up for dynamic memory monitoring...palm
+ *	12-sep-89	Ported PM's fix of 1-may-89 from UNIX...ljn
+ *	02-apr-90	Used old TAE_RCJM's to remove RCJM completely;
+ *			Comment out do_dmbytes if FAST_ALLOC;
+ *			Removed get_hostcmd()...ljn
+ *
+ */
+
+#include	"taeconf.inp"	/* TAE configuration definitions	*/
+#include	"symtab.inc"	/* symbol table				*/
+#include	"fileinc.inp"	/* file package				*/
+#include	"eventinc.inp"	/* event package			*/
+#include	"syninc.inc"	/* syntax block				*/
+#include	"tminc.inc"	/* TM-only host-independent definitions	*/
+#ifdef TAE_ASYNC
+#include	"asyncinc.inc"	/* for async processes			*/
+#endif
+#include	<stdio.h>
+#include   	<jpidef>	/* get JPI codes	*/
+
+
+/* Table of intrinsic commands in this source module: 	*/
+
+    GLOBAL CODE dcl_do(), faults_do();
+#ifndef FAST_ALLOC
+    GLOBAL CODE dm_bytes_do():
+#endif
+
+    GLOBAL struct ITRCMD hostcmd[] = 	
+	{
+
+/*  name        sub     flags	                  pcount    pdf    do-fun   */
+
+{0, "DCL",	"INTERRUPT",  
+#ifdef SYNTAX_CHECK
+              Y_ABI|Y_BODY|Y_CLEAR|Y_CMD|Y_SYNTAX|Y_DEFSUB, 
+#else
+		     Y_ABI|Y_BODY|Y_CLEAR|Y_CMD|Y_DEFSUB, 
+#endif
+						   0,     NULL,   dcl_do },
+{0, "DCL",	"NOINTERRUPT",  
+#ifdef SYNTAX_CHECK
+              Y_ABI|Y_BODY|Y_CLEAR|Y_CMD|Y_SYNTAX, 0,     NULL,   dcl_do },
+#else
+		     Y_ABI|Y_BODY|Y_CLEAR|Y_CMD,   0,     NULL,   dcl_do },
+#endif
+
+#ifndef FAST_ALLOC
+{0, "HI002",    "",  Y_ABI|Y_BODY|Y_CLEAR|Y_CMD,   0,     NULL,   dm_bytes_do},
+#endif
+
+{0, "HI004",    "",  Y_ABI|Y_BODY|Y_CLEAR|Y_CMD,   0,     NULL,   faults_do},
+
+{0, ""}   /* TERMINATOR ENTRY: required */
+
+	};
+
+/*	source locals for implementing page fault display   */
+
+    static long	cur_faults = 0;			/* current cumulative faults */
+    static long faults_code = JPI$_PAGEFLTS;
+
+
+/*
+ *	dodcl.   DCL command.  Everything past the command field is sent
+ *	to the subprocess as a DCL command.  This is much faster and
+ *	cleaner than RUNDCL.
+ *
+ *	While the DCL command is executing, to TM it is just like a
+ *	$RUN command is executing in the subprocess: we need proc
+ *	interrupt mode, etc.  So there exists a special flag (dcl_string) 
+ *      in the c_act logic which says: "do not send a $RUN command but
+ *	send the command pointed to by dcl_string.
+ */
+
+    FUNCTION CODE dcl_do(cpctx, npctx)
+
+    	struct CONTXT	*cpctx;		/* in: current proc context	*/
+	struct CONTXT	*npctx;		/* in: context of DCL command	*/
+
+	{
+	IMPORT TEXT 	*dcl_string;	/* magic hook in c_act		*/
+	IMPORT struct ECB   ecbi;	/* attn sequence ECB		*/
+	IMPORT CODE 	menu_screen;	
+	IMPORT CODE	cmd_mode;	/* INTMODE, or NORMODE 		*/
+        IMPORT BOOL	host_enabled;	/* TRUE if DCL command ok	*/
+
+	struct SYNBLK	*sb;		/* ptr to syntax block		*/
+    	struct CODE_ERR	*errmsg;	/* ptr to an errmsg defined statically */
+        TEXT	*dollar_stuff;
+	CODE		code;
+        TEXT		*i;
+
+/*
+ *	DCL is a special command in that it can produce terminal output
+ *	without going thru the terminal package in TM.  So, in case
+ *	this was activated by menu mode, we force the prompt for next
+ *	menu (but not if the menu has never been displayed).  Other 
+ *	intrinsics do not have this problem because terminal
+ *	output is detected by the TM terminal package.
+ */
+	if (menu_screen != UNDEFINE) 
+		menu_screen = PROMPT_PAINT; /* force menu prompt */
+	if (!host_enabled)
+	    {
+	    tmmsg (PROCFAIL, "'DCL' command has been disabled.", "TAE-DISHOST");
+	    return (DO_CHECK);
+	    }
+	if (cmd_mode != NORMCMD)		/* only from normal cmd mode! */
+	    {
+	    tmmsg(PROCFAIL, "'DCL' only available in normal command mode.",
+		"TAE-BADCMD");
+	    return(DO_CHECK);
+	    }
+	sb = (*npctx).sb;
+	for (i=(*sb).curchr; *i != EOS; i++);	/* go to end of string	*/
+	for(--i; *i == ' ' || *i == '\t'; i--);	/* ignore trailing white space */
+	if (*i == '-')				/* if last char is '-'	*/
+	    {
+	    tmmsg(PROCFAIL, "'-' invalid as last character.", "TAE-INVDCL");
+	    return(DO_CHECK);		
+	    }
+	
+	dcl_string = (*sb).curchr;	/* pointer to rest of TCL cmd	*/
+	if (chkend(sb) == SUCCESS)	/* if command is "DCL" only	*/
+	    dcl_string = "$@TERMINAL";	/* do interactive DCL		*/    
+        while (*dcl_string == ' '   ||   
+	       *dcl_string == '\t')
+	    dcl_string++;		/* strip leading white space    */
+	dollar_stuff = NULL;
+	if (*dcl_string != '$')		/* if first char is not a '$'	*/
+	    {
+	    --dcl_string;		/* back space one character	*/
+	    *dcl_string = '$';		/* prefix with '$'		*/
+	    dollar_stuff = dcl_string;	/* remember that we did it	*/
+	    }
+        (*npctx).interrupt = s_equal ((*npctx).subcmd, "INTERRUPT");
+	code = process(npctx, &ecbi, &errmsg);	     /* run "process"	*/
+	if (code == FAIL)
+    	    tmmsg(PROCFAIL, (*errmsg).text, (*errmsg).key, (*errmsg).code);
+	dcl_string = NULL;		/* reset special hook flag	*/
+	if (dollar_stuff != NULL)
+	    *dollar_stuff = ' ';	/* clean up for $LASTCMD	*/
+	return(DO_CHECK);
+	}
+
+#ifndef FAST_ALLOC
+/*	dm_bytes_do.	Return dm_bytes as $SFI and display dm_bytes
+ *
+ *	If you are chasing down memory allocation problems,
+ *	remember to do "let $lastcmd=--" to turn off
+ *	command archive.
+ *
+ */
+    FUNCTION dm_bytes_do ()
+    {
+    IMPORT struct VARIABLE *sfi_gbl;
+
+    globalref int dm_bytes;
+    TEXT	string[STRINGSIZ+1];
+
+    delete_ivp_pool();			/* clean up dm_bytes. This pool */
+					/* gets re-created automatically*/
+    IVAL (*sfi_gbl, 0) = dm_bytes;
+    s_i2s (dm_bytes, string);
+    put_stdout (string);
+    return (DO_CHECK);
+    }
+#endif
+
+/*	faults_do.	Return number of page faults 
+ *	since last call here.  $SFI set to the number of faults
+ *	and the value is displayed on stdout.
+ *
+ */
+    FUNCTION faults_do ()
+    {
+#ifdef VMS_V4
+    IMPORT struct VARIABLE *sfi_gbl;
+    TEXT	string[STRINGSIZ+1];
+    long   	new_faults;			/* new cumulative faults     */
+
+    lib$getjpi (&faults_code, NULL, NULL, &new_faults, NULL, NULL);
+    IVAL (*sfi_gbl, 0) = new_faults  -  cur_faults;
+    s_i2s (new_faults - cur_faults, string);
+    cur_faults = new_faults;
+    put_stdout (string);
+    return (DO_CHECK);
+#endif
+    }
+
+/*	host_init.   Host-dependent initialization.
+ *
+ *	For VMS, we close the UNIX files opened automatically.
+ *	We use other means of talking to terminals and these
+ *	open files subtract from the open file quota.
+ *
+ */
+
+    FUNCTION VOID host_init ()
+
+    {
+/* set up an exit handler					*/
+
+    struct EX_CB
+	{			/* the handler control block	*/
+	struct EX_CB *flink; 	/* used by VMS			*/
+	long	hndlrpt;	/* pointer to my handler	*/
+	char	numarg;		/* number of arguments to follow*/
+	char	fill[3];	/* fill out the longword	*/
+	long	*statargpt;	/* pointer to mandatory first arg */
+	} ;
+
+    static struct EX_CB	excb;
+    long 		test_handler();	/* our test handler		*/
+
+    long		code;
+    static long		status;
+
+
+    excb.fill[0] = excb.fill[1] = excb.fill[2] = 0;  /* required    	    */
+    excb.hndlrpt = test_handler;
+    excb.numarg = 1;				/* for now, use only status */
+    excb.statargpt = &status;
+    code = sys$dclexh (&excb);			/* declare the hander	    */
+
+/*	init the current number of process page faults 	*/
+
+#ifdef VMS_V4
+    lib$getjpi (&faults_code, NULL, NULL, &cur_faults, NULL, NULL);
+#endif
+    return;
+    }
+
+#ifdef TAE_ASYNC
+/*  The exit handler							    */
+
+    FUNCTION VOID test_handler (exit_status)
+
+    
+    long 		*exit_status;		/* the mandatory status arg */
+
+    {
+    IMPORT struct ACB	*acb_head;		/* acb list-head	*/
+
+    struct ACB		*acb;
+    struct RPCB		*rpcb;
+    CODE		code;
+    struct RPCB		*get_rpcbhead();	/* rpcb list-head	*/
+
+/* kill async processes							    */
+
+    for (acb = acb_head; acb != NULL; acb = (*acb).link)
+	{
+	if ((*acb).active)
+	    {
+	    abort_acb (acb);	/* abort the local process  */
+	    tmmsg (SUCCESS, "Job '%s' aborted.", "TAE-ABORTOK",(*acb).name);
+	    }
+    	}
+    return;				/* continue with next exit handler */
+    }
+#endif
+

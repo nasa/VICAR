@@ -1,0 +1,32 @@
+procedure help=* options=nointerrupt
+local (_job,message,key,type) string
+local stat integer
+refgbl $vidsflg
+body
+if ($vidsflg <> "WAITING")
+  putmsg "CHKVIDS2 -- You are not waiting for a VIDS message!" "VIDS-NOWAIT"
+  return
+end-if
+let $vidsflg="READY"
+loop
+  recvar (_job,stat,message,key,type) job=VIDSJOB
+  if (type <> "MESSAGE")
+    break
+  end-if
+  putmsg "&message" "&key"
+end-loop
+if (stat <> 1)
+    chkvids3 "&message" "&key" "&type"
+    return &stat "&key"
+end-if
+end-proc
+.title
+VIDS internal procedure CHKVIDS2 -- DO NOT EXECUTE !!
+.help
+****** DO NOT EXECUTE !!! ************
+
+CHKVIDS2 is used by VIDS procedures to check the final completion
+status of a VIDS command.  DO NOT run this procedure from the
+command line, as it could result in your VICAR session getting
+hung.
+.end

@@ -1,0 +1,98 @@
+procedure help=* options=nointerrupt
+parm plane (string,20) count=1 default=BW
+parm location integer count=(0,2) default=--
+parm stretch keyword valid=(STRETCHED,UNSTRETCHED) default=UNSTRETCHED
+parm referenc keyword valid=(CENTER,HOME) default=CENTER
+parm device string count=0:1 default=--
+body
+chkvids1
+sendvar (_proc,plane,location,stretch,referenc,device) job=VIDSJOB
+chkvids2
+end-proc
+.title
+VIDS Command JLIST
+.help
+The JLIST command will list the pixel values from a given area of
+the display to the terminal screen.  The size of the area listed is
+automatically computed from the size of your terminal screen.
+
+Only one image plane can be listed at a time.  To print the pixel
+values for more than one plane, multiple JLIST commands must be given
+with a different value of PLANE for each.
+
+The location the pixels are listed from can be controlled interactively
+via the cursor, or by the command line with the LOCATION parameter.
+For the interactive case, a small box will follow the cursor around on
+the screen indicating the size of the area to be listed.  Button 1
+(or the keyboard equivalent) will list the current location, then
+wait for another button press.  Button 2 will cancel the operation.
+.page
+The location specified is, by default, the center of the area.  If
+you set the REFERENC keyword to 'HOME, the location will be in the
+upper left corner of the area.
+
+The pixel values will normally be listed before the stretch is applied.
+If you want to see the effect the stretch has on the pixels, use the
+'STRETCHED keyword.
+
+Examples:
+
+JLIST GREEN			- Interactively lists DNs from the green plane
+JLIST LOC=(256,256)		- Lists the center of the BW plane
+JLIST LOC=(1,1) 'HOME 'STR	- Lists stretched data from upper left of plane
+.level1
+.vari plane
+Plane to list from
+.vari location
+Location to list from;
+interactive if not given
+.vari stretch
+Selects STRETCHED or
+UNSTRETCHED data
+.vari referenc
+Location is center (CENTER)
+or top left (HOME)?
+.vari device
+Name of device to use
+.level2
+.vari plane
+The PLANE parameter lists the image plane to be used for the listings.
+Only one plane may be specified.  If you need more than one, issue
+multiple JLIST commands.  The default is BW.
+
+Any valid plane name or number may be given, such as RED, GREEN, BLUE,
+or GRAPHICS.  See HELP PLANENAMES for details.
+.vari location
+The LOCATION parameter specifies the point around which to list the
+pixel values.  It is a pair of integers of the form (line,sample).
+The coordinates are always relative to the image plane in the PLANE
+parameter.
+
+By default, LOCATION is the center of the rectangular area being listed.
+If you specify 'HOME, however, then LOCATION is the upper left corner of
+the rectangle.
+
+If you do not give LOCATION, then the location will be defined
+interactively using the cursor.  You will be prompted with instructions.
+.vari stretch
+STRETCH controls whether or not to use the look-up table (LUT) for the
+plane.  If 'UNSTRETCHED is given, the raw data from the image memory is
+listed.  If 'STRETCHED is given, the raw data is passed through the LUT
+before being listed.  This allows you to see the effect of your contrast
+enhancement on the data.
+.vari referenc
+The REFERENC parameter indicates whether the location for the list
+(the cursor position or the LOCATION parameter) is to be centered
+in the listing area (REFERENC=CENTER) or positioned in the upper left
+corner of the listing area (REFERENC=HOME).  The default is CENTER.
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

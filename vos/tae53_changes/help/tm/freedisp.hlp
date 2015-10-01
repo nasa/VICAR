@@ -1,0 +1,25 @@
+.title
+FREEDISP
+.help
+FREEDISP is a command that deallocates an image display device
+previously allocated with USEDISP.
+
+Invocation:   FREE device
+
+where:        device    = a device name (i.e. EPA1) or
+                        = a generic device name (i.e. EP) or
+                        = DEFAULT, for the device associated 
+                          with your terminal
+.level1
+.VARI DEVICE
+STRING - Device name
+.LEVEL2
+.VARI DEVICE
+DEVICE is the name of the device to be deallocated.  For
+a complete list of devices available, enter SHOWDISP.
+
+The device name may be one of the following:
+
+        - A standard VMS device name (i.e. EPA1)
+        - A standard VMS generic device name (i.e. EP)
+        - DEFAULT, to get the device associated with your terminal

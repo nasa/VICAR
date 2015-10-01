@@ -1,0 +1,21 @@
+.Title           ! IBTRANS6.MDF
+[4mAdditional IBIS FILE TRANSFER & UTILITIES Menu[0m  (page 6 of 6)
+.Proc VOSDRIBIS
+[1mVOSRIBIS[0m - Extracts info from each Viking Orbiter record in the 
+           SEDR image catalog, placing them in a tabular file.
+.Proc VQUIC
+[1mVQUIC[0m    - Converts VAX ASCII Edit file into an interface file.
+.Proc VWRIS
+[1mVWRIS[0m    - Converts US Forest Service WRIS (Wild Land Resource Info 
+           System - RID*POLY) polygon map files in Universal Data Exchange 
+           Format into IBIS vector and centroid graphics files.
+.Proc WRISOUT
+[1mWRISOUT[0m  - Converts IBIS vector and annotation data into US Forest 
+           Service WRIS/RID*POLY files.
+.Proc XYZPIC
+[1mXYZPIC[0m   - Takes Graphics-1 file & creates a 0 DN image, except for 
+           pixels listed in the Graphics-1 file.
+.Proc ZIPCOL
+[1mZIPCOL[0m   - Merges data into specified columns of an existing
+           interface file from another interface file.
+.End

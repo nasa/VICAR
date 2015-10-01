@@ -1,0 +1,367 @@
+/******************************************************************************
+ *	Copyright (c) 1990, 1991, National Aeronautics and Space Administration
+ *	ALL RIGHTS RESERVED
+ *
+ *	The software (programs, data bases and/or documentation) on or in
+ *	any media can not be reproduced, disclosed or used except under
+ *	terms of the license between COSMIC and your organization.
+ *****************************************************************************/
+
+/*
+ * The functions in this module are used by the subprocess to 
+ * communicate with the parent task.
+ *
+ *
+ *	CHANGE LOG:
+ *
+ *	11-jul-83	Purged change log, deleted checkout records,
+ *			and audited global definitions...jtm
+ *	25-oct-83	Changed concat to avoid subroutine name conflict
+ *			PR 476---palm
+ *	18-feb-84	Remove PARBLK include; not needed...palm
+ *	12-mar-84	Add c_snpa...nhe
+ *
+ ***************************************************************************
+ * CHANGES MADE IN THE RCJM TREE (RCJM SPECIFIC):
+ *
+ *	29-jan-85	Add c_reqintp() for interrupt messages...dm
+ *	13-feb-85	Deleted debug print statements in c_reqintp...dm
+ ****************************************************************************	
+ *	29-oct-86	Compile c_reqintp conditionally for RCJM...ne
+ *	05-nov-86	Remove conditional on TAE_RCJM...nhe
+ *	29-mar-87	Fix system status return code processing error
+ *			for QIOWs.  "Mailbox too small" ss code was 
+ *			being ignored...palm
+ *	09-feb-89	Implement c_child_proc() for VMS...ljn
+ */
+
+#include "stdh.inp"			/* Standard C definitions		*/
+#include ssdef			/* VAX/VMS system service status values	*/
+#include iodef			/* VAX/VMS I/O definitions		*/
+#include jpidef			/* VAX/VMS $GETJPI definitions		*/
+#include pqldef			/* VAX/VMS quota list definitions	*/
+#include descrip		/* VAX/VMS descriptor structures	*/
+#include "taeconf.inp"		/* TAE standard, configuration defs	*/
+#include "eventinc.inp"		/* e_ definitions and structures	*/
+#include "taskinc.inp"		/* c_ definitions and structures  	*/
+#include "fileinc.inp"		/******** TEMPORARY	****************/
+#include "chartype.inc"
+
+/*  Module-wide variables and definitions				*/
+   
+#define	PROCLEN		15		/* max length for VMS process name */
+
+    long		c_code	= 0;	/* latest sys-service return	*/
+
+    static LONG		mess_chan;		/* message channel		*/
+    static LONG 	max_msg;		/* max message size		*/
+    static LONG		int_chan = 0;		/* interrupt channel		*/
+    static LONG		int_efn;		/* efn associated with channel */
+
+/* RGD 6/22/95: routine to fix the process name so it does not contain	*/
+/* any special characters.  Specifically, automatically-generated names	*/
+/* of the form "_VTA351:" are a problem; when "_M" is appended for the	*/
+/* mailbox name, the ":" makes the sys$assign stop, and assign the	*/
+/* terminal to the mailbox instead!  Note that this is only a problem	*/
+/* when *not* run under TAETM; TAETM itself explicitly sets the process	*/
+/* name to something legal.						*/
+
+static int fix_prcname(name)
+char *name;
+{
+   int i;
+   for (i=0; i<strlen(name); i++) {
+      if (!isalpha(name[i]) && !isdigit(name[i]) && name[i]!='_')
+         name[i] = '$';
+   }
+   return 0;
+}
+
+
+static CODE chk_qiow ();
+
+
+/*
+ *	c_rcvp		Receive a data block from a parent task.
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Data successfully received from the parent.
+ *		c_code(host error code) - Data could not be received
+ *
+ *	c_rcvp gets a data block from the parent task.  c_rcvp does not
+ *	return until the data is received or until an error is detected.
+ */
+
+    FUNCTION CODE c_rcvp(block, blksize)
+
+    GENPTR		block;		/* in: pointer to receive buffer */
+    FUNINT		blksize;	/* in: number of characters 	*/
+    					/*     dimensioned by 'block'	*/
+    {
+    COUNT		msglen;
+    LONG		iosb[2];		/* VMS QIO iosb			*/
+    CODE		code;
+
+    if (mess_chan == 0)				/* have we been this way before? */
+    	{
+    	code = c_subi(&mess_chan, &max_msg);  /* 1st time; get chan and size */
+    	if (code == FAIL)
+	    return(c_code);
+    	}
+    msglen = (max_msg < blksize )? max_msg:blksize;   /* min(maxmsg,blksize) */
+    sys$clref(SYNCH_EFN);
+    c_code = sys$qiow(SYNCH_EFN, mess_chan, IO$_READVBLK, iosb,
+    			0,0, block, msglen, 0,0,0,0);  /* read the mbx	*/
+    return (chk_qiow (c_code, iosb));
+    }
+
+
+/*
+ *	c_reqintp. Request an interrupt message from parent; no wait.
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Request successfully queued.
+ *		A host dependent error code otherwise
+ */
+
+    FUNCTION CODE c_reqintp(block, blksize, comp_func)
+
+    GENPTR		block;		/* in: data block to send	*/
+    FUNINT		blksize;	/* in: number of characters	*/
+    VOID		(*comp_func)(); /* in: address of completion routine */
+
+    {
+    LONG		dummy;
+    LONG		iosb[2];		/* VMS QIO iosb			*/
+    CODE		code;
+    TEXT		tempbuf[STRINGSIZ+1];
+
+    static TEXT	prcnam[PROCLEN+1];	/* VMS proc name, made into C-string */
+    static short	prclen;		/* number of characters in proc name */
+    static struct JPI	jpiitm[] =	/* to get process name via VMS */
+    	 {{sizeof(prcnam), JPI$_PRCNAM, prcnam, &prclen }, {0,0,0,0}};
+
+    struct {			/* device information buffer		*/
+    	   long 	charac;		/* characteristics		*/
+    	   short 	dummy1;
+    	   short 	buf_size;	/* size of mailbox		*/
+    	   long		dummy2;
+    	   } dev_buf;
+    static struct dsc$descriptor_s devstr = 	/* descr for getchn buffer */
+    		{sizeof(dev_buf), DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+    TEXT	mbxname[PROCLEN+3];	/* mailbox name			*/
+    static $DESCRIPTOR (dmbxname, "dummy");  /* mbx name descriptor	*/
+
+    if (int_chan == 0)				/* have we been this way before? */
+    	{					/* we should have; if not do a dummy read */
+	c_code = sys$getjpi(0,0,0, &jpiitm, 0,0,0);	/* get process name	*/
+        if (!(c_code&1))
+	    return(c_code);
+        prcnam[prclen] = EOS;			/* make a C string	     */
+        fix_prcname(prcnam);
+        c_concat(2, mbxname, prcnam, "_N");	/* mbx = procname//"_N"	     */
+	set_descr(&dmbxname, mbxname);
+	c_code = sys$assign(&dmbxname, &int_chan, 0, 0);  /* assign mbx chan */
+        if (!(c_code&1))
+	    return(c_code);			/* --> RETURNING HERE <-- */
+ 	c_code = lib$get_ef(&int_efn);
+	if (!(c_code&1))
+	    {
+	    sys$dassgn(int_chan);		/* deassign the channel	  */
+	    return (c_code);
+	    }
+	}
+    sys$clref(int_efn);
+    c_code = sys$qio(int_efn, int_chan, IO$_READVBLK, iosb,
+    			comp_func, 0, block, blksize, 0,0,0,0);  
+						/* queue read to the mbx  */
+    if (!(c_code&1))
+	return (c_code);
+    return (SUCCESS);
+    }
+
+/*
+ *	c_sndp		Send a data block to a parent task.
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Data successfully sent to the parent.
+ *		c_code(host error code) - Data could not be sent
+ *
+ *	c_sndp sends the specified data block to the task that activated
+ *	the sending task; completion occurs only upon termination of I/O or
+ *	detection of an error.
+ */
+
+    FUNCTION CODE c_sndp(block, blksize)
+
+    GENPTR		block;		/* in: data block to send	*/
+    FUNINT		blksize;	/* in: number of characters	*/
+
+    {
+    LONG		dummy;
+    LONG		iosb[2];		/* VMS QIO iosb			*/
+    CODE		code;
+
+    if (mess_chan == 0)				/* have we been this way before? */
+    	{					/* we should have; if not do a dummy read */
+    	code = c_subi(&mess_chan, &max_msg);  	/* 1st time; get chan and size */
+    	if (code == FAIL)
+	    return(c_code);
+	sys$clref(SYNCH_EFN);
+	c_code = sys$qiow(SYNCH_EFN, mess_chan, IO$_READVBLK, iosb,
+			    0,0, &dummy, 4, 0,0,0,0);  /* dummy read the mbx	*/
+        if (chk_qiow (c_code, iosb) != SUCCESS)
+    	    return (c_code);
+    	}
+    sys$clref(SYNCH_EFN);
+    c_code = sys$qiow(SYNCH_EFN, mess_chan, IO$_WRITEVBLK, iosb,
+    			0,0, block, blksize, 0,0,0,0);  /* write to the mbx	*/
+    return (chk_qiow (c_code, iosb));
+    }
+
+/*
+ *	c_snpa		Send a data block to a parent task, no wait.
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Data successfully sent to the parent.
+ *		c_code(host error code) - Data could not be sent
+ *
+ *	c_sndp sends the specified data block to the task that activated
+ *	the sending task; completion occurs immediately.
+ */
+
+    FUNCTION CODE c_snpa(block, blksize)
+
+    GENPTR		block;		/* in: data block to send	*/
+    FUNINT		blksize;	/* in: number of characters	*/
+
+    {
+    LONG		dummy;
+    LONG		iosb[2];		/* VMS QIO iosb			*/
+    CODE		code;
+
+    if (mess_chan == 0)				/* have we been this way before? */
+    	{					/* we should have; if not do a dummy read */
+    	code = c_subi(&mess_chan, &max_msg);  	/* 1st time; get chan and size */
+    	if (code == FAIL)
+	    return(c_code);
+	sys$clref(SYNCH_EFN);
+	c_code = sys$qiow(SYNCH_EFN, mess_chan, IO$_READVBLK, iosb,
+			    0,0, &dummy, 4, 0,0,0,0);  /* dummy read the mbx	*/
+        if (chk_qiow (c_code, iosb) != SUCCESS)
+    	    return (c_code);
+    	}
+    sys$clref(SYNCH_EFN);
+    c_code = sys$qiow(SYNCH_EFN, mess_chan, (IO$_WRITEVBLK|IO$M_NOW), iosb,
+    			0,0, block, blksize, 0,0,0,0);  /* write to the mbx	*/
+    return (chk_qiow (c_code, iosb));
+    }
+
+/*
+ *	c_subi		C_ package initialization for an initiated subtask
+ *
+ *	return codes:	SUCCESS or FAIL
+ *
+ *	c_subi initializes to receive messages from a parent task.
+ */
+
+    FUNCTION CODE c_subi(channel, size)
+
+    LONG	*channel;		/* out: message channel number	*/
+    COUNT	*size;			/* out: maximum message size	*/
+
+    {
+    static TEXT	prcnam[PROCLEN+1];	/* VMS proc name, made into C-string */
+    static short	prclen;		/* number of characters in proc name */
+    static struct JPI	jpiitm[] =	/* to get process name via VMS */
+    	 {{sizeof(prcnam), JPI$_PRCNAM, prcnam, &prclen }, {0,0,0,0}};
+
+    struct {			/* device information buffer		*/
+    	   long 	charac;		/* characteristics		*/
+    	   short 	trash;
+#ifdef BUG_FIXES    
+    	   unsigned short 	buf_size;	/* size of mailbox	*/
+#else
+    	   short 	buf_size;	/* size of mailbox		*/
+#endif
+    	   long		trash2;
+    	   } dev_buf;
+    static struct dsc$descriptor_s devstr = 	/* descr for getchn buffer */
+    		{sizeof(dev_buf), DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+    TEXT	mbxname[PROCLEN+3];	/* mailbox name			*/
+    static $DESCRIPTOR (dmbxname, "dummy");  /* mbx name descriptor	*/
+
+
+    c_code = sys$getjpi(0,0,0, &jpiitm, 0,0,0);	/* get process name	*/
+    if (!(c_code&1))
+	return(FAIL);
+    prcnam[prclen] = EOS;			/* make a C string	*/
+    fix_prcname(prcnam);
+    c_concat(2, mbxname, prcnam, "_M");		/* mbx = procname//"_M"	*/
+    set_descr(&dmbxname, mbxname);
+    c_code = sys$assign(&dmbxname, channel, 0, 0);	/* assign mbx chan */
+    if (!(c_code&1))
+	return(FAIL);				/* --> RETURNING HERE <-- */
+/* Determine max mbx size .  Attempting to read larger than this would abort
+ * the QIO.								*/
+    devstr.dsc$a_pointer = &dev_buf;	/* set ptr to buffer to get data */
+    c_code = sys$getchn(*channel, 0, &devstr, 0,0);	/* read device info */
+    *size = dev_buf.buf_size;
+    return(SUCCESS);
+
+    }
+
+
+/*	chk_qiow.   Check system service and IOSB for a QIOW.
+ *
+ *	Use this only for QIOW not for QIO or anything else!
+ *
+ *	Returns SUCCESS or the offending error code (ss or iosb[0]);
+ */
+
+    FUNCTION static CODE chk_qiow (ss, iosb)
+    
+    	FUNINT	ss;		/* in: VMS system serivce code	*/
+    	long 	iosb[2];	/* in  VMS IOSB			*/
+
+    {
+    if (ss & 1)			/* if sucessful service		*/
+        {
+        if (iosb[0] & 1)	/* if sucessful IOSB		*/
+    	    return (SUCCESS);	/* everything ok		*/            
+        else
+    	    {
+    	    c_code = iosb[0];	/* save for recall		*/
+    	    return (c_code);	/* IOSB error			*/
+    	    }
+        }
+    else
+       {
+       c_code = ss;		/* save most recent ss code     */
+       return (c_code);  	/* system service failure	*/
+       }
+    }
+
+
+/****
+ *
+ * c_child_proc.  Check if the process (task) is a child of TM.
+ *
+ ****/
+
+
+     FUNCTION  BOOL  c_child_proc()
+
+    {
+    CODE		code;
+
+    code = c_subi(&mess_chan, &max_msg);  	/* try to get chan and size */
+    if (code == FAIL)
+        return (FALSE);
+    else
+        return (TRUE);				/* TM is the parent	*/
+    }

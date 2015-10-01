@@ -1,0 +1,24 @@
+.Title
+[4mBRIGHTNESS CORRECTION Menu[0m                    (page 1 of 1)
+.Proc GEOMZ
+[1mGEOMZ[0m    - Performs vertical (brightness or DN) corrections on 
+           images specified by a set of points in a parameter dataset.
+.Proc GETZVAL
+[1mGETZVAL[0m  - IBIS program extracting brightness values in an image 
+           from points specified in an interface file.
+.Proc GRADREM
+[1mGRADREM[0m  - Removes large, systematic and non-linear artificial
+           brightness gradients alon scan lines or wide-angle aircraft
+           scanners.
+.Proc GRAFIMG
+[1mGRAFIMG[0m  - IBIS program converting image data into a gridded
+           3-D Graphics-1 file with z-values corresponding to image
+           DN values.
+.HELP
+
+
+The BRIGHTNESS CORRECTION section contains those programs which allow the 
+user to apply a brightness correction to the data.  These programs include:
+
+GEOMZ               GETZVAL             GRADREM            GRAFIMG
+.END

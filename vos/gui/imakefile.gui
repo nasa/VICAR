@@ -1,0 +1,16 @@
+# Imakefile for GUI Subroutines and Applications
+#
+
+all: make_sub make_prog
+
+make_inc:
+	($(CD) inc/gui; $(V2UTIL)/unpack_inc.csh)
+
+make_sub:
+	($(CD) sub/gui; $(V2UTIL)/bldcomfiles.csh $(GUILIB)) 
+
+make_prog: 
+	($(CD) prog;$(V2UTIL)/bldcomfiles.csh $(GUILIB)) 
+
+
+

@@ -1,0 +1,6 @@
+.Title
+[4mGALILEO  - LOGGING Menu[0m                         (page 1 of 1)
+.Proc VGLLOG
+[1mVGLLOG[0m  - Logs Galileo halfword calibration images into VICAR 
+          byte images.
+.End

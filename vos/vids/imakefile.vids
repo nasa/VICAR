@@ -1,0 +1,46 @@
+# Imakefile for VIDS
+# Copies make files to the appropriate places, then calls the
+# makefiles for each subdirectory.
+#
+
+all: bld_dirs make_source make_pdfs
+
+bld_dirs:
+	-mkdir -p lib/$(VICCPU)
+	-mkdir -p source/$(VICCPU)
+
+make_source: Imakefile_obj.vids Imakefile_targ.vids source/vids.imake source/makevids.csh
+	$(VSYSIMAKE) -f imakefile.vidssrc -s source/Makefile.$(VICCPU)
+	($(CD) source; $(MAKE) Makefile.$(VICCPU))
+
+Imakefile_obj.vids: imake_src.vids
+	-PERL($(V2UTIL)/create_Imake.perl, imake_src.vids, Imakefile_obj.vids,"")
+
+Imakefile_targ.vids: imake_src.vids
+	-PERL($(V2UTIL)/create_Imake.perl, imake_src.vids, Imakefile_targ.vids,"")
+
+imake_src.vids:
+	SED($(V2UTIL)/objlist.sed, imake_obj.vids, Imakefile_obj.vids)
+	SED($(V2UTIL)/targlist.sed, imake_targ.vids, Imakefile_targ.vids)
+
+source/vids.imake: vids.imake
+	$(CP) vids.imake source/vids.imake
+
+source/makevids.csh: makevids.csh
+	$(CP) makevids.csh source/makevids.csh
+	$(CHMOD) +x source/makevids.csh
+
+make_pdfs: compile_pdf.bld
+	$(CP) source/?*.pdf $(VIDSLIB)  /* can't use "/*": cpp sees comment! */
+	$(CP) compile_pdf.bld $(VIDSLIB)/compile_pdf.bld
+	-($(CD) $(VIDSLIB); $(RUN_TM) 'compile_pdf.bld')
+	-$(RM) $(VIDSLIB)/compile_pdf.bld
+
+compile_pdf.bld:
+	$(V2UTIL)/make_compile_pdf.csh > compile_pdf.bld
+
+make_inc: source/VIDSdefs.h
+
+source/VIDSdefs.h: source/vidsdefs.h
+	($(CD) source; $(SYMLINK) vidsdefs.h VIDSdefs.h)
+

@@ -1,0 +1,30 @@
+.Title
+VIDS Analysis Menu
+
+.proc jhist
+JHIST            - Displays histogram of planes or region of interest.
+.proc jstats
+JSTATS           - Calculates various statistics on a plane or region.
+
+.proc jlist
+JLIST            - Displays pixel values on the terminal screen.
+.proc jprofile
+JPROFILE         - Plots a DN profile on the graphics plane.
+
+.proc jwedge
+JWEDGE           - Draws a gray-scale wedge in the image planes.
+
+.proc jstretch-alarm
+JSTRETCH-ALARM   - Alarms specific DN's by setting them to a value.
+.proc jstretch-contour
+JSTRETCH-CONTOUR - Generates a contour plot of an image using the LUT.
+
+.menu jstretch
+Contrast Enhancement commands.
+
+.help
+
+The VIDS Analysis Menu lists all the VIDS commands that are useful
+for analyzing the image, such as profiles, histograms, statistics,
+DN lists, and stretches.
+.end

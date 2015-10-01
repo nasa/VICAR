@@ -1,0 +1,25 @@
+.Title
+[4mANNOTATION Menu[0m                                        (page 1 of 1)
+.Proc FONT
+[1mFONT[0m    - Superimposes text on an image allowing the selection of 
+          font type, size and intensity.
+.Proc MASKV
+[1mMASKV[0m   - Formats any image for film recording by placing an 
+          information mask around image. Labels and histograms optional.
+.Proc STARLAB
+[1mSTARLAB[0m - Places identifier labels beneath each object located by 
+          the program STARCAT.
+.Proc TEXTAD
+[1mTEXTAD[0m  - Superimposes rectangles and/or text on an image.
+
+.help
+
+The ANNOTATION section contains those programs which allow the user to 
+superimpose text on or around an image. This includes adding text 
+information actually within the border of the image, adding a grid around 
+the outside of the image and adding label information outside of the image 
+border. These programs include:
+
+FONT               MASKV              STARLAB            TEXTAD
+
+.end

@@ -1,0 +1,17 @@
+.Title           ! IBTERAN2.MDF
+[4mAdditional IBIS DIGITAL TERRAIN PROCESSING Menu[0m   (page 2 of 2)
+.Proc PLOT3D
+[1mPLOT3D[0m   - Plots 3-D Graphics-1 files in perspective view.
+.Proc RIV2HEX
+[1mRIV2HEX[0m  - Generates a Graphics-1 file with "hex" edges from
+           a normal Graphics-1 file.
+.Proc ROADHEX
+[1mROADHEX[0m  - Generates an interface file of a list of hexagon
+           edges, used to represent roads, from a Graphics-1 dataset.
+.Proc XYZPIC
+[1mXYZPIC[0m   - Takes a Graphics-1 file and creates a 0 DN image,
+           except for pixels listed in the Graphics-1 file.
+.Proc ZINTERP
+[1mZINTERP[0m  - Interpolates elevation values (z values) from random 
+           control points into a rectangular gridded image.
+.End

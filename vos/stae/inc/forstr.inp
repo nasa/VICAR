@@ -1,0 +1,61 @@
+/******************************************************************************
+ *	Copyright (c) 1990, 1991, 1992,
+ *	National Aeronautics and Space Administration
+ *	ALL RIGHTS RESERVED
+ *
+ *	The software (programs, data bases and/or documentation) on or in
+ *	any media can not be reproduced, disclosed or used except under
+ *	terms of the license between COSMIC and your organization.
+ *****************************************************************************/
+
+/*
+ *	FORTRAN-77 string descriptor
+ *
+ *	CHANGE LOG:
+ *
+ *	03-apr-88	Apollo conversion: macros for bridge routine
+ *			names and for string arguments...ljn
+ *	10-nov-88	HP port...ljn
+ *	31-dec-89	Apollo SR10.1 has UNIX f77...ljn
+ */
+
+#ifndef I_FORSTR		/* avoid double include			*/
+#define I_FORSTR	0
+
+#ifndef I_TAECONF
+#include "taeconf.inp"
+#endif
+
+typedef struct 			/* VAX-dependent string descriptor	*/
+    {
+    short	length;		/* length of string			*/
+    short	dummy;
+    char	*pointer;	/* pointer to string			*/
+    } FORSTR;
+
+#ifdef COMMENT
+/*
+ * Obsolete: Apollo SR10.1 has UNIX f77.
+ */
+#define STRLEN short *		/* Apollo's string length argument	*/
+#define GETLEN(A) (*A)		/*    is a pointer to a short		*/
+#define FOR_NAME(A) A
+#define BRIDGE1_NAME(A) A	/* names of top bridge routines		*/
+#define BRIDGE2_NAME(A) NAME2(A,_r) 	/*names of lower bridge routines*/
+#endif
+
+#ifdef hpux
+#define STRLEN TAEINT
+#define GETLEN(A) A
+#define FOR_NAME(A) A
+#define BRIDGE1_NAME(A) A	/* names of top bridge routines		*/
+#define BRIDGE2_NAME(A) NAME2(A,_r) 	/*names of lower bridge routines*/
+#else
+#define STRLEN TAEINT
+#define GETLEN(A) A
+#define FOR_NAME(A) NAME2(A,_)
+#define BRIDGE1_NAME(A) NAME2(A,_)
+#define BRIDGE2_NAME(A) A
+#endif
+
+#endif

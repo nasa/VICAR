@@ -1,0 +1,35 @@
+procedure help=*
+local device string
+refgbl $vidsflg
+body
+if ($vidsflg <> "NOVIDS")
+  write "A VIDS session is already running, so we don't need to"
+  write "start it up again."
+else
+  write "In order to start VIDS, we must first allocate a display device"
+  write "to use.  The SHOWDISP command will show what devices are available."
+  showdisp
+  write "Now, enter the device name you wish to use.  If you've already"
+  write "allocated the display device, then just hit return."
+  let device=""
+  getpar device
+  if (device <> "")
+    write "use &device"
+    use &device
+  end-if
+  write "vids"
+  vids
+end-if
+end-proc
+.title JMENUSTART
+.help
+JMENUSTART is a short procedure that allocates a display device (if
+needed), and then starts up VIDS.  You will be asked for the device
+name to use.
+
+If VIDS is already running, then a message will be printed and the
+procedure will exit.
+
+This procedure is meant to be called from the VIDS Menu System.
+It should not normally be run directly in command mode.
+.end

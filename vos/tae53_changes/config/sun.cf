@@ -1,0 +1,105 @@
+/*
+ * CHANGE LOG
+ * 10-dec-93	Pulled necessary stuff from IVconfig/sun.cf; distinguished
+ *		between SunOS 4.X and Solaris...dag
+ * 16-dec-93	PR2474: Removed SOL_DEF stuff...rt
+ * 22-dec-93	Solaris port: Added necessary defines and libraries...dag;
+ *		PR2301: Set HaveTerminalLibrary to 'no' for Solaris...rt
+ * 23-dec-93	Solaris port: ifdefs needed to be moved around...rt
+ * 29-dec-93	PR2548: Added -R option to XtaeLibPath...dag/rt
+ * 30-dec-93	PR2552: Defined StandardAnsiCFlags for SunOS4 and Solaris;
+ *		added -Xs to StandardCFlags...dag
+ */
+
+/* From the now defunct IVconfig/sun.cf */
+#define SunOSPlatform     YES           /* set to NO if not running SunOS */
+/* SunOS 4.X setup */
+#define OSName            SunOS 4.0.3
+#define OSMajorVersion    4
+#define OSMinorVersion    0
+#define SystemV           NO
+/* Uncomment for Solaris setup.  Verify correct Solaris version. */
+/* #define OSName            SunOS 5.3		*/
+/* #define OSMajorVersion    5			*/
+/* #define OSMinorVersion    3			*/
+/* #define SystemV           YES		*/
+/* End Solaris setup */
+
+/* Solaris machines are System V, so we don't have to check for SystemV */
+#if OSMajorVersion >= 5
+#define StandardCDefines -D_NO_PROTO -DSYSV -DOSMajorVersion=5
+#define StandardAnsiCDefines -DSYSV -DOSMajorVersion=5
+#define StandardCplusplusDefines -DXTFUNCPROTO -DSYSV -DOSMajorVersion=5
+#define ExtraLibraries -lsocket -lnsl -lgen -lintl -lw -ldl
+#define XtaeLibPath -L $$TAEXTAELIB -R $$TAEXTAELIB
+#define HaveTerminalLibrary no
+#define AnsiCCmd cc
+#define StandardAnsiCFlags -Xc
+#define StandardCFlags -Xs
+#else
+#define StandardAnsiCFlags -Xa
+#endif
+
+#ifdef sparc
+#undef sparc
+#define SparcArchitecture
+#endif
+#ifdef sun386
+#undef sun386
+#define i386Architecture
+#endif
+
+#ifdef mc68000
+#define DefaultCCOptions -f68881 -pipe          /* remove in R4 */
+#else
+#define DefaultCCOptions -pipe                  /* remove in R4 */
+#endif
+
+/* -PIC (-KPIC) is needed to enable compiling into a shared library. */
+/* Big PIC is needed because taetm won't link with small pic.  If we */
+/* could compile tm without pic, it might work, but that's too hard. */
+
+#undef ExtraCFlags
+#undef ExtraCplusplusFlags
+
+#if OSMajorVersion>=5
+#define ExtraCFlags -Xs -DOSMajorVersion=OSMajorVersion -KPIC
+#define ExtraCplusplusFlags -Xs -DOSMajorVersion=OSMajorVersion -KPIC
+#else
+#define ExtraCFlags -PIC
+#define ExtraCplusplusFlags -PIC
+#endif
+
+#if !defined(SparcArchitecture)
+/* sun.cf as it is before prepending the needed stuff from IVconfig/sun.cf. */
+/* The following block of lines are for Sun 3 and Sun 2 machines. */
+#define Have68KAssembler true
+/*
+ * Sun 3 and Sun 2 sites WITHOUT the M68881 co-processor should delete the 
+ * next 2 lines.
+ */
+#define MathLibrary /usr/lib/f68881/libm.a
+#define CcCmd cc -f68881
+/*
+ * Ada Sites Only:
+ * Sun 3 and Sun 2 Ada sites WITHOUT the M68881 co-processor should comment
+ * out the next Ada_Mcrt1 line.
+ */
+#define Ada_Mcrt1 /usr/lib/Mcrt1.o
+#endif
+/* End block for Sun 3 and Sun 2 machines. */
+
+/*
+ * For the Ada `Withn' link directive. On Suns, the first link poaition is
+ * reserved for the `-B' directive.
+ */
+#define WithStart 2
+
+/*
+ * Special treatment of the libXmu.a library is no longer needed.
+ */
+
+/*
+ * Sun 3/50's may need:
+ * #define ExtraLibraries /usr/local/lib/gcc-gnulib
+ */

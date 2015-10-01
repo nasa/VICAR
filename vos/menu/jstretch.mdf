@@ -1,0 +1,37 @@
+.Title
+VIDS Contrast Enhancement Menu                                  (page 1 of 2)
+
+.proc jstretch-linear
+JSTRETCH-LINEAR     - Applies a manual linear stretch to the LUT.
+.proc jstretch-percent
+JSTRETCH-PERCENT    - Performs an automatic linear stretch.
+.proc jstretch-complement
+JSTRETCH-COMPLEMENT - Inverts the look-up tables.
+.proc jstretch-cursor
+JSTRETCH-CURSOR     - Interactively changes brightness and contrast.
+.proc jstretch-gauss
+JSTRETCH-GAUSS      - Fits histogram to a Gaussian normal curve.
+
+.proc jstretch-alarm
+JSTRETCH-ALARM      - Alarms specific DN's by setting them to a value.
+.proc jstretch-table
+JSTRETCH-TABLE      - Linearly interpolates between points in the LUT.
+
+.proc jstretch-show
+JSTRETCH-SHOW       - Displays look-up tables on the graphics plane.
+.proc jstretch-edit
+JSTRETCH-EDIT       - Interactively edits the look-up tables.
+.proc jdtf
+JDTF                - Displays and optionally edits the current
+                      look-up tables.
+
+.menu jstretch2
+LESS COMMON CONTRAST ENHANCEMENT SELECTIONS
+
+.help
+
+The VIDS Contrast Enhancement Menu lists all the VIDS commands that
+stretch, or apply contrast enhancement to, the image.
+
+The first page lists the more common stretch commands.
+.end

@@ -1,0 +1,414 @@
+.TITLE	MOVESUBS
+.PSECT	MOVESUBS
+;------------------------------------------------------------------------
+;	BlockMove(SRC, DST, LEN) Moves LEN bytes from SRC to DST.
+;	SRC	R6	addr of source
+;	DST	R7	addr of destination
+;	LEN	R8	amount to move (longword by value).
+;
+;	Since MOVC3 instruction only takes a word for the length, we
+;	need a loop of moves for the longword length.
+;------------------------------------------------------------------------
+.ENTRY	BlockMove,^M<R2,R3,R4,R5,R6,R7,R8>
+	MOVL	4(AP),R6
+	MOVL	8(AP),R7
+	MOVL	12(AP),R8
+;
+A$LOOP:	CMPL	R8,#^x0000FFFF	  ; See if more than one move is needed
+	BLEQ	A$LST		  ; If not, goto the last move of the data
+	MOVC3	#^xFFFF,(R6),(R7) ; Move the first chunk
+	MOVL	R1,R6		  ; Increment the addresses to the next pos
+	MOVL	R3,R7		  ; (MOVC3 sets R1 and R3 for us)
+	SUBL2	#^x0000FFFF,R8	  ; Decrement the length to move
+	BRB	A$LOOP		  ; Start the loop over
+
+A$LST:	MOVC3	R8,(R6),(R7)
+	RET
+;------------------------------------------------------------------------
+;	BlockFill(VAL, DST, LEN) Fills DST with LEN bytes of VAL.
+;	VAL	4(AP)	value to fill with
+;	DST	R7	addr of destination
+;	LEN	R8	amount to move (longword by value).
+;
+;	Since MOVC5 instruction only takes a word for the length, we
+;	need a loop of moves for the longword length.
+;------------------------------------------------------------------------
+.ENTRY	BlockFill,^M<R2,R3,R4,R5,R6,R7,R8>
+	MOVL	8(AP),R7
+	MOVL	12(AP),R8
+;
+A1$LP:	CMPL	R8,#^x0000FFFF	  ; See if more than one move is needed
+	BLEQ	A1$LST		  ; If not, goto the last move of the data
+	MOVC5	#0,@4(AP),4(AP),#^xFFFF,(R7) ; Move the first chunk
+	MOVL	R3,R7		  ; (MOVC5 sets R1 and R3 for us)
+	SUBL2	#^x0000FFFF,R8	  ; Decrement the length to move
+	BRB	A1$LP		  ; Start the loop over
+
+A1$LST:	MOVC5	#0,@4(AP),4(AP),R8,(R7)
+	RET
+;------------------------------------------------------------------------
+;	IncreMove(SRC, DST, LEN, INC)
+;	
+;	Moves LEN bytes from SRC to DST, incrementing the DST counter by INC
+;	for each byte.
+;	SRC	R6	addr of source
+;	DST	R7	addr of destination
+;	LEN	R8	number of pixels to move (longword by value).
+;	INC	R9	number of bytes to incr DST addr for each pixel
+;------------------------------------------------------------------------
+.ENTRY	IncreMove,^M<R2,R3,R4,R5,R6,R7,R8,R9>
+	MOVL	4(AP),R6		; Load source ptr
+	MOVL	8(AP),R7		; Load destination ptr
+	MOVL	12(AP),R8		; Load number of pixels to move
+	MOVL	16(AP),R9		; Load number of bytes to increment
+
+	CMPL	#1,R9			; If incrementing by just 1, do a
+	BEQL	B$1			; single MOVC3
+
+B$STRT:	MOVB	(R6),(R7)		; Move each byte
+	ADDL2	R9,R6			; Next byte of source (add increment)
+	INCL	R7			; Next byte in destination
+	SOBGTR	R8,B$STRT		; Repeat LEN number of times
+	RET
+
+B$1:	CMPL	R8,#^x0000FFFF		; See if more than one move is needed
+	BLEQ	B$LST			; If not, goto the last move of the data
+B$LOOP:	MOVC3	#^xFFFF,(R6),(R7)	; Move the first chunk
+	MOVL	R1,R6			; Increment the addresses to the next pos
+	MOVL	R3,R7			; (MOVC3 sets R1 and R3 for us)
+	SUBL2	#^x0000FFFF,R8		; Decrement the length to move
+	BGTR	B$LOOP			; Start the loop over
+B$LST:	MOVC3	R8,(R6),(R7)		; Final move 
+	RET
+;------------------------------------------------------------------------
+;	ExpandMove(SRC, DST, DSTLEN, LEN, INC, ZOOM, SUBPIX)
+;	
+;	Moves LEN bytes from SRC to DST, incrementing the DST counter by INC
+;	for each byte, and making ZOOM copies of each byte.
+;	SRC	R6	addr of source
+;	DST	R7	addr of destination
+;	DSTLEN		Length in bytes of destination
+;	LEN		number of pixels to move (longword by value).
+;	INC	R9	number of bytes to incr SRC addr for each pixel
+;	ZOOM	R10	Number of copies of each byte
+;	SUBPIX		If not 0, number of copies of first byte only
+;------------------------------------------------------------------------
+.ENTRY	ExpandMove,^M<R2,R3,R4,R5,R6,R7,R8,R9,R10,R11>
+	MOVL	4(AP),R6		; Load source ptr
+	MOVL	8(AP),R7		; Load destination ptr
+	MOVL	16(AP),R8		; load no. of bytes to move (LEN)
+	MOVL	20(AP),R9		; Load number of bytes to increment
+
+	MOVL	28(AP),R10		; First subpixel
+	BLEQ	C$1			; skip if no subpixel
+	MOVC5	#1,(R6),(R6),R10,(R7)	; fill in partial pixel
+	ADDL2	R9,R6			; Next byte of source (add increment)
+	ADDL2	R10,R7			; Next byte in destination (add SUBPIX)
+	DECL	R8			; One less pixel to move now
+
+C$1:	MOVL	24(AP),R10		; Number of copies of each byte
+	MULL2	R10,R8			; Multiply by zoom
+	CMPL	R8,12(AP)		; R8 = MIN((LEN*ZOOM),DSTLEN)
+	BLEQ	C$STRT
+	MOVL	12(AP),R8
+
+C$STRT:	CMPL	R8,R10			; Is buf len < number of copies?
+	BLEQ	C$LST			; If so, do last move of buf len
+	MOVC5	#1,(R6),(R6),R10,(R7)	; Move ZOOM copies of this byte
+	ADDL2	R9,R6			; Next byte of source (add increment)
+	ADDL2	R10,R7			; Next byte in destination (add ZOOM)
+	SUBL2	R10,R8			; 
+	BRB	C$STRT			; Repeat LEN number of times
+C$LST:	MOVC5	#1,(R6),(R6),R8,(R7)	; Final move to fill buffer (partial pixel)
+	RET
+;------------------------------------------------------------------------
+;	IncreTrans(SRC, DST, LEN, INC, FORM, SLOPE, OFFS)
+;	
+;	Translate LEN pixels from
+;	SRC	R6	addr of source
+;	DST	R7	addr of destination
+;	LEN	R8	number of pixels to move (longword by value).
+;	INC	R9	number of bytes to incr DST addr for each pixel
+;	FORM		format constant (see VIDSdefs.h)
+;	SLOPE		multiply each pixel by SLOPE-- D_Floating point
+;	OFFS		add OFFS to each pixel-- D_Floating point
+;------------------------------------------------------------------------
+.ENTRY	IncreTrans,^M<R2,R3,R4,R5,R6,R7,R8,R9,R10,R11>
+	MOVL	4(AP),R6		; SRC
+	MOVL	8(AP),R7		; DST
+	MOVL	12(AP),R8		; LEN
+	MOVL	16(AP),R9		; INC
+	CVTDF	24(AP),R10		; SLOPE
+	CVTDF	32(AP),R11		; OFFSET
+
+	CASEL	20(AP),#1,#6		; Jump to the appropriate format
+D$1:	.WORD	D$BYTE-D$1		; conversion section.
+	.WORD	D$HALF-D$1
+	.WORD	D$FULL-D$1
+	.WORD	D$REAL-D$1
+	.WORD	D$DOUB-D$1
+	.WORD	D$COMP-D$1
+	MOVL	#-2,R0			; if we fell through the case stmt,
+	RET				; set R0 to FAIL and return
+
+D$BYTE:	CVTBF	(R6),R0			; Make source float for arithmetic
+	MULF2	R10,R0			; multiply by SLOPE
+	ADDF2	R11,R0			; add OFFSET
+	CMPF	R0,#0.0			; see if result > 0
+	BGEQ	D$B1			; if > 0, continue
+	CLRF	R0			; if result < 0, result = 0
+	BRB	D$B2			; do the store
+D$B1:	CMPF	R0,#255.0		; if result > 255,
+	BLEQ	D$B2
+	MOVF	#255.0,R0		;   then result = 255
+D$B2:	CVTFB	R0,(R7)			; Store at destination
+	ADDL2	R9,R6			; Next pixel of source (add increment)
+	INCL	R7			; Next byte in destination
+	SOBGTR	R8,D$BYTE		; Repeat LEN number of times
+	RET
+
+D$HALF:	ASHL	#1,R9,R9		; Double INC because WORD format
+D$2:	CVTWF	(R6),R0			; Make source float for arithmetic
+	MULF2	R10,R0			; multiply by SLOPE
+	ADDF2	R11,R0			; add OFFSET
+	CMPF	R0,#0.0			; see if result > 0
+	BGEQ	D$H1			; if > 0, continue
+	CLRF	R0			; if result < 0, result = 0
+	BRB	D$H2			; do the store
+D$H1:	CMPF	R0,#255.0		; if result > 255,
+	BLEQ	D$H2
+	MOVF	#255.0,R0		;   then result = 255
+D$H2:	CVTFB	R0,(R7)			; Store at destination
+	ADDL2	R9,R6			; Next pixel of source (add increment)
+	INCL	R7			; Next byte in destination
+	SOBGTR	R8,D$2			; Repeat LEN number of times
+	RET
+
+D$FULL:	ASHL	#2,R9,R9		; Quadruple INC because LONG format
+D$3:	CVTLF	(R6),R0			; Make source float for arithmetic
+	MULF2	R10,R0			; multiply by SLOPE
+	ADDF2	R11,R0			; add OFFSET
+	CMPF	R0,#0.0			; see if result > 0
+	BGEQ	D$F1			; if > 0, continue
+	CLRF	R0			; if result < 0, result = 0
+	BRB	D$F2			; do the store
+D$F1:	CMPF	R0,#255.0		; if result > 255,
+	BLEQ	D$F2
+	MOVF	#255.0,R0		;   then result = 255
+D$F2:	CVTFB	R0,(R7)			; Store at destination
+	ADDL2	R9,R6			; Next pixel of source (add increment)
+	INCL	R7			; Next byte in destination
+	SOBGTR	R8,D$3			; Repeat LEN number of times
+	RET
+
+D$REAL:	ASHL	#2,R9,R9		; Quadruple INC because REAL format
+D$4:	MOVF	(R6),R0			; Make source float for arithmetic
+	MULF2	R10,R0			; multiply by SLOPE
+	ADDF2	R11,R0			; add OFFSET
+	CMPF	R0,#0.0			; see if result > 0
+	BGEQ	D$R1			; if > 0, continue
+	CLRF	R0			; if result < 0, result = 0
+	BRB	D$R2			; do the store
+D$R1:	CMPF	R0,#255.0		; if result > 255,
+	BLEQ	D$R2
+	MOVF	#255.0,R0		;   then result = 255
+D$R2:	CVTFB	R0,(R7)			; Store at destination
+	ADDL2	R9,R6			; Next pixel of source (add increment)
+	INCL	R7			; Next byte in destination
+	SOBGTR	R8,D$4			; Repeat LEN number of times
+	RET
+
+D$DOUB:	ASHL	#3,R9,R9		; Multiply INC by 8 because DOUB format
+D$5:	CVTDF	(R6),R0			; Make source float for arithmetic
+	MULF2	R10,R0			; multiply by SLOPE
+	ADDF2	R11,R0			; add OFFSET
+	CMPF	R0,#0.0			; see if result > 0
+	BGEQ	D$D1			; if > 0, continue
+	CLRF	R0			; if result < 0, result = 0
+	BRB	D$D2			; do the store
+D$D1:	CMPF	R0,#255.0		; if result > 255,
+	BLEQ	D$D2
+	MOVF	#255.0,R0		;   then result = 255
+D$D2:	CVTFB	R0,(R7)			; Store at destination
+	ADDL2	R9,R6			; Next pixel of source (add increment)
+	INCL	R7			; Next byte in destination
+	SOBGTR	R8,D$5			; Repeat LEN number of times
+	RET
+
+D$COMP:	ASHL	#3,R9,R9		; Multiply INC by 8 because COMP format
+	BRW	D$4			; Use REAL code to convert only real part
+;------------------------------------------------------------------------
+;	ExpandTrans(SRC, DST, DSTLEN, LEN, INC, ZOOM, SUBPIX, FORM, SLOPE, OFFS)
+;	
+;	Translate LEN pixels from
+;4	SRC	R6	addr of source
+;8	DST	R3	addr of destination
+;12	DSTLEN		number of bytes in destination
+;16	LEN		number of pixels to move (longword by value).
+;20	INC	R9	number of bytes to incr SRC addr for each pixel
+;24	ZOOM	R7	number of copies to make of each result in DST
+;28	SUBPIX		If not 0, number of copies of first byte only
+;32	FORM		format constant (see VIDSdefs.h)
+;36	SLOPE	R10	multiply each pixel by SLOPE-- D_Floating point
+;44	OFFS	R11	add OFFS to each pixel-- D_Floating point
+;------------------------------------------------------------------------
+.ENTRY	ExpandTrans,^M<R2,R3,R4,R5,R6,R7,R8,R9,R10,R11>
+	MOVL	4(AP),R6		; SRC
+	MOVL	8(AP),R3		; DST
+	MOVL	16(AP),R8		; LEN
+	MOVL	20(AP),R9		; INC
+	CVTDF	36(AP),R10		; SLOPE
+	CVTDF	44(AP),R11		; OFFSET
+
+	MOVL	28(AP),R7		; First subpixel
+	BLEQ	E$STRT			; skip if no subpixel
+	MOVC5	#1,(R6),(R6),R7,(R3)	; fill in partial pixel
+	ADDL2	R9,R6			; Next byte of source (add increment)
+	ADDL2	R7,R3			; Next byte in destination (add SUBPIX)
+	DECL	R8			; One less pixel to move now
+
+E$STRT:	MOVL	24(AP),R7		; Number of copies of each byte
+	MULL2	R7,R8			; Multiply by zoom
+	CMPL	R8,12(AP)		; R8 = MIN((LEN*ZOOM),DSTLEN)
+	BLEQ	E$0
+	MOVL	12(AP),R8
+
+E$0:	CASEL	32(AP),#1,#6		; Jump to the appropriate format
+E$1:	.WORD	E$BYTE-E$1		; conversion section.
+	.WORD	E$HALF-E$1
+	.WORD	E$FULL-E$1
+	.WORD	E$REAL-E$1
+	.WORD	E$DOUB-E$1
+	.WORD	E$COMP-E$1
+	MOVL	#-2,R0			; if we fell through the case stmt,
+	RET				; set R0 to FAIL and return
+
+E$BYTE:	CVTBF	(R6),R0			; Make source float for arithmetic
+	MULF2	R10,R0			; multiply by SLOPE
+	ADDF2	R11,R0			; add OFFSET
+	CMPF	R0,#0.0			; see if result > 0
+	BGEQ	E$B1			; if > 0, continue
+	CLRF	R0			; if result < 0, result = 0
+	BRB	E$B2			; do the store
+E$B1:	CMPF	R0,#255.0		; if result > 255,
+	BLEQ	E$B2
+	MOVF	#255.0,R0		;   then result = 255
+E$B2:	CVTFB	R0,(R3)			; Store at destination
+	CMPL	R8,R7			; Check for buffer overflow
+	BLEQ	E$B3			; If would overflow, go to short move
+	MOVC5	#1,(R3),(R3),R7,(R3)	; Expand the pixel-MOVC5 updates R3 for us
+	ADDL2	R9,R6			; Next pixel of source (add increment)
+	SUBL2	R7,R8			; Decrement no. bytes in destination
+	BRB	E$BYTE			; Top of loop
+E$B3:	MOVC5	#1,(R3),(R3),R8,(R3)	; Last expansion
+	MOVL	#1,R0			; Successful return
+	RET
+
+E$HALF:	ASHL	#1,R9,R9		; Double INC because WORD format
+E$2:	CVTWF	(R6),R0			; Make source float for arithmetic
+	MULF2	R10,R0			; multiply by SLOPE
+	ADDF2	R11,R0			; add OFFSET
+	CMPF	R0,#0.0			; see if result > 0
+	BGEQ	E$H1			; if > 0, continue
+	CLRF	R0			; if result < 0, result = 0
+	BRB	E$H2			; do the store
+E$H1:	CMPF	R0,#255.0		; if result > 255,
+	BLEQ	E$H2
+	MOVF	#255.0,R0		;   then result = 255
+E$H2:	CVTFB	R0,(R3)			; Store at destination
+	CMPL	R8,R7			; Check for buffer overflow
+	BLEQ	E$H3			; If would overflow, go to short move
+	MOVC5	#1,(R3),(R3),R7,(R3)	; Expand the pixel-MOVC5 updates R3 for us
+	ADDL2	R9,R6			; Next pixel of source (add increment)
+	SUBL2	R7,R8			; Decrement no. bytes in destination
+	BRB	E$2			; Top of loop
+E$H3:	MOVC5	#1,(R3),(R3),R8,(R3)	; Last expansion
+	MOVL	#1,R0			; Successful return
+	RET
+
+E$FULL:	ASHL	#2,R9,R9		; Quadruple INC because LONG format
+E$3:	CVTLF	(R6),R0			; Make source float for arithmetic
+	MULF2	R10,R0			; multiply by SLOPE
+	ADDF2	R11,R0			; add OFFSET
+	CMPF	R0,#0.0			; see if result > 0
+	BGEQ	E$F1			; if > 0, continue
+	CLRF	R0			; if result < 0, result = 0
+	BRB	E$F2			; do the store
+E$F1:	CMPF	R0,#255.0		; if result > 255,
+	BLEQ	E$F2
+	MOVF	#255.0,R0		;   then result = 255
+E$F2:	CVTFB	R0,(R3)			; Store at destination
+	CMPL	R8,R7			; Check for buffer overflow
+	BLEQ	E$F3			; If would overflow, go to short move
+	MOVC5	#1,(R3),(R3),R7,(R3)	; Expand the pixel-MOVC5 updates R3 for us
+	ADDL2	R9,R6			; Next pixel of source (add increment)
+	SUBL2	R7,R8			; Decrement no. bytes in destination
+	BRB	E$3			; Top of loop
+E$F3:	MOVC5	#1,(R3),(R3),R8,(R3)	; Last expansion
+	MOVL	#1,R0			; Successful return
+	RET
+
+E$REAL:	ASHL	#2,R9,R9		; Quadruple INC because REAL format
+E$4:	MOVF	(R6),R0			; Make source float for arithmetic
+	MULF2	R10,R0			; multiply by SLOPE
+	ADDF2	R11,R0			; add OFFSET
+	CMPF	R0,#0.0			; see if result > 0
+	BGEQ	E$R1			; if > 0, continue
+	CLRF	R0			; if result < 0, result = 0
+	BRB	E$R2			; do the store
+E$R1:	CMPF	R0,#255.0		; if result > 255,
+	BLEQ	E$R2
+	MOVF	#255.0,R0		;   then result = 255
+E$R2:	CVTFB	R0,(R3)			; Store at destination
+	CMPL	R8,R7			; Check for buffer overflow
+	BLEQ	E$R3			; If would overflow, go to short move
+	MOVC5	#1,(R3),(R3),R7,(R3)	; Expand the pixel-MOVC5 updates R3 for us
+	ADDL2	R9,R6			; Next pixel of source (add increment)
+	SUBL2	R7,R8			; Decrement no. bytes in destination
+	BRB	E$4			; Top of loop
+E$R3:	MOVC5	#1,(R3),(R3),R8,(R3)	; Last expansion
+	MOVL	#1,R0			; Successful return
+	RET
+
+E$DOUB:	ASHL	#3,R9,R9		; Multiply INC by 8 because DOUB format
+E$5:	CVTDF	(R6),R0			; Make source float for arithmetic
+	MULF2	R10,R0			; multiply by SLOPE
+	ADDF2	R11,R0			; add OFFSET
+	CMPF	R0,#0.0			; see if result > 0
+	BGEQ	E$D1			; if > 0, continue
+	CLRF	R0			; if result < 0, result = 0
+	BRB	E$D2			; do the store
+E$D1:	CMPF	R0,#255.0		; if result > 255,
+	BLEQ	E$D2
+	MOVF	#255.0,R0		;   then result = 255
+E$D2:	CVTFB	R0,(R3)			; Store at destination
+	CMPL	R8,R7			; Check for buffer overflow
+	BLEQ	E$D3			; If would overflow, go to short move
+	MOVC5	#1,(R3),(R3),R7,(R3)	; Expand the pixel-MOVC5 updates R3 for us
+	ADDL2	R9,R6			; Next pixel of source (add increment)
+	SUBL2	R7,R8			; Decrement no. bytes in destination
+	BRB	E$5			; Top of loop
+E$D3:	MOVC5	#1,(R3),(R3),R8,(R3)	; Last expansion
+	MOVL	#1,R0			; Successful return
+	RET
+
+E$COMP:	ASHL	#3,R9,R9		; Multiply INC by 8 because COMP format
+	BRW	E$4			; Use REAL code to convert only real part
+
+.END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

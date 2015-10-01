@@ -1,0 +1,442 @@
+! TNHE CHECKOUT FILE_TIME=30-JAN-1985 11:22 DUA1:[TAEV1.HELP]HELP.HLP;7
+!	20-jun-83...dm
+!	21-jan-84 - conditional text for UNIX
+!	28-mar-84   General V1.2 cleanup...peb
+!	14-jun-84   Cleanup for default subcommand...lia
+!	26-jan-85   General V1.3 cleanup...lia
+!	19-sep-86   PR 965:  Add .level1, .level2 help on -GENERAL...peb
+!	21-sep-86   PR 979:  Make subcommand specific info non-redundant...peb
+!	15-sep-86   TAE FACELIFT...ljn
+!	13-feb-87   Merged TAE FACELIFT with V1.4 TAE...krw
+!	23-may-90   Removed RCJM stuff...ljn
+!	08-nov-90   Removed Facelift stuff...ljn
+.TITLE
+HELP
+.HELP
+
+	You may type HELP alone or you may request help
+	using one of the following subcommands:
+
+	    HELP-COMMAND
+	    HELP-PROC
+	    HELP-PARM
+	    HELP-MESSAGE
+	    HELP-GLOBAL
+	    HELP-HARDCOPY
+
+	"?" is also available as a special form of
+	HELP-MESSAGE.
+
+	If you are in command mode, type "HELP HELP-sub" for 
+	help on a particular subcommand of HELP.  If you are
+	tutoring for parameters, type "HELP -" for help on your
+	particular subcommand of HELP.
+.PAGE
+			HELP With No Subcommands
+
+	    If you type HELP with no parameters on a command
+	    line, information on all commands available
+	    in command mode is  displayed.
+
+	    In any mode of TAE operations, HELP with no parameters
+	    causes display of information on that mode.
+
+	    If the HELP command is followed by a parameter name,
+	    either HELP-PROC or HELP-COMMAND is assumed.
+
+	    HELP resolves between these two cases as described in
+	    the following pages.
+.PAGE
+		   HELP With No Subcommands
+
+
+			Usage Notes
+
+	    If you request HELP on a proc or a command, TAE
+	    uses the following search:
+
+	1.  TAE determines if the named proc or command is
+	    an intrinsic command.  If it is, information on
+	    the command is displayed.
+
+	2.  If it is not a command, and no library is specified
+	    for the proc, then TAE displays information on the proc
+	    located according to the TAE standard proc search.  The
+	    search order is set via the SETLIB command.
+
+.PAGE
+			HELP With No Subcommands
+
+
+			Usage Notes (continued)
+
+
+	3.  If a library is specified, TAE displays information
+	    on the proc in the specified library.
+!
+.level1
+.subcmd GENERAL
+Mode help or proc help.
+.subcmd PROC
+Help on a proc.
+.subcmd COMMAND
+Help on a TCL command.
+.subcmd PARM
+Help on a parameter.
+.subcmd MESSAGE
+Help on a TAE message.
+.subcmd GLOBAL
+Help on specified global.
+.subcmd HARDCOPY
+Create hardcopy of help.
+!
+.variable PROC
+Proc name including subcommand.
+.variable COMMAND
+TCL command name.
+.variable PARM
+Proc parameter name.
+.variable KEY
+Message key.
+.variable VARIABLE
+Global variable to display
+help on.
+.variable OUTPUT
+Output file name
+!
+.level2
+.variable PROC -GENERAL
+   
+
+	    "PROC" specifies the name of the proc on which help
+	    is requested.  If subcommand is desired, append it
+	    to the proc name as "-subcommand".
+
+	    If PROC is not specified (i.e., if the null string
+	    default is used), help on the current mode of TAE
+	    is entered.
+	    
+	    If no library is specified for the proc, then TAE 
+	    displays information on the proc located according 
+	    to the TAE standard proc search. The search order 
+	    is set via the SETLIB command.
+
+	    If a library is specified, TAE displays information
+	    on the proc in the specified library.
+!
+.variable PROC -PROC
+   
+
+	    "PROC" specifies the name of the proc on which help
+	    is requested.  If subcommand is desired, append it
+	    to the proc name as "-subcommand".
+
+	    If no library is specified for the proc, then TAE 
+	    displays information on the proc located according 
+	    to the TAE standard proc search. The search order 
+	    is set via the SETLIB command.
+
+	    If a library is specified, TAE displays information
+	    on the proc in the specified library.
+!
+.variable PROC -HARDCOPY
+   
+
+            "PROC" specifies the name of the proc on which help
+            is requested.  If subcommand is desired, append it
+            to the proc name as "-subcommand".
+
+            If no library is specified for the proc, then TAE 
+            displays information on the proc located according 
+            to the TAE standard proc search. The search order 
+            is set via the SETLIB command.
+
+            If a library is specified, TAE displays information
+            on the proc in the specified library.
+!
+.variable COMMAND
+
+
+
+	   "COMMAND" is the name of a TCL command on which help
+	   is requested.  If subcommand is desired, append it
+	   to the command as "-subcommand".
+!
+.variable PARM
+
+	    "PARM" specifies the parameter name for which 
+	    detailed help is requested. If you are in 
+	    dynamic parameter mode, only the current proc is 
+	    used.
+!
+.variable KEY
+
+	    KEY is an optional parameter. If omitted, the 
+	    key of the most recent message is assumed.
+!
+.variable OUTPUT
+
+            OUTPUT is an optional parameter describing the output
+            file to which the hard copy help should be written.
+            If omitted, the name of the proc on which help is being
+            requested is used with a type of ".MEM".
+!
+.subcmd GLOBAL
+			HELP-GLOBAL
+
+
+		    Function and Format
+
+
+	Function:
+
+	    The -GLOBAL subcommand requests that a description
+	    of the named global variable be displayed.
+
+
+	Format:
+
+	    HELP-GLOBAL   VARIABLE = global
+.subcmd COMMAND
+			   HELP-COMMAND
+
+			Function and Format
+	Function:
+
+	    HELP-COMMAND displays information on the specified command 
+	    or subcommand.  If the "-subcommand" is specified, only the 
+	    help information for the subcommand will be displayed.
+
+	    The proc name for a subcommand can be established by a 
+	    previous HELP-PARM, HELP-PROC or HELP-COMMAND request, 
+	    and can be used as default for the PROC parameter on 
+	    consecutive requests.
+
+	Format:
+
+	    HELP-COMMAND COMMAND=command-subcommand
+.PAGE
+			HELP-COMMAND
+
+			  Examples
+
+	    1.  TAE>HELP-COMMAND disable
+
+	          Display information on the "disable" command.
+	
+	    2.  TAE>HELP TUTOR
+		
+		  Display information on "tutor" command.
+
+	    3.  TAE>HELP-COMMAND show-async
+
+		  Display information on the "async" subcommand
+		  of the "show" command.
+.PAGE
+			HELP-COMMAND
+
+
+			  Examples (continued)
+
+
+	    4.	TAE>HELP-COMMAND -waiting
+
+		  If preceded by example 3, it would display
+		  information on the "waiting" subcommand of
+		  the "show" command.
+.subcmd GENERAL
+
+
+	    Provides help on the user's current mode (either
+            command mode or interrupt mode) if no parameter
+            is provided, or help on a proc or command if
+            one is named.
+
+            GENERAL is the default subcommand.
+.subcmd PROC
+			HELP-PROC
+
+		    Function and Format
+	Function:
+
+	    HELP-PROC displays information on the specified proc or 
+	    proc subcommand.  If the "-subcommand" is specified, only 
+	    the help information for the subcommand will be displayed.
+
+	    The proc name for a subcommand can be established by a 
+	    previous HELP-PARM, HELP-PROC or HELP-COMMAND request, 
+	    and can be used as default for the PROC parameter on 
+	    consecutive requests.
+	    
+	Format:
+
+	    HELP-PROC PROC=proc-subcommand
+.PAGE
+			HELP-PROC
+
+			Examples
+
+	1.  TAE>HELP-PROC zoom
+
+	      Find and display information on the proc named "zoom".
+
+.if1 VAX_VMS
+	2.  TAE>HELP [mylib]zoom
+.if1 UNIX
+	2.  TAE>HELP /mylib/zoom
+
+	      Display information on the proc named "zoom" in the 
+	      library named "mylib".
+
+	3.  TAE>HELP -lens
+
+	      If preceded by example 1 or 2, it would display
+	      information on the subcommand "lens" for the 
+	      proc named "zoom".
+.subcmd PARM
+			HELP-PARM
+
+		    Function and Format
+
+	Function:
+
+	    HELP-PARM is used to request detailed help on a 
+	    specific parameter of a proc or proc subcommand.
+	    The proc name and subcommand can be established
+	    by a previous HELP-PARM, HELP-PROC or HELP-COMMAND
+	    request, and can be used as default for the PROC 
+	    parameter on consecutive requests.  Should any 
+	    other command be entered, the proc name and 
+	    subcommand will have to be specified once again.
+	    
+	    If you are in dynamic parameter mode, only the 
+	    current proc is used.
+.PAGE
+			HELP-PARM	
+
+
+		 Function and Format (continued)
+
+	Format:
+		
+	    1.  In normal command mode:
+
+	           HELP-PARM PARM=parm PROC=proc-subcommand
+	    
+	    2.  In dynamic parameter mode:
+		
+	           HELP-PARM PARM=parm		
+		
+.PAGE
+			HELP-PARM Examples
+
+	    1.  TAE>HELP-PARM  window imgcopy  	! in command mode
+
+	          Detailed help information on the parameter "window"
+		  in the proc "imgcopy" is displayed.
+
+		  Note that "imgcopy" is located as described before.
+
+	    2.	TAE>HELP-PARM  frame		! in command mode
+
+		  If preceded by example 1, it will cause detailed
+		  help information on the parameter "frame" in the proc
+		  "imgcopy" to be displayed.
+
+.page
+	    3.  TAE>HELP-PARM  window		! in dynamic parameter mode
+
+		  Displays detailed help on parameter "window" while
+	  	  requesting for dynamic parameters from proc "imgcopy".
+.subcmd MESSAGE
+			HELP-MESSAGE
+
+
+		    Function and Format
+
+	Function:
+
+	    HELP-MESSAGE displays detailed information 
+	    explaining an error message.
+
+
+	Format:
+	
+	    HELP-MESSAGE KEY=message key
+	
+		KEY is an optional parameter. If omitted, the 
+		key of the most recent message is assumed.
+.PAGE
+			HELP-MESSAGE
+
+
+			 Examples
+
+	    1.  TAE>HELP-MESSAGE  TAE-NOPROC	
+
+		  Display detailed explanation of the error 
+		  key "TAE-NOPROC".
+
+
+	    2.  [IMF-IMGERR] Image file open error	!message from proc
+	        TAE>HELP-MESSAGE
+		
+	  	  Display detailed explanation of the error
+		  key "IMF-IMGERR". 	    
+.PAGE
+			HELP-MESSAGE
+
+
+			Usage Notes		
+
+	  o The  help-message file is located using the search 
+	    procedure described under HELP. This file must
+	    be formatted using the MSGBLD utility.
+
+	  o "?" may be used instead of HELP-MESSAGE.  "?" is
+	    special in that no parameters are allowed, i.e.
+	    "?" always causes TAE to display help on the
+	    last message.
+!
+.subcmd HARDCOPY
+			HELP-HARDCOPY
+
+		    Function and Format
+	Function:
+
+	    HELP-HARDCOPY writes out a file containing information on
+	    the specified proc or command.  The output file contains
+	    the help available both from HELP-PROC and from TUTOR.
+
+	    The parameters are listed in the output file in the
+	    order in which they appear in the LEVEL1 help, which is
+	    not necessarily the same order in which they are given
+	    on the command line.
+
+	Format:
+
+	    HELP-HARDCOPY PROC=proc [ OUTPUT=output-file-name ]
+.page
+			HELP-HARDCOPY
+
+		    Examples
+
+	1.  TAE>HELP-HARDCOPY zoom
+
+	      Find and write information on the proc named "zoom"
+	      to the output file "zoom.mem".
+
+.if1 VAX_VMS
+	2.  TAE>HELP-HARDCOPY [mylib]zoom
+.if1 UNIX
+	2.  TAE>HELP-HARDCOPY mylib/zoom
+
+	      Write information on the proc named "zoom" in the library
+	      named "mylib" to "zoom.mem" in the current library.
+
+	3.  TAE>HELP-HARDCOPY zoom z.dat
+
+	      Write help information on the proc "zoom" to the
+	      file "z.dat".
+.END
+

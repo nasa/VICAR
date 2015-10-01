@@ -1,0 +1,18 @@
+# Imakefile for the VICAR Run-Time Library source directory
+#
+
+#include "Imakefile_obj.shvic"		/* Object list */
+
+OBJS = $(COMOBJS) $(FTNOBJS)
+
+all: $(V2OLB)/libshvic.a
+
+$(V2OLB)/libshvic.a: $(SHVLIB)
+	cp $(SHVLIB) $(V2OLB)
+
+$(SHVLIB): $(OBJS)
+	$(RANLIB) $(SHVLIB)		/* AR done by compiles */
+
+#define Library5 $(SHVLIB)
+
+#include "Imakefile_targ.shvic"		/* Target list */

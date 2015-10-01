@@ -1,0 +1,314 @@
+procedure help=* options=nointerrupt
+subcmd image
+  parm out string count=1:100
+  parm planes (string,20) count=1:100 default=IMAGE
+  parm region string count=0:1 default=--
+  parm stretch keyword valid=(STRETCH,NOSTRETCH) default=STRETCH
+  parm pseudo keyword valid=(AUTO,PSEUDO,NOPSEUDO) default=AUTO
+  parm burn keyword valid=(BWGRAPH,COLORGRAPH,NOBURN) default=NOBURN
+end-subcmd
+subcmd stretch
+  parm out string count=1
+  parm planes (string,20) count=0:100 default=IMAGE
+end-subcmd
+subcmd pseudo
+  parm out string count=1
+  parm plane (string,20) count=1 default=BW
+  parm stretch keyword valid=(STRETCH,NOSTRETCH) default=STRETCH
+end-subcmd
+parm device string count=0:1 default=--
+body
+chkvids1
+if (_subcmd = "IMAGE")
+  sendvar (_proc,_subcmd,out,planes,region,stretch,pseudo,burn,device) +
+						 job=VIDSJOB
+else-if (_subcmd = "STRETCH")
+  sendvar (_proc,_subcmd,out,planes,device) job=VIDSJOB
+else-if (_subcmd = "PSEUDO")
+  sendvar (_proc,_subcmd,out,plane,stretch,device) job=VIDSJOB
+end-if
+chkvids2
+end-proc
+.title
+VIDS command JSAVE
+.help
+The JSAVE command is used to save images, stretch tables, or pseudocolor
+tables from the display device into a file.  JSAVE takes subcommands
+to describe the type of file to save, so the command takes the form:
+
+JSAVE-subcmd parms
+
+where "subcmd" describes the type of file to load, and "parms"
+indicates additional parameters which vary among the subcommands.
+For further information on a given subcommand, type "HELP JSAVE-subcmd",
+or, for a list of subcommands available and help on each, "TUTOR JSAVE-".
+.level1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd IMAGE
+Saves to an image file.
+.vari OUT -IMAGE
+Image file to save to
+.vari PLANES -IMAGE
+Image memory planes to
+be saved
+.vari REGION -IMAGE
+Region on screen to save
+.vari STRETCH -IMAGE
+Send image through stretch
+lookup table before saving?
+.vari PSEUDO -IMAGE
+Send image through pseudocolor
+table before saving?
+.vari BURN -IMAGE
+Burn graphics into image
+before saving?
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd STRETCH
+Saves one or more stretch
+lookup tables.
+.vari OUT -STRETCH
+LUT file to save to
+.vari PLANES -STRETCH
+Planes to save stretch from
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd PSEUDO
+Saves a pseudocolor table.
+.vari OUT -PSEUDO
+LUT file to save to
+.vari PLANE -PSEUDO
+Plane to save pseudo table from
+.vari STRETCH -PSEUDO
+Use the stretch table also?
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.vari device
+Name of device to use
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.level2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd IMAGE
+JSAVE-IMAGE will save the specified planes from the display device into
+the specified file.  Only what is in the image plane memory is saved,
+so if you are displaying a file that is larger than the image plane,
+only the part on the image plane will be saved.
+
+You may elect to save only a part of the screen using the REGION parameter.
+The file will be made as small as possible, and any pixels still outside the
+region in the file will be set to 0.
+
+The image may optionally be sent through the stretch table and/or the
+pseudocolor table before saving.  This means that you can load the file
+in with a simple linear stretch and still see your contrast enhancement
+or pseudocolor.
+.page
+The graphics plane may be "burned" in to the image via the BURN parameter.
+This means that the pixels in the graphics plane will be interpreted and
+put into the image plane wherever they are non-transparent.  The graphics
+become part of the image.  Of course, the image is lost where it is
+overwritten by the graphics.  Burning the graphics in means you could,
+for example, send the image with the graphics overlay to a film recorder,
+which does not normally support graphics overlays.
+
+The graphics burn may look funny if you have different hardware zooms on
+the graphics and image planes.  JSAVE-IMAGE does the best it can to make
+the file look like what's on the screen, but this is sometimes not
+possible if different hardware zooms are in effect.
+.page
+Normally, only the number of planes you specify are saved, so if you ask
+for 2 planes there will be 2 bands in the output files.  However, if you
+are saving with pseudocolor or with color graphics burned in, at least
+three bands will be written out (one each for red, green, and blue),
+regardless of the number of input planes.
+
+Bands get written out one per output file, until the last output file is
+reached.  The last file gets all the remaining bands written into it.
+This is similar to the way JDISP loads bands from multiple files.
+.vari OUT -IMAGE
+The OUT parameter is a string specifying the file(s) to save to.  At
+least one file name must be specified.
+
+Bands are written out one per output file, until the last output file
+is reached.  The last file gets all the remaining bands written into
+it.  This is similar to the way JDISP loads bands from multiple files.
+Any extra files are ignored.
+
+Files are always written in BSQ (Band Sequential) organization, and in
+Byte format.  If you need a different organization or format, several
+VICAR utility programs exist to help in the conversion.
+
+The file size used is the smallest size that will entirely contain the
+region being saved (or the whole image plane).  All files saved at once
+have the same file size.  If different hardware zooms are in effect on
+different planes, the file size will be the largest of the sizes needed
+for each plane.
+.vari PLANES -IMAGE
+The PLANES parameter specifies which image memory planes are to be
+saved.  PLANES is the standard VIDS PLANES parameter.  It may either
+be the name of a plane or a number.  See HELP PLANENAMES for details
+of how to use image plane names.
+
+The default is IMAGE.
+.vari REGION -IMAGE
+The REGION parameter selects what region of the image plane to save.
+The region may be any arbitrary shape.  Only points inside the region
+are saved in the file.  Any points outside the region that are still
+in the file are set to 0.  Regions are defined using JDEF-REGION.
+
+The image is always saved as a rectangle, the size at least as big as
+the bounding rectangle of the region (it could be bigger if other planes
+have different hardware zooms).  The region is used as a mask to zero
+out the pixels outside the region.  So, the image retains its shape in
+the file.
+
+The default is the entire image plane.
+.vari STRETCH -IMAGE
+The STRETCH parameter selects whether or not to send each image plane
+through its lookup table before being saved.  'STRETCH in effect makes
+the stretch permanent.
+
+If you save an image with the stretch, then immediately load it in again,
+it will not look right since the stretch is now being applied twice -
+once in the image itself and once by the lookup table.  To fix this,
+you can do a JSTRETCH-LINEAR to reset the stretch to a ramp.  Then the
+image will look correct.
+.vari PSEUDO -IMAGE
+The PSEUDO parameter selects whether or not to send the image plane
+through its pseudocolor table before being saved.  'PSEUDO in essence
+converts a pseudocolor image into a true color image that looks the same.
+It is no longer a single band image, but is now three bands, one for
+each primary color (red, green, and blue).  This is useful, for example,
+for sending the image to a film recorder that doesn't understand
+pseudocolor lookup tables.
+
+Only one image plane may be saved when 'PSEUDO is selected.  However,
+three bands are always output.
+
+If PSEUDO=AUTO (the default), then the selection of 'PSEUDO or 'NOPSEUDO
+is made automatically.  If the device is currently in pseudocolor mode,
+'PSEUDO is used.  If it is in color or black-and-white mode, 'NOPSEUDO
+is used.
+.vari BURN -IMAGE
+The BURN parameter allows you to "burn" the graphics plane into the image.
+This means that the pixels in the graphics plane will be interpreted and
+put into the image plane wherever they are non-transparent.  The graphics
+become part of the image.  Of course, the image is lost where it is
+overwritten by the graphics.  Burning the graphics in means you could,
+for example, send the image with the graphics overlay to a film recorder,
+which does not normally support graphics overlays.
+
+The graphics burn may look funny if you have different hardware zooms on
+the graphics and image planes.  JSAVE-IMAGE does the best it can to make
+the file look like what's on the screen, but this is sometimes not
+possible if different hardware zooms are in effect.
+.page
+There are two different ways to burn the graphics in, BWGRAPH and
+COLORGRAPH.  BWGRAPH stands for black-and-white graphics.  It simply
+takes each pixel where the graphics is non-transparent, and puts a
+255 (white) into the image.  So, the entire graphics overlay comes
+out white.  This is useful for annotating black-and-white images.
+If you give more than one plane, the graphics will be burned into
+all of them.
+
+COLORGRAPH burns the graphics in color.  The actual color of each
+graphics pixel is put in to the image planes, so your file looks
+just like what's on the screen.  This option will always output
+at least three bands, even if there are less than three input planes.
+The last input plane is simply repeated several times.  If there are
+more than three bands, the first always gets the red, the second the
+green, and the third the blue part of the graphics.  The extra planes
+do not get any graphics burned in.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd STRETCH
+JSAVE-STRETCH saves one or more stretch lookup tables from the
+display device into a file.
+
+The file is in IBIS tabular format, with each table being a separate
+column and each column 256 entries long.  This allows you to use all
+the standard IBIS programs for manipulating your stretch files.  For
+example, you could combine two separate tables into one file using
+the IBIS program COPYFILE.
+
+A new file is always created, with the number of columns equal to
+the number of planes specified.
+
+Stretch files are compatible with pseudocolor files.  That allows
+you, for example, to save a set of three stretches and load them back in
+as a pseudocolor table (which takes three tables, one for each
+of red, green, and blue).
+.vari OUT -STRETCH
+The OUT parameter is a string specifying the file to be saved to.
+A file name must be specified.  A new file is created in IBIS tabular
+format, with each stretch table being a column and each column 256
+entries long.
+.vari PLANES -STRETCH
+The PLANES parameter can be used to specify the image memory planes
+to save the stretch tables from.  PLANES is the standard VIDS PLANES
+parameter.  It may either be the name of a plane or a number.  See
+HELP PLANENAMES for details of how to use image plane names.
+
+The default is IMAGE.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd PSEUDO
+JSAVE-PSEUDO saves a pseudocolor table to a file.
+
+A new file is created in IBIS tabular format, with three columns of
+256 entries each.  This allows you to use all the standard IBIS
+programs for manipulating your stretch files.  For example, you
+could combine two separate tables into one file using the IBIS
+program COPYFILE.
+
+Three columns are always saved, one each for the red, green, and
+blue portions of the pseudocolor table.
+
+Pseudocolor table files are compatible with stretch files.  That
+allows you, for example, to save a pseudocolor table and load it
+back in as a set of three stretches.
+.page
+The pseudocolor table may optionally be sent through the stretch
+table before saving.  This combines the current stretch and
+pseudocolor tables into one pseudocolor table.  You could then
+use the pseudocolor table without having to use the same stretch.
+The combination table in the file cannot be separated into
+a separate stretch and pseudocolor table again, though.
+.vari OUT -PSEUDO
+The OUT parameter is a string specifying a file to save to.  A
+file name must be specified.  A new file is created in IBIS tabular
+format, with each component of the pseudocolor table being a
+column and each column 256 entries long.
+.vari PLANE -PSEUDO
+The PLANE parameter can be used to specify the image memory plane
+from which the pseudocolor table will be saved.  PLANE is the standard
+VIDS PLANE parameter.  It may either be the name of a plane or a
+number.  See HELP PLANENAMES for details of how to use image plane
+names.
+
+The default is BW (which is also the current pseudocolor plane).
+.vari STRETCH -PSEUDO
+The STRETCH parameter allows you to send the pseudocolor table through
+the stretch table before saving.  This combines the current stretch and
+pseudocolor tables into one pseudocolor table.  You could then use
+the pseudocolor table without having to use the same stretch.  The
+combination table in the file cannot be separated again, though.
+
+What you see on the screen is always the combination of the
+stretch and pseucolor tables, so saving that way is the default.
+However, you may want to save just the pseudocolor part, so the
+option is available.
+
+If you save a pseudocolor table with the stretch, then immediately
+load it back in again, the table will not look right, since the
+stretch is being applied twice - once in the pseudocolor table itself,
+and once in the plane's stretch table.  To fix this, simply do a
+JSTRETCH-LINEAR to get a ramped stretch table again.  The pseudocolor
+table will then look as you saved it.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

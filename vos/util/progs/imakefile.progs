@@ -1,0 +1,86 @@
+#
+# Imakefile for Programs 
+#
+
+all: make_progs 
+
+make_p2prog:
+	($(CD) $(P2SOURCE); $(V2UTIL)/bldcomfiles.csh $(R2LIB))
+	(cd $(R2LIB); $(V2UTIL)/make_pdf_cache.perl)
+	($(V2UTIL)/make_html.csh $(R2LIB) index_p2.html)
+
+make_casprog:
+	($(CD) $(CASSOURCE); $(V2UTIL)/bldcomfiles.csh $(CASLIB))
+	(cd $(CASLIB); $(V2UTIL)/make_pdf_cache.perl)
+	($(V2UTIL)/make_html.csh $(CASLIB) index_cas.html)
+
+make_uplinktourprog:
+	($(CD) $(UPLINKTOURSOURCE); $(V2UTIL)/bldcomfiles.csh $(UPLINKTOURLIB))
+	(cd $(UPLINKTOURLIB); $(V2UTIL)/make_pdf_cache.perl)
+	($(V2UTIL)/make_html.csh $(UPLINKTOURLIB) index_uplinktour.html)
+
+make_marsprog:
+	($(CD) $(MARSSOURCE); $(V2UTIL)/bldcomfiles.csh $(MARSLIB))
+	(cd $(MARSLIB); $(V2UTIL)/make_pdf_cache.perl)
+	($(V2UTIL)/make_html.csh $(MARSLIB) index_mars.html)
+
+make_sirtfprog:
+	($(CD) $(SIRTFSOURCE); $(V2UTIL)/bldcomfiles.csh $(SIRTFLIB))
+	(cd $(SIRTFLIB); $(V2UTIL)/make_pdf_cache.perl)
+	($(V2UTIL)/make_html.csh $(SIRTFLIB) index_sirtf.html)
+
+make_tlmprog:
+	($(CD) $(TLMSOURCE); $(V2UTIL)/bldcomfiles.csh $(TLMLIB))
+	(cd $(TLMLIB); $(V2UTIL)/make_pdf_cache.perl)
+	($(V2UTIL)/make_html.csh $(TLMLIB) index_tlm.html)
+
+make_divprog:
+	-($(CD) $(DIVSOURCE); $(V2UTIL)/bldcomfiles.csh $(DIVLIB))
+	-(cd $(DIVLIB); $(V2UTIL)/make_pdf_cache.perl)
+	-($(V2UTIL)/make_html.csh $(DIVLIB) index_div.html)
+
+make_neatprog:
+	($(CD) $(NEATSOURCE); $(V2UTIL)/bldcomfiles.csh $(NEATLIB))
+	(cd $(NEATLIB); $(V2UTIL)/make_pdf_cache.perl)
+	($(V2UTIL)/make_html.csh $(NEATLIB) index_neat.html)
+
+make_ssvprog:
+	($(CD) $(SSVSOURCE); $(V2UTIL)/bldcomfiles.csh $(SSVLIB))
+	(cd $(SSVLIB); $(V2UTIL)/make_pdf_cache.perl)
+	($(V2UTIL)/make_html.csh $(SSVLIB) index_ssv.html)
+
+make_guiprog:
+	($(CD) $(GUISOURCE); $(V2UTIL)/bldcomfiles.csh $(GUILIB))	
+
+make_progs:
+	-($(CD) $(GUISOURCE); $(V2UTIL)/bldcomfiles.csh $(GUILIB))	
+	-($(CD) $(P2SOURCE); $(V2UTIL)/bldcomfiles.csh $(R2LIB))
+	-(cd $(R2LIB); $(V2UTIL)/make_pdf_cache.perl)
+	-($(V2UTIL)/make_html.csh $(R2LIB) index_p2.html)
+	-($(CD) $(CASSOURCE); $(V2UTIL)/bldcomfiles.csh $(CASLIB))
+	-(cd $(CASLIB); $(V2UTIL)/make_pdf_cache.perl)
+	-($(V2UTIL)/make_html.csh $(CASLIB) index_cas.html)
+	-($(CD) $(UPLINKTOURSOURCE); $(V2UTIL)/bldcomfiles.csh  $(UPLINKTOURLIB))
+	-(cd $(UPLINKTOURLIB); $(V2UTIL)/make_pdf_cache.perl)
+	-($(V2UTIL)/make_html.csh $(UPLINKTOURLIB) index_uplinktour.html)
+	-($(CD) $(MARSSOURCE); $(V2UTIL)/bldcomfiles.csh $(MARSLIB))
+	-(cd $(MARSLIB); $(V2UTIL)/make_pdf_cache.perl)
+	-($(V2UTIL)/make_html.csh $(MARSLIB) index_mars.html)
+	-($(CD) $(TLMSOURCE); $(V2UTIL)/bldcomfiles.csh $(TLMLIB))
+	-(cd $(TLMLIB); $(V2UTIL)/make_pdf_cache.perl)
+	-($(V2UTIL)/make_html.csh $(TLMLIB) index_tlm.html)
+	-($(CD) $(SIRTFSOURCE); $(V2UTIL)/bldcomfiles.csh $(SIRTFLIB))
+	-(cd $(SIRTFLIB); $(V2UTIL)/make_pdf_cache.perl)
+	-($(V2UTIL)/make_html.csh $(SIRTFLIB) index_sirtf.html)
+	-($(CD) $(DIVSOURCE); $(V2UTIL)/bldcomfiles.csh $(DIVLIB))
+	-(cd $(DIVLIB); $(V2UTIL)/make_pdf_cache.perl)
+	-($(V2UTIL)/make_html.csh $(DIVLIB) index_div.html)
+	-($(CD) $(SSVSOURCE); $(V2UTIL)/bldcomfiles.csh $(SSVLIB))
+	-(cd $(SSVLIB); $(V2UTIL)/make_pdf_cache.perl)
+	-($(V2UTIL)/make_html.csh $(SSVLIB) index_ssv.html)
+	-($(CD) $(NEATSOURCE); $(V2UTIL)/bldcomfiles.csh $(NEATLIB))
+	-(cd $(NEATLIB); $(V2UTIL)/make_pdf_cache.perl)
+	-($(V2UTIL)/make_html.csh $(NEATLIB) index_neat.html)
+	-($(CD) $(P3SOURCE); $(V2UTIL)/bldcomfiles.csh $(R3LIB))
+	-(cd $(R3LIB); $(V2UTIL)/make_pdf_cache.perl)
+	-($(V2UTIL)/make_html.csh $(R3LIB) index_p3.html)

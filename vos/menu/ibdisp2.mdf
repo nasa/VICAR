@@ -1,0 +1,27 @@
+.Title           ! IBDISP2.MDF
+[4mAdditional IBIS DATA INSPECTION & DISPLAY Menu[0m   (page 2 of 3)
+.Proc G3LIST
+[1mG3LIST[0m    - Produces a listing of a Graphics-3 file.
+.Proc GR2REP
+[1mGR2REP[0m    - Produces a listing of a Graphics-2 file. 
+.Proc GRLIST
+[1mGRLIST[0m    - Produces line/sample listing of 2D or 3D 
+            Graphics-1 file.
+.Proc IBISSTAT
+[1mIBISSTAT[0m  - Performs statistical analyses (e.g. multiple regression,
+            factor analysis, correlation) on tabular files.
+.Proc IDX
+[1mIDX[0m       - Displays VICAR images interactively.
+.Proc LAB2TCL
+[1mLAB2TCL[0m   - Copies info from the system and history section of a 
+            VICAR label, into user specified TCL variables.
+.Proc LABVFY
+[1mLABVFY[0m    - Verifies that image label contains a specified string.
+.Proc MAPGEN
+[1mMAPGEN[0m    - Takes an image divided into polygon regions and
+            assigns a grey value to each region according to information in
+            an interface file, or by user specified input parameters.
+
+.Menu ibdisp3.mdf
+[7mAdditional IBIS DATA INSPECTION & DISPLAY Selections[0m
+.END

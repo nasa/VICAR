@@ -1,0 +1,82 @@
+.TITLE
+DEALLOC
+.HELP
+			Function and Format
+
+
+	Function:
+
+	    DEALLOC de-allocates a device that was previously
+	    allocated using the ALLOC command.
+
+
+	Format:
+
+
+	    DEALLOC  DEVICE=device-name  NAME=symbolic-name
+.PAGE
+			Usage Notes
+
+
+	o  DEVICE is either the actual device name or the symbolic
+	   name of the device to be de-allocated.  They are
+	   interchangeable for this command, so either will work.
+	   If DEVICE is omitted, then NAME must be used to specify
+	   the device.
+
+	o  NAME is the symbolic name of the device to be de-allocated.
+	   It is no longer necessary since the symbolic name may be
+	   specified using DEVICE.  However, if you specify both
+	   NAME and DEVICE, then VICAR will check to make sure the
+	   same device was named in both parameters.  If NAME is
+	   omitted, then DEVICE must be used to specify the device.
+	   Note that the DCL logical name (in the /job table) is not
+	   deassigned, in order to be consistent with the DCL DEALLOCATE
+	   command.  This should not normally cause any problems, though.
+.PAGE
+			Examples
+
+	    
+	1.  VICAR>DEALLOC MTA0
+
+	    The above command de-allocates the magnetic tape drive
+	    MTA0.  The drive is then available for common use.
+
+
+	2.  VICAR>DEALLOC TAPE 
+
+	    The above command de-allocates the magnetic tape drive that
+	    was previously associated with the symbolic name "TAPE".
+
+	3.  VICAR>DEALLOC MTA0 TAPE
+
+	    VICAR checks to make sure that the symbolic name "TAPE"
+	    is associated with "MTA0", then deallocates the drive.
+.LEVEL1
+.VAR DEVICE
+Actual name or symbolic
+name of the device
+to be de-allocated.
+.VAR NAME
+Symbolic name that has 
+been associated with the
+allocated device.
+.LEVEL2
+.VAR DEVICE
+
+
+	   DEVICE is either the actual device name or the symbolic
+	   name of the device to be de-allocated.  They are
+	   interchangeable for this command, so either will work.
+	   If DEVICE is omitted, then NAME must be used to specify
+	   the device.
+.VAR NAME
+
+
+	   NAME is the symbolic name of the device to be de-allocated.
+	   It is no longer necessary since the symbolic name may be
+	   specified using DEVICE.  However, if you specify both
+	   NAME and DEVICE, then VICAR will check to make sure the
+	   same device was named in both parameters.  If NAME is
+	   omitted, then DEVICE must be used to specify the device.
+.END

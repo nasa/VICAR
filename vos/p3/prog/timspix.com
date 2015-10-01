@@ -1,0 +1,365 @@
+$!****************************************************************************
+$!
+$! Build proc for MIPL module timspix
+$! VPACK Version 1.5, Wednesday, July 06, 1994, 12:18:13
+$!
+$! Execute by entering:		$ @timspix
+$!
+$! The primary option controls how much is to be built.  It must be in
+$! the first parameter.  Only the capitalized letters below are necessary.
+$!
+$! Primary options are:
+$!   ALL         Build a private version, and unpack the PDF and DOC files.
+$!   STD         Build a private version, and unpack the PDF file(s).
+$!   SYStem      Build the system version with the CLEAN option, and
+$!               unpack the PDF and DOC files.
+$!   CLEAN       Clean (delete/purge) parts of the code, see secondary options
+$!   UNPACK      All files are created.
+$!   REPACK      Only the repack file is created.
+$!   PDF         Only the PDF file is created.
+$!   IMAKE       Only the IMAKE file (used with the VIMAKE program) is created.
+$!
+$!   The default is to use the STD parameter if none is provided.
+$!
+$!****************************************************************************
+$!
+$! The secondary options modify how the primary option is performed.
+$! Note that secondary options apply to particular primary options,
+$! listed below.  If more than one secondary is desired, separate them by
+$! commas so the entire list is in a single parameter.
+$!
+$! Secondary options are:
+$! CLEAN:
+$!   OBJ        Delete object and list files, and purge executable (default)
+$!   SRC        Delete source and make files
+$!
+$!****************************************************************************
+$!
+$ write sys$output "*** module timspix ***"
+$!
+$ Create_Repack =""
+$ Create_PDF = ""
+$ Create_Imake = ""
+$ Do_Make = ""
+$!
+$! Parse the primary option, which must be in p1.
+$ primary = f$edit(p1,"UPCASE,TRIM")
+$ if (primary.eqs."") then primary = " "
+$ secondary = f$edit(p2,"UPCASE,TRIM")
+$!
+$ if primary .eqs. "UNPACK" then gosub Set_Unpack_Options
+$ if (f$locate("ALL", primary) .eqs. 0) then gosub Set_All_Options
+$ if (f$locate("STD", primary) .eqs. 0) then gosub Set_Default_Options
+$ if (f$locate("SYS", primary) .eqs. 0) then gosub Set_Sys_Options
+$ if primary .eqs. " " then gosub Set_Default_Options
+$ if primary .eqs. "REPACK" then Create_Repack = "Y"
+$ if primary .eqs. "PDF" then Create_PDF = "Y"
+$ if primary .eqs. "IMAKE" then Create_Imake = "Y"
+$ if (f$locate("CLEAN", primary) .eqs. 0) then Do_Make = "Y"
+$!
+$ if Create_Repack then gosub Repack_File
+$ if Create_PDF then gosub PDF_File
+$ if Create_Imake then gosub Imake_File
+$ if Do_Make then gosub Run_Make_File
+$ exit
+$!
+$ Set_Unpack_Options:
+$   Create_Repack = "Y"
+$   Create_PDF = "Y"
+$   Create_Imake = "Y"
+$ Return
+$!
+$ Set_Default_Options:
+$   Create_Imake = "Y"
+$   Do_Make = "Y"
+$   Create_PDF = "Y"
+$ Return
+$!
+$ Set_All_Options:
+$   Create_Imake = "Y"
+$   Do_Make = "Y"
+$   Create_PDF = "Y"
+$ Return
+$!
+$ Set_Sys_Options:
+$   Create_Imake = "Y"
+$   Create_PDF = "Y"
+$   Do_Make = "Y"
+$ Return
+$!
+$Run_Make_File:
+$   if F$SEARCH("timspix.imake") .nes. ""
+$   then
+$      vimake timspix
+$      purge timspix.bld
+$   else
+$      if F$SEARCH("timspix.bld") .eqs. ""
+$      then
+$         gosub Imake_File
+$         vimake timspix
+$      else
+$      endif
+$   endif
+$   if (primary .eqs. " ")
+$   then
+$      @timspix.bld "STD"
+$   else
+$      @timspix.bld "''primary'" "''secondary'"
+$   endif
+$ Return
+$!#############################################################################
+$Repack_File:
+$ create timspix.repack
+$ DECK/DOLLARS="$ VOKAGLEVE"
+$ vpack timspix.com -
+	-p timspix.pdf -
+	-i timspix.imake
+$ Exit
+$ VOKAGLEVE
+$ Return
+$!#############################################################################
+$PDF_File:
+$ create timspix.pdf
+PROCEDURE      HELP=*
+
+PARM NAME (STRING,30)
+PARM SYM_NAME (STRING,30) DEFAULT="t"
+PARM FLT_NAME (STRING,15)
+PARM NASA_CNTR KEYWORD  DEFAULT=AMES  VALID=(AMES,NSTL)
+PARM FILE_NUM INTEGER DEFAULT=1
+PARM N_LINE  INTEGER  DEFAULT=2500
+PARM CALMODE (STRING) DEFAULT=CAL VALID=(CAL,NOCAL)
+PARM FITAREA INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM DSTAREA INTEGER COUNT=4:40 DEFAULT=(1,1,0,0)
+PARM RECT (STRING) DEFAULT=NO VALID=(YES,NO)
+PARM ASPECT  REAL    DEFAULT=1.0
+PARM LENGTH  INTEGER COUNT=1 DEFAULT=3500
+PARM DATE    INTEGER DEFAULT=-1
+LOCAL BREAD (STRING,132) INITIAL=""
+LOCAL AREAD (STRING,132) INITIAL=""
+LOCAL INPIX (STRING,30)
+LOCAL INAUX (STRING,30)
+LOCAL OUTBND1 (STRING,30)
+LOCAL OUTBND2 (STRING,30)
+LOCAL OUTBND3 (STRING,30)
+LOCAL OUTBND4 (STRING,30)
+LOCAL OUTBND5 (STRING,30)
+LOCAL OUTBND6 (STRING,30)
+LOCAL OUTB (STRING,30)
+LOCAL OUTG (STRING,30)
+LOCAL OUTR (STRING,30)
+LOCAL NLINE  INTEGER
+LOCAL NSAMP  INTEGER
+
+BODY
+LET INPIX = NAME // ".pix"
+LET INAUX = NAME // ".aux"
+LET OUTBND1 = NAME // ".b1"
+LET OUTBND2 = NAME // ".b2"
+LET OUTBND3 = NAME // ".b3"
+LET OUTBND4 = NAME // ".b4"
+LET OUTBND5 = NAME // ".b5"
+LET OUTBND6 = NAME // ".b6"
+LET OUTB = NAME // ".blu"
+LET OUTG = NAME // ".grn"
+LET OUTR = NAME // ".red"
+
+IF (FITAREA(3) <> 0) LET BREAD="AREA=&&FITAREA"
+IF (DSTAREA(3) <> 0) LET AREAD="AREA=&&DSTAREA"
+
+IF (NASA_CNTR = "NSTL")
+	LET NLINE = (6*&N_LINE)+1
+	LET NSAMP = 1024
+ELSE
+	LET NLINE = &N_LINE
+	LET NSAMP = 4188
+END-IF
+
+CONVIM &SYM_NAME RAWFILE FILE=&FILE_NUM NL=&NLINE RECLEN=&NSAMP +
+       'BYTE 'LABEL
+TIMSLOG RAWFILE (&INPIX &INAUX) TITLE="&FLT_NAME" SOURCE=&NASA_CNTR
+ush \rm RAWFILE
+
+IF (CALMODE="CAL")
+   	TIMSCAL (&INPIX,&INAUX) IRADFILE 'IRAD DATE=&DATE
+   	TRAN IRADFILE (&OUTBND1,&OUTBND2,&OUTBND3,&OUTBND4,&OUTBND5,&OUTBND6) +
+	BANDS=(1,2,3,4,5,6) 'BSQ
+	ush \rm IRADFILE
+   	FIT &OUTBND1 SCRTCHA 'BYTE PERC=3.0 &BREAD
+   	FIT &OUTBND3 SCRTCHB 'BYTE PERC=3.0 &BREAD
+   	FIT &OUTBND5 SCRTCHC 'BYTE PERC=3.0 &BREAD
+ELSE
+   	TRAN &INPIX (SCRTCHA,SCRTCHB,SCRTCHC) BANDS=(1,3,5) 'BSQ
+END-IF
+
+EIGEN (SCRTCHA,SCRTCHB,SCRTCHC) (SCRTCHD,SCRTCHE,SCRTCHF) 'DSTR 'CORR +
+      DSCA=(1.,1.,0.5) &AREAD EXCLUDE=0. PERC=3.0
+LABEL-ADD SCRTCHD ITEM="INFO1='D-STRETCH TRAINED ON ABOVE AREA(S)'"
+LABEL-ADD SCRTCHE ITEM="INFO1='D-STRETCH TRAINED ON ABOVE AREA(S)'"
+LABEL-ADD SCRTCHF ITEM="INFO1='D-STRETCH TRAINED ON ABOVE AREA(S)'"
+
+IF (RECT = "YES")
+	C130RECT SCRTCHD SCRTCHA DEFL=38.28 SCALE=&ASPECT
+	C130RECT SCRTCHE SCRTCHB DEFL=38.28 SCALE=&ASPECT
+	C130RECT SCRTCHF SCRTCHC DEFL=38.28 SCALE=&ASPECT
+	STRIPPER SCRTCHA SCRTCHD STRIPLEN=&LENGTH GAPWIDTH=47
+	MASKV SCRTCHD &OUTB 
+	STRIPPER SCRTCHB SCRTCHE STRIPLEN=&LENGTH GAPWIDTH=47
+	MASKV SCRTCHE &OUTG
+	STRIPPER SCRTCHC SCRTCHF STRIPLEN=&LENGTH GAPWIDTH=47
+	MASKV SCRTCHF &OUTR
+ELSE
+	STRIPPER SCRTCHD SCRTCHA STRIPLEN=&LENGTH GAPWIDTH=47
+	MASKV SCRTCHA &OUTB 
+	STRIPPER SCRTCHE SCRTCHB STRIPLEN=&LENGTH GAPWIDTH=47
+	MASKV SCRTCHB &OUTG
+	STRIPPER SCRTCHF SCRTCHC STRIPLEN=&LENGTH GAPWIDTH=47
+	MASKV SCRTCHC &OUTR
+END-IF
+ush \rm SCRTCH*
+END-PROC
+
+.TITLE
+VICAR2 Procedure TIMSPIX
+.HELP
+	TIMSPIX is a procedure designed to process TIMS picture products
+in a throughput manner, beginning with the TIMS tapes provided by NASA's
+Ames Research Center and Stennis Space Center (formerly called National 
+Science and Technology Lab, or NSTL) SSC (NSTL).  There are eleven (11)
+possible outputs from this procedure: one byte-format file of image data 
+(*.PIX), one real-format file of auxilliary calibration data (*.AUX), six 
+halfword-format files of radiance data (*.B1 through *.B6), and three byte-
+format D-stretched image files with playback masks (*.RED, *.GRN, *.BLU).
+A panorama correction may be performed on the D-stretched images.
+
+	The user has the option of calibrating the TIMS imagery or performing
+the D-stretch processing on the raw data.  The default is to perform the
+calibration: this produces the six *.B* files. The calibrated, halfword
+data is mapped to byte format prior to the D-stretch. The user may specify the
+region of the image used to map the halfword data to byte data, the default 
+is to use the entire image.
+
+.PAGE
+	The user may specify up to 10 subareas for use as training sites for 
+the D-stretch procedure. The default is to use the enitre image as the 
+source for the statistics. 
+
+	The user may also specify the strip length used to create the playback
+image. If no stripping is desired, the strip length should be set to the
+number of scanlines in the flightline. The default is set at 3500 lines
+per strip.
+
+	IMPORTANT NOTE: TIMSPIX uses scratch files, which are deleteed at the
+end of the procedure. If you have any files with the name RAWFILE, IRADFILE,
+or SCRTCH* (in caps), THEY WILL BE DELETED!!!
+
+.PAGE
+Cognizant Programmer: Vince Realmuto                   	9 OCT 1990
+Modified by Vince Realmuto				5 MAY 1993
+
+.LEVEL1
+.VARIABLE NAME
+root name for the input and 
+output files, i.e. MONO3 for 
+MONO3.PIX and MONO3.AUX
+.VARIABLE SYM_NAME
+symbolic name for tape device,
+as defined by VICAR proc TMOUNT
+.VARIABLE FLT_NAME
+name of the flight line
+.VARIBLE NASA_CNTR
+NASA center responsible for the
+TIMS flight, AMES or NSTL (SSC)
+.VARIBLE FILE_NUM
+position of file on raw TIMS 
+data tape 
+.VARIABLE N_LINE
+number of scan lines of TIMS 
+data in data file
+.VARIABLE CALMODE
+calibration option
+(CAL or NOCAL)
+.VARIABLE FITAREA
+optional subarea for calc. of 
+stats used in conversion of
+halfword data to byte data
+.VARIABLE DSTAREA
+optional training areas for the 
+D-stretch (max. of 10 subareas)
+.VARIABLE RECT
+optional aspect ratio 
+correction; default is 
+to do no correction.
+.VARIABLE ASPECT
+aspect (H/V) ratio used in the 
+panorama correction
+.VARIABLE LENGTH
+length of the strip used in 
+playback
+.VARIABLE DATE
+Date of data acquisition. Used 
+to override the date in the 
+VICAR label (yymmdd)
+.LEVEL2
+.VARIABLE NAME
+The user must provide the base name for the datasets used. For example,
+to process "HAWAII32.PIX" and "HAWAII32.AUX" the name "HAWAII32" must be
+given.  This procedure will then generate output datasets with the names
+"HAWAII32.RED", "HAWAII32.GRN", and "HAWAII32.BLU" as needed.
+.variable SYM_NAME
+The user must provide the symbolic name of the tape device upon which the
+TIMS data tape is mounted. This name is defined with the VICAR procedure
+TMOUNT
+.VARIABLE FLT_NAME
+The user must provide the name of the flight line extracted from the TIMS
+data tape. The names are of the form "HAWAII 132".
+.VARIABLE NASA_CNTR
+The user must specify the NASA center responsible for the TIMS flight.
+TIMS is operated by the AMES Research Center and the Stennis Space Center
+(which is identified by the obsolete name NSTL)
+.VARIABLE FILE_NUM
+The user must specify the position of the flight line file on the AMES
+or NSTL tape.
+.VARIABLE N_LINE
+The user must specify the number of scanlines in the TIMS data file
+.VARIABLE CALMODE
+User's choice of a calibration option. The default is to calibrate the data.
+When this option is in effect, the six calibrated channel files are written 
+to disk.
+.VARIABLE FITAREA
+Optional specification of the subarea of the image that will be used to calculate
+statistics for the fitting of halfword data to byte data. The byte imagery thus 
+created is input to the D-stretch algorithm. The specification of this area is 
+only required when the calibrated (CAL) mode is selected. The default in CAL mode 
+is to use the entire image to calculate the statistics. 
+.VARIABLE RECT
+The can can elect to perform a panarama, or aspect ratio, correction of 
+the data by choosing YES. The parameter ASPECT is used to set the aspect
+ratio of the corrected data.
+.VARIABLE ASPECT
+Aspect (or horizontal to vertical) ratio used in the panorama correction (C130RECT). 
+The default is 1.0, which implies that the two dimensions are equal. With ASPECT=1, 
+the corrected TIMS image will have 753 samples (or pixels) per line.
+.VARIABLE DSTAREA
+Optional subareas for the training of the D-STRETCH. If subareas are specified, 
+the data from these areas are used to calculate the correlation matrix. The default
+is to use the entire image to calculate the correlation matrix.
+.VARIABLE LENGTH
+Optional length for the stripping of the playback image. If no stripping is desired, 
+the user should enter the number lines in the image for LENGTH. The default is to use 
+a strip length of 3500 lines to create the playback image.
+.VARIABLE DATE
+TIMSCAL uses the date of data acquisition to determine the proper calibration 
+coefficients.  If defaulted, the date in the VICAR label is used. This parameter 
+is needed only if the VICAR label is incorrect, or if an abnormal calibration set 
+is to be used.
+
+$ Return
+$!#############################################################################
+$Imake_File:
+$ create timspix.imake
+#define  PROCEDURE timspix
+
+#define R3LIB 
+$ Return
+$!#############################################################################

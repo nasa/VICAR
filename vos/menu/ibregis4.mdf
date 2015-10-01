@@ -1,0 +1,10 @@
+.Title           ! IBREGIS4.MDF
+[4mREGISTRATION/MOSAICKING/MAP PROJECTION Menu[0m    (page 4 of 4)
+.Proc TIEPARM
+[1mTIEPARM[0m   - Converts tiepoints from an interface file to a parameter
+            file (for TIECONM) and vice versa.
+.Proc TIEPLOT
+[1mTIEPLOT[0m   - Plots tiepoints in an interface file by drawing vectors
+            indicating direction and amount of shift between old and new
+            pixels.
+.End

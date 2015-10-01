@@ -1,0 +1,31 @@
+<html>
+<head>
+<title>VICAR Image I/O Codec</title>
+</head>
+<body>
+VICAR Image I/O Codec package for JAI.  Input and output are supported.  
+The Vicar I/O classes are called to do I/O. <br>
+The package includes:
+<p>
+<ul>
+<li>High-level JAI input codec with arbitrary tiling
+<li>High-level JAI output codec with arbitrary tiling
+<li>Thread-safe
+<li>1 banded images are treated as Gray scale
+<li>3 banded images are treated as RGB
+<li>A JAI RenderedImage from any input file format may be saved as a VICAR file
+<li>A vicar label created for images which were not input as vicar files
+<li>Binary labels supported (although discouraged)
+<li>Codec supports label access via JAI properties
+</ul>
+
+The codec is auto-registered with JAI (via the <code>OperationRegistrySpi</code>
+mechanism), so user code does not have to do anything to register it.  Simply
+attempt to open a vicar file, or save in "<code>vicar</code>" format.
+<p>
+
+<p>
+</body>
+</html>
+
+

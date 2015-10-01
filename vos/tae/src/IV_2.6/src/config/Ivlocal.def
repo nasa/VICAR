@@ -1,0 +1,52 @@
+/*
+ * IVlocal.def - local site-specific definitions
+ */
+
+/*
+ * Remove this definition if your /tmp space is less than a 1meg.
+ */
+#ifndef HasLargeTmp
+#define HasLargeTmp YES
+#endif
+
+/*
+ * Remove this definition if you want to use platform-specific .cf
+ * files from /usr/lib/X11/config.  Otherwise, imake will ignore any
+ * platform-specific .cf file you have in /usr/lib/X11/config that
+ * is also in /usr/lib/X11/config/InterViews.  Usually you want only
+ * one copy of a .cf file, but this definition is present in case you
+ * don't have any .cf files in /usr/lib/X11/config yet.
+ */
+#ifndef InstallPlatformCfFiles
+#define InstallPlatformCfFiles YES
+#endif
+
+/*
+ * Uncomment the CplusplusCcCmd line which contains the compiler you use:
+ * g++ for the GNU C++ compiler or CC for the Sun C++ compiler.
+ */
+#ifndef CplusplusCcCmd
+#define CplusplusCcCmd CC -pipe -Dsun_CC_3_0_1
+/*#define CplusplusCcCmd g++ -fstrength-reduce -pipe*/
+#endif
+#ifndef CplusplusLdCmd
+#define CplusplusLdCmd cc -Dsun_CC_3_0_1
+#endif
+/*
+ * Uncomment the ExtraLibraries line which contains the library appropriate
+ * for linking with your C++ compiler:
+ * gcc-gnulib for the GNU C++ library or libC.a for the Sun C++ library.
+ * We do not link with any C++ library because we use the cc linker.
+ */
+#ifndef ExtraLibraries
+/*#define ExtraLibraries  /usr/lang/SC1.0/libC.a */
+/*#define ExtraLibraries  /usr/local/lib/gcc-gnulib*/
+#define ExtraLibraries
+#endif
+#ifndef LibSearchPath
+#define LibSearchPath -L/usr/lib/X11R5 -L/usr/X11R5/lib
+#endif
+#ifndef ExtraIncludes
+#define ExtraIncludes -I/usr/include/X11R5 -I/usr/X11R5/include
+#endif
+

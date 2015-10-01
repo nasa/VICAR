@@ -1,0 +1,79 @@
+/****************************************************************************
+ *      Copyright (c) 1993, 1994
+ *      Century Computing, Inc.
+ *      ALL RIGHTS RESERVED
+ *
+ *      The software (programs, data bases and/or documentation) on or in
+ *      any media can not be reproduced, disclosed, or used except under
+ *      the terms of the TAE Plus Software License Agreement.
+ *
+ ***************************************************************************/
+
+
+
+/*
+ *	FORTRAN-77 string descriptor
+ *
+ *	CHANGE LOG:
+ *
+ *	03-apr-88	Apollo conversion: macros for bridge routine
+ *			names and for string arguments...ljn
+ *	10-nov-88	HP port...ljn
+ *	31-dec-89	Apollo SR10.1 has UNIX f77...ljn
+ */
+
+#ifndef I_FORSTR		/* avoid double include			*/
+#define I_FORSTR	0
+
+#ifndef I_TAECONF
+#include "taeconf.inp"
+#endif
+
+typedef struct 			/* VAX-dependent string descriptor	*/
+    {
+    short	length;		/* length of string			*/
+    short	dummy;
+    char	*pointer;	/* pointer to string			*/
+    } FORSTR;
+
+#ifdef COMMENT
+/*
+ * Obsolete: Apollo SR10.1 has UNIX f77.
+ */
+#define STRLEN short *		/* Apollo's string length argument	*/
+#define GETLEN(A) (*A)		/*    is a pointer to a short		*/
+#define FOR_NAME(A) A
+#define BRIDGE1_NAME(A) A	/* names of top bridge routines		*/
+#define BRIDGE2_NAME(A) NAME2(A,_r) 	/*names of lower bridge routines*/
+#endif
+
+#ifdef hpux
+#define STRLEN TAEINT
+#define GETLEN(A) A
+#define FOR_NAME(A) A
+#define BRIDGE1_NAME(A) A	/* names of top bridge routines		*/
+#define BRIDGE2_NAME(A) NAME2(A,_r) 	/*names of lower bridge routines*/
+#else
+#define STRLEN TAEINT
+#define GETLEN(A) A
+#define FOR_NAME(A) NAME2(A,_)
+#define BRIDGE1_NAME(A) NAME2(A,_)
+#define BRIDGE2_NAME(A) A
+#endif
+
+/* Macros for more complete fortran naming support.  The F77_FUNC  */
+/* macros are part of autoconf; if they're not available (and they */
+/* usually won't be, for standard VICAR) we use the above macro.   */
+/* The first argument should be lower case and the second upper,   */
+/* e.g. FOR_NAME2(name,NAME) . Use the trailing _ version if there */
+/* are underscores in the name.					   */
+
+#if defined(F77_FUNC) && defined(F77_FUNC_)
+#define FOR_NAME2(a,AA) F77_FUNC(a,AA)
+#define FOR_NAME2_(a,AA) F77_FUNC_(a,AA)
+#else
+#define FOR_NAME2(a,AA) FOR_NAME(a)
+#define FOR_NAME2_(a,AA) FOR_NAME(a)
+#endif
+
+#endif

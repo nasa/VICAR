@@ -1,0 +1,3 @@
+jar_file = vicario.jar
+services_files = (javax.imageio.spi.ImageInputStreamSpi,javax.imageio.spi.ImageTranscoderSpi,javax.imageio.spi.ImageOutputStreamSpi,javax.imageio.spi.ImageWriterSpi,javax.imageio.spi.ImageReaderSpi)
+

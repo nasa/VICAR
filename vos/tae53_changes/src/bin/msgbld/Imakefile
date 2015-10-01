@@ -1,0 +1,15 @@
+/**/ #
+/**/ #	msgbld - message build program.
+/**/ #
+
+PROG = msgbld
+
+CINCLUDES = -I$(TINC)
+
+OBJS = msgbld.o
+
+LINKLIBS = $(TAELINKLIBS) $(EXTRALIBS) $(SYSLIBS)
+
+DEPLIBS = $(TAEDEPLIBS)
+
+SimpleCProgramTarget($(PROG),$(OBJS))

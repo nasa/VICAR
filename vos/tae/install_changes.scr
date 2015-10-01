@@ -1,0 +1,19 @@
+#!/bin/csh
+# Copies VICAR TAE changes to the appropriate TAE directories.
+# The TAE environment variable must have already been set, and the
+# TAE tree must already exist.
+#
+cp -r * $TAE
+chmod +x $TAE/build_tae.csh
+chmod +x $TAE/installtae.nointer
+mkdir $TAE/src/tae/lib/vicar
+chmod +x $TAE/bin/all/taemunch
+chmod +x $TAE/bin/all/platform
+chmod +x $TAE/bin/all/bsdinst_sgi
+chmod +x $TAE/bin/all/bsdinst_hp800
+
+# See util/harvest_fetch_fixup.  Must use correct include files
+
+cp $TAE/inc/unix/taeconf.inp $TAE/inc
+cp $TAE/inc/unix/tmhost.inp $TAE/inc
+

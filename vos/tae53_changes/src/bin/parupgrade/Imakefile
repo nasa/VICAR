@@ -1,0 +1,24 @@
+/**/ #
+/**/ #	Makefile for parupgrade utilities.
+/**/ #
+
+PROG = parupgrade 
+
+
+CINCLUDES = -I. -I$(TINC) 
+
+
+OBJS = \
+	convert.o \
+	oldrestrict.o \
+	oldtranssym.o \
+	oldvm.o
+
+
+DEPLIBS = $(TAEDEPLIBS)
+
+
+LINKLIBS = $(TAELINKLIBS)  $(EXTRALIBS) $(TERMLIB)
+
+
+SimpleCProgramTarget($(PROG),$(OBJS))

@@ -1,0 +1,11 @@
+.Title
+[4mLANDSAT  - MOSAICKING Menu[0m                            (page 1 of 1)
+.Proc THERMMOS
+[1mTHERMMOS[0m  - Mosaics 4 quadrants of an EROS Data Center TIPS
+            processed LANDSAT 4 or 5 Thematic Mapper image. (Mosaics only 
+            the thermal band.)
+.Proc TIPSMOS
+[1mTIPSMOS[0m   - Mosaics 4 quadrants of an EROS Data Center TIPS 
+            processed LANDSAT 4 or 5 Thematic Mapper image. (Mosaics bands
+            1,2,3,4,5 and 7.)
+.END

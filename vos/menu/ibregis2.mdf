@@ -1,0 +1,23 @@
+.Title           ! IBREGIS2.MDF
+[4mREGISTRATION/MOSAICKING/MAP PROJECTION Menu[0m      (page 2 of 4)
+.Proc PICMATCH
+[1mPICMATCH[0m  - Image correlation routine for matching images or ground
+            control point datasets to an image.
+.Proc PLANETCNV
+[1mPLANETCNV[0m - Converts points in an interface file between line/sample
+            in an image and latitude/longitude on a planet surface.  For 
+            Viking Orbiter images only.
+.Proc POLYCLIP
+[1mPOLYCLIP[0m  - Clips a specified window of graphics elements from one
+            Graphics-1 file, placing the output in another Graphics-1 file.
+.Proc POLYGEOM
+[1mPOLYGEOM[0m  - Performs geometric transformations to correct for 
+            distortion. It may increase or decrease the size of a point
+            polygon dataset or return it to its original state.
+.Proc POLYMAP
+[1mPOLYMAP[0m   - Converts Graphics-1 files from one Earth-oriented map 
+            projection to another.
+
+.Menu IBREGIS3.mdf
+[7mAdditional REGISTRATION/MOSAICKING/MAP PROJECTION Selections[0m
+.END

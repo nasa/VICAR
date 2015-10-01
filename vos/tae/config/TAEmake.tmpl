@@ -1,0 +1,536 @@
+/**/#
+/**/#  IMAKE_TEMPLATE - imake template customized for TAE
+/**/#
+
+/*
+ *               *****TAE INSTALLERS TAKE NOTE*****
+ * YOU SHOULD ADD PLATFORM-SPECIFIC PARAMETERS IN THE APPROPRIATE .CF FILE
+ * OR IN SITE.DEF IN THIS DIRECTORY.
+ *
+ * If you have installed supporting software (such as X11) in un-orthodox
+ * places, or if you are porting TAE Plus to a new platform, you may
+ * want to review all parameters below.
+ */
+
+/*
+ * Change Log:
+ *  03-03-92 Added -lXmu ($XMULIBS) to XWINLIBS and also libxterm.a
+ *	         ($XTERMDEPLIB and $XTERMLINKLIBS) for scroller...kbs
+ *  06-apr-92 Added APP_C++INCLUDES and APP_C++FLAGS for C++FLAGS...tpl
+ *  11-jan-93 Added C++SUFFIX_FLAGS for IBM port (PR1807)...kbs
+ *  10-feb-93 Added EXTRA_C++DEFINES and EXTRA_CDEFINES...rt
+ *  22-mar-93 Changed -lXmu to XmuLibrary, mainly for Sun libXmu.a bug...rt
+ *  07-apr-93 Motif1.2.2 need -lXext...tpl
+ *  27-aug-93 Add ADASYSLIBS...ws
+ *
+ */
+#define YES      1
+#define NO       0
+
+/*
+ * Identify our current platform.
+ */
+
+#include "TAEplat.c"
+
+/*
+ * Include the platform-specific .cf file.
+ */
+
+#include MacroIncludeFile
+
+/*
+ * Site-specific configuration parameters.
+ */
+
+#include <site.def>
+
+/*
+ * Define any generic build parameters not already set by the platform
+ * or site configuration files.
+ */
+
+#ifndef SystemV
+#ifdef SYSV
+#define SystemV YES
+#else
+#define SystemV NO
+#endif
+#endif
+#ifndef BourneShell                     /* to force shell in makefile */
+#define BourneShell /bin/sh
+#endif
+#ifndef OptimizedCDebugFlags
+#define OptimizedCDebugFlags
+#endif
+#ifndef OptimizedCplusplusDebugFlags
+#define OptimizedCplusplusDebugFlags
+#endif
+#ifndef DebuggableCDebugFlags
+#define DebuggableCDebugFlags
+#endif
+#ifndef NoOpCDebugFlags
+#define NoOpCDebugFlags /* as nothing */
+#endif
+#ifndef DefaultCplusplusDebugFlags
+#define DefaultCplusplusDebugFlags OptimizedCplusplusDebugFlags
+#endif
+#ifndef DefaultCDebugFlags
+#define DefaultCDebugFlags OptimizedCDebugFlags
+#endif
+#ifndef DefaultLdDebugFlags
+#define DefaultLdDebugFlags 
+#endif
+#ifndef ArCmd
+#define ArCmd ar cq
+#endif
+#ifndef BootstrapCFlags
+#define BootstrapCFlags /**/
+#endif
+#ifndef CcCmd
+#define CcCmd cc 
+#endif
+#ifndef AsCmd
+#define AsCmd as
+#endif
+#ifndef CcOpts
+#define CcOpts /**/
+#endif
+/*
+ * Uncomment the CplusplusCmd line which contains the compiler you use:
+ * g++ for the GNU C++ compiler or CC for the Sun C++ compiler.
+ */
+#ifndef CplusplusCmd
+/*#define CplusplusCmd CC -pipe*/
+#define CplusplusCmd g++ -fstrength-reduce -pipe
+#endif
+#ifndef CplusplusLdCmd
+#define CplusplusLdCmd cc
+#endif
+#ifndef CppCmd
+#define CppCmd /lib/cpp
+#endif
+#ifndef DependCplusplusFlags
+#define DependCplusplusFlags $(C++FLAGS)
+#endif
+#ifndef DependCFlags
+#define DependCFlags $(CFLAGS)
+#endif
+#ifndef DependCmd
+#define DependCmd makedepend
+#endif
+#ifndef CLibrary
+#define CLibrary -lc
+#endif
+/*
+ * Uncomment the CplusplusLibrary line which contains the library appropriate
+ * for linking with your C++ compiler:
+ * gcc-gnulib for the GNU C++ library or libC.a for the Sun C++ library.
+ */
+#ifndef CplusplusLibrary
+/*#define CplusplusLibrary /usr/lang/SC1.0/libC.a*/
+#define CplusplusLibrary /usr/local/lib/gcc-gnulib
+#endif
+#ifndef ExtraCFlags
+#define ExtraCFlags
+#endif
+#ifndef AppCFlags
+#define AppCFlags
+#endif
+#ifndef CplusplusSuffixFlags
+#define CplusplusSuffixFlags 
+#endif
+#ifndef ExtraCplusplusFlags
+#define ExtraCplusplusFlags
+#endif
+#ifndef AppCplusplusFlags
+#define AppCplusplusFlags
+#endif
+#ifndef FortranCmd
+#define FortranCmd f77
+#endif
+#ifndef FortranLibrary
+#define FortranLibrary -lU77 -lF77
+#endif
+#ifndef FortObjNameSuffix
+#define FortObjNameSuffix .o
+#endif
+#ifndef PreProcessCmd
+#define PreProcessCmd CcCmd -E       /* run cpp with defines */
+#endif
+#ifndef Have68KAssembler
+#define Have68KAssembler false
+#endif
+#ifndef LdCmd
+#define LdCmd cc
+#endif
+#ifndef LnCmd
+#if SystemV
+#define LnCmd ln              /* or even cp */
+#else
+#define LnCmd ln -s
+#endif
+#endif
+#ifndef RanlibCmd
+#if SystemV
+#define RanlibCmd /bin/true
+#else
+#define RanlibCmd ranlib
+#endif
+#endif
+#ifndef RmCmd
+#define RmCmd rm -f
+#endif
+#ifndef StandardCppDefines
+#if SystemV
+#define StandardCppDefines -DSYSV
+#else
+#define StandardCppDefines /**/
+#endif
+#endif
+#ifndef StandardCplusplusDefines
+#if SystemV
+#define StandardCplusplusDefines -DXTFUNCPROTO -DSYSV
+#else
+#define StandardCplusplusDefines -DXTFUNCPROTO
+#endif
+#endif
+#ifndef StandardCDefines
+#if SystemV
+#define StandardCDefines -D_NO_PROTO -DSYSV
+#else
+#define StandardCDefines -D_NO_PROTO
+#endif
+#endif
+#ifndef ExtraLibraries
+#define ExtraLibraries  /**/
+#endif
+#ifndef AppLibraries
+#define AppLibraries /**/
+#endif
+#ifndef MathLibrary
+#define MathLibrary -lm
+#endif
+#ifndef Ada_Mcrt1
+#define Ada_Mcrt1 /**/
+#endif
+#ifndef ExtraLoadFlags
+#define ExtraLoadFlags /**/
+#endif
+#ifndef AppLoadFlags
+#define AppLoadFlags
+#endif
+#ifndef LibSearchPath
+#if SystemV
+#define LibSearchPath -L $$TAELIB
+#else
+#define LibSearchPath -L$$TAELIB
+#endif
+#endif
+#ifndef TerminalLibrary
+#if SystemV
+#define TerminalLibrary -lcurses
+#else
+#define TerminalLibrary -ltermlib
+#endif
+#endif
+#ifndef HaveTerminalLibrary
+#define HaveTerminalLibrary yes
+#endif
+#ifndef BigEndianMachine
+#define BigEndianMachine false
+#endif
+#ifndef ExtraCDefines
+#define ExtraCDefines
+#endif
+#ifndef ExtraCplusplusDefines
+#define ExtraCplusplusDefines
+#endif
+/*
+ * Ada link directives using WITHn start with this `n'.
+ */
+#ifndef WithStart
+#define WithStart 1
+#endif
+/*
+ * Stuff added by baw@fox 31-Aug-1990 for v5.0 from old TAEmake.tmpl
+ */
+#ifndef RmFileTypes
+#define RmFileTypes .emacs_* *.CKP *.ln *.BAK *.a *.o *..c ,* *~ \
+                    a.out core errs tags TAGS make.log make.out
+#endif
+/*
+ * code generator removes these files
+ * 12-Nov-1990 baw & cew
+ * tmp == generated by workbench rehearse
+ * rehearse.pdf == generated by workbench rehearse
+ * ?log == log of code generator session (.alog, .clog, ...)
+ * par == TAE par blocks
+ */
+#ifndef CGRmFileTypes
+#define CGRmFileTypes *.tmp *.?log *.par rehearse.pdf
+#endif
+
+#ifndef RemoveAfterInstall
+#define RemoveAfterInstall YES    /* to conserve disk space */
+#endif
+#ifndef StripInstalledExecutable
+#define StripInstalledExecutable YES   /* to conserve disk space */
+#endif
+#ifndef InstallExecutableFlags
+#if StripInstalledExecutable
+#define InstallExecutableFlags -s
+#else
+#define InstallExecutableFlags
+#endif
+#endif
+#ifndef AfterInstallCmd
+#if RemoveAfterInstall
+#define AfterInstallCmd $(RM)
+#else
+#define AfterInstallCmd /bin/true
+#endif
+#endif
+#ifndef InstallCmd
+#if SystemV
+#define InstallCmd bsdinstall
+#else
+#define InstallCmd install
+#endif
+#endif
+
+#ifndef CpCmd
+#define CpCmd cp
+#endif
+#ifndef MvCmd
+#define MvCmd mv
+#endif
+
+#ifndef MakeCmd
+#define MakeCmd make
+#endif
+#ifndef ImakeCmd
+#define ImakeCmd imake
+#endif
+#ifndef ImakeOpts
+#ifdef UseInstalled
+#define ImakeOpts -T$(IMAKETMPL) -I$(TAECONFIGDIR) -DUseInstalled SOL_DEF
+#else
+#define ImakeOpts -T$(IMAKETMPL) -I$(TAECONFIGDIR) SOL_DEF
+#endif
+#endif
+#ifndef TAEConfigDir
+#define TAEConfigDir $$TAE/config
+#endif
+#ifndef ImakeFlags
+#define ImakeFlags
+#endif
+
+#ifndef DefaultLdPlusPlusDebugFlags
+#define DefaultLdPlusPlusDebugFlags
+#endif
+
+#ifndef SortCmd
+#define SortCmd sort -u
+#endif
+
+
+/**/#
+/**/# System directories.
+/**/#
+
+          SYSINC = /usr/include
+
+/**/#
+/**/# Libraries.
+/**/#
+
+#ifndef XmuLibrary
+#define XmuLibrary -lXmu
+#endif
+
+#ifndef OtherStandardLibraries
+#define OtherStandardLibraries
+#endif
+
+          TERMLIB = TerminalLibrary
+             CLIB = CLibrary
+           C++LIB = CplusplusLibrary
+             FLIB = FortranLibrary
+          MATHLIB = MathLibrary
+            MCRT1 = Ada_Mcrt1
+           XTLIBS = -lXm -lXt
+#ifdef PREMOTIF12
+            XLIBS = -lX11
+#else
+            XLIBS = -lXext -lX11
+#endif
+          XMULIBS = XmuLibrary
+         XWINLIBS = $(XTLIBS) $(XMULIBS) $(XLIBS)
+           IVLIBS = -lInterViewsX11 -lgraphic
+
+/**/#
+/**/# Generic make variables
+/**/#
+
+            SHELL = BourneShell
+               AR = ArCmd
+  BOOTSTRAPCFLAGS = BootstrapCFlags     /* set if cpp doesn't have uniq sym */
+         ASSEMBLE = Have68KAssembler
+      HAVETERMLIB = HaveTerminalLibrary
+               CC = CcCmd
+           CCOPTS = CcOpts
+              C++ = CplusplusCmd
+              CPP = CppCmd $(STD_CPP_DEFINES)              /* simple filters */
+           DEPEND = DependCmd
+   DEPENDC++FLAGS = DependCplusplusFlags
+     DEPENDCFLAGS = DependCFlags
+             FORT = FortranCmd
+       FORTOBJEXT = FortObjNameSuffix
+             LD++ = CplusplusLdCmd
+    PREPROCESSCMD = PreProcessCmd $(STD_CPP_DEFINES)       /* prefered; mdep */
+               LD = LdCmd
+               LN = LnCmd
+           RANLIB = RanlibCmd
+               RM = RmCmd
+  STD_CPP_DEFINES = StandardCppDefines 
+   STD_C++DEFINES = StandardCplusplusDefines
+     STD_CDEFINES = StandardCDefines 
+   EXTRA_CDEFINES = ExtraCDefines
+ EXTRA_C++DEFINES = ExtraCplusplusDefines
+  C++SUFFIX_FLAGS = CplusplusSuffixFlags
+   EXTRA_C++FLAGS = ExtraCplusplusFlags
+     EXTRA_CFLAGS = ExtraCFlags
+ EXTRA_LOAD_FLAGS = ExtraLoadFlags
+        EXTRALIBS = ExtraLibraries
+     APP_C++FLAGS = AppCplusplusFlags
+       APP_CFLAGS = AppCFlags
+   APP_LOAD_FLAGS = AppLoadFlags
+     APP_LINKLIBS = AppLibraries
+          SYSLIBS = $(TERMLIB) $(MATHLIB) $(CLIB) OtherStandardLibraries
+       C++SYSLIBS = $(TERMLIB) $(MATHLIB) $(CLIB) $(C++LIB) OtherStandardLibraries
+       ADASYSLIBS = $(TERMLIB) $(MATHLIB) OtherStandardLibraries
+
+    C++DEBUGFLAGS = DefaultCplusplusDebugFlags
+      CDEBUGFLAGS = DefaultCDebugFlags
+     LDDEBUGFLAGS = DefaultLdDebugFlags
+         C++FLAGS = $(C++DEBUGFLAGS) $(C++INCLUDES) $(APP_C++INCLUDES) \
+                    $(EXTRA_C++FLAGS) $(APP_C++FLAGS) $(STD_C++DEFINES) \
+                    $(EXTRA_C++DEFINES)
+           CFLAGS = $(CDEBUGFLAGS) $(CINCLUDES) $(APP_CINCLUDES) \
+                    $(EXTRA_CFLAGS) $(APP_CFLAGS) $(STD_CDEFINES) \
+                    $(EXTRA_CDEFINES) $(CCOPTS)
+          LDFLAGS = $(LDDEBUGFLAGS) $(EXTRA_LOAD_FLAGS) $(APP_LOAD_FLAGS)
+            SPARC = SparcMachine
+        BIGENDIAN = BigEndianMachine
+       WITH_START = WithStart
+
+        MACROFILE = MacroFile
+
+/*
+ * Stuff added by baw@fox 31-Aug-1990 for v5.0 from old TAEmake.tmpl
+ * also, code generator stuff 12-Nov-1990 baw & cew
+ */
+    RM_FILE_TYPES = RmFileTypes
+ CG_RM_FILE_TYPES = CGRmFileTypes
+     AFTERINSTALL = AfterInstallCmd
+          INSTALL = InstallCmd
+    INST_LIBFLAGS = -m 644
+      INST_LIBDIR = $$TAELIB
+ INST_RANLIBFLAGS =
+   INST_EXECFLAGS = InstallExecutableFlags
+      INST_BINDIR = $$TAEBIN/$$TAEPLAT
+               CP = CpCmd
+               MV = MvCmd
+             MAKE = MakeCmd
+            IMAKE = ImakeCmd
+        IMAKETMPL = IMAKE_TEMPLATE
+        IMAKEOPTS = ImakeOpts
+       IMAKEFLAGS = ImakeFlags
+        IMAKE_CMD = $(IMAKE) $(IMAKEOPTS)
+     TAECONFIGDIR = TAEConfigDir
+        WPTDEPLIB = $(TAELIB)/libwpt.a
+      XTERMDEPLIB = $(TAELIB)/libxterm.a
+        DDODEPLIB = $(TAELIB)/libddo.a
+        WMWDEPLIB = $(TAELIB)/libwmw.a
+       TAECDEPLIB = $(TAELIB)/libtaec.a
+        TAEDEPLIB = $(TAELIB)/libtae.a
+       WPTDEPLIBS = $(WPTDEPLIB) $(XTERMDEPLIB) $(DDODEPLIB) $(WMWDEPLIB)
+       TAEDEPLIBS = $(TAECDEPLIB) $(TAEDEPLIB)
+          DEPLIBS = $(WPTDEPLIBS) $(TAEDEPLIBS)
+       WPTLINKLIB = -lwpt
+     XTERMLINKLIB = -lxterm
+       DDOLINKLIB = -lddo
+       WMWLINKLIB = -lwmw
+      TAECLINKLIB = -ltaec
+       TAELINKLIB = -ltae
+      WPTLINKLIBS = $(WPTLINKLIB) $(XTERMLINKLIB) $(DDOLINKLIB) $(WMWLINKLIB)
+      TAELINKLIBS = $(TAECLINKLIB) $(TAELINKLIB)
+         LINKLIBS = $(WPTLINKLIBS) $(IVLIBS) $(XWINLIBS) $(TAELINKLIBS) \
+                    $(EXTRALIBS) $(APP_LINKLIBS) $(SYSLIBS)
+      C++LINKLIBS = $(WPTLINKLIBS) $(IVLIBS) $(XWINLIBS) $(TAELINKLIBS) \
+                    $(EXTRALIBS) $(APP_LINKLIBS) $(C++SYSLIBS)
+   TAEVERSIONFILE = .version.o
+   LD++DEBUGFLAGS = DefaultLdPlusPlusDebugFlags
+        LD++FLAGS = $(LD++DEBUGFLAGS) $(EXTRA_LOAD_FLAGS) $(APP_LOAD_FLAGS)
+          SORTCMD = SortCmd
+    LIBSEARCHPATH = LibSearchPath
+
+
+/*
+ * Include the project-specific rules file.
+ */
+
+#include "TAErules.def"
+
+
+/*
+ * Include the local Imakefile.
+ */
+
+#include INCLUDE_IMAKEFILE
+
+#ifndef GeneratedApplication
+/**/#
+/**/# common rules for all Makefiles
+/**/#
+
+#ifdef IHaveSubdirs
+#ifndef DontMakeAllInSubdirs
+MakeAllInSubdirs($(SUBDIRS))
+#endif
+DummyAllTarget()
+#endif
+
+
+#ifdef IHaveSubdirs
+MakeMakefilesInSubdirs($(SUBDIRS))
+#endif
+#ifndef GeneratedImake
+MakeMakefileTarget(-Ddummy)
+#endif
+
+
+#ifndef IHaveSubdirs
+#ifndef GeneratedImake
+CleanTarget()
+#endif
+#else
+CleanSubdirs($(SUBDIRS))
+#endif
+
+
+#ifndef IHaveSubdirs
+DummyMakeDepend()
+#else
+MakeDependInSubdirs($(SUBDIRS))
+#endif
+
+#ifdef IHaveSubdirs
+MakeInstallInSubdirs($(SUBDIRS))
+#endif
+#endif
+
+/**/#
+/**/# dependencies generated by makedepend
+/**/#

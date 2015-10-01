@@ -1,0 +1,335 @@
+procedure help=* options=nointerrupt
+subcmd cursor
+  parm planes (string,20) count=1:100 default="ALL"
+  parm cursor int default=1
+  parm from keyword valid=(DISPLAY,FILE,BOTH) default=BOTH
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subcmd device
+  local i integer
+  local odev (string,20) count=0:100
+  local ndev integer
+  local dev string
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subcmd planes
+  parm planes (string,20) count=1:100 default="ALL"
+!
+  local i integer
+  local oplanes integer count=0:100
+  local nplanes integer
+  local p integer
+  local fn string
+  local band integer
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+subcmd regions
+  parm regions (string,20) count=0:100 default=--
+!
+  local i integer
+  local orgn (string,20) count=0:100
+  local nrgn integer
+  local rgn string
+end-subcmd
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+parm device string count=0:1 default=--
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+body
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if (_subcmd = "CURSOR")
+  jget-cursor @planes @cursor @from 'PRINT device=@device
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+else-if (_subcmd = "DEVICE")
+  if ($COUNT(device) = 0)
+    jget-devlist odev=odev ndev=ndev 'noprint
+  else
+    let ndev = $COUNT(device)
+    let odev = device
+  end-if
+  if (ndev=0)
+    write "No active devices"
+  else
+    let dev = odev(1)
+    write "Current device: &dev"
+    let i=1
+    loop
+      if (i>ndev) break
+      write ""
+      let dev = odev(i)
+      jget-device 'print device=@dev
+      let i = i + 1
+    end-loop
+    let dev = odev(1)
+    jgrab device=@dev		! reset the current device
+  end-if
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+else-if (_subcmd = "PLANES")
+  jget-planes @planes oplanes=oplanes nplanes=nplanes 'noprint device=@device
+  let i=1
+  loop
+    if (i>nplanes) break
+    let p = oplanes(i)
+    jget-plinfo &p band=band filename=fn 'noprint
+    if (fn = "")
+      write "Plane &p:  *** No file loaded ***"
+    else
+      write "Plane &p: Band &band, File &fn"
+    end-if
+    let i = i + 1
+  end-loop
+  write ""
+  let i=1
+  loop
+    if (i>nplanes) break
+    let p = oplanes(i)
+    if (i = 1)
+      jget-plinfo &p 'header 'print
+    else
+      jget-plinfo &p 'noheader 'print
+    end-if
+    let i = i + 1
+  end-loop
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+else-if (_subcmd = "REGIONS")
+  if ($COUNT(regions) = 0)
+    jget-rgnlist orgn=orgn nrgn=nrgn 'noprint device=@device
+  else
+    let nrgn = $COUNT(regions)
+    let orgn = regions
+  end-if
+  if (nrgn = 1)
+    let rgn = orgn(1)
+    jget-region &rgn 'print 'prtpts device=@device
+  else
+    let i=1
+    loop
+      if (i>nrgn) break
+      let rgn = orgn(i)
+      jget-region &rgn 'print 'noprtpts device=@device
+      let i = i + 1
+    end-loop
+  end-if
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+end-if
+end-proc
+.title
+VIDS command JSHOW
+.help
+The JSHOW command is used to print out information about VIDS.
+JSHOW takes subcommands to describe the type of information
+desired, so the command takes the form:
+
+JSHOW-subcmd parms
+
+where "subcmd" describes the type of information, and "parms"
+indicates additional parameters which vary among the subcommands.
+For further information on a given subcommand, type "HELP JSHOW-subcmd",
+or, for a list of sumcommands available and help on each, "TUTOR JSHOW-".
+.page
+JSHOW prints everything to the terminal screen; it does not return
+information on TCL variables.  However, most JSHOW subcommands have
+a corresponding JGET subcommand which can be used to get the same
+information into TCL variables for manipulation by PDFs.
+
+Examples:
+
+JSHOW-CURSOR (RED,GREEN)	! prints info about current cursor location
+				! in the red and green planes.
+JSHOW-DEVICE			! prints info about all active display devices
+JSHOW-PLANES			! prints info about all the image planes
+JSHOW-REGIONS			! prints info about all the regions
+.level1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd cursor
+Prints cursor coordinates and
+value of sample under cursor.
+.variable planes -cursor
+Plane numbers to use
+.variable cursor -cursor
+Cursor number to use
+.variable from -cursor
+Valid: DISPLAY,
+FILE, BOTH
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd device
+Prints information about
+all devices or the current
+display device.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd planes
+Prints information about
+one or more image planes.
+.variable planes -planes
+Image planes to use.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd regions
+Prints information about
+one or more regions.
+.variable regions -regions
+Regions to use.  Null means
+use all defined regions.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.vari device
+Name of device to use
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.level2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd cursor
+JSHOW-CURSOR prints the position of the display device's cursor and the
+value of the pixel under the cursor.  It can report the position relative
+to both the display device and the file being displayed.  It also reports
+the pixel values from both the display and the file.  The FROM parameter
+controls whether the display, the file, or both are used.
+
+Any set of image planes may be selected via the PLANES parameter,
+and you can pick the cursor number to use with the CURSOR parameter.
+.page
+COORDINATES
+-----------
+
+There are three different coordinate systems that the cursor
+position can be reported in.  In the simplest case they are
+all equivalent, but they can be different.
+
+RAW:  This is the cursor position relative to the display
+      screen.  It is called "RAW" because this is what the
+      hardware returns.  The upper left corner is always 1,1.
+      The bottom right corner is always whatever the resolution
+      of the device is, such as (512,512) or (1024,1024).
+.page
+IMP:  This is the cursor position relative to the image memory
+      plane.  It may be different from the RAW position if there
+      is a hardware zoom or pan in effect.  Any commands that
+      draw into the image plane (such as the LOCATION parameter
+      of JDISP) will use these coordinates.  The IMP coordinates
+      may be different for each plane.
+
+FILE: This is the cursor position relative to the file (or a
+      single band of the file) associated with the image memory
+      plane.  It may differ from the IMP coordinates if there
+      is a software zoom or pan in effect, or if you are
+      displaying only a portion of the file, such as with the
+      AREA parameter on JLOAD-IMAGE (which is effectively a
+      software pan).  The FILE coordinates may be different for
+      each file.
+.variable planes -cursor
+Specifies which image plane(s) to get pixel values from.
+
+Default:  "ALL"
+.variable cursor -cursor
+Specifies which cursor number to read.  This should normally
+be defaulted, but is available for special situations.
+
+Default:  1
+.variable from -cursor
+The FROM parameter specifies whether to read the display,
+the file, or both to get pixel values.  It is a keyword
+parameter, so you may say, for example, 'DISPLAY or 'BOTH
+or even just 'D or 'F instead of FROM=DISPLAY.
+
+Valid values are DISPLAY, FILE, and BOTH.
+
+Default:  BOTH
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd device
+JSHOW-DEVICE displays various pieces of information about the current
+display device or all active devices.
+
+The items printed out are the device name, the full name of the device
+(make/model), the number of image planes, the number of lines and
+samples in both the image plane and the video display, and the current
+display mode (color/pseudocolor/bw).
+
+If you give the DEVICE parameter, only info for that device is printed,
+and it becomes the new current device.
+
+If you do not give the DEVICE parameter, then information is printed
+about all devices that are currently available to this VIDS session
+(i.e., all devices that have been JGRAB'ed).  The current device is
+not changed.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd planes
+JSHOW-PLANES prints various items of information about one or more
+image planes.
+
+Any set of image planes may be selected via the PLANES parameter.
+
+A typical display with explanation is shown on the next page.
+.page
+VICAR>JSHOW-PLANES
+Plane 1: Band 1, File UD1:[MY_DIR]A.IMG;1
+Plane 2: Band 2, File UD1:[MY_DIR]A.IMG;1
+Plane 3: Band 3, File UD1:[MY_DIR]A.IMG;1
+Plane 4:  *** No file loaded ***
+
+Image      File Coordinates      Location    Device Pan     Zoom Factor
+plane     sl   ss   nl   ns       sl   ss       sl   ss   display  file
+   1       1    1  512  512        1    1        1    1         1     1
+   2       1    1  512  512        1    1        1    1         1     1
+   3       1    1  512  512        1    1        1    1         1     1
+   4       1    1  512  512        1    1        1    1         1     1
+
+The first block shows the filename and band number loaded in each
+image plane.
+
+The second block shows additional information for each plane, which is
+described on the next page.
+.page
+In all of the items, "sl" means Starting Line, "ss" means Starting
+Sample, "nl" means Number of Lines, and "ns" means Number of Samples.
+
+"File Coordinates" are the coordinates of the part of the file
+currently being displayed, relative to the file.
+
+"Location" is the location in the image plane where the top left
+corner of the file is loaded, relative to the image plane.
+
+"Device Pan" is the value of the display (hardware) pan.  It is the
+coordinates relative to the image plane of the pixel being displayed
+in the top left corner of the screen.  The file (software) pan is
+indicated under "File Coordinates".
+
+"Zoom Factor" is the value of the display (hardware) and file (software)
+zoom factors.  A positive number indicates magnification, while a
+negative number means the image has been shrunk.  A zoom factor of 1
+means no zoom.
+.variable planes -planes
+Specifies which image plane(s) to print information for.
+
+Default:  "ALL"
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd regions
+JSHOW-REGIONS prints various items of information about one or
+more or all regions.
+
+Any set of regions may be selected via the REGIONS parameter.
+If REGIONS is null, then all regions are selected.
+
+The information displayed is the name of the region, the shape
+(Rectangle, Square, Oval, Circle, or Polygon), and the bounding
+rectangle of the region.
+
+In addition, the list of points for the vertices of a polygonal
+region is printed if only one region is selected via the REGIONS
+parameter.  If more than one region is used, then the point list
+is not printed.  This is to avoid cluttering up the display.
+.variable regions -regions
+Specifies which region(s) to print information for.  If REGIONS
+is left blank, then all currently defined regions are printed.
+
+If only one region is specified, and it is a polygon, then the
+point list (vertices) of the polygon will also be printed.  If
+more than one region is listed, the point list is suppressed to
+avoid cluttering up the display.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

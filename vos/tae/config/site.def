@@ -1,0 +1,71 @@
+/*****************************************************************************
+ *                                                                           *
+ *                         SITE-SPECIFIC DEFINITIONS                         *
+ *                                                                           *
+ *               	*****TAE INSTALLERS TAKE NOTE*****
+ * Site-specific parameters should go here or in the relevant .cf file in
+ * this directory.
+ *
+ * If your platform is supported by this release of TAE Plus (see the
+ * Release Notes for TAE Plus for supported platforms), THE PARAMETERS IN THIS
+ * FILE ARE ALL THAT YOU NEED TO REVIEW.
+ *****************************************************************************/
+
+/*
+ * Change this at delivery time.
+ */
+#ifndef DefaultCDebugFlags
+#define DefaultCDebugFlags
+#endif
+
+/*
+ * Sun 3's and 2's which do NOT have available the M68881 co-processor should
+ * modify `CcCmd' in sun.cf in this directory.
+ */ 
+#ifndef CcCmd
+#define CcCmd cc
+#endif
+/*
+ * Uncomment the CplusplusCmd line which contains the compiler you use:
+ * g++ for the GNU C++ compiler or CC for the Sun C++ compiler.
+ */
+#ifndef CplusplusCmd
+#define CplusplusCmd CC -Dsun_CC_3_0_1
+/*#define CplusplusCmd g++ -fstrength-reduce -pipe*/
+#endif
+/*
+ * Uncomment the CplusplusLibrary line which contains the library appropriate
+ * for linking with your C++ compiler:
+ * gcc-gnulib for the GNU C++ library or libC.a for the Sun C++ library.
+ */
+#ifndef CplusplusLibrary
+/*#define CplusplusLibrary /usr/lang/SC1.0/libC.a*/
+/*#define CplusplusLibrary /usr/local/lib/gcc-gnulib*/
+#define CplusplusLibrary
+#endif
+#ifndef LdCmd
+#define LdCmd cc
+#endif
+#ifndef CplusplusLdCmd
+#define CplusplusLdCmd CplusplusCmd
+#endif
+/*
+ * Uncomment the next block of defines if you are using X11R4
+ * (in particular, the X11R4 bitmap utility).
+ */
+/*
+#define ExtraCplusplusDefines -DTAEX11R4
+#define ExtraCDefines -DTAEX11R4
+*/
+/* Uncomment the following if compiling with Motif 1.x */
+/*#define PREMOTIF12*/
+
+/*
+ * The following lines are examples of what you may have to define if you have
+ * Motif installed in a nonstandard location.
+ */
+/*
+#define LibSearchPath -L$$TAELIB -L/usr/local2/motif1.1.4/lib/Xm
+#define ExtraCFlags -I/usr/local2/motif1.1.4/lib/Xm
+#define ExtraCplusplusFlags -I/usr/local2/motif1.1.4/lib/Xm
+*/

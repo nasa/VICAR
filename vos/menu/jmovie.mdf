@@ -1,0 +1,28 @@
+.Title
+VIDS Animation Control Menu
+
+.command help jmovie
+HELP JMOVIE      - General help on animating a sequence of images.
+
+.proc jmovie-set
+JMOVIE-SET       - Sets the size and other parameters for movies.
+
+.proc jmovie-load
+JMOVIE-LOAD      - Loads a series of frames for a movie.
+.proc jmovie-frameload
+JMOVIE-FRAMELOAD - Loads a single image into the given frame of a movie.
+
+.proc jmovie-run
+JMOVIE-RUN       - Runs the previously loaded movie.
+
+.proc jmovie-show
+JMOVIE-SHOW      - Shows a single frame from a loaded movie.
+
+.help
+
+The VIDS Animation Control Menu lists all the VIDS commands associated
+with animating a sequence of frames like a movie, in other words the
+JMOVIE command.
+
+For general help on how to set up a movie, select item 1, "HELP JMOVIE".
+.end

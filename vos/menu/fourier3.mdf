@@ -1,0 +1,21 @@
+.Title
+[4mAdditional FOURIER TRANSFORM Menu Selections[0m          (page 3 of 3)
+.Proc MEM
+[1mMEM[0m      - Performs a non-linear restoration (deconvolution) of a 
+           degraded image by the Maximum Entropy Method.
+.Proc OTF1
+[1mOTF1[0m     - Performs 1-D FFTs to compute Optical Transfer Function 
+           from degraded edges in images, or from a line spread 
+           function or tabular real function.
+.Proc POWER
+[1mPOWER[0m    - Computes a 1-D power spectrum of a specified area in an 
+           image using FFT.
+.Proc PSF
+[1mPSF[0m      - Formats a Point Spread Function image for FFT22 or FT2.
+.Proc RESTORW
+[1mRESTORW[0m  - Procedure restoring an image using the Wiener noise
+           additive model and input Point Spread Function image.
+.Proc WIENER
+[1mWIENER[0m   - Restores a Fourier transform image by using the Wiener 
+           Noise additive model.
+.END

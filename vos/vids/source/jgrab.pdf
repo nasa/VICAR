@@ -1,0 +1,57 @@
+procedure help=* options=nointerrupt
+parm device string count=0:1 default=--
+body
+chkvids1
+sendvar (_proc, device) job=VIDSJOB
+chkvids2
+end-proc
+.title
+VIDS command JGRAB
+.help
+The JGRAB command is used to make a display device available to
+VIDS after it has been allocated, and to make it the current
+display device.
+
+The device should be allocated with the USE command before calling JGRAB.
+JGRAB must be called in order for VIDS to know about the device.  Pre-allocating
+the device is not strictly necessary, but it is a good idea because other
+applications won't be able to use the device if you don't allocate it.
+
+If the device has already been grabbed, then executing JGRAB on that
+device again merely sets it as the current display device.  You can also
+change the current device by putting a "DEVICE=" parameter on any VIDS
+command.  However, the first time you use a device you must use JGRAB.
+.page
+Note that VIDS automatically calls JGRAB on startup, so if you allocate
+a device before entering VIDS, it will be grabbed for you.  Any additional
+devices, however, must be explicitly grabbed with JGRAB.
+
+See also the JDROP command, which is the opposite of JGRAB.
+.page
+Examples:
+
+USE EPA1		- allocate EPA1.
+VIDS			- no JGRAB need be performed.
+jdisp xxx		- displays on EPA1.
+USE EPA2		- allocate EPA2, but not available to VIDS yet.
+JGRAB EPA2		- device EPA2 is now available, as well as EPA1.
+jdisp xxx		- displays on EPA2.
+JGRAB EPA1		- device EPA1 is now current.
+jdisp xxx		- displays on EPA1.
+jdisp xxx DEVICE=EPA2	- displays on EPA2.
+JDROP EPA2		- EPA2 is no longer available.  EPA1 still is.
+FREE EPA2		- deallocates EPA2 so other users can have it.
+jdisp xxx DEVICE=EPA1	- displays on EPA1.
+.level1
+.var device
+Physical device name
+of display device to grab
+.level2
+.var device
+DEVICE specifies the physical device name of a display device to grab
+for use by VIDS as the current device.  Use the SHOWDISP command to see
+what devices are available on your system.
+
+If you don't specify DEVICE, and you have used the USE command to allocate
+a display device, JGRAB will grab that device.
+.end

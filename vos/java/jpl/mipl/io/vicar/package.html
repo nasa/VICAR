@@ -1,0 +1,32 @@
+<html>
+<head>
+<title>VICAR Image I/O</title>
+</head>
+<body>
+VICAR Image I/O package.  Currently only Input and Output are supported;
+in-place Update of files is not.  The package's major features are:
+<p>
+<ul>
+<li>Full label parsing
+<li>Low-level (record-based) I/O API
+<li>Mid-level (tile-based) I/O API
+<li>Thread-safe
+<li>Data type translation for any valid VICAR file
+<li>Binary label supported (although discouraged)
+</ul>
+Note that Complex data is not fully supported.
+<p>
+While direct access to VICAR files via this API is possible, it is recommended
+that the higher-level "codec" from the <code>jpl.mipl.io.codec</code> package
+be used instead.  This codec is automatically registered with JAI using the
+<code>OperationRegistrySpi</code> interface.  The codec supports tiling and
+access to the VICAR metadata.
+<p>
+Information on the mid- and low-level interfaces can be found in the javadoc
+for the <code>VicarInput</code> and <code>VicarOutput</code> interfaces.
+<p>
+Support files for the PDS and ISIS image formats have been added. These classes are
+used by the PDS reader and writer. ISIS has a reader only.
+</body>
+</html>
+

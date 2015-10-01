@@ -1,0 +1,14 @@
+# Imakefile for the Tektronix backend for the VRDI
+#
+
+#include "Imakefile_obj.tek"		/* Object list */
+
+all: $(TEKLIB)
+
+$(TEKLIB): $(OBJS)
+	$(RANLIB) $(TEKLIB)		/* AR done by compiles */
+
+#define Library $(TEKLIB)
+
+#include "Imakefile_targ.tek"		/* Target list */
+

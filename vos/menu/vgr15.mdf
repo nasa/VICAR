@@ -1,0 +1,15 @@
+.Title
+[4mVOYAGER  - RADIOMETRIC CORRECTION Menu[0m                (page 1 of 1)
+.Title
+.Proc FICOR77
+[1mFICOR77[0m  - Removes Voyager vidicon radiometric distortions.
+.Proc FICORGEN
+[1mFICORGEN[0m - Generates a scale correction file for use by Voyager
+           radiometric programs FICOR77 and FIXVGR.
+.Proc FIXVGR
+[1mFIXVGR[0m   - Multiplies Voyager halfword images by a constant to
+           produce more radiometrically accurate data. Maybe run after
+           FICOR77.
+.Proc MJSPFCF
+[1mMJSPFCF[0m  - Creates radiometric calibration files for the Voyager cameras.
+.End

@@ -1,0 +1,18 @@
+.Title
+[4mAdditional LISTINGS Menu selections[0m                    (page 2 of 2)
+.Proc PRINTPIX
+[1mPRINTPIX[0m - Produces a pseudo grey-level image for a printer from an 
+           input image.
+.Proc PRNTIM
+[1mPRNTIM[0m   - Prints images in graphics mode on a DEC LA-50 printer 
+           using patterns having varying shades of grey.
+.Proc QREP
+[1mQREP[0m     - IBIS program which formats and lists tabular interface 
+           files and Graphics-1 files.
+.Proc REPORT
+[1mREPORT[0m   - IBIS program generating tabular listings of info within
+           interface files.
+.Proc XVPLIST
+[1mXVPLIST[0m  - Lists the tiepoints in a dataset written by the XVP 
+           routines in programs such as RG2, TIECONM or TIEPARM.
+.END

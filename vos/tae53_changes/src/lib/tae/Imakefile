@@ -1,0 +1,155 @@
+/**/ #
+/**/ #	lib - Sources for the tae library libtae.a
+/**/ #
+/**/ # Change Log:
+/**/ # 03-jan-92	Added -I. entry for PR1257; new depend handling...ljn
+/**/ # 01-jul-93	Had to change reference to TINC to TAEINC...rt
+
+LIBRARY = tae
+
+#ifndef CLFORTBIND
+#define CLFORTBIND no
+#endif
+
+CLFORT=CLFORTBIND
+
+CINCLUDES = -I. -I$(TAEINC)
+
+SRCS = $(TAETAELIB)//**/*.c
+
+OBJS = \
+	accStruct1.o \
+	alloc.np.o \
+	chartype.o \
+	collection.o \
+	comm.np.o \
+	directive.o \
+	dynamicmdf.o \
+	dynamicpdf.o \
+	enaover.o \
+	file.np.o \
+	fmtval.o \
+	forstring.np.o \
+	fsubst.np.o \
+	getprim.o \
+	hostutil.np.o \
+	image.np.o \
+	miscellan.o \
+	mmsg.o \
+	mparm.o \
+	oexits.o \
+	optstr.o \
+	parformat.o \
+	parmfile.o \
+	parmgen.o \
+	parmsubs.o \
+	parmtask.o \
+	qnextmenu.o \
+	qparmfile.o \
+	qparmgen.o \
+	qparmtask.o \
+	qvalid.o \
+	restrict.o \
+	rqparmgen.o \
+	stdfunc.o \
+	stralloc.o \
+	string.o \
+	stringcnv.o \
+	syntax.o \
+	taearith.np.o \
+	taeutil.o \
+	taskpro.np.o \
+	terminal.np.o \
+	termlib.o \
+	transsym.o \
+	vmcall.o \
+	vmcopy.o \
+	vmgetval.o \
+	vmmisc.o \
+	vmnextmenu.o \
+	vmparformat.o \
+	vmparmfile.o \
+	vmparmgen.o \
+	vmparmread.o \
+	vmparmtask.o \
+	vmstdout.o \
+	vmvalid.o \
+	wrtstd.o \
+	xco.o \
+	xcobr.o \
+	xerror.o \
+	xi.o \
+	xibr.o \
+	xm.o \
+	xmbr.o \
+	xqfile.o \
+	xqfilebr.o \
+	xqgen.o \
+	xqgenbr.o \
+	xqtask.o \
+	xqtaskbr.o \
+	xrf.o \
+	xrfbr.o \
+	xrfile.o \
+	xrfilebr.o \
+	xrgen.o \
+	xrgenbr.o \
+	xrrdb.o \
+	xrrdbbr.o \
+	xrtask.o \
+	xrtaskbr.o \
+	xt.o \
+	xu.o \
+	xubr.o \
+	xvm.o \
+	xvmbr.o \
+	xzbr.o \
+	xzcall.o \
+	xzdash.o \
+	xzexit.o \
+	xzhost.o \
+	xzinit.o \
+	xzper.o \
+	xzstd.o \
+	zcall.o \
+	zexit.o \
+	zinit.o
+
+
+
+SimpleLibraryTarget($(LIBRARY),$(OBJS))
+
+DependCTarget()
+
+#
+# Special Dependencies and Rules:
+#
+# Note: Apollo seems to need the '-' before the pre-process command.
+#
+SpecialApolloTarget(optstr)
+SpecialFortBindTarget(wrtstd)
+SpecialFortBindTarget(xt)
+SpecialFortBindTarget(xzcall)
+
+
+# Other Unique Special Cases
+#
+xzinit.o: xzinit.c $(TAEINC)/pgminc.fin $(TAEINC)/xiinc.fin
+	-@if test $(CLFORT) = yes; then \
+	    (set -x; \
+	      $(CC) -traditional -E -DFORTRAN -I$(TAEINC) xzinit.c | awk '$$1 != "#"' >tmp.f; \
+	      $(FORT) -c tmp.f; mv tmp$(FORTOBJEXT) xzinit.o; \
+	      $(RM) tmp.f); \
+	else \
+	    (set -x; $(CC) -c -I$(TAEINC) xzinit.c); \
+	fi
+
+
+# Take care of case where we do not have standard BSD termlib support.
+#
+termlib.o:
+	@-if test $(HAVETERMLIB) = no; then \
+	  (set -x; $(CC) -c $(CFLAGS) -DTERMLIB termlib.c); \
+	else \
+	  (set -x; $(CC) -c $(CFLAGS) termlib.c); \
+	fi

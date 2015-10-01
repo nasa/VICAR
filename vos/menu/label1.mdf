@@ -1,0 +1,34 @@
+.Title
+[4mLABEL OPERATIONS Menu[0m                                  (page 1 of 1)
+.Proc GETLAB
+[1mGETLAB[0m     - Retrieves a label item from any part of the VICAR label
+             and assigns it to a local variable.
+.Proc LABEL
+[1mLABEL[0m      - Lists, creates, modifies or removes a VICAR label.
+.Proc LAB2TCL
+[1mLAB2TCL[0m    - Copies info from the system and history section of a 
+             VICAR label into user specified TCL variables.
+.Proc LABSWTCH
+[1mLABSWTCH[0m   - Switches the history labels of two VICAR images.
+.Proc LABVFY
+[1mLABVFY[0m     - Verifies an image label contains a specified string.
+.Proc MAPLABPROG
+[1mMAPLABPROG[0m - Adds the MAP2 task-label to an image label.
+.Proc SLABEL
+[1mSLABEL[0m     - Lists the VICAR label of an image.
+.Proc VCOPY
+[1mVCOPY[0m      - Lists the VICAR labels of all files on a tape.
+.Proc VSAR
+[1mVSAR[0m       - Converts tape or disk images from the labeled to the 
+             unlabeled format or vice versa.
+.help
+
+
+The LABEL OPERATION section contains those programs which allow the user to 
+display, create, modify or remove a VICAR label.  These programs include:
+
+GETLAB             LABEL              LAB2TCL            LABSWTCH 
+LABVFY             MAPLABPROG         SLABEL             VCOPY
+VSAR
+
+.end

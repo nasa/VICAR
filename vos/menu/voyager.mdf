@@ -1,0 +1,55 @@
+.title
+[4m[1mVOYAGER PROJECT Menu[0m                             (page 1 of 1)
+.Menu VGR1.MDF
+ATMOSPHERIC MOTION      - Programs analysing atmospheric motion.
+.Menu VGR2.MDF
+BLEMISH, RESEAU and     - Programs which locate & remove blemishes,
+FIDUCIAL MARK REMOVAL     reseau marks and fiducial marks.
+.Menu VGR3.MDF
+DATA ARCHIVING          - Programs used to archive Voyager data.
+.Menu VGR4.MDF
+DISPLAY IMAGES          - Programs used to display Voyager images.
+.Menu VGR5.MDF
+EDR/SEDR MANIPULATIONS  - Programs used to read/generate EDR/SEDR data.
+.Menu VGR6.MDF
+GEOMETRIC ANALYSIS      - Programs used for geometric calibration.
+.Menu VGR7.MDF
+IMAGE CATALOG LISTING   - Programs which query the Voyager Image Catalog.
+.Menu VGR8.MDF
+LABEL PASSING           - Program passing label information to PDF's.
+.Menu VGR9.MDF
+MASK & FILM RECORDING   - Programs creating masks or recording data on film.
+.Menu VGR10.MDF
+MISSING LINES REPAIRS   - Programs which locate and repair missing lines.
+.Menu VGR11.MDF
+NAVIGATION              - Programs used to navigate a Voyager image.
+.Menu VGR12.MDF
+PHOTOMETRY              - Programs which analyze the image photometry.
+.Menu VGR13.MDF
+PROJECTIONS             - Programs which reproject a Voyager image.
+.Menu VGR14.MDF
+PWS/PRA                 - Programs used to process PWS or PRA data.
+.Menu VGR15.MDF
+RADIOMETRIC CORRECTION  - Programs used to radiometrically correct images.
+
+.help
+The VOYAGER section contains those programs written specifically to handle 
+Voyager data. These programs include:
+
+  Atmospheric Motion       : AMOS, UVECTOR, UVF, UVFMAP, UVFSTATS
+  Blemish, Reseau &        : BLEMFIX, FIXLOC, OSBLEMLOC, RES77,
+     Fiducial Removal        RESLGEN, RESLOC, RESSAR77, VGRBLEM
+  Data Archiving           : CATIMAGE, MERGE
+  Display Images           : BROWSE, FOOTPRINT
+  EDR/SEDR Manipulations   : EDRGEN, EDRVAL, LISTSEDR, VEDR, VGRLOG
+  Geometric Analysis       : GRIDGEN
+  Image Catalog Listings   : CATLIST, CATSLIST, LISTSEDR
+  Label Passing & Info     : CAMPARAM, IMLIST
+  Mask and Film Recording  : QKLK, VGRMASK
+  Missing Line Repairs     : VGRFILLIN
+  Navigation               : FARENC, NAV, NAV2, NEARENC
+  Photometry               : PHOTFIT2, PHOTFUNC, PHOTOM, 
+  Projections              : KEPLER, PTP, RING
+  PWS/PRA                  : PPLOAD, PWAUDIO, PWECHO, VGRPWS
+  Radiometric Corrections  : FICOR77, FICORGEN, FIXVGR, MJSPFCF
+.End

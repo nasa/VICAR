@@ -1,0 +1,23 @@
+.Title
+[4mDATA TRANSFER Menu[0m                                    (page 1 of 1)
+.Proc COPY
+[1mCOPY[0m   - Copies all or part of an image into another file. Works on
+         labeled or unlabeled files on tape or disk.
+.Proc LABEL
+label  - Lists, creates, modifies or removes a VICAR label.
+.Command DCL @tae$menu:TAPEHELP 
+[1mTAPES[0m  - Copies or scans tape files. Program runs under VMS. See
+         DCL HELP TAPES.
+.Proc VSAR
+vsar   - Converts tape or disk images from the labeled to the 
+         unlabeled format or vice versa.
+
+.help
+
+The DATA TRANSFER section contains those programs which allow the user to 
+transfer VICAR data from one storage medium to another (e.g., from tape to
+disk, disk to disk). These programs include:
+
+COPY                label              TAPES               vsar
+
+.end

@@ -1,0 +1,179 @@
+/******************************************************************************
+ *	Copyright (c) 1990, 1991, 1992,
+ *	National Aeronautics and Space Administration
+ *	ALL RIGHTS RESERVED
+ *
+ *	The software (programs, data bases and/or documentation) on or in
+ *	any media can not be reproduced, disclosed or used except under
+ *	terms of the license between COSMIC and your organization.
+ *****************************************************************************/
+
+/*>>UNIX<<*/
+/* FILE - file I/O package definitions and structures.
+ *
+ *	CHANGE LOG:
+ *
+ *	22-oct-83	Change file types to lower case...dm
+ *	05-dec-83	Define F_NOLOWER...dm
+ *	11-dec-83	Add chkopen bit to SFILE struct...dm
+ *	16-jan-83	Change chkopen bit to sentinel...dm
+ *	18-apr-84	Add ASYNC file types...dm
+ *	16-jun-85 	Update for TAE v1.3 and RCJM implementation...dm
+ *	25-jul-85	Add F_UPDATE for updatinf a file...dm
+ *	20-jan-87	Add F_LITERAL...palm
+ *	19-feb-87	Merge RCJM changes from VMS V1.4:
+ *			    Add CTX_TYPE ...gc
+ *	24-feb-88	Increase FNAMESIZ to 32...dm
+ *	09-mar-88	Avoid double def C++ compiler error: stdio
+ *			re-defines NULL...palm
+ *	02-aug-89	PS/2 port...ljn
+ */
+
+#ifndef I_FILEINC		/* prevent double define	*/
+#define I_FILEINC	0
+
+#undef NULL			/* avoid double def		*/
+#include	<stdio.h>	/* standard definitions		*/
+#ifndef NULL
+#define	NULL	0		/* in case some stdio doesn't define NULL */
+#endif
+
+#include	<errno.h>	/* error processing		*/
+
+/*     POSCTX.
+ *     Structure to hold positioning context of a record.
+ *     The structure of POSCTX is host-dependent but callers
+ *     can move it around with f_movpos to be portable.
+ *
+ */
+
+    struct POSCTX
+	{
+	BIT_FIELD_ALIGN
+	unsigned	possav : 1;	/* TRUE if position has been stored here*/
+	BIT_FIELD_ALIGN
+	LONG		pos;		/* position				*/
+	COUNT		line_num;	/* line number				*/
+	};
+
+
+/*
+ *	constants:
+ */
+#define FILEINC_BASE 1700
+
+#define F_READ    1700
+#define F_WRITE   1701
+#define F_EXTEND  1702
+#define F_NOFILE  1703
+#define F_FILERR  1704
+#define F_EOF     1705
+#define F_DELETE  1706
+#define F_KEEP    1707
+#define	F_BTOOSMALL 1708
+#define	F_OVER	  1709			/* overwrite mode		  */
+#define F_CREATE  1710
+#define F_LONGSUB 1711			/* substituted file spec too long */
+#define F_UPDATE  1712			/* file update mode (BSD)	  */
+
+
+#define	F_NOLOWER 0x8000		/* 16th bit, no lower case conversion */
+#define F_LITERAL F_NOLOWER		/* same meaning, better story         */
+
+#define FNAMESIZ	32		/* max bytes in file name	*/
+#define FLIBRSIZ	80		/* max bytes in library spec	*/
+#define FTYPESIZ	12		/* max bytes in type spec	*/
+#define FATTRSIZ	0		/* max bytes in attributes	*/
+#define FSPECSIZ	132		/* max bytes in a file spec	*/
+
+/* define best-guess host-independent for max sizes			*/
+
+#define FINAMESIZ	80		/* max bytes in file name	*/
+#define FILIBRSIZ	80		/* max bytes in library spec	*/
+#define FITYPESIZ	15		/* max bytes in type spec	*/
+#define FIATTRSIZ	20		/* max bytes in attributes	*/
+#define FISPECSIZ	256		/* max bytes in a file spec	*/
+
+#define FSECTSIZ	512		/* number of bytes in a file sector */
+
+#define ALOG_TYPE	"log"		/* async job log		*/
+#define ASY_TYPE	"asy"		/* async comm'n file		*/
+#define JEN_TYPE	"jen"		/* job environment par file	*/
+#define PDF_TYPE	"pdf"		/* proc definition type		*/
+#define CPD_TYPE	"cpd"		/* compiled proc type		*/
+#define MDF_TYPE	"mdf"		/* menu definition type		*/
+#define SCR_TYPE	"scr"		/* script file type		*/
+#define HLP_TYPE	"hlp"		/* help file type		*/
+#define JOB_TYPE	"job"		/* batch primary level file	*/
+#define BLOG_TYPE	"log"		/* batch job log file type 	*/
+#define TML_TYPE	"tml"		/* tm sys$output during batch 	*/
+#define SPL_TYPE	"spl"		/* tm subprocess sys$output
+					   during batch			*/
+#define MSG_TYPE	"msg"		/* message file type		*/
+#define EXE_TYPE	""		/* executable file, no extension*/
+#define PAR_TYPE	"par"		/* parameter file		*/
+#define LIS_TYPE	"lis"		/* listing file (stdout)	*/
+#define INX_TYPE	"inx"		/* help-message index file	*/
+#define RPD_TYPE	"rpd"		/* copy of a remote pdf		*/
+#define RHL_TYPE	"rhl"		/* copy of a remote help	*/
+#define	CTX_TYPE	"ctx"		/* Context file for RCJM.	*/
+
+
+/*
+ *	SFILE structure.
+ *
+ * 	SFILE describes an open sequential file.  A portion of the
+ *	structure is host-dependent;  the user of SFILE may access
+ *	any of the host-independent fields.
+ *
+ */
+
+#define F_MSGLEN 30
+
+    struct SFILE
+	{
+
+	/******   caller-accessible part: *****/
+
+	COUNT 	lun;			/* lun used for file		     */
+	struct  POSCTX posctx;		/* position context of current record*/
+	TEXT    errmsg[F_MSGLEN+1];  	/* host dependent error explanation  */
+	CODE    host_code;		/* host-dependent error code	     */
+	TEXT	full_spec[FSPECSIZ+1];	/* resulting file spec		     */
+	TEXT	spare1[20];		/* for future			     */
+
+	/******   UNIX-dependent part:  ******/
+	
+	FILE	*fileptr;		/* the file pointer		     */
+	LONG	sentinel;		/* sentinel to indicate file open    */
+	};
+
+
+/*  	File spec block.
+ *
+ *	This block contains components of a file spec.  It may be
+ *	built by calling f_crack or by stuffing each field.
+ */
+
+    struct  FSBLOCK
+	{
+	TEXT	libr[FLIBRSIZ+1];	/* library name			*/
+	TEXT	name[FNAMESIZ+1];	/* file name			*/
+	TEXT	type[FTYPESIZ+1];	/* file type			*/
+	TEXT	attr[FATTRSIZ+1];	/* attributes (null for UNIX)	*/
+	};
+
+
+/*	"Host-independent" file spec block.
+ *
+ *	This is used for communication of file name components between systems
+ *
+ */
+    struct  HI_FSBLOCK
+	{
+	TEXT	libr[FILIBRSIZ+1];	/* library name			*/
+	TEXT	name[FINAMESIZ+1];	/* file name			*/
+	TEXT	type[FITYPESIZ+1];	/* file type			*/
+	TEXT	attr[FIATTRSIZ+1];	/* attributes (null for UNIX)	*/
+	};
+#endif

@@ -1,0 +1,427 @@
+/* Imake template for VICAR system builds */
+/* Not for use with VICAR application builds */
+
+#include "xvmaininc.h"
+
+#define compile(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(CFLAGS) $(PICFLAGS) file.c @@\
+	$(AR) Library $(VICCPU)/file.o
+#define compile_ftn(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(CFTNFLAGS) $(PICFLAGS) file.c @@\
+	$(AR) Library $(VICCPU)/file.o
+#define make_app(app,system) \
+	-$(V2UTIL)/makeapp.sys app $$system
+#define compile_vrdi(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(CFLAGS) -I$(VRDIINC) -DVRDI file.c @@\
+	$(AR) Library $(VICCPU)/file.o
+#define compile_vrdi_ftn(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(CFTNFLAGS) -I$(VRDIINC) -DVRDI file.c @@\
+	$(AR) Library $(VICCPU)/file.o
+#define compile_vrdix(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(CFLAGS) -I$(VRDIINC) $(X11INC) -DVRDI file.c @@\
+	$(AR) Library $(VICCPU)/file.o
+#define compile_vrdixd(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(CFLAGS) -I$(VRDIINC) $(X11INC) -DVRDI file.c
+#define compile_vids(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(CFLAGS) -I$(VRDIINC) file.c
+#define compile_mdms(file) \
+	$(ANSI_CC) -c -o $(VICCPU)/file.o $(MDMSFLAGS) $(CFLAGS) -I$(MDMSINC)/lclinc -I$(MDMSINC)/glbinc -I$(SYBASE)/include file.c
+#define compile_mdms_lib(file) \
+	$(ANSI_CC) -c -o $(VICCPU)/file.o $(MDMSFLAGS) $(CFLAGS) -I$(MDMSINC)/lclinc -I$(MDMSINC)/glbinc -I$(SYBASE)/include file.c @@\
+	$(AR) Library $(VICCPU)/file.o
+#define compile_mdms_gatefront(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(MDMSFLAGS) $(CFLAGS) -I$(MDMSINC)/glbinc -I$(MDMSGATEINC) file.c @@\
+	$(AR) Library $(VICCPU)/file.o
+#define compile_mdms_gateway(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(MDMSFLAGS) $(CFLAGS) -I$(MDMSINC)/lclinc -I$(MDMSINC)/glbinc -I$(SYBASE)/include file.c
+#define compile_mdms_fei(file) \
+	$(CCC) -c -o $(VICCPU)/file.o $(CCFLAGS) -I. -I$(ROGUEINC) -I$(KERBEROSINC) -I$(MDMSINC)/glbinc -I$(MDMSINC)/feiinc -I$(SYBASE)/include file.cc
+#define compile_mdms_fei_lib1(file) \
+	$(CCC) -c -o $(VICCPU)/file.o $(CCFLAGS) -I. -I$(ROGUEINC) -I$(KERBEROSINC) -I$(MDMSINC)/glbinc -I$(MDMSINC)/feiinc -I$(SYBASE)/include file.cc @@\
+	$(AR) Library1 $(VICCPU)/file.o
+#define compile_mdms_fei_lib2(file) \
+	$(CCC) -c -o $(VICCPU)/file.o $(CCFLAGS) -I. -I$(ROGUEINC) -I$(KERBEROSINC) -I$(MDMSINC)/glbinc -I$(MDMSINC)/feiinc -I$(SYBASE)/include file.cc @@\
+	$(AR) Library2 $(VICCPU)/file.o
+#define compile_stae(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(STAE_CFLAGS) file.c @@\
+	$(AR) Library3 $(VICCPU)/file.o
+#define compile_staec(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(STAE_CFLAGS) $(PICFLAGS) file.c @@\
+	$(AR) Library4 $(VICCPU)/file.o
+#define compile_stae_apollo(file)                                           @@\
+	-@if test $(ASSEMBLE) = true; then \                                @@\
+		(set -x; $(CC) -E $(CFLAGS) -I$(STAEINC) -DASSEMBLE file.c > $(VICCPU)/tmp.s; \             @@\
+			$(CC) -c  $(VICCPU)/tmp.s; $(RM)  $(VICCPU)/tmp.s); \                     @@\
+	else \                                                              @@\
+		(set -x; $(CC) -E $(CFLAGS) -I$(STAEINC) file.c | awk '$$1 != "#"' > $(VICCPU)/tmp.c; \     @@\
+			$(CC) $(CFLAGS) -c  $(VICCPU)/tmp.c; rm  $(VICCPU)/tmp.c); \              @@\
+	fi                                                                  @@\
+	mv  $(VICCPU)/tmp.o $(VICCPU)/file.o                                @@\
+	$(AR) Library3 $(VICCPU)/file.o
+/***** Should put the MAC_AUX business around the Fortran compiles. *****/
+#define compile_stae_fort(file) \
+	(set -x; \                                              @@\
+	$(CC) -E $(CFLAGS) $(STAE_CFTNFLAGS) -DFORTRAN -I$(STAEINC) file.c | \ @@\
+		awk '$$1 != "#"' >$(VICCPU)/tmp.f; \        @@\
+	$(FC) $(PICFLAGS) -c $(VICCPU)/tmp.f -o $(VICCPU)/file.o; \ @@\
+	$(AR) Library3 $(VICCPU)/file.o; \		  @@\
+	$(RM) $(VICCPU)/tmp.f)                            @@\
+
+#define compile_shvic(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(SHVIC_CFLAGS) $(PICFLAGS) file.c @@\
+	$(AR) Library5 $(VICCPU)/file.o
+#define compile_shvic_cftn(file) \
+	$(CC) -c -o $(VICCPU)/file.o $(SHVIC_CFTNFLAGS) $(PICFLAGS) file.c @@\
+	$(AR) Library5 $(VICCPU)/file.o
+#define compile_shvic_ftn(file) \
+	$(FC) -c -o $(VICCPU)/file.o $(SHVIC_FFLAGS) $(PICFLAGS) file.f @@\
+	$(AR) Library5 $(VICCPU)/file.o
+
+
+#if MAC_AUX_ARCH+SGI_ARCH    /* Stupid AUX and SGI sed can't handle comments! */
+#define SED(script,in,out) \
+sed -e '/^#/d' script >temp.sed; sed -f temp.sed in >out; rm temp.sed
+#else
+#define SED(script,in,out) \
+sed -f script in >out
+#endif
+
+#define PERL(script,in,out,filter) \
+script in out filter
+
+#if MAC_AUX_ARCH		/* AUX AR can't handle NFS either!! */
+AR	= $(V2UTIL)/ar.mac-aux
+#else
+AR	= ar ru
+#endif
+
+#if SUN_SOLARIS_ARCH+X86_SOLARIS_ARCH+SGI_ARCH+TEK_ARCH+MAC_AUX_ARCH+HP700_ARCH+AXP_UNIX_ARCH
+RANLIB	= /bin/true
+#define NoRanlibAvail
+#else
+RANLIB	= ranlib
+#endif
+
+#if SUN_SOLARIS_ARCH
+#define CC_MACRO cc -Xt -DSOLARIS
+#define ANSI_CC_MACRO cc -Xa -DSOLARIS
+#endif
+#if X86_SOLARIS_ARCH
+#define CC_MACRO cc -Xt -DSOLARIS
+#define ANSI_CC_MACRO cc -Xa -DSOLARIS
+#endif
+#if SUN4_ARCH
+#define CC_MACRO acc -Xs
+#define ANSI_CC_MACRO acc -Xa
+#endif
+#if SGI_ARCH
+#define CC_MACRO cc -cckr
+#define ANSI_CC_MACRO cc -ansi
+#endif
+#if HP700_ARCH
+#define CC_MACRO cc -Ac
+#define ANSI_CC_MACRO cc -Aa
+#endif
+#if AXP_UNIX_ARCH
+#define CC_MACRO cc -std	/* Fortran strings don't like -std0 */
+#define ANSI_CC_MACRO cc -std
+#endif
+#if X86_LINUX_ARCH + PPC_LINUX_ARCH
+#define CC_MACRO gcc
+#define ANSI_CC_MACRO gcc
+#define CCC_MACRO g++
+#endif
+#if X86_64_LINX_ARCH
+#define CC_MACRO gcc44
+#define ANSI_CC_MACRO gcc44
+#define CCC_MACRO g++44
+#endif
+#if AXP_LINUX_ARCH
+#define CC_MACRO gcc -fno-builtin
+#define ANSI_CC_MACRO gcc
+#define CCC_MACRO g++
+#endif
+#if ANY_OSX_ARCH
+#define CC_MACRO gcc -m32 -ansi -Wno-return-type
+#define ANSI_CC_MACRO gcc -m32 -ansi -Wno-return-type
+#define CCC_MACRO g++ -m32
+#endif
+#ifndef CC_MACRO
+#define CC_MACRO cc
+#endif
+#ifndef CCC_MACRO
+#define CCC_MACRO CC
+#endif
+#ifndef ANSI_CC_MACRO
+#define ANSI_CC_MACRO cc
+#endif
+CC = CC_MACRO
+ANSI_CC = ANSI_CC_MACRO
+CCC = CCC_MACRO
+
+#if TAE_VERSION == 4
+CPPFLAGS = -I$$V2INC -I$$TINC
+#else
+CPPFLAGS = -I$$V2INC -I$$TAEINC
+#endif
+#if SGI_ARCH
+CFLAGS	= $(CPPFLAGS) -O -cckr
+#else
+CFLAGS	= $(CPPFLAGS) -O
+#endif
+
+STAE_CPPFLAGS = -I$$STAEINC
+#if SGI_ARCH
+STAE_CFLAGS	= $(STAE_CPPFLAGS) -O -DOSMajorVersion=5 -D_NOPROTO -DSYSV -cckr
+#else
+#if HP700_ARCH + SUN_SOLARIS_ARCH + X86_SOLARIS_ARCH
+STAE_CFLAGS	= $(STAE_CPPFLAGS) -O -DOSMajorVersion=5 -D_NOPROTO -DSYSV
+#else
+#if ANY_LINUX_ARCH
+STAE_CFLAGS	= $(STAE_CPPFLAGS) -DSYSV
+#else
+STAE_CFLAGS	= $(STAE_CPPFLAGS) -O
+#endif
+#endif
+#endif
+
+#if ANY_OSX_ARCH + ANY_LINUX_ARCH
+STAE_CFTNFLAGS	= -traditional
+#else
+STAE_CFTNFLAGS	=
+#endif
+
+SHVIC_CPPFLAGS = -I$$SHVICINC $(CPPFLAGS)
+#if SGI_ARCH
+SHVIC_CFLAGS    = $(SHVIC_CPPFLAGS) -O -cckr
+#else
+SHVIC_CFLAGS    = $(SHVIC_CPPFLAGS) -O
+#endif
+#if HP700_ARCH
+SHVIC_FFLAGS    = +U77
+#else
+SHVIC_FFLAG     =
+#endif
+
+
+#if SUN4_ARCH
+CFTNFLAGS = $(CPPFLAGS) -O1
+SHVIC_CFTNFLAGS = $(SHVIC_CPPFLAGS) -O1
+#else
+#if SUN_SOLARIS_ARCH + X86_SOLARIS_ARCH
+CFTNFLAGS = $(CPPFLAGS) -xO1
+SHVIC_CFTNFLAGS = $(SHVIC_CPPFLAGS) -xO1
+#else
+#if SGI_ARCH
+CFTNFLAGS = $(CPPFLAGS) -O1 -cckr
+SHVIC_CFTNFLAGS = $(SHVIC_CPPFLAGS) -O1 -cckr
+#else
+#if PPC_LINUX_ARCH
+CFTNFLAGS = $(CPPFLAGS) -O0
+SHVIC_CFTNFLAGS = $(SHVIC_CPPFLAGS) -O0
+#else
+CFTNFLAGS = $(CPPFLAGS) -O
+SHVIC_CFTNFLAGS = $(SHVIC_CPPFLAGS) -O
+#endif
+#endif
+#endif
+#endif
+
+/* Compile Position-Independent Code, needed when code is intended for	*/
+/* a shared library.							*/
+
+#if SUN4_ARCH
+PICFLAGS = -PIC
+#else
+#if SUN_SOLARIS_ARCH + X86_SOLARIS_ARCH
+PICFLAGS = -KPIC
+#else
+#if HP700_ARCH
+PICFLAGS = +z
+#else
+#if X86_LINUX_ARCH + X86_64_LINX_ARCH + PPC_LINUX_ARCH
+PICFLAGS = -fPIC
+#else		/* MAC_OSX is naturally PIC.  PPC_LINUX and X86-MACOSX may also be. */
+PICFLAGS =
+#endif
+#endif
+#endif
+#endif
+
+#if MAC_MPW_ARCH
+LDFLAGS = -model far -c 'MPS ' -t MPST -w
+#else
+#if SUN_SOLARIS_ARCH+X86_SOLARIS_ARCH
+LDFLAGS = -lsocket -lnsl 
+#else
+LDFLAGS =
+#endif
+#endif
+
+#if HP700_ARCH				/* HP put includes in a weird place */
+X11INC	= -I/usr/include/X11R6
+#else
+#if SUN_SOLARIS_ARCH
+X11INC  = -I/usr/openwin/include
+#else
+#if X86_SOLARIS_ARCH
+X11INC  = -I/usr/dt/include -I/usr/openwin/include
+#else
+#if SUN4_ARCH
+X11INC  = -I/usr/X11R5/include
+#else
+#if ANY_LINUX_ARCH
+X11INC  = -I/usr/X11R6/include
+#else
+#if ANY_OSX_ARCH
+X11INC  = -I/usr/X11R6/include -I//usr/OpenMotif/include
+#else
+X11INC	=
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+
+#if HP700_ARCH
+X11LIB	= -L/usr/lib/X11R6 -L/usr/lib/Motif1.2_R6 -lXm -lXt -lX11
+#else
+#if SGI_ARCH
+X11LIB  = -lXm -lXt -lX11 -lsun
+#else
+#if SUN4_ARCH
+X11LIB	= -L/usr/X11R5/lib -lXm -Bstatic -lXt -Bdynamic -lX11
+#else
+#if SUN_SOLARIS_ARCH
+X11LIB	= -L/usr/dt/lib -L/usr/openwin/lib -lXm -lXt -lX11 -lgen
+#else
+#if X86_SOLARIS_ARCH
+X11LIB  = -L/usr/dt/lib -L/usr/openwin/lib -lXm -lXt -lX11 -lgen
+#else
+#if ANY_LINUX_ARCH
+X11LIB = -L/usr/X11R6/lib -lXm -lXp -lXext -lXt -lX11
+#else
+#if ANY_OSX_ARCH
+X11LIB = -L/usr/X11R6/lib -L//usr/OpenMotif/lib -lXm -lXp -lXext -lXt -lX11 -force_flat_namespace
+#else
+X11LIB	= -lXm -lXt -lX11
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+
+SHELL	= /bin/sh	/* builds assume Bourne shell (SGI needs this) */
+RM	= rm -f
+MAKE	= make -f
+#if SUN_SOLARIS_ARCH + X86_SOLARIS_ARCH
+#if SUN_SOLARIS_ARCH
+VSYSIMAKE = imake -D__sparc -DSOLARIS -T$$V2UTIL/vicsys.tmpl -I$$V2INC
+#else
+VSYSIMAKE = imake -DSOLARIS -T$$V2UTIL/vicsys.tmpl -I$$V2INC
+#endif
+#else
+VSYSIMAKE = imake -T$$V2UTIL/vicsys.tmpl -I$$V2INC
+#endif
+CP	= cp
+CD	= cd
+CHMOD	= chmod
+#if HP700_ARCH + AXP_UNIX_ARCH
+SYMLINK = ln -fs	/* Under HP/UX 9, ln to file that exists is an error */
+#else			/* Just a warning under AXP_UNIX, but suppress it */
+SYMLINK = ln -s
+#endif
+#if TAE_VERSION == 4
+RUN_TM	= $$TMIMAGE
+MSGBLD	= $$TUTIL/msgbld
+#else
+RUN_TM	= taetm 
+MSGBLD	= $$TAEPDF/msgbld
+#endif
+
+#if ALLIANT_ARCH
+#define FC_MACRO fortran
+#endif
+#if MAC_AUX_ARCH
+#define FC_MACRO ftn
+#endif
+#if ANY_LINUX_ARCH
+#if X86_64_LINX_ARCH
+#define FC_MACRO gfortran44 -fno-second-underscore -std=legacy -ffixed-line-length-none -fno-range-check
+#else
+#define FC_MACRO gfortran -fno-second-underscore -std=legacy -ffixed-line-length-none -fno-range-check
+#endif
+#endif
+#if ANY_OSX_ARCH
+#define FC_MACRO gfortran -m32 -fno-second-underscore -std=legacy -ffixed-line-length-none -fno-range-check
+#endif
+#ifndef FC_MACRO
+#define FC_MACRO f77
+#endif
+FC = FC_MACRO
+
+#if MAC_MPW_ARCH
+LINK.c = Link $(LDFLAGS)
+#else
+LINK.c = $(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
+#endif
+
+LINK.cc = $(CCC) $(CPPFLAGS)
+
+RTLLIB	= $(V2OLB)/librtl.a
+VRDI_LIB = $(V2OLB)/libvrdi.a	/* don't conflict with $VRDILIB env var! */
+VIDS_LIB = $(V2OLB)/libvids.a
+ADAGELIB = $(V2OLB)/libvrdi_adage.a
+COMMONLIB = $(V2OLB)/libvrdi_common.a
+DUMMYLIB = $(V2OLB)/libvrdi_dummy.a
+IP85HILIB = $(V2OLB)/libvrdi_ip85hi.a
+IP85LOLIB = $(V2OLB)/libvrdi_ip85lo.a
+IVASLIB = $(V2OLB)/libvrdi_ivas.a
+JUPITERLIB = $(V2OLB)/libvrdi_jupiter.a
+RAMTEKLIB = $(V2OLB)/libvrdi_ramtek.a
+TEKLIB = $(V2OLB)/libvrdi_tek.a
+XDISPLAYLIB = $(V2OLB)/libvrdi_xdisplay.a
+MDMS_LCLLIB = $(MDMSOLB)/libmdmslocal.a
+MDMS_GLBLIB = $(MDMSOLB)/libmdms.a
+MDMS_GATEFRONT = $(MDMSGATE)/lib/libsybdb.a
+MDMS_FEISERVERLIB = $(MDMSOLB)/libmdms_feiServer.a
+MDMS_FEICLIENTLIB = $(MDMSOLB)/libmdms_feiClient.a
+
+/*************************************************************************/
+/* compile flags unique to MDMS software                                 */
+
+#if SUN_SOLARIS_ARCH
+MDMSFLAGS = -DSVRLEVEL=5 -DUSE_TLI=1
+MDMS_FEISERVERLIBS = $(MDMSOLB)/libmdms.a $(SYBASE)/lib/libsybdb.a -lthread $(ROGUEOLB)/librwtool_mt.a -lkrb
+MDMS_FEICLIENTLIBS = $(ROGUEOLB)/librwtool.a -lkrb
+MDMS_FEIADMINLIBS = $(ROGUEOLB)/librwtool.a -lkrb
+#define SYBASE_AVAIL 1
+#define BUILD_FEISERVER 1
+#define BUILD_GATEWAY 1
+#endif
+#if SUN4_ARCH
+MDMSFLAGS = -DSVRLEVEL=4
+MDMS_FEISERVERLIBS = 
+MDMS_FEICLIENTLIBS = -lnsl $(ROGUEOLB)/librwtool.a $(KERBEROSOLB)/libkrb.a $(KERBEROSOLB)/libdes.a
+MDMS_FEIADMINLIBS = -lnsl $(ROGUEOLB)/librwtool.a $(KERBEROSOLB)/libkrb.a $(KERBEROSOLB)/libdes.a
+#define SYBASE_AVAIL 1
+#endif
+#if HP700_ARCH
+MDMSFLAGS = -Aa -DSVRLEVEL=5 -D_HPUX
+MDMS_FEISERVERLIBS = 
+MDMS_FEICLIENTLIBS = $(ROGUEOLB)/librwtool.a $(KERBEROSOLB)/libkrb.a $(KERBEROSOLB)/libdes.a
+MDMS_FEIADMINLIBS =  $(ROGUEOLB)/librwtool.a $(KERBEROSOLB)/libkrb.a $(KERBEROSOLB)/libdes.a
+#define SYBASE_AVAIL 1
+#endif
+#if SGI_ARCH
+MDMSFLAGS = -DSVRLEVEL=5 -Wf,-XNl18000
+MDMS_FEISERVERLIBS = 
+MDMS_FEICLIENTLIBS =
+MDMS_FEIADMINLIBS = 
+#endif
+
+#include INCLUDE_IMAKEFILE
+

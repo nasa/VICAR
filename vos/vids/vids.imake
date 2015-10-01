@@ -1,0 +1,38 @@
+/* Vimake file for vids */
+
+/* Note:  This is not intended to compile VIDS, only to link it. The	*/
+/* compile is handled by imakefile.vidssrc, so the objects can go in a	*/
+/* different directory than the source.  The module list below must	*/
+/* match the modules in CMS.						*/
+/* This module is used only for Unix; the VMS build is currently done	*/
+/* via link_vids.com.  If this is to be used under VMS, movesubs must	*/
+/* be fixed up to use the Macro version on the VAX.			*/
+
+#define PROGRAM vidsprog
+
+#if VMS_OS
+#define HF hostfunc_vms.o
+#else
+#define HF hostfunc_unix.o
+#endif
+
+#define MODULE_LIST
+#define LINK_LIST axis.o cursutils.o dovids.o function.o graphutil.o \
+histutils.o HF ibisfil.o ibisgr.o impnames.o inits.o jcursor.o jdef.o jdisp.o \
+jdraw.o jdrop.o jdtf.o jerase.o jget.o jgrab.o jgraphics.o jgrdisp.o jhist.o \
+jlist.o jload.o jmovie.o joff.o jon.o jpan.o jprofile.o jpscopy.o jpsedit.o \
+jsave.o jset.o jstretch.o jtext.o jwedge.o jzoom.o loadimp.o lutio.o \
+lututils.o modes.o movesubs.o notify.o pen.o pickcolor.o poke.o psutils.o \
+region.o rgnutil.o timer_unix.o vids.o vidsutils.o
+
+#define MAIN_LANG_C
+#define USES_C
+#if VMS_OS
+#define USES_MACRO
+#endif
+
+#define LIB_P2SUB
+#define LIB_VRDI
+#define LIB_RTL_NOSHR
+#define LIB_TAE_NOSHR
+

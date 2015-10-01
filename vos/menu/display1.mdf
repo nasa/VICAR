@@ -1,0 +1,39 @@
+.Title
+[4mDISPLAY MENU[0m                                           (page 1 of 2)
+.Proc BROWSE
+[1mBROWSE[0m    - Interactively allows the user to collect/display images
+            from the Voyager Image Catalog, based on user supplied criteria.
+.Proc DISPLAYS
+[1mDISPLAYS[0m  - Allocates or deallocates a display device.
+.Proc DISPOUT
+[1mDISPOUT[0m   - Produces VICAR formatted datasets from the video and/or
+            graphics planes of frame buffers supported by the IPL 
+            Virtual Frame Buffer Interface.
+.Proc EDIMAGE
+[0medimage[0m   - Allows interactive image editing and annotating.
+.Proc FOOTPRINT
+[1mFOOTPRINT[0m - Interactive program displaying Voyager image "footprint"
+            on a specified map with graphical indication of the limb, 
+            terminator, and lighting angles. Requires Voyager Image Catalog.
+.Proc IDX
+[1mIDX[0m       - Displays VICAR images interactively.
+.Proc IFFT
+[1mIFFT[0m      - Allows interactive selection & modification of areas in
+            an FFT.
+
+.Menu DISPLAY2.MDF
+[7mAdditional DISPLAY MENU Selections[0m
+
+.help
+
+
+The DISPLAY section contains those programs which allow the user to 
+display data on a monitor. A majority of the programs permit the user to 
+interactively manipulate the data and redisplay the new image. These programs
+include:
+
+BROWSE             DISPLAYS           DISPOUT            edimage
+FOOTPRINT          IDX                IFFT               IGIS
+IMP                leonardo           QD                 VIDS
+
+.end

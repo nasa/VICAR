@@ -1,0 +1,4 @@
+procedure
+parm devname string count=0:1 default=--
+body
+end-proc

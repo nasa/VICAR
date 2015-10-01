@@ -1,0 +1,29 @@
+.Title
+VIDS Graphics Menu
+
+.proc jgraphics
+JGRAPHICS  - Selects the graphics plane and turns it on.
+
+.proc jset-color
+JSET-COLOR - Sets the graphics color for use with JDRAW and JTEXT.
+.proc jdraw
+JDRAW      - Draws various shapes in the graphics plane.
+
+.proc jset-text
+JSET-TEXT  - Sets the font and other text attributes for JTEXT.
+.proc jtext
+JTEXT      - Draws text in the graphics plane.
+
+.proc jgrdisp
+JGRDISP    - Displays an IBIS Graphics-1 format file on the graphics plane.
+
+.help
+
+The VIDS Graphics Menu lists all the VIDS commands that deal with graphics
+as such.  Many other commands will write graphics in the graphics plane
+in order to display their results, but these commands deal with graphics
+as their primary function.
+
+For a list of all commands that can write in the graphics plane, look
+under the object grouping menu.
+.end

@@ -1,0 +1,10 @@
+#
+# /software/vicar/taetest/dev/tae52/install.opt.
+#
+# Record of choices for most recent TAE installation.
+# DO NOT DELETE THIS FILE.
+#
+	WINDOWS=no
+	DEMOS=no
+	ADABIND=no
+	CLFORTBIND=yes

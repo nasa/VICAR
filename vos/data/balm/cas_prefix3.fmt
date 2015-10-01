@@ -1,0 +1,112 @@
+OBJECT             = COLUMN
+NAME               = LINE_NUMBER
+DATA_TYPE          = LSB_UNSIGNED_INTEGER
+START_BYTE         = 1
+BYTES              = 2
+DESCRIPTION        = "The image line number of this record.  Maintained at
+                       proper value even through data gaps."
+END_OBJECT         = COLUMN
+
+OBJECT             = COLUMN
+NAME               = LAST_VALID_PIXEL
+DATA_TYPE          = LSB_UNSIGNED_INTEGER
+START_BYTE         = 3
+BYTES              = 2
+DESCRIPTION        = "Sample number of the last valid pixel in
+                       this line not artificially set to zero due to
+                       missing data (sample 1 is defined as the leftmost image
+                       pixel of this line). Set to zero for missing lines.
+                       Set to 1024, 512 or 256 for complete lines."
+END_OBJECT         = COLUMN
+
+OBJECT             = COLUMN
+NAME               = FIRST_VALID_PIXEL_SEG1
+DATA_TYPE          = LSB_UNSIGNED_INTEGER
+START_BYTE         = 5
+BYTES              = 2
+DESCRIPTION        = "Sample number of the first pixel of the
+                       first line segment containing valid data.  The image
+                       line is constructed from up to 3 packets of data, any 
+                       of which may be missing.  Thus, an image line can 
+                       appear to have 0, 1, or 2 segments which contain data.
+                       Set to zero for missing lines and 1 for complete 
+                       lines."
+END_OBJECT         = COLUMN
+
+OBJECT             = COLUMN
+NAME               = LAST_VALID_PIXEL_SEG1
+DATA_TYPE          = LSB_UNSIGNED_INTEGER
+START_BYTE         = 7
+BYTES              = 2
+DESCRIPTION        = "Sample number of the last pixel of the
+                       first line segment containing valid data. Set to zero
+                       for missing lines.  Set to 1024, 512 or 256 for
+                       complete lines."
+END_OBJECT         = COLUMN
+
+OBJECT             = COLUMN
+NAME               = FIRST_VALID_PIXEL_SEG2
+DATA_TYPE          = LSB_UNSIGNED_INTEGER
+START_BYTE         = 9
+BYTES              = 2
+DESCRIPTION        = "Sample number of the first pixel of the
+                       second line segment containing valid data.
+                       Set to zero for missing lines and complete lines."
+END_OBJECT         = COLUMN
+
+OBJECT             = COLUMN
+NAME               = LAST_VALID_PIXEL_SEG2
+DATA_TYPE          = LSB_UNSIGNED_INTEGER
+START_BYTE         = 11
+BYTES              = 2
+DESCRIPTION        = "Sample number of the last valid pixel of
+                       the second line segment containing valid data.
+                       Set to zero for missing lines and complete lines."
+END_OBJECT         = COLUMN
+
+OBJECT             = COLUMN
+NAME               = FIRST_OVERCLOCKED_PIXEL_SUM
+DATA_TYPE          = LSB_UNSIGNED_INTEGER
+START_BYTE         = 13
+BYTES              = 2
+DESCRIPTION        = "Sum of up to two overclocked pixels returned at the
+                       beginning of this line. In 1X1 mode, this will be the
+                       sum of the first two overclocked pixels, in 2X2 and in
+                       4X4 mode it will be the first overclocked pixel.  In 
+                       the case of 8-bit data, one 8-bit pixel sum is returned
+                       right-adjusted in the 16-bit word."
+END_OBJECT         = COLUMN
+
+OBJECT             = COLUMN
+NAME               = SPARE
+DATA_TYPE          = "N/A"
+START_BYTE         = 15
+BYTES              = 6
+DESCRIPTION        = "For future use."
+END_OBJECT         = COLUMN
+
+OBJECT             = COLUMN
+NAME               = EXTENDED_PIXEL_SUM
+DATA_TYPE          = LSB_UNSIGNED_INTEGER
+START_BYTE         = 21
+BYTES              = 2
+DESCRIPTION        = "The sum of up to 8 extended pixels returned for this
+                       line.  For lossy-compression data, this value is only
+                       available for data returned in the last compression
+                       block."
+
+END_OBJECT         = COLUMN
+
+OBJECT             = COLUMN
+NAME               = LAST_OVERCLOCKED_PIXEL_SUM
+DATA_TYPE          = LSB_UNSIGNED_INTEGER
+START_BYTE         = 23
+BYTES              = 2
+DESCRIPTION        = "Sum of up to six overclocked pixels returned at the end
+                       of this line. In 1X1 mode, this will be the sum of the
+                       last 6 overclocked pixels,  in 2X2 mode the sum of the
+                       last 3 overclocked pixels and in 4X4 mode the last
+                       overclocked pixel.  In the case of 8-bit data, one 
+                       8-bit pixel sum is returned right-adjusted in the 
+                       16-bit word."
+END_OBJECT         = COLUMN

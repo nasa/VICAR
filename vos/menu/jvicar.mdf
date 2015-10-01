@@ -1,0 +1,40 @@
+.Title
+VIDS VICAR File Menu
+
+.proc jdisp
+JDISP            - Performs a quick display of an image.
+.proc jload-image
+JLOAD-IMAGE      - Loads an image from disk into a plane.
+.proc jmovie-load
+JMOVIE-LOAD      - Loads a series of frames for an animation.
+.proc jmovie-frameload
+JMOVIE-FRAMELOAD - Loads a single image into a frame for an animation.
+
+.proc jsave-image
+JSAVE-IMAGE      - Saves an image to disk.
+.proc jphoto
+JPHOTO           - Sends quick image of screen to the MIPL film recorders.
+
+.proc jset-range
+JSET-RANGE       - Sets a data range for non-byte images.
+
+.proc jshow-cursor
+JSHOW-CURSOR     - Prints the pixel from the file under the cursor.
+.proc jpan
+JPAN             - Pans the image so that a different window is visible.
+.proc jzoom
+JZOOM            - Zooms in (magnifies) or zooms out (shrinks) the image.
+
+.help
+
+The VIDS VICAR File Menu lists all the VIDS commands that read from
+or write to VICAR-format image files.
+
+Most of these commands take a filename as an argument.  However, the
+commands in the last section, with JPAN, JZOOM, and JSHOW-CURSOR, merely
+read the file that is already associated with the plane (via JDISP or
+JLOAD-IMAGE).
+
+JSET-RANGE accepts a VICAR filename, but does not actually read or
+write the file.
+.end

@@ -1,0 +1,151 @@
+/*	USEDISP/FREEDISP processing main routines	*/
+/*
+ * CHANGE LOG:
+ *
+ */
+
+/* The code for the actual device allocation/deallocation is lifted	*/
+/* direct from the VRDI, with a few minor changes.  For that reason,	*/
+/* the modules have slightly different names than the usual TAE		*/
+/* conventions... the include files end in .h, even though they are	*/
+/* non-portable.  The code in TAE and in the VRDI should always be	*/
+/* maintained in parallel.						*/
+
+
+#define XD_INITIALIZE
+#ifndef TAE
+#define TAE
+#endif
+
+#include "xdexterns.h"
+#include "xdalloc.h"
+#include "xderrors.h"
+
+#include "stdh.inp"		/* system standard  (REQUIRED)		*/
+#include "taeconf.inp"		/* TAE configuration (REQUIRED)		*/
+
+#include "parblk.inc"		/* parameter block definitions		*/
+#include "symtab.inc"		/* TM symbol table			*/
+#include "tmhost.inp"		/* TM host-dependent definitions	*/
+#include "tminc.inc"		/* TM definitions			*/
+
+#define KILL(x,y,z) {tmmsg(PROCFAIL,y,x,z); return(DO_CHECK);}
+
+
+/***************************************************************************
+ *	usedisp_do.   Intrinsic usedisp processing.
+ ***************************************************************************
+ */
+
+    FUNCTION CODE usedisp_do (procctx, cmdctx)
+    
+    struct CONTXT *procctx;	/* in/out: proc context		*/
+    struct CONTXT *cmdctx;	/* in/out: command context	*/
+
+    {
+    struct VARIABLE	*v;
+    TEXT	*dev, device[STRINGSIZ+1];
+    CODE	code;
+
+    v = lookex(&(*cmdctx).parmst, "DEVICE");
+    dev = SVAL(*v,0);
+    strcpy(device, dev);
+    UpperString(device);
+
+    code = zddallocate(device);
+    if (code == SUCCESS)
+	{
+	sprintf(device, "   %s allocated", DIB[DeviceNumber]->DeviceName);
+	put_stdout(device);
+	}
+    else
+	{
+        usedisp_error(code);
+	return DO_CHECK;
+        }
+
+    return SUCCESS;
+    }
+
+
+/***************************************************************************
+ *	freedisp_do.   Performs intrinsic freedisp processing.
+ ***************************************************************************
+*/
+    FUNCTION CODE freedisp_do (procctx, cmdctx)
+
+    struct CONTXT *procctx;	/* in/out: proc context		*/
+    struct CONTXT *cmdctx;	/* in/out: command context	*/
+
+    {
+    struct VARIABLE	*v;
+    TEXT		*dev, device[STRINGSIZ+1];
+    CODE code;
+
+    v = lookex(&(*cmdctx).parmst, "DEVICE");
+    dev = SVAL(*v,0);
+    strcpy(device, dev);
+    UpperString(device);
+
+    code = zddfree(device);
+    if ( code == SUCCESS )
+	{
+	sprintf(device, "   %s deallocated", DIB[DeviceNumber]->DeviceName);
+	put_stdout(device);
+	}
+    else
+	{
+        usedisp_error(code);
+	return DO_CHECK;
+        }
+
+    return SUCCESS;
+    }
+
+
+/***************************************************************************
+ *	usedisp_error.   Prints an error message returned from xddallocate
+ *	or xddfree.
+ ***************************************************************************
+*/
+    FUNCTION CODE usedisp_error (code)
+
+    CODE code;
+
+    {
+    CODE index;
+    TEXT error_key[STRINGSIZ+1];
+
+    if (code == SUCCESS)
+        return SUCCESS;			/* whoops! */
+
+    index = (-code) - 2;		/* they start at -2 */
+    if (index >= 0 && index < N_ERRORS)
+        {
+	strcpy(error_key, "TAE-");
+	strcat(error_key, error_table[index].key);
+
+        KILL(error_key, error_table[index].message, "");
+        }
+    else
+        KILL("TAE-INTERR", "Unknown error number from USEDISP/FREEDISP!", "");
+
+    return (code);
+    }
+
+/***************************************************************************
+ *	UpperString.   Converts a string to upper case.  Modifies the
+ *	original string.
+ ***************************************************************************
+*/
+
+UpperString( String )
+char	*String;
+{
+  int	i, Length;
+
+  Length = strlen( String );
+  for ( i = 0; i < Length; i++ ) {
+    String[i] = toupper(String[i]);
+  }
+}

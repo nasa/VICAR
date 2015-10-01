@@ -1,0 +1,10 @@
+.Title
+[4mVOYAGER  - DATA ARCHIVING Menu[0m                        (page 1 of 1)
+.Proc CATIMAGE
+[1mCATIMAGE[0m  - Enters data from processed Voyager images into the 
+            Voyager Image Catalog.
+.Proc MERGE
+[1mMERGE[0m     - Creates a new Voyager image from all versions of a 
+            specified image and updates the EDR header and the Voyager
+            Image Catalog.
+.End

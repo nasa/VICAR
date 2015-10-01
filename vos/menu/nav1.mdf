@@ -1,0 +1,33 @@
+.Title
+[4mPLANETARY NAVIGATION Menu[0m                          (page 1 of 1)
+.Proc AMOS
+amos    - Interactive program supporting atmospheric motion studies 
+          on Voyager and Galileo images.
+.Proc FARENC
+[1mFARENC[0m  - Determines target body center from an image containing
+          a planetary limb.
+.Proc MAP2
+map2    - Generates map projections by rubber-sheeting methods.
+.Proc NAV 
+[1mNAV[0m     - Determines interactively the camera viewing geometry of
+          an image by locating one or more distinct features in the image
+          (e.g., planet limb).
+.Proc NAV2
+[1mNAV2[0m    - Determines interactively the camera viewing geometry of
+          an image by registering it to a reference image whose viewing
+          geometry is known.
+.Proc NEARENC
+[1mNEARENC[0m - Determines non-interactively the camera viewing geometry
+          of an image by registering it to a reference image whose viewing
+          geometry is known.
+.help
+
+The PLANETARY NAVIGATION section contains those programs which allow the 
+user to determine the camera viewing geometry which is used to transform 
+images from picture coordinates to planetary coordinates. These programs 
+include:
+
+amos                FARENC              map2                NAV
+NAV2                NEARENC             
+
+.end

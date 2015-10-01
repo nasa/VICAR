@@ -1,0 +1,55 @@
+procedure help=*
+parm mode default=nocheck valid=(check,nocheck)
+body
+if (mode = "check")		!if syntax check only is desired
+    flag-add syntax
+else
+    flag-del syntax
+end-if
+end-proc
+.title
+ Vicar procedure SYNTAX
+.help
+ PURPOSE:
+ SYNTAX is a procedure that allows syntax checking of programs run
+ under VICAR. This is particularly useful for programs to be run in batch
+ mode.
+
+ OPERATION:
+
+ SYNTAX sets a switch which prevents a Vicar program from executing after
+ it is invoked. However all normal processing up to actual program 
+ execution does take place, so any syntax errors or parameters errors
+ that are visible to VICAR will be detected and reported.
+
+ Type:
+
+ VICAR> SYNTAX CHECK
+
+ to set the switch. Thereafter, all programs executed interactively or in
+ batch mode in  the same VICAR session will operate under the "syntax-checking"
+ mode.  This command is equivalent to the command "FLAG-SET SYNTAX".
+
+ To turn the switch off, type:
+
+ VICAR> SYNTAX NOCHECK
+
+ This command is equivalent to "FLAG-DEL SYNTAX".
+
+ Caution: The command "LET $SWITCH=..." should not be used in syntax
+ mode, since the syntax check flag is in $SWITCH.  By setting $SWITCH
+ to an absolute value, it is possible to  turn off syntax check mode
+ by accident.  To set of clear other options in $SWITCH, use the 
+ FLAG-ADD or FLAG-DEL command.
+.level1
+.vari mode
+ Syntax checking mode.
+ Valid: CHECK, NOCHECK.
+.level2
+.vari mode
+ If CHECK is specified, then the syntax-checking mode is invoked and any
+ Vicar programs run thereafter will not execute. However, any syntax
+ or parameter errors will be reported to the user.
+
+ If NOCHECK is specified, then the syntax-checking mode is turned off and
+ Vicar programs will execute normally.

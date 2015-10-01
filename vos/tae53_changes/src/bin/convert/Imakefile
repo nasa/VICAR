@@ -1,0 +1,40 @@
+/**/ #
+/**/ #	Makefile for conversion utilities.
+/**/ #
+/**/ #	Change Log:
+/**/ #	14-jul-93 $TAEBIN/$TAEPLAT is now $TAEBIN...kbs
+/**/ #	18-jul-93 $TINC is now $TAEINC; add SRCS so make depend works...kbs
+/**/ #
+
+PROG = taeconvert
+
+
+CINCLUDES = -I$(TAEINC) 
+
+SRCS = \
+	convert.c \
+	oldmodules.c
+	
+
+
+OBJS = \
+	convert.o \
+	oldmodules.o
+
+
+DEPLIBS = $(TAEDEPLIBS)
+
+
+LINKLIBS = $(TAELINKLIBS)  $(EXTRALIBS) $(TERMLIB)
+
+
+SimpleCProgramTarget($(PROG),$(OBJS))
+
+install::
+	(cd $(TAEBIN); \
+		$(RM) resconvert parconvert; \
+		$(LN) $(PROG) resconvert; \
+		$(LN) $(PROG) parconvert)
+
+oldmodules.o:  oldcoll.c oldtaeutil.c oldtranssym.c \
+    oldvmcopy.c oldvmfile.c oldvmmisc.c oldvmparmgen.c oldvmvalid.c

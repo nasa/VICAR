@@ -1,0 +1,63 @@
+procedure help=* options=nointerrupt
+parm plane string default="BW"
+parm device string count=0:1 default=--
+body
+chkvids1
+sendvar (_proc,plane,device) job=VIDSJOB
+chkvids2
+end-proc
+.title
+VIDS command JBW
+.help
+The JBW command will place the active display device into black
+and white mode, and optionally (via the PLANE parameter) will 
+change the image memory plane used for black and white viewing.
+
+Upon VIDS startup, the black and white plane is set to the
+same image plane as the red plane.
+
+The image plane is specifiable either as a name or a number.  See
+HELP for the PLANE parameter for details of specifying image planes.
+If an image plane other than "BW" is specified to JBW, the reserved plane
+name "BW" is changed to reflect the new black and white plane.
+
+Related commands: JCOLOR - put device into color mode.
+
+Examples:
+		JBW		! view current black and white
+				! plane in b&w
+		JBW GREEN	! view green plane in b&w
+		JBW 12		! view plane 12 in black and white
+.level1
+.vari plane
+Image plane for black & white
+.vari device
+Name of device to use
+.level2
+.vari plane
+PLANE is the image memory plane which is to be used for viewing
+black and white frames.  It may be either a plane name or an 
+absolute plane number.  You can find out what planes are available
+with the JSHOW-DEVICE command.
+
+An image plane name may be one of the predefined names BW, RED,
+GREEN, BLUE, COLOR, GRAPHICS, or VISIBLE, or it may be a name
+defined by you with the JDEFNAME command.  See HELP PLANENAMES
+for more information.
+
+Examples:
+		JBW		! view current black and white
+				! plane in b&w
+		JBW GREEN	! view green plane in b&w
+		JBW 12		! view plane 12 in black and white
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

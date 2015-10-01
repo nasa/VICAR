@@ -1,0 +1,37 @@
+/****************************************************************************
+ *      Copyright (c) 1993, 1994
+ *      Century Computing, Inc.
+ *      ALL RIGHTS RESERVED
+ *
+ *      The software (programs, data bases and/or documentation) on or in
+ *      any media can not be reproduced, disclosed, or used except under
+ *      the terms of the TAE Plus Software License Agreement.
+ *
+ ***************************************************************************/
+
+
+
+/*
+ *	INCLUDE FILE FOR TASK PACKAGE		
+ */
+
+#include "stdh.inp" 
+#include <signal.h>
+
+#define ACKN_CODE 	0x1717			/* acknowledgement data	  */
+#define	ACKN_SIZE	sizeof(LONG)		/* size in bytes	  */
+#define	SIGREAD		SIGUSR1	/* signal to read message from subprocess */
+
+#define	ABORT		1
+#define CONT		2
+#define HELP		3
+
+/* 	The following struct is used for async jobs only	*/
+
+    struct TCB
+	{
+	TAEINT	child_pid;			/* id of child  	   */
+	TAEINT	send_chan;			/* send channel to child   */
+	BOOL	msgheld;			/* TRUE if msg arrived     */
+	LONG	hostcode;
+	};

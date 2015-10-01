@@ -1,0 +1,67 @@
+/*
+Generation time: 24-JUN-1985 13:50:38.28
+*/
+/*
+
+	Symbol definitions for the TAE XI (Image File I-O)
+	subroutine package
+
+	CAUTION:  This include file is generated from XIINC.TXT using
+	the GENERATE.COM DCL procedure (under VMS) and then transported
+	to UNIX.  (Under VMS, only XIINC.TXT should be edited!!)
+
+  CHANGE LOG:
+	
+	20-jun-85	New release for new FORTAN/C callable xi package...dm
+
+*/
+#ifndef I_XIINC
+#define I_XIINC 0
+/*
+
+	The following indexes are UNIX-dependent.
+
+*/
+
+/* None	*/
+
+
+struct IFCB
+    {
+    int	i_lines;	/* Lines per channel	*/
+    int	i_chans;	/* Channels in file	*/
+    int	i_linsz;	/* Bytes per line	*/
+    int	i_labs;		/* Number of label records  */
+    int	i_labsz;	/* Bytes in one label record*/
+    int	i_org;		/* File organization (xci or xcs)*/
+    int	i_start;	/* Starting block number of line 1, chan 1*/
+    int	i_blocs;	/* Number of blocks in the file	*/
+
+/* UNIX-dependent members:	*/
+
+    int	i_dum1[2];	/* dummy data			*/
+    int	i_filds;	/* Image file descriptor	*/
+    int	i_dum2;
+    char	i_senti[4];	/* Image file sentinel		*/
+    int	i_dum3;
+    int	i_hcode;	/* Host returned error code	*/
+    int	i_filsz;	/* characters in file specification	*/
+    char	i_filnm[104];	/* file specification		*/
+    int	i_dum4;
+    int	i_spare[7];
+    };
+
+/*
+
+	Other constants
+
+*/
+#define	I_CI	1	/* Channel interleaved organization */
+#define	I_CS	2	/* Channel sequential organization */
+#define	I_DEL	3	/* file deletion mode (at close time) */
+#define	I_IVLIN	4	/* Invalid line specfication (STATUS) */
+#define	I_NOLAB	5	/* Incorrect label number (STATUS) */
+#define	I_SAVE	6	/* file save mode */
+#define	I_FSSIZ	132	/* host file spec size in bytes */
+#define	I_SECT	512	/* Bytes per sector */
+#endif

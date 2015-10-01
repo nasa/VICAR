@@ -1,0 +1,1056 @@
+/******************************************************************************
+ *	Copyright (c) 1990, 1991, National Aeronautics and Space Administration
+ *	ALL RIGHTS RESERVED
+ *
+ *	The software (programs, data bases and/or documentation) on or in
+ *	any media can not be reproduced, disclosed or used except under
+ *	terms of the license between COSMIC and your organization.
+ *****************************************************************************/
+
+/*>>VAX/VMS<<								*/
+/*
+ *	"Parent" side of...
+ *	VMS-dependent control and communication package for C callers.
+ *
+ *	The package provides primitives for activating a task, sending data
+ *	to a task activated by the sender (a "sub-task"), receiving data from a
+ *	sub-task.
+ *
+ *
+ *******************************************************************************
+ * CHANGE LOG:
+ *
+ *	11-jul-83	Purged change log, deleted checkout records,
+ *			and audited global definitions...jtm
+ *	14-jul-83	updated to return host error code to caller...dm
+ *	25-sep-83	Add new c_iabort and c_term...palm
+ *	25-oct-83	Fix PR 476 (concat name to c_concat)...palm
+ *	14-feb-84	Poll forever on subprocess deletion...palm
+ *			Also, STAT_MASK redefined.
+ *	23-feb-84	Change method of runtype determination and
+ *			change BATCH_SUB_LOG to ALT_SUB_LOG...nhe
+ *	06-mar-84	Get rid of "TAE_" prefix for subproc names...nhe
+ *	04-may-84	Replace getsw with switch_gbl use ... ces
+ *	07-may-84	Move the IMPORT declarations...lim
+ *	25-jun-84	Reword TBD...palm
+ *
+ ****************************************************************************
+ * CHANGES MADE IN THE RCJM TREE
+ *
+ *	16-feb-85	add c_maxsub() for max allowed sync subprocess...dm
+ *	17-mar-85	Release resources for the killed subprocess
+ *			if reinitializing by c_init by the same monitor...dm
+ *
+ *****************************************************************************
+ * MERGE WITH TAE V1.3 TREE...dm (26-may-85)
+ *
+ *	22-mar-85	Assign sys$input and sys$command to terminal/input.dat
+ *			because in VMS V4 we do not get a confusing info
+ *			message.  Also, this is needed because an attempt
+ *			by an application to read the mailbox will, under
+ *			VMS V4, read our critical $WRITE MB statement and
+ *			hang the subprocess. (Under V4, a dollar sign
+ *			in a mailbox is not an EOF as it was in V3.x.)
+ *      08-may-85       VMS 4.0 call to $trnlnm instead of $trnlog...joh
+ **************************************************************************
+ *
+ *	30-aug-85	Call new routine trans_log() to translate logical
+ *			name...joh
+ *	10-oct-85	PR 1059: Reset SYS$INPUT to terminal in 'c_act' before
+ *			DCL or $RUN command "mailed" for execution...dab
+ *	21-feb-86	Assign sys$input for batch and async to logical name
+ *			tae$app_input which is assigned at tm startup via 
+ *			usrassign.com file...lia
+ *	28-mar-87	Change calc_size to consider sizeof (LARGE_PARBLK)
+ *			in determining mail box size...palm
+ *      25-sep-87       Assign terminal to tt...tpl
+ *	21-sep-88	PR1562: Replaced dsc$a_pointer with bufadr; made
+ *			jpiitm -> jpiitm[0]...ljn
+ *	01-feb-89	Include chartype.inc...ljn
+ *	25-apr-91	tae$app_input is now $taeapp_input...ljn
+ */
+
+#ifndef testmain
+
+#include ssdef			/* VAX/VMS system service status values	*/
+#include iodef			/* VAX/VMS I/O definitions		*/
+#include jpidef			/* VAX/VMS $GETJPI definitions		*/
+#include pqldef			/* VAX/VMS quota list definitions	*/
+#include descrip		/* VAX/VMS descriptor structures	*/
+#include "taeconf.inp"		/* TAE standard, configuration defs	*/
+#include "eventinc.inp"		/* e_ definitions and structures	*/
+#include "taskinc.inp"		/* c_ definitions and structures  	*/
+#include "parblk.inc"		/* Parameter block definitions		*/
+#include "terminc.inc"		/* TERMINAL specific definitions 	*/
+#include "chartype.inc"		
+
+
+
+    GLOBAL	v94tskp = 0;			/* Version   	*/
+
+
+/*  Module-wide variables and definitions				*/
+   
+#define	LIB_SIZE	100		/* max length of a VMS string for
+    					   a library			*/   
+#define	PROCLEN		15		/* max length for VMS process name */
+#define	TERM_LEN	30		/* max length for a terminal string */
+#define	VMS_IMGFNF	0x000388B2 	/* VMS CLI error code: image not found */
+#define	VMS_NOSUCH	0x0001C04A 	/* No such file			*/
+#define	VMS_RMSDEV	0x000184C4 	/* Bad device spec		*/
+#define VMS_RMSPROT	0x0001829A 	/* Protection violation		*/
+#define STAT_MASK	0xFFFFFFF	/* mask for status bits in iosb	*/
+    long		c_code	= 0;	/* latest sys-service return	*/
+    TINY		maxsub  = -1;	/* max number of sync subprocesses, 
+ *					   initialize to force default  */
+    
+/* The following is a skeleton tcb for tcb parameters that are setup
+   in c_init.								*/
+
+    GLOBAL	struct TCB	initcb;
+
+/* NOTE:  The struct initcb is not included in the GLOBAL.C module because
+ *   it contains mostly host-dependent information to be used by the
+ *   Resource manager. Also, this struct should not be referenced by any 
+ *   other host-independent (.C) module.
+ */
+
+    GLOBAL	TEXT	*dcl_string = NULL;	/* DCL cmd not $RUN	*/
+
+
+/*
+ *	assign		do DCL assignments
+ *
+ *	returns SUCCESS or FAIL
+ *
+ */
+    FUNCTION static CODE assign(term_name, channel)
+
+    TEXT	term_name[];			/* terminal name		*/
+    FUNINT	channel;			/* channel for assignments	*/
+
+    {
+    TEXT	cmdstr[STRINGSIZ+1];
+    static TEXT *assignment[] = {"TERMINAL", "DBG$INPUT", "FOR$READ",
+    				 "FOR005", "FOR$ACCEPT", "SYS$INPUT",
+				 "SYS$COMMAND"};
+#define NUM_ASSIGNS (sizeof(assignment)/4)
+    short 	i;
+    CODE	code;
+
+    for (i=0; i < NUM_ASSIGNS; i++)		/* walk assignment table		*/
+    	{
+    	c_concat(4, cmdstr, "ASSIGN ", term_name, " ", assignment[i]);
+    	code = send_cmd(cmdstr, channel, SYNCH_EFN);   /* send the command	*/
+    	if (!(code&1)) return(FAIL);
+    	}
+    c_concat(4, cmdstr, "ASSIGN ", "TERMINAL", " ", "TT");
+    code = send_cmd(cmdstr, channel, SYNCH_EFN);   /* send the command	*/
+        if (!(code&1)) return(FAIL);
+    return(SUCCESS);
+    }
+
+/*
+ *	c_iabort	Initiate abort of a task.
+ *
+ *	This initiates the abort request.  The caller must then
+ *	wait on task completion.
+ *	
+ *	c_iabort exists so that the caller can receive output 
+ *	variables sent by exit handlers in the application process.
+ *
+ */
+    FUNCTION CODE c_iabort(tcb)
+
+    struct TCB		*tcb;		/* in: task control block	*/
+
+    {
+
+/* Use SS$_ABORT as completion code.  Set high nibble to avoid DCL msg	*/
+
+    c_code = sys$resume(&(*tcb).pid, 0);		/* force a resume just in case	*/
+    c_code = sys$forcex(&(*tcb).pid, 0, (SS$_ABORT + 0X10000000) );  /* force exit	*/
+
+/* Because the task may have been terminated and an ast left hanging in
+   the process, we start a null task.
+*/
+    c_code = send_cmd("$RUN $TAEBIN:NULL", (*tcb).sysinchan, SYNCH_EFN);
+    return (SUCCESS);
+    }    
+
+/*
+ *	c_abort		Abort a sub-task.
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Task successfully aborted
+ *
+ *	c_abort aborts the task implied by the tcb.
+ *	Note that the task cleanup (deleting the message mailbox,
+ *	etc.) is done by the task_done function via AST from
+ *	the QIO to the termination mailbox.
+ */
+
+    FUNCTION CODE c_abort(tcb)
+
+    struct TCB		*tcb;		/* in: task control block	*/
+
+    {
+
+    c_iabort(tcb);			/* initiate abort		*/
+    sys$waitfr((*tcb).ecbtsk.efn);	/* wait for task complete	*/
+    return (SUCCESS);
+
+#ifdef XXXXXXX				/* old code */
+
+/* Use SS$_ABORT as completion code.  Set high nibble to avoid msg	*/
+
+    c_code = sys$resume(&(*tcb).pid, 0);		/* force a resume just in case	*/
+    c_code = sys$forcex(&(*tcb).pid, 0, (SS$_ABORT + 0X10000000) );  /* force exit	*/
+    if (dcl_string == NULL)			/* never assigned if DCL	*/
+        c_code = sys$dassgn((*tcb).msgchan);	/* delete msg mailbox	*/
+
+/* Because the task may have been terminated and an ast left hanging in
+   the process, we start a null task.
+*/
+    c_code = send_cmd("$RUN $TAEBIN:NULL", (*tcb).sysinchan, SYNCH_EFN);
+    sys$waitfr((*tcb).ecbtsk.efn);		/* wait for task mbx read	*/
+    sys$clref((*tcb).ecbsnd.efn);		/* clear send efn		*/
+    (*tcb).mb_idle = TRUE;			/* free the mailbox	*/
+    (*tcb).hostcode = (c_code&STAT_MASK);	/* stuff host code	*/
+    return(SUCCESS);
+#endif
+
+    }
+
+/*
+ *	c_act		Activate a task from a VMS process.
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Successful activation
+ *		FAIL - Task activation error.
+ *
+ *	c_act activates the specified executable file 
+ *	and sets up the caller-provided tcb for calls to other "task" 
+ *	functions.
+ */
+
+    FUNCTION CODE c_act(tcb, filespec)
+
+    struct TCB		*tcb;		/* out: task control block	*/
+    TEXT		filespec[];	/* in: executable host file spec*/
+
+    {
+    IMPORT struct VARIABLE *switch_gbl;	/* pointer to $switch	*/
+
+    CODE		code;		/* return code from subroutines */
+    short 		i;
+    short 		size;		/* size of mailbox		*/
+    TEXT		dcl_cmd[132];	/* DCL cmd to run an image.	*/
+    TEXT		msgname[PROCLEN+3];  /* Name for msg mailbox	*/
+    static $DESCRIPTOR  (dmsgname,"dummy");  /* VMS descr for msg mb	*/
+    VOID		task_done();	/* function for task termination wrapup	*/
+
+/*
+ *	Create a message mailbox; send DCL commands to RUN and to
+ *	write status after run to the task mailbox; start read of
+ *	task mailbox.		
+ *
+ *	A special hook:  if some the GLOBAL dcl_string is not NULL, then
+ *	it is the DCL command to be sent rather than a $RUN command.  This
+ *	exists for the "DCL" command in TCL.
+ */
+
+    bytmov((GENPTR) &initcb, (GENPTR) tcb, sizeof(struct TCB )); /* move initialized tcb to user's */
+    /* Reset SYS$INPUT to terminal device */
+    send_cmd ("ASSIGN/NOLOG TERMINAL: SYS$INPUT", (*tcb).sysinchan, SYNCH_EFN);
+
+    if (dcl_string == NULL)
+	{
+	(*tcb).size = calc_size();			/* calculate msg mbx size	*/
+	c_concat(2, msgname, (*tcb).subnam, "_M");	/* build name for msg mbx:	*/
+						        /* subproc//"_M"		*/
+	set_descr(&dmsgname, msgname);			/* make it a VMS string		*/
+	c_code = sys$crembx(0, &(*tcb).msgchan, (*tcb).size, (*tcb).size, 0, 0, &dmsgname); /*create mb*/
+	if ( !(c_code&1))
+	    goto exit;	   			/* --> RETURNING HERE <--	*/
+	if (IVAL (*switch_gbl, 0) & SW_DEBUG)
+	    i = s_copy("$run/debug ", dcl_cmd);
+	else
+	    i = s_copy("$run/nodebug ", dcl_cmd);
+	s_copy (filespec, &dcl_cmd[i]);
+	code = send_cmd(dcl_cmd, (*tcb).sysinchan, SYNCH_EFN);    
+	if ( code == FAIL)
+	    goto exit;	   			/* --> RETURNING HERE <--	*/
+	}
+    else
+    	{
+    	code = send_cmd(dcl_string, (*tcb).sysinchan, SYNCH_EFN);
+        if ( code == FAIL)
+	    goto exit;
+        }
+
+    code = send_cmd("$WRITE MB $STATUS", (*tcb).sysinchan, SYNCH_EFN);
+    if ( code == FAIL)
+	goto exit;	   				/* --> RETURNING HERE <--	*/
+    (*tcb).ecbtsk.comp_fn = task_done;			/* Set completion routine	*/
+    (*tcb).ecbtsk.ctxptr = (GENPTR)tcb;			/* Set tcb pointer in ecb	*/
+    sys$clref((*tcb).ecbtsk.efn);			/* Clear task efn		*/
+    c_code = sys$qio((*tcb).ecbtsk.efn, (*tcb).taskchan, IO$_READVBLK, 
+        	(*tcb).taskiosb, 0, 0, (*tcb).statmsg, 
+    		STAT_LEN, 0,0,0,0);
+    			/* initiate read of task termination mailbox	*/
+    (*tcb).hostcode = (c_code&STAT_MASK); 
+    if (!(c_code&1))
+    	return(FAIL);
+    else
+        return(SUCCESS);
+
+exit:							/* error exit	*/
+    (*tcb).hostcode = (c_code&STAT_MASK);
+    return (FAIL);
+    }
+
+/*
+ *	c_init.		Task package initialization for a VMS process.
+ *
+ *	return codes:
+ *
+ *		SUCCESS
+ *		host-dependent error code.
+ *
+ * 	c_init is called by a VMS process to initialize the task package
+ *	for activating other processes.  c_init must be called once per 
+ *	user program.  For initialization to communicate with a parent process
+ *	see c_subi.
+ */
+
+    FUNCTION CODE c_init()
+
+    {
+    IMPORT CODE 	termtype;		/* Terminal type */
+    IMPORT CODE 	run_type;
+
+    static TEXT		prcnam[PROCLEN+1];  	/* buffer for process name characters +EOS */
+    static short	prclen;			/* number of chars in string	*/
+    static short	dummylen;
+
+    static struct JPI 	itmlst[] =		/* jpi list for sending program	*/
+    	     {
+    	      {sizeof(prcnam), JPI$_PRCNAM, prcnam, &prclen},  /* proc name */
+    	      {0, 0, 0, 0}		/*required   terminator		*/
+             };
+    TEXT	in_name[PROCLEN+3];	 /* name of input mailbox	*/   
+    TEXT	st_name[PROCLEN+3];	 /* name of status mailbox	*/
+
+/* The following uses a VAX/VMS C macro to setup structures with dummy 
+ * strings for VAX/VMS strings used below. */
+
+    static	$DESCRIPTOR( dsubname,  "dummy");  	/* VMS process name	*/
+    static 	$DESCRIPTOR( inmb_name, "dummy");	/* 'in' mbx	*/
+    static	$DESCRIPTOR( stmb_name, "dummy");	/* 'status' mbx	*/
+    static	$DESCRIPTOR( sys_out, "SYS$OUTPUT");
+    char	term_name[TERM_LEN];			/* terminal name characters	*/
+    static struct dsc$descriptor_s 			/* descr for terminal name	*/
+    		ttname = {TERM_LEN, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+    static	$DESCRIPTOR( subterm, "ALT_SUB_LOG"); 	/* descr for subprocess output	*/
+    TEXT	cmdstr[132];
+    static	BOOL first_init = TRUE;	  	/* initializing  first time */
+    short 	len;
+    CODE	code;
+
+
+/* Get name of current process.  Create mailbox for sub-process's input 
+ * (name: process-name//"_I"); mailbox for termination status 
+ * (process-name//"_S".  Create the process and send commands to setup context.
+ */
+    initcb.mb_idle = TRUE;			/* new msg mailbox is idle	*/
+    c_code = sys$getjpi( 0, 0, 0, &itmlst, 0, 0, 0); /* get VMS process data	*/
+    prcnam[prclen] = EOS;			/* make a C string		*/
+    newname(prcnam, initcb.subnam, PROCLEN); 	/* get a name for the sub-process */
+    c_concat(2, in_name, initcb.subnam, "_I");	/* build mbx name		*/
+    set_descr(&inmb_name, in_name);		/* update descr for string in in_name*/
+    ttname.dsc$a_pointer = term_name;		/* set pointer to buffer to receive */
+    len = TERM_LEN;		/* maximum length		*/
+    c_code = trans_log(&sys_out, &ttname, len);  /* get term name */
+    set_descr(&dsubname, initcb.subnam);	/* make subname into descr */
+    term_name[ttname.dsc$w_length] = EOS;	/* set correct length		*/
+    if (run_type == INTER)
+	set_descr(&subterm, &term_name[4]); 	/* make descr starting with 5th char */
+    code = kill_sub(&dsubname);		/* kill the existing sub, if one */
+    if (code == FAIL)
+    	goto exit;
+/*** note: The following logic works for a single subprocess only.
+ *   If we ever actually implement more than one concurrent subprocess, 
+ *   we must copy and save the tcb for each subprocess and delete the 
+ *   resourses for the killed subprocess using the corresponding tcb.
+ ****/
+    if (!first_init)				/* reinitializing for the sub */
+	rels_subres(&initcb);			/* release killed sub's resources */
+    c_code = lib$get_ef(&(initcb).ecbtsk.efn);	/* get an ef for task term 	*/
+    c_code = lib$get_ef(&(initcb).ecbsnd.efn);	/* get an ef for send msg  	*/
+    c_code = lib$get_ef(&(initcb).ecbrcv.efn);	/* get an ef for rcv msg	*/
+    if (!(c_code&1))
+	goto exit;
+    c_code = sys$crembx( 0, &initcb.sysinchan, 132, 132, 0, 0, &inmb_name); /*create  in*/
+    if (!(c_code&1))
+	goto exit;				/* --> RETURNING HERE <-- 	*/
+    c_concat(2, st_name, initcb.subnam, "_S");	/* status mbx name	*/
+    set_descr(&stmb_name, st_name);		/* update descr for st_name string */
+    c_code = sys$crembx( 0, &initcb.taskchan, sizeof(initcb.statmsg), 
+    		sizeof(initcb.statmsg), 0, 0, &stmb_name);  /* create task status mbx	*/
+    if (!(c_code&1))
+	goto exit; 				/* --> RETURNING HERE <-- 	*/
+#ifdef VICAR_BATCH_LOG
+    code = spawn(&inmb_name, 0, &dsubname, &initcb.pid);
+#else
+    code = spawn(&inmb_name, &subterm, &dsubname, &initcb.pid);
+#endif
+    if (code == FAIL)
+	goto exit;
+
+
+/* 	Send setup DCL commands to the created process			*/
+    if (termtype == T_NOTTERM)				/* use file for batch	*/
+	code = assign("$taeapp_input", initcb.sysinchan);
+    else
+        code = assign(&term_name[4], initcb.sysinchan); /* use term for inter	*/
+    if (code != SUCCESS)
+	goto exit;
+    c_concat(2, cmdstr, "$OPEN/WRITE MB ", st_name); 	/* term status mbx */
+    code = send_cmd(cmdstr, initcb.sysinchan, SYNCH_EFN);
+    if (code != SUCCESS)
+	goto exit;				/* --> RETURNING HERE <-- */
+    code = send_cmd("$SET NOON", initcb.sysinchan, SYNCH_EFN);  /* avoid logout on error */
+    if (code != SUCCESS)
+	goto exit;	     			/* --> RETURNING HERE <-- */
+    code = send_cmd("$TAE:==EXIT", initcb.sysinchan, SYNCH_EFN);
+    if (code != SUCCESS)
+	goto exit;
+    code = send_cmd("$LO*GOUT:==\"WRITE SYS$OUTPUT  \
+\"\"Use CONTROL/Z or EXIT to return to TAE\"\" ",
+    		initcb.sysinchan, SYNCH_EFN); 	/* reset LOGOUT command */
+    if (code == SUCCESS)
+	{
+	first_init = FALSE;
+	return(SUCCESS);
+	}
+exit:						/* error exit		   */
+/*  we are not releasing resources here because it is a fatal error anyway */
+    code = (c_code&STAT_MASK);		     	/* get latest host code	   */
+    return(code);			
+    }
+
+/*
+ *	c_maxsub. Set maximum allowed  number of subprocesses
+ *	
+ *	NOTE:  Default is 9. (See function newname).
+ */
+
+    FUNCTION  VOID c_maxsub(subnum)
+
+    FUNINT		subnum;		/* in: max number of subproc allowed */
+
+    {
+    maxsub = subnum;			/* set to user value (RHS byte only) */
+    return;
+    }
+
+
+/*
+ *	c_recs		Receive data from a task
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Data successfully received into the specified block.
+ *			  (Actual character count is in the tcb.)
+ *		FAIL	- Data could not be read (host error code in tcb)
+ *
+ *	c_recs receives data from the sub-task implied by the tcb.
+ *
+ *	c_recs does not wait on I/O completion; the event associated with
+ *	the ecb in the tcb is set upon completion.
+ */
+
+    FUNCTION CODE c_recs(tcb, block, blksize)
+
+    struct TCB		*tcb;		/* in: task control block	*/
+    GENPTR		block;		/* in: addr of receive block 	*/
+    FUNINT		blksize;	/* in: number of bytes expected	*/
+
+    {
+    VOID		rcv_done();	/* completion function for completion...*/
+    					/* of receive QIO		*/
+    LONG		size;
+
+
+    if (dcl_string != NULL)		/* special hook: no msg receive	*/
+        return (SUCCESS);		/* (for DCL, there is no msg)	*/
+    if (!(*tcb).mb_idle)			/* mailbox tied up...error	*/
+    	{
+    	(*tcb).rcviosb[0] = 0;
+        (*tcb).hostcode = 0;		/* no host error code		*/
+	return(FAIL);
+    	}
+    (*tcb).ecbrcv.comp_fn = rcv_done;
+    (*tcb).ecbrcv.ctxptr = (GENPTR)tcb;		/* context is the tcb		*/
+    sys$clref((*tcb).ecbrcv.efn);		/* clear the receive efn	*/
+    size = ((*tcb).size < blksize)? (*tcb).size : blksize;	/* use min of user, mb size */
+    c_code = sys$qio((*tcb).ecbrcv.efn, (*tcb).msgchan, IO$_READVBLK,
+    			(*tcb).rcviosb, 0, 0, block, size, 0,0,0,0);
+    (*tcb).hostcode = (c_code&STAT_MASK);
+    if (!((*tcb).hostcode & 1))
+    	return(FAIL);
+    (*tcb).mb_idle = FALSE;			/* we've tied up the mailbox	*/
+    return(SUCCESS);
+    }
+
+
+/*
+ *	c_resume		Resume a suspended sub-task
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Task successfully resumed
+ *		FAIL - Task could not be resumed (host error code in hostcode)
+ *
+ *	c_resume resumes the sub-task implied by the tcb.
+ */
+
+    FUNCTION CODE c_resume(tcb)
+
+    struct TCB		*tcb;		/* in: task control block	*/
+
+    {
+    c_code = sys$resume(&(*tcb).pid, 0);	/* resume	*/
+    (*tcb).hostcode = (c_code&STAT_MASK);
+    if (!((*tcb).hostcode&1))
+    	return(FAIL);
+    else
+    	return(SUCCESS);
+    }
+
+
+/*
+ *	c_snds		Send data to a sub-task
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Successful initiation of transmission
+ *		FAIL - Data transmission could not be initiated
+ *			  (The host error code is saved in the tcb.)
+ *
+ *	c_snds sends a data block to the sub-task implied by the tcb.
+ *
+ *	c_snds does not wait on I/O completion.
+ */
+
+    FUNCTION CODE c_snds(tcb, block, blksize)
+
+    struct TCB		*tcb;		/* in: task control block	*/
+    GENPTR		block;		/* in: data block to send	*/
+    FUNINT		blksize;	/* in: number of bytes to send	*/
+
+    {
+    VOID		send_done();	/* "completion fn" for completion
+    					   of a send qio.  See the ecb	*/
+
+    if (dcl_string != NULL)		/* special hook: no msg to send	*/
+        {
+        sys$setef((*tcb).ecbsnd.efn);	/* make it look like msg sent	*/
+        (*tcb).sendiosb[0] = 1;		/* and sent successfully	*/
+	return (SUCCESS);		/* (for DCL, there is no msg)	*/
+        }
+    if (!(*tcb).mb_idle)
+    	{
+    	(*tcb).sendiosb[0] = 0;		/* Msg mailbox is tied up	*/
+  	(*tcb).hostcode = 0;		/* put no hostcode		*/
+   	return (FAIL);
+    	}
+    (*tcb).ecbsnd.comp_fn = send_done;	/* Set completion routine to 'none' */
+    (*tcb).ecbsnd.ctxptr = (GENPTR)tcb;
+    sys$clref((*tcb).ecbsnd.efn);	/* clear the efn we're using	*/
+    c_code = sys$qio((*tcb).ecbsnd.efn, (*tcb).msgchan,
+    		      IO$_WRITEVBLK, (*tcb).sendiosb, 0, 0, 
+    		      block, blksize, 0,0,0,0);   /* send block	*/
+    (*tcb).hostcode = (c_code&STAT_MASK);
+    if (!((*tcb).hostcode&1))
+    	return(FAIL);
+    (*tcb).mb_idle = FALSE;
+    return(SUCCESS);
+    }
+    
+
+/*
+ *	c_suspend		Suspend a sub-task.
+ *
+ *	return codes:
+ *
+ *		SUCCESS - Task successfully suspended
+ *		FAIL - Task could not be suspended (host error code in 
+ *			  hostcode)
+ *		
+ *
+ *	c_suspend suspends the sub-task implied by the tcb.
+ *
+ */
+
+    FUNCTION CODE c_suspend(tcb)
+
+    struct TCB		*tcb;		/* in: task control block	*/
+
+    {
+
+    c_code = sys$suspnd(&(*tcb).pid, 0);	/* suspend	*/
+    (*tcb).hostcode = (c_code&STAT_MASK);
+    if (!((*tcb).hostcode&1))
+    	return(FAIL);
+    else
+    	return(SUCCESS);
+    }
+    	
+
+/*
+ *	calc_size		Calculate the message mailbox size
+ *
+ *	calc_size returns the size of the message mailbox.
+ *
+ * The problems:  (1) Although we know the length of the message to be sent
+ * to the sub initially, we do not know the length of messages coming back
+ * for dynamic parameters, etc.  (2) We do not want to exhaust the caller's
+ * bytlm quota by creating a mailbox with some unreasonably large size.
+
+ * Technique:  Mailbox is 60% of the remaining bufferred byte count (bytlm)
+ * now available to the process or parameter block max
+ * whichever is smaller.
+ */
+
+    FUNCTION static COUNT calc_size()
+
+    {
+    LONG		bytcnt;		/* byte count from JPI service	*/
+    LONG		answer;
+    static struct JPI			/* for getting process byte count limit */
+    	jpiitm[]= {{4, JPI$_BYTCNT, 0, 0}, {0,0,0,0}}; 
+
+
+
+    jpiitm[0].bufadr = &bytcnt;
+    c_code = sys$getjpi(0,0,0, &jpiitm, 0,0,0);	/* get process info	*/
+    bytcnt = (3*bytcnt)/5;		/* 60%				*/
+    answer = min (bytcnt, sizeof (struct LARGE_PARBLK));
+#ifdef BUG_FIXES
+    answer = min (answer, 65200);	/* MAX SIZE VMS mailbox	*/
+				/* (approximately; determined empirically) */
+#endif
+
+    return(answer);
+    }
+
+
+/*	kill_sub		Kill subprocess with specified name
+ *
+ *	returns SUCCESS/FAIL
+ */
+    FUNCTION static CODE kill_sub(procname)
+
+    struct dsc$descriptor_s	*procname;	/* in: pointer to process name */
+
+    {
+    static		$DESCRIPTOR( fiftystr, "0 00:00:00.05");		/* 50 ms delta time */
+    long		fiftyms[2];		/* converted 50 ms in binary	*/
+    static long		status;			/* jpi resulting status		*/
+    static short	statlen;		/* gets status length word 	*/
+    static struct JPI	sublist[]= 
+    	{{4, JPI$_STS, &status, &statlen}, {0,0,0,0}};	/* jpi list for process status */
+    long		sys$bintim(),sys$delprc(),sys$setimr(),sys$waitfr(),sys$getjpi();
+    short 		i;
+
+
+/* make sure there's no other process by this name			*/
+    c_code = sys$bintim(&fiftystr, fiftyms);		/* make 50ms bin 	*/
+    c_code = sys$delprc(0, procname);			/* try to delete	*/
+    while (FOREVER)
+    	{
+    	if (c_code != SS$_NORMAL && c_code !=SS$_NONEXPR)
+	    return(FAIL);
+    	if (c_code == SS$_NONEXPR) break;			/* he's gone	*/
+    	c_code = sys$setimr(0, fiftyms, 0, 0);			/* wait 50 ms	*/
+    	c_code = sys$waitfr(0);
+    	c_code = sys$getjpi(0, 0, procname, &sublist, 0, 0, 0);	/* get status	*/
+    	}
+    return(SUCCESS);
+    }
+
+/*
+ *	newname			Build a new sub-process name
+ *
+ *	return codes:	none
+ *
+ *	newname builds a new name by appending a simple integer
+ *	sequence number to the name passed.
+ */
+    FUNCTION static VOID newname(old, new, maxlen)
+
+    TEXT	old[];		/* in: current name			*/
+    TEXT	new[];		/* out: new name			*/
+    short 	maxlen;		/* in: maximum length of new name	*/
+
+    {
+    static    TINY 	seq_num = 0;	/* sequence number to append	*/
+    short 	i, n;			/* a counter			*/
+    TINY	num;
+    
+    new[0] = EOS;
+
+/*  Append seq_num to 'old' after truncating to maxlen-1 (to make room
+    for one digit sequence number).  Don't allow characters that are
+    illegal in a simple file name (because mailboxes use the subproc name)
+
+    Also: don't use lower case because DCL will use upper case when trying
+    to open the mailboxes.
+*/
+
+
+    for (n = s_length(new), i = 0; old[i] != EOS; i++, n++)
+    	{
+    	if ( n+1 > maxlen-1) break;	/* leave room for seq number	*/
+    	if (!isalpha(old[i]) && !isdigit(old[i]))
+    	    {
+    	    new[n] = '$';		/* use a dollar sign substitute	*/
+    	    continue;
+    	    }
+    	new[n] = old[i];
+    	if (islower(new[n]))
+    	    new[n] = new[n] - ('a'-'A');	/* make upper		*/
+    	}
+ /* if no maximum number given, use 9.	
+  */
+    num = (maxsub > 0) ? maxsub : 9;		/* must be positive	 */
+    if (++seq_num > num) seq_num = 1; 	/* don't use more than one digit */
+			/* NOTE: THIS IMPLIES A LIMIT OF 9  SUBPROCESSES */
+    s_i2s(seq_num, &new[n]);		/* put the character plus EOS    */
+    return;
+    }
+
+
+
+/*
+ *	rcv_done	Completion processing for a receive qio
+ *
+ */
+    FUNCTION static VOID rcv_done(ecb)
+
+    struct ECB 	*ecb;
+
+    {
+    struct TCB	*tcb;
+
+
+    tcb = (struct TCB *)(*ecb).ctxptr;	/* find tcb associated with this ecb */
+    (*tcb).mb_idle = TRUE;		/* mailbox is free		*/
+    (*tcb).hostcode = ((*tcb).rcviosb[0] & STAT_MASK);
+    return;
+    }
+
+
+/*	rels_subres.  Release resources of the sub process 
+ */
+    FUNCTION VOID rels_subres(tcb)
+
+    struct TCB		*tcb;
+
+    {
+    CODE		code;
+
+    lib$free_ef (&(*tcb).ecbrcv.efn);		/* receive ef		*/
+    lib$free_ef (&(*tcb).ecbsnd.efn);		/* send ef		*/
+    lib$free_ef (&(*tcb).ecbtsk.efn);		/* task ef		*/
+    code = sys$dassgn ((*tcb).sysinchan);	/* mailbox		*/
+    code = sys$dassgn ((*tcb).taskchan);	/* mailbox		*/
+    return;
+    }
+
+
+/*
+ *	send_cmd	Send a DCL command over the specified channel
+ *
+ *	return code:	host code
+ *
+ */
+    FUNCTION static CODE send_cmd(cmd, channel, efn)
+
+    TEXT	cmd[];		/* command to send, a C string		*/
+    FUNINT	channel;	/* I/O channel to use			*/
+    FUNINT	efn;		/* event flag to use			*/
+
+/* Do the qio.  We use a IO$M_NOW because we don't want to wait on a 
+ * possibly swapped-out process.					*/
+    {
+    long	iosb[2];	/* I/O status block			*/
+
+    c_code = sys$qiow(efn, channel, (IO$_WRITEVBLK|IO$M_NOW), iosb,
+    			0,0, cmd, s_length(cmd), 0,0,0,0);
+    c_code = iosb[0];
+    if (iosb[0]&1)
+	return(SUCCESS);
+    return(FAIL);    
+    }
+    	
+
+
+/*
+ *	send_done	Completion processing for a send qio
+ *
+ */
+    FUNCTION static VOID send_done(ecb)
+
+    struct ECB 	*ecb;
+
+    {
+    struct TCB	*tcb;
+
+
+    tcb = (struct TCB *)(*ecb).ctxptr;	/* find tcb associated with this ecb */
+    (*tcb).mb_idle = TRUE;		/* mailbox is free		*/
+    (*tcb).hostcode = ((*tcb).sendiosb[0] & STAT_MASK);
+    return;
+    }
+
+/*
+ *	spawn		Spawn a subprocess under login image
+ *
+ *	return codes:   SUCCESS or FAIL
+ *
+ *
+ */
+    FUNCTION static CODE spawn(sysin, sysout, procname, pid)
+
+    struct dsc$descriptor_s 	*sysin;		/* in: pointer to descr for proc input */
+    struct dsc$descriptor_s	*sysout;	/* in: pointer to proc output	*/
+    struct dsc$descriptor_s	*procname;	/* in: pointer to process name */
+    long			*pid;		/* out: pid of new process	*/
+
+    {
+    static		$DESCRIPTOR( image, "SYS$SYSTEM:LOGINOUT");	/* image in new process */
+    long		nowait = 1;		/* flag for lib$spawn: don't wait */
+    static struct dsc$descriptor_s sysequiv = 
+    			   {64, DSC$K_DTYPE_T,DSC$K_CLASS_S,0};  /* Note: 64 as in "char*64" */
+    TEXT		equivstr[64];		/* translated input name	*/
+    short	len;
+
+    sysequiv.dsc$a_pointer = equivstr;		/* translate mb logical to 'equivalent' */
+    len = 64;
+
+    c_code = trans_log(sysin, &sysequiv, len);
+    equivstr[sysequiv.dsc$w_length] = EOS;		/* make sure we terminate	*/
+
+    c_code = lib$spawn(0, &sysequiv, sysout, &nowait, procname, pid);
+    if (c_code != SS$_NORMAL)
+	return(FAIL);
+    return(SUCCESS);
+    }
+
+/*
+ *	task_done	Event completion routine (called by e_occur) to 
+ *	determine the status of a task termination.
+ *
+ *	return codes:	none
+ *
+ *	task_done determines the host-independent task termination status
+ *	and frees the msg mailbox.  The codes, placed in member
+ *	compcd of the tcb, are:
+ *
+ *		C_NORMAL - Normal termination
+ *		C_ACTERR -  Task could not be activated
+ *		C_ABNORMAL - Other abnormal task termination
+ *
+ *	The host-dependent status code is placed in members taskcode and
+ *	hostcode for error report by the caller.
+ *
+ *	NOTE:  We cannot distinguish between a process that explicitly
+ *	       returns a completion status of VMS_NOSUCH etc and a
+ *	       non-existent image file.  For now, we play the odds on
+ *	       a non-existent image file.  Most application programs
+ *	       call XZEXIT which returns a controlled completion status,
+ *	       so we're usually ok.  It's best to guess non-existent
+ *	       image file because library configuration is a big user 
+ *	       problem.
+ */
+
+    FUNCTION static VOID task_done(ecb)
+
+    struct ECB		*ecb;		/* in: event control block	*/
+    {
+
+    struct TCB		*tcb;		/* pointer to tcb		*/
+    CODE		code;
+
+    tcb = (struct TCB *)(*ecb).ctxptr;		/* find parent tcb	*/
+    (*tcb).statmsg[10] = EOS;		/* make a C string 	*/  
+
+    /* Interpret the status message					*/
+
+    code = s_sh2i(&(*tcb).statmsg[2], &(*tcb).taskcode);	/* convert string to integer	*/
+    if (code != SUCCESS) 
+    	(*tcb).compcd = C_ABNORMAL;
+    else if ((*tcb).taskcode == (VMS_IMGFNF + 0x10000000))	/* file not found 	*/
+    	(*tcb).compcd = C_ACTERR;
+    else if ((*tcb).taskcode == (VMS_NOSUCH + 0x10000000))	/* file not found 	*/
+    	(*tcb).compcd = C_ACTERR;
+    else if ((*tcb).taskcode == (VMS_RMSDEV + 0x10000000))	/* Bad device 		*/
+    	(*tcb).compcd = C_ACTERR;
+    else if ((*tcb).taskcode == (VMS_RMSPROT + 0x10000000))	/* Protection violation */
+    	(*tcb).compcd = C_ACTERR;
+    else if (!((*tcb).taskcode&1))
+    	(*tcb).compcd = C_ABNORMAL;
+    else
+    	(*tcb).compcd = C_NORMAL;
+    
+/* Delete the message mailbox 							*/
+   
+    if (dcl_string == NULL)			/* never assigned if DCL	*/
+        c_code = sys$dassgn((*tcb).msgchan);	/* delete msg mailbox		*/
+    (*tcb).hostcode = ((*tcb).taskcode & 0x0FFFFFFF);	/* vms code		*/						/* of received message		*/    
+    return;
+    }
+    	
+
+/*
+ *	Test Case
+ */
+#else
+
+#include "STDH"			/* C standard defs			*/
+#include "TAECONF"		/* TAE standard, configuration defs	*/
+#include "EVENTINC"		/* e_ definitions and structures	*/
+#include "TASKINC"		/* c_ definitions and structures  	*/
+#include "TERMINC"		/* terminal support	*/
+
+    main()
+    {
+    IMPORT TEXT	vrsion[];
+
+    CODE	code;
+    short 	d;
+    CODE	t;
+    TEXT	oper_str[132];		/* operator-entered string	*/
+    TEXT	rec_str[132] = EOS;
+    struct TCB	tcb;
+    BOOL	e_occur();		/*fn to check for event occurrence	*/
+    TEXT	term_msg[132];
+    struct ECB	ecbatn;			/* for control/c		*/
+    short 	i;
+    static TEXT	retmsg[132];
+    TEXT	stringi[2];		/* string for a one digit integer */
+
+    term_msg[0] = EOS;
+    s_append("TASK TERMINATION STATUS: " , term_msg );
+    code = t_init(&d, &d, &t);
+    t_write("c_test", T_STDCC);			/* greeting	*/
+#ifdef rcvtest
+    goto receiver;
+#endif
+    t_write(vrsion, T_DOUBLE);
+    code = c_init();				/* initialize	*/
+    printf("CODE= %d",  code);		/* print code	*/
+    t_write("Check subprocess created and mailboxes.", T_STDCC);
+    
+    t_write("enter the file spec for a task to activate: ", T_PROMPT);
+    t_read(oper_str,&t);
+    code = t_attn(&ecbatn);			/* enable control /C */
+    printf("t_attn CODE= %d", code);
+    code = c_act(&tcb, oper_str);		/* activate a simple test */
+    printf("CODE= %d",  code);		/* print code	*/
+    t_write("enter a one-line message :", T_STDCC);
+    t_read(oper_str,&t);
+    code = c_snds(&tcb, oper_str, s_length(oper_str));
+    printf ("\nc_snds CODE= %d\n", code);
+    while (FOREVER)
+        {
+wait:  	code = e_wait(4, &tcb.ecbtsk, &tcb.ecbrcv, &tcb.ecbsnd, &ecbatn);	/* wait for an event	*/
+    	printf("\ne_wait code: %d\n", code);
+    	if (e_occur(&ecbatn))
+    	    {
+    	    t_write("OPERATOR INTERRUPT", T_STDCC);
+    	    code = c_suspend(&tcb);				/* suspend the suproc	*/
+    	    printf ("c_suspend CODE= %d", code);
+    	    t_write("ENTER A FOR ABORT, R FOR RESUME: ", T_PROMPT);
+    	    t_read(oper_str,&t);
+    	    if (oper_str[0] == 'R')
+    		{
+    	        code = c_resume(&tcb);
+    		printf ("c_resume CODE= %d", code);
+    		e_clear(&ecbatn);
+		code = t_attn(&ecbatn);			/* enable control /C */
+		printf("t_attn CODE= %d", code);
+    		goto wait;
+    		}
+    	    else
+    		{
+    		code = c_abort(&tcb);
+    		printf ("c_abort CODE= %d", code);
+    		break;
+    		}
+    	    }
+    	if (e_occur(&tcb.ecbtsk))
+    	    {
+    	    t_write("TASK TERMINATION", T_STDCC);
+    	    if (tcb.compcd == C_NORMAL) s_append("NORMAL", term_msg);
+    	    else if (tcb.compcd == C_ABNORMAL) s_append("ABNORMAL", term_msg);
+    	    else if (tcb.compcd == C_ACTERR) s_append("ACTIVATION ERROR", term_msg);
+    	    else s_append("UNKNOWN STATUS...BUG");
+    	    t_write(term_msg, T_STDCC);
+    	    break;
+    	    }
+    	if (e_occur(&tcb.ecbsnd))
+    	    {
+    	    e_clear(&tcb.ecbsnd);
+    	    t_write(" PARENT SEND COMPLETE", T_STDCC);
+    	    code = c_recs(&tcb, rec_str, 132);		/* do a receive	*/
+    	    printf ("\nc_recs CODE = %d\n", code);
+    	    }
+    	if (e_occur(&tcb.ecbrcv))
+    	    {
+    	    e_clear(&tcb.ecbrcv);
+    	    printf ("\nPARENT RECEIVED MESSAGE: %s\n", rec_str);
+    	    rec_str[0] = EOS;
+	    t_write("enter a one-line message :", T_STDCC);
+	    t_read(oper_str,&t);
+	    code = c_snds(&tcb, oper_str, s_length(oper_str));
+	    printf ("\nc_snds CODE= %d\n", code);
+    	    }
+    	}
+    exit();
+
+
+
+/*	Application Subprocess Receive Test				*/
+receiver:
+
+    t_write("RECEIVE TASK STARTED", T_STDCC);
+    t_write(vrsion, T_DOUBLE);
+    for (i=1; i <= 3; i++)
+    	{
+        code = c_rcvp(oper_str, 132);		/*  get a message	*/
+    	printf ("\nc_rcvp CODE= %d\n", code);
+        t_write(oper_str, T_STDCC);
+
+    	retmsg[0] = EOS;
+    	s_append("RETURN MESSAGE #", retmsg);
+    	s_i2s(i, stringi);
+    	s_append(stringi, retmsg);
+    	code = c_sndp(retmsg, s_length(retmsg)+1);
+    	printf ("\nc_sndp CODE= %d\n", code);
+    	}
+    exit();
+    }
+#endif    
+
+
+/*			T B D page:
+ *
+ *	TBD: look into less kludgy way of doing the DCL command.
+ *
+ */

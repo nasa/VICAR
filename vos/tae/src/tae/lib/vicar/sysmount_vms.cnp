@@ -1,0 +1,372 @@
+/*	Do what sys$mount is supposed to do, except do it right.
+ *	If the user types a ctrl-c during a sys$mount call, the operator
+ *	message is not cancelled until the current image is exited... in
+ *	this case meaning exiting TAE!
+ *
+ * CHANGE LOG:
+ */
+
+
+#include "stdh.inp"		/* system standard  (REQUIRED)		*/
+#include "taeconf.inp"		/* TAE configuration (REQUIRED)		*/
+#include "tmhost.inp"		/* TM host-dependent definitions	*/
+#include "tminc.inc"		/* TM definitions			*/
+#include "eventinc.inp"		/* event block definitions		*/
+
+#include "vicartae.inc"		/* VICAR-specific definitions		*/
+
+#include <ssdef.h>		/* VMS system service status codes	*/
+#include <dvidef.h>		/* VMS device information               */
+#include <descrip.h>		/* VMS c descriptor macros              */
+#include <iodef.h>		/* VMS i/o codes                        */
+#include <opcdef.h>		/* VMS operator message definitions     */
+#include <mntdef.h>		/* VMS mount definitions		*/
+
+#define KILL(x,y,z) {tmmsg(PROCFAIL,y,x,z); return(DO_CHECK);}
+
+#define ROOM(x)	(sizeof(x)-strlen(x)-1)	/* Returns unused room left in string */
+
+
+/* sys_mount
+ *
+ * This function is needed because sys$mount does not cancel operator messages
+ * when ctrl-c is typed until image rundown.  Since we don't want to exit TAE
+ * just because the user aborted a mount, we must use this kludge.  We must do
+ * a no-assist mount sending our own message, and check for the operator
+ * actually mounting the tape.  sys_mount is passed an item list, just like
+ * the real sys$mount call.  The only restriction is that the item list MUST
+ * have a FLAGS item.
+ */
+    FUNCTION CODE sys_mount(itemlist)
+
+    struct itmlst itemlist[];
+
+    {
+
+    struct itmlst *flags;		/* Pointers into the itemlist */
+    struct itmlst *curdev;
+    struct itmlst *curlbl;
+    struct itmlst *comment;
+    int first;				/* Flag used for \r\n's in op msg */
+    char opmsg[256];			/* Actual operator message	  */
+    char full_name[STRINGSIZ+1];	/* Full name of device		  */
+    CODE		status;		/* function status return	  */
+    ULONG		efns;		/* event flags from readef	  */
+    ULONG		rqst_efn;	/* event flag for oper reply	  */
+    ULONG		timer_efn;	/* event flag for timer service	  */
+    unsigned short	mailbox;	/* mailbox i/o channel		  */
+    ULONG		efn_mask;	/* mask used to specify efns	  */
+    LONG		time[2] = {-100000000,-1};  /* 10 seconds in system */
+						    /* quadword format      */
+    IMPORT struct ECB	ecbi;	     /* event block for operator interrupts */
+
+    struct
+	{
+	char type;		/* This structure to receive the oper reply */
+	char reserved;		/* is not defined accurately in opcdef, so  */
+	short status;		/* we build our own.			    */
+	long replyid;
+	TEXT text[160];
+	} inbuf;
+
+    struct
+	{
+	unsigned short status ;		/* the standard VMS i/o status block */
+	unsigned short size ;
+	long device_info ;
+	} iosb;
+
+
+    /* Add a NOASSIST flag */
+
+    for (flags = itemlist; flags->code != 0; flags++)
+	if (flags->code == MNT$_FLAGS)
+	    *flags->buffer |= MNT$M_NOASSIST;
+
+    status = sys$mount(itemlist);	/* Check if tapes are already mounted */
+    if (status == SS$_NORMAL) return SUCCESS; 	/* Mount succeeded */
+    if (((status & 0x0000ffff) != SS$_VOLINV) &&
+	((status & 0x0000ffff) != SS$_IVLOGNAM))
+	return status;		/* Mount failed for unknown reason */
+
+    /* If we made it here, then the mount failed with the SS$_VOLINV 
+     * (volume is not software enabled) status (determined empirically)
+     * (or, for some drives, value 340 decimal, which is SS$_IVLOGNAM,
+     * also determined empirically) and thus there is no tape loaded on
+     * the drive.
+     */
+    if (e_occur(&ecbi))		/* mount attempt takes a long time, */
+	{			/* so check for control-c	    */
+	e_clear(&ecbi);
+	tmmsg(PROCFAIL, "Mount aborted by control-C","TAE-MNTABORT");
+	return SS$_ABORT;
+	}
+
+    /* Build the operator message */
+
+    opmsg[0] = '\0';
+
+    curdev = itemlist;		/* pointer to current device */
+    curlbl = itemlist;		/* pointer to current tape label */
+
+    while (curdev->code != 0 && curdev->code != MNT$_DEVNAM)
+	curdev++;		/* Find first device name */
+    while (curlbl->code != 0 && curlbl->code != MNT$_VOLNAM)
+	curlbl++;		/* Find first volume name */
+
+    if (curdev->code == 0)	/* This should quite definitely never */
+	return SS$_ABORT;	/* happen, but if it does, punt */
+
+    if (curlbl->code == 0)	/* No label, must be foreign */
+	{
+	i_full_name(curdev->buffer, full_name);
+	sprintf(opmsg, "Please mount device %s", full_name);
+	}
+    else
+	{
+	first = TRUE;
+	while (curdev->code != 0 && curlbl->code != 0)
+	    {
+	    if (!first)
+		strncat(opmsg, "\r\n", ROOM(opmsg));
+	    first = FALSE;
+	    strncat(opmsg, "Please mount volume ", ROOM(opmsg));
+	    strncat(opmsg, curlbl->buffer, ROOM(opmsg));
+	    strncat(opmsg, " in device ", ROOM(opmsg));
+	    i_full_name(curdev->buffer, full_name);
+	    strncat(opmsg, full_name, ROOM(opmsg));
+
+	    curdev++;
+	    curlbl++;
+	    while (curdev->code != 0 && curdev->code != MNT$_DEVNAM)
+		curdev++;		/* Find next device name */
+	    while (curlbl->code != 0 && curlbl->code != MNT$_VOLNAM)
+		curlbl++;		/* Find next volume name */
+	    }
+	}
+    for (comment = itemlist; comment->code != 0; comment++)
+	if (comment->code == MNT$_COMMENT)		/* Add comment */
+	    {
+	    strncat(opmsg, "\r\n", ROOM(opmsg));
+	    strncat(opmsg, comment->buffer, ROOM(opmsg));
+	    }
+
+    /* Now issue the operator request and actually do the mount */
+
+    status = mnt_request(opmsg, &mailbox);
+    if (status != SS$_NORMAL) return status;	/* issue a request for oper */
+						/* to mount tape.	    */
+
+    status = lib$get_ef(&rqst_efn);		/* set up an event flag */
+    if (status != SS$_NORMAL)			/* to be set if oper    */
+	{					/* replies or aborts job*/
+	cancel_mnt_request(mailbox);
+	sys$dassgn(mailbox);
+	return status;
+	}
+
+    status = sys$qio(rqst_efn,mailbox,IO$_READVBLK,&iosb,0,0,
+		     &inbuf,sizeof(inbuf),0,0,0,0);
+    if (status != SS$_NORMAL)			/* Issue a read to the */
+	{					/* mailbox for a reply */
+	cancel_mnt_request(mailbox);
+	sys$dassgn(mailbox);
+	lib$free_ef(&rqst_efn);
+	return status;
+	}
+    
+    status = lib$get_ef(&timer_efn);		/* get an ef for the 10	   */
+    if (status != SS$_NORMAL)			/* second timer to tell us */
+	{					/* when to check the drive */
+	cancel_mnt_request(mailbox);
+	sys$dassgn(mailbox);
+	lib$free_ef(&rqst_efn);
+	return status;
+	}
+    
+    efn_mask = (1<<rqst_efn-32)  |		/* set the mask to determine */
+	       (1<<timer_efn-32) |		/* the event flags for which */
+	       (1<<ecbi.efn-32);		/* to wait		     */
+    
+/*  Now loop through waiting for one of three events:
+ *     1.  The operator replied to the request (probably an abort),
+ *     2.  The user typed a ^C (user abort),
+ *  or 3.  The tape was loaded on the drive.
+ *
+ *  To do this, we wait on our local event flag cluster for one of 3 events:
+ *  a user ^C (ecbi.efn flag), an operator reply (rqst_efn flag), or the
+ *  expiration of our timer (timer_efn flag).  A reply or ^C causes the
+ *  mount to abort, and the timer running out signals us to check whether
+ *  or not the operator has loaded the tape.  If not, we set the timer again
+ *  and continue to wait for an event.
+ *
+ *  The timer is used because we don't want to eat up CPU time looping
+ *  over and over while the operator has a cup of coffee, and the system
+ *  provides no asynchronous way of letting us know the tape is loaded (at
+ *  least not that I could find - dfs).  Ten seconds seemed like a good
+ *  amount of time to wait.  Any longer could both make the user impatient
+ *  and could also confuse the operator if he/she gets a request to mount a 
+ *  tape he has already mounted.
+ */
+    
+    while (FOREVER)
+	{
+	status = sys$setimr(timer_efn,time,0,0);	/* set the timer */
+	if (status != SS$_NORMAL) 
+	    {
+	    cancel_mnt_request(mailbox);
+	    break;
+	    }
+	
+	status = sys$wflor(timer_efn, efn_mask);	/* wait for an event */
+	if (status != SS$_NORMAL) 
+	    {
+	    cancel_mnt_request(mailbox);
+	    break;
+	    }
+	
+	status = sys$readef(rqst_efn,&efns);	/* Check for REPLY from oper */
+	
+	if (status == SS$_WASSET)		/* OPER replied, so check the*/
+	    {					/* contents of the reply. . .*/
+	    status = iosb.status;
+	    if ((status != SS$_NORMAL) &&	/* check final read status  */
+		(status != SS$_BUFFEROVF)) break;
+	    
+	    inbuf.text[iosb.size-8] = '\0';	/* prepare reply string */
+						/* for printing		*/
+
+	    status = inbuf.status;		/* check status given by oper*/
+	    if (!(status & SUCCESS))
+		{				/* operator aborted 	*/
+		tmmsg(PROCFAIL,
+		    "Mount aborted by operator, operator message follows:",
+		    "TAE-MNTABORT");
+		put_stdout(inbuf.text);
+		status = SS$_ABORT;	/* just for some non-success status */
+		break;
+		}
+	    
+	    if (status == OPC$_NOPERATOR)
+		{
+		tmmsg(PROCFAIL,
+		    "Sorry, no operator is available.  Aborting mount.",
+		    "TAE-MNTABORT");
+		status = SS$_ABORT;	/* just for some non-success status */
+		break;
+		}
+	    
+	    status = sys$mount(itemlist);	/* Try to mount.  Break out  */
+	    if (((status & 0xffff) != SS$_VOLINV) && /* of the loop if tape  */
+		((status & 0xffff) != SS$_IVLOGNAM)) /* is on the drive or   */
+	        break;				/* some other error occurred */
+
+	    tmmsg(PROCFAIL,
+		"Reply received from operator, but tape is not mounted!",
+		"TAE-MNTABORT");			/* we should never get here. */
+	    put_stdout("Operator message is:"); /* Tape was not loaded, but  */
+	    put_stdout(inbuf.text);		/* operator gave a reply     */
+						/* indicating it was. . .    */
+	    status = SS$_ABORT;	/* just for some non-success status */
+	    break;
+	    }
+	else if (status != SS$_WASCLR)		/* An error which we cannot  */
+	    {					/* handle must have occurred */
+	    cancel_mnt_request(mailbox);
+	    break;
+	    }
+	
+	if (e_occur(&ecbi))			/* Check for ^C		     */
+	    {
+	    e_clear(&ecbi);			/* if user typed ^C, abort   */
+	    cancel_mnt_request(mailbox);	/* the mount.		     */
+	    tmmsg(PROCFAIL, "Mount aborted by control-C","TAE-MNTABORT");
+	    status = SS$_ABORT;	/* just for some non-success status */
+	    break;
+	    }
+	
+/* If timer ran out, try to mount the tape again */
+	status = sys$mount(itemlist);
+	if (((status & 0xffff) != SS$_VOLINV) && /* If mounted or failed,   */
+	    ((status & 0xffff) != SS$_IVLOGNAM)) /* clear the oper request, */
+	    {					 /* and we are done.	    */
+	    cancel_mnt_request(mailbox);
+	    break;
+	    }
+	}	/* If not loaded, loop back up to set timer and wait again */
+
+    sys$dassgn(mailbox);	/* Deassigning the channel cancels the i/o   */
+				/* request and deletes the mailbox.	     */
+    sys$cantim(0,0);			/* cancel the timer if still there   */
+    lib$free_ef(&rqst_efn);		/* Free up the event flags allocated */
+    lib$free_ef(&timer_efn);		/* and return the mount status	     */
+    return status;
+    }
+
+/* mnt_request
+ *
+ * Issues a request to the tape operator to mount a tape.  The request requires
+ * a reply, so the channel for the mailbox is passed out.  The request will
+ * be canceled if the operator mounts the tape, so a reply is not actually
+ * needed -- we require the reply simply so that the oper may abort the 
+ * request if he/she desires.
+ */ 
+    FUNCTION CODE mnt_request(message, mailbox)
+
+    TEXT	message[];		/* message for operator		  */
+    unsigned short	*mailbox;	/* mailbox i/o channel		  */
+    
+    {
+    CODE	status;		/* function status return */
+    struct
+	{
+	TINY		msgtype;
+	unsigned        target : 24;
+	LONG		rqst_id;
+	TEXT            string[255];
+	} mnt_message = {OPC$_RQ_RQST,OPC$M_NM_CENTRL | OPC$M_NM_TAPES,1,0};
+    
+    struct dsc$descriptor_s mnt_message_dscr =
+	{
+	0,
+	DSC$K_DTYPE_T,
+	DSC$K_CLASS_S,
+	&mnt_message
+	};
+    
+    
+    status = sys$crembx(0, mailbox, 0,0,0,0,0);
+    if (status != SS$_NORMAL) return status;
+    
+    strcpy(mnt_message.string, message);
+    mnt_message_dscr.dsc$w_length = 9 + strlen(mnt_message.string);
+    status = sys$sndopr(&mnt_message_dscr, *mailbox);
+    put_stdout(mnt_message.string);
+    return status;
+    }
+
+/* cancel_mnt_request -- cancel the outstanding mount request
+ * 
+ */
+    FUNCTION CODE cancel_mnt_request(mbx_chan)
+
+    unsigned short mbx_chan;
+
+    {
+    struct
+	{
+	UTINY		type;
+	unsigned	target : 24;
+	LONG		rqst_id;
+	} can_message = {OPC$_RQ_CANCEL,OPC$M_NM_CENTRL | OPC$M_NM_TAPES,1};
+
+    struct dsc$descriptor_s can_message_dscr =
+        {   sizeof(can_message),
+	    DSC$K_DTYPE_T,
+	    DSC$K_CLASS_S,
+	    &can_message
+	};
+
+    sys$sndopr(&can_message_dscr, mbx_chan); /* cancel the oper rqst */
+    return;
+    }

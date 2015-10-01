@@ -1,0 +1,20 @@
+.Title
+[4mAdditional ARITHMETIC FUNCTION Menu Selections[0m        (page 2 of 2)
+.Proc QSAR
+qsar      - Adds or subtracts specified values to or from the DN 
+            numbers of rectangular sections of an image.
+.Proc RATIO
+[1mRATIO[0m     - Procedure ratioing two images (e.g., ratio, log ratio,
+            difference or log difference).
+.Proc SARGON
+sargon    - Performs arithmetic operations interactively on user 
+            defined areas (polygons) within an image.
+.Proc SARGONB
+sargonb   - Performs arithmetic operations on user defined areas
+            (polygons) within an image.
+.Proc XFORM
+[1mXFORM[0m     - Performs a matrix defined linear transformation. 
+.Proc ZINTERP
+[1mZINTERP[0m   - IBIS program interpolating elevation values (z values)
+            from random control points into a rectangular gridded image.
+.END

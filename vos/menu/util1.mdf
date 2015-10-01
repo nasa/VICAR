@@ -1,0 +1,38 @@
+.Title  
+[4mMISCELLANEOUS UTILITIES Menu[0m                           (page 1 of 2)
+.Proc AL
+[1mAL[0m        - Pre-allocates disk image files.
+.Proc APFLAG
+[1mAPFLAG[0m    - Returns into local variables the array processor 
+            availability, format and size of an input image.
+.Proc CAMPARAM
+[1mCAMPARAM[0m  - Returns into local variables, info from a Voyager 
+            image label.
+.Proc DATETIME
+[1mDATETIME[0m  - Types the current date and time.
+.Proc DTRTAE
+[1mDTRTAE[0m    - Allows the user to run Datatrieve commands from within
+            VICAR procedures.
+.Proc FORM
+[1mFORM[0m      - Returns to local variables: data format, NL and NS of a 
+            file.
+.Proc GETLAB
+[1mGETLAB[0m    - Retrieves a label item from any part of the VICAR label
+            and assigns it to a local variable.
+
+.Menu util2.mdf
+[7mAdditional MISCELLANEOUS UTILITIES Selections[0m
+
+.help
+
+The MISCELLANEOUS UTILITIES section contains those programs which allow the 
+user to do miscellaneous things like: send messages to the system operator, 
+find out the date and time, pass parameters to pdf's etc.  These programs 
+include: 
+
+AP                 APFLAG             CAMPARAM           DATETIME           
+DTRTAE             FORM               GETLAB             IBIS2TCL
+LAB2TCL            MAXMIN             MENUTREE           REQUEST            
+SYNTAX             TRANSLOG           USERNAME           V2VERSION          
+WILDCARD
+.END

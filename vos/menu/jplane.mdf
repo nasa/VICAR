@@ -1,0 +1,40 @@
+.Title
+VIDS Image Plane Control Menu
+.proc jbw
+JBW          - Sets the current display device to black and white mode.
+.proc jcolor
+JCOLOR       - Sets the current display device to color mode.
+.proc jpseudo
+JPSEUDO      - Sets the current display device to pseudocolor mode.
+
+.proc jgraphics
+JGRAPHICS    - Selects the graphics plane and turns it on.
+.proc jon
+JON          - Turns on the specified image planes.
+.proc joff
+JOFF         - Turns off the specified image planes.
+
+.proc jerase
+JERASE       - Erases the whole display device, specified planes, or regions.
+.proc jdtf
+JDTF         - Displays and optionally edits the current look-up tables.
+
+.command help planenames
+PLANENAMES   - Help on the naming of planes.
+.proc jdef-plane
+JDEF-PLANE   - Defines a new image plane name.
+.proc jshow-planes
+JSHOW-PLANES - Prints information about the image planes to the terminal.
+
+.proc jgrab
+JGRAB        - Allocates a display device.
+
+.help
+
+
+The VIDS Image Plane Control Menu lists all the VIDS commands that
+affect the configuration of the image planes.  Included are commands
+that turn on and off the planes, commands that reassign which plane is
+used for color, gray scale, and pseudocolor, and commands that show
+the status of the planes or define new plane names.
+.end

@@ -1,0 +1,15 @@
+; FUNCTION N_ARGS
+;
+; 81-6     ...  LWK
+;
+; Used to provide a subroutine with the number of actual
+; arguments in the calling routine.
+; (Cribbed from the RSX mini-VICAR routine.)
+;
+; Calling sequence:   N = N_ARGS()
+;
+	.TITLE  N_ARGS_VMS
+	.ENTRY  N_ARGS,^M<>
+	MOVZBL  @L^8(SP),R0       ;LOW BYTE FROM SAVED AP
+	RET
+	.END

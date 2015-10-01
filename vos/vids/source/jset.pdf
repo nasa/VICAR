@@ -1,0 +1,695 @@
+procedure help=* options=nointerrupt
+subcmd color
+  parm color		(string,20) count=0:8	default=-- +
+	valid=(RED,GREEN,BLUE,WHITE,MAGENTA,YELLOW,CYAN,BLACK,TRANSPARENT)
+  parm rgb		integer count=(0,3)	default=--	valid=(0:255)
+  parm dn		integer count=0:1	default=--	valid=(0:255)
+  parm blend		keyword valid=(BLEND,OPAQUE) default=BLEND
+end-subcmd
+subcmd cursor
+  parm location		integer	count=(0,2)	default=--
+  parm (form,blink)	integer	count=0:1	default=--
+  parm onoff		keyword	valid=(ON,OFF)	default=ON
+  parm rgb		integer	count=(0,3)	default=--
+  parm color		keyword	valid=(RED,GREEN,BLUE,ORANGE,YELLOW,MAGENTA, +
+	CYAN,PURPLE,BROWN,PINK,LTGREEN,LTBLUE,VIOLET,GREY,BLACK,WHITE,AQUA, +
+	MELON)		count=0:1 default=--
+  parm coord		keyword valid=(RAW,IMP,FILE) count=0:1 default=RAW
+  parm plane		(string,20) count=1 default=BW
+end-subcmd
+subcmd message
+  parm degree	keyword valid=(SILENT, INFORMATIONAL, VERBOSE)
+end-subcmd
+subcmd range
+  parm low	real default=0.0
+  parm high	real default=0.0
+  parm inp	string count=0:1 default=--
+end-subcmd
+subcmd size
+  parm video	integer count=0:2 valid=(0,512,1024,480,640,1280) default=--
+  parm imps	integer count=0:2 valid=(0,512,1024,2048,4096,480,640,1280) +
+							default=--
+end-subcmd
+subcmd text
+  parm font	integer count=0:1 default=--
+  parm size	integer count=0:1 default=--
+  parm angle	real count=0:1 default=--
+  parm aspect   real count=0:1 default=--
+  parm user	keyword valid=(USER,SYSTEM) default=USER
+end-subcmd
+parm device string count=0:1 default=--
+body
+chkvids1
+if (_subcmd = "COLOR")
+  sendvar (_proc,_subcmd,color,rgb,dn,blend,device) job=VIDSJOB
+else-if (_subcmd = "CURSOR")
+  sendvar (_proc,_subcmd,form,onoff,blink,location,rgb,color, +
+		coord,plane,device) job=VIDSJOB
+else-if (_subcmd = "RANGE")
+  sendvar (_proc,_subcmd,low,high,inp,device) job=VIDSJOB
+else-if (_subcmd = "MESSAGE")
+  sendvar (_proc,_subcmd,degree,device) job=VIDSJOB
+else-if (_subcmd = "SIZE")
+  sendvar (_proc,_subcmd,video,imps,device) job=VIDSJOB
+else-if (_subcmd = "TEXT")
+  sendvar (_proc,_subcmd,font,size,angle,aspect,user,device) job=VIDSJOB
+end-if
+chkvids2
+end-proc
+.title
+VIDS command JSET
+.help
+The JSET command is used with various subcommands to set options and
+values in VIDS.  It is used in the format JSET-subcommand, where each
+subcommand has its own parameters described in its help.  Subcommand
+names may be abbreviated.
+
+Examples:
+
+JSET-COLOR RED		- Set graphics drawing color to red
+JSET-CURSOR 4 0		- Set cursor to form 4 with no blink
+JSET-MESSAGE VERBOSE	- Make VIDS messages verbose
+JSET-RANGE 0 5000 A.DAT	- Set the valid data range for a.dat to be from
+			- 0 to 5000
+JSET-SIZE 480 1024	- Set device size to 480 x 640 video and
+			- 1024 x 1024 memory planes
+JSET-TEXT 7 ANGLE=90    - Set text to use font 7 at an angle of 90 degrees
+.level1
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd color
+Set the graphics drawing color
+.vari color -color
+The color to use for graphics.
+(may be a blend of colors)
+.vari rgb -color
+Approximate RGB values
+for the graphics color
+(overridden by COLOR)
+.vari dn -color
+Direct DN color value.
+(overridden by COLOR and RGB)
+.vari blend -color
+Specifies blending
+or opaque colors.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd cursor
+Set the cursor attributes
+.vari form -cursor
+Shape of the cursor
+(different for each device)
+.vari blink -cursor
+Blink rate of the cursor
+.vari onoff -cursor
+Turn cursor ON or OFF
+.vari location -cursor
+Location to put cursor
+.vari rgb -cursor
+RGB color value to set cursor
+to.  Overrides COLOR.
+.vari color -cursor
+Color to use for cursor.
+Overridden by RGB.
+.vari coord -cursor
+Coordinate system of
+input location:
+RAW, IMP, or FILE
+.vari plane -cursor
+Plane to use for IMP
+or FILE coordinates
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd message
+Set which messages should
+appear on terminal
+.vari degree -message
+SILENT, INFORMATIONAL,
+or VERBOSE
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd range
+Set a valid data range for a
+given input file or for all
+input files
+.vari low -range
+Bottom end of valid
+data range
+.vari high -range
+Top end of valid
+data range
+.vari inp -range
+Image file to which range
+is to be applied; sets
+default range if blank
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd size
+Set the size (nl,ns) of
+video and image plane memory
+.vari video -size
+Number of lines and
+samples of video
+.vari imps -size
+Number of lines and
+samples in image memory planes
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd text
+Sets various text attributes
+.vari font -text
+Font number to use
+.vari size -text
+Height in pixels of text
+.vari angle -text
+Angle to use for
+the text baseline
+.vari aspect -text
+Aspect ratio of text
+(width/height ratio)
+.vari user -text
+Selects whether to change
+USER (JTEXT) or SYSTEM
+(VIDS output) attributes
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.vari device
+Name of device to use
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.level2
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd COLOR
+JSET-COLOR is used to set the color to be used for graphics and text
+drawing routines, such as JDRAW and JTEXT.
+
+The color may be specified in either of three ways.  The first is via the
+COLOR parameter.  COLOR accepts the color names RED, GREEN, BLUE, WHITE,
+MAGENTA, YELLOW, CYAN, BLACK, and TRANSPARENT.  The color names may be
+abbreviated.  You may give more than one color, in which case a blend
+of the colors listed is used.  See the help for the COLOR parameter.
+
+The second is with an RGB value for the color to use.  This is only an
+approximate value; the actual color is the closest color that exists in
+the graphics lookup table.
+
+The third method for setting the drawing color is via the DN parameter.
+This allows you to control the actual pixel value that is written, without
+translating through the color names.  This is most useful if you assign an
+image plane to the graphics plane temporarily in order to draw in the image
+plane.  The COLOR parameter overrides DN.
+.page
+If none of COLOR, RGB, or DN are given, the color does not change.  You
+can change the blending or opaque quality of a color this way without
+re-entering the color.
+
+Colors may either be blending or opaque.  Blending colors blend with
+whatever graphics are already displayed.  Opaque colors overwrite any
+existing graphics they fall over.
+
+The special color name TRANSPARENT can be used to erase graphics, allowing
+the image to show through.
+
+Examples:
+
+JSET-COLOR RED		- Sets the color to red which blends with other colors.
+JSET-COLOR RED 'OPAQUE	- Sets the color to an opaque red.
+JSET-COLOR (GRE,WHITE)	- Sets the color to a light green.
+JSET-COLOR (WHI,BLA)	- Sets the color to a medium gray.
+JSET-COLOR RGB=(0,128,0)- Sets the color as close as possible to dark green.
+.vari color -color
+The COLOR parameter specifies the color to use for drawing graphics.
+COLOR accepts the color names RED, GREEN, BLUE, WHITE, MAGENTA, YELLOW,
+CYAN, BLACK, and TRANSPARENT.  The color names may be abbreviated.
+
+You can give more than one color in the COLOR parameter, in which case the
+output color is a blend of the colors you list, to the best ability of the
+hardware.  For example, a color of RED would appear as red.  A color of
+(RED,GREEN) would come out as yellow.  A color of (red,white) would be pink.
+(YELLOW,BLACK) comes out as a gold.  Different display devices have different
+amounts of blending they can do.  Some may display only the 8 basic colors
+listed above, while others can display hundreds of colors derived from the
+basic 8.
+.page
+The color TRANSPARENT is a special color.  Any graphics drawn with TRANSPARENT
+will actually erase the existing graphics that the shape overwrites, allowing
+the image underneath to show through.  TRANSPARENT does not blend with
+anything.  If TRANSPARENT is given as one of the colors in a list, all the
+other colors are ignored.
+
+The COLOR parameter overrides the DN and RGB parameters.  If none are given,
+the color used does not change.
+.vari rgb -color
+The RGB parameter allows you to enter an approximate value for each of the
+Red, Green, and Blue components of the color you want.  It is only an
+approximate value because there are a limited number of colors available in
+the graphics plane.  Some devices have 256 colors, some only 16, and some may
+only have 1.  The color chosen is the one with the least Cartesian distance
+in RGB color space to the value you provide.
+
+The RGB parameter overrides the DN parameter, but is overridden by the COLOR
+parameter.
+.vari dn -color
+The DN parameter allows you to control the actual pixel value that is
+written, without translating through the color names.  This is most useful
+if you assign an image plane to the graphics plane temporarily in order to
+draw in the image plane.
+
+The actual color that gets displayed for a given DN depends on the display
+device.  For this reason, the use of DN is not recommended.  It should only
+be used if you need to write graphics into an image plane.
+
+The DN parameter is ignored if COLOR or RGB is given.  If none are given, the
+color used does not change.
+.vari blend -color
+The BLEND keyword parameter controls the blending qualities of a color.
+Colors may be either blending or opaque.  'BLEND colors blend with
+whatever graphics are already displayed, to the limits of the hardware.
+'OPAQUE colors overwrite any existing graphics they fall over.
+
+Note that any graphics always obscure the image beneath them.  Blending
+applies only to other graphics colors that are on the screen when the
+graphic is written.  If you need to uncover the image, draw with the
+special color TRANSPARENT.
+
+The default is BLEND.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd CURSOR
+JSET-CURSOR is used to position the cursor and change cursor attributes.
+Three attributes may be changed:  the form, the blink rate, the color,
+and whether the cursor is on or off.  Each attribute is described under
+HELP for its parameter (FORM, BLINK, RGB or COLOR, and ONOFF).
+
+The LOCATION parameter may be used to specify a location at which the
+cursor is to be positioned.  It can be given in screen, image plane,
+or file coordinates with the COORD parameter.  The default is screen (raw).
+.page
+Examples:
+
+JSET-CURS LOC=(146,257)	- Position the cursor on line 146, samp 257
+
+JSET-CURS LOC=(10,97) 'FILE - Position the cursor in file coordinates.
+
+JSET-CURS 'ON		- Turn on the cursor
+
+JSET-CURS FORM=4	- Set cursor to form (shape) 4.  The actual shape is
+			- device-dependent.
+
+JSET-CURS BLI=3		- Set the blink rate of the cursor to 3.  The actual
+			- blink rate is device-dependent.  BLINK=0 indicates
+			- no blink.  The larger the value of BLINK, the slower
+			- the blink.
+
+JSET-CURS COLOR=RED	- Sets the cursor color to red, if possible for this
+			  particular display device.
+.vari form -cursor
+The FORM parameter indicates in which form or shape the cursor should
+appear.  Each device supported has different forms and a different
+number of forms available.  To see what a given form looks like,
+use the JSET-CURSOR command to browse through all the forms until
+an error message occurs (i.e., until you have passed the maximum number
+of forms).
+
+Example:
+
+JSET-CURS FORM=3	- Use cursor form number 3
+.vari blink -cursor
+The BLINK parameter sets a blink rate for the cursor.  A blink rate of
+zero indicates no blinking.  A negative number is not allowed.  The 
+larger the BLINK parameter is, the slower the cursor will blink.
+
+Examples:
+
+JSET-CURS BLINK=0	- Turn off blinking
+JSET-CURS BLINK=1	- Use fastest blink rate
+JSET-CURS BLINK=8	- Use slower blink rate
+.vari onoff -cursor
+The ONOFF parameter controls whether to turn the cursor on or off.
+When the cursor is off, it is invisible and may only be turned on
+with the JSET-CURSOR command.
+
+Examples:
+
+JSET-CURS 'OFF	- Turn off the cursor.
+JSET-CURS 4	- Turn on the cursor and change to form number 4.
+JSET-CURS 'ON	- Turn on the cursor with the current form and blink.
+.vari location -cursor
+The LOCATION parameter specifies a location at which to position the
+cursor.  It may be given in screen coordinates, image plane coordinates,
+or file coordinates by using the COORD parameter.  The default is
+screen coordinates.
+.vari rgb -cursor
+RGB defines the color to use for the cursor as Red, Green, and Blue
+intensities in that order.  The intensities range from 0 to 255.  All
+three values must be given if any are given.
+
+RGB will override the COLOR parameter.  If neither are given, the color
+will not be changed.
+
+Not all devices support changing the cursor color.  In addition, only a
+limited set of colors may be available.  In this case, the closest color
+to the desired one will be chosen.
+.vari color -cursor
+The COLOR keyword parameter allows you to change the cursor color to one
+of several predefined colors.  The available colors are:
+
+RED, GREEN, BLUE, ORANGE, YELLOW, MAGENTA, CYAN, PURPLE, BROWN,
+PINK, LTGREEN, LTBLUE, VIOLET, GREY, BLACK, WHITE, AQUA, MELON
+
+The COLOR parameter is overridden by RGB.  If neither are given, the
+color will not be changed.
+
+Not all devices support changing the cursor color.  In addition, only a
+limited set of colors may be available.  In this case, the closest color
+to the desired one will be chosen.
+.vari coord -cursor
+The COORD keyword parameter allows you to select the coordinate system
+to use for the LOCATION parameter.  The possible values are RAW, IMP,
+and FILE.  See the help for JSHOW-CURSOR for more on coordinate systems.
+Both IMP and FILE require their coordinates to be relative to an image
+plane.  This is specified with the PLANE parameter, which defaults to BW.
+
+RAW (the default) uses screen-relative coordinates.  (1,1) is always the
+upper left.
+
+IMP sets the cursor relative to the image plane, which is affected by
+hardware zooms and pans.  If the selected location is not currently
+displayed, the cursor will be placed in a wrap-around location, i.e. on
+a 512 screen, location 600 would go to 600-512 = 88.
+
+FILE sets the cursor relative to the currently displayed file.  If the
+location requested is not currently displayed, an error message will be
+printed and the cursor will not be moved.
+.vari plane -cursor
+The PLANE parameter specifies the plane that the coordinates of the
+LOCATION parameter are relative to.  It only applies of 'IMP or 'FILE
+has been specified.  File coordinates are relative to the file
+displayed on this plane.
+
+See HELP PLANENAMES for more information on plane names.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd MESSAGE
+JSET-MESSAGE may be used to determine what messages VIDS will print on
+the terminal.  DEGREE is a keyword parameter which may take any of the
+following values:
+
+	SILENT:		No messages are to be printed to the terminal.
+			SILENT is useful for custom procedures in which
+			you do not want the individual steps to be reflected
+			on the terminal, such as during a demo.
+	INFORMATIONAL:	Only normal, informational messages are to be
+			printed on the screen.  This value is the default
+			upon starting VIDS.
+	VERBOSE:	When messages are set to VERBOSE, a message is
+			printed to the terminal when each command begins,
+			and individual commands will print out extra
+			information which one usually would not care to
+			or need to see.
+.vari degree -MESSAGE
+DEGREE is a keyword parameter which indicates what messages you desire
+VIDS to print.  It may take any of the following values:
+
+	SILENT:		No messages are to be printed to the terminal.
+			SILENT is useful for custom procedures in which
+			you do not want the individual steps to be reflected
+			on the terminal, such as during a demo.
+	INFORMATIONAL:	Only normal, informational messages are to be
+			printed on the screen.  This value is the default
+			upon starting VIDS.
+	VERBOSE:	When messages are set to VERBOSE, a message is
+			printed to the terminal when each command begins,
+			and individual commands will print out extra
+			information which one usually would not care to
+			or need to see.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd RANGE
+JSET-RANGE is used to set a data range for non-byte images.  Whenever
+a non-byte image file is loaded onto the display device, it is scaled
+linearly so that the LOW value is mapped to zero, and the HIGH value
+is mapped to 255.  Any pixels which map to a value higher than 255 will
+be set to 255; any which map to a value lower than zero will be set to
+zero.
+
+This data range can be set for each file individually via the INP
+parameter.  It remains attached to this image file until a new range
+is given.  In other words, if the image is loaded or displayed multiple
+times after specifying a range, that range is used each time.
+.page
+If you don't set a range for a particular file, then that file uses the
+default range.  The default range starts out with LOW at 0 and HIGH at 255,
+however you can change it.  To change the default range, simply leave
+the INP parameter blank.
+
+You may wish to cancel a range on a particular image after displaying
+it.  By setting LOW and HIGH both to 0 and giving the filename, you
+cancel the range for that file and cause it to use the default range.
+
+You may also set the default range back to it's starting point by
+setting LOW and HIGH both to 0 and leaving off the filename.
+.page
+Examples:
+
+JSET-RANGE 300 6000 A.IMG	- A.IMG uses the range (300,6000)
+JDISP B.IMG			- B.IMG uses the default (0,255)
+JSET-RANGE 200 5000		- sets default range to (200,5000)
+JDISP A.IMG			- A.IMG still has a range of (300,6000)
+JDISP B.IMG			- B.IMG uses the new default (200,5000)
+JSET-RANGE 4.2 6.9 C.IMG	- C.IMG uses (4.2,6.9)
+JSET-RANGE 0 0 A.IMG		- Resets A.IMG's range to default
+JDISP A.IMG			- A.IMG uses the default (200,5000)
+JSET-RANGE			- Resets default range to (0,255)
+JDISP (A.IMG,B.IMG)		- Both use the new default (0,255)
+JDISP C.IMG			- C.IMG still uses (4.2,6.9)
+.vari low -RANGE
+The LOW parameter is a real number specifying the bottom of the data
+range of interest.  A linear transformation is applied to the image
+data wherein LOW is mapped to zero.  Values mapped below zero will
+become zero.
+
+If both LOW and HIGH are 0, then the file named by INP will revert
+to using the default range.  This in effect turns off the settings
+given by a previous JSET-RANGE command for this particular file.
+If INP is also blank, then the default range will be reset to a low
+of 0 and a high of 255.  See the general help for JSET-RANGE for
+details and examples of the default range.
+.vari high -RANGE
+The HIGH parameter is a real number specifying the top of the data
+range of interest.  A linear transformation is applied to the image
+data wherein HIGH is mapped to 255.  Values mapped above 255 will
+become 255.
+
+If both LOW and HIGH are 0, then the file named by INP will revert
+to using the default range.  This in effect turns off the settings
+given by a previous JSET-RANGE command for this particular file.
+If INP is also blank, then the default range will be reset to a low
+of 0 and a high of 255.  See the general help for JSET-RANGE for
+details and examples of the default range.
+.vari inp -RANGE
+The INP parameter is a string specifying the name of the file to
+which the range applies.  Specifying the same file with two different
+names (e.g., "a.dat" and "[adir]a.dat") will not confuse VIDS, it will
+recognize them as the same file.  Setting the range for a file will
+override the default range.
+
+If INP is left off, then the given range will become the default range.
+This default is applied to all non-byte format images that don't have
+an explicitly set range.  This allows you to, for example, set a range
+once and have it apply to a large group of similar files, without needing
+to set each file's range individually.  You can override this default
+for a particular file by issuing a JSET-RANGE command with the file
+name in the INP parameter.
+
+See the general help for JSET-RANGE for details and examples of the
+default range.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd size
+The JSET-SIZE command changes the current size of the image memory
+planes and the video output if the device supports it.  The VIDEO
+parameter is used to indicate the size of video output to use, and the
+IMPS parameter is used to indicate the size of the image memory planes.
+
+Both parameters are integer pairs with a limited number of valid values.
+The first integer of the pair is NL, the second is NS.  The number of
+samples may be left off if the requested size is square (i.e. nl=ns), or
+if setting it to (480,640) for backward compatibility.
+
+Examples:
+
+JSET-SIZE 512 1024		- 512 x 512 video, and 1024 x 1024 memory
+JSET-SIZE (1024,1280) (1024,1280) - 1024 x 1280 video and memory planes
+JSET-SIZE 512 512		- 512 x 512 video, and 512 x 512 memory planes
+.vari video -size
+The VIDEO parameter is the number of lines and samples of video output to
+be used.  Abbreviated valid values (i.e. only NL need be given):
+
+	 512:	512 x 512 video output
+	1024:	1024 x 1024 video output
+	 480:	480 x 640 video output
+
+Other valid values:
+
+	 (512,512)	(1024,1024)	 (480,640)
+	 (512,640)	(1024,1280)	 (512,1024)
+
+If the device does not support the requested video output size, an error
+message will be printed and the size will not be changed.
+
+By default, the output video size will not change.
+.vari imps -size
+The IMPS parameter is the number of lines and samples to be used in each
+image memory plane.  Abbreviated valid values (i.e. only NL need be given):
+
+	 512:	512 x 512 image memory planes
+	1024:	1024 x 1024 image memory planes
+	2048:	2048 x 2048 image memory planes
+	 480:	480 x 640 image memory planes
+
+Other valid values:
+
+	 (512,512)	(1024,1024)	 (480,640)	(2048,2048)
+	 (512,640)	(1024,1280)	 (512,1024)	(4096,4096)
+
+If the device does not support the requested image memory plane size,
+an error message will be printed and the size will not be changed.
+
+By default, the image plane size will not change.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.subcmd TEXT
+JSET-TEXT is used to set the text attributes to use with either user
+text (written with JTEXT command) or system text (written by JPROFILE,
+JHIST, etc.).
+
+The attributes that may be changed are the font, the height, the
+width/height ratio (aspect ratio), and the angle of the text baseline.
+
+There are two independent sets of attributes - one for the user, and
+one for the VIDS system.  Either one may be changed via the USER keyword
+parameter.  If 'USER is specified, then the attributes used with the JTEXT
+command are changed.  If 'SYSTEM is specified, then the attributes used
+with VIDS-written text, such as labels for JPROFILE, JHIST, JPSEDIT, etc.,
+are changed.
+.page
+Color is not a text attribute.  If you wish to change the color used with
+JTEXT, use JSET-COLOR.  If you wish to change the color used with system
+text, use the appropriate parameter on the command that writes the text.
+
+You may change one or more attributes without affecting the others.
+In other words, defaulting a parameter leaves it unchanged.  For
+example, if you said "JSET-TEXT SIZE=20", then the size will be 20
+until you explicity change it.  You could then issue another command,
+such as "JSET-TEXT FONT=3", and the size would still be set to 20.
+
+Examples:
+
+JSET-TEXT 2 15		- Sets font 2 with a height of 15 for the user.
+JSET-TEXT ANGLE=30	- Sets the rotation angle to 30 degrees.  The
+			  font, size, and aspect ratio do not change.
+JSET-TEXT ASP=2.0 'SYS	- Sets the system text to be twice as wide.
+JSET-TEXT FONT=7 'SYS	- Sets system text to font 7.  Aspect ratio=2.0
+			  from the previous command is still in effect.
+.vari font -text
+The FONT parameter selects which font to use.  The font is similar
+to a typeface; it specifies how the characters look.  It can also
+change the character set, so a font may have special characters instead
+of an alphabet.  For example, Roman, Script, Old English, Cartographic
+symbols, and Russian (Cyrillic) would be five different fonts.
+
+The fonts are specified by number, not by name.  For a complete list
+of all standard VICAR fonts, see the appendices to the VRDI User's
+Reference Guide.  The appendices also list what special characters are
+available and where they are located in some of the fonts.  You can
+define your own fonts if you wish; for details, see the VRDI User's
+Reference Guide.
+
+Some fonts, such as most of the special symbol fonts, will not work
+well with 'SYSTEM, since they do not have numbers in the right places.
+If you select one of these fonts for the system font, you may get
+strange characters or no characters at all instead of numbers and labels.
+.page
+A partial list of available fonts follows:
+
+  0	Default Font			  8	Hollow
+  1	Simplex				  9	Cartographic
+  2	Duplex				 10	Greek
+  3	Roman				 11	English Gothic
+  4	Standard			 12	German Gothic
+  5	Standard 2			 13	Italian Gothic
+  6	Standard Italics		 14	Cyrillic
+  7	Script				 30	CCSI Font (from CC plot pkg)
+
+(more)
+.page
+102	Cartographic Special Characters
+103	Simplex Roman, Greek, and Script (Upper Case)
+104	Simplex Roman, Greek, and Script (Lower Case)
+105	Simplex Roman Special Characters, Geometry, Cards, and Weather Symbols
+106	Circuit and Map Symbols
+107	Circles and Highway Symbols
+111	Math Symbols (normal size)
+112	Complex Roman, Greek, and Italic (Upper Case)
+113	Complex Roman, Greek, and Italic (Lower Case)
+114	Complex Roman Special Characters and Astrology
+115	Zodiac and Music Symbols
+116	Math Symbols (large size)
+117	Duplex Roman and Complex Script (Upper Case)
+118	Duplex Roman and Complex Script (Lower Case)
+
+(more)
+.page
+119	Duplex Roman and Complex Script Special Characters
+120	Complex Cyrillic (Upper Case)
+121	Complex Cyrillic (Lower Case)
+122	Triplex Roman and Italic (Upper Case)
+123	Triplex Roman and Italic (Lower Case)
+124	Triplex Roman and Italic Special Characters
+125	German Gothic (Upper Case)
+126	German Gothic (Lower Case)
+127	English Gothic (Upper Case)
+128	English Gothic (Lower Case)
+129	Gothic Special Characters
+130	Italian Gothic (Upper Case)
+131	Italian Gothic (Lower Case)
+203	Roman font like 003 except has underscore instead of arrow
+.vari size -text
+The SIZE parameter specifies the height in pixels to use when drawing
+the text.  Text may be scaled up arbitrarily; however, many fonts will
+not look good when sized too large.
+
+The default size for both system and user text is 7 pixels, or 14 pixels
+on a device with more than 512 lines of video.  If you don't specify
+SIZE, the size does NOT revert to the default; rather, it remains unchanged.
+If you want the default size again, you must explicitly set it to 7 or 14.
+.vari angle -text
+The ANGLE parameter sets the angle above or below the X axis (horizontal)
+that text is to be written.  The angle is measured in degrees with a
+positive angle causing a rotation in the counter-clockwise direction.
+An angle of 0 is normal left-to-right text.
+
+ANGLE cannot be used with the 'SYSTEM keyword.
+.vari aspect -text
+The ASPECT parameter sets the horizontal scale factor, or aspect ratio,
+to be applied to the text.  It is measured as the ratio of width to height.
+A value of 1.0 is normal spacing.  A large value, such as 2.0, stretches
+the text horizontally.  A small value, such as 0.5, compressed the text
+horizontally which makes it appear to stretch vertically.
+.vari user -text
+The USER keyword parameter selects whether to change the user attributes,
+or the system text attributes.  They are independent, and do not affect
+one another.
+
+'USER (the default) causes the user's attributes to be changed.  This
+will affect the text you write with JTEXT.
+
+'SYSTEM changes the system attributes.  VIDS commands that write text
+on the display for labelling will use these attributes.  This allows
+you to change the look of commands like JPROFILE, JPSEDIT, JHIST, etc.
+The ANGLE parameter is not allowed with 'SYSTEM.
+
+Some fonts, such as most of the special symbol fonts, will not work
+well with 'SYSTEM, since they do not have numbers in the right places.
+If you select one of these fonts for the system font, you may get
+strange characters or no characters at all instead of numbers and labels.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+.vari device
+The DEVICE parameter specifies which display device to perform this
+operation on.  This device will then become the current device for
+future operations.
+
+If DEVICE is not given, the current display device is used, i.e. the
+last device you specified on any VIDS command.
+
+A device must be JGRAB'ed before use.  See the help for JGRAB for more
+details.
+.end

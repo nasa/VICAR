@@ -1,0 +1,317 @@
+C	Generation time: 12-APR-1990 18:55:19.31
+C	
+C	        PGMINC.TXT.  Definitions for "native" (i.e. as defined in the
+C	        Version 1 PGM document)  TAE subroutines. Native routines 
+C	        use FORTRAN-77 character strings.
+C	
+C	        CAUTION:  this include file is generated from PGMINC.TXT using
+C	        the GENERATE.COM DCL procedure.  Only PGMINC.TXT should be
+C	        edited!!
+C	
+C	        CAUTION:  DO NOT add other "INCLUDE" statements without
+C	        consulting INSTALLTAE on UNIX.
+C	
+C	        NOTE: UNIX users BEWARE! The PGMINC.FIN file generated from
+C	        PGMINC.TXT isnt quite ready for porting. Two further changes
+C	        are required: (1) Substitute the 'INCLUDE' statement below 
+C		with the actual file, xiinc.fin, and (2) check for any
+C	        TABS and remove them as required by Apollo Fortran.
+C		(3) PGMINC.FIN as generated has inline comments (!) which
+C		SUN FORTRAN does not allow.
+C	        
+C	
+C	        CHANGE LOG:
+C	        31-mar-83       Delete xsyefn...palm
+C	        05-aug-83       Fix misspellings (conflicts with PGM)...peb
+C	        25-OCT-83       Add new P_  and x.. codes for xr package...dm
+C	        31-oct-83       Fix xlabsz misspelling...palm
+C	        05-nov-83       Set xprdim to P_BYTES/4...palm
+C	        10-nov-83       New xfilnm, xfilsz, xfilsp, xifdim...palm
+C	        18-nov-83       Add xover and xerror...palm
+C	        06-dec-83       XI package defs moved to XIINC.TXT and included...peb
+C	        23-feb-84       New 
+C	        26-jul-84       New "generation language"...palm
+C	        27-sep-84       Add I_INPUT, I_OUTPUT for C-callable image pkg...peb
+C	        25-oct-84       Add M_HOLD...nhe
+C	        04-nov-84       Put M_HOLD in correct slot...nhe
+C	        27-nov-84       Add P_NOPARM, P_OLDPARM...peb
+C	        13-aug-86       On 26-Aug-85, dab added M_DYNEXIT for exit from 
+C	                        dynamic tutor directly to PGMINC.INC.  I migrated
+C	                        the change into here...nci
+C	        14-sep-86       Add application language type definitions...dm
+C	        16-jul-87       Add dynamic pdf,mdf codes...tpl
+C	        10-mar-87       Change XIINC to xiinc.inp; add warning at top of 
+C	                        this file...ljn
+C	        28-dec-88       Added P_BADSIZE...tpl
+C		03-may-89	M_COMMAND...ljn
+C	        12-apr-90	Added xbmnmx, xnster...krw
+C	
+C	        Avoid re-definitions when multiply included in C:
+C	
+C	
+C	        error and success code definitions for parameter block 
+C	        manipulation.
+C	
+C       base of arbitrary constants
+        INTEGER	xpgmbs
+        PARAMETER (xpgmbs=1800)
+C      	bad parameter name
+        INTEGER	xbadnm
+        PARAMETER (xbadnm=1800)
+C	parameter type is wrong
+        INTEGER	xbadty
+        PARAMETER (xbadty=1801)
+C	caller-supplied array to small
+        INTEGER	xbadcn
+        PARAMETER (xbadcn=1802)
+C	abort on error
+        INTEGER	xabort
+        PARAMETER (xabort=1803)
+C	return with error code on error
+        INTEGER	xcont
+        PARAMETER (xcont=1804)
+C	duplicate name attempt
+        INTEGER	xdupnm
+        PARAMETER (xdupnm=1805)
+C	tutor user killed process
+        INTEGER	xkilld
+        PARAMETER (xkilld=1806)
+C	update mode for v-block
+        INTEGER	xupdat
+        PARAMETER (xupdat=1807)
+C	add mode for v-block
+        INTEGER	xadd
+        PARAMETER (xadd=1808)
+C	no room in v-block
+        INTEGER	xnoroo
+        PARAMETER (xnoroo=1809)
+C	overflow for FOR-77 string
+        INTEGER	xbadsz
+        PARAMETER (xbadsz=1810)
+C	general error indicator
+        INTEGER	xerror
+        PARAMETER (xerror=1811)
+C	adding qual to non-exist parm
+        INTEGER	xnopar
+        PARAMETER (xnopar=1812)
+C	parm created before quals existed
+        INTEGER	xoldp
+        PARAMETER (xoldp=1813)
+C	same as P_OVER
+        INTEGER	xover
+        PARAMETER (xover=xbadsz)
+C	success
+        INTEGER	xsucc
+        PARAMETER (xsucc=1)
+C	fail
+        INTEGER	xfail
+        PARAMETER (xfail=2)
+C	same as M_NESTER in MENUINC.INC
+        INTEGER	xnster
+        PARAMETER (xnster=13)
+C	bad min and max combination
+        INTEGER	xbmnmx
+        PARAMETER (xbmnmx=1814)
+C	end of parameter list
+        INTEGER	xeof
+        PARAMETER (xeof=2101)
+C	no parameter returned
+        INTEGER	xnull
+        PARAMETER (xnull=2102)
+C	T_NULL
+        INTEGER	xccnul
+        PARAMETER (xccnul=5)
+C	T_PROMPT
+        INTEGER	xccpro
+        PARAMETER (xccpro=6)
+C	T_STDCC
+        INTEGER	xccstd
+        PARAMETER (xccstd=7)
+C	T_DOUBLE
+        INTEGER	xccdbl
+        PARAMETER (xccdbl=8)
+C	T_CR
+        INTEGER	xcr
+        PARAMETER (xcr=9)
+C	T_ESCAPE
+        INTEGER	xesc
+        PARAMETER (xesc=10)
+C	T_CRT
+        INTEGER	xcrt
+        PARAMETER (xcrt=11)
+C	T_NOCRT
+        INTEGER	xnocrt
+        PARAMETER (xnocrt=12)
+C	T_NOTTERM
+        INTEGER	xnotrm
+        PARAMETER (xnotrm=13)
+C	not file or nocheck mode
+        INTEGER	xnone
+        PARAMETER (xnone=0)
+C	input file mode
+        INTEGER	xinput
+        PARAMETER (xinput=1)
+C	output file mode
+        INTEGER	xouput
+        PARAMETER (xouput=2)
+C	update file mode
+        INTEGER	xinout
+        PARAMETER (xinout=3)
+C	integer parameter
+        INTEGER	xintg
+        PARAMETER (xintg=1)
+C	real parameter
+        INTEGER	xreal
+        PARAMETER (xreal=2)
+C	string parameter
+        INTEGER	xstrng
+        PARAMETER (xstrng=3)
+C	file parameter
+        INTEGER	xfile
+        PARAMETER (xfile=4)
+C	parameter block dimension (int*4)
+        INTEGER	xprdim
+        PARAMETER (xprdim=1325)
+C	
+C	        Codes for parblk.msgtyp field.  Note that for dynamic parameters, 
+C	        we do not have a header block transmitted to TM as we did in the
+C	        prototype; the PDF file spec for dynamic parameters is obtained 
+C	        by TM from the string value of a variable named "_PROC" in the PARBLK.
+C	
+C	dynamic on all PDF parms, (process-to-TM)
+        INTEGER	xfulpd
+        PARAMETER (xfulpd=1850)
+C	dynamic on PDF subset  ,(process-to-TM)
+        INTEGER	xsubpd
+        PARAMETER (xsubpd=1851)
+C	
+C	        New V1.2 "handshake" versions 
+C	
+C	
+C	        Message for hold async jobs
+C	
+C	
+C	        Message to inform process of exit from dynamic tutor
+C	
+C	
+C	        Definitions for application program (language) type 
+C	        NOTE: Not sure if they belong here (or in TAECONF)
+C	
+C	
+C	        The XI definitions are in a separate file:
+C	
+C      INCLUDE "xiinc.fin"
+C
+C      Generation time:  2-APR-1988 16:33:26.29
+C      
+C              Symbol definitions for the TAE XI (Image File I-O)
+C              subroutine package
+C      
+C              CAUTION:  this include file is generated from XIINC.TXT using
+C              the GENERATE.COM DCL procedure.  Only XIINC.TXT should be
+C              edited!!
+C      
+C              UNIX users BEWARE!! The XIINC.FIN file generated from
+C              XIINC.TXT needs two further changes before it is ready for
+C              UNIX. (1) Edit the file using the VMS editor making no changes,
+C              but creating a new version of the file. This does some magic
+C              with the file format making it more palatable to UNIX.
+C              (2) Check for any TABS and remove them as required by
+C              Apollo Fortran.
+C      
+C        CHANGE LOG:
+C      
+C              26-jul-84        New definition language...palm
+C              27-sep-84        Constants & struct IFCB for C-callable image pkg...peb
+C              29-mar-85        Allow xsect to be C-callable...lia
+C              02-may-85        Fix for DECNET-compatible XI...palm
+C              03-may-85        Fix use of FAB, RAB, and NAM...palm
+C              08-may-85        Increase the value for I_FSSIZ...lia
+C      
+C      Lines per channel
+       INTEGER xlines
+       PARAMETER (xlines=1)
+C      Channels in file
+       INTEGER xchans
+       PARAMETER (xchans=2)
+C      Bytes per line
+       INTEGER xlinsz
+       PARAMETER (xlinsz=3)
+C      Number of label records
+       INTEGER xlabs
+       PARAMETER (xlabs=4)
+C      Bytes in one label record
+       INTEGER xlabsz
+       PARAMETER (xlabsz=5)
+C      File organization (xci or xcs)
+       INTEGER xorg
+       PARAMETER (xorg=6)
+C      Starting block number of line 1, channel 1
+       INTEGER xstart
+       PARAMETER (xstart=7)
+C      Number of blocks in the file
+       INTEGER xblocs
+       PARAMETER (xblocs=8)
+C      
+C             The following indexes are VAX-dependent.
+C      
+C      VMS channel number for SYS$QIO
+       INTEGER xqioch
+       PARAMETER (xqioch=9)
+C      System return code for SYS$QIO
+       INTEGER xqioer
+       PARAMETER (xqioer=10)
+C      IOSB for SYS$QIO -- 1st elements
+       INTEGER xiosb
+       PARAMETER (xiosb=11)
+C      IOSB -- 2nd element, dummy
+       INTEGER xiosb1
+       PARAMETER (xiosb1=12)
+C      Sentinel word: constant IMAG
+       INTEGER xsenti
+       PARAMETER (xsenti=13)
+C      Event flag allocated for I-O
+       INTEGER xefn
+       PARAMETER (xefn=14)
+C      Host returned error code
+       INTEGER xhcode
+       PARAMETER (xhcode=15)
+C      characters in file specification
+       INTEGER xfilsz
+       PARAMETER (xfilsz=16)
+C      file specification
+       INTEGER xfilnm
+       PARAMETER (xfilnm=17)
+C      
+C              Other constants
+C      
+C      Channel interleaved organization
+       INTEGER xci
+       PARAMETER (xci=1)
+C      Channel sequential organization
+       INTEGER xcs
+       PARAMETER (xcs=2)
+C      file deletion mode (at close time)
+       INTEGER xdel
+       PARAMETER (xdel=3)
+C      space (integer elements) to hold file name
+       INTEGER xfilsp
+       PARAMETER (xfilsp=25)
+C      IFCB dimension: note room for spare
+       INTEGER xifdim
+       PARAMETER (xifdim=50)
+C      Invalid line specfication (STATUS)
+       INTEGER xivlin
+       PARAMETER (xivlin=4)
+C      Incorrect label number (STATUS)
+       INTEGER xnolab
+       PARAMETER (xnolab=5)
+C      file save mode
+       INTEGER xsave
+       PARAMETER (xsave=6)
+C      host file spec size in bytes
+       INTEGER xfssiz
+       PARAMETER (xfssiz=132)
+C      Bytes per sector
+       INTEGER xsect
+       PARAMETER (xsect=512)

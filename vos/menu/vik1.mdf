@@ -1,0 +1,12 @@
+.Title
+[4mVIKING - BLEMISH, RESEAU & FIDUCIAL MARK REMOVAL Menu[0m  (page 1 of 1)
+.Proc BLEMVORB
+[1mBLEMVORB[0m  - Removes blemishes, wrinkles and warts from raw Viking
+            Orbiter images by replacing rectilinear areas with an average
+            of nearby points.
+.Proc RESLOCVO
+[1mRESLOCVO[0m  - Locates reseau marks on Viking Orbiter images.
+.Proc RESSAR75
+[1mRESSAR75[0m  - Removes reseau, fiducial marks and blemishes from 
+            Viking Orbiter images.
+.End

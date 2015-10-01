@@ -1,0 +1,22 @@
+.Title
+[4mAdditional STATISTICS Menu Selections[0m                 (page 4 of 4)
+.Proc SDSIBIS
+[1mSDSIBIS[0m   - IBIS program converting statistical datasets generated 
+            by classification programs into interface files and vice versa.
+.Proc SLIST
+[1mSLIST[0m     - Lists DN values of pixels within 10x10 area of image.
+.Proc SPAM
+[1mSPAM[0m      - SPectral Analysis Manager performs variety of spectral
+            analysis functions interactively.
+.Proc STATPLT
+[1mSTATPLT[0m   - Procedure plotting classification statistics file
+            with Centroids and Bayesian confidence regions for each class.
+.Proc STATS
+[1mSTATS[0m     - Computes statistics of training areas for 
+            classifications using multispectral data.
+.Proc USTATS 
+[1mUSTATS[0m    - Performs unsupervised clustering on multispectral data.
+.Proc UVFSTATS
+[1mUVFSTATS[0m  - Extracts information from output of UVF generating scalar
+            dataset of selected quantities. 
+.END

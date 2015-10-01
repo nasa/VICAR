@@ -1,0 +1,24 @@
+procedure help=* options=nointerrupt
+refgbl $vidsflg
+local (_job,message,key) string
+local stat integer
+body
+if ($vidsflg = "NOVIDS")
+  putmsg "VIDS is not running.  Use the VIDS command to start a session." +
+         "VIDS-NOTRUN"
+  return -1 "VIDS-NOTRUN"
+else-if ($vidsflg <> "READY")
+  putmsg "VIDS is not ready for the next command yet." "VIDS-NOTREADY"
+  return -1 "VIDS-NOTREADY"
+end-if
+let $vidsflg="WAITING"
+end-proc
+.title
+VIDS internal procedure CHKVIDS1 -- DO NOT EXECUTE !!
+.help
+****** DO NOT EXECUTE !!! ************
+
+CHKVIDS1 is used internally by VIDS procedures.  DO NOT run this
+procedure from the command line, as it could result in your VICAR
+session getting hung.
+.end

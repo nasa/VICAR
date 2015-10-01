@@ -1,0 +1,186 @@
+!	edited	23-jun-83...dm
+!		22-jan-84 - Conditional text for UNIX implementation...dm
+!		26-jan-85   Cleanup for V1.3...lia
+!		07-jul-85   Conditional text for UNIX implementation...dm
+.TITLE
+SWITCH 
+.HELP
+			Function and Format
+
+	
+	Function:
+	    
+	    The SWITCH command is used to set the value of
+	    the TAE switch word which is an implicit TAE 
+	    global variable named $SWITCH.
+
+	    SWITCH may be used in place of the FLAG command to
+	    set the values in $SWITCH numerically instead of
+	    symbolically.  FLAG is preferred.  See also HELP FLAG.
+	Format:
+
+	    VICAR>SWITCH  VALUE=hexadecimal-value
+.PAGE
+			Usage Notes
+
+
+	o  $SWITCH is used by programmers to pass special 
+	   test flags to application programs. The $SWITCH 
+	   global is implicitly referenced by every PDF, so 
+	   the value may be obtained from any program by 
+	   calling the  XR package routine XRINTG.
+	
+
+	o  TAE reserves the right-hand eight bits of the switch
+	   word for its own use.
+.if VAX_VMS
+.PAGE
+			Usage Notes (continued)
+	
+
+	o  Currently, the right-hand bit means "run all 
+	   application programs using the VMS /DEBUG qualifier".
+	   Thus, a programmer may always LINK with the debugger 
+	   and enable the debugger only when needed.		
+
+	   To enable the debugger, use:
+
+		VICAR>SWITCH 1
+	
+	o  To produce full batch or async logging, use:
+ 
+		VICAR>SWITCH 2
+.PAGE
+			Usage Notes (continued)
+
+	
+	o  SWITCH 4 is used for debugging async jobs:  If this
+	   switch is set the asynchronous TAE Monitor uses the
+	   file ASYNC.COM as its JOB file, rather than the proc
+	   job file.  You can edit ASYNC.COM, adding host debug 
+	   commands for example, and then run with SWITCH 4 set.
+
+	o  To see the library of the proc in dynamic tutor, use:
+
+		VICAR>SWITCH 10
+.ifend
+.if UNIX
+.PAGE
+			Usage Notes (continued)
+	
+
+	o  Currently, the right-hand bit means "run all 
+	   application programs under debugger." The debugger 
+	   defined by the shell environment symbol DEBUGGER 
+	   then gets control at process activation time.
+	   Thus, a programmer may always load an application 
+	   program with the debugger and enable the debugger 
+	   only when needed.		
+
+	   To enable the debugger, use:
+
+		VICAR>SWITCH 1
+
+	o  To see the library of the proc in dynamic tutor, use:
+
+		VICAR>SWITCH 10
+.ifend
+.page
+			Usage Notes (continued)
+	
+
+	o  To run in syntax check mode, use:
+
+		VICAR>SWITCH 100
+
+	   This is a VICAR-specific flag bit which causes the
+	   TAE monitor to treat commands as follows:
+
+            - Primary level (e.g., interactive level) commands
+              are executed normally.
+
+            - Intrinsic declaration and proc introductory
+              commands (e.g., PARM, LOCAL, SUBCMD, PROCESS),
+              as well as commands which invoke procs, are
+              executed normally.
+.PAGE
+
+            - Intrinsic commands that do not use proc invocation
+              syntax (e.g. FOR, LET, and GOTO) are ignored.
+
+            - All other intrinsic commands are processed through
+              substitution and syntax checking but are never
+              actually executed.
+
+            - Processes have the capability to check the SYNTAX
+              bit and may avoid all or part of their execution
+              if the bit is set.  All standard VICAR programs
+              check this bit and are therefore not executed.
+              The programs are actually loaded into the machine,
+              so they must be present and executable, and all
+              parameters and syntax must be correct, but they
+              terminate immediately and produce no output.
+.page
+                        Usage Notes (Cont.)
+
+
+        o  To suppress the message "Beginning VICAR task ..."
+           at the beginning of program execution, use:
+
+		VICAR>SWITCH 200
+
+	   This is a VICAR-specific bit which causes the above
+	   message to be suppressed at program invocation time.
+!
+.level1
+.variable VALUE
+Hexadecimal value.
+!
+.level2
+.variable VALUE
+
+
+	    "VALUE" specifies the hexadecimal value that will
+	    be assigned to the global variable $SWITCH.
+	    TAE reserves the right-hand eight bits of the switch
+	    word for its own use. 
+.if VAX_VMS
+
+	    Following are the current definitions of the switch 
+	    word used by VICAR.
+
+	    o SWITCH 1 - Enable the debugger for the application
+			 Process.
+
+	    o SWITCH 2 - Produce full batch or async logging.
+			 All output to sys$output is placed
+			 in a SPL file and debugger output
+			 in a TML file.
+.PAGE
+
+
+	    o SWITCH 4 - Activate async TM through ASYNC.COM,
+			 a user modified JOB file.  Modified 
+			 to use the debugger for an async job.
+
+	    o SWITCH 10 - Request for display of library for
+			  the proc in dynamic tutor.
+.ifend
+.if UNIX
+
+	    Following are the current definitions of the switch 
+	    word used by VICAR.
+
+	    o SWITCH 1 - Enable the debugger for the application
+			 Process.
+
+	    o SWITCH 10 - Request for display of library for
+			  the proc in dynamic tutor.
+.page
+.ifend
+
+	    o SWITCH 100 - Run in syntax check mode.
+
+	    o SWITCH 200 - Suppress "Beginning VICAR task ..."
+			   message.
+.END
