@@ -2,7 +2,9 @@
 VICAR, which stands for Video Image Communication And Retrieval, is a general purpose image processing software system that has been developed since 1966 to digitally process multi-dimensional imaging data.
 
 We are pleased to announce that the VICAR Core is now available in Open
-Source form! The VICAR Open Source release homepage can be found [here](http://www-mipl.jpl.nasa.gov/vicar_open.html).
+Source form! Please visit the VICAR Open Source release homepage:
+
+[http://www-mipl.jpl.nasa.gov/vicar_open.html](http://www-mipl.jpl.nasa.gov/vicar_open.html).
 
 This release includes:
 
