@@ -33,20 +33,18 @@ well as separate ones for each platform.  You need only the one that
 applies to your machine type.
 
 
-
 #### Tarballs
 
 * Main VICAR source code:  [Click here to download](https://github.jpl.nasa.gov/MIPL/VICAR/tarball/master)
-
 * Solaris externals:  *** link ***
-
 * Linux 32-bit:  *** link ***
-
 * Linux 64-bit:  *** link ***
-
 * Mac OS X:  *** link ***
-
 * All externals (don't get unless you know you need this): *** link ***
 
+## Using VICAR
+
+* The VICAR quick-start guide can be found [here](http://www-mipl.jpl.nasa.gov/install/index.html).
+* The VICAR installation guide can be found [here](http://www-mipl.jpl.nasa.gov/install/index.html).
 
 Questions:  vicar_help@jpl.nasa.gov
