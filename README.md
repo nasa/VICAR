@@ -44,7 +44,8 @@ applies to your machine type.
 
 ## Using VICAR
 
-* The VICAR quick-start guide can be found [here](http://www-mipl.jpl.nasa.gov/install/index.html).
 * The VICAR installation guide can be found [here](http://www-mipl.jpl.nasa.gov/install/index.html).
+* The VICAR quick-start guide can be found [here](http://www-mipl.jpl.nasa.gov/external/vug/vugfinal.html).
+
 
 Questions:  vicar_help@jpl.nasa.gov
