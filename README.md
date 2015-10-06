@@ -19,9 +19,9 @@ This release includes:
   - Efficient handling of large data sets
 
 
-For a full list of programs being released [click here](http://www-mipl.jpl.nasa.gov/VICAR_OS_contents_v1.0.pdf)
+For a full list of programs being released [click here](http://www-mipl.jpl.nasa.gov/VICAR_OS_contents_v1.0.pdf).
 
-For details of the release in a presentation [click here](http://www-mipl.jpl.nasa.gov/vicar_open_source.pdf)
+For details of the release in a presentation [click here](http://www-mipl.jpl.nasa.gov/vicar_open_source.pdf).
 
 
 ## Obtaining VICAR
