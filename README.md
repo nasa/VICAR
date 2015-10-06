@@ -46,8 +46,8 @@ applies to your machine type.
 
 ## Using VICAR
 
-* The VICAR installation guide can be found [here](VICAR/vos/docsource/vicar/VICAR_build_1.0.pdf).
-* The VICAR quick-start guide can be found [here](VICAR/vos/docsource/vicar/VICAR_guide_1.0.pdf).
+* The VICAR installation guide can be found [here](vos/docsource/vicar/VICAR_build_1.0.pdf).
+* The VICAR quick-start guide can be found [here](vos/docsource/vicar/VICAR_guide_1.0.pdf).
 
 
 Questions:  vicar_help@jpl.nasa.gov
