@@ -37,12 +37,12 @@ applies to your machine type.
 
 #### Tarballs
 
-* Main VICAR source code:  [Click here to download](https://github.jpl.nasa.gov/MIPL/VICAR/tarball/master)
-* Solaris externals:  *** link ***
-* Linux 32-bit:  *** link ***
-* Linux 64-bit:  *** link ***
-* Mac OS X:  *** link ***
-* All externals (don't get unless you know you need this): *** link ***
+* Main VICAR source code:  [Click to download](https://github.jpl.nasa.gov/MIPL/VICAR/tarball/master)
+* Solaris externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v1.0/vicar_open_ext_sun-solr_1.0.tar.gz)
+* Linux 32-bit:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v1.0/vicar_open_ext_x86-linux_1.0.tar.gz)
+* Linux 64-bit:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v1.0/vicar_open_ext_x86-64-linx_1.0.tar.gz)
+* Mac OS X:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v1.0/vicar_open_ext_x86-macosx_1.0.tar.gz)
+* All externals (don't get unless you know you need this): [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v1.0/vicar_open_ext_1.0.tar.gz)
 
 ## Using VICAR
 
