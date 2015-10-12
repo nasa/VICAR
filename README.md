@@ -34,6 +34,7 @@ Note that for externals you'll find a tarball that contains all the platforms, a
 well as separate ones for each platform. Externals are 3rd party packages that are required to run VICAR. See section 2 of the [Building VICAR document](vos/docsource/vicar/VICAR_build_1.0.pdf) for more information. You need only the one that
 applies to your machine type.
 
+Please sign up [here](https://groups.google.com/forum/#!forum/vicar-open-source/join) to be notified of new releases of VICAR.
 
 #### Tarballs
 
