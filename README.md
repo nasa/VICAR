@@ -23,7 +23,7 @@ This release includes:
 
 For a full list of programs being released [click here](vos/docsource/vicar/VICAR_OS_contents_v1.0.pdf).
 
-For details of the release in a presentation [click here](vos/docsource/vicar/vicar_open_source.pdf).
+For details of the release in the VICAR presentation from the 2nd Planetary Data Workshop in Flagstaff, AZ in June 2015 [click here](vos/docsource/vicar/vicar_open_source.pdf).
 
 
 ## Obtaining VICAR
