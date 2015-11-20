@@ -25,6 +25,9 @@ For a full list of programs being released [click here](vos/docsource/vicar/VICA
 
 For details of the release in the VICAR presentation from the 2nd Planetary Data Workshop in Flagstaff, AZ in June 2015 [click here](vos/docsource/vicar/vicar_open_source.pdf).
 
+## VICAR Discussion Forum
+
+We have set up a [VICAR Open Source Google group](https://groups.google.com/forum/#!forum/vicar-open-source/), where you can find notifications of new releases, bug reports, and general discussion. You can join the group [here](https://groups.google.com/forum/#!forum/vicar-open-source/join). 
 
 ## Obtaining VICAR
 
@@ -33,8 +36,6 @@ The VICAR source code can be obtained via github.com using the links below. In a
 Note that for externals you'll find a tarball that contains all the platforms, as
 well as separate ones for each platform. Externals are 3rd party packages that are required to run VICAR. See section 2 of the [Building VICAR document](vos/docsource/vicar/VICAR_build_1.0.pdf) for more information. You need only the one that
 applies to your machine type.
-
-Please sign up [here](https://groups.google.com/forum/#!forum/vicar-open-source/join) to be notified of new releases of VICAR.
 
 #### Tarballs
 
