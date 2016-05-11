@@ -40,11 +40,11 @@ applies to your machine type.
 #### Tarballs
 
 * Main VICAR source code:  [Click to download](https://github.com/nasa/VICAR/tarball/master)
-* Solaris externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v1.0/vicar_open_ext_sun-solr_1.0.tar.gz)
-* Linux 32-bit externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v1.0/vicar_open_ext_x86-linux_1.0.tar.gz)
-* Linux 64-bit externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v1.0/vicar_open_ext_x86-64-linx_1.0.tar.gz)
-* Mac OS X externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v1.0/vicar_open_ext_x86-macosx_1.0.tar.gz)
-* All externals (don't get unless you know you need this): [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v1.0/vicar_open_ext_1.0.tar.gz)
+* Solaris externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v2.0/vicar_open_ext_sun-solr_2.0.tar.gz)
+* Linux 32-bit externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v2.0/vicar_open_ext_x86-linux_2.0.tar.gz)
+* Linux 64-bit externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v2.0/vicar_open_ext_x86-64-linx_2.0.tar.gz)
+* Mac OS X externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v2.0/vicar_open_ext_x86-macosx_2.0.tar.gz)
+* All externals (don't get unless you know you need this): [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v2.0/vicar_open_ext_2.0.tar.gz)
 
 ## Using VICAR
 
