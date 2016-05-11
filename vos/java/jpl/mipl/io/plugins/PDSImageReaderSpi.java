@@ -92,15 +92,21 @@ public class PDSImageReaderSpi extends ImageReaderSpi {
               PDSMetadata.nativeStreamMetadataFormatName,
               PDSMetadata.nativeStreamMetadataFormatClassName,
               
-             null, //  extraStreamMetadataFormatNames,  // new in 1.4
-			 null, // extraStreamMetadataFormatClassNames,  // new in 1.4
+              // NEW TO SUPPORT vicar metadata for a dualie 12-14
+              PDSMetadata.extraMetadataFormatNames,
+              PDSMetadata.extraMetadataFormatClassNames,
+             // null, //  extraStreamMetadataFormatNames,  // new in 1.4
+			 // null, // extraStreamMetadataFormatClassNames,  // new in 1.4
               
               _supportsStandardImageMetadataFormat, // new in 1.4
               PDSMetadata.nativeImageMetadataFormatName,
               PDSMetadata.nativeImageMetadataFormatClassName,
               
-              null, // extraImageMetadataFormatNames,  // new in 1.4
-			  null // extraImageMetadataFormatClassNames  // new in 1.4
+           // NEW TO SUPPORT vicar metadata for a dualie 12-14
+              PDSMetadata.extraMetadataFormatNames,
+              PDSMetadata.extraMetadataFormatClassNames
+              // null, // extraImageMetadataFormatNames,  // new in 1.4
+			  // null // extraImageMetadataFormatClassNames  // new in 1.4
               );
               
             if (debug)  System.out.println("PDSImageReaderSpi 1.4 constructor");

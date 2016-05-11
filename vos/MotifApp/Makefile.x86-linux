@@ -1,6 +1,6 @@
 .SUFFIXES: .o .cc .c 
 
-CC = g++ -Wno-invalid-offsetof
+CC = g++44 -Wno-invalid-offsetof
 DEBUG = -g
 CCFLAGS = $(DEBUG) -DFUNCPROTO -DXTFUNCPROTO -I../MotifApp -I/usr/X11R6/include
 LIBS = -l/usr/X11R6/lib -lXm -lXt -lXext -lX11

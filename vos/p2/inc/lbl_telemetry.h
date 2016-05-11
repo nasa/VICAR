@@ -52,6 +52,7 @@ extern "C" {
    * History
    *========
    * Date         Who             Description
+   * 2015-07-02   C. Cheng        Added ERROR_PIXEL_LINE and ERROR_PIXEL_SAMPLE
    * ============ =============== =============================================
    *****************************************************************************/
 
@@ -106,6 +107,8 @@ extern "C" {
     LblApiStringItem_typ           TelemetrySourceHostName;
     LblApiStringItem_typ              VirtualChannelId;
     LblApiIntItem_typ              ImageDataSize;
+    LblApiIntItem_typ              ErrorPixelLine;
+    LblApiIntItem_typ              ErrorPixelSample;
     //LblApiIntItem_typ
   } LblTelemetry_typ;
 

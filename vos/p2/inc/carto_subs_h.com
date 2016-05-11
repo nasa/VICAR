@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module carto_subs_h
-$! VPACK Version 1.9, Thursday, November 17, 2011, 16:54:29
+$! VPACK Version 2.1, Thursday, December 10, 2015, 13:29:54
 $!
 $! Execute by entering:		$ @carto_subs_h
 $!
@@ -104,7 +104,13 @@ $ create carto_subs_h.repack
 $ DECK/DOLLARS="$ VOKAGLEVE"
 $ vpack carto_subs_h.com -mixed -
 	-s cartoGridUtils.h cartoGtUtils.h cartoLsqUtils.h cartoMatUtils.h -
-	   cartoMemUtils.h cartoSortUtils.h cartoStrUtils.h
+	   cartoMemUtils.h cartoSortUtils.h cartoStrUtils.h cartoTaeUtils.h -
+	   astroreference_camera.h ephreference_camera.h eos_coords.h mat33.h -
+	   qmalloc.h quaternion.h rodrigues.h time_conversion.h safe_sqrt.h -
+	   time_utils.h strsel.h count_lines.h tokenize.h fgetl.h -
+	   sprintf_alloc.h burl.h georeference_camera.h utils_return_values.h -
+	   cartoTieUtils.h ibisControlMapper.h ibishelper.h cartoLinkedList.h -
+	   ImageUtils.h cloud_masks.h cartoLoggerUtils.h hdfIncludes.h
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -731,6 +737,1881 @@ char *ms_find( char * str1, char * str2 );
 char *nameget(char* s);
 
 /*#endif*/
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create cartoTaeUtils.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef CARTOTAEUTILS_H
+#define CARTOTAEUTILS_H
+
+/*======================================================
+
+mq_out_int
+
+output integer value to parameter block
+
+arguments :
+
+      1. pname: input, char *pname;
+         Parameter name.
+
+      2. val: output, int val;
+         Value output to parameter block.
+
+mq_out_int returns integer variables to the parameter block.
+*/
+
+void mq_out_int (char *pname, int val);
+
+/*======================================================
+
+mq_out_real
+
+output real value to parameter block
+
+arguments :
+
+      1. pname: input, char *pname;
+	 Parameter name.
+
+      2. val: output, double val;
+	 Value output to parameter block.
+
+mq_out_real returns integer variables to the parameter block.  The name
+and value are output to the print log.
+*/
+
+void mq_out_real (char *pname, double val);
+
+/*======================================================
+
+mq_out_string
+
+returns character string to the parameter block
+
+arguments :
+
+      1. pname: input, char *pname;
+	 Parameter name.
+
+      2. val: output, char *val;
+	 String returned to parameter block.
+
+      3. maxlen: input, int maxlen;
+	 max length to put to output parameter block
+
+mq_out_string returns character strings to the
+parameter block.
+*/
+
+void mq_out_string (char *pname, char *val, int maxlen);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create astroreference_camera.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __ASTROREFERENCE_CAMERA_H
+#define __ASTROREFERENCE_CAMERA_H
+
+#ifndef ASTROREFERENCE_ECEF 
+#define ASTROREFERENCE_ECEF 0
+#endif
+
+#ifndef ASTROREFERENCE_TOD 
+#define ASTROREFERENCE_TOD 1
+#endif
+
+int astroreference_camera(double *urange, double *vrange, int wframe, double *w_t_c, double *w_q_c, double fu, double fv, double q, double u0, double v0, double *kappa, double TDB, double UT1, int *gr_adr, int *gc_adr, double **G_adr);
+int astroreference_camera_sv_c(double *urange, double *vrange, double *TOD_t_SV, double *TOD_q_SV, double *SV_t_C, double *SV_q_C, double fu, double fv, double q, double u0, double v0, double *kappa, double TDB, double UT1, int *gr_adr, int *gc_adr, double **G_adr);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create ephreference_camera.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+int ephreference_camera_sv_c(double *urange, double *vrange, double *hrange,
+			     double *TOD_t_SV, double *TOD_q_SV, double *SV_t_C, double *SV_q_C, 
+			     double fu, double fv, double q, double u0, double v0, double *kappa, 
+			     double TT, double UT1, int *gr_adr, int *gc_adr, double **G_adr,
+			     int clen, int calc_mode,int *calc_case);
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create eos_coords.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __EOS_COORDS_H
+#define __EOS_COORDS_H
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+  int eos_coords(double TDB, double UT1, double *J2000_R_TOD, double *ECEF_R_TOD);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create mat33.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+int mat33_mat33_mult(double *A, double *B, double *C);
+double mat33_det(double *A);
+int mat33_add(double *A, double *B, double *C);
+int mat33_inverse(double *A, double *B);
+int mat33_assign(double *A, double a0, double a1, double a2, double a3, double a4, double a5, double a6, double a7, double a8);
+int mat33_print(double *A);
+int mat33_copy(double *A, double *B);
+int mat33_transpose(double *A, double *B);
+double mat33_xtax(double *X, double *A);
+double mat33_xtay(double *X, double *A, double *Y);
+int mat33_vec31_mult(double *A, double *V, double *B);
+int vec31_add(double *A, double *B, double *C);
+int vec31_assign(double *V, double v0, double v1, double v2);
+int vec31_copy(double *A, double *B);
+int vec31_subtract(double *A, double *B, double *C);
+int mat33_scale(double *A, double s, double *B);
+int vec31_print(double *A);
+int vec31_scale(double *A, double s, double *B);
+int vec31_axpy(double a, double *X, double *Y, double *Z);
+double vec31_vec31_dot(double *A, double *B);
+int vec31_vec31_cross(double *A, double *B, double *C);
+double vec31_norm(double *A);
+int vec31_unit(double *A);
+int vec31_vec31_basis(double *A, double *B, double *C);
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create qmalloc.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __QMALLOC_H
+#define __QMALLOC_H
+
+#include <stdlib.h>
+
+#define QMALLOC_TRUE  1
+#define QMALLOC_FALSE 0
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void *qmalloc(size_t nelem, size_t elsize, int reset, char *infunc,
+	      char *vname);
+
+#ifdef __cplusplus
+}
+#endif
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create quaternion.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __QUATERNION_H
+#define __QUATERNION_H
+
+int rodrigues_to_quaternion(double *v, double *q);
+int quaternion_to_rodrigues(double *q, double *v);
+int quaternion_to_mat(double *q, double *R);
+int mat_to_quaternion(double *R, double *q);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create rodrigues.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __RODRIGUES_H
+#define __RODRIGUES_H
+
+int rodrigues_vec2mat(double *wrot, double *R);
+int rodrigues_mat2vec(double *R, double *wrot);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create time_conversion.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __TIME_CONVERSION_H
+#define __TIME_CONVERSION_H
+
+/* From UTC_ISO_TIME_STRING */
+int utc_iso_time_string_to_si(char *UTC_string, double *SI_adr);
+int utc_iso_time_string_to_tt_and_ut1(char *UTC_string, double Delta_UT1, double *TT_adr, double *UT1_adr);
+int utc_iso_time_string_to_tt_iso_time_string(char *UTC_string, char **TT_string_adr);
+int utc_iso_time_string_to_ut1_iso_time_string(char *UTC_string, double Delta_UT1, char **UT1_string_adr);
+int utc_iso_time_string_to_leapsec_count(char *UTC_string, double *leapsec_count_adr);
+int utc_iso_time_string_to_dut1tbl_time_string(char *UTC_string, char **DUT1_table_string_adr);
+
+/* From UTC time components */
+int utc_time_components_to_leapsec_count(int y0, int t0, int d0, int h0, int m0, double s0, double *leapsec_count_adr);
+int utc_time_components_to_leap_table_index(int y0, int t0, int d0, int h0, int m0, double s0, int *k_adr);
+
+/* From ACS */
+int acs_to_tt_and_ut1(double ACS, double Delta_UT1, double *TT_adr, double *UT1_adr);
+int acs_to_tt(double ACS_time, double *TT_adr);
+int acs_to_ut1(double ACS_time, double Delta_UT1, double *UT1_adr);
+int acs_to_utc_iso_time_string(double ACS, char **UTC_string_adr);
+
+/* From SI */
+int si_to_tt_and_ut1(double SI, double Delta_UT1, double *TT_adr, double *UT1_adr);
+int si_to_tt(double SI, double *TT_adr);
+int si_to_ut1(double SI, double Delta_UT1, double *UT1_adr);
+int si_to_utc_iso_time_string(double SI, char **UTC_string_adr);
+
+/* From TT_ISO_TIME_STRING */
+int tt_iso_time_string_to_tt(char *TT_string, double *TT_adr);
+int tt_iso_time_string_to_tdb(char *TT_string, double *TDB_adr);
+
+/* From TT */
+int tt_to_utc_iso_time_string(double UTC, char **UTC_string_adr);
+int tt_to_si(double TT, double *SI_adr);
+int tt_to_ut1(double TT, double Delta_UT1, double *UT1_adr);
+int tt_to_tdb(double TT, double *TDB_adr);
+
+/* Helper functions */
+int lookup_delta_ut1(char *fname, int yyyymmdd, double *Delta_UT1_adr);
+int initialize_leap_second_table(char *filename);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create safe_sqrt.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __SAFE_SQRT_H
+#define __SAFE_SQRT_H
+
+double safe_sqrt(double a);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create time_utils.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __TIME_UTILS_H
+#define __TIME_UTILS_H
+
+int julian_date(int year, int month, int day, int hour, int minute, double second, double *jd_adr);
+int parse_iso_time_string(char *T, int *year_adr, int *month_adr, int *day_adr, int *hour_adr, int *minute_adr, double *second_adr);
+int compose_iso_time_string(int year, int month, int day, int hour, int minute, double second, char **T_adr);
+int compose_dut1_table_time_string(int year, int month, int day, int hour, int minute, int second, char **T_adr);
+int is_leap_year(int year);
+int parse_yyyymmdd(int yyyymmdd, int *year_adr, int *month_adr, int *day_adr);
+int compose_yyyymmdd(int year, int month, int day, int *yyyymmdd_adr);
+int standardize_time_components(int y0, int t0, int d0, int h0, int m0, double s0, int *y1_adr, int *t1_adr, int *d1_adr, int *h1_adr, int *m1_adr, double *s1_adr);
+int calendar_increment(int yyyymmdd_old, int n_days, int *yyyymmdd_new_adr);
+int month_string_to_month(char *month_str, int *month_adr);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create strsel.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef STRSEL_H
+#define STRSEL_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int strsel(char *dest, char *src, int i0, int i1);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create count_lines.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+int count_lines(char *filename, int usage, ...);
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create tokenize.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+int tokenize(char *line, char *sep_char, int *n_adr, int **b_adr, int **e_adr);
+int get_max_token_length(int n_tokens, int *bt, int *et);
+int extract_token(char *dest, char *src, int *b, int *e, int w);
+int get_token_list(char *src, int n_tokens, int *b, int *e, char ***token_list_adr);
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create fgetl.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __FGETL_H
+#define __FGETL_H
+
+char *fgetl(char *s, int n, FILE *fp);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create sprintf_alloc.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __SPRINTF_ALLOC
+#define __SPRINTF_ALLOC
+
+int sprintf_alloc(char **S_adr, char *fmt, ...);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create burl.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __BURL_H
+#define __BURL_H
+
+#include <math.h>
+
+#ifndef MAX
+#define MAX(A, B) ((A) > (B) ? (A) : (B))
+#endif
+
+#ifndef MIN
+#define MIN(A, B) ((A) < (B) ? (A) : (B))
+#endif
+
+#ifndef ABS
+#define ABS(A)    ((A) > 0.0 ? (A) : (-(A)))
+#endif
+
+#ifndef ROUND
+#define ROUND(A)  (floor((A) + 0.5))
+#endif
+
+#ifndef CLIP
+#define CLIP(V, A, B) ( MIN((MAX((V),(A))), (B)) )
+#endif
+
+#ifndef MAXABS
+#define MAXABS(A, B) (MAX(ABS(A),ABS(B)))
+#endif
+
+#ifndef SIGNUM
+#define SIGNUM(A) (((A) == 0) ? 0 : (((A) > 0) ? 1 : -1))
+#endif
+
+#ifndef TWOPI
+#define TWOPI (((double) 2.0) * M_PI)
+#endif
+
+#ifndef DEG2RAD
+#define  DEG2RAD ((M_PI)/((double) 180.0))
+#endif
+
+#ifndef ARCSEC2RAD
+#define  ARCSEC2RAD ((M_PI)/((double) 180.0 * 3600.0))
+#endif
+
+#ifndef RAD2DEG
+#define  RAD2DEG   (((double) 180.0)/(M_PI))
+#endif
+
+#ifndef D_ZERO
+#define D_ZERO ((double) 0.0)
+#endif
+
+#ifndef D_ONE
+#define D_ONE ((double) 1.0)
+#endif
+
+#ifndef D_TWO
+#define D_TWO ((double) 2.0)
+#endif
+
+#ifndef D_THREE
+#define D_THREE ((double) 3.0)
+#endif
+
+#ifndef D_FOUR
+#define D_FOUR ((double) 4.0)
+#endif
+
+#ifndef D_TEN
+#define D_TEN ((double) 10.0)
+#endif
+
+#ifndef ERR
+#define ERR -1
+#endif
+
+#ifndef OK
+#define OK 0
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef MILLION
+#define MILLION 1000000
+#endif
+
+#ifndef BILLION
+#define BILLION 1000000000
+#endif
+
+#ifndef MAXSTRING
+#define MAXSTRING 4096
+#endif
+
+#ifndef MAXLINE
+#define MAXLINE 4096
+#endif
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create georeference_camera.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __GEOREFERENCE_CAMERA_H
+#define __GEOREFERENCE_CAMERA_H
+
+#ifndef GEOREFERENCE_ECEF 
+#define GEOREFERENCE_ECEF 0
+#endif
+
+#ifndef GEOREFERENCE_TOD 
+#define GEOREFERENCE_TOD 1
+#endif
+
+int georeference_camera(double *urange, double *vrange, double *hrange, int wframe, double *w_t_c, double *w_q_c, double fu, double fv, double q, double u0, double v0, double *kappa, double TDB, double UT1, int *gr_adr, int *gc_adr, double **G_adr);
+int georeference_camera_sv_c(double *urange, double *vrange, double *hrange, double *TOD_t_SV, double *TOD_q_SV, double *SV_t_C, double *SV_q_C, double fu, double fv, double q, double u0, double v0, double *kappa, double TDB, double UT1, int *gr_adr, int *gc_adr, double **G_adr);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create utils_return_values.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __UTILS_RETURN_VALUES_H
+#define __UTILS_RETURN_VALUES_H
+
+#ifndef OK
+#define OK 0
+#endif
+
+#ifndef ERR
+#define ERR -1
+#endif
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create cartoTieUtils.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef __CARTOTIEUTILS_H
+#define __CARTOTIEUTILS_H
+
+void rot90(double* tie, int nrot);
+void swp90(double* tie, int nrot);
+void flip(double* tie);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create ibisControlMapper.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef IBISCONTROLMAPPER
+#define IBISCONTROLMAPPER
+
+#include "ibishelper.h"
+
+/***********************************/
+typedef struct{
+   int controlID;
+   int length;
+   int *toIbisIndices;
+}IBIS_CONTROL_MAP;
+
+/***********************************/
+typedef struct{
+   IBIS_CONTROL_MAP **maps;
+   int nControls;
+}IBIS_CONTROL_MAPPER;
+
+/***********************************/
+IBIS_CONTROL_MAPPER* IBISCONTROL_getMapper(IBISStruct *ibis, int controlCol);
+
+/***********************************/
+IBIS_CONTROL_MAPPER* IBISCONTROL_getSingleMapper(IBISStruct *ibis);
+
+/***********************************/
+IBIS_CONTROL_MAP* getIbisControlMap(IBISStruct *ibis, int controlCol, double control);
+
+/******************************************************/
+IBIS_CONTROL_MAP* IBISCONTROL_getMap(IBISStruct *ibis, int controlCol, double control, int count);
+
+/******************************************************/
+void IBISCONTROL_deleteMapper(IBIS_CONTROL_MAPPER** mapper);
+
+/******************************************************/
+void IBISCONTROL_deleteMap(IBIS_CONTROL_MAP** map);
+
+#endif
+
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create ibishelper.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef IBISHELPER
+#define IBISHELPER
+
+#include <stdio.h>
+
+#include "cartoLinkedList.h"
+
+#ifndef MAXCOLS
+#define MAXCOLS 500
+#endif
+
+/* IBIS formatting and printing was copied over from ibis_list.c */
+#define IBISPRINT( ptr, fmtchar, fmtStr ) \
+	switch (tolower(fmtchar)) { \
+		case 'b': printf( fmtStr,    *(char *)  (ptr));  break; \
+		case 'h': printf( fmtStr,    *(short *) (ptr));  break; \
+		case 'f': printf( fmtStr,    *(long *)  (ptr));  break; \
+		case 'r': printf( fmtStr,    *(float *)  (ptr));  break; \
+		case 'd': printf( fmtStr,    *(double *)(ptr));  break; \
+		case 'c': printf( fmtStr,    ((float*)ptr)[0],((float*)ptr)[1] );break; \
+		case 'a': printf( fmtStr,    ptr );break; \
+		default:  printf( fmtStr,   "BAD FORMAT!" );break; \
+	}
+
+#define IBISFORMAT( str, fmtchar, colsize ) \
+	switch (tolower(fmtchar)) { \
+		case 'b': \
+		case 'h': \
+		case 'f': sprintf( str, "%%%dd",  (colsize));  break; \
+		case 'r': sprintf( str, "%%%d.2f",  (colsize));  break; \
+		case 'd': sprintf( str, "%%%d.2lf", (colsize));  break; \
+		case 'c': sprintf( str, " (%%-%d.2f,%%%d.2f)", \
+			((colsize)-4)/2, colsize - (4 + ((colsize)-4)/2) );\
+			 break; \
+		case 'a': sprintf( str, "%%%ds", (colsize));break; \
+		default:  sprintf( str, "%%%ds", (colsize));break; \
+	}
+
+///////////////////////////////////////////////////
+typedef struct{
+   int unit, handle;
+   int nr, nc;
+   char mode[8], org[7];
+   char formats[MAXCOLS][6];
+   int colLens[MAXCOLS];
+   int totRecSize;   // size of each record in bytes
+   int totDataSize;  // size of row * col in bytes
+   char **data;
+
+} IBISStruct;
+
+///////////////////////////////////////////////////
+typedef struct{
+   int unit, handle;
+   int nr, nc;
+   char mode[8], org[7];
+   LINKEDLIST *formats;
+   LINKEDLIST *colLens;
+} IBISPrep;
+
+/* errors when an unknown format is specified    */
+void IBISHELPER_wrongFormatError(IBISStruct *ibis, int col);
+
+/* opens the ibis file for read or update        */
+IBISStruct* IBISHELPER_openIBIS(char *name, int instance, char *mode);
+
+/* DEPRECATED - USE IBISHELPER_openIBIS_out2     */
+/* creates an output ibis file based on the out  */
+/* parameter and returns an ibis struct          */
+/* creates a new file but does not IBISFileOpen  */
+/* until the IBISHELPER_closeIBIS is called      */
+/* Data is written out at the end of program     */
+IBISStruct* IBISHELPER_openIBIS_out(char **format, int inst, int nr, int nc);
+
+/* writes out data if mode is read or update,    */
+/* closes the file and deletes the ibis struct   */
+void IBISHELPER_closeIBIS(IBISStruct **ibis);
+
+/* returns the greatest column size              */
+int IBISHELPER_getMaxColLen(IBISStruct *ibis);
+
+/* casts the IBIS data into an integer data type */
+/* and returns the integer                       */
+/*                                               */
+/* col and index start offset at 0 not 1         */
+int IBISHELPER_getInt(IBISStruct *ibis, int col, int index);
+
+/* casts the IBIS data into a float data type    */
+/* and return the float                          */
+/*                                               */
+/* col and index start offset at 0 not 1         */
+float IBISHELPER_getFloat(IBISStruct *ibis, int col, int index);
+
+/* casts the IBIS data into a float data type    */
+/* and return the double                         */
+/*                                               */
+/* col and index start offset at 0 not 1         */
+double IBISHELPER_getDouble(IBISStruct *ibis, int col, int index);
+
+/* copies a strint into the parameter variable   */
+/*                                               */
+/* col and index start offset at 0 not 1         */
+void IBISHELPER_getString(IBISStruct *ibis, char *buf, int col, int index);
+
+/* returns an actual pointer to the data in ibis */
+/*                                               */
+/* col and index start offset at 0 not 1         */
+char* IBISHELPER_getBufPtr(IBISStruct *ibis, int col, int index);
+
+/* gets the formats                              */
+void IBISHELPER_getFormats(IBISStruct *ibis, char formats[MAXCOLS][30]);
+
+/* sets the IBIS file buffer at col, index with  */
+/* data                                          */
+/* data gets written out when                    */
+/* IBISHELPER_closeIBIS is called                */
+/*                                               */
+/* col and index start offset at 0 not 1         */
+void IBISHELPER_setDouble(IBISStruct *ibis, int col, int index, double data);
+
+/* sets the IBIS file buffer at col, index with  */
+/* data                                          */
+/* data gets written out when                    */
+/* IBISHELPER_closeIBIS is called                */
+/*                                               */
+/* col and index start offset at 0 not 1         */
+void IBISHELPER_setString(IBISStruct *ibis, int col, int index, char *str);
+
+/* creates an output ibis file based on the out  */
+/* parameter and returns an ibis struct          */
+/* creates a new file but does not IBISFileOpen  */
+/* until the IBISHELPER_closeIBIS is called      */
+/* Data is written out at the end of program     */
+IBISPrep* IBISHELPER_openIBIS_out2(char *name, int inst, int nr);
+
+/* Since IBISPrep does not require all the       */
+/* columns to be declared at start we need to    */
+/* set it up using this call.                    */
+/* The column number will be in order of the     */
+/* call to this function.                        */
+void IBISHELPER_addColumn(IBISPrep *ibis2, char *format);
+
+/* Returns an IBISStruct* so that the data can   */
+/* be written out                                */
+IBISStruct* IBISHELPER_getIBISStruct(IBISPrep **prep);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create cartoLinkedList.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef CARTOLINKEDLIST
+#define CARTOLINKEDLIST
+
+///////////////////////////////////////////
+struct node{
+   void *data;
+   struct node *next;
+   struct node *prev;
+   int rank;
+};
+
+///////////////////////////////////////////
+typedef struct{
+   struct node *head;
+   struct node *tail;
+   int size;
+} LINKEDLIST;
+
+/*********************************************/
+LINKEDLIST* LinkedList_getLinkedList();
+
+/*********************************************/
+void LinkedList_setNodeArray(LINKEDLIST *list, struct node** array);
+
+/*********************************************/
+void LinkedList_addWithRank(LINKEDLIST *list, void *data, int rank);
+
+/*********************************************/
+void LinkedList_add(LINKEDLIST *list, void *data);
+
+/*********************************************/
+void* LinkedList_remove(LINKEDLIST *list, int index);
+
+/*********************************************/
+void LinkedList_free(LINKEDLIST **list);
+
+/*********************************************/
+LINKEDLIST* LinkedList_sortAscending(LINKEDLIST **list);
+
+/*********************************************/
+LINKEDLIST* LinkedList_bigMemSortAscending(LINKEDLIST **list);
+
+/*********************************************/
+struct node* LinkedList_getMinNode(LINKEDLIST *list);
+
+/*********************************************/
+//struct node* LinkedList_getNode(LINKEDLIST *list, int index);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create ImageUtils.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef IMAGE_UTILS
+#define IMAGE_UTILS
+
+#define IU_MAX_FNAME_LEN 250
+#define IU_MAX_PARM       20
+#define IU_SKIP_LINES      0
+#define IU_BILINEAR_INTERP 1
+#define IU_BICUBIC_INTERP  2
+#define IU_NEAR_NEIGHBOR   3
+
+/******************************************************************************/
+typedef struct
+{
+   int unit;
+   int nl, ns, pixsize;
+   char format[8];
+   char fname[IU_MAX_FNAME_LEN];
+
+   double *buffer;
+   unsigned char **valid;
+   long long int valid_cnt;
+   int curr_line_in_buff;
+}VICAR_IMAGE;
+
+/******************************************************************************/
+typedef struct
+{
+   VICAR_IMAGE *vi;
+
+   double **buffer;
+   double **tile;
+   int buffer_size;
+   int last_line_requested;
+   int tile_nl, tile_ns;
+   int startPos;
+}VICAR_TILE_IMAGE;
+
+/******************************************************************************/
+typedef struct
+{
+   VICAR_IMAGE *from;
+   VICAR_IMAGE *to;
+
+   /* buffer is assumed to be 4 sequential lines */
+   double **buffer;
+   int curr_lines_in_buff[4];
+   int resample_mode;
+}VICAR_RESAMPLE_IMAGE;
+
+/******************************************************************************/
+//void getValidMask(VICAR_IMAGE **vi);
+
+/******************************************************************************/
+// getVI_inp: returns an initialized VICAR_IMAGE struct
+//
+// input:
+// ======
+// + inst
+//    - the instance of vicar input file opened
+//
+// output:
+// =======
+// + vi
+//    - initialized VICAR_IMAGE struct pointer
+//    - memory will be allocated inside the function
+/******************************************************************************/
+VICAR_IMAGE* getVI_inp(int inst);
+
+/******************************************************************************/
+// getVI_inp_by_fname: returns an initialized VICAR_IMAGE struct
+//
+// input:
+// ======
+// + fname
+//    - filename
+// + inst
+//    - the instance of vicar input file opened
+//
+// output:
+// =======
+// + vi
+//    - initialized VICAR_IMAGE struct pointer
+//    - memory will be allocated inside the function
+/******************************************************************************/
+VICAR_IMAGE* getVI_inp_by_fname(char *fname, int inst);
+
+/******************************************************************************/
+// getVI_inp_by_parmName: returns an initialized VICAR_IMAGE struct
+//
+// input:
+// ======
+// + parmName
+//    - parameter name in the pdf file
+// + inst
+//    - the instance of vicar input file opened
+//
+// output:
+// =======
+// + NULL
+//    - if inst is less than the number of parameter given
+// + vi
+//    - initialized VICAR_IMAGE struct pointer
+//    - memory will be allocated inside the function
+/******************************************************************************/
+VICAR_IMAGE* getVI_inp_by_parmName(char *parmName, int inst);
+
+/******************************************************************************/
+// getVI_out: returns an initialized VICAR_IMAGE struct
+//
+// input:
+// ======
+// + format
+//    - format of the output file
+// + inst
+//    - the instance of vicar input file opened
+// 
+//
+// output:
+// =======
+// + vi
+//    - initialized VICAR_IMAGE struct pointer
+//    - memory will be allocated inside the function
+/******************************************************************************/
+VICAR_IMAGE* getVI_out(char *format, int inst, int nl, int ns);
+
+/******************************************************************************/
+// getVI_out_by_fname: returns an initialized VICAR_IMAGE struct
+//
+// input:
+// ======
+// + fname
+//    - filename
+// + type
+//    - group name of inst
+// + format
+//    - format of the output file
+// + inst
+//    - instance of vicar output file opened
+//
+// output:
+// =======
+// + vi
+//    - initialized VICAR_IMAGE struct pointer
+//    - memory will be allocated inside the function
+/******************************************************************************/
+VICAR_IMAGE* getVI_out_by_fname(char *fname, char *type, char *format, int inst, int nl, int ns);
+
+/******************************************************************************/
+// getVI_out_by_parmName: returns an initialized VICAR_IMAGE struct
+//
+// input:
+// ======
+// + parmName
+//    - parameter name in the calling pdf file
+// + format
+//    - format of the output file
+// + inst
+//    - instance of vicar output file opened
+//    - !!! every new parm should begin w/ 1 !!! - corresponds to nth parm
+//      in a multidimensional parm
+//
+// output:
+// =======
+// + NULL
+//    - if inst is less than the number of parameters given
+// + vi
+//    - initialized VICAR_IMAGE struct pointer
+//    - memory will be allocated inside the function
+/******************************************************************************/
+VICAR_IMAGE* getVI_out_by_parmName(char *parmName, char *format, int inst, int nl, int ns);
+
+/******************************************************************************/
+// (depricated - use getVI function) 
+// getImage: returns an initialized VICAR_IMAGE struct
+//
+// input:
+// ======
+// + unit
+//    - an opened VICAR file handle
+//
+// output:
+// =======
+// + vi
+//    - initialized VICAR_IMAGE struct pointer
+//    - memory will be allocated inside the function
+/******************************************************************************/
+VICAR_IMAGE* getImage(int unit);
+
+/******************************************************************************/
+// deleteImage: deletes a VICAR_IMAGE struct
+//
+// input:
+// ======
+// + *vi
+//    - pointer to VICAR_IMAGE to delete
+/******************************************************************************/
+void deleteImage(VICAR_IMAGE **vi);
+
+/******************************************************************************/
+// getVRI: return an initialized VICAR_RESAMPLE_IMAGE struct pointer
+//
+// input:
+// ======
+// + from
+//    - image to resample from
+// + to
+//    - image to resample to
+// + resample_mode
+//    - method used to resample
+//
+// output:
+// =======
+// + vri
+//    - initialized VICAR_RESAMPLE_IMAGE
+/******************************************************************************/
+VICAR_RESAMPLE_IMAGE* getVRI(VICAR_IMAGE *from, VICAR_IMAGE *to, int resample_mode);
+
+/******************************************************************************/
+// getVTI: returns an initialized VICAR_TILE_IMAGE struct
+//
+// input:
+// ======
+// + vi
+//    - an initialzed VICAR_IMAGE
+//    - call getImage to initialize vi before calling the function
+//
+// output:
+// =======
+// + vti
+//    - initialized VICAR_TILE_IMAGE struct pointer
+//    - memory will be allocated inside the function
+/******************************************************************************/
+VICAR_TILE_IMAGE* getVTI(VICAR_IMAGE *vi, int tile_nl, int tile_ns);
+
+/******************************************************************************/
+// readVicarTileImage: reads the tile for given line samp
+//
+// input:
+// ======
+// + vti
+//    - an initialzed VICAR_TILE_IMAGE
+//    - call getVTI before calling this function
+//
+// output:
+// =======
+// + vti
+//    - buffer inside vti will hold image tile
+/******************************************************************************/
+void readVicarTileImage(VICAR_TILE_IMAGE *vti, int line, int samp);
+
+/******************************************************************************/
+// deleteVTI: deletes the VICAR_RESAMPLE_IMAGE structure
+//            (!! DOES NOT DELETE THE VICAR_IMAGE STRUCT !!)
+//
+// input:
+// ======
+// + vti
+//    - VICAR_TILE_IMAGE struct
+/******************************************************************************/
+void deleteVTI(VICAR_TILE_IMAGE **vti);
+
+/******************************************************************************/
+// getSkippedLine: returns a downsampled line by skipping
+//
+// input:
+// ======
+// + vri
+//    - VICAR_RESAMPLE_IMAGE struct
+// + to_line
+//    - line at offset 0 specifying the output line
+//
+// output:
+// =======
+// + buf
+//    - output buffer to put the downsampled line into
+/******************************************************************************/
+void getSkippedLine(VICAR_RESAMPLE_IMAGE *vri, double *buf, int to_line);
+
+/******************************************************************************/
+// getInterpolatedLine: returns an interpolated line *** NOT YET IMPLEMENTED ***
+//
+// input:
+// ======
+// + vri
+//    - VICAR_RESAMPLE_IMAGE struct
+// + to_line
+//    - line at offset 0 specifying the output line
+//
+// output:
+// =======
+// + buf
+//    - output buffer to put the downsampled line into
+/******************************************************************************/
+void getBilinInterpLine(VICAR_RESAMPLE_IMAGE *vri, double *buf, int line);
+
+/******************************************************************************/
+// getSkippedLine: returns a downsampled line by skipping
+//
+// input:
+// ======
+// + vri
+//    - VICAR_RESAMPLE_IMAGE struct
+// + to_line
+//    - line at offset 0 specifying the output line
+//
+// output:
+// =======
+// + buf
+//    - output buffer to put the downsampled line into
+/******************************************************************************/
+void getDownSampledLine(VICAR_RESAMPLE_IMAGE *vri, double *ds_buf, int line);
+
+/******************************************************************************/
+// writeVicarImageLine: writes a VICAR line onto disk
+//
+// input:
+// ======
+// + vi
+//    - VICAR_IMAGE struct (writes the data stored in vi->buffer onto disk)
+// + line
+//    - line at offset 0 specifying the line to read (offset = 0)
+//
+/******************************************************************************/
+void writeVicarImageLine(VICAR_IMAGE *vi, int line);
+
+/******************************************************************************/
+// readVicarResampleImageLine: reads a line from "from" image in vri and stores it
+//                             inside the vri buffer
+//
+// input:
+// ======
+// + vri
+//    - VICAR_RESAMPLED_IMAGE with from and to set
+// + buf_index
+//    - specifies which of the 4 buffers in the 4 X NS vri buffer to read into
+// + line
+//    - specifies the line number in the "from" file to read (offset = 0)
+//
+// output:
+// =======
+// + vri->buffer[buf_index] stores the line read from "from" image
+/******************************************************************************/
+void readVicarResampleImageLine(VICAR_RESAMPLE_IMAGE *vri, int buf_index, int line);
+
+/******************************************************************************/
+// createDownSampledImage: creates a downsampled image
+//
+// input:
+// ======
+// + vri
+//    - VICAR_RESAMPLED_IMAGE with from and to set
+//
+// output:
+// =======
+// + vri->to image
+/******************************************************************************/
+void createDownSampledImage(VICAR_RESAMPLE_IMAGE *vri);
+
+/******************************************************************************/
+// readVicarImageLine: read a VICAR line and stores it in vi->buffer
+//
+// input:
+// ======
+// + vi
+//    - VICAR_IMAGE struct
+// + line
+//    - line at offset 0 specifying the line to read
+//
+// output:
+// =======
+// + vi->buffer
+//    - output buffer
+/******************************************************************************/
+void readVicarImageLine(VICAR_IMAGE *vi, int line);
+
+/******************************************************************************/
+// deleteAndCloseImage: closes the VICAR_IMAGE and frees memory
+//
+// input:
+// ======
+// + vi
+//    - VICAR_IMAGE struct
+/******************************************************************************/
+void deleteAndCloseImage(VICAR_IMAGE **vi);
+
+/******************************************************************************/
+// deleteVRI: deletes the VICAR_RESAMPLE_IMAGE structure
+//            (!! DOES NOT DELETE THE TO AND FROM FILES !!)
+//
+// input:
+// ======
+// + vri
+//    - VICAR_RESAMPLE_IMAGE struct
+/******************************************************************************/
+void deleteVRI(VICAR_RESAMPLE_IMAGE **vri);
+
+/******************************************************************************/
+// getValidMask: gets valid pixels of images by looking at non-zero pixels
+//               (*UNTESTED FUNCTION*)
+//
+// input:
+// ======
+// + vi
+//    - VICAR_IMAGE struct
+//
+// output:
+// =======
+// + vi valid buffer
+/******************************************************************************/
+void getValidMask(VICAR_IMAGE **vi);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create cloud_masks.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef CLOUD_MASK
+#define CLOUD_MASK
+
+#define CM_CLOUD      1
+#define CM_AMBIG      1
+#define CM_SNOW       1
+#define CM_DESERT     1
+#define CM_WARM_CLOUD 1
+#define CM_COLD_CLOUD 1
+#define CM_ICE        1
+#define CM_CIRRUS     1
+#define CM_VALID      1
+
+#define CM_NONCLOUD       0
+#define CM_NONAMBIG       0
+#define CM_NONSNOW        0
+#define CM_NONDESERT      0
+#define CM_NONWARM_CLOUD  0
+#define CM_NONCOLD_CLOUD  0
+#define CM_NONICE         0
+#define CM_NONCIRRUS      0
+#define CM_NONVALID       0
+
+#define CM_GREEN_REF (cm->band_files->green_band->buffer)
+#define CM_RED_REF   (cm->band_files->red_band->buffer)
+#define CM_NIR_REF   (cm->band_files->nir_band->buffer)
+#define CM_SWIR1_REF (cm->band_files->swir1_band->buffer)
+#define CM_TIR1_REF  (cm->band_files->tir_band1->buffer)
+
+#define CM_CLOUDMASK     0
+#define CM_SNOWMASK      1
+#define CM_DESERTMASK    2
+#define CM_WARMCLOUDMASK 3
+#define CM_COLDCLOUDMASK 4
+#define CM_ICEMASK       5
+#define CM_CIRRUSMASK    6
+#define CM_AMBIGMASK     7
+#define CM_VALIDMASK     8
+
+#define CM_FILTER1       10
+#define CM_FILTER2       11
+#define CM_FILTER3       12
+#define CM_FILTER4       13
+#define CM_FILTER5       14
+#define CM_FILTER6       15
+#define CM_FILTER7       16
+#define CM_FILTER8       17
+#define CM_FILTER9       18
+#define CM_FILTER10      19
+
+#define NEIGHBORSIZE 5
+
+#include "ImageUtils.h"
+
+typedef struct
+{
+   long long int b3_noncloud;
+   long long int b6_noncloud;
+   long long int snowCnt;
+   long long int ndsi_noncloud;
+   long long int pass2_revisit;
+   long long int b5_noncloud;
+   long long int b42ratio_tally;
+   long long int b45ratio_tally;
+   long long int warmcloud;
+   long long int coldcloud;
+   long long int scenePixels;
+   long long int enterdesert;
+   long long int exitdesert;
+   long long int snowpresent;
+   long long int cloudCnt;
+
+   double filter4Thresh;
+   double filter8Thresh;
+
+   int nl, ns;
+}ALGORITHM_VARS;
+
+typedef struct
+{
+   double *ndsi;
+   double *bTempComp;
+   double *gv;
+   double *sv;
+   double *rs;
+}CM_WORKSPACE;
+
+typedef struct
+{
+   VICAR_IMAGE *green_band;
+   VICAR_IMAGE *red_band;
+   VICAR_IMAGE *nir_band;
+   VICAR_IMAGE *swir1_band;
+   VICAR_IMAGE *tir_band1;
+}BAND_FILES;
+
+typedef struct
+{
+   VICAR_IMAGE *ndsi_file;
+   VICAR_IMAGE *bTempComp_file;
+   VICAR_IMAGE *gv_file;
+   VICAR_IMAGE *sv_file;
+   VICAR_IMAGE *rs_file;
+}WORKSPACE_FILES;
+
+typedef struct
+{
+   ALGORITHM_VARS *vars;
+   CM_WORKSPACE *ws;
+   WORKSPACE_FILES *ws_files;
+   BAND_FILES *band_files;
+
+   unsigned char **CMcloud;
+   unsigned char **CMsnow;
+   unsigned char **CMdesert;
+   unsigned char **CMcloud_warm;
+   unsigned char **CMcloud_cold;
+   unsigned char **ice;
+   unsigned char **filter_cirrus;
+   unsigned char **ambig;
+   unsigned char **valid;
+
+   unsigned char **filter1;
+   unsigned char **filter2;
+   unsigned char **filter3;
+   unsigned char **filter4;
+   unsigned char **filter5;
+   unsigned char **filter6;
+   unsigned char **filter7;
+   unsigned char **filter8;
+   unsigned char **filter9;
+   unsigned char **filter10;
+
+   unsigned char **tambig_warm_mask;
+   unsigned char **tambig_cold_mask;
+
+}CLOUD_MASKS;
+
+/******************************************************************************/
+// get_Cloud_Masks: creates a CLOUD_MASKS and initializes the buffers inside them
+//
+// input:
+// ======
+// + nl
+//    - number of lines
+// + ns
+//    - number of samples
+//
+// output:
+// =======
+// + masks
+//    - CLOUD_MASKS pointer
+//
+/******************************************************************************/
+CLOUD_MASKS* get_CLOUD_MASKS(int nl, int ns);
+
+/******************************************************************************/
+// delete_Cloud_Masks: deletes a CLOUD_MASKS
+// 
+// input:
+// ======
+// + masks
+//    - CLOUD_MASKS
+/******************************************************************************/
+void delete_CLOUD_MASKS(CLOUD_MASKS **masks);
+
+/******************************************************************************/
+// init_CM_WORKSPACE: creates a CLOUD_MASK workspace
+//
+// input:
+// ======
+// + nl
+//    - number of lines
+// + ns
+//    - number of samples
+//
+// output:
+// =======
+// + work
+//    - CM_WORKSPACE pointer
+//
+/******************************************************************************/
+void init_CM_WORKSPACE(CLOUD_MASKS **masks);
+
+/******************************************************************************/
+// delete_CM_WORKSPACE: deletes a CLOUD_MASKS
+// 
+// input:
+// ======
+// + work
+//    - CM_WORKSPACE
+/******************************************************************************/
+void delete_CM_WORKSPACE(CLOUD_MASKS **masks);
+
+/******************************************************************************/
+// filter1: brightness threshold
+//
+// inputs:
+// =======
+// + red_ref (0.6-0.7 micron) reflectance
+//    - ETM+ (BAND 3)
+//    - ASTER (BAND 2)
+// + ns
+//    - number of samples
+// + valid
+//    - valid pixels of the scene
+//
+// outputs:
+// ========
+// + finalmask
+//    - cloud mask
+// + ambig
+//    - ambig mask
+/******************************************************************************/
+void filter1(double *red_ref, unsigned char *finalmask, unsigned char* ambig,
+             unsigned char *valid, int ns);
+
+/******************************************************************************/
+// filter2: snow threshold
+//
+// inputs:
+// =======
+// + ndsi
+//    - normalized difference snow index
+//    - see getNDSI
+// + near_ref (0.7-0.9 micron) reflectance
+//    - ETM+ (BAND 4)
+//    - ASTER (BAND 3)
+// + ns
+//    - number of samples
+//
+// outputs:
+// ========
+// + finalmask
+//    - cloud mask
+// + snow
+//    - flag to represent if snow is in the image
+/******************************************************************************/
+void filter2(double* ndsi, double *near_ref, unsigned char *finalmask,
+             unsigned char *snow, int ns);
+
+/******************************************************************************/
+// filter3: temperature threshold
+//
+// inputs:
+// =======
+// + b_temp
+//    - brightness temperature (! NOT AT SATELLITE TEMPERATURE !)
+//    - ETM+ (BAND 6)
+//    - Aster (BAND 13)
+// + ns
+//    - number of samples
+//
+// outputs:
+// ========
+// + finalmask
+//    - cloud mask
+/******************************************************************************/
+void filter3(double *b_temp, unsigned char *finalmask, int ns);
+
+/******************************************************************************/
+// filter4: snow and tundra threshold
+//
+// inputs:
+// =======
+// + bTempComp
+//    - see getBTempComp
+// + shortwave_ref (0.7-0.9 micron) reflectance
+//    - ETM+ (BAND 5)
+//    - ASTER (BAND 4)
+// + b_temp
+//    - brightness temperature (! NOT AT SATELLITE TEMPERATURE !)
+//    - see getBTemp
+// + ns
+//    - number of samples
+// + thresh
+//    - threshold for brightness comp filter
+//
+// outputs:
+// ========
+// + finalmask
+//    - cloud mask
+// + ambig
+//    - ambiguous mask
+// + snow
+//    - flag to represent if snow is in the image
+// + ice
+//    - ice mask
+/******************************************************************************/
+void filter4(double *bTempComp, double *shortwave_ref, double *b_temp, unsigned char *finalmask,
+             unsigned char *ambig, unsigned char *ice, int ns, double thresh);
+
+/******************************************************************************/
+// filter5: growing vegetation
+//
+// inputs:
+// =======
+// + gv
+//    - see getGV
+// + ns
+//    - number of samples
+//
+// outputs:
+// ========
+// + finalmask
+//    - cloud mask
+// + ambig
+//    - ambiguous mask
+/******************************************************************************/
+void filter5(double *gv, unsigned char *finalmask, unsigned char *ambig, int ns);
+
+/******************************************************************************/
+// filter6: senescing vegetation
+//
+// inputs:
+// =======
+// + sv
+//    - see getSV
+// + ns
+//    - number of samples
+//
+// outputs:
+// ========
+// + finalmask
+//    - cloud mask
+// + ambig
+//    - ambiguous mask
+// + enterdesert
+//    - count of pixels entering "desert"
+//    - cumulative count - does not start at 0 but at the value passed in
+/******************************************************************************/
+void filter6(double *sv, unsigned char *finalmask, unsigned char *ambig,
+             long long int *enterdesert, int ns);
+
+/******************************************************************************/
+// filter7: reflective rocks and soil
+//
+// inputs:
+// =======
+// + rs
+//    - see getRS
+// + ns
+//    - number of samples
+//
+// outputs:
+// ========
+// + finalmask
+//    - cloud mask
+// + CMdesert
+//    - desert mask
+// + exitdesert
+//    - count of desert pixels exiting "desert"
+//    - cumulative count - does not start at 0 but at the value passed in
+/******************************************************************************/
+void filter7(double *rs, unsigned char *finalmask, unsigned char *CMdesert,
+             unsigned char *ambig, long long int *exitdesert, int ns);
+
+/******************************************************************************/
+// filter8: identifying warm and cold clouds
+//
+// inputs:
+// =======
+// + bTempComp
+//    - see getBTempComp
+// + ns
+//    - number of samples
+// + thresh
+//    - threshold for this filter
+//
+// outputs:
+// ========
+// + finalmask
+//    - cloud mask
+// + CMcloud_cold
+//    - cold cloud mask
+// + CMcloud_warm
+//    - warm cloud mask
+// + enterdesert
+//    - count of desert pixels
+//    - cumulative count - does not start at 0 but at the value passed in
+/******************************************************************************/
+void filter8(double *bTempComp, unsigned char *finalmask, unsigned char *CMcloud_cold,
+             unsigned char *CMcloud_warm, int ns, double thresh,
+             long long int *coldcloud, long long int *warmcloud);
+
+/******************************************************************************/
+// getNDSI: gets the normalized difference snow index
+//
+// inputs:
+// =======
+// + green_ref reflectance
+//    - ETM+ (BAND 2)
+//    - Aster (BAND 1)
+// + shortwave_ref reflectance
+//    - ETM+ (BAND 5)
+//    - Aster (BAND 4)
+// + ns
+//    - number of samples
+//
+// outputs:
+// ========
+// + ndsi
+//    - buffer containing ndsi data
+/******************************************************************************/
+void getNDSI(double *green_ref, double *shortwave_ref, double *ndsi, int ns);
+
+/******************************************************************************/
+// getBTempComp: gets the brightness temperature
+//
+// inputs:
+// =======
+// + b_temp
+//    - brightness temperature
+//    - ETM+ (BAND 6)
+//    - Aster (BAND 13)
+// + shortwave_ref reflectance
+//    - ETM+ (BAND 5)
+//    - Aster (BAND 4)
+// + ns
+//    - number of samples
+//
+// outputs:
+// ========
+// + bTempComp
+//    - buffer containing bTempComp
+/******************************************************************************/
+void getBTempComp(double *b_temp, double *shortwave_ref, double *bTempComp, int ns);
+
+/******************************************************************************/
+// getGV: gets the growing vegetation indicator
+//
+// inputs:
+// =======
+// + near_ref reflectance
+//    - ETM+ (BAND 4)
+//    - Aster (BAND 3)
+// + red_ref reflectance
+//    - ETM+ (BAND 3)
+//    - Aster (BAND 2)
+// + ns
+//    - number of samples
+//
+// outputs:
+// ========
+// + gv
+//    - buffer containing growing vegetation data
+/******************************************************************************/
+void getGV(double *near_ref, double *red_ref, double *gv, int ns);
+
+/******************************************************************************/
+// getSV: gets the senescing vegetation indicator
+//
+// inputs:
+// =======
+// + near_ref reflectance
+//    - ETM+ (BAND 4)
+//    - Aster (BAND 3)
+// + green_ref reflectance
+//    - ETM+ (BAND 2)
+//    - Aster (BAND 1)
+// + ns
+//    - number of samples
+//
+// outputs:
+// ========
+// + sv
+//    - buffer containing senescing vegetation data
+/******************************************************************************/
+void getSV(double *near_ref, double *green_ref, double *sv, int ns);
+
+/******************************************************************************/
+// getRS: gets the reflective soil indicator
+//
+// inputs:
+// =======
+// + near_ref reflectance
+//    - ETM+ (BAND 4)
+//    - Aster (BAND 3)
+// + shortwave_ref reflectance
+//    - ETM+ (BAND 5)
+//    - Aster (BAND 4)
+// + ns
+//    - number of samples
+//
+// outputs:
+// ========
+// + rs
+//    - buffer containing reflective soil data
+/******************************************************************************/
+void getRS(double *near_ref, double *shortwave_ref, double *rs, int ns);
+
+/******************************************************************************/
+// setBandImages: assign images to corresponding bands
+//
+// inputs:
+// =======
+// + cm
+//    - CLOUD_MASKS struct to assign
+// + green
+//    - ETM+ (BAND 2)
+//    - Aster (BAND 1)
+// + red
+//    - ETM+ (BAND 3)
+//    - Aster (BAND 2)
+// + nir
+//    - ETM+ (BAND 4)
+//    - Aster (BAND 3)
+// + swir1
+//    - ETM+ (BAND 5)
+//    - Aster (BAND 4)
+// + tir1
+//    - ETM+ (BAND 6)
+//    - Aster (BAND 5)
+//
+// outputs:
+// ========
+// + cm
+//    - BAND_FILES struct in cm is initialized
+/******************************************************************************/
+void setBandImages(CLOUD_MASKS **cm, VICAR_IMAGE *green, VICAR_IMAGE *red, VICAR_IMAGE *nir,
+                   VICAR_IMAGE *swir1, VICAR_IMAGE *tir1);
+
+/******************************************************************************/
+// setWorkspaceImages: assign images to corresponding workspace
+//
+// inputs:
+// =======
+// + cm
+//    - CLOUD_MASKS struct to assign
+// + ndsi
+//    - Normalized Difference Snow Index image
+// + bTempComp
+//    - bTempComp image
+// + gv
+//    - growing vegetation image
+// + sv
+//    - scenesing vegetation image
+// + rs
+//    - reflective soil image
+//
+// outputs:
+// ========
+// + cm
+//    - WORKSPACE_FILES struct in cm is initialized
+/******************************************************************************/
+void setWorkspaceImages(CLOUD_MASKS **cm, VICAR_IMAGE *ndsi, VICAR_IMAGE *bTempComp,
+                        VICAR_IMAGE *gv, VICAR_IMAGE *sv, VICAR_IMAGE *rs);
+
+/******************************************************************************/
+// doPass1: perform all the filters of pass1 (setBandImages and setWorkspaceImages
+//                                            should be called before performing
+//                                            this function)
+//
+// inputs:
+// =======
+// + masks
+//    - CLOUD_MASKS stuct to perform the pass1 on
+//
+// outputs:
+// ========
+// + masks
+//    - filter buffers will be set
+/******************************************************************************/
+void doPass1(CLOUD_MASKS *masks);
+
+/******************************************************************************/
+// doPass2: perform all the filters of pass2 (pass1 should be called before performing
+//                                            this function)
+//
+// inputs:
+// =======
+// + masks
+//    - CLOUD_MASKS stuct to perform the pass1 on
+//
+// outputs:
+// ========
+// + masks
+//    - CMcloud buffers will be set
+/******************************************************************************/
+void doPass2(CLOUD_MASKS *cm);
+
+#endif
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create cartoLoggerUtils.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef _loggerutils_h_
+#define _loggerutils_h_
+
+#include <stdlib.h>
+#include "ibisfile.h"
+#include "zvproto.h"
+
+#define _loggerutils_version_ 22
+
+void checkLoggerUtilsVersion (int minimum);
+
+/* Version Changes:
+   22 Enhanced labelRaw16bitImage to pad short images
+   21 Changed labelRaw16bitImage to complain and return when fread fails
+   20 Added logMetaDoubleProperty
+   19 Switched IBIS organization from row to column
+   18 Added noQuotes parm to logMetaStringToProperty
+   17 Allowed metadata to log to arbitrary label
+   16 Added raw image labeler
+   15 Enhanced usingLatLonSubArea to allow specification of only one lat/lon limit
+   14 Added shortSwapBytes to convert shorts from 386 architecture
+   13 Added echoMeta flag to logMeta* to echo to stdout via zifmessage
+   12 Added more HDF declarations and azimuth and zenith columns to IBIS file
+      Added checkedMalloc function
+   11 Added HDF declarations
+   10 Added daysInMonth (from sunup.c)
+      Added dateToDayOfYear (from sunup.c)
+      Added dayOfYearToDate (from sunup.c)
+    9 Added null path option to logMeta* to inhibit logging to file
+    8 Added VICAR image labeling with meta data interface; replaced getTimesData with mallocAndRead
+    7 Added zvread to missing VICAR declarations
+    6 Removed metaFileName from getTimesData args; replaced logDataSetTime with getDataSetTime
+    5 Added geocentricToGeodetic
+    4 Added logDayTimeFlag, getTimesData, logDataSetTime (factored out of avhrrlog and avhrrllog)
+    3 Added forceSubAreaSanity
+    2 Added meta data interface and lat/long sub-area parameters
+      Added lat/lon specified sub-area
+    1 Initial version Mon Dec  3 2001
+  */
+
+short shortSwapBytes (short s); /* to convert shorts from 386 architecture */
+
+/* calls stdlib malloc, calls abend on null returned pointer; description used for error message */
+void * checkedMalloc (size_t size, char * description);
+
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
+#define BOUNDED(val, min, max) (MIN ((max), MAX ((min), (val))))
+
+char * mallocAndRead (char * path);
+double geocentricToGeodetic (double latitude);
+void getDataSetTime (char * dataSetName, char * times, int * utcTimeInMinutes, char * date, char * time);
+
+/* Ensures sub area make sense for image shape.
+   sl, ss are forced to be within the image
+   if nl or ns are < 1 > possible, they are forced to include all image available
+ */
+void forceSubAreaSanity (int * sl, int * ss, int * nl, int * ns, int lines, int samples);
+
+/* Allows lat/lon specified sub-area
+   Assumes that sl, ss, nl, ns default to -999
+   Assumes that minLat, maxLat, minLon, maxLon default to -999.0
+   Assumes that exactly one of the following is true:
+      1 All line/sample values and no lat/lon values are specified; returns 0
+      2 All lat/lon values and no line/sample values are specified; returns 1
+      3 No line/sample values or lat/lon values are specified; returns 0
+ */
+int usingLatLonSubArea (int imageLines, int imageSamples,
+		       double * minLat, double * maxLat, double * minLon, double * maxLon,
+		       int * sl, int * ss, int * nl, int * ns, int allow);
+
+/* Meta data interface
+   initMetaData must be called before meta data is logged. The path names the
+   meta data file. unitCount indicates the number of vunits for the data to be 
+   added to the vicar label as Property "loggerMetaData", Key name, Value value.
+   MetaToLabel stuffs the whole contents of the named meta file into a label named
+   ALL_META_DATA.
+*/
+
+void initMetaData (char * path);
+void logMetaString (int echoMeta, char * path, char * name, char * value, int unitCount, int * vunits);
+void logMetaStringToProperty (int echoMeta, char * path, char * name, char * value, int unitCount, int * vunits, char * property, int noQuotes);
+void logMetaInt (int echoMeta, char * path, char * name, int value, int unitCount, int * vunits);
+void logMetaDouble (int echoMeta, char * path, char * name, double value, int unitCount, int * vunits);
+void logMetaDoubleToProperty (int echoMeta, char * path, char * name, double value, int unitCount, int * vunits, char * property);
+
+void metaToLabel (char * metaName, int vunit);
+void addGTKey (int vunit, char * key, char * value);
+
+/* IBIS navigation data support */
+int logNavDataToIBIS (char * zvunitParmName, int zvunitParmIndex,
+		      int numRows,
+		      double * lineColumn, double * sampleColumn,
+		      double * latColumn, double * lonColumn);
+int logNavAndAnglesDataToIBIS (char * zvunitParmName, int zvunitParmIndex,
+			       int numRows,
+			       double * lineColumn, double * sampleColumn,
+			       double * latColumn, double * lonColumn,
+			       double * zenithColumn, double * azimuthColumn);
+
+/* returns vunit on open image; must be zvclosed */
+int labelRaw16bitImage (char * inpath, char * outpath, int nl, int ns);
+
+/* Time functions */
+int daysInMonth (int year, int month);
+
+/* dayOfYear is 1-based, e.g. dayOfYear==1 => January 1 */
+int dateToDayOfYear (int year, int month, int day);
+void dayOfYearToDate (int dayOfYear, int year, int * month, int * day);
+
+/* Misc macros */
+#ifndef MIN
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#endif
+
+#ifndef MAX
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+#endif
+
+#define BETWEEN(left, middle, right) ((left) <= (middle) && (middle) <= (right))
+
+#endif
+
+$ VOKAGLEVE
+$!-----------------------------------------------------------------------------
+$ create hdfIncludes.h
+$ DECK/DOLLARS="$ VOKAGLEVE"
+#ifndef _hdfIncludes_h_
+#define _hdfIncludes_h_
+
+/* HDF and HDF-EOS includes */
+#include "hdf.h"
+/* conflicts with taeconf.inp */
+#undef FAIL
+
+#include "hdfi.h"
+#include "mfhdf.h"
+#include "hntdefs.h"
+#include "HdfEosDef.h"
+
+#endif
 $ VOKAGLEVE
 $ Return
 $!#############################################################################

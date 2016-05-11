@@ -184,6 +184,21 @@ public class VicarImageReader extends ImageReader {
         }
     }
 
+    /** Wrapper for the protected method <code>computeRegions</code>.  So it
+     *  can be access from the classes which are not in <code>ImageReader</code>
+     *  hierarchy.
+     */
+    public static void computeRegionsWrapper(ImageReadParam param,
+            int srcWidth,
+            int srcHeight,
+            BufferedImage image,
+            Rectangle srcRegion,
+            Rectangle destRegion) {
+    			computeRegions(param, srcWidth, srcHeight,
+    						image, srcRegion, destRegion) ;
+    }
+    
+    
 	public void setDebug(boolean d) {
 		debug = d;
 	}
@@ -193,10 +208,20 @@ public class VicarImageReader extends ImageReader {
      * into a list of tokens.  Each comment, to the end of the line where it
      * occurs, is considered a single token.
      */
-    private void readHeader() throws IIOException {
+	
+	 private void readHeader() throws IIOException {
+		 
+		 
+		 readHeader((ImageReadParam) null);
+	 }
+	 
+    private void readHeader(ImageReadParam param) throws IIOException {
         
-        if (debug)     
+        if (debug) {    
            System.out.println("readHeader");
+           System.out.println("ImageReadParam param = "+param);
+        }
+        
         if (stream == null && seekableStream == null) {
             throw new IllegalStateException ("Input stream not set");
         }
@@ -207,8 +232,11 @@ public class VicarImageReader extends ImageReader {
             vif = new VicarInputFile();
             // System.out.println("input="+input);
             // System.out.println("seekableStream="+seekableStream);
-            if (debug)     
-              System.out.println("stream="+stream);
+            if (debug) {    
+            	vif.setDebug(debug);
+            	// vif.setDebug_tile(debug);
+            	System.out.println("stream="+stream);
+            }
 	        // vif.open(input); // this causes the file to be read and data structures to filled
 	        if (stream != null) {
 	            if (debug)     
@@ -229,7 +257,12 @@ public class VicarImageReader extends ImageReader {
 	            vif.open(seekableStream);
 	        }
 	       
+	       if (param != null) {
+	        	vif.setImageReadParam(param);
+	       }
 	       sys = vif.getSystemLabel();
+	       
+	       // set default values for vif for ImageReadParam
 	       
 	       String format = sys.getFormat();
 	       String org = sys.getOrg(); 
@@ -526,10 +559,10 @@ public class VicarImageReader extends ImageReader {
     }
     
     /**
-     * Uses the default implementation of ImageReadParam.
+     * Uses a Subclassed implementation of ImageReadParam.
      */
     public ImageReadParam getDefaultReadParam() {
-        return new ImageReadParam();
+        return new VicarImageReadParam();
     }
 
     /**
@@ -588,24 +621,25 @@ public class VicarImageReader extends ImageReader {
 
         throws IIOException {
             
-        if (debug) System.out.println("VicarImageReader.readAsRenderedImage()");
+        if (debug) {
+        	System.out.println("VicarImageReader.readAsRenderedImage()");
+        	System.out.println("ImageReadParam "+param);
+        }
         if (imageIndex != 0) {
             throw new IndexOutOfBoundsException ();
         }
-        if (haveReadHeader == false) {
-            readHeader();
-        }
-
-		if (debug) {
-		
+        
+		if (debug) {		
         	System.out.println("VicarImageReader.readAsRenderedImage() after readHeader() ");
         	printParam(param);
 		}
-        // look at the param, decide what to do.
-        // for now ignore it
-        // boolean parameterizedRead = false;
-        
-        
+		
+		if (haveReadHeader == false) {
+            readHeader(param);
+        }
+        // inside readHeader this is called now
+		// vif.setImageReadParam(param);
+                
         // create a VicarRenderedImage using the input stream and the SystemLabel obtained by readHeader()         
         VicarRenderedImage image = null ;
         if (imageIndex != 0) {
@@ -613,7 +647,7 @@ public class VicarImageReader extends ImageReader {
         }
         
         try {
-            image = new VicarRenderedImage(vif, param);
+            image = new VicarRenderedImage(vif, param, debug);
         }
         catch (Exception e) {
             System.err.println("readAsRenderedImage ERROR: "+e);
@@ -623,19 +657,32 @@ public class VicarImageReader extends ImageReader {
         	System.out.println(" vif "+vif);
         	System.out.println(" image "+image);
         }
+        if (debug && image instanceof VicarRenderedImage ) {
+        	((VicarRenderedImage) image).setDebug(debug);
+        }
                  
-       
-
         if (debug) 
         	System.out.println("VicarImageReader.readAsRenderedImage() after readHeader() ");
         // return vri ;
         return image;
         }
 
-
+	
+    public BufferedImage read() throws IIOException {
+    	
+    	if (debug) { System.out.println("VicarImageReader.read() "); }
+    	return read(0, (ImageReadParam) null);
+    }
+    
+    public BufferedImage read(int imageIndex) throws IIOException {
+    	
+    	if (debug) { System.out.println("VicarImageReader.read("+imageIndex+") "); }
+    	return read(imageIndex, (ImageReadParam) null);
+    }
+    
     /**
      * This implementation performs a simple read, leaving any ImageReadParam
-     * subsampling to be performed by a postprocess, which has not yet been
+     * subsampling to be performed by a post process, which has not yet been
      * implemented.  There are currently problems with the color code that
      * appear to be bugs in the Java2D image creation and display chain.  Only
      * bitmap and grayscale images can be read.  May 11, 2000 REV.
@@ -923,7 +970,12 @@ public class VicarImageReader extends ImageReader {
                 vif.readTile(0, 0, sampleModel, buf);
             }
 
-        } catch (IOException e)
+        } catch (NullPointerException e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException(
+                    "IOException occured while reading vicar image file");
+        }catch (IOException e)
         {
             e.printStackTrace();
             throw new RuntimeException(

@@ -1,4 +1,4 @@
-package jpl.mipl.util;
+package jpl.mipl.io.util;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -212,7 +212,8 @@ public class TreeInfo {
 		    	// ((Element) parend).getTagName() and nodeName = parend.getNodeName(); give the same String
 		    	
 		    	sb.append(indent +" "+level+") "+nodeTypeS+" "+nodeName+" <"+nodeName+">"+nodeText2+"</"+nodeName+"> \n");
-		    	sb.append(indent +" "+level+")  XPath /"+xpath+"\n");
+		    	sb.append(indent +" "+level+")       source "+nodeName+" "+nodeText2+"  \n");
+		    	sb.append(indent +" "+level+")        XPath "+nodeName+" /"+xpath+"\n");
 		    	// System.out.println(" $$"+level+" "+info);
 		    	// sb.append("\n");
 		    	
@@ -280,7 +281,7 @@ public class TreeInfo {
 					    }
 		            }
 		            
-		            
+		           
 		            for (int j=0 ; j<cnlen ; j++) {
 			            Node cn = cnl.item(j);
 			            String cnNodeName = cn.getNodeName();
@@ -288,8 +289,10 @@ public class TreeInfo {
 			            cnodeText = cnodeText.trim().replaceAll("\n","##");
 					    cnodeText = cnodeText.replaceAll("\\s+","_");
 					    if (cnNodeName.equalsIgnoreCase("#comment") || cnNodeName.equalsIgnoreCase("comment")) {
-					    	// comments must be ignored. They may not be valid content
-					    	sb.append(String.format("%s %d) %s COMMENT ****************\n", indent, level, cnNodeName));
+					    	// comments must be ignored. They may not be valid content in an XPath expresion
+					    	if (debug) {
+					    		sb.append(String.format("%s %d) %s COMMENT ****************\n", indent, level, cnNodeName));
+					    	}
 					    }
 					    else if (! cnNodeName.equalsIgnoreCase("#text") && sameParent) {
 					    	// System.out.printf("%s %d-%d/%d)PC %s = %s \n",  indent, level, j, cnlen, cnNodeName, cnodeText);
@@ -298,13 +301,15 @@ public class TreeInfo {
 					    	
 					    	String xp = String.format("%s[../%s/text()='%s']", xpath, cnNodeName, cnodeText) ;
 					    	sb.append(String.format("%s %d) %s \n",  indent, level, xp));
+					    	// put a try catch block around this. catch an xpath Exception
+					    	// don't bomb - show the error
 					    	NodeList nlx = domUtils.getNodeList(ownerDoc, xp);
 					        int nxlen = nlx.getLength();
 					        
 					        if (debug) sb.append(String.format("%s %d) nxlen=%d cnlen=%d\n", indent, level, nxlen, cnlen));
 					        for (int ii=0 ; ii< nxlen ; ii++) {
 					        	sb.append(String.format("%s %d) ",  indent, level));
-					        	sb.append(printNode(" x ", nlx.item(ii)));
+					        	sb.append(printNode(" i="+ii+" ", nlx.item(ii)));
 					        	// sb.append(printNode(indent, nlx.item(ii)));
 					        }
 		            	}

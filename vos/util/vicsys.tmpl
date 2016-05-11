@@ -126,12 +126,12 @@ RANLIB	= ranlib
 #define CC_MACRO cc -std	/* Fortran strings don't like -std0 */
 #define ANSI_CC_MACRO cc -std
 #endif
-#if X86_LINUX_ARCH + PPC_LINUX_ARCH
+#if PPC_LINUX_ARCH
 #define CC_MACRO gcc
 #define ANSI_CC_MACRO gcc
 #define CCC_MACRO g++
 #endif
-#if X86_64_LINX_ARCH
+#if X86_64_LINX_ARCH + X86_LINUX_ARCH 
 #define CC_MACRO gcc44
 #define ANSI_CC_MACRO gcc44
 #define CCC_MACRO g++44
@@ -349,7 +349,7 @@ MSGBLD	= $$TAEPDF/msgbld
 #define FC_MACRO ftn
 #endif
 #if ANY_LINUX_ARCH
-#if X86_64_LINX_ARCH
+#if X86_64_LINX_ARCH + X86_LINUX_ARCH 
 #define FC_MACRO gfortran44 -fno-second-underscore -std=legacy -ffixed-line-length-none -fno-range-check
 #else
 #define FC_MACRO gfortran -fno-second-underscore -std=legacy -ffixed-line-length-none -fno-range-check

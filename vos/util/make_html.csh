@@ -9,15 +9,14 @@
 # arg 1 = the directory to find PDF's in (e.g. $R2LIB)
 # arg 2 = the name of the index file to create (e.g. index_p2.html)
 
-if ("$VICCPU" == "sun-solr") then
+if ("$VICCPU" == "x86-linux") then
    echo "*********************"
    echo "* Building HTML files for $1"
    echo "*********************"
    mkdir -p $V2TOP/html/vichelp
    cd $V2TOP/html/vichelp
    $V2UTIL/pdf2html.perl $1 $2
-#   /home/rgd/work/vichelp/pdf2html.perl $1 $2
 else
-   echo "HTML files are built on sun-solr only"
+   echo "HTML files are built on linux 32-bit only"
 endif
 

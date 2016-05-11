@@ -830,7 +830,7 @@ public class PDSImageWriter extends ImageWriter {
             // then we can always recalculate statistics and use them instead of ones from the 
             // input image header
             
-            /****
+            /***
             if (dirty == false) {
             	pdsImStats.setAddMerItems(false);
             	pdsImStats.setAddStatistics(false);
@@ -841,6 +841,10 @@ public class PDSImageWriter extends ImageWriter {
             	pdsImStats.setCalculateStatistics(calculateStatistics);
             }
             ****/
+            
+            // pdsImStats.setAddMerItems(addMerItems);
+        	pdsImStats.setAddStatistics(addStatistics);
+        	pdsImStats.setCalculateStatistics(calculateStatistics);
             
             pdsImStats.setDebug(debug);
             i2PDSdom.setPDSimageStatistics(pdsImStats);
@@ -916,10 +920,11 @@ public class PDSImageWriter extends ImageWriter {
     			PDS_POINTER_PTR = new int[pds_pointer_elementCt]; // this is the value of the element
     			
     			
-    			// there may be some ^DECSRIPTION node. Keep them. They will be ignored when the label is written
+    			// there may be some ^DESCRIPTION node. Keep them. They will be ignored when the label is written
     			
-    			// delete the ones which are NOT ^DECSRIPTION since we will recreate them later using this info
-    			String itemNameToKeep = "^DECSRIPTION" ;
+    			// delete the ones which are NOT ^DESCRIPTION since we will recreate them later using this info
+    			String itemNameToKeep = "^DESCRIPTION" ;
+    			// String itemNameToKeep = "^DECSRIPTION" ;
     			String valueToDelete ="nothing"; // PDS_OBJECT__PTR
     			boolean includeAttributes = true;
     			boolean includeParent = true ;
@@ -1632,7 +1637,9 @@ public class PDSImageWriter extends ImageWriter {
             }
             
             if (detachedLabelOnly) {
-            	System.out.println("  delete: pds_systemLabel_doc FILE_RECORDS    +++++"); 
+            	if (debug) {
+            		System.out.println("  delete: pds_systemLabel_doc FILE_RECORDS    +++++"); 
+            	}
             	xPath = "//item[@key='FILE_RECORDS']";       		       		
             	domUtil.deleteNode(pds_systemLabel_doc, xPath);
             	
@@ -1695,6 +1702,10 @@ public class PDSImageWriter extends ImageWriter {
         		// <IMAGE_START_RECORD>LABEL_RECORDS+1</IMAGE_START_RECORD>
             	Node imageStartRecordNode = domUtil.createNode(pdsDoc, "IMAGE_START_RECORD", "LABEL_RECORDS+1");
             	
+            	if (debug) {
+            		domUtil.serializeNode(pdsDoc, "pdsDoc.xml", "xml");
+            	}
+            	
             	// <PDS_VERSION_ID>PDS3</PDS_VERSION_UD>
             	Node pdsVeridNode;
             	if (pdsLabelType.equalsIgnoreCase("PDS3")) {           			
@@ -1704,6 +1715,7 @@ public class PDSImageWriter extends ImageWriter {
             	}
             	
             	
+            	
             	// insert the node
             	xPath = "//PDS_LABEL";
                 Node pdsNode = domUtil.getSingleNode(pdsDoc, xPath);
@@ -1711,8 +1723,38 @@ public class PDSImageWriter extends ImageWriter {
             	xPath = "//ODL3";
                 Node odl3Node = domUtil.getSingleNode(pdsDoc, xPath);
                 
+                if (debug) {
+                	System.out.println("PDSImageWriter.write() pdsVeridNode "+pdsVeridNode);
+                	System.out.println("PDSImageWriter.write() odl3Node "+odl3Node);
+                	System.out.println("PDSImageWriter.write() pdsNode "+pdsNode);
+                	System.out.println("PDSImageWriter.write() imageStartRecordNode "+imageStartRecordNode);
+            		domUtil.serializeNode(pdsVeridNode, "pdsVeridNode.xml", "xml");
+            		domUtil.serializeNode(odl3Node, "odl3Node.xml", "xml");
+            		domUtil.serializeNode(pdsNode, "pdsNode.xml", "xml");
+            		domUtil.serializeNode(imageStartRecordNode, "imageStartRecordNode.xml", "xml");
+            	}
                 
-                Node oldNode = pdsNode.replaceChild(pdsVeridNode, odl3Node );
+                Node oldNode = null;
+                /**
+                if (pdsNode != null) {
+                	oldNode = pdsNode.replaceChild(pdsVeridNode, pdsNode );
+                	domUtil.serializeNode(oldNode, "oldNodePds.xml", "xml");
+                } else if (odl3Node != null) {
+                	oldNode = pdsNode.replaceChild(pdsVeridNode, odl3Node );
+                	domUtil.serializeNode(oldNode, "oldNodeOdl3.xml", "xml");
+                } 
+                ***/
+                if (pdsNode != null) {
+                	Node firstChild = pdsNode.getFirstChild();
+                	if (debug) {
+                		domUtil.serializeNode(firstChild, "pdsNodeFirstChild.xml", "xml");
+                	}
+                	// pdsNode.insertBefore(newChild, refChild)
+                	pdsNode.insertBefore( pdsVeridNode, firstChild) ;
+                	 if (debug) {
+                		 domUtil.serializeNode(pdsNode, "pdsNode2.xml", "xml");
+                	 }
+                }
                 
                 
                 xPath = "//item[@key='RECORD_TYPE']";      
@@ -1721,8 +1763,7 @@ public class PDSImageWriter extends ImageWriter {
                 
         		Node commentNode = getNodeByValue(pdsNode, xPath, "/* IDENTIFICATION DATA ELEMENTS */") ;
                
-                
-                
+                              
                 pdsNode.insertBefore(imageStartRecordNode, commentNode);
             	
             	doc = pdsDoc;
@@ -1745,11 +1786,11 @@ public class PDSImageWriter extends ImageWriter {
         		// we need to have FILE_RECORDS before IMAGE_START_RECORD for the label to print properly
         		xPath = "//IMAGE_START_RECORD";
                 Node imageStartNode = domUtil.getSingleNode(doc, xPath);
-                domUtil.serializeNode(imageStartNode, "imageStartNode.xml", "xml");
+                if (debug) { domUtil.serializeNode(imageStartNode, "imageStartNode.xml", "xml"); }
                 
                 xPath = "//item[@key='FILE_RECORDS']";    
                 Node fileRecordsNode = domUtil.getSingleNode(doc, xPath);
-                domUtil.serializeNode(fileRecordsNode, "fileRecordsNode.xml", "xml");
+                if (debug) { domUtil.serializeNode(fileRecordsNode, "fileRecordsNode.xml", "xml"); }
                 
                 /***
                  * The insertBefore does all of this 

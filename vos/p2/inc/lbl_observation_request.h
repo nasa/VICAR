@@ -47,11 +47,12 @@ extern "C" {
  *  success or failure of the routine.  Basically, a value of zero represents
  *  a successful completion of the label processing, a non-zero value
  *  indicates a failure.
- *============================================================================
- * History of modifications:
- * ------------------------ 
- * Date         Who             Description
- * -----------  --------------- ---------------------------------------------
+ *****************************************************************************
+ * History
+ *========
+ * Date		Who		Description
+ * ============ =============== =============================================
+ * 2015-09-24   C. Cheng        Added SHUTTER_CORRECTION_MODE
  *****************************************************************************/
 
 typedef struct
@@ -79,6 +80,7 @@ typedef struct
 	  LblApiIntItem_typ		InstrumentIdleTimeout;
 	  LblApiTypeItem_typ	InstrumentIdleTimeoutUnit;
 	  LblApiIntItem_typ		MaxAutoExposIterationCount;
+	  LblApiStringItem_typ	ShutterCorrectionMode;
 	  LblApiIdItem_typ		ShutterCorrectionModeId;
 	  LblApiIntItem_typ		ShutterCorrectThreshCount;
 	  LblApiIdItem_typ		SourceId;

@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module knuth
-$! VPACK Version 1.9, Monday, December 07, 2009, 15:58:16
+$! VPACK Version 1.9, Monday, August 03, 2015, 14:11:49
 $!
 $! Execute by entering:		$ @knuth
 $!
@@ -198,6 +198,8 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
 /*     FEB  07   LWK   CHANGED "SMALL" (IN KNUTH.H) FROM 1E-6   */
 /*                     TO 1E-20;  ADDED CODE TO CHECK BOUNDS OF */
 /*                     "INT" FUNCTION.                          */
+/*     AUG  15   WLB   INCREASED MAXCODE FROM 100 TO 1000 TO    */
+/*                     HANDLE LONGER F2 FUNCTION STRINGS        */
 /*--------------------------------------------------------------*/
 
 /* macros for accessing stack and checking registers */
@@ -1688,7 +1690,7 @@ typedef struct
 
 #define MAXVARIABLES 51
 #define MAXSTATIC 40
-#define MAXCODE 100
+#define MAXCODE 1000
 #define MAXREGISTER MAXCODE
 #define MAXBUFFER MAXVARIABLES+MAXSTATIC+MAXCODE+MAXREGISTER
 

@@ -30,6 +30,7 @@ package jpl.mipl.io.vicar;
 import java.io.*;
 
 import com.sun.media.jai.codec.*;
+
 // import java.lang.reflect.*;
 // import java.beans.*;
 import java.awt.image.*;
@@ -47,17 +48,22 @@ import jpl.mipl.io.util.DOMutils;
 
 // import jpl.mipl.io.plugins.vicar.*;
 
+
 import javax.imageio.ImageIO;
 /*$$$$ Enable for IIO */
 // 9-28-01 commented out
 // import javax.media.imageio.stream.*; // EA1
 import javax.imageio.stream.*; 
+
 /*$$$$*/
 import jpl.mipl.io.streams.*;
 import jpl.mipl.io.ImageUtils;
 
 // import com.sun.media.jai.codec.SeekableStream;
 // import com.sun.media.jai.codec.ImageCodec;
+/** InputStreamWrapper **
+import jpl.mipl.mars.viewer.image.RenderedOpLoaderGetImageInputStreamWrapper;
+** InputStreamWrapper **/
 
 import org.apache.xpath.XPathAPI;
 import org.w3c.dom.*;
@@ -65,11 +71,11 @@ import org.w3c.dom.traversal.NodeIterator;
 // import org.xml.sax.SAXException;
 
 
+
 import javax.media.jai.*;
 import javax.xml.transform.TransformerException;
 
 import java.awt.Rectangle;
-
 import java.net.URL;
 import java.nio.ByteOrder;
 
@@ -542,8 +548,13 @@ public class PDSInputFile extends VicarInputFile
     // pdsLabel2Dom should leave _input_stream at the beginning of the VicarLabel !!!
     
     if (_hasEmbeddedVicarLabel) {
-    	// readEmbeddedVicarLabel();
-	    
+    	readEmbeddedVicarLabel();	    
+    }
+    
+    if (debug) {
+        System.out.println("  AFTER readEmbeddedVicarLabel()  _hasEmbeddedVicarLabel "+_hasEmbeddedVicarLabel); 
+        System.out.println("  _hasEmbeddedVicarLabel "+_hasEmbeddedVicarLabel+"  _embedded_label_start = "+_embedded_label_start);
+        System.out.println("  _embeddedVicarLabel = "+_embeddedVicarLabel+"  ");
     }
 	
     
@@ -566,14 +577,9 @@ public class PDSInputFile extends VicarInputFile
 					(_system.getN2() * _system.getN3()))
 			* _system.getRecsize();
 
-	
-
     // _lblsize_front MUST take into account the embedded Vicar label
     // it really is the start of the image data
-	_current_file_pos = _lblsize_front;
-	
-	
-	
+	_current_file_pos = _lblsize_front;	
 	}
 	
 	/**
@@ -645,8 +651,15 @@ public class PDSInputFile extends VicarInputFile
            }
         }
         catch (IOException ioe) {
-            System.out.println("IOException attempting to read embedded vicar label "+ioe);
-            ioe.printStackTrace();
+        	if (debug) {
+        		System.out.println("IOException attempting to read embedded vicar label "+ioe);
+        		ioe.printStackTrace();
+        	}
+            
+            
+            _hasEmbeddedVicarLabel = false;
+            _embeddedVicarLabel = null;
+            
         }
 	   }
     }
@@ -700,6 +713,7 @@ public class PDSInputFile extends VicarInputFile
 			System.out.println("_system.getHost() = "+_system.getHost());
 			System.out.println("_system.getIntFmt() = "+_system.getIntFmt());
 			System.out.println("_system.getRealFmt() = "+_system.getRealFmt());
+			System.out.println("pdsImageReadParam = "+ pdsImageReadParam);
 		}
 		
 		
@@ -712,10 +726,7 @@ public class PDSInputFile extends VicarInputFile
 			if (debug) {
 				System.out.println("detachedLabel opening the image data file now");
 				System.out.println("PDSInputFile.open("+detachedFilename+")");
-			}
-                        
-			if (debug) {
-				System.out.println("PDSInputFile.open("+detachedFilename+") this.pdsImageReadParam = "+this.pdsImageReadParam);
+				System.out.println("this.pdsImageReadParam = "+this.pdsImageReadParam);
 			}
 			// 20110709, xing, 20140319, srl
 			String directoryPath = ".";
@@ -731,19 +742,27 @@ public class PDSInputFile extends VicarInputFile
 			}
 			
 			String separator = java.io.File.separator;
-         	int forwardSlashI = directoryPath.indexOf('/');
-         	int backSlashI = directoryPath.indexOf('\\');
-         	separator = "/";
-         	if (forwardSlashI >= 0) {
-         		separator = "/";
-         	} else {
-         		separator = "\\";
-         	}
-         	if (debug) {
-         		System.out.println("forwardSlashI "+forwardSlashI+"  backSlashI "+backSlashI);
-         		System.out.println("seperator "+separator+"    java.io.File.separator = "+java.io.File.separator);
-         		
-         	}
+			// check if this is a url ( look for ':' ) 
+			if (directoryPath.indexOf(':') != -1) {
+				separator = "/";
+				if (debug) {
+	         		System.out.println("This is a URL since it contains ':' separator "+separator+"   ");
+				}
+			} else {
+			
+				int forwardSlashI = directoryPath.indexOf('/');
+				int backSlashI = directoryPath.indexOf('\\');
+				separator = "/";
+				if (forwardSlashI >= 0) {
+					separator = "/";
+				} else {
+					separator = "\\";
+				}
+				if (debug) {
+	         		System.out.println("forwardSlashI "+forwardSlashI+"  backSlashI "+backSlashI);
+	         		System.out.println("seperator "+separator+"    java.io.File.separator = "+java.io.File.separator);    
+				}
+			}
          	
 			// String fullPath = directoryPath+java.io.File.separator+detachedFilename;
 			// look at directoryPath and see if it is using "\" or "/" use the same things
@@ -756,7 +775,61 @@ public class PDSInputFile extends VicarInputFile
 			imUtil.setDebug(debug);
 			// This will handle opening local file, URL
 			// we may still need to add something to configure web authentication: certificates or CSS
-			_input_stream =  imUtil.getImageInputStream(fullPath) ;
+			// if (imUtil.hasGetInputStreamCallback()) {
+			// this is set in the imageReadParam
+			
+			/** InputStreamWrapper **
+			if (pdsImageReadParam != null && pdsImageReadParam.getUseMarsviewerCallback()) {
+				if (debug) { 
+					System.out.println("******************************************************");
+					System.out.println("*** PDSInputFile                               *******");
+					System.out.println("******************************************************");
+					System.out.println("PDSInputFile.open() imUtil.getUseMarsviewerCallback()");					
+				}
+				try {
+					// this could be a URL
+					// set up the callback. We just created a new instance imUtil so it isn't setup by default
+					// import jpl.mipl.mars.viewer.image.RenderedOpLoaderGetImageInputStreamWrapper;			
+					// check if this class is available ( it is contained in the marsviewer.jar 
+					// avoid throwing an unrecoverable NoClassDefFoundError if the marsviewer.jar isn't on the classpath
+					// The error happens even though this piece of code is never called when 
+					// the PDSInputFile constructor is called 
+					String cname = "jpl.mipl.mars.viewer.image.RenderedOpLoaderGetImageInputStreamWrapper";
+					Class c = Class.forName(cname, true, this.getClass().getClassLoader());
+					//  old code which throws an error
+					// RenderedOpLoaderGetImageInputStreamWrapper ropWrapper = new RenderedOpLoaderGetImageInputStreamWrapper();
+					// imUtil.addGetInputStreamCallback(ropWrapper);
+					
+					if (debug) {  
+						System.out.println("The class of " + c + " is " + c.getClass().getName());
+					}
+					RenderedOpLoaderGetImageInputStreamWrapper ropWrapper = (RenderedOpLoaderGetImageInputStreamWrapper) c.newInstance();
+					imUtil.addGetInputStreamCallback(ropWrapper);
+				
+					_input_stream = imUtil.getImageInputStreamCallback(fullPath);
+					if (debug) {
+						System.out.println("PDSInputFile.openInternal _input_stream "+_input_stream);
+					}
+					
+				}
+				catch (NoClassDefFoundError ee) {
+		            System.out.println("NoClassDefFoundError getImageInputStreamCallback "+ee);
+		            ee.printStackTrace();
+		        }
+				catch (Exception e) {
+		            System.out.println("Exception getImageInputStreamCallback "+e);
+		            e.printStackTrace();
+		        }
+			} else 
+			** InputStreamWrapper **/
+			{
+				if (debug) { 
+					System.out.println("PDSInputFile.open() imUtil.getImageInputStream(()");					
+				}
+				_input_stream =  imUtil.getImageInputStream(fullPath) ;
+			}
+			
+			
 			/******************************
 			 * This is the old way. Now there is one file/URL opening method caled from anywhere
 			//RandomAccessFile raf = new RandomAccessFile(detachedFilename, "r");
@@ -840,7 +913,7 @@ public class PDSInputFile extends VicarInputFile
 		// will take care of it (it re-verifies the order is right).
 		
 		if (debug) {
-			System.out.println("VicarInputFile.openInternal()");
+			System.out.println("PDSInputFile.openInternal()");
 			System.out.println("_data_format="+_data_format);
 			// Get the host and data formats and set up the VicarDataFormat object.
 			System.out.println("_system.getHost() = "+_system.getHost());
@@ -890,7 +963,7 @@ public class PDSInputFile extends VicarInputFile
  * 
  * called at the end of openInternal. Can be used by subclasses to do any 
  * extra work once openInternal has completed. Created so 
- * PDSInputFile and ISISInputFile  oculd have the oportunity to modify 
+ * PDSInputFile and ISISInputFile  could have the oportunity to modify 
  * _input_stream_wrap. 
  */
 protected void openInternalLast() {
@@ -1568,7 +1641,17 @@ protected void openInternalLast() {
     * @return the Document derived from the embedded vicar label
     */
     public Document getVicarDocument() {
-            return _Vicar_document;
+    	if (debug) System.out.println("getVicarDocument() "+_Vicar_document);
+    	
+    	if (_Vicar_document == null) {
+    		// create the document
+    		DOMutils domUtils = new DOMutils();
+    		Document doc = domUtils.getNewDocument();
+            Node lbl = _embeddedVicarLabel.toXML(doc);
+            doc.appendChild(lbl);
+            _Vicar_document = doc;
+    	}
+        return _Vicar_document;
     }
 
     /**

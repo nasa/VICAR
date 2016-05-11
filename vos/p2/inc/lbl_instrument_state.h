@@ -52,6 +52,7 @@ extern "C" {
  *========
  * Date		Who		Description
  * ============ =============== =============================================
+ * 2015-09-24   C. Cheng        Added SHUTTER_CORRECTION_MODE
  * 2003-05-12   H. Lee          Changed SunFindParm to LblApiRealItem_typ
  * 2003-04-18   H. Lee          Changed DetectorToImageRotation to LblApiRealItem_typ
  * 2003-01-13	P. Zamani	Changed BadPixelReplaceFlag to
@@ -110,6 +111,7 @@ typedef struct
 	LblApiIntItem_typ		PixelAveragingWidth;
 	LblApiNameItem_typ		SampleBitMethod;
 	LblApiIdItem_typ		SampleBitModeId;
+    LblApiStringItem_typ    ShutterCorrectionMode;
 	LblApiFlagItem_typ		ShutterEffectCorrectionFlag;
 	LblApiIdItem_typ		ShutterModeId;
 	LblApiFlagItem_typ		SunFindFlag;

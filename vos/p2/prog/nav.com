@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module nav
-$! VPACK Version 1.9, Saturday, February 04, 2012, 09:54:59
+$! VPACK Version 2.1, Thursday, February 18, 2016, 15:17:02
 $!
 $! Execute by entering:		$ @nav
 $!
@@ -159,8 +159,8 @@ $ vpack nav.com -mixed -
 	-s nav.f spicesub.f limbfit.f ringfit.f phasprof.f starfit.f t1950.f -
 	   carea.f getangles.f planet.f editnav.f display.f dpic.f -
 	-p nav.pdf -
-	-t tstnav.pdf tstnav.scr tstnavstar.pdf tstnavstar_vms.scr -
-	   tstnavstar_unix.scr tstnav.log_solos -
+	-t tstnav.pdf tstnav.scr tstnav.log tstnavstar.pdf tstnavstar_unix.scr -
+	   tstnavstar_unix.log -
 	-d nav.doc -
 	-i nav.imake
 $ Exit
@@ -261,7 +261,7 @@ C
       CHARACTER*5 FORMAT
       CHARACTER*12 tname
 
-      CALL XVMESSAGE('NAV version 06jul2011',' ')
+      CALL XVMESSAGE('NAV version 2016-02-18',' ')
 c  (latest change was in subr. SPICESUB, to add INIT_SPICE before PBDATA)
       CALL DEVICE(ind)		!Initialize display device
       IF (IND.EQ.0) GOTO 999
@@ -13687,31 +13687,31 @@ Haemmerle of Arizona.
 Original Programmers: Gary Yagi and Vance Haemmerle, 30 September 1985
 Current Cognizant Programmer: Gary Yagi
 Revisions:
- Jan 01, 85  GMY  ...Add ringfit routines
- Feb 17, 85  GMY  ...Add eccentric ring routines
- Sep 11, 87  GMY  ...Change planet model from oblate spheroid to ellipsoid
- May 28, 88  GMY  ...New VRDI and SEDR interfaces.
- Jun 26, 88  GMY  ...Add starfit routines
+ 1985-01-01  GMY  ...Add ringfit routines
+ 1985-02-17  GMY  ...Add eccentric ring routines
+ 1987-09-11  GMY  ...Change planet model from oblate spheroid to ellipsoid
+ 1988-05-28  GMY  ...New VRDI and SEDR interfaces.
+ 1988-06-26  GMY  ...Add starfit routines
                   ...Modify program to work on image-space images.
- Jun 30, 88  GMY  ...Modify program to work on 1024x1024 display.
- Jul 15, 88  GMY  ...Fix LIMBPT and RINGPT routines to skip over points
+ 1988-06-30  GMY  ...Modify program to work on 1024x1024 display.
+ 1988-07-15  GMY  ...Fix LIMBPT and RINGPT routines to skip over points
                      not in picture. 
- Jul 20, 88  GMY  ...Modify program to work on halfword images.
- Jul 26, 88  GMY  ...Merge code from Vance Haemmerle's version of NAV.
+ 1988-07-20  GMY  ...Modify program to work on halfword images.
+ 1988-07-26  GMY  ...Merge code from Vance Haemmerle's version of NAV.
 		  ...New capabilities include computation of phase angle,
 		  ...orbital elements of Saturn's rings, longitudinal
 		  ...ring profiles, and graphics display of ring profile.
- Mar 17, 89  GMY  ...Read orbital elements from file
+ 1989-03-17  GMY  ...Read orbital elements from file
                   ...Numerous bug fixes (FRs 38130,42711,42712)
- May 31, 89  VRH  ...RL, LS functions for rings added
+ 1989-05-31  VRH  ...RL, LS functions for rings added
 		  ...Chisq, Covarient matrix, PHASE, LATI, LL fixed
                   ...PROFILE for Master ring system 
                   ...(* System directory dependences removed - UA version)
- Jun  8, 89  VRH  ...RADIUS in Master ring system for drawing & fiting
+ 1989-06-08  VRH  ...RADIUS in Master ring system for drawing & fiting
                   ...PLANE option in fiting (TRACE,SCAN) for RADIUS ring
                   ...Use ring place holders for defining new rings
                   ...available for every use except SRINGS
- Jul 29, 89  VRH  ...Direct C-Matrix corrections for ANGLA less than 10 degrees
+ 1989-07-29  VRH  ...Direct C-Matrix corrections for ANGLA less than 10 degrees
                   ...Epoch's changed from ERT to Planet time
                   ...Cursor routines report DN value
                   ...Bug fixes: /C1/ common block, Scan limits, RA in LATLON,
@@ -13719,27 +13719,26 @@ Revisions:
                   ...ERING changed: ALPHAp,DELTAp,THETA,ZETAZ only changed
                   ...using RING=P then all rings updated
                   ...Labels added to profile plots
- Aug 16 89  VRH   ...Added PREDICT parameter & subroutine
- Jun 1, 90  GMY   ...Galileo conversion.
+ 1989-08-16 VRH   ...Added PREDICT parameter & subroutine
+ 1990-06-01 GMY   ...Galileo conversion.
                   ...Minor bug fixes (FRs 48219,48452,48454,50799,48218,52848)
- Jul 26, 90 GMY   ...Change PLANET_NAME to TAREGET_NAME in call to SPICESUB.
- Feb 22, 91 GMY   ...Make it work when SEDR or SPICE kernels are not available.
- 1-nov-95   lwk   ...ported program (limb-fit only, and no halfword data or
+ 1990-07-26 GMY   ...Change PLANET_NAME to TAREGET_NAME in call to SPICESUB.
+ 1991-02-22 GMY   ...Make it work when SEDR or SPICE kernels are not available.
+ 1995-11-01 LWK   ...ported program (limb-fit only, and no halfword data or
                      graphics under Unix)
- Apr 4, 96  ARV   ...Added capability to handle non-flight projects.
+ 1996-04-04 ARV   ...Added capability to handle non-flight projects.
                   ...VICAR retrieves SCLAT, SCLON, SUNLAT, SUNLON, CENTLINE,
                   ...CENTSAMP, RANGE, FOCAL, SCALE, NORTH, OALINE, OASAMP
                   ...from a MAP2 Perspective Projection label, the command
                   ...line (these parameters added to command line), or
                   ...prompts user.  Changes tagged by 'A. VASAVADA'.
- 7-apr-96   lwk   ...enabled graphics on all platforms
- 24-jun-96  BAM   ...modified program for new Reseau File Format
- 27-Aug-96  OAM   ...modified program to call getspice2 instead of getspice.
+ 1996-04-07 LWK   ...enabled graphics on all platforms
+ 1996-06-24 BAM   ...modified program for new Reseau File Format
+ 1996-08-27 OAM   ...modified program to call getspice2 instead of getspice.
                      Included provenance parameters. Modified to reference
                      the OEF and SAO files only when they are needed.
- 06-Nov-96  BTC   ...Changes from 06-Nov-96 version have the marker "CBTC"
- (Feb, 1997)          "CBTC" near them - this work was done in Feb, 1997
-                  ...Fixed several problems with RINGFIT & STARFIT
+ 1996-11-06 BTC   ...Changes from 06-Nov-96 version have the marker "CBTC"
+ 1997-02    BTC   ...Fixed several problems with RINGFIT & STARFIT
                   ...See also RINGORBS.COM to get correct ROEF.DAT(Jupiter/GLL)
                   ...Fixed broken non-VGR logic around call to VGRCLEAR
                   ...Fixed mistakes regarding INTEGER vs REAL vars (XDROTATE
@@ -13752,20 +13751,20 @@ Revisions:
                      the graphics overlay color (default is CYAN).
                   ...Added RPARAMS call to STARFIT()
                   ...Fixed STARFIT et al. for J2000 Reference Frame (ISYSTEM=1)
- 23-Jul-98  RRP   ...Updated to obtain four digit year and use four digit year
+ 1998-07-23 RRP   ...Updated to obtain four digit year and use four digit year
                   ...through out the program. The variable name is IDATE and it
                   ...is used in calculating number of days since 1950 in T1950
                   ...subroutine (Y2K-FRD<901>).
- 07-Jan-99  RRP   ...Updated to display four digit year (Y2K-FRD<901>).
- 01 Apr 00  GMY  Fixed display of halfword data (AR 9059)
- 12 May 00  GMY  Fixed RADIUS count in .PDF.
- 13 May 00  GMY  Removed compiler errors on SGI and Linux.
- 26 May 00  GMY  Fix display of halfword when going from CZOOM=2 back to 'H.
- 12 Jun 00  GMY  Replace PARMTST1 with XVIPTST, replace UPRCASE w library vers.
-  3 Jun 02  VRH   ...Increase max image size to accomodate Cassini images
+ 1999-01-07 RRP   ...Updated to display four digit year (Y2K-FRD<901>).
+ 2000-04-01 GMY  Fixed display of halfword data (AR 9059)
+ 2000-05-12 GMY  Fixed RADIUS count in .PDF.
+ 2000-05-13 GMY  Removed compiler errors on SGI and Linux.
+ 2000-05-26 GMY  Fix display of halfword when going from CZOOM=2 back to 'H.
+ 2000-06-12 GMY  Replace PARMTST1 with XVIPTST, replace UPRCASE w library vers.
+ 2002-01-02 VRH   ...Increase max image size to accomodate Cassini images
                   ...Make default FOV not Voyager specific
                   ...Add Cassini as a recognized Project
- 16 Oct 02  VRH  Fixed some compile warnings in LIMBFIT
+ 2002-10-16 VRH  Fixed some compile warnings in LIMBFIT
                   ...Updated star catalog and GETSTARS to work on all platforms
                   ...New SAO catalog is sao_idl.str, no longer blocked
                   ...Star catalogs now contain star name and spectral type
@@ -13783,14 +13782,15 @@ Revisions:
                   ...Use GETCAMCON instead of VGRCAM in EDITNAV CAMERA select
                   ...Fixed use of VGR BLEM files on unix (call VIC1LABX)
                   ...Update documentation and PDF
- 29 may 06  lwk  Convert SCLON read in from MP to East.  Fixed some minor bugs
+ 2006-05-29 LWK  Convert SCLON read in from MP to East.  Fixed some minor bugs
                  causing build problems or crashes.
- 12 feb 10  lwk  Changed "west" to "east" in Help text for SCLON and SUNLON.
+ 2010-02-12 LWK  Changed "west" to "east" in Help text for SCLON and SUNLON.
                  Added line to Help file reminding users that NAV can't be
                  run in shell-vicar.
-  6 jul 11  lwk  Added INIT_SPICE before call to PBDATA in routine SPICESUB, since
+ 2011-07-06 LWK  Added INIT_SPICE before call to PBDATA in routine SPICESUB, since
                  the new PBDATA needs SPICE kernels and the call to GETSPICE2 clears
                  the kernel pool on return.
+ 2016-02-18 WLB  Added enable/disable-log to tst*.pdf.
 
 .LEVEL1
 .VARI INP
@@ -14528,6 +14528,8 @@ BODY
 LET _ONFAIL="CONTINUE"
 LET $ECHO="NO"
 
+enable-log
+
 LOCAL GLL_PATH  TYPE=STRING INIT="/project/test_work/testdata/gll/"
 LOCAL MIPL_PATH TYPE=STRING INIT="/project/test_work/testdata/mipl/gll/"
 LOCAL VGR_PATH  TYPE=STRING INIT="/project/test_work/testdata/mipl/vgr/"
@@ -14537,18 +14539,6 @@ LOCAL COPY      TYPE=STRING INIT="cp"
 LOCAL TO_THIS   TYPE=STRING INIT="."
 LOCAL DELETE    TYPE=STRING INIT="rm"
 LOCAL SUFFIX    TYPE=STRING INIT=""
-
-IF ($SYSCHAR(1) = "VAX_VMS")
-  LET GLL_PATH  = "WMS_TEST_WORK:[TESTDATA.GLL]"
-  LET MIPL_PATH = "WMS_TEST_WORK:[TESTDATA.MIPL.GLL]"
-  LET VGR_PATH  = "WMS_TEST_WORK:[TESTDATA.MIPL.VGR]"
-  LET CAS_PATH  = "WMS_TEST_WORK:[TESTDATA.CASSINI.CAS$I$SS]"
-  LET COMMAND   = "DCL"
-  LET COPY      = "COPY"
-  LET TO_THIS   = "*.*"
-  LET DELETE    = "DEL"
-  LET SUFFIX    = ";*"
-END-IF
 
 &COMMAND  &COPY &"VGR_PATH"f1636832.geo   &TO_THIS
 &COMMAND  &COPY &"GLL_PATH"s0165034052.u  &TO_THIS
@@ -14564,10 +14554,9 @@ USE XWC0
 
 ENABLE-SCRIPT tstnav.scr
 
+disable-log
+
 END-PROC
-
-
-
 $!-----------------------------------------------------------------------------
 $ create tstnav.scr
 ! Allocate display device before running this file. First testcase is of a byte
@@ -14641,6 +14630,11 @@ NAV n1354897340.1 SPICEMODE=REMOTE
 'exit
 'n
 $!-----------------------------------------------------------------------------
+$ create tstnav.log
+ush $VRDILIB/usedisp a XWC0
+ENABLE-SCRIPT tstnav.scr
+disable-log
+$!-----------------------------------------------------------------------------
 $ create tstnavstar.pdf
 PROCEDURE
 REFGBL $ECHO
@@ -14649,6 +14643,8 @@ BODY
 LET _ONFAIL="CONTINUE"
 LET $ECHO="NO"
 
+enable-log
+
 LOCAL CAS_PATH  TYPE=STRING INIT="/project/test_work/testdata/cassini/casIss/"
 LOCAL COMMAND   TYPE=STRING INIT="ush"
 LOCAL COPY      TYPE=STRING INIT="cp"
@@ -14656,40 +14652,18 @@ LOCAL TO_THIS   TYPE=STRING INIT="."
 LOCAL DELETE    TYPE=STRING INIT="rm"
 LOCAL SUFFIX    TYPE=STRING INIT=""
 
-IF ($SYSCHAR(1) = "VAX_VMS")
-  LET CAS_PATH  = "WMS_TEST_WORK:[TESTDATA.CASSINI.CAS$I$SS]"
-  LET COMMAND   = "DCL"
-  LET COPY      = "COPY"
-  LET TO_THIS   = "*.*"
-  LET DELETE    = "DEL"
-  LET SUFFIX    = ";*"
-END-IF
-
 &COMMAND  &COPY &"CAS_PATH"w1364364259.2  &TO_THIS
 
 LET $ECHO="YES"
 
-IF ($SYSCHAR(1) = "VAX_VMS")
-  ENABLE-SCRIPT tstnavstar_vms.scr
-END-IF
+USE XWC0
 
-IF ($SYSCHAR(1) = "UNIX")
-  ENABLE-SCRIPT tstnavstar_unix.scr
-END-IF
+ENABLE-SCRIPT tstnavstar_unix.scr
 
+disable-log
 END-PROC
 
 
-
-$!-----------------------------------------------------------------------------
-$ create tstnavstar_vms.scr
-! Test SAO star catalog w/Cassini image
-NAV w1364364259.2 SPICEMODE=REMOTE TARGET=SATURN SAO=WMS_VGR:[000000]SAO_IDL.STR
-'star
-stretch=(15,40)
-'exit
-'exit
-'n
 
 $!-----------------------------------------------------------------------------
 $ create tstnavstar_unix.scr
@@ -14702,261 +14676,10 @@ stretch=(15,40)
 'n
 
 $!-----------------------------------------------------------------------------
-$ create tstnav.log_solos
-tstnav
+$ create tstnavstar_unix.log
 ush $VRDILIB/usedisp a XWC0
-ENABLE-SCRIPT tstnav.scr
-END-PROC
-NAV s0165034052.u SPICEMODE=REMOTE
-Beginning VICAR task NAV
-NAV version 06jul2011
-(SL,SS)=(   1,   1)  ZOOM= 1
-CKNAME=NAIF  SPKID=N083  PROGRAM=ual sh  1993
-Specify feature to be fitted
-'limb
-'scan
-Begin manual registration of limb...
-Move Cursor to a point on computed limb
-'exit
-'n
-Object Space PC (LINE,SAMP)=(    418.77,   1776.61)  ANGLN= -27.706
- Image Space PC (LINE,SAMP)=(    419.01,   1793.78)
-'exit
-Specify feature to be fitted
-'exit
-NAVIGATION DATA FOR FRAME  165034052
-S/C Event Time (yyyyddd hhmmssmmm)  SCET  1992343  43559910
-Target body                         TARG  MOON
-Major equatorial radius (km)        RA      1737.4
-Minor equatorial radius (km)        RB      1737.4
-Polar radius (km)                   RC      1737.4
-Longitude of major eq. radius (deg) LORA    35.58
-Spacecraft range (km)               RANG      113839
-Spacecraft position (lat,lon(East)) SSP   ( 53.74,  35.58)
-O.S. planet center (line,sample)    PC    (    418.77,   1776.61)
-I.S. planet center (line,sample)    ISPC  (    419.01,   1793.78)
-North Angle (CW degrees from right) ANGLN  -27.71
-Camera Serial Number                CAM          1
-Focal length (mm)                   FL      1501.039
-O.S. optical axis (line,sample)     OAXIS ( 400.0, 400.0)
-Scale (pixels/mm at focal plane)    SC     65.6168
-Min and max ring radii (km)         RLIM        0.      0.
-Solar position (lat,lon(East))      SOL   ( -0.19,  17.14)
-All latitudes are planetocentric
-CKNAME=NAIF  SPKID=N083  PROGRAM=ual sh  1993
-'n
-NAV task completed
-NAV  venus2.img SPICEMODE=REMOTE
-Beginning VICAR task NAV
-NAV version 06jul2011
-(SL,SS)=(   1,   1)  ZOOM= 1
-CKNAME=NAV   SPKID=N083  PROGRAM=  1111  
-Specify feature to be fitted
-'limb
-'scan
-Begin manual registration of limb...
-Move Cursor to a point on computed limb
-'exit
-'n
-Object Space PC (LINE,SAMP)=(    149.11,    481.02)  ANGLN=  88.546
- Image Space PC (LINE,SAMP)=(    149.00,    481.05)
-'exit
-Specify feature to be fitted
-'exit
-NAVIGATION DATA FOR FRAME   18494445
-S/C Event Time (yyyyddd hhmmssmmm)  SCET  1990044  55847329
-Target body                         TARG  VENUS
-Major equatorial radius (km)        RA      6051.8
-Minor equatorial radius (km)        RB      6051.8
-Polar radius (km)                   RC      6051.8
-Longitude of major eq. radius (deg) LORA   183.68
-Spacecraft range (km)               RANG     1630160
-Spacecraft position (lat,lon(East)) SSP   ( -2.95, 183.68)
-O.S. planet center (line,sample)    PC    (    149.11,    481.02)
-I.S. planet center (line,sample)    ISPC  (    149.00,    481.05)
-North Angle (CW degrees from right) ANGLN   88.55
-Camera Serial Number                CAM          1
-Focal length (mm)                   FL      1501.039
-O.S. optical axis (line,sample)     OAXIS ( 400.0, 400.0)
-Scale (pixels/mm at focal plane)    SC     65.6168
-Min and max ring radii (km)         RLIM        0.      0.
-Solar position (lat,lon(East))      SOL   ( -2.58, 230.52)
-All latitudes are planetocentric
-CKNAME=NAV   SPKID=N083  PROGRAM=  1111  
-'n
-NAV task completed
-NAV s0349674100.u SPICEMODE=REMOTE
-Beginning VICAR task NAV
-NAV version 06jul2011
-(SL,SS)=(   1,   1)  ZOOM= 1
-CKNAME=NAV   SPKID=N052  PROGRAM=NAV 77  ADC IC        11/04/96
-Specify feature to be fitted
-'limb
-'scan
-Begin manual registration of limb...
-Move Cursor to a point on computed limb
-'exit
-'n
-Object Space PC (LINE,SAMP)=(    913.99,   2356.87)  ANGLN=  92.892
- Image Space PC (LINE,SAMP)=(    927.83,   2409.58)
-'exit
-Specify feature to be fitted
-'exit
-NAVIGATION DATA FOR FRAME  349674100
-S/C Event Time (yyyyddd hhmmssmmm)  SCET  1996178 155044876
-Target body                         TARG  JUPITER
-Major equatorial radius (km)        RA     71492.0
-Minor equatorial radius (km)        RB     71492.0
-Polar radius (km)                   RC     66854.0
-Longitude of major eq. radius (deg) LORA   329.02
-Spacecraft range (km)               RANG     1481862
-Spacecraft position (lat,lon(East)) SSP   ( -2.54, 329.02)
-O.S. planet center (line,sample)    PC    (    913.99,   2356.87)
-I.S. planet center (line,sample)    ISPC  (   1010.99,   2649.91)
-North Angle (CW degrees from right) ANGLN   92.89
-Camera Serial Number                CAM          2
-Focal length (mm)                   FL      1501.039
-O.S. optical axis (line,sample)     OAXIS ( 200.0, 200.0)
-Scale (pixels/mm at focal plane)    SC     32.8084
-Min and max ring radii (km)         RLIM        0.      0.
-Solar position (lat,lon(East))      SOL   ( -1.80,   7.16)
-All latitudes are planetocentric
-CKNAME=NAV   SPKID=N052  PROGRAM=NAV 77  ADC IC        11/04/96
-'n
-NAV task completed
-NAV moon_limb.img SPICEMODE=REMOTE
-Beginning VICAR task NAV
-NAV version 06jul2011
-(SL,SS)=(   1,   1)  ZOOM= 1
-CKNAME=NAV   SPKID=N014  PROGRAM=NAV     EZF 5
-Specify feature to be fitted
-'limb
-'scan
-Begin manual registration of limb...
-Move Cursor to a point on computed limb
-'exit
-'n
-Object Space PC (LINE,SAMP)=(    322.89,    337.82)  ANGLN= 176.852
- Image Space PC (LINE,SAMP)=(    322.89,    337.82)
-'exit
-Specify feature to be fitted
-'exit
-NAVIGATION DATA FOR FRAME   61183500
-S/C Event Time (yyyyddd hhmmssmmm)  SCET  1990343 235217156
-Target body                         TARG  MOON
-Major equatorial radius (km)        RA      1737.4
-Minor equatorial radius (km)        RB      1737.4
-Polar radius (km)                   RC      1737.4
-Longitude of major eq. radius (deg) LORA   263.95
-Spacecraft range (km)               RANG      720674
-Spacecraft position (lat,lon(East)) SSP   (-20.35, 263.95)
-O.S. planet center (line,sample)    PC    (    322.89,    337.82)
-I.S. planet center (line,sample)    ISPC  (    322.89,    337.82)
-North Angle (CW degrees from right) ANGLN  176.85
-Camera Serial Number                CAM          1
-Focal length (mm)                   FL      1501.039
-O.S. optical axis (line,sample)     OAXIS ( 400.0, 400.0)
-Scale (pixels/mm at focal plane)    SC     65.6168
-Min and max ring radii (km)         RLIM        0.      0.
-Solar position (lat,lon(East))      SOL   ( -1.02, 266.85)
-All latitudes are planetocentric
-CKNAME=NAV   SPKID=N014  PROGRAM=NAV     EZF 5
-'n
-NAV task completed
-NAV f1636832.geo TARGET=IO SPICEMODE=REMOTE  +
- blems=/project/test_work/testdata/mipl/vgr/osblemloc.na1
-Beginning VICAR task NAV
-NAV version 06jul2011
-(SL,SS)=(   1,   1)  ZOOM= 1
-Warning::year number is not 4-digit.
-Warning::year number is not 4-digit.
-Warning::year number is not 4-digit.
-Warning::year number is not 4-digit.
-CKNAME=NAV   SPKID=N005  PROGRAM=NAV     GMY059  NONE  01/12/01
-Specify feature to be fitted
-'limb
-'scan
-Begin manual registration of limb...
-Move Cursor to a point on computed limb
-'exit
-'n
-Object Space PC (LINE,SAMP)=(    537.06,    603.21)  ANGLN= -34.301
-'sblems
-'exit
-Specify feature to be fitted
-'exit
-NAVIGATION DATA FOR FRAME    1636832
-S/C Event Time (yyyyddd hhmmssmmm)  SCET  1979063 192259820
-Target body                         TARG  IO
-Major equatorial radius (km)        RA      1829.4
-Minor equatorial radius (km)        RB      1819.3
-Polar radius (km)                   RC      1815.7
-Longitude of major eq. radius (deg) LORA     0.00
-Spacecraft range (km)               RANG      806060
-Spacecraft position (lat,lon(East)) SSP   ( -0.03, 203.53)
-O.S. planet center (line,sample)    PC    (    537.06,    603.21)
-North Angle (CW degrees from right) ANGLN  -34.30
-Camera Serial Number                CAM          7
-Focal length (mm)                   FL      1500.190
-O.S. optical axis (line,sample)     OAXIS ( 500.0, 500.0)
-Scale (pixels/mm at focal plane)    SC     84.8214
-Min and max ring radii (km)         RLIM        0.      0.
-Solar position (lat,lon(East))      SOL   (  0.54, 188.72)
-All latitudes are planetographic
-CKNAME=NAV   SPKID=N005  PROGRAM=NAV     GMY059  NONE  01/12/01
-'n
-NAV task completed
-NAV n1354897340.1 SPICEMODE=REMOTE
-Beginning VICAR task NAV
-NAV version 06jul2011
-(SL,SS)=(   1,   1)  ZOOM= 1
-CKNAME=NAV   SPKID=N009  PROGRAM=NAV     GMY059  NONE  02/08/03
-Specify feature to be fitted
-'limb
-'scan
-Begin manual registration of limb...
-Move Cursor to a point on computed limb
-'exit
-'n
-Object Space PC (LINE,SAMP)=(    138.69,    840.44)  ANGLN= -90.090
- Image Space PC (LINE,SAMP)=(    137.86,    841.17)
-'exit
-Specify feature to be fitted
-'exit
-NAVIGATION DATA FOR FRAME 1354897340
-S/C Event Time (yyyyddd hhmmssmmm)  SCET  2000342 161056162
-Target body                         TARG  JUPITER
-Major equatorial radius (km)        RA     71492.0
-Minor equatorial radius (km)        RB     71492.0
-Polar radius (km)                   RC     66854.0
-Longitude of major eq. radius (deg) LORA   312.22
-Spacecraft range (km)               RANG    23592884
-Spacecraft position (lat,lon(East)) SSP   (  3.57, 312.22)
-O.S. planet center (line,sample)    PC    (    138.69,    840.44)
-I.S. planet center (line,sample)    ISPC  (    138.69,    840.44)
-North Angle (CW degrees from right) ANGLN  -90.09
-Camera Serial Number                CAM          1
-Focal length (mm)                   FL      2000.000
-O.S. optical axis (line,sample)     OAXIS ( 512.0, 512.0)
-Scale (pixels/mm at focal plane)    SC     83.3333
-Min and max ring radii (km)         RLIM        0.      0.
-Solar position (lat,lon(East))      SOL   (  2.94, 319.26)
-All latitudes are planetocentric
-CKNAME=NAV   SPKID=N009  PROGRAM=NAV     GMY059  NONE  02/08/03
-'n
-NAV task completed
-exit
-slogoff
-if ($RUNTYPE = "INTERACTIVE")
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-else
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-end-if
-ulogoff
-END-PROC
-END-PROC
+ENABLE-SCRIPT tstnavstar_unix.scr
+disable-log
 $ Return
 $!#############################################################################
 $Doc_File:

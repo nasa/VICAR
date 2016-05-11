@@ -44,48 +44,49 @@ import java.awt.Point;
 import java.awt.Dimension;
 
 import com.sun.media.jai.codec.*;
+
 import javax.media.jai.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Iterator;
 
 import javax.imageio.IIOException;
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageWriter;
 import javax.imageio.metadata.*;
-
-
 import javax.imageio.*;
 import javax.imageio.spi.*;
 import javax.imageio.event.*;
 import javax.imageio.stream.*;
 
 import org.w3c.dom.*;
-// import jpl.mipl.io.codec.*;
 
 import jpl.mipl.io.vicar.*;
 import jpl.mipl.io.plugins.*;
 import jpl.mipl.io.util.*;
 import jpl.mipl.util.*;
-
 import jpl.mipl.jade.*;
 
 // import java.lang.Package ;
 import java.net.*;
 
+/*****
 import com.sun.media.imageio.stream.RawImageInputStream;
 import com.sun.media.imageioimpl.plugins.raw.*;
 import com.sun.media.imageioimpl.plugins.*;
-
+******/
 
 public class ImageUtils {
 	
 	RenderedImage renderedImage = null;
 	BufferedImage bufferedImage = null;
 	
-	 boolean debug = false;
-        //boolean debug = true; // false;
+	boolean debug = false;
+	// boolean debug = true; // false;
 	boolean useRawReader = false; // test of RawImageReader
 	String rawReaderName = "raw";
 	
@@ -114,6 +115,12 @@ public class ImageUtils {
 	ImageWriter writer = null;
 	int tileSizeX = 0; // do nothing
 	int tileSizeY = 0; // do nothing
+	
+	int imageIndex = 0;
+	
+	boolean useMarsviewerCallback = false;
+	
+	boolean fakeImage = false;
 	
 	
 	// constructors
@@ -178,6 +185,19 @@ public class ImageUtils {
 		rawReaderName = name;
 		if (debug) System.out.println("ImageUtils.setRawReaderName("+rawReaderName+")");
 	}
+	
+	/** InputStreamCallback **/
+	public void setUseMarsviewerCallback(boolean f) {
+		useMarsviewerCallback = f;
+		if (debug) System.out.println("ImageUtils.setUseMarsviewerCallback("+useMarsviewerCallback+")");
+	}
+	
+	public boolean getUseMarsviewerCallback() {
+		
+		if (debug) System.out.println("ImageUtils.getUseMarsviewerCallback("+useMarsviewerCallback+")");
+		return useMarsviewerCallback ;
+	}
+	/** InputStreamCallback **/
 	
 	/**
 	 * Returns the file name that has been set
@@ -373,6 +393,14 @@ public class ImageUtils {
 	}
 	public  String getStreamType() {
 		return streamType;
+	}
+	
+	public IIOImage getIIOimage() {
+		return this.iioImage ;
+	}
+	
+	public IIOMetadata getIIOMetadata() {
+		return this.iioImage.getMetadata() ;
 	}
 	
 	
@@ -666,299 +694,6 @@ public void jaiCreateRead() {
 * The name of the file to read was supplied to the constructor
 * @throws IOException - if the file can't be read
 **************************************************/	
-public IIOImage fullRead2() throws IOException {
-	if (inputFileName == null || inputFileName =="") {
-		System.out.println("No image filename supplied: ");
-		// could htrow an Exception
-		return null;
-	}
-	else {
-		iioImage = fullRead2 (inputFileName);
-		return iioImage;
-	}	
-}
-
-/*************************************************
-* Does a complete ImageIO read, gets the RenderedImage. <br>
-* and Metadata which is returned in an IIOImage Object.
-* IOExceptions asre not caught, Instead they must be caught by the caller
-* @param String - the name of the file to read
-* @throws IOException - if the file can't be read
-**************************************************/
-
-public IIOImage fullRead2(String fileName) throws IOException {
-	
-	
-	inputFileName = fileName;
-	
-	// we will need a File, URL and stream version eventually
-    
-    ImageInputStream iis = null;
-    IIOMetadata im = null;
-    IIOMetadata sm = null;
-    ImageReader reader = null;
-    String readerClassName = "" ;
-    String readerFormat = "";
-    
-    int numImages = 0;
-    
-    if (debug) System.out.println("ImageUtil open: " + fileName);
-        try {
-            iis = ImageIO.createImageInputStream(new File(fileName));
-        
-
-            if (iis == null) {
-                System.out.println("Unable to get a stream!");
-                // return null ;  // error return
-                // throw an exception !!! instead
-                throw new IOException("ImageUtils.fullRead2() Unable to get a stream!");
-            }
-
-            Iterator iter = ImageIO.getImageReaders(iis);
-            
-            while (iter.hasNext()) {
-                reader = (ImageReader)iter.next();
-                if (debug) System.out.println("Using " +
-                               reader.getClass().getName() +
-                               " to read.");
-                readerClassName = reader.getClass().getName() ;
-                // get the format we are reading
-                readerFormat = reader.getFormatName();
-                break;
-            }
-
-            if (reader == null) {
-                System.err.println("Unable to find a reader!");
-                // System.exit(1);  // error return
-                // return null;
-                throw new IOException("ImageUtils.fullRead() Unable to find a reader!");
-            }
-
-        	imageFormatName = readerFormat;
-            reader.setInput(iis, true);
-            
-        
-            numImages = 1;
-            // numImages = reader.getNumImages(true);
-            if (debug) {
-            	System.out.println("\nThe file contains " + numImages + " image"
-                           + (numImages == 1 ? "" : "s") + ".");
-            	System.out.println();
-            }
-
-            sm = reader.getStreamMetadata();
-        
-        /**/ } catch (IOException ioe) {
-            System.out.println("I/O exception");
-            // System.exit(1);  // error return
-            throw new IOException("ImageUtils.fullRead() exception reading stream metadata!");
-        } /**/
-        
-        if (sm == null) {
-            if (debug) System.out.println("The file contains no stream metadata.");
-        } else {
-            if (debug) System.out.println("has Stream metadata");
-            // String nativeFormatName = sm.getNativeMetadataFormatName();
-            // displayMetadata(sm.getAsTree(nativeFormatName));
-        }
-
-		// flag to decide if we get as BufferedImage or RenderedImage
-		
-		/*
-		 * * for now user must set this explictly,default is true
-		 */
-		 /*
-		if (readerFormat.equalsIgnoreCase("vicar") || readerFormat.equalsIgnoreCase("pds") ||
-			readerFormat.equalsIgnoreCase("isis")) { 
-			getAsRenderedImage = true;
-		}
-		else {
-			getAsRenderedImage = false;
-		}
-		*/
-		
-		
-		if (getAsRenderedImage) {
-			if (debug) System.out.println("get as RenderedImage *************** "+readerFormat );
-			try {
-				ImageReadParam param = reader.getDefaultReadParam();
-				// add something to it
-     			renderedImage = reader.readAsRenderedImage(0, param);
-     			if (renderedImage instanceof VicarRenderedImage ) {
-     				VicarRenderedImage vri = (VicarRenderedImage) renderedImage;
-     				vri.setTileWidth(vri.getWidth());
-     				renderedImage = null;
-     			}
-            } catch (IOException ioe) {
-                System.out.println("I/O exception !");
-                // System.exit(1);  // error return
-                // throw new IOException("ImageUtils.fullRead() exception getting rendered image!");
-            }
-			// for now try to create the bufferedImage using the RenderedImage
-			
-			// bufferedImage = 
-		}
-		else {
-
-
-		 try {
-     			bufferedImage = reader.read(0);
-            } catch (IOException ioe) {
-                System.out.println("I/O exception !");
-                // System.exit(1);  // error return
-                throw new IOException("ImageUtils.fullRead() exception reading buffered Image!");
-                
-            }
-		}
-
-		// this forces the reader to read in and store the metadata
-            try {
-                im = reader.getImageMetadata(0);
-            } catch (IOException ioe) {
-                System.out.println("I/O exception obtaining Image Metadata!");
-                // this exception isn't alasys a problem. it is not forwarded
-                // the metatadta will just be null
-                // System.exit(0);
-            }
-            
-            if (debug) {
-            	if (im == null) {
-                	System.out.println("\nThe file has no Image metadata.");
-            	} else {
-                	System.out.println("\nThe file contains Image metadata.");
-            	}
-            }
-            
-            if (bufferedImage != null) {
-            	if (debug)
-            		printImageInfo(bufferedImage, "fullRead.bufferedImage");
-            
-            	// 2nd argument is a List of thumbnails     
-  	 			iioImage  = new IIOImage(bufferedImage, null, im);
-            }
-            else if (renderedImage != null) {
-            	if (debug)
-            		printImageInfo(renderedImage, "fullRead.renderedImage");
-            
-            	// 2nd argument is a List of thumbnails     
-  	 			iioImage  = new IIOImage(renderedImage, null, im);
-            }
-            try {
-            	iis.close();
-            }
-            catch (IOException cioe ) {
-            	System.err.println (" Error closing IIS");
-            }
-            // check if 
-   			return iioImage;
-/***
-        for (int i = 0; i < numImages; i++) {
-            System.out.println("\n---------- Image #" + i + " ----------");
-            System.out.println();
-
-            try {
-                int width = reader.getWidth(i);
-                System.out.println("width = " + width);
-
-                int height = reader.getHeight(i);
-                System.out.println("height = " + height);
-
-                int numThumbnails = reader.getNumThumbnails(i);
-                System.out.println("numThumbnails = " + numThumbnails);
-
-                for (int j = 0; i < numThumbnails; j++) {
-                    System.out.println("  width = " +
-                                   reader.getThumbnailWidth(i, j) + 
-                                   ", height = " +
-                                   reader.getThumbnailHeight(i, j));
-                }
-
-                // File ff = new File(f);
-                // BufferedImage bufferedImage = ImageIO.read(f);
-                bufferedImage = reader.read(0);
-            } catch (IOException ioe) {
-                System.out.println("I/O exception !");
-                System.exit(0);
-            }
-            
-            
-            if (bufferedImage == null) {
-                System.out.println(inputFileName + " - couldn't read!");
-                // return;
-            }
-
-           
-            System.out.println("\n ImageToDOM");
-            ImageToDOM i2dom = new ImageToDOM ( bufferedImage );
-            Document d = i2dom.getDocument();
-            displayMetadata((Node) d);
-            makeFrameDomEcho4((Node) d, bufferedImage );
-            
-            System.out.println("<**************************************>");
-            
-            System.out.println("\n ImageToPDS_DOM");
-            ImageToPDS_DOM i2PDSdom = new ImageToPDS_DOM ( bufferedImage );
-            Document d1 = i2PDSdom.getDocument();
-            displayMetadata((Node) d1);
-            makeFrameDomEcho4((Node) d1, bufferedImage );
-            
-            System.out.println("<**************************************>");
-           
-            
-            // this forces the reader to read in and store the metadata
-            try {
-                im = reader.getImageMetadata(i);
-            } catch (IOException ioe) {
-                System.out.println("I/O exception obtaining Image Metadata!");
-                // System.exit(0);
-            }
-            
-            if (im == null) {
-                System.out.println("\nThe file has no Image metadata.");
-            } else {
-                System.out.println("\nThe file contains Image metadata.");
-            }
-          
-            else {
-                System.out.println("\nImage metadata:");
-                String nativeFormatName = im.getNativeMetadataFormatName();
-                
-                Node imNode = im.getAsTree(nativeFormatName);
-                // this could be loaded into the DomEcho4
-                
-                System.out.println("ImageDumper.displayMetadata() >>>>>>");
-                displayMetadata(imNode);
-                System.out.println("<<<<<< ImageDumper.displayMetadata()");
-                // makeFrameDomEcho4(d);
-                // makeFrameDomEcho4(imNode);
-                IIOImage iioImage = new IIOImage(bufferedImage, null, im);
-                System.out.println("<**************************************>");
-                String fname = f.getName();
-                System.out.println(" ");
-                // pass image AND stream metadata to the DomEcho
-                // we pass it the image so it has the image to wriiten out to
-                // a file
-                makeFrameDomEcho4(iioImage, sm, fname);
-                // makeFrameDomEcho4(imNode, bufferedImage);
-                
-            }
-            
-        }
-        
-        // 2nd argument is a List of thumbnails     
-   iioImage  = new IIOImage(bufferedImage, null, im);
-   return iioImage;
-        ***/
-        
-   
-}
-
-/*************************************************
-* Does a complete ImageIO read, gets the RenderedImage. <br>
-* and Metadata which is returned in an IIOImage Object.
-* The name of the file to read was supplied to the constructor
-* @throws IOException - if the file can't be read
-**************************************************/	
 public IIOImage fullRead() throws IOException {
 	if (inputFileName == null || inputFileName =="") {
 		System.out.println("No image filename supplied: ");
@@ -1019,7 +754,7 @@ public IIOImage fullRead(String fileName, ImageReadParam _inputImageReadParam)  
  fileNameNoPath = ""; // only the actual filename
  streamType = "";
  
- boolean fakeImage = false;
+ fakeImage = false;
  
  // we want to get the ImageInputStream and pass it into the reader
  boolean use_filename = false;
@@ -1041,7 +776,10 @@ ImageReadParam imageReadParam ;
  boolean save_debug = debug;
  // debug = true;
  
+
+ 
  if (debug) {	 
+	System.out.println("ImageUtils.fullRead(String fileName, ImageReadParam _inputImageReadParam) ******************");
 	System.out.println("ImageUtils.fullRead open: >" + fileName+"<");
 	System.out.println("ImageUtils.fullRead getAsRenderedImage "+getAsRenderedImage );
 	System.out.println("ImageUtils.fullRead open: inputImageReadParam "+inputImageReadParam);
@@ -1076,6 +814,14 @@ ImageReadParam imageReadParam ;
 		// these 2 values can be set before we get here
 		System.out.println("tileSizeX = "+tileSizeX+"    tileSizeY = "+tileSizeY );
 		System.out.println("getAsRenderedImage "+getAsRenderedImage );
+		
+		// look for PDS4TableReadParam disable for now
+		/**** 
+		if (inputImageReadParam instanceof PDS4TableReadParam) {
+			System.out.println("inputImageReadParam instanceof PDS4TableReadParam is TRUE");
+			// print more values out
+		}
+		******/
 	}
 	 
  }
@@ -1123,12 +869,12 @@ public IIOImage fullRead(InputStream is)  throws IOException  {
 /**
  * fullRead
  * This is called from the other fullRead() variants 
- * centralize all the code which does the actual reading once an ImageInpoutStream is obtained
+ * centralize all the code which does the actual reading once an ImageInputStream is obtained
  * @param is ImageInputStream
  * @return IIOImage
  */
 public IIOImage fullRead(ImageInputStream iis)  throws IOException  {
-	// public IIOImage fullRead2(String fileName) {
+	
 	 RenderedImage image = null;
 	 BufferedImage bufferedImage = null;
 	 IIOImage iioImage = null;
@@ -1139,6 +885,14 @@ public IIOImage fullRead(ImageInputStream iis)  throws IOException  {
 	 IIOMetadata sm = null;
 	 int numImages = 0;
 	 // WebdavVFS2file = null;
+	 if (debug) {
+		 System.out.println("*************************************************************");
+		 System.out.println("ImageUtils.fullRead(ImageInputStream iis) ----------------------");
+	
+		 System.out.println(" getAsRenderedImage "+getAsRenderedImage );
+		 System.out.println(" useMarsviewerCallback  "+useMarsviewerCallback);
+		 System.out.println("*************************************************************");
+	 }
 	 
 	 
 	 boolean fakeImage = false;
@@ -1174,12 +928,18 @@ fileFullPath = getFileFullPath();
 fileNameNoPath = getFileNameNoPath();
 streamType = getStreamType();
 
+if (debug) {
+	System.out.println("ImageUtils.fullRead(ImageInputStream iis) ----------------------");
+	System.out.println(" forcedReaderFormat = "+forcedReaderFormat);
+	System.out.println(" getAsRenderedImage "+getAsRenderedImage );
+	System.out.println(" useMarsviewerCallback  "+useMarsviewerCallback);
+}
     
 // forcedReaderFormat is a global I don't see using here 
        try {
 			if (forcedReaderFormat != null && !forcedReaderFormat.equalsIgnoreCase("true") &&
 					!forcedReaderFormat.equalsIgnoreCase("")) {
-				if (debug) System.out.println("fullRead forcedReaderFormat = "+forcedReaderFormat);
+				if (debug) System.out.println("fullRead using forcedReaderFormat = "+forcedReaderFormat);
 				Iterator iter = ImageIO.getImageReadersByFormatName(forcedReaderFormat);
 				reader = (ImageReader)iter.next();
 				
@@ -1194,13 +954,15 @@ streamType = getStreamType();
 				if (debug) {
 					System.out.println("ImageUtils.fullRead iis " + iis);
 				}
+			// get the reader that says it can open this file
          	Iterator iter = ImageIO.getImageReaders(iis);
          
          	while (iter.hasNext()) {
              	reader = (ImageReader)iter.next();               	
-             	if (debug) System.out.println("Using " +
-                            reader.getClass().getName() +
-                            " to read.");
+             	if (debug) {
+             		System.out.println("Using "+reader.getClass().getName()+" to read.");
+             	}
+                            
              	readerClassName = reader.getClass().getName() ;
              	// get the format we are reading
              	readerFormat = reader.getFormatName();
@@ -1209,29 +971,50 @@ streamType = getStreamType();
      	}
 
          if (reader == null) {
-             System.err.println("ImageUtils.fullRead Unable to find a reader!");
-             System.exit(1); // 1 is error return
+             // System.err.println("ImageUtils.fullRead Unable to find a reader!");
+          // System.exit(1); // 1 is error return
+             return null;
          }
+         
+        if (debug) System.out.println("readerFormat "+readerFormat+"   readerClassName "+readerClassName+"  debug = "+debug);
+ 		if (reader instanceof PDSImageReader || readerFormat == "pds") {	
+ 			if (debug) System.out.println("reader instanceof PDSImageReader" );
+ 			((PDSImageReader) reader).setDebug(debug);
+ 		} 
+ 		/** pds4table **
+ 		else if (reader instanceof PDS4TableReader ) {	
+
+ 			if (debug) System.out.println("reader instanceof PDS4TableReader" );
+ 			((PDS4TableReader) reader).setDebug(debug);
+ 			fakeImage = true;
+ 			// create an empty BufferedImage so we don't get errors
+ 		} 
+ 		** pds4table **/
          
      
      	// if (readerFormat.equalsIgnoreCase("pds")) {
-			if (use_filename == true) {			
+		if (use_filename == true) {			
      		iis.close();
-				if (debug) System.out.println("Calling "+readerFormat +" reader with a filename "+fileName);
-				reader.setInput(fileName, true);
-				if (debug) System.out.println("AFTER Calling PDS reader with a filename ");
+			if (debug) System.out.println("Calling "+readerFormat +" reader with a filename "+fileName);
+			reader.setInput(fileName, true);
+			if (debug) System.out.println("AFTER Calling PDS reader with a filename ");
      	}
      	else {
      		
-				reader.setInput(iis, true);
+			reader.setInput(iis, true);
      	}
          
-			if (debug) {
-				System.out.println("ImageUtils.fullRead() readerFormat = "+readerFormat);
-			}
+		if (debug) {
+			System.out.println("ImageUtils.fullRead() readerFormat = "+readerFormat);
+		}
      
          numImages = 1;
-         // numImages = reader.getNumImages(true);
+         // srl; 1-2015 read from fits file with more than one image
+         if (readerFormat.equals("fits")) {
+        	 // numImages = reader.getNumImages(true);
+        	 numImages = ((FITSImageReader) reader).getNumImages();
+         }
+         
          if (debug) {
          	System.out.println("\nThe file contains " + numImages + " image"
                         + (numImages == 1 ? "" : "s") + ".");
@@ -1242,7 +1025,8 @@ streamType = getStreamType();
      
      } catch (IOException ioe) {
          System.out.println("I/O exception");
-         System.exit(1); // 1 is error return
+      // System.exit(1); // 1 is error return
+         return null;
      }
        
      
@@ -1262,7 +1046,7 @@ streamType = getStreamType();
 		/***
 		 * see if we can read everything as a RenderedImage
 		if ((readerFormat.equalsIgnoreCase("vicar") || readerFormat.equalsIgnoreCase("pds") ||
-			readerFormat.equalsIgnoreCase("pds4") || readerFormat.equalsIgnoreCase("isis")) && RI.equalsIgnoreCase("true")) { 
+			readerFormat.equalsIgnoreCase("pds4") || readerFormat.equalsIgnoreCase("isis")) && !RI.equalsIgnoreCase("false")) { 
 			getAsRenderedImage = true;
 		}
 		else {
@@ -1273,6 +1057,7 @@ streamType = getStreamType();
 		
 		if (getAsRenderedImage) {
 			if (debug) {
+				System.out.println("======================================================");
 				System.out.println("getAsRenderedImage "+getAsRenderedImage );
 				System.out.println("ImageUtils.fullRead get as RenderedImage ** "+readerFormat+"  "+fileName );
 				System.out.println("streamType "+streamType);
@@ -1287,6 +1072,8 @@ streamType = getStreamType();
 	            System.out.println("iis.getClass().getName() "+iis.getClass().getName());
 	            System.out.println("iis.getClass().getSimpleName() "+iis.getClass().getSimpleName());
 	            System.out.println("inputImageReadParam  "+inputImageReadParam);
+	            System.out.println("useMarsviewerCallback "+ useMarsviewerCallback);
+	            
 	            // add streamType, fielNameNoPath, fileFullPath, readerFormat to PDSImageReadParam ??
 	            // use reader className
 	           
@@ -1297,9 +1084,25 @@ streamType = getStreamType();
 				// the input param object is generic, pass thru the values and add new ones
 				ImageReadParam param = reader.getDefaultReadParam();
 				
+				/** pds4table **
+				if (param instanceof PDS4TableReadParam) {
+					System.out.println("inputImageReadParam  "+inputImageReadParam);
+					System.out.println("param  "+param);
+					
+					// where can I get all these values?
+					// pass in a reference to jConvertIIO ??
+					/// create a PDS4TableReadParam in jConvertIIO. put all the values (even if they are defaults)
+					// set that into ImageUtils.setPDS4TableReadParam(p)
+					// then get it if we need it. ImageUtils.getPDS4TableReadParam()
+					// ((PDS4TableReadParam) param).setOutputFileName(f);
+					
+				}
+				** pds4table **/
+				
 				// add something to it
 				if (param instanceof PDSImageReadParam) {
 					((PDSImageReadParam) param).setDirectoryPath(filePath);
+					// ((PDSImageReadParam) param).setUseMarsviewerCallback(useMarsviewerCallback);
 				}
 				
 				if (param instanceof VicarImageReadParam) {
@@ -1318,7 +1121,7 @@ streamType = getStreamType();
 				if (inputImageReadParam != null) {
 					int[] srcBands = inputImageReadParam.getSourceBands();
 					Rectangle srcRegion = inputImageReadParam.getSourceRegion();
-					if (debug) System.out.println("inputImageReadParam  srcRegion "+srcRegion);
+					if (debug) System.out.println("inputImageReadParam  srcRegion "+srcRegion+"   srcBands "+srcBands+" ");
 					
 					/**
 					 * canSetSourceRenderSize this should be false. I don't get what it is trying to do.
@@ -1342,7 +1145,7 @@ streamType = getStreamType();
                             
                      Not at all sure how setSourceRegion and getSubsamplingXOffset(), getSubsamplingYOffset()
                      Is offset the same point or is X,Y offset inside SourceRegion??
-                     test with the jpeg reader. Just try tyo get the same result (tif and png also??)
+                     test with the jpeg reader. Just try to get the same result (tif and png also??)
                      start with a 1024x1024 vicar image
                      
                      see where this is set in the vicar read library
@@ -1393,13 +1196,23 @@ streamType = getStreamType();
 					System.out.println("inputImageReadParam  "+inputImageReadParam);						
 					System.out.println("reader.readAsRenderedImage(0, param) tileSize = "+tileSizeX+" x "+tileSizeY);
 				}
-				renderedImage = reader.readAsRenderedImage(0, param);		
+				if (debug && reader instanceof VicarImageReader) { 
+					((VicarImageReader) reader).setDebug(debug);
+				}
+				/**
+				if (reader.getFormatName().equalsIgnoreCase("fits") {
+					renderedImage = reader.readAsRenderedImage(imageIndex, param);	
+				} **/
+				// renderedImage = reader.readAsRenderedImage(0, param);	
+				renderedImage = reader.readAsRenderedImage(imageIndex, param);	
 				if (debug) {
-					System.out.println("reader.readAsRenderedImage(0, param) AFTER");
+					System.out.println("reader.readAsRenderedImage("+imageIndex+", param) AFTER");
 				}
 				if (renderedImage == null) {
-					System.out.println("renderedImage == null. Try reading as BufferedImage");
-					bufferedImage = reader.read(0, param);
+					if (debug) {
+						System.out.println("renderedImage == null. Try reading as BufferedImage imageIndex = "+imageIndex);
+					}
+					bufferedImage = reader.read(imageIndex, param);
 				}
 				
 				/***/
@@ -1407,72 +1220,128 @@ streamType = getStreamType();
   				System.out.println("renderedImage  "+renderedImage );
   				System.out.println("renderedImage tileSize "+tileSizeX+" x "+tileSizeY );
   				// System.out.println("renderedImage.getWidth() "+renderedImage.getWidth() );
-				System.out.println("-------------------------------- useRawReader "+useRawReader+" "+rawReaderName);
-			}
+  				System.out.println("-------------------------------- useRawReader "+useRawReader+" "+rawReaderName);
+  			}
   			/****/
   			
   			if (rawReaderName.equalsIgnoreCase("raw2")) {
-  				useRawReader = true;
+  				// useRawReader = true;
   			}
   			// PDS, PDS4 and ISIS use VicarRenderedImage to read the data
   			if (renderedImage instanceof VicarRenderedImage ) {
   				VicarRenderedImage vri = (VicarRenderedImage) renderedImage;
   				// check of there is subsampling, crop (sourceRegion), band select
   				// set some flags on input args, 
-  				if (useRawReader)  {
-					// get all the info needed from the renderedImage??
-					
-					// create the xmlSource doc 
-					// open the RawImageInputStream
-					// iis
-					int riHeight = renderedImage.getHeight();
-					int riWidth = renderedImage.getWidth();
-					// get imageStartByte ??? from VicarRenderedImage ???
-					SampleModel sampleModel = renderedImage.getSampleModel();
-					VicarInputFile vif = vri.getVicarInputFile();
-					long fileOffset = vif.getFileOffset();
-					int lblsize = vif.getLblsize_front(); // may be the same
-					System.out.println("-------------------------------- useRawReader ");
-					System.out.println("renderedImage useRawReader rawReaderName = "+rawReaderName);
+  				int riHeight = renderedImage.getHeight();
+				int riWidth = renderedImage.getWidth();
+				int riTileHeight = renderedImage.getTileHeight();
+				int riTileWidth = renderedImage.getTileWidth();
+				int riNumXTiles = renderedImage.getNumXTiles();
+				int riNumYTiles = renderedImage.getNumYTiles();
+				// get imageStartByte ??? from VicarRenderedImage ???
+				SampleModel sampleModel = renderedImage.getSampleModel();
+				VicarInputFile vif = vri.getVicarInputFile();
+				long fileOffset = vif.getFileOffset();
+				int lblsize = vif.getLblsize_front(); // may be the same
+				long[] imageOffsets = {lblsize};
+				Dimension dim = new Dimension(riWidth, riHeight);
+				Dimension[] imageDimensions = {dim};
+				
+				if (debug) {
+					System.out.println("-------------------------------- ");
+					System.out.println("--- renderedImage instanceof VicarRenderedImage  ");
+					System.out.println("renderedImage useRawReader "+useRawReader+"  rawReaderName = "+rawReaderName);
 					System.out.println("fileOffset = "+fileOffset+"  lblsize = "+lblsize);
 					System.out.println("riHeight = "+riHeight+"  riWidth = "+riWidth);
-					long[] imageOffsets = {lblsize};
-					Dimension dim = new Dimension(riWidth, riHeight);
-					Dimension[] imageDimensions = {dim};
+					System.out.println("riTileHeight = "+riTileHeight+"  riTileWidth = "+riTileWidth);
+					System.out.println("riNumXTiles = "+riNumXTiles+"  riNumYTiles = "+riNumYTiles);
+				
 					// get a RawImageInputStream
-					RawImageInputStream rawIIS = new RawImageInputStream(iis, sampleModel, imageOffsets, imageDimensions );
-					System.out.println("rawIIS = "+rawIIS);
-					System.out.println("sampleModel = "+sampleModel);
+				
 					// sampleModel details
-					if (sampleModel instanceof BandedSampleModel ) {
-						System.out.println("BandedSampleModel ******************************************");
+					if (sampleModel instanceof PixelInterleavedSampleModel ) {
+						System.out.println("PixelInterleavedSampleModel ******************************************");
+					
 					   System.out.println("numBands = "+sampleModel.getNumBands()+"  NumDataElements = "+sampleModel.getNumDataElements());					
-					   System.out.println("pixelStride = "+((BandedSampleModel) sampleModel).getPixelStride()+"  ScanlineStride = "+((BandedSampleModel) sampleModel).getScanlineStride());
-					   
-					   System.out.println("BandOffsets = "+((BandedSampleModel) sampleModel).getBandOffsets()+"  BankIndices = "+((BandedSampleModel) sampleModel).getBankIndices());
-					   int[] bandOffsets = ((BandedSampleModel) sampleModel).getBandOffsets();
-					   int[] bankIndices = ((BandedSampleModel) sampleModel).getBankIndices();
+					   System.out.println("pixelStride = "+((ComponentSampleModel) sampleModel).getPixelStride()+"  ScanlineStride = "+((ComponentSampleModel) sampleModel).getScanlineStride());
+					   System.out.println("sampleSize = "+((ComponentSampleModel) sampleModel).getSampleSize(0)+"  dataType = "+((ComponentSampleModel) sampleModel).getDataType()+" ");
+					   System.out.println("BandOffsets = "+((ComponentSampleModel) sampleModel).getBandOffsets()+"  BankIndices = "+((ComponentSampleModel) sampleModel).getBankIndices());
+					   int[] bandOffsets = ((ComponentSampleModel) sampleModel).getBandOffsets();
+					   int[] bankIndices = ((ComponentSampleModel) sampleModel).getBankIndices();
 					   for (int i=0 ; i< bandOffsets.length ; i++) {
 						   System.out.println("  BandOffsets "+i+" = "+bandOffsets[i]);
 					   }
 					   for (int i=0 ; i< bankIndices.length ; i++) {
 						   System.out.println("  BankIndices "+i+" = "+bankIndices[i]);
-					   }
-					
+					   }					
 					}
+					if (sampleModel instanceof BandedSampleModel ) {
+						System.out.println("BandedSampleModel ******************************************");
+						System.out.println("numBands = "+sampleModel.getNumBands()+"  NumDataElements = "+sampleModel.getNumDataElements());					
+						System.out.println("pixelStride = "+((BandedSampleModel) sampleModel).getPixelStride()+"  ScanlineStride = "+((BandedSampleModel) sampleModel).getScanlineStride());
+						System.out.println("sampleSize = "+((BandedSampleModel) sampleModel).getSampleSize(0)+"  dataType = "+((BandedSampleModel) sampleModel).getDataType()+" ");
+						System.out.println("BandOffsets = "+((BandedSampleModel) sampleModel).getBandOffsets()+"  BankIndices = "+((BandedSampleModel) sampleModel).getBankIndices());
+						int[] bandOffsets = ((BandedSampleModel) sampleModel).getBandOffsets();
+						int[] bankIndices = ((BandedSampleModel) sampleModel).getBankIndices();
+						for (int i=0 ; i< bandOffsets.length ; i++) {
+							System.out.println("  BandOffsets "+i+" = "+bandOffsets[i]);
+						}
+						for (int i=0 ; i< bankIndices.length ; i++) {
+							System.out.println("  BankIndices "+i+" = "+bankIndices[i]);
+						}				
+					}
+				}
+				
+  				if (useRawReader)  {
+  					if (debug) {
+  						System.out.println("useRawReader true ******************************************");
+  						
+  					}
+  					/******************
+  					 * This block of code should be removed.
+  					 * RawImageInputStream was an attempt to read images and perform subsamplings and cropping
+  					 * This functionality is now implemented in the vicar io routines
+  					 */
+  					System.out.println("useRawReader true **** Not supported, exiting ");
+  					boolean dontUseRawReader = true;
+  					if (dontUseRawReader) {
+  						return null;
+  					}
+					// get all the info needed from the renderedImage??
+					
+					// create the xmlSource doc 
+					// open the RawImageInputStream
+					// iis
+					
+					// get a RawImageInputStream
+					// RawImageInputStream rawIIS = new RawImageInputStream(iis, sampleModel, imageOffsets, imageDimensions );
+					ImageInputStream rawIIS = null;
+					if (debug) { System.out.println("rawIIS = "+rawIIS); }
+					
 					// use it to get a raw reader
 					// RawImageReader rawReader = new RawImageReader();
 					
 					// Iterator iter = ImageIO.getImageReadersByFormatName("raw2");
 					// Iterator iter = ImageIO.getImageReadersByFormatName("raw");
 					Iterator iter = ImageIO.getImageReadersByFormatName(rawReaderName);
+					if (debug) { System.out.println("getImageReadersByFormatName("+rawReaderName+")  iter "+iter+" "); }
 					if (iter == null) {
-						System.out.println("getImageReadersByFormatName("+rawReaderName+")  iter == null ");
-						System.out.println("ImageUtils.fullRead() return null");
+						if (debug) {
+							System.out.println("getImageReadersByFormatName("+rawReaderName+")  iter == null ");
+							System.out.println("ImageUtils.fullRead() return null");
+						}
 						return null;
 					}
-					reader = (ImageReader)iter.next();
-					System.out.println("reader = "+reader);
+					if (iter.hasNext()) {
+						reader = (ImageReader)iter.next();
+						if (debug) { System.out.println("reader = "+reader); }
+					} else {
+						if (debug) { 
+							System.out.println("no readers found" );
+							System.out.println("ImageUtils.fullRead() return null");
+						}
+						return null;
+					}
 					
 					// reader == null
 					
@@ -1481,8 +1350,10 @@ streamType = getStreamType();
 					readerFormat = reader.getFormatName();
 					
 		         	
-		         	System.out.println("readerClassName = "+readerClassName);
-		         	System.out.println("readerFormat = "+readerFormat);
+					if (debug) { 
+						System.out.println("readerClassName = "+readerClassName);					
+						System.out.println("readerFormat = "+readerFormat);
+					}
 		         	
 					// close the current reader
 					
@@ -1492,7 +1363,7 @@ streamType = getStreamType();
 		         		reader.setInput(rawIIS, false, true);
 		         		
 		         		renderedImage = reader.readAsRenderedImage(0, param);	
-		         		System.out.println("RAW reader.readAsRenderedImage(0, param) AFTER");
+		         		if (debug) { System.out.println("RAW reader.readAsRenderedImage(0, param) AFTER"); }
 		         	} catch (Exception e) {
 		         		System.out.println("Exception  "+e);
 		         		e.printStackTrace();
@@ -1500,9 +1371,10 @@ streamType = getStreamType();
 		         	}
 					
 					
-					System.out.println("renderedImage "+renderedImage);
+		         	if (debug) { System.out.println("renderedImage "+renderedImage); }
   				// } else if (tileSizeX > 0 && tileSizeY > 0) {	
 				} else if (tileSizeY > 0) {
+					if (debug) { System.out.println("useRawReader false tileSizeY > 0 ******************************************");}
   					// vri.setDefaultTileWidth(tileSize);
   					// vri.setDefaultTileHeight(tileSize);
   					vri.setTileWidth(tileSizeX);
@@ -1510,6 +1382,8 @@ streamType = getStreamType();
   					// force creation of a new SampleModel and ColorModel for the new tile size
   					vri.getNewSampleModel();
   					
+				} else {
+  					if (debug) { System.out.println("useRawReader false *********************************"); }
   				}
   				// vri.setTileWidth(vri.getWidth());
   			}
@@ -1521,18 +1395,52 @@ streamType = getStreamType();
 			
 		}
 		else {
-
+			if (debug) { 
+				System.out.println("ImageUtils.fullRead bufferedImage *********************************"); 
+				System.out.println("ImageUtils.fullRead bufferedImage imageIndex = "+imageIndex);
+				if (inputImageReadParam != null) {
+					System.out.println(" "+inputImageReadParam.getClass().toString()); 
+					System.out.println(" "+inputImageReadParam); 			
+				}
+			}
+			// pdsDetachedOnly = true; ???
+			// check reader set readParam values
 		 try {
-  			bufferedImage = reader.read(0);
+			 
+			 readerFormat = reader.getFormatName();
+			 /** p[ds4table **
+			 if (readerFormat.equalsIgnoreCase("pds4table")) {
+				 // bufferedImage = ((PDS4TableReader) reader).read(inputFileName);
+				 if (debug) {
+		  				System.out.println("ImageUtils.fullRead(pds4table) ");		  				
+		  			}
+				 bufferedImage = ((PDS4TableReader) reader).read(imageIndex);
+				 if (debug) {
+		  				System.out.println("ImageUtils.fullRead(pds4table) bufferedImage = "+bufferedImage);	  				
+		  			}
+			 } else 
+			 ** pds4table **/
+			 {
+				 // srl 1-2015 FITS multiple image support
+				 bufferedImage = reader.read(imageIndex);
+			 }
+			 
+  			
   			
   			if (readerFormat.equalsIgnoreCase("pds") ) {
   				fakeImage = ((PDSImageReader) reader).getFakeImageNoRead();
+  			} 
+  			/** pds4table **
+  			else if (readerFormat.equalsIgnoreCase("pds4table") ) {
+  				fakeImage = ((PDS4TableReader) reader).getFakeImageNoRead();
   			}
+  			** pds4table **/
   			
   			if (debug) {
   				System.out.println("ImageUtils.fullRead() ");
   				System.out.println("readerFormat "+readerFormat);
   				System.out.println("fakeImage "+fakeImage);
+  				System.out.println("bufferedImage "+bufferedImage);
   			}
   			
          } catch (IOException ioe) {
@@ -1553,6 +1461,8 @@ streamType = getStreamType();
          
          if (debug) {
         	 System.out.println("renderedImage  "+renderedImage );
+        	 System.out.println("bufferedImage "+bufferedImage);
+        	 System.out.println("im  "+im );
          	if (im == null) {
              	System.out.println("\nThe file has no Image metadata.");
          	} else {
@@ -1567,7 +1477,7 @@ streamType = getStreamType();
          	}
          
          	// 2nd argument is a List of thumbnails     
-	 			iioImage  = new IIOImage(bufferedImage, null, im);
+	 		iioImage  = new IIOImage(bufferedImage, null, im);
          }
          else if (renderedImage != null) {
          	if (debug) {
@@ -1606,6 +1516,9 @@ streamType = getStreamType();
                  System.out.println("root "+root);               
          		}
          		***/
+         } else {
+        	 // bufferedImage and RenderedImage are null. We still need an iioImage for pds4table
+        	 iioImage  = new IIOImage(renderedImage, null, im);
          }
          
          this.renderedImage = renderedImage;
@@ -1616,6 +1529,45 @@ streamType = getStreamType();
 		return iioImage;
 }
 
+/** InputStreamCallback **
+private List<RenderedOpLoaderGetImageInputStreamWrapper> callbacks = new ArrayList<RenderedOpLoaderGetImageInputStreamWrapper>();
+
+public void addGetInputStreamCallback(RenderedOpLoaderGetImageInputStreamWrapper ropWrapper) {
+	// even though we have a list we only want 1 item in the list
+	// if the list is empty add this. If something is there replace it
+	int ct = callbacks.size();
+	if (ct == 0) {
+		// add a new item
+		callbacks.add(ropWrapper);
+	} else {
+		// replace the item at index 0
+		callbacks.set(0, ropWrapper);	
+	}
+}
+
+
+public boolean hasGetInputStreamCallback() {
+	int ct = callbacks.size();
+	if (ct > 0) {
+		return true;
+	} else {
+		return false;
+	}
+	
+}
+
+public ImageInputStream getImageInputStreamCallback(String fileLocation) {
+	
+	int ct = callbacks.size();
+	ImageInputStream iis = null;
+	if (ct > 0) {
+		// always use the first one in the list
+		RenderedOpLoaderGetImageInputStreamWrapper ropWrapper = callbacks.get(0);
+		iis = ropWrapper.getImageInputStream(fileLocation);
+	}
+	return iis;
+}
+** InputStreamCallback **/
 
 /**
  * getImageReader
@@ -1636,6 +1588,33 @@ public ImageReader getImageReader() {
 public ImageWriter getImageWriter() {
 	
 	return writer;
+}
+
+/**
+ * getFile
+ * @param filename
+ * @return
+ * Open a File for given filename
+ */
+public File getFile(String filename) {
+	File f = null;
+	try {
+		if (fileName != null) {
+			f = new File(filename);
+			String fileNameNoPath = f.getName();
+			String fileFullPath = f.getCanonicalPath() ;
+			if (debug) {
+				System.out.printf("ImageUtils.getFile filename=%s fileNameNoPath=%s fileFullPath=%s \n", 
+						filename, fileNameNoPath, fileFullPath );
+			}
+		}
+	} catch (IOException ioe) {
+		if (debug) {
+			System.out.println("I/O exception !"+ioe);
+		}
+	}
+	
+	return f;
 }
 
 
@@ -1665,7 +1644,7 @@ public ImageInputStream getImageInputStream(String fileName) {
 	 streamType = "";
 	
 	 if (debug) {
-    	 System.out.println("ImageUtils.getImageInputStream fileName = "+fileName);
+    	 System.out.println("ImageUtils.getImageInputStream fileName = "+fileName+"< ");
      }
 	 try {
 	     	File f = new File(fileName);
@@ -1828,6 +1807,15 @@ public ImageInputStream getImageInputStream(String fileName) {
 	if (debug) {
 		if (iis == null) {
 			System.out.println("iis == null. Unable to get Stream for: "+fileName);	
+		} else {
+			long length = 0;
+			try {
+				length = iis.length();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("getImageInputStream for: "+fileName+" length = "+length);	
 		}
 	}
 	return iis;	
@@ -1876,6 +1864,39 @@ ImageOutputStream getImageOutputStream(String fileName) {
 	 
 	 return ios;
 	 
+}
+
+/**
+ * writeStringToFile
+ * @param outputFile
+ * @param s
+ * @return
+ */
+public boolean writeStringToFile(String outputFile, String s) {
+	boolean success= false;
+	
+	FileWriter fw= null;
+    File file = null;
+    try {
+        file=new File(outputFile);
+        if(!file.exists()) {
+            file.createNewFile();
+        }
+        fw = new FileWriter(file);
+        fw.write(s);
+        fw.flush();
+        fw.close();
+        success = true;
+    } catch (IOException e) {
+    	if (debug) {
+    		System.out.println("writeStringToFile "+outputFile+" "+e);
+    		e.printStackTrace();
+    	}
+    }
+	
+	
+	return success;
+	
 }
 
    // ------- operators -------------------
@@ -2003,11 +2024,7 @@ ImageOutputStream getImageOutputStream(String fileName) {
 						}	
 				else if ( dataType.equalsIgnoreCase("double") ) {
 							return DataBuffer.TYPE_DOUBLE; 
-						}	
-												 
-				
-	           
-	    
+						}		    
 				else  {
 					System.out.println("ERROR: INput format type "+ dataType+" IS unknown");
 	        	return -1;
@@ -2239,6 +2256,20 @@ ImageOutputStream getImageOutputStream(String fileName) {
 		// return (flippedImage);
     }
  
+ 	public void setImageIndex(int i) {
+ 		imageIndex = i;
+ 	}
+ 
+ 	public int getImageIndex() {
+ 		return imageIndex ;
+ 	}
+ 	
+ 	public boolean getFakeImage() {
+ 		return fakeImage;
+ 	}
+ 
+ 	
+ 
  /**
      * convenience for using format/rescale operators.
      * 
@@ -2269,7 +2300,79 @@ ImageOutputStream getImageOutputStream(String fileName) {
 	    
 	    return max;
 	 }   
-    
+   
+    /**
+    * convenience for using format/rescale operators.
+    * 
+    * @param dataType
+    * @return double. The minimum value for the dataType
+    * 
+    * * From the web:
+	    * While the name is debatable as the "true minimum value" of a float is -Float.MAX_VALUE, 
+	    * I suspect MIN_VALUE was chosen for consistency with the other numeric types. 
+	    * Using the names MIN_RANGE_VALUE and MAX_RANGE_VALUE (or similar) might have made the difference more clear.
+    */
+   public double getMinForDataType(int dataType) {
+   	
+   	double min = 0.0;
+   	if (dataType == DataBuffer.TYPE_BYTE) {
+   			min = Byte.MIN_VALUE ;//used as unsigned
+   			// min = 0.0;
+	        }
+	    else if (dataType == DataBuffer.TYPE_SHORT) {
+	    	min = Short.MIN_VALUE;
+	        }	    
+	    else if (dataType == DataBuffer.TYPE_USHORT) {	    	
+	    	min = Short.MIN_VALUE;
+	    	// or 0.0 ?? // assume unsigned ???
+	        }
+	    else if (dataType == DataBuffer.TYPE_INT) {
+	    	min = Integer.MIN_VALUE; 
+	    	// or 0.0 ?? // assume unsigned ???
+	        }	    
+	    else if (dataType == DataBuffer.TYPE_FLOAT) {
+	    	// min = Float.MIN_VALUE; 
+	    	min = -Float.MAX_VALUE; 
+	        }
+	    else if (dataType == DataBuffer.TYPE_DOUBLE) {
+	    	// min = Double.MIN_VALUE; 
+	    	min = -Double.MAX_VALUE; 
+	        }
+	    
+	    return min;
+	 }   
+   
+   /**
+    * convenience for using format/rescale operators.
+    * 
+    * @param dataType
+    * @return double. The minimum value for the dataType
+    */
+   public String getDataTypeName(int dataType) {
+   	
+   	String name = "";
+   	if (dataType == DataBuffer.TYPE_BYTE) {
+   		name = "BYTE";
+	        }
+	    else if (dataType == DataBuffer.TYPE_SHORT) {
+	    	name = "SHORT";
+	        }	    
+	    else if (dataType == DataBuffer.TYPE_USHORT) {	    	
+	    	name = "USHORT";
+	        }
+	    else if (dataType == DataBuffer.TYPE_INT) {
+	    	name = "INT";
+	        }	    
+	    else if (dataType == DataBuffer.TYPE_FLOAT) {
+	    	name = "FLOAT";
+	        }
+	    else if (dataType == DataBuffer.TYPE_DOUBLE) {
+	    	name = "DOUBLE";
+	        }
+	    
+	    return name;
+	 }   
+   
   
   /**
   * prints useful debug information on a the image read in by fullRead()
@@ -2297,6 +2400,7 @@ public void printImageInfo(RenderedImage im, String description) {
 	
 	SampleModel sm = im.getSampleModel();
     ColorModel cm = im.getColorModel();
+    System.out.println("printImageInfo SampleModel "+sm+"  ColorModel "+cm+" ");
     int  width = im.getWidth();
     int height = im.getHeight();
    
@@ -2391,9 +2495,18 @@ public void printImageInfo(RenderedImage im, String description) {
                 System.out.println("The image "+inputFileName+"  has no ImageMetadata.");
                 // return null;
             } else {
+            	
+            	String[] formats = im.getMetadataFormatNames();    
+            	
+            	
+            	System.out.println("im.getMetadataFormatNames()"); 
+            	for (int i=0 ; i< formats.length ;i++) {
+            		System.out.println(" formats["+i+"] " +formats[i]); 
+            	}
                 
                 String nativeFormatName = im.getNativeMetadataFormatName();
                 System.out.println("Image metadata: "+nativeFormatName);
+                
                 if (nativeFormatName.equalsIgnoreCase("VICAR_LABEL") || 
                 	nativeFormatName.equalsIgnoreCase("PDS_LABEL") ||
                 	nativeFormatName.equalsIgnoreCase("ISIS_LABEL") ||
@@ -2439,14 +2552,91 @@ public void printImageInfo(RenderedImage im, String description) {
         System.out.println(" ============================ ");
 	
     }
+	
+	/**
+	 * displayAllMetadata
+	 * *
+	 * display the IIOmetadata of the image which has been read
+	 *
+	 */
+	void displayAllMetadata() {
+	Document document = null;
+	Node root = null;
+	Node node = null;
+	IIOMetadata im = null;
+	String formatName = "";
+	String[] formats ;
+	DOMutils domUtils = new DOMutils();
+	
+	if (iioImage != null) {		
+		im = iioImage.getMetadata();
+		System.out.println(" ");
+            
+            if (im == null) {
+                System.out.println("The image "+inputFileName+"  has no ImageMetadata.");
+                // return null;
+            } else {          	
+            	formats = im.getMetadataFormatNames();                	
+            	System.out.println("im.getMetadataFormatNames()"); 
+            	for (int i=0 ; i< formats.length ;i++) {
+            		System.out.println(" formats["+i+"] " +formats[i]); 
+            	}
+                
+                String nativeFormatName = im.getNativeMetadataFormatName();
+                System.out.println("Image metadata nativeFormatName: "+nativeFormatName);
+                
+                for (int i=0 ; i< formats.length ;i++) {
+                	formatName = formats[i];
+                	System.out.println("\n formatName " +formatName); 
+                
+                	if (formatName.equalsIgnoreCase("VICAR_LABEL") || 
+                			formatName.equalsIgnoreCase("PDS_LABEL") ||
+                			formatName.equalsIgnoreCase("ISIS_LABEL") ||
+                			formatName.equalsIgnoreCase("FITS_LABEL")
+                			) {
+                		document =  (Document) im.getAsTree(formatName);
+                		
+                		if (debug) 
+                			System.out.println("VICAR, FITS, ISIS or PDS document "+ docInfo(document) );
+                	} else {
+                		node =  im.getAsTree(formatName);
+                		System.out.println("node "+ docInfo(node) );
+                		// convert this to Document
+                		IIOMetadataNode iomNode = (IIOMetadataNode) node;
+                		IIOMetadataToDOM iomDOM = new IIOMetadataToDOM (iomNode) ;
+                		document = iomDOM.getDocument();
+                		if (debug) {
+                			System.out.println("\n ##############################" );
+                			System.out.println("document "+ docInfo(document) );
+                			}
+                		}                            
+ 
+            		String xmlFile = formatName+".xml";
+            		System.out.println("write metadata to xml for the image: "+xmlFile+" document = "+document);
+            		domUtils.serializeDocument(document, xmlFile, "xml");
+            		
+                }
+            }
+		} else {
+          	if (debug) System.out.println("NO metadata to write to xml : ");
+        }  	
+
+				
+		
+        System.out.println(" ============================ ");
+	
+    }
 
     /*
-	 * returns a String with the class name of the suppllied Node. Since a Document descends from Node
-	 * a Document may be supplied here. Useful in denugiing to see that a proper and compatable Document/Node 
+	 * returns a String with the class name of the supplied Node. Since a Document descends from Node
+	 * a Document may be supplied here. Useful in debugiing to see that a proper and compatable Document/Node 
 	 * is being used
 	 */
 	public String docInfo(Node doc) {
 	// public String docInfo(Document doc) {
+		if (doc == null) {
+			return "NULL"; // "errror" or "NULL"
+		}
 		Class c = doc.getClass();
 		String docName = c.getName();
 		// System.out.println(
@@ -2475,6 +2665,15 @@ public void printImageInfo(RenderedImage im, String description) {
             System.out.print("  ");
         }
     }
+  
+	private String indentString(int level) {
+		String s = "";
+		for (int i = 0 ; i< level ; i++) {
+			s = s+"  ";
+		}
+		return s;
+	}
+    
 
     /**
      * called to display specific node in a tree
@@ -2569,6 +2768,48 @@ public void printImageInfo(RenderedImage im, String description) {
        return hash;
 				
 	}
+	
+	/**
+	 * Creates a Hashtable from the image Matadata Document
+	 * @param rootHash - this is ignored
+	 * @return Hashtable
+	 */
+	public Hashtable getHashFromMetadata(String formatName) {
+		Document document = null;
+		Hashtable hash = null;
+		IIOMetadata im = null;
+		if (iioImage != null) {
+		
+		im = iioImage.getMetadata();
+		if (debug) System.out.println(" ");
+            
+            if (im == null) {
+                System.out.println("The image "+inputFileName+"  has no ImageMetadata.");
+                // return null;
+            } else {
+                               
+                if (debug) System.out.println("Image metadata: "+formatName);
+                // PDSMetadata.nativeImageMetadataFormatName PDS_LABEL 
+                // PDSMetadata.vicarImageMetadataFormatName VICAR_LABEL
+                // VicarMetadata.nativeStreamMetadataFormatName VICAR_LABEL
+                // ISISMetadata.nativeImageMetadataFormatName ISIS_LABEL
+                // FITSMetadata.nativeImageMetadataFormatName FITS_LABEL
+                
+                if (formatName.equalsIgnoreCase("VICAR_LABEL") || 
+                	formatName.equalsIgnoreCase("PDS_LABEL") ||
+                	formatName.equalsIgnoreCase("ISIS_LABEL") ||
+					formatName.equalsIgnoreCase("FITS_LABEL")) {
+                	document =  (Document) im.getAsTree(formatName);
+                	if (debug) System.out.println("VICAR, FITS, ISIS or PDS document "+ docInfo(document) );
+		
+					DOMtoHashtable dh = new DOMtoHashtable(document);
+					hash = dh.getHashtable();
+                }
+            }
+		}
+       return hash;
+				
+	}
 
 /**
  * Prints the contents of a Hashtable. Assumes the Hashtable contains either
@@ -2610,11 +2851,139 @@ public void printImageInfo(RenderedImage im, String description) {
 				System.out.println("--------");
 			}
 			
+		}		
+	}
+	
+	/**
+	 * Prints the contents of a Hashtable. Assumes the Hashtable contains either
+	 *  All Keys are Strings, values may Strings or Hashtables. 
+	 * If a Hashtable is encountered it is recursively printed
+	 * @param h
+	 */
+		public String printHashToString(Hashtable h) {
+			System.out.println("ImageUtils.printHashToString() >>>>>>>>>>>>>" );
+			StringBuilder sb = new StringBuilder("");
+			sb = printHashToString(h, 0, sb) ;
+			System.out.println("ImageUtils.printHashToString() <<<<<<<<<<<<<" );
+			return sb.toString();
+		}
+
+		/**
+		 * Recursive private method that prints one level of a Hashtable
+		 * @param h
+		 * @param level
+		 */
+		private StringBuilder printHashToString(Hashtable h, int level, StringBuilder sb) {
+			// recursively print embedded hashtables
+			Enumeration keys = h.keys();
+			String key, value;
+			Object v;
+			Enumeration subKeys;
+			Hashtable subHash;
+			while (keys.hasMoreElements()) {
+				key = (String) keys.nextElement();
+				v = h.get(key);
+				String is = indentString(level);
+				if (v instanceof String) {
+					value = (String) v;
+					System.out.println(is+key+" = "+value);
+					sb.append(is+key+" = "+value+"\n");
+				}
+				else if (v instanceof Hashtable) {
+					System.out.println(key+" -------- ");
+					sb.append(is+key+"\n");
+					// sb.append("."+is+printHashToString((Hashtable) v, level + 1, sb));
+					sb = printHashToString((Hashtable) v, level + 1, sb);
+				}
+				else {
+					System.out.println("--------");
+				}
+				
+			}
+			return sb;
+		}
+	
+		
+
+	/*********
+	 * 
+	 * getBufferedWriter
+	 * 	 
+	 * @param filename
+	 * @return BufferedWriter
+	 * Use must close the writer  bw.close()
+	 */
+	public BufferedWriter getBufferedWriter(String filename) {
+		
+		try {
+			File file = new File(filename);
+		 
+			// if file doesnt exists, then create it
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			// bw.write(content);
+			// bw.close();
+			return bw;
+		} catch (IOException e) {
+			System.out.println("ImageUtils.getBufferedWriter IOException" );
+			if (debug) e.printStackTrace();
 		}
 		
-		
-		
+		return null;
 	}
+	
+	/**
+	 * Prints the contents of a Hashtable. Assumes the Hashtable contains either
+	 *  All Keys are Strings, values may Strings or Hashtables. 
+	 * If a Hashtable is encountered it is recursively printed
+	 * @param h
+	 */
+		public void printHashToFile(Hashtable h, BufferedWriter bw) {
+			// System.out.println("ImageUtils.printHash() >>>>>>>>>>>>>" );
+			printHashToFile(h, 0, bw) ;
+			// System.out.println("ImageUtils.printHash() <<<<<<<<<<<<<" );
+		}
+
+		/**
+		 * Recursive private method that prints one level of a Hashtable
+		 * @param h
+		 * @param level
+		 */
+		private void printHashToFile(Hashtable h, int level, BufferedWriter bw) {
+			// recursively print embedded hashtables
+			Enumeration keys = h.keys();
+			String key, value;
+			Object v;
+			Enumeration subKeys;
+			Hashtable subHash;
+			try {
+				while (keys.hasMoreElements()) {
+					key = (String) keys.nextElement();
+					v = h.get(key);
+					String is = indentString(level);
+					if (v instanceof String) {
+						value = (String) v;
+						System.out.println(is+key+" = "+value);
+						bw.write(is+key+" = "+value+"\n");					
+					}
+					else if (v instanceof Hashtable) {
+						System.out.println(key+" -------- ");
+						bw.write(is+key+"\n");
+						printHashToFile((Hashtable) v, level + 1, bw);
+					}
+					else {
+						System.out.println("--------");
+					}				
+				}
+			} catch (IOException e) {
+				System.out.println("ImageUtils.printHashToFile IOException" );
+				if (debug) e.printStackTrace();
+			}			
+		}
 
 	/**
 	 * 
@@ -2732,7 +3101,7 @@ private void displayMetadata(Node node, int level, Hashtable hash) {
 
 /**
  * test method that will print the metadata from a vicar image file
- *
+ * 
  */
 	public void vicarLabelTest() {
 	System.out.println("vicarLabelTest");
@@ -2756,6 +3125,10 @@ private void displayMetadata(Node node, int level, Hashtable hash) {
 			
 		im = iioImage.getMetadata();
 		System.out.println(" ");
+		
+		System.out.println("#############################################################");
+		System.out.println("#### vicaLabelTest() ");
+		System.out.println("#############################################################");
             
         if (im != null) {
         	formats = im.getMetadataFormatNames();    
@@ -2890,10 +3263,13 @@ public void jediTest(String inputFileName, boolean displayImage) {
     System.out.println("jediTest: " + inputFileName+"  *********************");
     
     ImageUtils imUtil = new ImageUtils(inputFileName) ;
+    imUtil.setDebug(debug);
     
     imUtil.setFormatToByte(true);
     
+    // imUtil.setImageReadParam(inputImageReadParam);
     
+    System.out.println("jediTest: calling fullRead() *********************");
     try {
 		imUtil.fullRead();
 	} catch (IOException e) {
@@ -2917,7 +3293,8 @@ public void jediTest(String inputFileName, boolean displayImage) {
     
     // imUtil.printImageInfo();
 	// // get the metadata
-	// imUtil.displayMetadata();
+    System.out.println("********* displayMetadata <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+	imUtil.displayMetadata();
 	
 	// convert metadata to a hash
 	// Hashtable imHash = imUtil.getMetadataHash();
@@ -3046,7 +3423,8 @@ public void serializeMetadata() {
 		System.out.println(" ");
             
         if (im != null) {
-        	formats = im.getMetadataFormatNames();    
+        	formats = im.getMetadataFormatNames();  
+        	
         	format = im.getNativeMetadataFormatName() ;// nativeImageMetadataFormatName = "VICAR_LABEL"; 
         	
         	if (debug) {

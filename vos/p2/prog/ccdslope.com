@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module ccdslope
-$! VPACK Version 1.9, Monday, June 09, 2014, 16:37:00
+$! VPACK Version 2.1, Wednesday, January 13, 2016, 12:05:16
 $!
 $! Execute by entering:		$ @ccdslope
 $!
@@ -152,7 +152,7 @@ $ vpack ccdslope.com -mixed -
 	-s ccdslope.f -
 	-i ccdslope.imake -
 	-p ccdslope.pdf -
-	-t tstccdslope.pdf tstccdslope_linux.log tstccdslope_sun.log
+	-t tstccdslope.pdf tstccdslope_linux32.log tstccdslope_linux64.log
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -215,7 +215,7 @@ ccc         INTEGER*4 STATUS
 
 	character*4 gpi/'.gpi'/,eps/'.eps'/,asc/'.asc'/
 
-         CALL IFMESSAGE ('CCDSLOPE version 07-Jul-2013  (64-bit) - rjb')
+         CALL IFMESSAGE ('CCDSLOPE version 2015-08-19')
 
          ARMES = 'NUMBER OF GOOD AREAS=**** OUT OF**** AREAS SAMPLED'
          RMSG = 'NUMBER REJECTED FOR               =     '
@@ -559,9 +559,11 @@ C-----Print out slope and offset for each area...
 	unit97 = 97
 	unit98 = 98
 
-        open(98,file=plotgpi(1:nplotgpi),status='UNKNOWN',iostat=jj,err=960)
-        if (epsplot) then
-           open(97,file=plotgpi2(1:nplotgpi2),status='UNKNOWN',iostat=jj,err=961)
+        if (LOOP .ne. 1) then
+          open(98,file=plotgpi(1:nplotgpi),status='UNKNOWN',iostat=jj,err=960)
+          if (epsplot) then
+             open(97,file=plotgpi2(1:nplotgpi2),status='UNKNOWN',iostat=jj,err=961)
+          endif
         endif
 
          CALL LTCPLOT(AREA,BAD,CEXPO,DN,EXPOS,W,LABEL,SLOPE,OFFS,
@@ -581,6 +583,7 @@ c-----Adjust energy terms by DLTX and loop back
                W(J,K) = W(J,K) - DLTX
             ENDDO
          ENDDO
+
          GOTO 60 
 
 200	continue
@@ -2201,39 +2204,31 @@ where PIC is one of the flat field frames used in the calibration.
 .PAGE
 HISTORY:
 
-  13 Jul 2013 R. J. Bambery  Adjusted eps format to more readable fonts
-                             Remove vestiges of debug statments   
-  07 Jul 2013 R. J. Bambery  Refine plot ranges
-  13 Feb 2013 R. J. Bambery  Documentation and test updates
-  23 Nov 2012 R. J. Bambery  Linux 64-bit, Gnuplot
-  28 Jan 2005 -lwk- Changed & to * in alternate returns, disabled variable
-                 use in format statement in subr.GENTBL, for Linux.
- 27 Apr 99  gmy  Declared P an integer to avoid compiler err on SGI.
-  8 Apr 97...T.Huang.......Ported from VAX to UNIX to support CASSINI
- 30 Jan 96...c.c.avis......Clarified table headers
- 22 Aug 95...c.c.avis......Added tests with noise
- 24 Jul 95...J.R.Yoshimizu.Look for RADIANCE not LUMINANCE in label.  Changed
-                           format of statistics.
- 14 Jan 95...J.R.Yoshimizu.changed LUMINANC to LIGHT.  Added UNITS
- 23 Jan 95...C.C.Avis......changed calculation of SIGMAs
- 25 Jun 94...C.C.Avis......Add tabular output, read Cassini labels for
-                           Luminance, change LIGHT to LUMINANC, allow
-                           for line- or sample-dependent shutter-offset
-                           file, add comments
-    Jun 91...W.P.Lee ......Strengthen Level-2 Variable HELP Descriptions
-                           (FR #64654)
-                           Also, resolve the EMPTY PLOT file problem that
-                           LKW encountered
-  3 Mar 88...G.M.Yagi......Change PDF to treat all EXTEXPO call.
- 01 Nov 87...G.M.Yagi......Convert to new CPLT plotting routines
- 25 Sep 87...G.M.Yagi......Fix summation mode plots
- 01 Jun 87...G.M.Yagi......Add plot of RETICLES
- 25 AUG 86...G.M.Yagi......Code and documentation clean-up
- 19 FEB 85...M.E.MORRILL...Redefined iteration for extended expo modes.
- 18 FEB 85...M.E.MORRILL...Adding sigma tolerance parameter
- 27 JAN 85...M.E.MORRILL...Adding iterative loop control
- 17 JAN 85...M.E.MORRILL...Adding mark output for rejected areas
- 31 OCT 84...M.E.MORRILL...INITIAL RELEASE
+ 1984-10-31 M.E.MORRILL - Initial release
+ 1985-01-17 M.E.MORRILL - Adding mark output for rejected areas
+ 1985-01-27 M.E.MORRILL - Adding iterative loop control
+ 1985-02-18 M.E.MORRILL - Adding sigma tolerance parameter
+ 1985-02-19 M.E.MORRILL - Redefined iteration for extended expo modes.
+ 1986-08-25 G.M.Yagi - Code and documentation clean-up
+ 1987-06-01 G.M.Yagi - Add plot of RETICLES
+ 1987-09-25 G.M.Yagi - Fix summation mode plots
+ 1987-11-01 G.M.Yagi - Convert to new CPLT plotting routines
+ 1988-03-03 G.M.Yagi - Change PDF to treat all EXTEXPO call.
+ 1991-06    W.P.Lee - Strengthen Level-2 Variable HELP Descriptions (FR #64654) Also, resolve the EMPTY PLOT file problem that LKW encountered
+ 1994-06-25 C.C.Avis - Add tabular output, read Cassini labels for Luminance, change LIGHT to LUMINANC, allow for line- or sample-dependent shutter-offset file, add comments
+ 1995-01-23 C.C.Avis - Changed calculation of SIGMAs
+ 1995-01-14 J.R.Yoshimizu - Changed LUMINANC to LIGHT.  Added UNITS
+ 1995-07-24 J.R.Yoshimizu - Look for RADIANCE not LUMINANCE in label.  Changed format of statistics.
+ 1995-08-22 C.C.AVIS - Added tests with noise
+ 1996-01-30 C.C.AVIS - Clarified table headers
+ 1997-04-08 T.Huang - Ported from VAX to UNIX to support CASSINI
+ 1999-04-27 GMY - Declared P an integer to avoid compiler err on SGI.
+ 2005-01-28 LWK - Changed & to * in alternate returns, disabled variable use in format statement in subr.GENTBL, for Linux.
+ 2012-11-23 R. J. Bambery - Linux 64-bit, Gnuplot
+ 2013-02-13 R. J. Bambery - Documentation and test updates
+ 2013-07-07 R. J. Bambery - Refine plot ranges
+ 2013-07-13 R. J. Bambery - Adjusted eps format to more readable fonts Remove vestiges of debug statments   
+ 2015-08-19 W. L. Bunch - Fixed loop logic bug in DELTX case
  
 .LEVEL1
 .VARIABLE INP
@@ -2417,6 +2412,8 @@ refgbl $autousage
 refgbl $echo
 refgbl $syschar
 body
+enable-log
+
 let $autousage="none"
 let _onfail="goto rm"
 let $echo="yes"
@@ -2433,7 +2430,7 @@ else
     ush ln -s /raid1/vicar_test_images/testdata/cassini/iss cas
 end-if       
  
-  defcmd-replace typeit "ush cat"
+defcmd-replace typeit "ush cat"
  
 !CASSINI TEST:
 !---------------------------
@@ -2468,6 +2465,7 @@ copy l4.a l4.c
  
 !Create list of the files created
 createfile l.list
+let $echo="yes"
 addtofile l.list "NEXT FILE=0001"
 addtofile l.list "l1.a"
 addtofile l.list "l1.b"
@@ -2482,7 +2480,8 @@ addtofile l.list "l4.a"
 addtofile l.list "l4.b"
 addtofile l.list "l4.c"
 reset l.list
-typeit l.list
+let $echo="yes"
+!typeit l.list
  
 !Initialize Light Transfer File
 ltgen l1.a out=test.ltf list=l.list 'GRID
@@ -2492,6 +2491,7 @@ momgen2 list=l.list ltfrcp=test.ltf
 
 ! TEST 1 
 ! 18 plots - each upper left, upper right, etc.
+let $echo="yes"
 ccdslope test.ltf table=ccdslope1.tbl mofset=0.0 light=10. rej=0 'SUBDC +
     plot=test1
 
@@ -2549,6 +2549,7 @@ label-rep m4.c 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
  
 !Create list of the files created
 createfile m.list
+let $echo="yes"
 addtofile m.list "NEXT FILE=0001"
 addtofile m.list "m1.a"
 addtofile m.list "m1.b"
@@ -2563,7 +2564,8 @@ addtofile m.list "m4.a"
 addtofile m.list "m4.b"
 addtofile m.list "m4.c"
 reset m.list
-typeit m.list
+let $echo="yes"
+!typeit m.list
  
 !Initialize Light Transfer File
 ltgen m1.a out=test.ltfn list=m.list 'GRID
@@ -2587,6 +2589,7 @@ end-if
 
 ! 
 ! TEST 2 - synthetic data reject 
+let $echo="yes"
 ccdslope test.ltfn table=ccdslope2n.tbl mofset=0.0 light=10. rej=0 'SUBDC +
     plot=test2
 if (mode = "nobatch" or mode = "inter")
@@ -2597,6 +2600,7 @@ end-if
 ! TEST 3
 !go to real data and the sample-dependent shutter-offset file
  
+let $echo="yes"
 ccdslope test.ltf mark.out table=ccdslope3.tbl offsets=cas/sos.dat rej=3 +
     plot=test3
 if (mode = "nobatch" or mode = "inter")
@@ -2605,6 +2609,7 @@ end-if
 
 ! TEST 4 - real data deltax  and sigtol
  
+let $echo="yes"
 ccdslope test.ltf  offsets=cas/sol.dat rej=2  +
    'deltax sigtol=1.0 plot=test4
 
@@ -2614,6 +2619,7 @@ end-if
 
 ! TEST 5 - encapsulated postscript file
 
+let $echo="yes"
 ccdslope test.ltf  offsets=cas/sol.dat rej=1  +
    'deltax sigtol=1.0 plot=test5 plotfmt=eps
 ush gnuplot test5.eps.gpi
@@ -2625,46 +2631,25 @@ end-if
 let $echo="no"
 rm>
 ush rm cas
-ush rm l.list
+!ush rm l.list
+
+disable-log
 end-proc
 
 $!-----------------------------------------------------------------------------
-$ create tstccdslope_linux.log
-                Version 5C/16C
-
-      ***********************************************************
-      *                                                         *
-      * VICAR Supervisor version 5C, TAE V5.2                   *
-      *   Debugger is now supported on all platforms            *
-      *   USAGE command now implemented under Unix              *
-      *                                                         *
-      * VRDI and VIDS now support X-windows and Unix            *
-      * New X-windows display program: xvd (for all but VAX/VMS)*
-      *                                                         *
-      * VICAR Run-Time Library version 16C                      *
-      *   '+' form of temp filename now avail. on all platforms *
-      *   ANSI C now fully supported                            *
-      *                                                         *
-      * See B.Deen(RGD059) with problems                        *
-      *                                                         *
-      ***********************************************************
-
-  --- Type NUT for the New User Tutorial ---
-
-  --- Type MENU for a menu of available applications ---
-
+$ create tstccdslope_linux32.log
 translog INP=AFIDS_ROOT TRANS=afidsroot
 if (afidsroot = "")
     ush ln -s /project/test_work/testdata/cassini/iss cas
 else
 end-if
-  defcmd-replace typeit "ush cat"
+defcmd-replace typeit "ush cat"
 copy cas/sum2.1 l1.ax
 Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 f2 l1.ax l1.a func=10
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 26 TIMES
 copy l1.a l1.b
@@ -2675,7 +2660,7 @@ Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 f2 cas/sum2.1 l2.a func=110
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 26 TIMES
 label-rep l2.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
@@ -2690,7 +2675,7 @@ Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 f2 cas/sum2.1 l3.a func=210
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 26 TIMES
 label-rep l3.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
@@ -2705,7 +2690,7 @@ Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 f2 cas/sum2.1 l4.a func=410
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 26 TIMES
 label-rep l4.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
@@ -2719,14 +2704,8 @@ copy l4.a l4.c
 Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 createfile l.list
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  l.list
-end-if
-END-PROC
+let $echo="no"
+CREATEFILE version 2015-11-19
 addtofile l.list "NEXT FILE=0001"
 refgbl  $syschar
 write "ADDTOFILE version 1-3-97"
@@ -2859,23 +2838,10 @@ end-if
 END-PROC
 reset l.list
 Beginning VICAR task reset
-ush cat l.list
-NEXT FILE =     1
-l1.a
-l1.b
-l1.c
-l2.a
-l2.b
-l2.c
-l3.a
-l3.b
-l3.c
-l4.a
-l4.b
-l4.c
+let $echo="yes"
 ltgen l1.a out=test.ltf list=l.list 'GRID
 Beginning VICAR task ltgen
-LTGEN Version 14-MAR-97
+LTGEN Version 23-Nov-2012  (64-bit) - rjb
 NUMBER OF FILES  =         12
 NUMBER OF LEVELS =          4
 MAX FRAMES/LEVEL =          3
@@ -2913,557 +2879,141 @@ Beginning VICAR task getlab
 let LUMS = "5.099999904633e+00"
 let LMS(1)=LUMS
 createfile list1.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list1.dat
-end-if
-END-PROC
-addtofile list1.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+let $echo="no"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-addtofile list1.dat "l1.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l1.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-let J=1
-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 2 is l1.b
-   if (F="END_OF_FILE") break
-   getlab l1.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l1.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"1"//".dat"
-       addtofile list1.dat "l1.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l1.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 3 is l1.c
-   if (F="END_OF_FILE") break
-   getlab l1.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l1.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"1"//".dat"
-       addtofile list1.dat "l1.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l1.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 4 is l2.a
-   if (F="END_OF_FILE") break
-   getlab l2.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l2.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"2"//".dat"
-       createfile list2.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list2.dat
-end-if
-END-PROC
-       addtofile list2.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list2.dat "l2.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l2.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 5 is l2.b
-   if (F="END_OF_FILE") break
-   getlab l2.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l2.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"2"//".dat"
-       addtofile list2.dat "l2.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l2.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 6 is l2.c
-   if (F="END_OF_FILE") break
-   getlab l2.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l2.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"2"//".dat"
-       addtofile list2.dat "l2.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l2.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 7 is l3.a
-   if (F="END_OF_FILE") break
-   getlab l3.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l3.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"3"//".dat"
-       createfile list3.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list3.dat
-end-if
-END-PROC
-       addtofile list3.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list3.dat "l3.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l3.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 8 is l3.b
-   if (F="END_OF_FILE") break
-   getlab l3.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l3.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"3"//".dat"
-       addtofile list3.dat "l3.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l3.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 9 is l3.c
-   if (F="END_OF_FILE") break
-   getlab l3.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l3.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"3"//".dat"
-       addtofile list3.dat "l3.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l3.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 10 is l4.a
-   if (F="END_OF_FILE") break
-   getlab l4.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l4.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"4"//".dat"
-       createfile list4.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list4.dat
-end-if
-END-PROC
-       addtofile list4.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list4.dat "l4.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l4.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 11 is l4.b
-   if (F="END_OF_FILE") break
-   getlab l4.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l4.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"4"//".dat"
-       addtofile list4.dat "l4.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l4.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 12 is l4.c
-   if (F="END_OF_FILE") break
-   getlab l4.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l4.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"4"//".dat"
-       addtofile list4.dat "l4.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l4.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  NXT encountered end of file
-   if (F="END_OF_FILE") break
- break
-   if (EXP=EX(J))
-   end-if
-end-loop
-let NLVL=J
-let $BECHO="NO"
-write " NUMBER OF EXPOSURE LEVELS = 4"
  NUMBER OF EXPOSURE LEVELS = 4
-write " "
  
-write " "
  
-write " EXPOSURE LEVEL ... EXPOSURE TIME ... RADIANCES"
  EXPOSURE LEVEL ... EXPOSURE TIME ... RADIANCES
-let I=1
-loop
-   let X=EX(I)
-   let EXS = "0.000000000000e+00"
-   let LUMS=LMS(I)
-   write "       1              0.000000000000e+00             5.099999904633e+00"
        1              0.000000000000e+00             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "1.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       2              1.000000000000e+01             5.099999904633e+00"
        2              1.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "2.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       3              2.000000000000e+01             5.099999904633e+00"
        3              2.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "4.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       4              4.000000000000e+01             5.099999904633e+00"
        4              4.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
- break
-end-loop
-write " "
  
-let $BECHO="YES"
-let I=1
-loop
-   let X=EX(I)
-   let EXS = "0.000000000000e+00"
-   let G="list"//"1"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 1    EXPOSURE TIME 0.000000000000e+00"
 FRAME LIST FOR LEVEL 1    EXPOSURE TIME 0.000000000000e+00
-ush cat list1.dat
-NEXT FILE=0001
-l1.a
-l1.b
-l1.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"1".dat" out=test.ltf
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    0.000E+00
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "1.000000000000e+01"
-   let G="list"//"2"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 2    EXPOSURE TIME 1.000000000000e+01"
 FRAME LIST FOR LEVEL 2    EXPOSURE TIME 1.000000000000e+01
-ush cat list2.dat
-NEXT FILE=0001
-l2.a
-l2.b
-l2.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"2".dat" out=test.ltf
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    10.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "2.000000000000e+01"
-   let G="list"//"3"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 3    EXPOSURE TIME 2.000000000000e+01"
 FRAME LIST FOR LEVEL 3    EXPOSURE TIME 2.000000000000e+01
-ush cat list3.dat
-NEXT FILE=0001
-l3.a
-l3.b
-l3.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"3".dat" out=test.ltf
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    20.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "4.000000000000e+01"
-   let G="list"//"4"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 4    EXPOSURE TIME 4.000000000000e+01"
 FRAME LIST FOR LEVEL 4    EXPOSURE TIME 4.000000000000e+01
-ush cat list4.dat
-NEXT FILE=0001
-l4.a
-l4.b
-l4.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"4".dat" out=test.ltf
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    40.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
- break
-end-loop
-if ($count(LTFILE) = 1)
-      if (EX(I)=0.0) let LUMS="0.0"
-      if (I=NLVL) break
-end-if
-end-proc
 ccdslope test.ltf table=ccdslope1.tbl mofset=0.0 light=10. rej=0 'SUBDC  +
     plot=test1
 Beginning VICAR task ccdslope
-CCDSLOPE version 07-Jul-2013  (64-bit) - rjb
+CCDSLOPE version 2015-08-19
  SIGMA REJ TOL=          2
 Mean shutter-offset =  0.000E+00
 Shutter-offset is LINE-dependent
 DC subtraction mode
-----TASK:COPY    ----USER:wlb         Mon Jun  9 15:14:37 2014
-----TASK:F2      ----USER:wlb         Mon Jun  9 15:14:37 2014
-----TASK:LTGEN   ----USER:wlb         Mon Jun  9 15:14:38 2014
+----TASK:COPY    ----USER:wlb         Wed Jan 13 11:56:11 2016
+----TASK:F2      ----USER:wlb         Wed Jan 13 11:56:11 2016
+----TASK:LTGEN   ----USER:wlb         Wed Jan 13 11:56:11 2016
 
 GLOBAL VALUE FOR SLOPE...
 Raw mean and sigma are...
@@ -3599,7 +3149,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 Reticle           2
 Means from averaging values of areas
  SLOPE  =  1.0000000
@@ -3617,7 +3167,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 Reticle           3
 Means from averaging values of areas
  SLOPE  =  1.0000000
@@ -3635,7 +3185,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 Reticle           4
 Means from averaging values of areas
  SLOPE  =  1.0000000
@@ -3653,7 +3203,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 Reticle           5
 Means from averaging values of areas
  SLOPE  =  1.0000000
@@ -3671,7 +3221,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  40 OUT OF  40 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 Framewide
 Means from averaging values of areas
  SLOPE=  1.0000000
@@ -3689,7 +3239,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  40 OUT OF  40 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 CCDSLOPE task completed
 if (mode = "nobatch" or mode = "inter")
 end-if
@@ -3697,28 +3247,28 @@ gausnois a.img mean=0 sigma=3 format=HALF nl=512 ns=512 seed=512
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m1.a func=10+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 443 TIMES
 gausnois a.img mean=0 sigma=3 format=HALF nl=512 ns=512 seed=612
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m1.b func=10+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 440 TIMES
 gausnois a.img mean=0 sigma=3 format=HALF nl=512 ns=512 seed=712
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m1.c func=10+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 435 TIMES
 gausnois a.img mean=0 sigma=10 format=HALF nl=512 ns=512 seed=812
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m2.a func=110+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1312 TIMES
 label-rep m2.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
@@ -3729,7 +3279,7 @@ gausnois a.img mean=0 sigma=10 format=HALF nl=512 ns=512 seed=912
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m2.b func=110+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1314 TIMES
 label-rep m2.b 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
@@ -3740,7 +3290,7 @@ gausnois a.img mean=0 sigma=10 format=HALF nl=512 ns=512 seed=112
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m2.c func=110+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1304 TIMES
 label-rep m2.c 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
@@ -3751,7 +3301,7 @@ gausnois a.img mean=0 sigma=14 format=HALF nl=512 ns=512 seed=212
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m3.a func=210+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1786 TIMES
 label-rep m3.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
@@ -3762,7 +3312,7 @@ gausnois a.img mean=0 sigma=14 format=HALF nl=512 ns=512 seed=312
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m3.b func=210+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1802 TIMES
 label-rep m3.b 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
@@ -3773,7 +3323,7 @@ gausnois a.img mean=0 sigma=14 format=HALF nl=512 ns=512 seed=412
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m3.c func=210+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1798 TIMES
 label-rep m3.c 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
@@ -3784,7 +3334,7 @@ gausnois a.img mean=0 sigma=20 format=HALF nl=512 ns=512 seed=544
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m4.a func=410+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 2448 TIMES
 label-rep m4.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
@@ -3795,7 +3345,7 @@ gausnois a.img mean=0 sigma=20 format=HALF nl=512 ns=512 seed=566
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m4.b func=410+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 2441 TIMES
 label-rep m4.b 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
@@ -3806,7 +3356,7 @@ gausnois a.img mean=0 sigma=20 format=HALF nl=512 ns=512 seed=588
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m4.c func=410+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 2444 TIMES
 label-rep m4.c 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
@@ -3814,14 +3364,8 @@ Beginning VICAR task label
 LABEL version 15-Nov-2010
 Keyword EXPOSURE_DURATION replaced
 createfile m.list
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  m.list
-end-if
-END-PROC
+let $echo="no"
+CREATEFILE version 2015-11-19
 addtofile m.list "NEXT FILE=0001"
 refgbl  $syschar
 write "ADDTOFILE version 1-3-97"
@@ -3954,23 +3498,10 @@ end-if
 END-PROC
 reset m.list
 Beginning VICAR task reset
-ush cat m.list
-NEXT FILE =     1
-m1.a
-m1.b
-m1.c
-m2.a
-m2.b
-m2.c
-m3.a
-m3.b
-m3.c
-m4.a
-m4.b
-m4.c
+let $echo="yes"
 ltgen m1.a out=test.ltfn list=m.list 'GRID
 Beginning VICAR task ltgen
-LTGEN Version 14-MAR-97
+LTGEN Version 23-Nov-2012  (64-bit) - rjb
 NUMBER OF FILES  =         12
 NUMBER OF LEVELS =          4
 MAX FRAMES/LEVEL =          3
@@ -4008,564 +3539,140 @@ Beginning VICAR task getlab
 let LUMS = "5.099999904633e+00"
 let LMS(1)=LUMS
 createfile list1.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list1.dat
-end-if
-END-PROC
-addtofile list1.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+let $echo="no"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-addtofile list1.dat "m1.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m1.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-let J=1
-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 2 is m1.b
-   if (F="END_OF_FILE") break
-   getlab m1.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m1.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"1"//".dat"
-       addtofile list1.dat "m1.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m1.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 3 is m1.c
-   if (F="END_OF_FILE") break
-   getlab m1.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m1.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"1"//".dat"
-       addtofile list1.dat "m1.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m1.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 4 is m2.a
-   if (F="END_OF_FILE") break
-   getlab m2.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m2.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"2"//".dat"
-       createfile list2.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list2.dat
-end-if
-END-PROC
-       addtofile list2.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list2.dat "m2.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m2.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 5 is m2.b
-   if (F="END_OF_FILE") break
-   getlab m2.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m2.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"2"//".dat"
-       addtofile list2.dat "m2.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m2.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 6 is m2.c
-   if (F="END_OF_FILE") break
-   getlab m2.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m2.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"2"//".dat"
-       addtofile list2.dat "m2.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m2.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 7 is m3.a
-   if (F="END_OF_FILE") break
-   getlab m3.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m3.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"3"//".dat"
-       createfile list3.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list3.dat
-end-if
-END-PROC
-       addtofile list3.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list3.dat "m3.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m3.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 8 is m3.b
-   if (F="END_OF_FILE") break
-   getlab m3.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m3.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"3"//".dat"
-       addtofile list3.dat "m3.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m3.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 9 is m3.c
-   if (F="END_OF_FILE") break
-   getlab m3.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m3.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"3"//".dat"
-       addtofile list3.dat "m3.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m3.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 10 is m4.a
-   if (F="END_OF_FILE") break
-   getlab m4.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m4.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"4"//".dat"
-       createfile list4.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list4.dat
-end-if
-END-PROC
-       addtofile list4.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list4.dat "m4.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m4.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 11 is m4.b
-   if (F="END_OF_FILE") break
-   getlab m4.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m4.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"4"//".dat"
-       addtofile list4.dat "m4.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m4.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 12 is m4.c
-   if (F="END_OF_FILE") break
-   getlab m4.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m4.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"4"//".dat"
-       addtofile list4.dat "m4.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m4.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  NXT encountered end of file
-   if (F="END_OF_FILE") break
- break
-   if (EXP=EX(J))
-   end-if
-end-loop
-let NLVL=J
-let $BECHO="NO"
-write " NUMBER OF EXPOSURE LEVELS = 4"
  NUMBER OF EXPOSURE LEVELS = 4
-write " "
  
-write " "
  
-write " EXPOSURE LEVEL ... EXPOSURE TIME ... RADIANCES"
  EXPOSURE LEVEL ... EXPOSURE TIME ... RADIANCES
-let I=1
-loop
-   let X=EX(I)
-   let EXS = "0.000000000000e+00"
-   let LUMS=LMS(I)
-   write "       1              0.000000000000e+00             5.099999904633e+00"
        1              0.000000000000e+00             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "1.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       2              1.000000000000e+01             5.099999904633e+00"
        2              1.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "2.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       3              2.000000000000e+01             5.099999904633e+00"
        3              2.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "4.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       4              4.000000000000e+01             5.099999904633e+00"
        4              4.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
- break
-end-loop
-write " "
  
-let $BECHO="YES"
-let I=1
-loop
-   let X=EX(I)
-   let EXS = "0.000000000000e+00"
-   let G="list"//"1"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 1    EXPOSURE TIME 0.000000000000e+00"
 FRAME LIST FOR LEVEL 1    EXPOSURE TIME 0.000000000000e+00
-ush cat list1.dat
-NEXT FILE=0001
-m1.a
-m1.b
-m1.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"1".dat" out=test.ltfn
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    0.000E+00
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "1.000000000000e+01"
-   let G="list"//"2"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 2    EXPOSURE TIME 1.000000000000e+01"
 FRAME LIST FOR LEVEL 2    EXPOSURE TIME 1.000000000000e+01
-ush cat list2.dat
-NEXT FILE=0001
-m2.a
-m2.b
-m2.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"2".dat" out=test.ltfn
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    10.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "2.000000000000e+01"
-   let G="list"//"3"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 3    EXPOSURE TIME 2.000000000000e+01"
 FRAME LIST FOR LEVEL 3    EXPOSURE TIME 2.000000000000e+01
-ush cat list3.dat
-NEXT FILE=0001
-m3.a
-m3.b
-m3.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"3".dat" out=test.ltfn
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    20.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "4.000000000000e+01"
-   let G="list"//"4"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 4    EXPOSURE TIME 4.000000000000e+01"
 FRAME LIST FOR LEVEL 4    EXPOSURE TIME 4.000000000000e+01
-ush cat list4.dat
-NEXT FILE=0001
-m4.a
-m4.b
-m4.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"4".dat" out=test.ltfn
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    40.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
- break
-end-loop
-if ($count(LTFILE) = 1)
-      if (EX(I)=0.0) let LUMS="0.0"
-      if (I=NLVL) break
-end-if
-end-proc
-if ($syschar(1)="UNIX")
-   ush rm m1.*
-   ush rm m2.*
-   ush rm m3.*
-   ush rm m4.*
-   ush rm m.list
-else
-end-if
 ccdslope test.ltfn table=ccdslope2n.tbl mofset=0.0 light=10. rej=0 'SUBDC  +
     plot=test2
 Beginning VICAR task ccdslope
-CCDSLOPE version 07-Jul-2013  (64-bit) - rjb
+CCDSLOPE version 2015-08-19
  SIGMA REJ TOL=          2
 Mean shutter-offset =  0.000E+00
 Shutter-offset is LINE-dependent
 DC subtraction mode
-----TASK:F2      ----USER:wlb         Mon Jun  9 15:14:41 2014
-----TASK:LTGEN   ----USER:wlb         Mon Jun  9 15:14:42 2014
+----TASK:F2      ----USER:wlb         Wed Jan 13 11:56:13 2016
+----TASK:LTGEN   ----USER:wlb         Wed Jan 13 11:56:14 2016
 
 GLOBAL VALUE FOR SLOPE...
 Raw mean and sigma are...
@@ -4801,17 +3908,18 @@ GALGEN:C1=   1.00014 ENERGY UNIT/DN C2=  -0.02747 ENERGY UNIT
 CCDSLOPE task completed
 if (mode = "nobatch" or mode = "inter")
 end-if
+let $echo="yes"
 ccdslope test.ltf mark.out table=ccdslope3.tbl offsets=cas/sos.dat rej=3  +
     plot=test3
 Beginning VICAR task ccdslope
-CCDSLOPE version 07-Jul-2013  (64-bit) - rjb
+CCDSLOPE version 2015-08-19
  SIGMA REJ TOL=          2
 Mean shutter-offset = 0.93262106
 Shutter-offset is SAMP-dependent
 DC included as data point on curve
-----TASK:COPY    ----USER:wlb         Mon Jun  9 15:14:37 2014
-----TASK:F2      ----USER:wlb         Mon Jun  9 15:14:37 2014
-----TASK:LTGEN   ----USER:wlb         Mon Jun  9 15:14:38 2014
+----TASK:COPY    ----USER:wlb         Wed Jan 13 11:56:11 2016
+----TASK:F2      ----USER:wlb         Wed Jan 13 11:56:11 2016
+----TASK:LTGEN   ----USER:wlb         Wed Jan 13 11:56:11 2016
 
 GLOBAL VALUE FOR SLOPE...
 Raw mean and sigma are...
@@ -5060,17 +4168,18 @@ GALGEN:C1=   0.50123 ENERGY UNIT/DN C2=  -6.83445 ENERGY UNIT
 CCDSLOPE task completed
 if (mode = "nobatch" or mode = "inter")
 end-if
+let $echo="yes"
 ccdslope test.ltf  offsets=cas/sol.dat rej=2   +
    'deltax sigtol=1.0 plot=test4
 Beginning VICAR task ccdslope
-CCDSLOPE version 07-Jul-2013  (64-bit) - rjb
+CCDSLOPE version 2015-08-19
  SIGMA REJ TOL=          1
 Mean shutter-offset = 0.93262106
 Shutter-offset is LINE-dependent
 DC included as data point on curve
-----TASK:COPY    ----USER:wlb         Mon Jun  9 15:14:37 2014
-----TASK:F2      ----USER:wlb         Mon Jun  9 15:14:37 2014
-----TASK:LTGEN   ----USER:wlb         Mon Jun  9 15:14:38 2014
+----TASK:COPY    ----USER:wlb         Wed Jan 13 11:56:11 2016
+----TASK:F2      ----USER:wlb         Wed Jan 13 11:56:11 2016
+----TASK:LTGEN   ----USER:wlb         Wed Jan 13 11:56:11 2016
 
 GLOBAL VALUE FOR SLOPE...
 Raw mean and sigma are...
@@ -5603,24 +4712,25 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
    20.0000    19.1256     5.1000      104.3688   210.0000   208.2118    1.7882
    40.0000    39.1256     5.1000      206.3688   410.0000   411.6978   -1.6978
                                                                 RMS=    2.8137
-SLOPE=   1.994961 SD= 0.000742 OFFSET=   0.000000 SD= 0.076686
+SLOPE=   1.994961 SD= 0.000742 OFFSET=  -0.000000 SD= 0.076686
 NUMBER OF GOOD AREAS=  32 OUT OF  40 AREAS SAMPLED
 NUMBER REJECTED FOR      OFFSET        8
 GALGEN:C1=   0.50126 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
 CCDSLOPE task completed
 if (mode = "nobatch" or mode = "inter")
 end-if
+let $echo="yes"
 ccdslope test.ltf  offsets=cas/sol.dat rej=1   +
    'deltax sigtol=1.0 plot=test5 plotfmt=eps
 Beginning VICAR task ccdslope
-CCDSLOPE version 07-Jul-2013  (64-bit) - rjb
+CCDSLOPE version 2015-08-19
  SIGMA REJ TOL=          1
 Mean shutter-offset = 0.93262106
 Shutter-offset is LINE-dependent
 DC included as data point on curve
-----TASK:COPY    ----USER:wlb         Mon Jun  9 15:14:37 2014
-----TASK:F2      ----USER:wlb         Mon Jun  9 15:14:37 2014
-----TASK:LTGEN   ----USER:wlb         Mon Jun  9 15:14:38 2014
+----TASK:COPY    ----USER:wlb         Wed Jan 13 11:56:11 2016
+----TASK:F2      ----USER:wlb         Wed Jan 13 11:56:11 2016
+----TASK:LTGEN   ----USER:wlb         Wed Jan 13 11:56:11 2016
 
 GLOBAL VALUE FOR SLOPE...
 Raw mean and sigma are...
@@ -6153,7 +5263,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
    20.0000    19.1256     5.1000      104.3688   210.0000   208.2118    1.7882
    40.0000    39.1256     5.1000      206.3688   410.0000   411.6978   -1.6978
                                                                 RMS=    2.8137
-SLOPE=   1.994961 SD= 0.000742 OFFSET=   0.000000 SD= 0.076686
+SLOPE=   1.994961 SD= 0.000742 OFFSET=  -0.000000 SD= 0.076686
 NUMBER OF GOOD AREAS=  32 OUT OF  40 AREAS SAMPLED
 NUMBER REJECTED FOR      SLOPE         8
 GALGEN:C1=   0.50126 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
@@ -6163,42 +5273,19 @@ if (mode = "nobatch" or mode = "inter")
 end-if
 let $echo="no"
 $!-----------------------------------------------------------------------------
-$ create tstccdslope_sun.log
-                Version 5C/16C
-
-      ***********************************************************
-      *                                                         *
-      * VICAR Supervisor version 5C, TAE V5.2                   *
-      *   Debugger is now supported on all platforms            *
-      *   USAGE command now implemented under Unix              *
-      *                                                         *
-      * VRDI and VIDS now support X-windows and Unix            *
-      * New X-windows display program: xvd (for all but VAX/VMS)*
-      *                                                         *
-      * VICAR Run-Time Library version 16C                      *
-      *   '+' form of temp filename now avail. on all platforms *
-      *   ANSI C now fully supported                            *
-      *                                                         *
-      * See B.Deen(RGD059) with problems                        *
-      *                                                         *
-      ***********************************************************
-
-  --- Type NUT for the New User Tutorial ---
-
-  --- Type MENU for a menu of available applications ---
-
+$ create tstccdslope_linux64.log
 translog INP=AFIDS_ROOT TRANS=afidsroot
 if (afidsroot = "")
     ush ln -s /project/test_work/testdata/cassini/iss cas
 else
 end-if
-  defcmd-replace typeit "ush cat"
+defcmd-replace typeit "ush cat"
 copy cas/sum2.1 l1.ax
 Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 f2 l1.ax l1.a func=10
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 26 TIMES
 copy l1.a l1.b
@@ -6209,7 +5296,7 @@ Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 f2 cas/sum2.1 l2.a func=110
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 26 TIMES
 label-rep l2.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
@@ -6224,7 +5311,7 @@ Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 f2 cas/sum2.1 l3.a func=210
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 26 TIMES
 label-rep l3.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
@@ -6239,7 +5326,7 @@ Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 f2 cas/sum2.1 l4.a func=410
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 26 TIMES
 label-rep l4.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
@@ -6253,14 +5340,8 @@ copy l4.a l4.c
 Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 createfile l.list
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  l.list
-end-if
-END-PROC
+let $echo="no"
+CREATEFILE version 2015-11-19
 addtofile l.list "NEXT FILE=0001"
 refgbl  $syschar
 write "ADDTOFILE version 1-3-97"
@@ -6393,23 +5474,10 @@ end-if
 END-PROC
 reset l.list
 Beginning VICAR task reset
-ush cat l.list
-NEXT FILE =     1
-l1.a
-l1.b
-l1.c
-l2.a
-l2.b
-l2.c
-l3.a
-l3.b
-l3.c
-l4.a
-l4.b
-l4.c
+let $echo="yes"
 ltgen l1.a out=test.ltf list=l.list 'GRID
 Beginning VICAR task ltgen
-LTGEN Version 14-MAR-97
+LTGEN Version 23-Nov-2012  (64-bit) - rjb
 NUMBER OF FILES  =         12
 NUMBER OF LEVELS =          4
 MAX FRAMES/LEVEL =          3
@@ -6447,557 +5515,141 @@ Beginning VICAR task getlab
 let LUMS = "5.099999904633e+00"
 let LMS(1)=LUMS
 createfile list1.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list1.dat
-end-if
-END-PROC
-addtofile list1.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+let $echo="no"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-addtofile list1.dat "l1.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l1.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-let J=1
-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 2 is l1.b
-   if (F="END_OF_FILE") break
-   getlab l1.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l1.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"1"//".dat"
-       addtofile list1.dat "l1.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l1.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 3 is l1.c
-   if (F="END_OF_FILE") break
-   getlab l1.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l1.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"1"//".dat"
-       addtofile list1.dat "l1.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l1.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 4 is l2.a
-   if (F="END_OF_FILE") break
-   getlab l2.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l2.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"2"//".dat"
-       createfile list2.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list2.dat
-end-if
-END-PROC
-       addtofile list2.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list2.dat "l2.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l2.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 5 is l2.b
-   if (F="END_OF_FILE") break
-   getlab l2.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l2.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"2"//".dat"
-       addtofile list2.dat "l2.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l2.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 6 is l2.c
-   if (F="END_OF_FILE") break
-   getlab l2.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l2.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"2"//".dat"
-       addtofile list2.dat "l2.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l2.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 7 is l3.a
-   if (F="END_OF_FILE") break
-   getlab l3.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l3.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"3"//".dat"
-       createfile list3.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list3.dat
-end-if
-END-PROC
-       addtofile list3.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list3.dat "l3.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l3.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 8 is l3.b
-   if (F="END_OF_FILE") break
-   getlab l3.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l3.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"3"//".dat"
-       addtofile list3.dat "l3.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l3.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 9 is l3.c
-   if (F="END_OF_FILE") break
-   getlab l3.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l3.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"3"//".dat"
-       addtofile list3.dat "l3.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l3.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 10 is l4.a
-   if (F="END_OF_FILE") break
-   getlab l4.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l4.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"4"//".dat"
-       createfile list4.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list4.dat
-end-if
-END-PROC
-       addtofile list4.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list4.dat "l4.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l4.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 11 is l4.b
-   if (F="END_OF_FILE") break
-   getlab l4.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l4.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"4"//".dat"
-       addtofile list4.dat "l4.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l4.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 12 is l4.c
-   if (F="END_OF_FILE") break
-   getlab l4.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab l4.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"4"//".dat"
-       addtofile list4.dat "l4.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="l4.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt l.list F I1 I2 I3
 Beginning VICAR task nxt
  NXT encountered end of file
-   if (F="END_OF_FILE") break
- break
-   if (EXP=EX(J))
-   end-if
-end-loop
-let NLVL=J
-let $BECHO="NO"
-write " NUMBER OF EXPOSURE LEVELS = 4"
  NUMBER OF EXPOSURE LEVELS = 4
-write " "
  
-write " "
  
-write " EXPOSURE LEVEL ... EXPOSURE TIME ... RADIANCES"
  EXPOSURE LEVEL ... EXPOSURE TIME ... RADIANCES
-let I=1
-loop
-   let X=EX(I)
-   let EXS = "0.000000000000e+00"
-   let LUMS=LMS(I)
-   write "       1              0.000000000000e+00             5.099999904633e+00"
        1              0.000000000000e+00             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "1.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       2              1.000000000000e+01             5.099999904633e+00"
        2              1.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "2.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       3              2.000000000000e+01             5.099999904633e+00"
        3              2.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "4.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       4              4.000000000000e+01             5.099999904633e+00"
        4              4.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
- break
-end-loop
-write " "
  
-let $BECHO="YES"
-let I=1
-loop
-   let X=EX(I)
-   let EXS = "0.000000000000e+00"
-   let G="list"//"1"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 1    EXPOSURE TIME 0.000000000000e+00"
 FRAME LIST FOR LEVEL 1    EXPOSURE TIME 0.000000000000e+00
-ush cat list1.dat
-NEXT FILE=0001
-l1.a
-l1.b
-l1.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"1".dat" out=test.ltf
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    0.000E+00
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "1.000000000000e+01"
-   let G="list"//"2"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 2    EXPOSURE TIME 1.000000000000e+01"
 FRAME LIST FOR LEVEL 2    EXPOSURE TIME 1.000000000000e+01
-ush cat list2.dat
-NEXT FILE=0001
-l2.a
-l2.b
-l2.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"2".dat" out=test.ltf
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    10.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "2.000000000000e+01"
-   let G="list"//"3"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 3    EXPOSURE TIME 2.000000000000e+01"
 FRAME LIST FOR LEVEL 3    EXPOSURE TIME 2.000000000000e+01
-ush cat list3.dat
-NEXT FILE=0001
-l3.a
-l3.b
-l3.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"3".dat" out=test.ltf
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    20.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "4.000000000000e+01"
-   let G="list"//"4"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 4    EXPOSURE TIME 4.000000000000e+01"
 FRAME LIST FOR LEVEL 4    EXPOSURE TIME 4.000000000000e+01
-ush cat list4.dat
-NEXT FILE=0001
-l4.a
-l4.b
-l4.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"4".dat" out=test.ltf
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    40.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
- break
-end-loop
-if ($count(LTFILE) = 1)
-      if (EX(I)=0.0) let LUMS="0.0"
-      if (I=NLVL) break
-end-if
-end-proc
 ccdslope test.ltf table=ccdslope1.tbl mofset=0.0 light=10. rej=0 'SUBDC  +
     plot=test1
 Beginning VICAR task ccdslope
-CCDSLOPE version 07-Jul-2013  (64-bit) - rjb
+CCDSLOPE version 2015-08-19
  SIGMA REJ TOL=          2
 Mean shutter-offset =  0.000E+00
 Shutter-offset is LINE-dependent
 DC subtraction mode
-----TASK:COPY    ----USER:wlb         Mon Jun  9 16:32:32 2014
-----TASK:F2      ----USER:wlb         Mon Jun  9 16:32:32 2014
-----TASK:LTGEN   ----USER:wlb         Mon Jun  9 16:32:35 2014
+----TASK:COPY    ----USER:wlb         Wed Jan 13 11:58:58 2016
+----TASK:F2      ----USER:wlb         Wed Jan 13 11:58:58 2016
+----TASK:LTGEN   ----USER:wlb         Wed Jan 13 11:58:59 2016
 
 GLOBAL VALUE FOR SLOPE...
 Raw mean and sigma are...
@@ -7133,7 +5785,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 Reticle           2
 Means from averaging values of areas
  SLOPE  =  1.0000000
@@ -7151,7 +5803,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 Reticle           3
 Means from averaging values of areas
  SLOPE  =  1.0000000
@@ -7169,7 +5821,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 Reticle           4
 Means from averaging values of areas
  SLOPE  =  1.0000000
@@ -7187,7 +5839,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 Reticle           5
 Means from averaging values of areas
  SLOPE  =  1.0000000
@@ -7205,7 +5857,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  40 OUT OF  40 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 Framewide
 Means from averaging values of areas
  SLOPE=  1.0000000
@@ -7223,7 +5875,7 @@ EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY    (DN-DC)    (DN-DC)    (DN-DC)
 SLOPE=   1.000000 SD= 0.000000 OFFSET=   0.000000 SD= 0.000000
 NUMBER OF GOOD AREAS=  40 OUT OF  40 AREAS SAMPLED
 NO REJECTION CRITERIA APPLIED
-GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=   0.00000 ENERGY UNIT
+GALGEN:C1=   1.00000 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
 CCDSLOPE task completed
 if (mode = "nobatch" or mode = "inter")
 end-if
@@ -7231,28 +5883,28 @@ gausnois a.img mean=0 sigma=3 format=HALF nl=512 ns=512 seed=512
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m1.a func=10+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 443 TIMES
 gausnois a.img mean=0 sigma=3 format=HALF nl=512 ns=512 seed=612
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m1.b func=10+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 440 TIMES
 gausnois a.img mean=0 sigma=3 format=HALF nl=512 ns=512 seed=712
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m1.c func=10+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 435 TIMES
 gausnois a.img mean=0 sigma=10 format=HALF nl=512 ns=512 seed=812
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m2.a func=110+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1312 TIMES
 label-rep m2.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
@@ -7263,7 +5915,7 @@ gausnois a.img mean=0 sigma=10 format=HALF nl=512 ns=512 seed=912
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m2.b func=110+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1314 TIMES
 label-rep m2.b 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
@@ -7274,7 +5926,7 @@ gausnois a.img mean=0 sigma=10 format=HALF nl=512 ns=512 seed=112
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m2.c func=110+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1304 TIMES
 label-rep m2.c 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
@@ -7285,7 +5937,7 @@ gausnois a.img mean=0 sigma=14 format=HALF nl=512 ns=512 seed=212
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m3.a func=210+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1786 TIMES
 label-rep m3.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
@@ -7296,7 +5948,7 @@ gausnois a.img mean=0 sigma=14 format=HALF nl=512 ns=512 seed=312
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m3.b func=210+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1802 TIMES
 label-rep m3.b 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
@@ -7307,7 +5959,7 @@ gausnois a.img mean=0 sigma=14 format=HALF nl=512 ns=512 seed=412
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m3.c func=210+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 1798 TIMES
 label-rep m3.c 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
@@ -7318,7 +5970,7 @@ gausnois a.img mean=0 sigma=20 format=HALF nl=512 ns=512 seed=544
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m4.a func=410+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 2448 TIMES
 label-rep m4.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
@@ -7329,7 +5981,7 @@ gausnois a.img mean=0 sigma=20 format=HALF nl=512 ns=512 seed=566
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m4.b func=410+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 2441 TIMES
 label-rep m4.b 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
@@ -7340,7 +5992,7 @@ gausnois a.img mean=0 sigma=20 format=HALF nl=512 ns=512 seed=588
 Beginning VICAR task gausnois
 f2 (cas/sum2.1, a.img) m4.c func=410+IN2
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 2444 TIMES
 label-rep m4.c 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
@@ -7348,14 +6000,8 @@ Beginning VICAR task label
 LABEL version 15-Nov-2010
 Keyword EXPOSURE_DURATION replaced
 createfile m.list
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  m.list
-end-if
-END-PROC
+let $echo="no"
+CREATEFILE version 2015-11-19
 addtofile m.list "NEXT FILE=0001"
 refgbl  $syschar
 write "ADDTOFILE version 1-3-97"
@@ -7488,23 +6134,10 @@ end-if
 END-PROC
 reset m.list
 Beginning VICAR task reset
-ush cat m.list
-NEXT FILE =     1
-m1.a
-m1.b
-m1.c
-m2.a
-m2.b
-m2.c
-m3.a
-m3.b
-m3.c
-m4.a
-m4.b
-m4.c
+let $echo="yes"
 ltgen m1.a out=test.ltfn list=m.list 'GRID
 Beginning VICAR task ltgen
-LTGEN Version 14-MAR-97
+LTGEN Version 23-Nov-2012  (64-bit) - rjb
 NUMBER OF FILES  =         12
 NUMBER OF LEVELS =          4
 MAX FRAMES/LEVEL =          3
@@ -7542,564 +6175,140 @@ Beginning VICAR task getlab
 let LUMS = "5.099999904633e+00"
 let LMS(1)=LUMS
 createfile list1.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list1.dat
-end-if
-END-PROC
-addtofile list1.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+let $echo="no"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-addtofile list1.dat "m1.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m1.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-let J=1
-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 2 is m1.b
-   if (F="END_OF_FILE") break
-   getlab m1.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m1.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"1"//".dat"
-       addtofile list1.dat "m1.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m1.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 3 is m1.c
-   if (F="END_OF_FILE") break
-   getlab m1.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m1.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"1"//".dat"
-       addtofile list1.dat "m1.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m1.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 4 is m2.a
-   if (F="END_OF_FILE") break
-   getlab m2.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m2.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"2"//".dat"
-       createfile list2.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list2.dat
-end-if
-END-PROC
-       addtofile list2.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list2.dat "m2.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m2.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 5 is m2.b
-   if (F="END_OF_FILE") break
-   getlab m2.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m2.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"2"//".dat"
-       addtofile list2.dat "m2.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m2.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 6 is m2.c
-   if (F="END_OF_FILE") break
-   getlab m2.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m2.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"2"//".dat"
-       addtofile list2.dat "m2.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m2.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 7 is m3.a
-   if (F="END_OF_FILE") break
-   getlab m3.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m3.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"3"//".dat"
-       createfile list3.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list3.dat
-end-if
-END-PROC
-       addtofile list3.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list3.dat "m3.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m3.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 8 is m3.b
-   if (F="END_OF_FILE") break
-   getlab m3.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m3.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"3"//".dat"
-       addtofile list3.dat "m3.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m3.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 9 is m3.c
-   if (F="END_OF_FILE") break
-   getlab m3.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m3.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"3"//".dat"
-       addtofile list3.dat "m3.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m3.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 10 is m4.a
-   if (F="END_OF_FILE") break
-   getlab m4.a lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m4.a lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-   else
-       let J=J+1
-       let EX(J)=EXP
-       let LMS(J) = LUMS
-       let G="list"//"4"//".dat"
-       createfile list4.dat
-refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-CREATEFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  USH cp /dev/null  list4.dat
-end-if
-END-PROC
-       addtofile list4.dat "NEXT FILE=0001"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
+CREATEFILE version 2015-11-19
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-       addtofile list4.dat "m4.a"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m4.a"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 11 is m4.b
-   if (F="END_OF_FILE") break
-   getlab m4.b lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m4.b lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"4"//".dat"
-       addtofile list4.dat "m4.b"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m4.b"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  Output 12 is m4.c
-   if (F="END_OF_FILE") break
-   getlab m4.c lab_item="EXPOSURE_DURATION" itm_name=EXP 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   getlab m4.c lab_item="RADIANCE" itm_name=LM 'PROPERTY+
-            itm_type=REAL itm_task="CASSINI-ISS"
 Beginning VICAR task getlab
-   let LUMS = "5.099999904633e+00"
-   if (EXP=EX(J))
-       let G="list"//"4"//".dat"
-       addtofile list4.dat "m4.c"
-refgbl  $syschar
-write "ADDTOFILE version 1-3-97"
 ADDTOFILE version 1-3-97
-if ($syschar(1) = "VAX_VMS")
-else
-  addtofil INPUT=@INPUT STRING1="m4.c"
 Beginning VICAR task addtofil
-end-if
-END-PROC
-   else
-   end-if
-end-loop
-   nxt m.list F I1 I2 I3
 Beginning VICAR task nxt
  NXT encountered end of file
-   if (F="END_OF_FILE") break
- break
-   if (EXP=EX(J))
-   end-if
-end-loop
-let NLVL=J
-let $BECHO="NO"
-write " NUMBER OF EXPOSURE LEVELS = 4"
  NUMBER OF EXPOSURE LEVELS = 4
-write " "
  
-write " "
  
-write " EXPOSURE LEVEL ... EXPOSURE TIME ... RADIANCES"
  EXPOSURE LEVEL ... EXPOSURE TIME ... RADIANCES
-let I=1
-loop
-   let X=EX(I)
-   let EXS = "0.000000000000e+00"
-   let LUMS=LMS(I)
-   write "       1              0.000000000000e+00             5.099999904633e+00"
        1              0.000000000000e+00             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "1.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       2              1.000000000000e+01             5.099999904633e+00"
        2              1.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "2.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       3              2.000000000000e+01             5.099999904633e+00"
        3              2.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "4.000000000000e+01"
-   let LUMS=LMS(I)
-   write "       4              4.000000000000e+01             5.099999904633e+00"
        4              4.000000000000e+01             5.099999904633e+00
-   if (I=NLVL) break
- break
-end-loop
-write " "
  
-let $BECHO="YES"
-let I=1
-loop
-   let X=EX(I)
-   let EXS = "0.000000000000e+00"
-   let G="list"//"1"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 1    EXPOSURE TIME 0.000000000000e+00"
 FRAME LIST FOR LEVEL 1    EXPOSURE TIME 0.000000000000e+00
-ush cat list1.dat
-NEXT FILE=0001
-m1.a
-m1.b
-m1.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"1".dat" out=test.ltfn
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    0.000E+00
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "1.000000000000e+01"
-   let G="list"//"2"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 2    EXPOSURE TIME 1.000000000000e+01"
 FRAME LIST FOR LEVEL 2    EXPOSURE TIME 1.000000000000e+01
-ush cat list2.dat
-NEXT FILE=0001
-m2.a
-m2.b
-m2.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"2".dat" out=test.ltfn
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    10.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "2.000000000000e+01"
-   let G="list"//"3"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 3    EXPOSURE TIME 2.000000000000e+01"
 FRAME LIST FOR LEVEL 3    EXPOSURE TIME 2.000000000000e+01
-ush cat list3.dat
-NEXT FILE=0001
-m3.a
-m3.b
-m3.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"3".dat" out=test.ltfn
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    20.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
-   let I=I+1
-end-loop
-   let X=EX(I)
-   let EXS = "4.000000000000e+01"
-   let G="list"//"4"//".dat"
-   let $BECHO="NO"
-   write "FRAME LIST FOR LEVEL 4    EXPOSURE TIME 4.000000000000e+01"
 FRAME LIST FOR LEVEL 4    EXPOSURE TIME 4.000000000000e+01
-ush cat list4.dat
-NEXT FILE=0001
-m4.a
-m4.b
-m4.c
-   write " "
  
-   let $BECHO="YES"
-   momgen LIST="list"4".dat" out=test.ltfn
 Beginning VICAR task momgen
 MOMGEN Version 19-MAR-1997
 
 EXPOSURE TIME=    40.000000
 INPUT FRAMES=             3
 NUMBER OF AREAS=        100
-   if (I=NLVL) break
- break
-end-loop
-if ($count(LTFILE) = 1)
-      if (EX(I)=0.0) let LUMS="0.0"
-      if (I=NLVL) break
-end-if
-end-proc
-if ($syschar(1)="UNIX")
-   ush rm m1.*
-   ush rm m2.*
-   ush rm m3.*
-   ush rm m4.*
-   ush rm m.list
-else
-end-if
 ccdslope test.ltfn table=ccdslope2n.tbl mofset=0.0 light=10. rej=0 'SUBDC  +
     plot=test2
 Beginning VICAR task ccdslope
-CCDSLOPE version 07-Jul-2013  (64-bit) - rjb
+CCDSLOPE version 2015-08-19
  SIGMA REJ TOL=          2
 Mean shutter-offset =  0.000E+00
 Shutter-offset is LINE-dependent
 DC subtraction mode
-----TASK:F2      ----USER:wlb         Mon Jun  9 16:32:38 2014
-----TASK:LTGEN   ----USER:wlb         Mon Jun  9 16:32:42 2014
+----TASK:F2      ----USER:wlb         Wed Jan 13 11:59:00 2016
+----TASK:LTGEN   ----USER:wlb         Wed Jan 13 11:59:01 2016
 
 GLOBAL VALUE FOR SLOPE...
 Raw mean and sigma are...
@@ -8335,17 +6544,18 @@ GALGEN:C1=   1.00014 ENERGY UNIT/DN C2=  -0.02747 ENERGY UNIT
 CCDSLOPE task completed
 if (mode = "nobatch" or mode = "inter")
 end-if
+let $echo="yes"
 ccdslope test.ltf mark.out table=ccdslope3.tbl offsets=cas/sos.dat rej=3  +
     plot=test3
 Beginning VICAR task ccdslope
-CCDSLOPE version 07-Jul-2013  (64-bit) - rjb
+CCDSLOPE version 2015-08-19
  SIGMA REJ TOL=          2
 Mean shutter-offset = 0.93261701
 Shutter-offset is SAMP-dependent
 DC included as data point on curve
-----TASK:COPY    ----USER:wlb         Mon Jun  9 16:32:32 2014
-----TASK:F2      ----USER:wlb         Mon Jun  9 16:32:32 2014
-----TASK:LTGEN   ----USER:wlb         Mon Jun  9 16:32:35 2014
+----TASK:COPY    ----USER:wlb         Wed Jan 13 11:58:58 2016
+----TASK:F2      ----USER:wlb         Wed Jan 13 11:58:58 2016
+----TASK:LTGEN   ----USER:wlb         Wed Jan 13 11:58:59 2016
 
 GLOBAL VALUE FOR SLOPE...
 Raw mean and sigma are...
@@ -8594,17 +6804,18 @@ GALGEN:C1=   0.50123 ENERGY UNIT/DN C2=  -6.83445 ENERGY UNIT
 CCDSLOPE task completed
 if (mode = "nobatch" or mode = "inter")
 end-if
+let $echo="yes"
 ccdslope test.ltf  offsets=cas/sol.dat rej=2   +
    'deltax sigtol=1.0 plot=test4
 Beginning VICAR task ccdslope
-CCDSLOPE version 07-Jul-2013  (64-bit) - rjb
+CCDSLOPE version 2015-08-19
  SIGMA REJ TOL=          1
 Mean shutter-offset = 0.93261701
 Shutter-offset is LINE-dependent
 DC included as data point on curve
-----TASK:COPY    ----USER:wlb         Mon Jun  9 16:32:32 2014
-----TASK:F2      ----USER:wlb         Mon Jun  9 16:32:32 2014
-----TASK:LTGEN   ----USER:wlb         Mon Jun  9 16:32:35 2014
+----TASK:COPY    ----USER:wlb         Wed Jan 13 11:58:58 2016
+----TASK:F2      ----USER:wlb         Wed Jan 13 11:58:58 2016
+----TASK:LTGEN   ----USER:wlb         Wed Jan 13 11:58:59 2016
 
 GLOBAL VALUE FOR SLOPE...
 Raw mean and sigma are...
@@ -9027,17 +7238,675 @@ AREA    SL   SS   NL   NS  SLOPE (DN/ENERGY UNIT)  OFFSET (DN)
   98   474  372   20   20          1.99627            0.13525
   99   474  423   20   20          1.99627            0.13525
  100   474  474   20   20          1.99627            0.13525
-??E - splot: Error opening/writing gnuplot file
-IOSTAT=       1141
-***CCDSLOPE task cancelled
- ** ABEND called **
-goto rm
+Reticle           1
+Means from averaging values of areas
+ SLOPE  =  1.9947002
+ OFFSET = -0.02690602
+
+STATISTICS FOR UPPER-LEFT  CORNER
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.5930   -3.5930
+   10.0000     9.1323     5.1000       53.4030   110.0000   106.4960    3.5040
+   20.0000    19.1323     5.1000      104.4030   210.0000   208.2258    1.7742
+   40.0000    39.1323     5.1000      206.4030   410.0000   411.6852   -1.6852
+                                                                RMS=    2.7917
+SLOPE=   1.994700 SD= 0.000405 OFFSET=  -0.026926 SD= 0.043981
+NUMBER OF GOOD AREAS=   4 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      OFFSET       11
+GALGEN:C1=   0.50133 ENERGY UNIT/DN C2=   0.01350 ENERGY UNIT
+Reticle           2
+Means from averaging values of areas
+ SLOPE  =  1.9947002
+ OFFSET = -0.02690602
+
+STATISTICS FOR UPPER-RIGHT CORNER
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.5930   -3.5930
+   10.0000     9.1323     5.1000       53.4030   110.0000   106.4960    3.5040
+   20.0000    19.1323     5.1000      104.4030   210.0000   208.2258    1.7742
+   40.0000    39.1323     5.1000      206.4030   410.0000   411.6852   -1.6852
+                                                                RMS=    2.7917
+SLOPE=   1.994700 SD= 0.000405 OFFSET=  -0.026926 SD= 0.043981
+NUMBER OF GOOD AREAS=   4 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      OFFSET       11
+GALGEN:C1=   0.50133 ENERGY UNIT/DN C2=   0.01350 ENERGY UNIT
+Reticle           3
+Means from averaging values of areas
+ SLOPE  =  1.9955057
+ OFFSET = 0.05635322
+
+STATISTICS FOR LOWER-LEFT  CORNER
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.6818   -3.6818
+   10.0000     9.1116     5.1000       53.2975   110.0000   106.4117    3.5883
+   20.0000    19.1116     5.1000      104.2975   210.0000   208.1825    1.8175
+   40.0000    39.1116     5.1000      206.2975   410.0000   411.7241   -1.7241
+                                                                RMS=    2.8595
+SLOPE=   1.995506 SD= 0.000657 OFFSET=   0.056303 SD= 0.069356
+NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      OFFSET        0
+GALGEN:C1=   0.50113 ENERGY UNIT/DN C2=  -0.02821 ENERGY UNIT
+Reticle           4
+Means from averaging values of areas
+ SLOPE  =  1.9955057
+ OFFSET = 0.05635322
+
+STATISTICS FOR LOWER-RIGHT CORNER
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.6818   -3.6818
+   10.0000     9.1116     5.1000       53.2975   110.0000   106.4117    3.5883
+   20.0000    19.1116     5.1000      104.2975   210.0000   208.1825    1.8175
+   40.0000    39.1116     5.1000      206.2975   410.0000   411.7241   -1.7241
+                                                                RMS=    2.8595
+SLOPE=   1.995506 SD= 0.000657 OFFSET=   0.056303 SD= 0.069356
+NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      OFFSET        0
+GALGEN:C1=   0.50113 ENERGY UNIT/DN C2=  -0.02821 ENERGY UNIT
+Reticle           5
+Means from averaging values of areas
+ SLOPE  =  1.9945154
+ OFFSET = -0.04597008
+
+STATISTICS FOR CENTER
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.5727   -3.5727
+   10.0000     9.1371     5.1000       53.4272   110.0000   106.5154    3.4846
+   20.0000    19.1371     5.1000      104.4272   210.0000   208.2357    1.7643
+   40.0000    39.1371     5.1000      206.4272   410.0000   411.6762   -1.6762
+                                                                RMS=    2.7762
+SLOPE=   1.994515 SD= 0.000537 OFFSET=  -0.045997 SD= 0.050992
+NUMBER OF GOOD AREAS=  32 OUT OF  40 AREAS SAMPLED
+NUMBER REJECTED FOR      OFFSET        8
+GALGEN:C1=   0.50137 ENERGY UNIT/DN C2=   0.02306 ENERGY UNIT
+Framewide
+Means from averaging values of areas
+ SLOPE=  1.9949609
+ OFFSET=  6.151E-05
+
+STATISTICS FOR FULL FRAME
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.6217   -3.6217
+   10.0000     9.1256     5.1000       53.3688   110.0000   106.4687    3.5313
+   20.0000    19.1256     5.1000      104.3688   210.0000   208.2118    1.7882
+   40.0000    39.1256     5.1000      206.3688   410.0000   411.6978   -1.6978
+                                                                RMS=    2.8137
+SLOPE=   1.994961 SD= 0.000749 OFFSET=   0.000000 SD= 0.076688
+NUMBER OF GOOD AREAS=  32 OUT OF  40 AREAS SAMPLED
+NUMBER REJECTED FOR      OFFSET        8
+GALGEN:C1=   0.50126 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
+CCDSLOPE task completed
 if (mode = "nobatch" or mode = "inter")
 end-if
+let $echo="yes"
+ccdslope test.ltf  offsets=cas/sol.dat rej=1   +
+   'deltax sigtol=1.0 plot=test5 plotfmt=eps
+Beginning VICAR task ccdslope
+CCDSLOPE version 2015-08-19
+ SIGMA REJ TOL=          1
+Mean shutter-offset = 0.93261701
+Shutter-offset is LINE-dependent
+DC included as data point on curve
+----TASK:COPY    ----USER:wlb         Wed Jan 13 11:58:58 2016
+----TASK:F2      ----USER:wlb         Wed Jan 13 11:58:58 2016
+----TASK:LTGEN   ----USER:wlb         Wed Jan 13 11:58:59 2016
+
+GLOBAL VALUE FOR SLOPE...
+Raw mean and sigma are...
+N= 100 MEAN=     1.99551 SIGMA=     0.00164
+After throwing out samples differing by 1 sigma
+N=  70 MEAN=     1.99496 SIGMA=     0.00075
+
+GLOBAL VALUE FOR OFFSET...
+Raw mean and sigma are...
+N= 100 MEAN=    13.68306 SIGMA=     0.17981
+After throwing out samples differing by 1 sigma
+N=  70 MEAN=    13.62179 SIGMA=     0.08175
+
+Summary of bad areas....
+AREA   1 (SL,SS,NL,NS)=(  15,  15,  20,  20)  ****BOTH BAD FIT*********
+AREA   2 (SL,SS,NL,NS)=(  15,  66,  20,  20)  ****BOTH BAD FIT*********
+AREA   3 (SL,SS,NL,NS)=(  15, 117,  20,  20)  ****BOTH BAD FIT*********
+AREA   4 (SL,SS,NL,NS)=(  15, 168,  20,  20)  ****BOTH BAD FIT*********
+AREA   5 (SL,SS,NL,NS)=(  15, 219,  20,  20)  ****BOTH BAD FIT*********
+AREA   6 (SL,SS,NL,NS)=(  15, 270,  20,  20)  ****BOTH BAD FIT*********
+AREA   7 (SL,SS,NL,NS)=(  15, 321,  20,  20)  ****BOTH BAD FIT*********
+AREA   8 (SL,SS,NL,NS)=(  15, 372,  20,  20)  ****BOTH BAD FIT*********
+AREA   9 (SL,SS,NL,NS)=(  15, 423,  20,  20)  ****BOTH BAD FIT*********
+AREA  10 (SL,SS,NL,NS)=(  15, 474,  20,  20)  ****BOTH BAD FIT*********
+AREA  11 (SL,SS,NL,NS)=(  66,  15,  20,  20)  ****BOTH BAD FIT*********
+AREA  12 (SL,SS,NL,NS)=(  66,  66,  20,  20)  ****BOTH BAD FIT*********
+AREA  13 (SL,SS,NL,NS)=(  66, 117,  20,  20)  ****BOTH BAD FIT*********
+AREA  14 (SL,SS,NL,NS)=(  66, 168,  20,  20)  ****BOTH BAD FIT*********
+AREA  15 (SL,SS,NL,NS)=(  66, 219,  20,  20)  ****BOTH BAD FIT*********
+AREA  16 (SL,SS,NL,NS)=(  66, 270,  20,  20)  ****BOTH BAD FIT*********
+AREA  17 (SL,SS,NL,NS)=(  66, 321,  20,  20)  ****BOTH BAD FIT*********
+AREA  18 (SL,SS,NL,NS)=(  66, 372,  20,  20)  ****BOTH BAD FIT*********
+AREA  19 (SL,SS,NL,NS)=(  66, 423,  20,  20)  ****BOTH BAD FIT*********
+AREA  20 (SL,SS,NL,NS)=(  66, 474,  20,  20)  ****BOTH BAD FIT*********
+AREA  31 (SL,SS,NL,NS)=( 168,  15,  20,  20)  ****BOTH BAD FIT*********
+AREA  32 (SL,SS,NL,NS)=( 168,  66,  20,  20)  ****BOTH BAD FIT*********
+AREA  33 (SL,SS,NL,NS)=( 168, 117,  20,  20)  ****BOTH BAD FIT*********
+AREA  34 (SL,SS,NL,NS)=( 168, 168,  20,  20)  ****BOTH BAD FIT*********
+AREA  35 (SL,SS,NL,NS)=( 168, 219,  20,  20)  ****BOTH BAD FIT*********
+AREA  36 (SL,SS,NL,NS)=( 168, 270,  20,  20)  ****BOTH BAD FIT*********
+AREA  37 (SL,SS,NL,NS)=( 168, 321,  20,  20)  ****BOTH BAD FIT*********
+AREA  38 (SL,SS,NL,NS)=( 168, 372,  20,  20)  ****BOTH BAD FIT*********
+AREA  39 (SL,SS,NL,NS)=( 168, 423,  20,  20)  ****BOTH BAD FIT*********
+AREA  40 (SL,SS,NL,NS)=( 168, 474,  20,  20)  ****BOTH BAD FIT*********
+
+
+Slopes and offsets for each area...
+
+ENERGY UNIT = PICOAMP-MILLISECONDS
+
+AREA    SL   SS   NL   NS  SLOPE (DN/ENERGY UNIT)  OFFSET (DN)
+   1    15   15   20   20          1.99939           14.11181
+   2    15   66   20   20          1.99939           14.11181
+   3    15  117   20   20          1.99939           14.11181
+   4    15  168   20   20          1.99939           14.11181
+   5    15  219   20   20          1.99939           14.11181
+   6    15  270   20   20          1.99939           14.11181
+   7    15  321   20   20          1.99939           14.11181
+   8    15  372   20   20          1.99939           14.11181
+   9    15  423   20   20          1.99939           14.11181
+  10    15  474   20   20          1.99939           14.11181
+  11    66   15   20   20          1.99717           13.86541
+  12    66   66   20   20          1.99717           13.86541
+  13    66  117   20   20          1.99717           13.86541
+  14    66  168   20   20          1.99717           13.86541
+  15    66  219   20   20          1.99717           13.86541
+  16    66  270   20   20          1.99717           13.86541
+  17    66  321   20   20          1.99717           13.86541
+  18    66  372   20   20          1.99717           13.86541
+  19    66  423   20   20          1.99717           13.86541
+  20    66  474   20   20          1.99717           13.86541
+  21   117   15   20   20          1.99495           13.62012
+  22   117   66   20   20          1.99495           13.62012
+  23   117  117   20   20          1.99495           13.62012
+  24   117  168   20   20          1.99495           13.62012
+  25   117  219   20   20          1.99495           13.62012
+  26   117  270   20   20          1.99495           13.62012
+  27   117  321   20   20          1.99495           13.62012
+  28   117  372   20   20          1.99495           13.62012
+  29   117  423   20   20          1.99495           13.62012
+  30   117  474   20   20          1.99495           13.62012
+  31   168   15   20   20          1.99386           13.50086
+  32   168   66   20   20          1.99386           13.50086
+  33   168  117   20   20          1.99386           13.50086
+  34   168  168   20   20          1.99386           13.50086
+  35   168  219   20   20          1.99386           13.50086
+  36   168  270   20   20          1.99386           13.50086
+  37   168  321   20   20          1.99386           13.50086
+  38   168  372   20   20          1.99386           13.50086
+  39   168  423   20   20          1.99386           13.50086
+  40   168  474   20   20          1.99386           13.50086
+  41   219   15   20   20          1.99396           13.51183
+  42   219   66   20   20          1.99396           13.51183
+  43   219  117   20   20          1.99396           13.51183
+  44   219  168   20   20          1.99396           13.51183
+  45   219  219   20   20          1.99396           13.51183
+  46   219  270   20   20          1.99396           13.51183
+  47   219  321   20   20          1.99396           13.51183
+  48   219  372   20   20          1.99396           13.51183
+  49   219  423   20   20          1.99396           13.51183
+  50   219  474   20   20          1.99396           13.51183
+  51   270   15   20   20          1.99421           13.53925
+  52   270   66   20   20          1.99421           13.53925
+  53   270  117   20   20          1.99421           13.53925
+  54   270  168   20   20          1.99421           13.53925
+  55   270  219   20   20          1.99421           13.53925
+  56   270  270   20   20          1.99421           13.53925
+  57   270  321   20   20          1.99421           13.53925
+  58   270  372   20   20          1.99421           13.53925
+  59   270  423   20   20          1.99421           13.53925
+  60   270  474   20   20          1.99421           13.53925
+  61   321   15   20   20          1.99462           13.58382
+  62   321   66   20   20          1.99462           13.58382
+  63   321  117   20   20          1.99462           13.58382
+  64   321  168   20   20          1.99462           13.58382
+  65   321  219   20   20          1.99462           13.58382
+  66   321  270   20   20          1.99462           13.58382
+  67   321  321   20   20          1.99462           13.58382
+  68   321  372   20   20          1.99462           13.58382
+  69   321  423   20   20          1.99462           13.58382
+  70   321  474   20   20          1.99462           13.58382
+  71   372   15   20   20          1.99509           13.63587
+  72   372   66   20   20          1.99509           13.63587
+  73   372  117   20   20          1.99509           13.63587
+  74   372  168   20   20          1.99509           13.63587
+  75   372  219   20   20          1.99509           13.63587
+  76   372  270   20   20          1.99509           13.63587
+  77   372  321   20   20          1.99509           13.63587
+  78   372  372   20   20          1.99509           13.63587
+  79   372  423   20   20          1.99509           13.63587
+  80   372  474   20   20          1.99509           13.63587
+  81   423   15   20   20          1.99563           13.69575
+  82   423   66   20   20          1.99563           13.69575
+  83   423  117   20   20          1.99563           13.69575
+  84   423  168   20   20          1.99563           13.69575
+  85   423  219   20   20          1.99563           13.69575
+  86   423  270   20   20          1.99563           13.69575
+  87   423  321   20   20          1.99563           13.69575
+  88   423  372   20   20          1.99563           13.69575
+  89   423  423   20   20          1.99563           13.69575
+  90   423  474   20   20          1.99563           13.69575
+  91   474   15   20   20          1.99627           13.76591
+  92   474   66   20   20          1.99627           13.76591
+  93   474  117   20   20          1.99627           13.76591
+  94   474  168   20   20          1.99627           13.76591
+  95   474  219   20   20          1.99627           13.76591
+  96   474  270   20   20          1.99627           13.76591
+  97   474  321   20   20          1.99627           13.76591
+  98   474  372   20   20          1.99627           13.76591
+  99   474  423   20   20          1.99627           13.76591
+ 100   474  474   20   20          1.99627           13.76591
+Reticle           1
+Means from averaging values of areas
+ SLOPE  =  1.9947002
+ OFFSET =  13.593047
+
+STATISTICS FOR UPPER-LEFT  CORNER
+
+COMMANDED   ACTUAL                                         BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        0.0000    10.0000    13.5930   -3.5930
+   10.0000     9.1323     5.1000       46.5749   110.0000   106.4960    3.5040
+   20.0000    19.1323     5.1000       97.5749   210.0000   208.2258    1.7742
+   40.0000    39.1323     5.1000      199.5749   410.0000   411.6852   -1.6852
+                                                                RMS=    2.7917
+SLOPE=   1.994700 SD= 0.000405 OFFSET=  13.593026 SD= 0.046898
+NUMBER OF GOOD AREAS=   4 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE        11
+GALGEN:C1=   0.50133 ENERGY UNIT/DN C2=  -6.81457 ENERGY UNIT
+Reticle           2
+Means from averaging values of areas
+ SLOPE  =  1.9947002
+ OFFSET =  13.593047
+
+STATISTICS FOR UPPER-RIGHT CORNER
+
+COMMANDED   ACTUAL                                         BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        0.0000    10.0000    13.5930   -3.5930
+   10.0000     9.1323     5.1000       46.5749   110.0000   106.4960    3.5040
+   20.0000    19.1323     5.1000       97.5749   210.0000   208.2258    1.7742
+   40.0000    39.1323     5.1000      199.5749   410.0000   411.6852   -1.6852
+                                                                RMS=    2.7917
+SLOPE=   1.994700 SD= 0.000405 OFFSET=  13.593026 SD= 0.046898
+NUMBER OF GOOD AREAS=   4 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE        11
+GALGEN:C1=   0.50133 ENERGY UNIT/DN C2=  -6.81457 ENERGY UNIT
+Reticle           3
+Means from averaging values of areas
+ SLOPE  =  1.9955057
+ OFFSET =  13.681805
+
+STATISTICS FOR LOWER-LEFT  CORNER
+
+COMMANDED   ACTUAL                                         BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        0.0000    10.0000    13.6818   -3.6818
+   10.0000     9.1116     5.1000       46.4694   110.0000   106.4117    3.5883
+   20.0000    19.1116     5.1000       97.4694   210.0000   208.1825    1.8175
+   40.0000    39.1116     5.1000      199.4694   410.0000   411.7241   -1.7241
+                                                                RMS=    2.8595
+SLOPE=   1.995506 SD= 0.000657 OFFSET=  13.681756 SD= 0.073921
+NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE         0
+GALGEN:C1=   0.50113 ENERGY UNIT/DN C2=  -6.85628 ENERGY UNIT
+Reticle           4
+Means from averaging values of areas
+ SLOPE  =  1.9955057
+ OFFSET =  13.681805
+
+STATISTICS FOR LOWER-RIGHT CORNER
+
+COMMANDED   ACTUAL                                         BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        0.0000    10.0000    13.6818   -3.6818
+   10.0000     9.1116     5.1000       46.4694   110.0000   106.4117    3.5883
+   20.0000    19.1116     5.1000       97.4694   210.0000   208.1825    1.8175
+   40.0000    39.1116     5.1000      199.4694   410.0000   411.7241   -1.7241
+                                                                RMS=    2.8595
+SLOPE=   1.995506 SD= 0.000657 OFFSET=  13.681756 SD= 0.073921
+NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE         0
+GALGEN:C1=   0.50113 ENERGY UNIT/DN C2=  -6.85628 ENERGY UNIT
+Reticle           5
+Means from averaging values of areas
+ SLOPE  =  1.9945154
+ OFFSET =  13.572721
+
+STATISTICS FOR CENTER
+
+COMMANDED   ACTUAL                                         BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        0.0000    10.0000    13.5727   -3.5727
+   10.0000     9.1371     5.1000       46.5991   110.0000   106.5154    3.4846
+   20.0000    19.1371     5.1000       97.5991   210.0000   208.2357    1.7643
+   40.0000    39.1371     5.1000      199.5991   410.0000   411.6762   -1.6762
+                                                                RMS=    2.7762
+SLOPE=   1.994515 SD= 0.000537 OFFSET=  13.572694 SD= 0.054375
+NUMBER OF GOOD AREAS=  32 OUT OF  40 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE         8
+GALGEN:C1=   0.50137 ENERGY UNIT/DN C2=  -6.80501 ENERGY UNIT
+Framewide
+Means from averaging values of areas
+ SLOPE=  1.9949609
+ OFFSET=  13.621794
+
+STATISTICS FOR FULL FRAME
+
+COMMANDED   ACTUAL                                         BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        0.0000    10.0000    13.6217   -3.6217
+   10.0000     9.1256     5.1000       46.5408   110.0000   106.4687    3.5313
+   20.0000    19.1256     5.1000       97.5408   210.0000   208.2118    1.7882
+   40.0000    39.1256     5.1000      199.5408   410.0000   411.6978   -1.6978
+                                                                RMS=    2.8137
+SLOPE=   1.994961 SD= 0.000749 OFFSET=  13.621734 SD= 0.081753
+NUMBER OF GOOD AREAS=  32 OUT OF  40 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE         8
+GALGEN:C1=   0.50126 ENERGY UNIT/DN C2=  -6.82807 ENERGY UNIT
+DELTA CORRECTION=  -6.82807 ENERGY UNIT
+
+
+-----------------------------------------
+Processing repeated with DELTA correction
+-----------------------------------------
+
+GLOBAL VALUE FOR SLOPE...
+Raw mean and sigma are...
+N= 100 MEAN=     1.99551 SIGMA=     0.00164
+After throwing out samples differing by 1 sigma
+N=  70 MEAN=     1.99496 SIGMA=     0.00075
+
+GLOBAL VALUE FOR OFFSET...
+Raw mean and sigma are...
+N= 100 MEAN=     0.05755 SIGMA=     0.16870
+After throwing out samples differing by 1 sigma
+N=  70 MEAN=     0.00006 SIGMA=     0.07669
+
+Summary of bad areas....
+AREA   1 (SL,SS,NL,NS)=(  15,  15,  20,  20)  ****BOTH BAD FIT*********
+AREA   2 (SL,SS,NL,NS)=(  15,  66,  20,  20)  ****BOTH BAD FIT*********
+AREA   3 (SL,SS,NL,NS)=(  15, 117,  20,  20)  ****BOTH BAD FIT*********
+AREA   4 (SL,SS,NL,NS)=(  15, 168,  20,  20)  ****BOTH BAD FIT*********
+AREA   5 (SL,SS,NL,NS)=(  15, 219,  20,  20)  ****BOTH BAD FIT*********
+AREA   6 (SL,SS,NL,NS)=(  15, 270,  20,  20)  ****BOTH BAD FIT*********
+AREA   7 (SL,SS,NL,NS)=(  15, 321,  20,  20)  ****BOTH BAD FIT*********
+AREA   8 (SL,SS,NL,NS)=(  15, 372,  20,  20)  ****BOTH BAD FIT*********
+AREA   9 (SL,SS,NL,NS)=(  15, 423,  20,  20)  ****BOTH BAD FIT*********
+AREA  10 (SL,SS,NL,NS)=(  15, 474,  20,  20)  ****BOTH BAD FIT*********
+AREA  11 (SL,SS,NL,NS)=(  66,  15,  20,  20)  ****BOTH BAD FIT*********
+AREA  12 (SL,SS,NL,NS)=(  66,  66,  20,  20)  ****BOTH BAD FIT*********
+AREA  13 (SL,SS,NL,NS)=(  66, 117,  20,  20)  ****BOTH BAD FIT*********
+AREA  14 (SL,SS,NL,NS)=(  66, 168,  20,  20)  ****BOTH BAD FIT*********
+AREA  15 (SL,SS,NL,NS)=(  66, 219,  20,  20)  ****BOTH BAD FIT*********
+AREA  16 (SL,SS,NL,NS)=(  66, 270,  20,  20)  ****BOTH BAD FIT*********
+AREA  17 (SL,SS,NL,NS)=(  66, 321,  20,  20)  ****BOTH BAD FIT*********
+AREA  18 (SL,SS,NL,NS)=(  66, 372,  20,  20)  ****BOTH BAD FIT*********
+AREA  19 (SL,SS,NL,NS)=(  66, 423,  20,  20)  ****BOTH BAD FIT*********
+AREA  20 (SL,SS,NL,NS)=(  66, 474,  20,  20)  ****BOTH BAD FIT*********
+AREA  31 (SL,SS,NL,NS)=( 168,  15,  20,  20)  ****BOTH BAD FIT*********
+AREA  32 (SL,SS,NL,NS)=( 168,  66,  20,  20)  ****BOTH BAD FIT*********
+AREA  33 (SL,SS,NL,NS)=( 168, 117,  20,  20)  ****BOTH BAD FIT*********
+AREA  34 (SL,SS,NL,NS)=( 168, 168,  20,  20)  ****BOTH BAD FIT*********
+AREA  35 (SL,SS,NL,NS)=( 168, 219,  20,  20)  ****BOTH BAD FIT*********
+AREA  36 (SL,SS,NL,NS)=( 168, 270,  20,  20)  ****BOTH BAD FIT*********
+AREA  37 (SL,SS,NL,NS)=( 168, 321,  20,  20)  ****BOTH BAD FIT*********
+AREA  38 (SL,SS,NL,NS)=( 168, 372,  20,  20)  ****BOTH BAD FIT*********
+AREA  39 (SL,SS,NL,NS)=( 168, 423,  20,  20)  ****BOTH BAD FIT*********
+AREA  40 (SL,SS,NL,NS)=( 168, 474,  20,  20)  ****BOTH BAD FIT*********
+
+
+Slopes and offsets for each area...
+
+ENERGY UNIT = PICOAMP-MILLISECONDS
+
+AREA    SL   SS   NL   NS  SLOPE (DN/ENERGY UNIT)  OFFSET (DN)
+   1    15   15   20   20          1.99939            0.45985
+   2    15   66   20   20          1.99939            0.45985
+   3    15  117   20   20          1.99939            0.45985
+   4    15  168   20   20          1.99939            0.45985
+   5    15  219   20   20          1.99939            0.45985
+   6    15  270   20   20          1.99939            0.45985
+   7    15  321   20   20          1.99939            0.45985
+   8    15  372   20   20          1.99939            0.45985
+   9    15  423   20   20          1.99939            0.45985
+  10    15  474   20   20          1.99939            0.45985
+  11    66   15   20   20          1.99717            0.22860
+  12    66   66   20   20          1.99717            0.22860
+  13    66  117   20   20          1.99717            0.22860
+  14    66  168   20   20          1.99717            0.22860
+  15    66  219   20   20          1.99717            0.22860
+  16    66  270   20   20          1.99717            0.22860
+  17    66  321   20   20          1.99717            0.22860
+  18    66  372   20   20          1.99717            0.22860
+  19    66  423   20   20          1.99717            0.22860
+  20    66  474   20   20          1.99717            0.22860
+  21   117   15   20   20          1.99495           -0.00151
+  22   117   66   20   20          1.99495           -0.00151
+  23   117  117   20   20          1.99495           -0.00151
+  24   117  168   20   20          1.99495           -0.00151
+  25   117  219   20   20          1.99495           -0.00151
+  26   117  270   20   20          1.99495           -0.00151
+  27   117  321   20   20          1.99495           -0.00151
+  28   117  372   20   20          1.99495           -0.00151
+  29   117  423   20   20          1.99495           -0.00151
+  30   117  474   20   20          1.99495           -0.00151
+  31   168   15   20   20          1.99386           -0.11336
+  32   168   66   20   20          1.99386           -0.11336
+  33   168  117   20   20          1.99386           -0.11336
+  34   168  168   20   20          1.99386           -0.11336
+  35   168  219   20   20          1.99386           -0.11336
+  36   168  270   20   20          1.99386           -0.11336
+  37   168  321   20   20          1.99386           -0.11336
+  38   168  372   20   20          1.99386           -0.11336
+  39   168  423   20   20          1.99386           -0.11336
+  40   168  474   20   20          1.99386           -0.11336
+  41   219   15   20   20          1.99396           -0.10308
+  42   219   66   20   20          1.99396           -0.10308
+  43   219  117   20   20          1.99396           -0.10308
+  44   219  168   20   20          1.99396           -0.10308
+  45   219  219   20   20          1.99396           -0.10308
+  46   219  270   20   20          1.99396           -0.10308
+  47   219  321   20   20          1.99396           -0.10308
+  48   219  372   20   20          1.99396           -0.10308
+  49   219  423   20   20          1.99396           -0.10308
+  50   219  474   20   20          1.99396           -0.10308
+  51   270   15   20   20          1.99421           -0.07736
+  52   270   66   20   20          1.99421           -0.07736
+  53   270  117   20   20          1.99421           -0.07736
+  54   270  168   20   20          1.99421           -0.07736
+  55   270  219   20   20          1.99421           -0.07736
+  56   270  270   20   20          1.99421           -0.07736
+  57   270  321   20   20          1.99421           -0.07736
+  58   270  372   20   20          1.99421           -0.07736
+  59   270  423   20   20          1.99421           -0.07736
+  60   270  474   20   20          1.99421           -0.07736
+  61   321   15   20   20          1.99462           -0.03556
+  62   321   66   20   20          1.99462           -0.03556
+  63   321  117   20   20          1.99462           -0.03556
+  64   321  168   20   20          1.99462           -0.03556
+  65   321  219   20   20          1.99462           -0.03556
+  66   321  270   20   20          1.99462           -0.03556
+  67   321  321   20   20          1.99462           -0.03556
+  68   321  372   20   20          1.99462           -0.03556
+  69   321  423   20   20          1.99462           -0.03556
+  70   321  474   20   20          1.99462           -0.03556
+  71   372   15   20   20          1.99509            0.01326
+  72   372   66   20   20          1.99509            0.01326
+  73   372  117   20   20          1.99509            0.01326
+  74   372  168   20   20          1.99509            0.01326
+  75   372  219   20   20          1.99509            0.01326
+  76   372  270   20   20          1.99509            0.01326
+  77   372  321   20   20          1.99509            0.01326
+  78   372  372   20   20          1.99509            0.01326
+  79   372  423   20   20          1.99509            0.01326
+  80   372  474   20   20          1.99509            0.01326
+  81   423   15   20   20          1.99563            0.06943
+  82   423   66   20   20          1.99563            0.06943
+  83   423  117   20   20          1.99563            0.06943
+  84   423  168   20   20          1.99563            0.06943
+  85   423  219   20   20          1.99563            0.06943
+  86   423  270   20   20          1.99563            0.06943
+  87   423  321   20   20          1.99563            0.06943
+  88   423  372   20   20          1.99563            0.06943
+  89   423  423   20   20          1.99563            0.06943
+  90   423  474   20   20          1.99563            0.06943
+  91   474   15   20   20          1.99627            0.13525
+  92   474   66   20   20          1.99627            0.13525
+  93   474  117   20   20          1.99627            0.13525
+  94   474  168   20   20          1.99627            0.13525
+  95   474  219   20   20          1.99627            0.13525
+  96   474  270   20   20          1.99627            0.13525
+  97   474  321   20   20          1.99627            0.13525
+  98   474  372   20   20          1.99627            0.13525
+  99   474  423   20   20          1.99627            0.13525
+ 100   474  474   20   20          1.99627            0.13525
+Reticle           1
+Means from averaging values of areas
+ SLOPE  =  1.9947002
+ OFFSET = -0.02690602
+
+STATISTICS FOR UPPER-LEFT  CORNER
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.5930   -3.5930
+   10.0000     9.1323     5.1000       53.4030   110.0000   106.4960    3.5040
+   20.0000    19.1323     5.1000      104.4030   210.0000   208.2258    1.7742
+   40.0000    39.1323     5.1000      206.4030   410.0000   411.6852   -1.6852
+                                                                RMS=    2.7917
+SLOPE=   1.994700 SD= 0.000405 OFFSET=  -0.026926 SD= 0.043981
+NUMBER OF GOOD AREAS=   4 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE        11
+GALGEN:C1=   0.50133 ENERGY UNIT/DN C2=   0.01350 ENERGY UNIT
+Reticle           2
+Means from averaging values of areas
+ SLOPE  =  1.9947002
+ OFFSET = -0.02690602
+
+STATISTICS FOR UPPER-RIGHT CORNER
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.5930   -3.5930
+   10.0000     9.1323     5.1000       53.4030   110.0000   106.4960    3.5040
+   20.0000    19.1323     5.1000      104.4030   210.0000   208.2258    1.7742
+   40.0000    39.1323     5.1000      206.4030   410.0000   411.6852   -1.6852
+                                                                RMS=    2.7917
+SLOPE=   1.994700 SD= 0.000405 OFFSET=  -0.026926 SD= 0.043981
+NUMBER OF GOOD AREAS=   4 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE        11
+GALGEN:C1=   0.50133 ENERGY UNIT/DN C2=   0.01350 ENERGY UNIT
+Reticle           3
+Means from averaging values of areas
+ SLOPE  =  1.9955057
+ OFFSET = 0.05635322
+
+STATISTICS FOR LOWER-LEFT  CORNER
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.6818   -3.6818
+   10.0000     9.1116     5.1000       53.2975   110.0000   106.4117    3.5883
+   20.0000    19.1116     5.1000      104.2975   210.0000   208.1825    1.8175
+   40.0000    39.1116     5.1000      206.2975   410.0000   411.7241   -1.7241
+                                                                RMS=    2.8595
+SLOPE=   1.995506 SD= 0.000657 OFFSET=   0.056303 SD= 0.069356
+NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE         0
+GALGEN:C1=   0.50113 ENERGY UNIT/DN C2=  -0.02821 ENERGY UNIT
+Reticle           4
+Means from averaging values of areas
+ SLOPE  =  1.9955057
+ OFFSET = 0.05635322
+
+STATISTICS FOR LOWER-RIGHT CORNER
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.6818   -3.6818
+   10.0000     9.1116     5.1000       53.2975   110.0000   106.4117    3.5883
+   20.0000    19.1116     5.1000      104.2975   210.0000   208.1825    1.8175
+   40.0000    39.1116     5.1000      206.2975   410.0000   411.7241   -1.7241
+                                                                RMS=    2.8595
+SLOPE=   1.995506 SD= 0.000657 OFFSET=   0.056303 SD= 0.069356
+NUMBER OF GOOD AREAS=  15 OUT OF  15 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE         0
+GALGEN:C1=   0.50113 ENERGY UNIT/DN C2=  -0.02821 ENERGY UNIT
+Reticle           5
+Means from averaging values of areas
+ SLOPE  =  1.9945154
+ OFFSET = -0.04597008
+
+STATISTICS FOR CENTER
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.5727   -3.5727
+   10.0000     9.1371     5.1000       53.4272   110.0000   106.5154    3.4846
+   20.0000    19.1371     5.1000      104.4272   210.0000   208.2357    1.7643
+   40.0000    39.1371     5.1000      206.4272   410.0000   411.6762   -1.6762
+                                                                RMS=    2.7762
+SLOPE=   1.994515 SD= 0.000537 OFFSET=  -0.045997 SD= 0.050992
+NUMBER OF GOOD AREAS=  32 OUT OF  40 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE         8
+GALGEN:C1=   0.50137 ENERGY UNIT/DN C2=   0.02306 ENERGY UNIT
+Framewide
+Means from averaging values of areas
+ SLOPE=  1.9949609
+ OFFSET=  6.151E-05
+
+STATISTICS FOR FULL FRAME
+
+COMMANDED   ACTUAL                    CORRECTED            BEST FIT   RESIDUAL
+EXPOSURE   EXPOSURE  ILLUMINATION     ENERGY       DN         DN         DN
+ T(MS)      T(MS)       L(RAD)    (ENERGY UNIT)
+    0.0000     0.0000     5.1000        6.8281    10.0000    13.6217   -3.6217
+   10.0000     9.1256     5.1000       53.3688   110.0000   106.4687    3.5313
+   20.0000    19.1256     5.1000      104.3688   210.0000   208.2118    1.7882
+   40.0000    39.1256     5.1000      206.3688   410.0000   411.6978   -1.6978
+                                                                RMS=    2.8137
+SLOPE=   1.994961 SD= 0.000749 OFFSET=   0.000000 SD= 0.076688
+NUMBER OF GOOD AREAS=  32 OUT OF  40 AREAS SAMPLED
+NUMBER REJECTED FOR      SLOPE         8
+GALGEN:C1=   0.50126 ENERGY UNIT/DN C2=  -0.00000 ENERGY UNIT
+CCDSLOPE task completed
+ush gnuplot test5.eps.gpi
 if (mode = "nobatch" or mode = "inter")
 end-if
-ush rm cas
-ush rm l.list
-end-proc
+let $echo="no"
 $ Return
 $!#############################################################################

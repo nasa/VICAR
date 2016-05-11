@@ -31,7 +31,7 @@ import jpl.mipl.io.util.*;
  * <br>
  * The metdata object is needed by an IIOImage to be a container for the metadata
  * for an image. The reader will create the Document and put it in here.
- * If the "common" IIOMetadataNode verdion of the metedata is requested it will then be built
+ * If the "common" IIOMetadataNode version of the metadata is requested it will then be built
  * using the native Document as the input. 
  * VicarBinaryLinePrefix has been added to support HRSC images which do contain Binary prefix data.
  * The metadata is used to transfer this data since prefix data is normally not read for an
@@ -49,11 +49,12 @@ public class PDSMetadata extends IIOMetadata implements Cloneable {
     public static final String 
         nativeStreamMetadataFormatClassName = "" ; // "jpl.mipl.io.plugins.vicar.pdsimage";    
         
-    public static final String nativeImageMetadataFormatName = "PDS_LABEL";    
+    public static final String nativeImageMetadataFormatName = "PDS_LABEL";   
+    public static final String vicarImageMetadataFormatName = "VICAR_LABEL";   
       //   nativeImageMetadataFormatName = "jpl.mipl.io.plugins.pdsimage";    
         // this isn't defined yet - this is a placeholder
         
-        public static final String 
+    public static final String 
         nativeImageMetadataFormatClassName = "jpl.mipl.io.plugins.PDSMetadataFormat";
         
         // this uses a DOM (currently xerces)
@@ -72,6 +73,11 @@ public class PDSMetadata extends IIOMetadata implements Cloneable {
      // this one uses IIOMetadata to hold all the data
      public static final String commonMetadataFormatName = "com.sun.imageio_1.0";
      
+     public static final String[] extraMetadataFormatNames = { vicarImageMetadataFormatName } ;
+     public static final String[] extraMetadataFormatClassNames = { vicarImageMetadataFormatClassName } ;
+     // string[] commonMetadataFormatName, vicarImageMetadataFormatName
+  	// extraMetadataFormatNames,  extraMetadataFormatClassNames
+     
      // do we need one like this?? or is the native the DOM one
      // or is native really the common one ???
      // org.apache.xerces.dom.DocumentImpl
@@ -79,12 +85,19 @@ public class PDSMetadata extends IIOMetadata implements Cloneable {
 
     // public static final String commonMetadataFormatName="xml";// or default or DOM ??
     public static final String[] metadataFormatNames = {
-        nativeStreamMetadataFormatName, nativeImageMetadataFormatName, commonMetadataFormatName
-    }; // vicarImageMetadataFormatClassName
+        nativeStreamMetadataFormatName, nativeImageMetadataFormatName, 
+        vicarImageMetadataFormatName, commonMetadataFormatName
+    }; 
     
+    /**
+    protected	IIOMetadata(boolean standardMetadataFormatSupported, String nativeMetadataFormatName, String nativeMetadataFormatClassName, String[] extraMetadataFormatNames, String[] extraMetadataFormatClassNames)
+    Constructs an IIOMetadata object with the given format names and format class names, as well as a boolean indicating whether the standard format is supported.
+    **/
     // we will hold our "native" metadata in a simple DOM Document object
     // since Document descends from Node we can return it as a Node with no problem
     org.w3c.dom.Document nativeDoc = null;
+    
+    org.w3c.dom.Document vicarDoc = null;
     
     // this will be created ON DEMAND from the nativeDoc
     IIOMetadataNode commonNode = null;
@@ -118,7 +131,8 @@ public class PDSMetadata extends IIOMetadata implements Cloneable {
         nativeImageMetadataFormatName, 
         nativeImageMetadataFormatClassName,
         // metadataFormatNames,
-        null, null);
+        extraMetadataFormatNames,  extraMetadataFormatClassNames);
+        // null, null);
     }
     
  public PDSMetadata(IIOMetadata metadata) {
@@ -126,7 +140,8 @@ public class PDSMetadata extends IIOMetadata implements Cloneable {
         super(false,
         nativeImageMetadataFormatName,
          nativeImageMetadataFormatClassName,
-         null, null);
+         extraMetadataFormatNames,  extraMetadataFormatClassNames);
+        // null, null);
          
          /****
          // use values from the passed metadata??
@@ -148,7 +163,8 @@ public class PDSMetadata extends IIOMetadata implements Cloneable {
         nativeImageMetadataFormatName, 
         nativeImageMetadataFormatClassName,
         // metadataFormatNames,
-        null, null);
+        extraMetadataFormatNames,  extraMetadataFormatClassNames);
+        // null, null);
         
         // TODO -- implement check node name ?? before allowing ??
         setFromTree(nativeMetadataFormatName, doc);
@@ -240,6 +256,9 @@ public class PDSMetadata extends IIOMetadata implements Cloneable {
             throw new IllegalArgumentException("Not a recognized format!");
         }
     }
+    
+    // vicarMetadataFormatName
+    // 
 
     public Node getAsTree(String formatName) {
         // commonMetadataFormatName
@@ -248,6 +267,9 @@ public class PDSMetadata extends IIOMetadata implements Cloneable {
             return getNativeTree();
         } else if (formatName.equals(commonMetadataFormatName)) {
             return getCommonTree();
+            
+        } else if (formatName.equals(vicarImageMetadataFormatName)) {   
+        	return getVicarTree();
         } else {
             throw new IllegalArgumentException("Not a recognized format!");
         }  
@@ -267,6 +289,24 @@ public class PDSMetadata extends IIOMetadata implements Cloneable {
     	if (debug) System.out.println("PDSMetadata.getNativeTree() "+nativeDoc);
         return nativeDoc; // Document is a subclass of Node
     }
+    
+    /**
+     * getVicarTree
+     *
+     * create or return the tree
+     * the vicar tree is a Document
+     * look at VicarMetadata getNativeTree()
+     */
+  
+      private Node getVicarTree() {
+          
+          // if vicarDoc is null go create it now
+          // if (vicarDoc == null ) {
+          
+      	if (debug) System.out.println("PDSMetadata.getVicarTree() "+vicarDoc);
+          return vicarDoc; // Document is a subclass of Node
+      }
+      
   
   
   /**
@@ -368,6 +408,9 @@ public class PDSMetadata extends IIOMetadata implements Cloneable {
         } else if (formatName.equals(commonMetadataFormatName)) {
         //  do something with the "common" metaData
             commonNode = (IIOMetadataNode) root;
+        } else if (formatName.equals(vicarImageMetadataFormatName)) {
+        //  vicar embedded label Document
+            vicarDoc = (Document) root;
         } else {
             throw new IllegalArgumentException("Not a recognized format!");
         }

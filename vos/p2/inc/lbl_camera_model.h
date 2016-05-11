@@ -53,6 +53,9 @@ extern "C" {
  *
  * Date         who             Description
  * -----------  --------------- ----------------------------------------------
+ * 19-Aug-2015  Cecilia Cheng   Added MODEL_COMPONENT__UNIT (should delete MODEL_COMPONENT_UNIT 
+ *                              after confirming that that didn't break anything)
+ * 12-Jul-2015  Cecilia Cheng   Added CAMERA_SERIAL_NUMBER
  * 14-May-2003  Hyun Lee        Added ReferenceCoordSystemSolnId
  * 11-Feb-2003  Payam Zamani    Added FilterName
  * ?            Allan Runkle    Original development and release
@@ -62,6 +65,7 @@ extern "C" {
 typedef struct
 	{
 	LblApiIdItem_typ		CalibrationSourceId;
+    LblApiIntItem_typ       CameraSerialNumber;
 	LblApiIdItem_typ		GeometrySourceId;
 	LblApiIdItem_typ		FilterName;
 	LblApiDescItem_typ		ModelDesc;
@@ -70,6 +74,7 @@ typedef struct
 	LblApiFlagItem_typ		ModelComponentId[LBL_CAM_MODEL_ELEMENTS];
 	LblApiNameItem_typ		ModelComponentName[LBL_CAM_MODEL_ELEMENTS];
 	LblApiTypeItem_typ		ModelComponentUnit[LBL_CAM_MODEL_ELEMENTS];
+	LblApiTypeItem_typ		ModelComponentUnitB[LBL_CAM_MODEL_ELEMENTS];
 	LblApiRealItem_typ		ModelComponent1[3];
 	LblApiRealItem_typ		ModelComponent2[3];
 	LblApiRealItem_typ		ModelComponent3[3];

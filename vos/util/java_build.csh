@@ -83,7 +83,7 @@ echo "**** CODE GENERATION PHASE OF JAVA BUILD ****"
 echo "*********************************************"
 
 cd $V2JAVA
-foreach tld (jpl com gov)
+foreach tld (jpl com gov one the)
   find $tld -name test -prune -o -type d -exec $V2UTIL/java_build_dir.csh {} generate \;
 end
 
@@ -95,7 +95,7 @@ echo "**** COMPILE PHASE OF JAVA BUILD ****"
 echo "*************************************"
 
 cd $V2JAVA
-foreach tld (jpl com gov)
+foreach tld (jpl com gov one the)
   find $tld -name test -prune -o -type d -exec $V2UTIL/java_build_dir.csh {} compile \;
 end
 

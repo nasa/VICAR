@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module plot3d
-$! VPACK Version 1.9, Monday, June 09, 2014, 17:36:10
+$! VPACK Version 2.1, Friday, January 08, 2016, 12:20:42
 $!
 $! Execute by entering:		$ @plot3d
 $!
@@ -1260,6 +1260,8 @@ procedure
 refgbl $echo
 refgbl $autousage
 body
+enable-log
+
 let $autousage="none"
 let _onfail="continue"
 let $echo="yes"
@@ -1344,32 +1346,10 @@ plot3d cube title="P: lsz" dataform=lsz plot="p3dt"
 ! Print the plots
 !!!! dcl print/nofeed/delete printronx.plt;*
 !
+disable-log
 end-proc
 $!-----------------------------------------------------------------------------
 $ create tstplot3d.log
-                Version 5C/16C
-
-      ***********************************************************
-      *                                                         *
-      * VICAR Supervisor version 5C, TAE V5.2                   *
-      *   Debugger is now supported on all platforms            *
-      *   USAGE command now implemented under Unix              *
-      *                                                         *
-      * VRDI and VIDS now support X-windows and Unix            *
-      * New X-windows display program: xvd (for all but VAX/VMS)*
-      *                                                         *
-      * VICAR Run-Time Library version 16C                      *
-      *   '+' form of temp filename now avail. on all platforms *
-      *   ANSI C now fully supported                            *
-      *                                                         *
-      * See B.Deen(RGD059) with problems                        *
-      *                                                         *
-      ***********************************************************
-
-  --- Type NUT for the New User Tutorial ---
-
-  --- Type MENU for a menu of available applications ---
-
 ibis-gen cube.pic NC=3 NR=26 'IBIS-1 'ROW DATACOL=(1,2,3)  +
     data=(1,1,1, 1,51,1, 51,51,1, 51,1,1, 1,1,1, 1,1,51,  +
     1,51,51, 51,51,51, 51,1,51, 1,1,51, 0,0,0, 1,51,1, 1,51,51, 0,0,0,  +
@@ -1391,115 +1371,21 @@ PERSPEC version 2-10-2013 (64-bit) - rjb
 plot3d cube.pic title="A" plot="p3da"
 Beginning VICAR task plot3d
 PLOT3D version 7-13-2013 (64-bit) - rjb
- PLOTSIZE =    8.000000    
- SCALE =    1.000000    
- AUTOSCALING =  T
- title = A                                                                                                                       
- dataformat =            1
- plotsize =    8.000000    
- scale =    1.000000    
- zscale =    1.000000    
- plotoffsets =    0.000000       0.000000    
- distance =    0.000000    
- elev =    0.000000    
- azimuth =    180.0000    
- i,input x,y,z =           1   1.000000       1.000000       1.000000    
- i,input x,y,z =           2   1.000000       51.00000       1.000000    
- i,input x,y,z =           3   51.00000       51.00000       1.000000    
- i,input x,y,z =           4   51.00000       1.000000       1.000000    
- i,input x,y,z =           5   1.000000       1.000000       1.000000    
- i,input x,y,z =           6   1.000000       1.000000       51.00000    
- i,input x,y,z =           7   1.000000       51.00000       51.00000    
- i,input x,y,z =           8   51.00000       51.00000       51.00000    
- i,input x,y,z =           9   51.00000       1.000000       51.00000    
- i,input x,y,z =          10   1.000000       1.000000       51.00000    
- dblzero =            1
- zero   i =           11
- i,input x,y,z =          12   1.000000       51.00000       1.000000    
- i,input x,y,z =          13   1.000000       51.00000       51.00000    
- dblzero =            1
- zero   i =           14
- i,input x,y,z =          15   51.00000       51.00000       1.000000    
- i,input x,y,z =          16   51.00000       51.00000       51.00000    
- dblzero =            1
- zero   i =           17
- i,input x,y,z =          18   51.00000       1.000000       1.000000    
- i,input x,y,z =          19   51.00000       1.000000       51.00000    
- dblzero =            1
- zero   i =           20
- i,input x,y,z =          21   36.00000       41.00000       26.00000    
- i,input x,y,z =          22   41.00000       41.00000       36.00000    
- i,input x,y,z =          23   36.00000       41.00000       46.00000    
- i,input x,y,z =          24   31.00000       41.00000       36.00000    
- i,input x,y,z =          25   36.00000       41.00000       26.00000    
- dblzero =            1
- zero   i =           26
- dblzero =            2
- total count =           27
- maxx,minx,maxy,miny,maxz,minz =    51.00000       1.000000       51.00000       1.000000       51.00000       1.000000    
- tmax =    51.00000    
- plotxoff, plotyoff, plotxsize, plotysize,scale =   -1.000000      -1.000000       50.00000       50.00000       1.000000    
- axplot, axisdef =            0           1
- axlengths =  F
- axes =    0.000000       0.000000       0.000000    
 pltgraf cube_perspective  title="B via PLTGRAF - Az=0 elev=30" DIM=3 dataform="YX" direct=BR PLOT="pg1"
+Beginning VICAR task pltgraf
+PLTGRAF version 13-Jul-2013 (64-bit) - rjb
 pltgraf cube_perspective1 title="B via PLTGRAF - Az=0 elev=30" DIM=3 dataform="XY" direct=BR PLOT="pg2"
+Beginning VICAR task pltgraf
+PLTGRAF version 13-Jul-2013 (64-bit) - rjb
 pltgraf cube_perspective2 title="B via PLTGRAF - Az=90 elev=30" DIM=3 direct=TR PLOT="pg3"
+Beginning VICAR task pltgraf
+PLTGRAF version 13-Jul-2013 (64-bit) - rjb
 pltgraf cube_perspective3 title="B via PLTGRAF - Az=0 elev=60" DIM=3 direct=TR PLOT="pg4"
+Beginning VICAR task pltgraf
+PLTGRAF version 13-Jul-2013 (64-bit) - rjb
 plot3d cube_perspective title="B" origin=(26,26,26) distance=100  plot="p3db1"
 Beginning VICAR task plot3d
 PLOT3D version 7-13-2013 (64-bit) - rjb
- PLOTSIZE =    8.000000    
- SCALE =    1.000000    
- AUTOSCALING =  T
- title = B                                                                                                                       
- dataformat =            1
- plotsize =    8.000000    
- scale =    1.000000    
- zscale =    1.000000    
- plotoffsets =    0.000000       0.000000    
- distance =    100.0000    
- elev =    0.000000    
- azimuth =    180.0000    
- i,input x,y,z =           1   18.63577      -6.821166       0.000000    
- i,input x,y,z =           2   27.51808      -37.59040       0.000000    
- i,input x,y,z =           3  -27.51808      -37.59040       0.000000    
- i,input x,y,z =           4  -18.63577      -6.821165       0.000000    
- i,input x,y,z =           5   18.63577      -6.821166       0.000000    
- i,input x,y,z =           6   22.90413       31.28762       0.000000    
- i,input x,y,z =           7   37.96544       13.89632       0.000000    
- i,input x,y,z =           8  -37.96544       13.89632       0.000000    
- i,input x,y,z =           9  -22.90413       31.28762       0.000000    
- i,input x,y,z =          10   22.90413       31.28762       0.000000    
- dblzero =            1
- zero   i =           11
- i,input x,y,z =          12   27.51808      -37.59040       0.000000    
- i,input x,y,z =          13   37.96544       13.89632       0.000000    
- dblzero =            1
- zero   i =           14
- i,input x,y,z =          15  -27.51808      -37.59040       0.000000    
- i,input x,y,z =          16  -37.96544       13.89632       0.000000    
- dblzero =            1
- zero   i =           17
- i,input x,y,z =          18  -18.63577      -6.821165       0.000000    
- i,input x,y,z =          19  -22.90413       31.28762       0.000000    
- dblzero =            1
- zero   i =           20
- i,input x,y,z =          21  -11.49298      -8.619736       0.000000    
- i,input x,y,z =          22  -18.29054       1.414779       0.000000    
- i,input x,y,z =          23  -12.98539       12.75232       0.000000    
- i,input x,y,z =          24  -6.096847       1.414779       0.000000    
- i,input x,y,z =          25  -11.49298      -8.619736       0.000000    
- dblzero =            1
- zero   i =           26
- dblzero =            2
- total count =           27
- maxx,minx,maxy,miny,maxz,minz =    37.96544      -37.96544       31.28762      -37.59040      1.4012985E-45   0.000000    
- tmax =    37.96544    
- plotxoff, plotyoff, plotxsize, plotysize,scale =    37.96544       37.59040       75.93088       68.87801       1.000000    
- axplot, axisdef =            0           1
- axlengths =  F
- axes =    0.000000       0.000000       0.000000    
 end-proc
 $ Return
 $!#############################################################################

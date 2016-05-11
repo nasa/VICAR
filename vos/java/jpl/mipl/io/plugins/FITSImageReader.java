@@ -15,11 +15,11 @@ import jpl.mipl.io.util.*;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
 import java.awt.Rectangle;
 import java.awt.color.*;
-import java.awt.color.ColorSpace;
 import java.awt.image.BandedSampleModel;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -42,7 +42,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.io.BufferedReader;
-
 import java.awt.image.renderable.ParameterBlock;
 
 import javax.imageio.IIOException;
@@ -52,8 +51,11 @@ import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.metadata.IIOMetadata; 
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
+
 import com.sun.imageio.plugins.common.InputStreamAdapter; 
 import com.sun.imageio.plugins.common.SubImageInputStream;
+
+
 
 // added to example 
 import java.io.InputStream;
@@ -65,11 +67,12 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.awt.image.RenderedImage;
 
+
+
 // import VicarIO stuff
 // VicarInputFile  SystemLabel
 import jpl.mipl.io.streams.*;
 import jpl.mipl.io.vicar.*;
-
 
 // SeekableStream is in jai - we must remove dependancy on jai
 // maybe switch to the ImageInputStream
@@ -77,7 +80,6 @@ import com.sun.media.jai.codec.SeekableStream;
 import com.sun.media.jai.codec.ImageCodec;
 
 import javax.media.jai.*;
-
 import javax.imageio.stream.*;
 
 import org.w3c.dom.*;
@@ -98,33 +100,22 @@ import nom.tam.util.*;
 
 /**
  * This class is an <code>ImageReader</code>
- * for reading image files in the Vicar format.
+ * for reading image files in the FITS format.
  *
  * @version 0.5
  */
 public class FITSImageReader extends ImageReader {
 
     private boolean debug = false;
-	/// private boolean debug = true;
-    /**
-     *
-     * VicarIO specific variables
-     *
-     * used to get file info 
-     */
-     
-    // private VicarInputFile vif; // this may become FITSInputFile or RawInputFile
-    // private FITSInputFile iif;
+	// private boolean debug = true;
+    
     Fits fits = null; // this is the fits object, everything comes from it
     
     // BasicHDU[] hdus ; // an array of HDU's from the file, most will contain 1 ??? 
     Object[] hdus ; // an array of HDU's from the file, most will contain 1 ??? 
-    // private SystemLabel sys; // we need a system label object for all the reader routines
     
     private SeekableStream seekableStream;
-    // vicarIO currently uses SeekableStream
-    // may transition to ImageInputStream ?????
-
+    
     private ImageInputStream stream; 
     
     private DataInputStreamWrapper inputStreamWrapper;
@@ -146,10 +137,12 @@ public class FITSImageReader extends ImageReader {
     String keyTag = "key";
     String quoted = "false";
     
-    // boolean flip_image = false; // control if the image is flipped
+    boolean inputIsSet = false;
+    
+    // control if the image is flipped
     // this needs to be a part of an ImageReadParam
-    // the fits library also supports sub image return, ther generic ImageReadParam 
-    // can ask for that Implement some day
+    // the fits library also supports sub image return, 
+    // the generic ImageReadParam can ask for that some day
     boolean flip_image = true;
 
     /**
@@ -159,7 +152,7 @@ public class FITSImageReader extends ImageReader {
      */
     private List header = new ArrayList();
     
-    // private VicarType vicarType;
+    
     private int type; // Redundant, for convenience
     private int bitDepth; // Redundant, for convenience
     private boolean isBinary; // Redundant, for convenience
@@ -180,7 +173,7 @@ public class FITSImageReader extends ImageReader {
     int[] ns = {0};
     int[] bytesPerPixel = {0};
     
-    
+    FITSRenderedImage fitsRenderedImage = null;
     
     /**
      * Constructor taking an ImageReaderSpi required by ImageReaderSpi.
@@ -211,6 +204,7 @@ public class FITSImageReader extends ImageReader {
         super.setInput(input, false, false);
         setInputInternal(input);		
 	}
+	
     /**
      * Enforce that the input must be an <code>ImageInputStream</code>
      */
@@ -222,9 +216,9 @@ public class FITSImageReader extends ImageReader {
         // debug = true;
         if (debug) {
         	System.out.println("*********************************************");      
-        	System.out.println("FITSImageReader.setInputInternal "+input);
+        	System.out.println("FITSImageReader.setInputInternal "+input+"   inputIsSet="+inputIsSet);
         }
-        
+        inputIsSet = true;
         /*
          * Fits(java.io.File myFile) 
           Associate FITS object with an uncompressed File 
@@ -271,8 +265,10 @@ public class FITSImageReader extends ImageReader {
         } else {
         	// throw exception for unsupported input type
         	// get the class of input
+        	inputIsSet = false;
         	Class c = input.getClass();
         	throw (new FitsException("unsupported FITS input type: " + c.getName() ));
+        	
         }
        }
        catch (FitsException fe) {
@@ -292,60 +288,76 @@ public class FITSImageReader extends ImageReader {
 	 * ColorModel exists for > 3 bands. The user can extract bands for display using ImageOps.
 	 * 
 	 * added Steve Levoe 2-2003
+	 * 2015 - new version of the FITSIO package now supports tiled image access
+	 * Add tiled image read here. previously we could only read the entire file which works 
+	 * fine as a BufferedImage
 	 */
-	public RenderedImage readAsRenderedImage(int imageIndex, ImageReadParam param)
-
-
-		
+	public RenderedImage readAsRenderedImage(int ii, ImageReadParam param)	
         throws IIOException {
             
-        if (debug) System.out.println("FITSImageReader.readAsRenderedImage()");
-        if (imageIndex != 0) {
-            throw new IndexOutOfBoundsException ();
+        if (debug) {
+        	System.out.println("===================================================================================");
+        	System.out.println("FITSImageReader.readAsRenderedImage("+ii+") haveReadHeader "+haveReadHeader+" ********************");
         }
+        
+        
         if (haveReadHeader == false) {
             readHeader();
         }
 
-		if (debug) 
-        	System.out.println("FITSImageReader.readAsRenderedImage() after readHeader() ");
-        // printParam(param);
+		if (debug) {
+        	System.out.println("FITSImageReader.readAsRenderedImage() after readHeader() imageindex = "+ii);
+            printParam(param);
+		}
         // look at the param, decide what to do.
         // for now ignore it
         // boolean parameterizedRead = false;
+		// look into doing a subimage read based on the read param, crop and subsample
+		// scale values to float using scale and offset
         
-        
-        // create a VicarRenderedImage using the input stream and the SystemLabel obtained by readHeader()
         RenderedImage image = null;
-        
-        /** 
-        VicarRenderedImage image = null ;
-        if (imageIndex != 0) {
-            throw new IIOException("Illegal page requested from a Vicar image.");
-        }
-        
-        try {
-            image = new VicarRenderedImage(iif, param);
-        }
-        catch (Exception e) {
-            System.err.println("readAsRenderedImage ERROR: "+e);
-        }
-        
-        if (debug) { 
-        	System.out.println(" vif "+iif);
-        	System.out.println(" image "+image);
-        }
-        
-         
-       
+        boolean rescaleFITS = false ; // this should come from the param
+        // for 16 bit data if zero = 32768.0 then the data is really UNSIGNED short but FITS stores it as signed
+        // to have the true data values the data should be rescaled and used as USHORT
+        // for now we will leave it as signed SHORT to use for display purposes
 
-        if (debug) 
-        	System.out.println("IsisImageReader.readAsRenderedImage() after readHeader() ");
-        // return vri ;
-                  */
-        return image;
-        }
+        boolean parameterizedRead = false;
         
+        int i=0; // how do I use imageIndex ?? 
+        // srl 1-2015 attempt to read beyond first image
+		if (ii < hduCount) {
+			imageIndex = ii;
+		} else {
+			// throw an error/Exception and return??
+			imageIndex = 0;
+			if (debug) {
+				System.out.printf("FITSImageReader.readAsRenderedImage() imageIndex = %d is too big\n hduCount=%d hdus.length=%d \n",
+			          ii, hduCount, hdus.length);
+			}
+			return image;
+			// throw new IndexOutOfBoundsException ();
+		}
+		// how do I know how many images are in this file ???
+		if (debug) {
+			System.out.printf("imageIndex = %d hduCount=%d hdus.length=%d \n",
+					imageIndex, hduCount, hdus.length);
+		}
+		
+		BasicHDU hdu = (BasicHDU) hdus[imageIndex];
+		// setup the renderedImage for the HDU for the image we want
+		if (debug) System.out.printf("FITSImageReader.readAsRenderedImage() new FITSRenderedImage(hdu, param, debug); \n");
+		fitsRenderedImage = new FITSRenderedImage(hdu, param, debug);
+        
+		return fitsRenderedImage;
+        // return image;
+        }
+    
+	
+	/**********************************
+	 * setDebug
+	 * sets the debug flag for this file
+	 * @param d
+	 */
 	public void setDebug( boolean d) {
 		debug = d;
 	}
@@ -383,7 +395,9 @@ public class FITSImageReader extends ImageReader {
         }
         
         if (debug)     
-           System.out.println("readHeader");
+           System.out.println("readHeader haveReadHeader="+haveReadHeader);
+        
+        if (haveReadHeader) return ; // header has already been read, don't do it again
         
         BasicHDU hdu = null;
         
@@ -422,10 +436,56 @@ public class FITSImageReader extends ImageReader {
         // get the metadata now?? or when user request it
         
         
-        
-        if (debug) System.out.println("*** end of ReadHeader *****");
+        ImageHDU imageHDU;
+        if (debug) {
+        	System.out.printf("HDU hdus.length %d fits.getNumberOfHDUs %d verion %s \n", hdus.length, fits.getNumberOfHDUs(), fits.version());
+        	
+        	for (int ii=0 ; ii< hdus.length ; ii++) {
+        		System.out.printf("hdu.info(%d) ", ii);
+        		try {
+					hdu = fits.getHDU(ii);
+					System.out.println("hdu "+hdu);
+					if (hdu instanceof nom.tam.fits.ImageHDU) {
+						imageHDU = (ImageHDU) hdu;
+						System.out.println("instanceof imageHDU "+imageHDU);	
+						nom.tam.image.StandardImageTiler tiler = imageHDU.getTiler();
+						imageHDU.info(System.out);
+												
+						int bitpix = imageHDU.getBitPix();
+					    
+				 		int[] naxis = imageHDU.getAxes();
+				 		if (debug) {
+				 			System.out.println("bitpix="+bitpix);
+				 			System.out.println("naxis="+naxis.length);				 		
+				 			for (int j=0 ; j<naxis.length ; j++) {
+				 				System.out.println("naxis["+j+"]="+naxis[j]);
+				 			}
+				 		}
+				 		
+				 		// how do we find out if the image is compressed??
+				 		double min = imageHDU.getMinimumValue();
+				 		double max = imageHDU.getMaximumValue();
+				 		double scale = imageHDU.getBScale();
+				 		double zero = imageHDU.getBZero();
+				 		String units = imageHDU.getBUnit();
+				 		System.out.println("min "+min+"  max "+max+"  scale "+scale+"  zero "+zero +" units "+units);				 		
+					}
+					// hdu.info();
+					// hdu.info(System.out)
+				} catch (FitsException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}     		
+        	}
+        	System.out.println("*** end of ReadHeader *****");
+        }
         getImageStuff(); // sets up arrays of nl,ns, numBands, bytesPerPixel
         haveReadHeader = true;
+        
+        // printHduInfo();
     }
 
     
@@ -446,7 +506,7 @@ public class FITSImageReader extends ImageReader {
         }
         
         
-        int hduCount = hdus.length;
+        hduCount = hdus.length;
         int cardCt = 0;
     	// int bitpix = new int[hduCount];
     	// int[] naxis = null;
@@ -455,20 +515,34 @@ public class FITSImageReader extends ImageReader {
         	System.out.println("###  HDU                           ####");
         	System.out.println("#######################################");
         	System.out.println("readMetadata hduCount="+hduCount);
+        	System.out.println("FITSMetadata.nativeImageMetadataFormatName "+FITSMetadata.nativeImageMetadataFormatName);
         }
     	
     // create a Document for the metadata object to use
         DOMutils domUtils = new DOMutils();
         document = domUtils.getNewDocument();
+        
         Element root = (Element) document.createElement(FITSMetadata.nativeImageMetadataFormatName);
         document.appendChild(root);
         Element item, element;
         Node currentNode = root;
         
+        Element hdu_count_element = document.createElement("hdu_count");
+        Text text = (Text) document.createTextNode(""+hduCount);
+        hdu_count_element.appendChild(text);
+		root.appendChild(hdu_count_element);
+        
     for (int i=0 ; i< hduCount ; i++) { 
     	
     	// try {
     	BasicHDU hdu = (BasicHDU) hdus[i];
+    	Element hdu_element = document.createElement("HDU");
+    	String hduName = hdu.getClass().getSimpleName();
+    	if (debug)  System.out.printf("readMetadata %d %s %s\n", i, hduName, hdu.getClass().getName());
+    	hdu_element.setAttribute("name", hduName);
+    	hdu_element.setAttribute("index", ""+i);
+    	root.appendChild (hdu_element);
+    	currentNode = hdu_element;
     	// System.out.println(i+") info -------------------------");
     	// hdu.info();
     	Header header = hdu.getHeader();
@@ -502,13 +576,16 @@ public class FITSImageReader extends ImageReader {
     		} else {
     			comment = "";
     		}
-    			
+    		
+    		if (value == null) {
+    			value = "";
+    		}
     		    		
-    		if (key != null) {
+    		if (key != null && !key.equals("")) {
     		  element = (Element) document.createElement("item");
     		  element.setAttribute(keyTag,key);
     		  element.setAttribute("comment",comment);
-    		  Text text = (Text) document.createTextNode(value);
+    		  text = (Text) document.createTextNode(value);
     		  element.appendChild(text);
     		  currentNode.appendChild(element);
     		  // element.setAttribute("quoted",quoted);
@@ -536,8 +613,17 @@ public class FITSImageReader extends ImageReader {
     	fitsMetadata = new FITSMetadata(document);
     	// print the XML file out
     	if (debug) {
-    		String xmlFile = "fitsDoc.xml";
-    		domUtils.serializeDocument(document, xmlFile, "xml");
+    		String xmlNodeFile = "fitsNode.xml";
+    		String xmlDocFile = "fitsDoc.xml";
+    		// document serialization error, figure it out
+    		// if we make a valid XML we could make a transcoder and writer
+    		// XML useful so a user could determine number of images in the file
+    		domUtils.printDocInfo(document);
+    		
+    		Node firstChild = document.getFirstChild();
+    		
+    		domUtils.serializeNode(firstChild, xmlNodeFile, "xml") ;
+    		domUtils.serializeDocument(document, xmlDocFile, "xml");
     	}
     }
     else {
@@ -570,9 +656,7 @@ public class FITSImageReader extends ImageReader {
     	}
         
         return hdus.length;
-        
-        	
-        	
+                	
         // return 1; // Vicar always have just 1 ???
         // at least that's all we support now
     }
@@ -583,9 +667,7 @@ public class FITSImageReader extends ImageReader {
      * set the globals to those values     * @param index     */
     // private void getImageStuff(int index)
     private void getImageStuff()
-    {
-    	
-    	 
+    { 	 
     	// if (index < hdus.length && index >= 0) {
     		
     	int bitpix = 0;;
@@ -593,9 +675,7 @@ public class FITSImageReader extends ImageReader {
     	
     	hduCount = hdus.length;
     	// int bitpix = new int[hduCount];
-    	// int[] naxis = null;
-    
-    	
+    	// int[] naxis = null;    	
    		numBands = new int[hduCount];
     	nl = new int[hduCount];
     	ns = new int[hduCount];
@@ -618,8 +698,7 @@ public class FITSImageReader extends ImageReader {
     		System.out.println("FitsException: "+fe);
     		fe.printStackTrace();
     	}
-    	
-    	
+    		
     /*
     int formatCode;
 	int orgCode;	
@@ -683,7 +762,7 @@ public class FITSImageReader extends ImageReader {
     } 
     
     public int getWidth(int imageIndex) throws IIOException {
-        if (imageIndex != 0) {
+    	if (imageIndex >= hduCount) {
             throw new IndexOutOfBoundsException();
         }
         if (haveReadHeader == false) {
@@ -695,7 +774,7 @@ public class FITSImageReader extends ImageReader {
     }
     
     public int getHeight(int imageIndex) throws IIOException {
-        if (imageIndex != 0) {
+    	if (imageIndex >= hduCount) {
             throw new IndexOutOfBoundsException();
         }
         if (haveReadHeader == false) {
@@ -710,7 +789,7 @@ public class FITSImageReader extends ImageReader {
     // I think these are not useful
     public ImageTypeSpecifier getRawImageType(int imageIndex)
         throws IIOException {
-        if (imageIndex != 0) {
+    	if (imageIndex >= hduCount) {
             throw new IndexOutOfBoundsException();
         }
         if (haveReadHeader == false) {
@@ -723,7 +802,7 @@ public class FITSImageReader extends ImageReader {
     
     public Iterator getImageTypes(int imageIndex)
         throws IIOException {
-        if (imageIndex != 0) {
+    	if (imageIndex >= hduCount) {
             throw new IndexOutOfBoundsException();
         }
         if (haveReadHeader == false) {
@@ -736,12 +815,16 @@ public class FITSImageReader extends ImageReader {
 
 
     public int getNumImages(boolean allowSearch) throws IIOException {
-        if (stream == null) {
+        if (inputIsSet == false) {
             throw new IllegalStateException("No input source set!");
         }
         
         // check hdus.length; ??????????
-        return 1;
+        // srl 1-2015
+        // return hduCount;
+        // srl 11-15
+        return getNumImages();
+        // return 1;
     }
     
     /**
@@ -761,7 +844,7 @@ public class FITSImageReader extends ImageReader {
     }
     
     public IIOMetadata getImageMetadata(int imageIndex) throws IIOException {
-        if (imageIndex != 0) {
+    	if (imageIndex >= hduCount) {
             throw new IndexOutOfBoundsException("imageIndex != 0!");
         }
         readMetadata(); // make sure fitsMetadata has valid data in it
@@ -797,10 +880,16 @@ public class FITSImageReader extends ImageReader {
 
         throws IIOException {
             
-        if (debug) System.out.println("FITSImageReader.read()");
-        if (imageIndex != 0) {
+        if (debug) {
+        	System.out.println("FITSImageReader.read() imageIndex = "+imageIndex+"  haveReadHeader="+haveReadHeader);
+        	// hduCount
+        }
+        // srl 1-2015 
+        /**
+        if (imageIndex >= hduCount) {
             throw new IndexOutOfBoundsException ();
         }
+        **/
         if (haveReadHeader == false) {
             readHeader();
         }
@@ -812,13 +901,13 @@ public class FITSImageReader extends ImageReader {
         // for now we will leave it as signed SHORT to use for display purposes
         boolean parameterizedRead = false;
 
-        if (debug) System.out.println("FITSImageReader.read() after readHeader() ");
+        if (debug) System.out.println("FITSImageReader.read() after readHeader() imageIndex="+imageIndex+" hduCount="+hduCount);
         /**
          * create a BufferedImage for the entire image
          * tiling stuff will come later
          **/
          
-         // does hdus[imageIndex] work correctlt ???
+         // does hdus[imageIndex] work correctly ???
          
          // get the image
          /**
@@ -830,7 +919,18 @@ public class FITSImageReader extends ImageReader {
          
          
          int i=0; // how do I use imageIndex ?? 
-         // how do I know how namy images are in this file ???
+      // srl 1-2015 attempt to read beyond first image
+         if (imageIndex < hduCount) {
+         	i = imageIndex;
+         } else {
+        	 // throw an error/Exception and return??
+         }
+         // how do I know how many images are in this file ???
+         if (debug) {
+        	 System.out.printf("imageIndex = %d i=%d hduCount=%d hdus.length=%d \n", imageIndex, i, hduCount, hdus.length);
+         }
+      // check that we can read something for this index ??
+         
 	BasicHDU h;
 	int bitpix ;
 	int[] naxis ;
@@ -848,9 +948,15 @@ public class FITSImageReader extends ImageReader {
 	  try {
 	    h = (BasicHDU) hdus[i];
 	    if (h != null) {
-	    	if (debug) h.info();
-	        if (i == 0) {
+	    	
+	    	if (debug) {
+	    		System.out.println("h is "+h);
+	    		// h.info();
+	    	}
+	        // if (i == 0) {
+	        if (i < hdus.length) {
 		        if (debug) System.out.println("\n\nPrimary header:\n");
+	        
 		    
 		    bitpix = h.getBitPix();
 		    
@@ -864,7 +970,7 @@ public class FITSImageReader extends ImageReader {
 	 			}
 	 		}
 	 		
-	 		
+	 		// how do we find out if the image is compressed??
 	 		double min = h.getMinimumValue();
 	 		double max = h.getMaximumValue();
 	 		double scale = h.getBScale();
@@ -874,7 +980,7 @@ public class FITSImageReader extends ImageReader {
 	 		  System.out.println("###############################################################");
 	 		  System.out.println(" ");
 	 		  System.out.println("min "+min+"  max "+max+"  scale "+scale+"  zero "+zero +" units "+units);
-	 		  h.info();
+	 		  // h.info();
 	 		  System.out.println(" ");
 	 		  System.out.println("###############################################################");
 	 		}
@@ -1162,7 +1268,7 @@ public class FITSImageReader extends ImageReader {
         			bi.setData(raster);
         		}
         	
-        		// a Valid Color model MUST be supplied to this constructor or an Exceptiion will be thrown
+        		// a Valid Color model MUST be supplied to this constructor or an Exception will be thrown
         		// theImage = new java.awt.image.BufferedImage(colorModel, raster, false, new Hashtable());
         	}
          	else {
@@ -1242,6 +1348,8 @@ public class FITSImageReader extends ImageReader {
 					bi = temp.getAsBufferedImage();
 					}
 					
+					// check the header to see if this information is in the header
+					// also look for no data value
 					
 					//---------------------
 					PB=new ParameterBlock();
@@ -1540,7 +1648,7 @@ public class FITSImageReader extends ImageReader {
 		else
 		**/
 		
-		    return new BandedSampleModel(data_buffer_type,
+		return new BandedSampleModel(data_buffer_type,
 				tileWidth, tileHeight,
 				scanline_stride,
 				bank_indices, band_offsets);
@@ -1578,6 +1686,15 @@ public class FITSImageReader extends ImageReader {
 	}
 
 	return null;		// whoops!!  Shouldn't happen!
+    }
+    
+    
+    public void printHduInfo() {
+    	for (int i=0 ; i< hdus.length ; i++) {    	
+    		BasicHDU hdu = (BasicHDU) hdus[i];
+    		System.out.println("hdus["+i+"] "+hdu.getClass().getName());
+    		hdu.info(System.out);
+    	}
     }
 
 }

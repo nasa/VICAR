@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module gtlist
-$! VPACK Version 1.9, Thursday, January 26, 2012, 13:58:23
+$! VPACK Version 2.1, Wednesday, January 13, 2016, 14:45:49
 $!
 $! Execute by entering:		$ @gtlist
 $!
@@ -152,7 +152,7 @@ $ vpack gtlist.com -mixed -
 	-s gtlist.c -
 	-i gtlist.imake -
 	-p gtlist.pdf -
-	-t tstgtlist.pdf tstgtlist.log_solos
+	-t tstgtlist.pdf tstgtlist.log
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -168,13 +168,14 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
 #include "applic.h"
 #include "defines.h"
 
-/*#include "cartoVicarProtos.h"*/
 #include "cartoStrUtils.h"
 #include "cartoMemUtils.h"
 #include "cartoLsqUtils.h"
 #include "cartoGtUtils.h"
 
 /*  GeoTIFF file list routine   A. Zobrist    8/16/99   */
+
+static char msgBuf[10000];
 
 void main44(void)
 {
@@ -186,7 +187,7 @@ void main44(void)
    
    /* initialize, fetch params */
 
-   zifmessage("gtlist version Wed Jan  2 2008");
+   zifmessage("gtlist version 2016-01-13");
    
    status = gtgetlab("inp",1,&labelstr,&nl,&ns);
    if (status!=1)
@@ -209,8 +210,9 @@ void main44(void)
    status = geofix(labelstr,map,mapinv,nl,ns,corner);
    if (status!=1)
       {
-      printf("No mapping in GeoTIFF label\n");
-      printf("The GeoTIFF label is:\n%s\n\n",printlabel);
+	zifmessage("No mapping in GeoTIFF label");
+	zifmessage("The GeoTIFF label is:");
+	zifmessage(printlabel);
       return;
       }
    rot = gtgetrot(labelstr);
@@ -223,22 +225,25 @@ void main44(void)
    
    /* printing section */
    
-   printf("\n\n      VICAR GeoTIFF LABEL LIST\n\n");
+   zifmessage("VICAR GeoTIFF LABEL LIST");
    if (!gtholder)
       {
-      printf("The file is a standalone VICAR GeoTIFF label\n");
-      printf("A hypothetical %d x %d VICAR image will\n",nl,ns);
-      printf("be used to illustrate the mapping of corner points\n\n");
+      zifmessage("The file is a standalone VICAR GeoTIFF label");
+      sprintf(msgBuf, "A hypothetical %d x %d VICAR image will", nl, ns);
+      zifmessage(msgBuf);
+      zifmessage("be used to illustrate the mapping of corner points.");
       }
    
-   printf("The VICAR GeoTIFF label is:\n%s\n\n",printlabel);
+   zifmessage("The VICAR GeoTIFF label is:");
+   zifmessage(printlabel);
    
-   if (voff<0.75) printf("The image raster is an 'area' type\n\n");
-      else printf("The image raster is a 'point' or 'post' type\n\n");
+   if (voff<0.75)
+     zifmessage("The image raster is an 'area' type");
+   else
+     zifmessage("The image raster is a 'point' or 'post' type");
    
-   printf("The centers of the corner pixels are:\n\n");
-   printf("VICAR-line    -samp GeoTIFF-samp    -line");
-   printf("            East           North\n\n");
+   zifmessage("The centers of the corner pixels are:");
+   zifmessage("VICAR-line    -samp GeoTIFF-samp    -line            East           North");
    
    for (i=0;i<4;i++)
       {
@@ -250,13 +255,13 @@ void main44(void)
       elen = MAX(12-(int)(log10(fabs(east)+.9)),1);
       north = map[3]*vl+map[4]*vs+map[5];
       nlen = MAX(12-(int)(log10(fabs(north)+.9)),1);
-      printf("%10.1f%9.1f%13.1f%9.1f %15.*f %15.*f\n",
+      sprintf(msgBuf, "%10.1f%9.1f%13.1f%9.1f %15.*f %15.*f",
          vl,vs,gs,gl,elen,east,nlen,north);
+      zifmessage(msgBuf);
       }          
    
-   printf("\n\nThe outer corners of the corner pixels are:\n\n");
-   printf("VICAR-line    -samp GeoTIFF-samp    -line");
-   printf("            East           North\n\n");
+   zifmessage("The outer corners of the corner pixels are:");
+   zifmessage("VICAR-line    -samp GeoTIFF-samp    -line            East           North");
    
    for (i=0;i<4;i++)
       {
@@ -268,48 +273,55 @@ void main44(void)
       elen = MAX(12-(int)(log10(fabs(east)+.9)),1);
       north = map[3]*vl+map[4]*vs+map[5];
       nlen = MAX(12-(int)(log10(fabs(north)+.9)),1);
-      printf("%10.1f%9.1f%13.1f%9.1f %15.*f %15.*f\n",
+      sprintf(msgBuf, "%10.1f%9.1f%13.1f%9.1f %15.*f %15.*f",
          vl,vs,gs,gl,elen,east,nlen,north);
+      zifmessage(msgBuf);
       }          
    
-   printf("\nThe rotation of the image relative to an E-N geographic frame is:\n\n");
+   zifmessage("The rotation of the image relative to an E-N geographic frame is:");
    switch (rot)
       {
-      case 0:  printf("rotation 0\n369\n258\n147\n\n"); break;
-      case 1:  printf("rotation 1\n123\n456\n789\n\n"); break;
-      case 2:  printf("rotation 2\n741\n852\n963\n\n"); break;
-      case 3:  printf("rotation 3\n987\n654\n321\n\n"); break;
-      case 4:  printf("rotation 4\n963\n852\n741\n\n"); break;
-      case 5:  printf("rotation 5\n789\n456\n123\n\n"); break;
-      case 6:  printf("rotation 6\n147\n258\n369\n\n"); break;
-      case 7:  printf("rotation 7\n321\n654\n987\n\n"); break;
+      case 0:  zifmessage("rotation 0\n369\n258\n147"); break;
+      case 1:  zifmessage("rotation 1\n123\n456\n789"); break;
+      case 2:  zifmessage("rotation 2\n741\n852\n963"); break;
+      case 3:  zifmessage("rotation 3\n987\n654\n321"); break;
+      case 4:  zifmessage("rotation 4\n963\n852\n741"); break;
+      case 5:  zifmessage("rotation 5\n789\n456\n123"); break;
+      case 6:  zifmessage("rotation 6\n147\n258\n369"); break;
+      case 7:  zifmessage("rotation 7\n321\n654\n987"); break;
       default:
-         printf("NOT ALIGNED WITH EAST-NORTH COORDINATE SYSTEM\n\n");
+         zifmessage("NOT ALIGNED WITH EAST-NORTH COORDINATE SYSTEM");
       }
    
-   printf("\nThe scale units of the image are (ignoring sign):\n\n");
+   zifmessage("The scale units of the image are (ignoring sign):");
    switch (rot)
       {
       case 0: case 2: case 4: case 6:
          elen = MAX(13-(int)(log10(fabs(map[4])+.9)),1);
-         printf("1 sample = %15.*f map units north\n",elen,fabs(map[4]));
-         printf("1 line   = %15.*f map units east\n\n",elen,fabs(map[0]));
+         sprintf(msgBuf, "1 sample = %15.*f map units north",elen,fabs(map[4]));
+	 zifmessage(msgBuf);
+         sprintf(msgBuf, "1 line   = %15.*f map units east",elen,fabs(map[0]));
+	 zifmessage(msgBuf);
          horizpix = (double)nl*map[0];
          break;
       case 1: case 3: case 5: case 7:
          elen = MAX(13-(int)(log10(fabs(map[1])+.9)),1);
-         printf("1 sample = %15.*f map units east\n",elen,fabs(map[1]));
-         printf("1 line   = %15.*f map units north\n\n",elen,fabs(map[3]));
+         sprintf(msgBuf, "1 sample = %15.*f map units east",elen,fabs(map[1]));
+	 zifmessage(msgBuf);
+         sprintf(msgBuf, "1 line   = %15.*f map units north",elen,fabs(map[3]));
+	 zifmessage(msgBuf);
          horizpix = (double)ns*map[1];
          break;
       default:
-         printf("SEE TRANSFORMATION MATRIX\n\n");
+         zifmessage("SEE TRANSFORMATION MATRIX");
       }
    
    scalefrac = fabs((horizpix*mapunitm*39.0)/mapinch);
-   printf("\nThe scale fraction is 1 /%9.1f\n",scalefrac);
-   printf("(assuming mapunit = %f meters and the map is %f inches)\n\n",
+   sprintf(msgBuf, "The scale fraction is 1 /%9.1f",scalefrac);
+   zifmessage(msgBuf);
+   sprintf(msgBuf, "(assuming mapunit = %f meters and the map is %f inches)",
            mapunitm,mapinch);
+   zifmessage(msgBuf);
       
    return;
 }
@@ -363,7 +375,7 @@ process help=*
 GTLIST - Program for listing image mapping information in a GeoTIFF label
 .HELP
 PURPOSE
-     GTFORM is a VICAR applications program which lists information
+     GTLIST is a VICAR applications program which lists information
      in a VICAR GeoTIFF label.  Besides listing the label contents,
      derived information about the corner point coordinates and the
      image rotation are calculated.
@@ -463,7 +475,9 @@ REFERENCES
 Original Programmer: A. L. Zobrist, 16 Aug. 1999
 Current Cognizant Programmer: B. A. McGuffie
 Revisions:
-  Wed Jan  2 2008 wlb switched to USES_ANSI_C AND LIB_CARTO; misc cleanup  
+  2008-01-02 WLB Switched to USES_ANSI_C AND LIB_CARTO; misc cleanup  
+  2015-11-01 WLB Migrated to MIPL
+  2016-01-13 WLB Replaced printfs with zifmessages
 
 .LEVEL1
 .VARI INP
@@ -568,6 +582,8 @@ refgbl $echo
 parm version string def="ibis-1"
 parm org string def="column"
 body
+enable-log
+
 !let _onfail="continue"
 let $echo="yes"
 
@@ -744,11 +760,11 @@ gtgen out=xxxlab6  +
 gtlist xxxlab6
 
 theend>
+
+disable-log
 end-proc
 $!-----------------------------------------------------------------------------
-$ create tstgtlist.log_solos
-tstgtlist
-let $echo="yes"
+$ create tstgtlist.log
 gtgen out=xxxlab1 'tiecnvrt  +
    geotiff=("ModelTiePointTag=(0,0,0,350000.4,5307000.3,0.0)",  +
           "ModelTiePointTag=(100,100,0,351000.4,5306000.3,0.0)",  +
@@ -758,7 +774,39 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab1
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1000 x 2000 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTIEPOINTTAG=(0,0,0,350000.4,5307000.3,0.0)
+MODELPIXELSCALETAG=(10.0,10.0,0.0)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
+The image raster is an 'area' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.5      0.5  350005.4000000  5306995.300000
+       1.0   2000.0       1999.5      0.5  369995.4000000  5306995.300000
+    1000.0      1.0          0.5    999.5  350005.4000000  5297005.300000
+    1000.0   2000.0       1999.5    999.5  369995.4000000  5297005.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5          0.0      0.0  350000.4000000  5307000.300000
+       0.5   2000.5       2000.0      0.0  370000.4000000  5307000.300000
+    1000.5      0.5          0.0   1000.0  350000.4000000  5297000.300000
+    1000.5   2000.5       2000.0   1000.0  370000.4000000  5297000.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 1
+123
+456
+789
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units east
+1 line   = 10.000000000000 map units north
+The scale fraction is 1 /  78000.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gtgen out=xxxlab2 'tiecnvrt  +
    geotiff=("ModelTiePointTag=(0,0,0,351000.4,5306000.3,0.0)",  +
           "ModelTiePointTag=(100,100,0,350000.4,5307000.3,0.0)",  +
@@ -768,7 +816,39 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab2
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1000 x 2000 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTIEPOINTTAG=(0,0,0,351000.4,5306000.3,0.0)
+MODELPIXELSCALETAG=(-10.0,-10.0,0.0)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
+The image raster is an 'area' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.5      0.5  350995.4000000  5306005.300000
+       1.0   2000.0       1999.5      0.5  331005.4000000  5306005.300000
+    1000.0      1.0          0.5    999.5  350995.4000000  5315995.300000
+    1000.0   2000.0       1999.5    999.5  331005.4000000  5315995.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5          0.0      0.0  351000.4000000  5306000.300000
+       0.5   2000.5       2000.0      0.0  331000.4000000  5306000.300000
+    1000.5      0.5          0.0   1000.0  351000.4000000  5316000.300000
+    1000.5   2000.5       2000.0   1000.0  331000.4000000  5316000.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 3
+987
+654
+321
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units east
+1 line   = 10.000000000000 map units north
+The scale fraction is 1 /  78000.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gtgen out=xxxlab2 'tiecnvrt  +
    geotiff=("ModelTiePointTag=(0,0,0,350000.4,5306000.3,0.0)",  +
           "ModelTiePointTag=(100,100,0,351000.4,5307000.3,0.0)",  +
@@ -778,7 +858,39 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab2
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1000 x 2000 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTIEPOINTTAG=(0,0,0,350000.4,5306000.3,0.0)
+MODELPIXELSCALETAG=(10.0,-10.0,0.0)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
+The image raster is an 'area' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.5      0.5  350005.4000000  5306005.300000
+       1.0   2000.0       1999.5      0.5  369995.4000000  5306005.300000
+    1000.0      1.0          0.5    999.5  350005.4000000  5315995.300000
+    1000.0   2000.0       1999.5    999.5  369995.4000000  5315995.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5          0.0      0.0  350000.4000000  5306000.300000
+       0.5   2000.5       2000.0      0.0  370000.4000000  5306000.300000
+    1000.5      0.5          0.0   1000.0  350000.4000000  5316000.300000
+    1000.5   2000.5       2000.0   1000.0  370000.4000000  5316000.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 5
+789
+456
+123
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units east
+1 line   = 10.000000000000 map units north
+The scale fraction is 1 /  78000.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gtgen out=xxxlab2 'tiecnvrt  +
    geotiff=("ModelTiePointTag=(0,0,0,350000.4,5306000.3,0.0)",  +
           "ModelTiePointTag=(100,100,0,351000.4,5307000.3,0.0)",  +
@@ -788,7 +900,39 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab2
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1000 x 2000 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTIEPOINTTAG=(0,0,0,350000.4,5306000.3,0.0)
+MODELPIXELSCALETAG=(10.0,-10.0,0.0)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
+The image raster is an 'area' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.5      0.5  350005.4000000  5306005.300000
+       1.0   2000.0       1999.5      0.5  369995.4000000  5306005.300000
+    1000.0      1.0          0.5    999.5  350005.4000000  5315995.300000
+    1000.0   2000.0       1999.5    999.5  369995.4000000  5315995.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5          0.0      0.0  350000.4000000  5306000.300000
+       0.5   2000.5       2000.0      0.0  370000.4000000  5306000.300000
+    1000.5      0.5          0.0   1000.0  350000.4000000  5316000.300000
+    1000.5   2000.5       2000.0   1000.0  370000.4000000  5316000.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 5
+789
+456
+123
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units east
+1 line   = 10.000000000000 map units north
+The scale fraction is 1 /  78000.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gtgen out=xxxlab2 'tiecnvrt  +
    geotiff=("ModelTiePointTag=(0,0,0,351000.4,5307000.3,0.0)",  +
           "ModelTiePointTag=(100,100,0,350000.4,5306000.3,0.0)",  +
@@ -798,7 +942,39 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab2
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1000 x 2000 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTIEPOINTTAG=(0,0,0,351000.4,5307000.3,0.0)
+MODELPIXELSCALETAG=(-10.0,10.0,0.0)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
+The image raster is an 'area' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.5      0.5  350995.4000000  5306995.300000
+       1.0   2000.0       1999.5      0.5  331005.4000000  5306995.300000
+    1000.0      1.0          0.5    999.5  350995.4000000  5297005.300000
+    1000.0   2000.0       1999.5    999.5  331005.4000000  5297005.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5          0.0      0.0  351000.4000000  5307000.300000
+       0.5   2000.5       2000.0      0.0  331000.4000000  5307000.300000
+    1000.5      0.5          0.0   1000.0  351000.4000000  5297000.300000
+    1000.5   2000.5       2000.0   1000.0  331000.4000000  5297000.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 7
+321
+654
+987
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units east
+1 line   = 10.000000000000 map units north
+The scale fraction is 1 /  78000.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gtgen out=xxxlab2 'tiecnvrt  +
    geotiff=("ModelTiePointTag=(0,0,0,350000.4,5306000.3,0.0)",  +
           "ModelTiePointTag=(100,100,0,351000.4,5307000.3,0.0)",  +
@@ -808,7 +984,38 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab2
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1000 x 2000 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTRANSFORMATIONTAG=(-0.0,10.0,0,350000.4,10.0,-0.0,0,5306000.3,0,0,0,0,0,0,0,1)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
+The image raster is an 'area' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.5      0.5  350005.4000000  5306005.300000
+       1.0   2000.0       1999.5      0.5  350005.4000000  5325995.300000
+    1000.0      1.0          0.5    999.5  359995.4000000  5306005.300000
+    1000.0   2000.0       1999.5    999.5  359995.4000000  5325995.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5          0.0      0.0  350000.4000000  5306000.300000
+       0.5   2000.5       2000.0      0.0  350000.4000000  5326000.300000
+    1000.5      0.5          0.0   1000.0  360000.4000000  5306000.300000
+    1000.5   2000.5       2000.0   1000.0  360000.4000000  5326000.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 0
+369
+258
+147
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units north
+1 line   = 10.000000000000 map units east
+The scale fraction is 1 /  39000.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gtgen out=xxxlab2 'tiecnvrt  +
    geotiff=("ModelTiePointTag=(0,0,0,351000.4,5307000.3,0.0)",  +
           "ModelTiePointTag=(100,100,0,350000.4,5306000.3,0.0)",  +
@@ -818,7 +1025,38 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab2
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1000 x 2000 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTRANSFORMATIONTAG=(0.0,-10.0,0,351000.4,-10.0,-0.0,0,5307000.3,0,0,0,0,0,0,0,1)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
+The image raster is an 'area' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.5      0.5  350995.4000000  5306995.300000
+       1.0   2000.0       1999.5      0.5  350995.4000000  5287005.300000
+    1000.0      1.0          0.5    999.5  341005.4000000  5306995.300000
+    1000.0   2000.0       1999.5    999.5  341005.4000000  5287005.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5          0.0      0.0  351000.4000000  5307000.300000
+       0.5   2000.5       2000.0      0.0  351000.4000000  5287000.300000
+    1000.5      0.5          0.0   1000.0  341000.4000000  5307000.300000
+    1000.5   2000.5       2000.0   1000.0  341000.4000000  5287000.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 2
+741
+852
+963
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units north
+1 line   = 10.000000000000 map units east
+The scale fraction is 1 /  39000.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gtgen out=xxxlab2 'tiecnvrt  +
    geotiff=("ModelTiePointTag=(0,0,0,350000.4,5307000.3,0.0)",  +
           "ModelTiePointTag=(100,100,0,351000.4,5306000.3,0.0)",  +
@@ -828,7 +1066,38 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab2
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1000 x 2000 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTRANSFORMATIONTAG=(-0.0,10.0,0,350000.4,-10.0,-0.0,0,5307000.3,0,0,0,0,0,0,0,1)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
+The image raster is an 'area' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.5      0.5  350005.4000000  5306995.300000
+       1.0   2000.0       1999.5      0.5  350005.4000000  5287005.300000
+    1000.0      1.0          0.5    999.5  359995.4000000  5306995.300000
+    1000.0   2000.0       1999.5    999.5  359995.4000000  5287005.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5          0.0      0.0  350000.4000000  5307000.300000
+       0.5   2000.5       2000.0      0.0  350000.4000000  5287000.300000
+    1000.5      0.5          0.0   1000.0  360000.4000000  5307000.300000
+    1000.5   2000.5       2000.0   1000.0  360000.4000000  5287000.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 6
+147
+258
+369
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units north
+1 line   = 10.000000000000 map units east
+The scale fraction is 1 /  39000.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gtgen out=xxxlab2 'tiecnvrt  +
    geotiff=("ModelTiePointTag=(0,0,0,351000.4,5306000.3,0.0)",  +
           "ModelTiePointTag=(100,100,0,350000.4,5307000.3,0.0)",  +
@@ -838,7 +1107,38 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab2
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1000 x 2000 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTRANSFORMATIONTAG=(0.0,-10.0,0,351000.4,10.0,-0.0,0,5306000.3,0,0,0,0,0,0,0,1)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
+The image raster is an 'area' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.5      0.5  350995.4000000  5306005.300000
+       1.0   2000.0       1999.5      0.5  350995.4000000  5325995.300000
+    1000.0      1.0          0.5    999.5  341005.4000000  5306005.300000
+    1000.0   2000.0       1999.5    999.5  341005.4000000  5325995.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5          0.0      0.0  351000.4000000  5306000.300000
+       0.5   2000.5       2000.0      0.0  351000.4000000  5326000.300000
+    1000.5      0.5          0.0   1000.0  341000.4000000  5306000.300000
+    1000.5   2000.5       2000.0   1000.0  341000.4000000  5326000.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 4
+963
+852
+741
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units north
+1 line   = 10.000000000000 map units east
+The scale fraction is 1 /  39000.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gtgen out=xxxlab3 'tiecnvrt  +
    geotiff=("ModelTiePointTag=(1,1,0,350000.4,5306000.3,0.0)",  +
           "ModelTiePointTag=(101,101,0,351000.4,5307000.3,0.0)",  +
@@ -848,7 +1148,38 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab3
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1000 x 2000 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTRANSFORMATIONTAG=(-0.0,10.0,0,349990.4,10.0,0.0,0,5305990.3,0,0,0,0,0,0,0,1)
+GTRASTERTYPEGEOKEY=2(RasterPixelIsPoint)
+
+The image raster is a 'point' or 'post' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.0      0.0  349990.4000000  5305990.300000
+       1.0   2000.0       1999.0      0.0  349990.4000000  5325980.300000
+    1000.0      1.0          0.0    999.0  359980.4000000  5305990.300000
+    1000.0   2000.0       1999.0    999.0  359980.4000000  5325980.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5         -0.5     -0.5  349985.4000000  5305985.300000
+       0.5   2000.5       1999.5     -0.5  349985.4000000  5325985.300000
+    1000.5      0.5         -0.5    999.5  359985.4000000  5305985.300000
+    1000.5   2000.5       1999.5    999.5  359985.4000000  5325985.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 0
+369
+258
+147
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units north
+1 line   = 10.000000000000 map units east
+The scale fraction is 1 /  39000.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gtgen out=xxxlab4 'tiecnvrt +
    geotiff=("ModelTiePointTag=(0,0,0,121.0,25.0,0.0)",  +
         "ModelTiePointTag=(1200,0,0,121.0,26.0,0.0)",  +
@@ -858,7 +1189,38 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab4 mapunitm=75500.0 mapinch=20.0 listnl=1201 listns=1201
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1201 x 1201 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTRANSFORMATIONTAG=(-0.0,0.0008333333333,0,121.0,0.0008333333333,-0.0,0,25.0,0,0,0,0,0,0,0,1)
+GTRASTERTYPEGEOKEY=2(RasterPixelIsPoint)
+
+The image raster is a 'point' or 'post' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.0      0.0  121.0000000000  25.00000000000
+       1.0   1201.0       1200.0      0.0  121.0000000000  25.99999999996
+    1201.0      1.0          0.0   1200.0  122.0000000000  25.00000000000
+    1201.0   1201.0       1200.0   1200.0  122.0000000000  25.99999999996
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5         -0.5     -0.5  120.9995833333  24.99958333333
+       0.5   1201.5       1200.5     -0.5  120.9995833333  26.00041666663
+    1201.5      0.5         -0.5   1200.5  122.0004166666  24.99958333333
+    1201.5   1201.5       1200.5   1200.5  122.0004166666  26.00041666663
+The rotation of the image relative to an E-N geographic frame is:
+rotation 0
+369
+258
+147
+The scale units of the image are (ignoring sign):
+1 sample = 0.0008333333333 map units north
+1 line   = 0.0008333333333 map units east
+The scale fraction is 1 / 147347.7
+(assuming mapunit = 75500.000000 meters and the map is 20.000000 inches)
 gtgen out=xxxlab5 'tiecnvrt  +
    geotiff=("ModelTiePointTag=(2,3,0,350000.4,5307000.3,0.0)",  +
           "ModelTiePointTag=(102,103,0,351000.4,5305000.3,0.0)",  +
@@ -868,7 +1230,39 @@ Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab5
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The file is a standalone VICAR GeoTIFF label
+A hypothetical 1000 x 2000 VICAR image will
+be used to illustrate the mapping of corner points.
+The VICAR GeoTIFF label is:
+MODELTIEPOINTTAG=(2,3,0,350000.4,5307000.3,0.0)
+MODELPIXELSCALETAG=(10.0,20.0,0.0)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
+The image raster is an 'area' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.5      0.5  349985.4000000  5307050.300000
+       1.0   2000.0       1999.5      0.5  369975.4000000  5307050.300000
+    1000.0      1.0          0.5    999.5  349985.4000000  5287070.300000
+    1000.0   2000.0       1999.5    999.5  369975.4000000  5287070.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5          0.0      0.0  349980.4000000  5307060.300000
+       0.5   2000.5       2000.0      0.0  369980.4000000  5307060.300000
+    1000.5      0.5          0.0   1000.0  349980.4000000  5287060.300000
+    1000.5   2000.5       2000.0   1000.0  369980.4000000  5287060.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 1
+123
+456
+789
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units east
+1 line   = 20.000000000000 map units north
+The scale fraction is 1 /  78000.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gen xxxim1 nl=500 ns=500
 Beginning VICAR task gen
 GEN Version 6
@@ -888,7 +1282,7 @@ LABEL version 15-Nov-2010
         ************  File xxxim2 ************
                 3 dimensional IMAGE file
                 File organization is BSQ
-                Pixels are in BYTE format from a SUN-SOLR host
+                Pixels are in BYTE format from a X86-LINUX host
                 1 bands
                 500 lines per band
                 500 samples per line
@@ -898,18 +1292,47 @@ LABEL version 15-Nov-2010
 MODELTIEPOINTTAG='(0,0,0,350807.4,5317081.3,0.0)'
 MODELPIXELSCALETAG='(10.0,10.0,0.0)'
 GTRASTERTYPEGEOKEY='1(RasterPixelIsArea)'
----- Task: GEN -- User: lwk -- Tue Jan 24 14:32:31 2012 ----
+---- Task: GEN -- User: wlb -- Wed Jan 13 14:35:34 2016 ----
 IVAL=0.0
 SINC=1.0
 LINC=1.0
 BINC=1.0
 MODULO=0.0
----- Task: GTGEN -- User: lwk -- Tue Jan 24 14:32:31 2012 ----
+---- Task: GTGEN -- User: wlb -- Wed Jan 13 14:35:34 2016 ----
  
 ************************************************************
 gtlist xxxim2
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+VICAR GeoTIFF LABEL LIST
+The VICAR GeoTIFF label is:
+MODELTIEPOINTTAG=(0,0,0,350807.4,5317081.3,0.0)
+MODELPIXELSCALETAG=(10.0,10.0,0.0)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
+The image raster is an 'area' type
+The centers of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       1.0      1.0          0.5      0.5  350812.4000000  5317076.300000
+       1.0    500.0        499.5      0.5  355802.4000000  5317076.300000
+     500.0      1.0          0.5    499.5  350812.4000000  5312086.300000
+     500.0    500.0        499.5    499.5  355802.4000000  5312086.300000
+The outer corners of the corner pixels are:
+VICAR-line    -samp GeoTIFF-samp    -line            East           North
+       0.5      0.5          0.0      0.0  350807.4000000  5317081.300000
+       0.5    500.5        500.0      0.0  355807.4000000  5317081.300000
+     500.5      0.5          0.0    500.0  350807.4000000  5312081.300000
+     500.5    500.5        500.0    500.0  355807.4000000  5312081.300000
+The rotation of the image relative to an E-N geographic frame is:
+rotation 1
+123
+456
+789
+The scale units of the image are (ignoring sign):
+1 sample = 10.000000000000 map units east
+1 line   = 10.000000000000 map units north
+The scale fraction is 1 /  19500.0
+(assuming mapunit = 1.000000 meters and the map is 10.000000 inches)
 gtgen inp=xxxim1 out=xxxim2 'add geotiff=(  +
   "PCSCitationGeoKey=""UTM Zone 60 N with WGS84""")
 Beginning VICAR task gtgen
@@ -922,7 +1345,7 @@ LABEL version 15-Nov-2010
         ************  File xxxim2 ************
                 3 dimensional IMAGE file
                 File organization is BSQ
-                Pixels are in BYTE format from a SUN-SOLR host
+                Pixels are in BYTE format from a X86-LINUX host
                 1 bands
                 500 lines per band
                 500 samples per line
@@ -930,18 +1353,22 @@ LABEL version 15-Nov-2010
                 0 bytes of binary prefix per line
 ---- Property: GEOTIFF ----
 PCSCITATIONGEOKEY='"UTM Zone 60 N with WGS84"'
----- Task: GEN -- User: lwk -- Tue Jan 24 14:32:31 2012 ----
+---- Task: GEN -- User: wlb -- Wed Jan 13 14:35:34 2016 ----
 IVAL=0.0
 SINC=1.0
 LINC=1.0
 BINC=1.0
 MODULO=0.0
----- Task: GTGEN -- User: lwk -- Tue Jan 24 14:32:32 2012 ----
+---- Task: GTGEN -- User: wlb -- Wed Jan 13 14:35:34 2016 ----
  
 ************************************************************
 gtlist xxxim2
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+No mapping in GeoTIFF label
+The GeoTIFF label is:
+PCSCITATIONGEOKEY="UTM Zone 60 N with WGS84"
+
 gtgen inp=xxxim1 out=xxxim2  +
    geotiff=("ModelTiePointTag=(0,0,0,350807.4,5317081.3,0.0)",  +
           "ModelTiePointTag=(100,100,0,351807.4,5316081.3,0.0)",  +
@@ -957,7 +1384,7 @@ LABEL version 15-Nov-2010
         ************  File xxxim2 ************
                 3 dimensional IMAGE file
                 File organization is BSQ
-                Pixels are in BYTE format from a SUN-SOLR host
+                Pixels are in BYTE format from a X86-LINUX host
                 1 bands
                 500 lines per band
                 500 samples per line
@@ -967,26 +1394,36 @@ LABEL version 15-Nov-2010
 MODELTIEPOINTTAG=('(0,0,0,350807.4,5317081.3,0.0)', 
 '(100,100,0,351807.4,5316081.3,0.0)', '(100,0,0,351807.4,5317081.3,0.0)')
 GTRASTERTYPEGEOKEY='1(RasterPixelIsArea)'
----- Task: GEN -- User: lwk -- Tue Jan 24 14:32:31 2012 ----
+---- Task: GEN -- User: wlb -- Wed Jan 13 14:35:34 2016 ----
 IVAL=0.0
 SINC=1.0
 LINC=1.0
 BINC=1.0
 MODULO=0.0
----- Task: GTGEN -- User: lwk -- Tue Jan 24 14:32:32 2012 ----
+---- Task: GTGEN -- User: wlb -- Wed Jan 13 14:35:34 2016 ----
  
 ************************************************************
 gtlist xxxim2
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
+gtlist version 2016-01-13
+No mapping in GeoTIFF label
+The GeoTIFF label is:
+MODELTIEPOINTTAG=(0,0,0,350807.4,5317081.3,0.0)
+MODELTIEPOINTTAG=(100,100,0,351807.4,5316081.3,0.0)
+MODELTIEPOINTTAG=(100,0,0,351807.4,5317081.3,0.0)
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
 gtgen out=xxxlab6   +
   geotiff=("GTRasterTypeGeoKey=1(RasterPixelIsArea)")
 Beginning VICAR task gtgen
 gtgen version Fri Jan 11 2008
 gtlist xxxlab6
 Beginning VICAR task gtlist
-gtlist version Wed Jan  2 2008
-end-proc
+gtlist version 2016-01-13
+No mapping in GeoTIFF label
+The GeoTIFF label is:
+GTRASTERTYPEGEOKEY=1(RasterPixelIsArea)
+
 disable-log
 $ Return
 $!#############################################################################

@@ -1,8 +1,11 @@
 # @(#)javax.imageio.spi.ImageReaderSpi	1.3 00/10/25
 # com.sun.imageio.plugins.gif.GIFImageReaderSpi
 # com.sun.imageio.plugins.png.PNGImageReaderSpi
+# Commented out PDS4 references for the Vicar Open Source System 3/30/16
 jpl.mipl.io.plugins.VicarImageReaderSpi
 jpl.mipl.io.plugins.PDSImageReaderSpi
 jpl.mipl.io.plugins.ISISImageReaderSpi
 jpl.mipl.io.plugins.FITSImageReaderSpi
-jpl.mipl.io.plugins.PDS4ImageReaderSpi
+#jpl.mipl.io.plugins.PDS4ImageReaderSpi
+#jpl.mipl.io.plugins.PDS4TableReaderSpi
+

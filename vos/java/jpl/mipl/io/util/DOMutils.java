@@ -727,7 +727,7 @@ public class DOMutils
         
             Node root1 = doc1.getDocumentElement();
             // strip off the document node??
-            // check if there is onlt one child??
+            // check if there is only one child??
             // child the name of the root??
             Node childOfDocRoot1 = root1.getFirstChild();
             
@@ -1088,7 +1088,7 @@ public class DOMutils
    /* transform a Document using an XSL file
      * @param Doc - the Document to transform
      * @param xslIS - an input Stream for an XSL file<br>
-     * The xsl file probably isthe default XSL read in from the jar file
+     * The xsl file probably is the default XSL read in from the jar file
      */
    	public Document transformDocument(Document doc, InputStream xslIS) {
    		StreamSource xslSS = new StreamSource(xslIS);
@@ -1171,6 +1171,7 @@ public class DOMutils
       if (debug) {
     	  System.out.println("DOMutils.transformDocument  start transform >>>>" );
       }
+      
       transformer.transform(domSource, domResult);
       if (debug) {
     	  System.out.println("DOMutils.transformDocument  end transform <<<<" );
@@ -1221,6 +1222,7 @@ public class DOMutils
 	   		serializeDocument((Document)  node, file, type) ;
 	   		return;
 	   	}
+	   	
 	       //Instantiate an XML serializer and use it to serialize the output DOM to System.out
 		    // using a default output format.
 		if (debug) System.out.println("serializeNode as "+type+" to "+file); 
@@ -1236,6 +1238,7 @@ public class DOMutils
 	        // if (out != null) {
 	        Transformer serializer = TransformerFactory.newInstance().newTransformer();
 	        serializer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+	        serializer.setOutputProperty(OutputKeys.INDENT, "yes");
 	        serializer.transform(new DOMSource(node), new StreamResult(new OutputStreamWriter(out)));
 
 	        
@@ -1277,6 +1280,7 @@ public class DOMutils
 		        // if (out != null) {
 		        Transformer serializer = TransformerFactory.newInstance().newTransformer();
 		        serializer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		        serializer.setOutputProperty(OutputKeys.INDENT, "yes");
 		        serializer.transform(new DOMSource(doc), new StreamResult(new OutputStreamWriter(out)));
 
 		        
@@ -1319,6 +1323,7 @@ public class DOMutils
 		        
 		        Transformer serializer = TransformerFactory.newInstance().newTransformer();
 		        serializer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		        serializer.setOutputProperty(OutputKeys.INDENT, "yes");
 		        serializer.transform(new DOMSource(doc), new StreamResult(new OutputStreamWriter(out)));
 
 		        
@@ -2117,6 +2122,67 @@ public class DOMutils
        }
     return values;
    }
+   
+   /**
+    * Construct an array of all the xPath expressions for this node.
+    * Each attrubute results in a different xPath expression.
+    * IncludeAttributes will return a String with an attribute.
+    * If there are multiple attributes there will be multile xPath
+    * expressions returned, each with a DIFFERENT attribute.
+    * IncludeAttributeValue will include the attribute's value in the xPath String if there
+    * are attributes.
+    * I don't think an xPath expression can hold a value.
+    * // xpath = "//item[@key='FIRST_LINE']" ;
+    **/
+     public String getNodeXPath(Node node) {
+                  // boolean includeValue, 
+                  // boolean includeAttributes, boolean includeAttributeValue) {
+         
+    	 boolean includeParent  = true;
+         String xpath = "";
+         
+         int nodeCt = 1;
+         String nodeName = node.getNodeName();
+         String nodeValue = node.getNodeValue();
+         String localName = node.getLocalName();
+         String prefix = null;
+         
+         // walk up the tree to get all the parents?
+         String[] parentNames = new String[0];
+         Node parent = null;
+         
+         // get the xpath
+         if (includeParent) {
+         		prefix = node.getPrefix();
+         		if (prefix == null) prefix = "";
+         		parent = node.getParentNode();
+         		if (parent != null) {
+         			parentNames = getNodeXPath(parent, false);
+         		}
+         		else {
+         			parentNames = new String[0];
+         		}
+         }
+         		
+         
+         // System.out.println("getNodeXPath "+nodeName+" - "+nodeValue);
+         // System.out.println("localName "+localName+" - "+prefix);
+         
+         if (nodeName.equals("#text")) {
+          return null;
+         }
+                 
+         int parentCt = parentNames.length;            
+          
+          for (int j=0 ; j < parentCt ; j++) {
+          	xpath += "/"+parentNames[j] ;
+          	
+          }
+          xpath += "/"+nodeName ;
+      
+         
+      return xpath;
+     }
    
    /**
    * Get a NodeIterator for a given node.

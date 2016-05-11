@@ -9,6 +9,9 @@ public class VicarImageReadParam extends ImageReadParam {
     private int tileSize = 256;
     private int tileSizeX = 256;
     private int tileSizeY = 256;
+    // flag. If true we will calculate md5 checksums on the input file
+    // add the info to the metadata (DOM) 
+    private boolean md5sum = false;
     
 
     public void setDirectoryPath(String path) {
@@ -41,6 +44,16 @@ public class VicarImageReadParam extends ImageReadParam {
 
     public int getTileSizeY() {
         return this.tileSizeY;
+    }
+    
+    // new for PDS4 velocity template use
+    
+    public void setMd5sum(boolean f) {
+    	md5sum = f;
+    }
+    
+    public boolean getMd5sum() {
+    	return md5sum;
     }
     
 }

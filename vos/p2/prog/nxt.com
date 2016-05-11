@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module nxt
-$! VPACK Version 1.9, Wednesday, December 21, 2011, 14:21:00
+$! VPACK Version 2.1, Monday, April 11, 2016, 22:17:27
 $!
 $! Execute by entering:		$ @nxt
 $!
@@ -152,7 +152,7 @@ $ vpack nxt.com -mixed -
 	-s nxt.c -
 	-i nxt.imake -
 	-p nxt.pdf -
-	-t tstnxt.pdf tstnxt.dat file_list.list tstnxt.log_solos
+	-t tstnxt.pdf tstnxt.log
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -162,10 +162,10 @@ $ create nxt.c
 $ DECK/DOLLARS="$ VOKAGLEVE"
 #include <stdio.h>
 #include <string.h>
-#include "taeconf.inp"
+#include "taeextproto.h"
 #include "parblk.inc"
-#include "pgminc.inc"
-#include "vicmain_c"
+#include "vicmain_c.h"
+#include "zifmessage.h"
 
 /*  Revision History                                                    */
 /*    9-86   SP   changed fscanf to sscanf and changed                  */
@@ -183,7 +183,9 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
 /*    7-1998 TIH  Changed constant value with FILENAME_LEN to fix       */
 /*   10-2011 LWK  Increased pool size in q_init call from 500 to 1000   */
 /*                to fix V-block overflow in 64-bit linux.              */
-
+/*    12-09-2012 R. J. Bambery - fixed warnings with gcc 4.7.2          */
+/*                moved variables c and ounit into #ifdef VMS block     */
+ 
 void main44(void)
 {
 
@@ -191,7 +193,7 @@ void main44(void)
 #define LENGTH1  17             /* number of chars in first record      */
 #define FILENAME_LEN	255
    
-    FILE *unit, *ounit;	        /* C I/O control block			*/
+    FILE *unit;	        /* C I/O control block			*/
     int length;                 /* first record length                  */
     int count,def;		/* COUNT, DEF for XVPARM		*/
     struct PARBLK out_parb;	/* Local parameter block for XQ calls	*/
@@ -200,7 +202,6 @@ void main44(void)
     int j;                      /* loop variable, first record length   */
     int tape_pos;		/* File position number for tapes	*/
     int is_tape;		/* 1 if file is tape; 0 if not		*/
-    char c;
     char rec1[MAXR1];           /* buffer for first record in file.     */
     int rec_tmp[MAXR1];           /* buffer for first record in file.     */
     char file_name[FILENAME_LEN];	/* name of file to reset	*/
@@ -212,18 +213,19 @@ void main44(void)
     long off_dst,off_src;	/* used for fseek */
     int c_buf_size, c_buf_indx;
 
+    zifmessage("*** nxt version 2016-03-07");
     zvparm("INPUT",file_name,&count,&def,1,0);
     zvfilename(file_name,new_name,FILENAME_LEN);
 
     unit = fopen(new_name,"r+");	/* Open the file		*/
     if (unit == NULL)
     {
-	zvmessage(" File open error.  Check specification.","");
+	zvmessage("??E - File open error.  Check specification.","");
 	zabend();
     }
 
      /*   Load first record into rec1 buffer.                           */
-    for (i=0; (rec1[i] = getc(unit) ) != '\n' && i < MAXR1-1; ++i)
+    for (i=0; (rec1[i] = (char)getc(unit) ) != '\n' && i < MAXR1-1; ++i)
          ;
     length = i;
     /* Start source offset at character right after the first \n. */
@@ -236,7 +238,7 @@ void main44(void)
       stat = sscanf(rec1, "NEXT FILE = %10d", &next_file);
       if (stat != 1)
       {
-  	zvmessage(" Error reading number of next file","");
+  	zvmessage("??E - Error reading number of next file","");
   	zvmessage(" First line of input file must be of the form:","");
   	zvmessage(" NEXT FILE = file_number","");
   	zabend();
@@ -250,7 +252,7 @@ void main44(void)
   	if (stat == EOF) break;
   	if (stat != 1)
   	{
-  	    zvmessage(" Read error on input","");
+  	    zvmessage("??E - Read error on input","");
   	    zabend();
   	}
       }
@@ -267,7 +269,7 @@ void main44(void)
     {
 	for (i = 1; output_name[i] != '/'; i++)
 	  ;
-	strncpy(output_name_final,&output_name[1],i-1);
+	strncpy(output_name_final,&output_name[1],(size_t)( i-1));
 	output_name_final[i-1] = '\0';
 	sscanf(&output_name[i+1],"%d",&tape_pos);
 	is_tape = 1;
@@ -311,37 +313,11 @@ void main44(void)
       stat = fprintf(unit,rec1);
       if (stat != length+1)
       {
- 	zvmessage(" Write (update) error on input","");
+ 	zvmessage("??E -  Write (update) error on input","");
 	zabend();
       }
       fclose(unit);
     } else { 
-/* sorry guys.  I tried to get VMS to use the same code as UNIX, but */
-/* it just refused, and i tried 3 different approaches, so we're stuck */
-/* with 2 seperate routines. */
-#if VMS_OS
-      /* open up another file and just copy into it - the reason this */
-      /* works is because VMS just opens up another version. */
-      ounit = fopen(new_name,"w");
-       if (ounit == NULL)
-      {
-	zvmessage(" File open error.  Check specification.","");
-	zabend();
-      }
-      rewind(unit);
-      for(i=0; getc(unit)!= '\n' && i < MAXR1 -1; i++);
-      sprintf(rec1,"NEXT FILE = %5d\n",next_file);
-
-      for (i=0; i <= LENGTH1; ++i)
-        putc( rec1[i], ounit );          /* write out first record. */
-
-      while ( (c=getc(unit)) != EOF )
-        putc( c, ounit);                 /* copy the rest of the file. */
-
-      fclose(unit);
-      fclose(ounit);
-
-#else
       /* determine size needed and fill circular buffer */
       c_buf_size = LENGTH1-length;
       c_buf_indx = 0;
@@ -359,7 +335,7 @@ void main44(void)
       sprintf(rec1,"NEXT FILE = %5d\n",next_file);
       for (i=0; i <= LENGTH1; ++i)
         putc( rec1[i], unit );          /* write out first record. */
-      off_dst = strlen(rec1);
+      off_dst = (long int)strlen(rec1);
 
       /* copy over remainder of file through circular buffer */
       /* until we hit end of file */
@@ -384,9 +360,7 @@ void main44(void)
       }
 
       fclose(unit);
-#endif
     }
-
 }
 
 
@@ -403,10 +377,11 @@ $ create nxt.imake
 #define MAIN_LANG_C
 #define R2LIB
 
-#define USES_C
+#define USES_ANSI_C
 
 #define LIB_RTL
 #define LIB_TAE
+#define LIB_P2SUB
 
 /*#define DEBUG	/* comment out on delivery */
 $ Return
@@ -414,13 +389,13 @@ $!#############################################################################
 $PDF_File:
 $ create nxt.pdf
 PROCESS HELP=*
-  local a type=string
-  local (b,c,d) type = integer
-  PARM INPUT   TYPE=STRING COUNT=1
-  PARM ONAM    TYPE=NAME  default = a
-  PARM ISTAPE  TYPE=NAME  default = b
-  PARM TAPEPOS TYPE=NAME  default = c
-  PARM NXTFIL  TYPE=NAME  default = d
+  local a       type=string  count=1
+  local (b,c,d) type = integer 
+  PARM INPUT    TYPE=STRING COUNT=1
+  PARM ONAM     TYPE=NAME  default = a
+  PARM ISTAPE   TYPE=NAME  default = b
+  PARM TAPEPOS  TYPE=NAME  default = c
+  PARM NXTFIL   TYPE=NAME  default = d
 
 !# annot function="VICAR Procedure Generation"
 !# annot keywords=(SRCH,ONAM,ISTAPE,TAPEPOS,NXTFIL,"LIST.DAT",+
@@ -429,10 +404,13 @@ END-PROC
 .TITLE
 Returns data for next file in a SRCH list
 .HELP
-NXT takes a list file which was written by the program SRCH and 
+
+OPERATION
+
+NXT reads a list file which was written by the program SRCH and 
 returns information about the next file in the list.  The values 
 are returned in ONAM, ISTAPE, TAPEPOS, and NXTFIL.  Upon completion, ONAM
-contains the name of the disk file or tape which is next in the list.
+contains the name of the disk file or tape position which is next in the list.
 
 If the file is a tape, ISTAPE will be 1, otherwise it will be 0.
 
@@ -444,8 +422,27 @@ NXTFIL contains the (ordinal) number of the returned file within the list file.
 NXT needs to have write access to the input file and to its directory because
 it modifies the first record of the file.  The recommended method for accessing
 a SRCH file owned by another user is to make a copy of it in one's account.
+
+
+HISTORICAL FOOTNOTE
+
+This program was written for processing files from a 9-track tape on
+a VAX-VMS system in the 1980's. In those days disk space was limited,
+so tape was the medium of archival storage and data interchange.
+
+Tapes came in two forms; with and without IBM standard labels. Standard
+label tape allowed file names to be associated with a position on the
+tape. If the tape was not labeled then you could only access data
+by knowing its position on the tape. This program performed this
+function for you by relating an entry in an ascii text list of files
+to a position on a tape and then creating a disk file with a filename.
+
+The example, below shows historically how this was done under VAX-VMS.
+
+Now this program gives you the ability to access files quickly from
+a list, thus avoiding a human manual entry.
 .page
-Example:
+EXAMPLE:
 
 The following procedure could be used to get a list of the 
 system label of each file in the list file LIST.DAT.
@@ -472,26 +469,32 @@ BODY
 END-PROC
 
 .page
-HISTORY:
-   REVISIONS :
+REVISIONS:
 
-    9-86   SP   changed fscanf to sscanf and changed                  
-                format specifier from "%5d" to "10%d"                 
-                to allow users to modify the first record in file.    
-                added code to check for first record having a         
-                different length than expected and to handle this.    
-    9-86   SP   modified to output to a TAE variable the number of the
-                file (as done in program CNT) per Charlie Avis.       
-                note that this change the calling sequence of NXT by  
-                adding another required parameter, NXTFIL.            
-    2-87   SP   Added code to handle  NO RECORDS in SRCH file.        
-    6-94   SVH  Ported to UNIX - Steve Hwan				
-    6-96   OAM  Included a REWIND statement and a loop in the VMS part
-		to avoid dropping filenames as it updates the NEXT FILE
-                number.  FR 89371.
-    8-97   RRD  Added first fseek call after #else (the UNIX specific 
-		section) because a previous call to fscanf had moved 
-		the current position in the file and this fixes it.
+  1986-09    SP  Changed fscanf to sscanf and changed                  
+                 format specifier from "%5d" to "10%d"                 
+                 to allow users to modify the first record in file.    
+                 Added code to check for first record having a         
+                 different length than expected and to handle this.    
+                 Modified to output to a TAE variable the number of the
+                 file (as done in program CNT) per Charlie Avis.       
+                 Note that this change the calling sequence of NXT by  
+                 adding another required parameter, NXTFIL.            
+  1987-02    SP  Added code to handle  NO RECORDS in SRCH file.        
+  1994-06    SVH Ported to UNIX - Steve Hwan				
+  1996-06    OAM Included a REWIND statement and a loop in the VMS part
+	         to avoid dropping filenames as it updates the NEXT FILE
+                 number.  FR 89371.
+  1997-08    RRD Added first fseek call after #else (the UNIX specific 
+                 section) because a previous call to fscanf had moved 
+                 the current position in the file and this fixes it.
+  1998-07    TIH Changed constant value with FILENAME_LEN to fix       
+  2011-10    LWK Increased pool size in q_init call from 500 to 1000   
+                 to fix V-block overflow in 64-bit linux.             
+  2012-12-09 RJB fixed warnings with gcc 4.7.2         
+                 moved variables c and ounit into #ifdef VMS_OS block   
+  2012-12-14 RJB Doc update.
+  2016-03-07 WLB Switched to ANSI_C. Removed VMS residue. Migrated to MIPL.
 
 .LEVEL1
 .VARI INPUT 
@@ -502,7 +505,7 @@ in the list
 .VARI ISTAPE
 Output -- TRUE (1) if tape
 .VARI TAPEPOS
-Output -- File position number
+Output -- File position number 
 .vari nxtfil
 Output -- Number of next
 file in list.
@@ -541,23 +544,88 @@ $!#############################################################################
 $Test_File:
 $ create tstnxt.pdf
 procedure
+local   afidsroot   type=string count=1
+local   aftestdata  type=string count=1
+local filnam    type=string count=1
+local istape    type=int    count=1
+local tapos     type=int    count=1
+local filenum   type=int    count=1
+
+! Aug 22, 2013 - RJB
+! TEST SCRIPT FOR NXT
+!
+! Vicar Programs:
+!       translog reset 
+!
+! External programs
+!       <none>
+!
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no xvd display
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!           
+!   In batch mode it produces files testx.eps by calling gnuplot
+!       to create the encapsulated postscript file which can be
+!       later viewed with ghostscript or gimp
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
+!            
+! Requires external test data: 
+!   cartlab or mipl dependent pointers
+!
+!   Cartlab defines env var $AFIDS_ROOT, mipl doesn't
+!   The test data in cartlab is on /raid1/test_data 
+!   but in other facilities it might be somewhere else. 
+!   
+!   To facilitate this test you can define an
+!   environment variable $AFIDS_TESTDATA to point to
+!   that data. The cartlab system does not. In the git archive
+!   on pistol there is softlink to the test data in vdev that
+!   allows this test to pass 
+
 refgbl $echo
-LOCAL FILNAM TYPE=STRING
-LOCAL ISTAPE TYPE=INT
-LOCAL TAPOS TYPE=INT
-LOCAL FILENUM TYPE=INT
+
+
 body
-let _onfail="continue"
+let _onfail="stop"
+
+enable-log
+
+!check to see if mipl or cartlab for test images
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
+if (afidsroot = "")
+!MIPL
+    ush ln -s /project/test_work/testdata/carto ct
+else
+!CARTLAB
+    if (aftestdata = "") 
+        ush ln -s ../test_data/vicar_test_images/testdata/carto ct
+    else
+        ush ln -s $AFIDS_TESTDATA/vicar_test_images/testdata/carto ct
+    end-if
+end-if
+
+let _onfail="goto rm"
+
 let $echo="yes"
+ush cp ct/tstnxt.dat ./
+ush cp ct/file_list.list ./ 
 reset tstnxt.dat 3
 reset file_list.list 1
 loop
   nxt tstnxt.dat filnam istape tapos filenum
   if (filnam = "END_OF_FILE") break
-  disp filnam
-  disp istape
-  disp tapos
-  disp filenum
+  let $echo="no"
+  write "filnam = &filnam"
+  write "istape = &istape"
+  write "tapos = &tapos"
+  write "filenum = &filenum"
+  let $echo="yes"
 end-loop
 !
 !Now, using default parameters.....
@@ -571,25 +639,17 @@ end-loop
 !
 !To test for AR100461, add the current path in front
 !of input filename, as: /project/it/tih/deliv20.01/ss/nxt/tstnxt.dat
+rm>
+ush rm ct
+
+disable-log
+
+let $echo="no"
 end-proc
 $!-----------------------------------------------------------------------------
-$ create tstnxt.dat
-NEXT FILE =     3
-A.DAT
-B.DAT
-C.DAT
-?JS4269/4
-E.DAT
-F.DAT
-$!-----------------------------------------------------------------------------
-$ create file_list.list
-NEXT FILE =     1
-0400r.spk
-0600r.spk
-0800r.spk
-$!-----------------------------------------------------------------------------
-$ create tstnxt.log_solos
-tstnxt
+$ create tstnxt.log
+ush cp ct/tstnxt.dat ./
+ush cp ct/file_list.list ./
 reset tstnxt.dat 3
 Beginning VICAR task reset
 reset file_list.list 1
@@ -597,109 +657,60 @@ Beginning VICAR task reset
 loop
   nxt tstnxt.dat filnam istape tapos filenum
 Beginning VICAR task nxt
+*** nxt version 2016-03-07
  Output 3 is C.DAT
   if (filnam = "END_OF_FILE") break
-  disp filnam
-
-filnam="C.DAT"
-
-  disp istape
-
-istape=0
-
-  disp tapos
-
-tapos=0
-
-  disp filenum
-
-filenum=3
-
+  let $echo="no"
+filnam = C.DAT
+istape = 0
+tapos = 0
+filenum = 3
 end-loop
   nxt tstnxt.dat filnam istape tapos filenum
 Beginning VICAR task nxt
+*** nxt version 2016-03-07
  Output 4 is tape JS4269 file 4
   if (filnam = "END_OF_FILE") break
-  disp filnam
-
-filnam="JS4269"
-
-  disp istape
-
-istape=1
-
-  disp tapos
-
-tapos=4
-
-  disp filenum
-
-filenum=4
-
+  let $echo="no"
+filnam = JS4269
+istape = 1
+tapos = 4
+filenum = 4
 end-loop
   nxt tstnxt.dat filnam istape tapos filenum
 Beginning VICAR task nxt
+*** nxt version 2016-03-07
  Output 5 is E.DAT
   if (filnam = "END_OF_FILE") break
-  disp filnam
-
-filnam="E.DAT"
-
-  disp istape
-
-istape=0
-
-  disp tapos
-
-tapos=0
-
-  disp filenum
-
-filenum=5
-
+  let $echo="no"
+filnam = E.DAT
+istape = 0
+tapos = 0
+filenum = 5
 end-loop
   nxt tstnxt.dat filnam istape tapos filenum
 Beginning VICAR task nxt
+*** nxt version 2016-03-07
  Output 6 is F.DAT
   if (filnam = "END_OF_FILE") break
-  disp filnam
-
-filnam="F.DAT"
-
-  disp istape
-
-istape=0
-
-  disp tapos
-
-tapos=0
-
-  disp filenum
-
-filenum=6
-
+  let $echo="no"
+filnam = F.DAT
+istape = 0
+tapos = 0
+filenum = 6
 end-loop
   nxt tstnxt.dat filnam istape tapos filenum
 Beginning VICAR task nxt
+*** nxt version 2016-03-07
  NXT encountered end of file
   if (filnam = "END_OF_FILE") break
  break
 end-loop
   nxt file_list.list
 Beginning VICAR task nxt
+*** nxt version 2016-03-07
  Output 1 is 0400r.spk
-end-proc
-exit
-slogoff
-if ($RUNTYPE = "INTERACTIVE")
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-else
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-end-if
-ulogoff
-END-PROC
-END-PROC
+ush rm ct
+disable-log
 $ Return
 $!#############################################################################

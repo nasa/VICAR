@@ -52,6 +52,7 @@ extern "C" {
  *
  * Date		Who		Description
  * -----------  --------------- ---------------------------------------------
+ * 2015-08-19   C. Cheng    Added SiteInstrumentAzimuth and SiteInstrumentElevation
  * 2003-01-08	P. Zamani	Changed type of ReferenceCoordSystemIndex to
  *                              LblApiIntItem_typ
  *****************************************************************************/
@@ -81,6 +82,8 @@ typedef struct
 	LblApiRealItem_typ		    SlantDistance;
 	LblApiRealItem_typ		    SmearAzimuth;
 	LblApiRealItem_typ		    SmearMagnitude;
+	LblApiRealItem_typ		    SiteInstrumentAzimuth;
+	LblApiRealItem_typ		    SiteInstrumentElevation;
 	LblApiRealItem_typ		    SolarAzimuth;
 	LblApiTypeItem_typ		    SolarAzimuthUnit;
 	LblApiRealItem_typ		    SolarElevation;

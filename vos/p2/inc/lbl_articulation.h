@@ -52,6 +52,9 @@ extern "C" {
  *========
  * Date         Who             Description
  * ============ =============== =============================================
+ * 2015-08-19   C. Cheng        Added ArticulationDeviceTempCount
+ * 2015-07-01   C. Cheng        Added GravityAcceleration
+ * 2015-07-01   C. Cheng        Added ArticulationDevicePhase
  * 2003-01-13   P. Zamani       Added ArticulationDevInstrumentId
  *****************************************************************************/
 
@@ -79,6 +82,7 @@ typedef struct
 	LblApiIdItem_typ		ArticulationDevPosition_Id[LBL_POSITION_ARRAY];
 	LblApiNameItem_typ		ArticulationDevPositionName[LBL_POSITION_ARRAY];
 	LblApiIdItem_typ		ArticulationDeviceMode;
+	LblApiRealItem_typ		ArticulationDeviceTempCount[5];
 	LblApiRealItem_typ		ArticulationDeviceTemp[5];
 	LblApiNameItem_typ		ArticulationDeviceTempName[5];
 	LblApiTypeItem_typ		ArticulationDeviceTempUnit[5];
@@ -91,6 +95,8 @@ typedef struct
 	LblApiNameItem_typ		ArticulationDeviceStateName[12];
 	LblApiIdItem_typ		InstrumentId;
 	LblApiIdItem_typ		SolutionId;
+    LblApiRealItem_typ      GravityAcceleration;
+    LblApiStringItem_typ	ArticulationDevicePhase;
 	} LblArticulation_typ;
 
 /***  Function prototypes  ***/

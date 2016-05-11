@@ -129,10 +129,13 @@
 #ifdef SS_P2PROG
 #define SS_P2SUB
 #define EXT_GNUPLOT
+#define EXT_TIFF
+#define EXT_FFTW
 #endif
 
 #ifdef SS_P3PROG
 #define SS_P3SUB
+#define EXT_TIFF
 #endif
 
 #ifdef PROD_VICAR_EXEC
@@ -210,11 +213,13 @@
 #define JEXT_HTTPCLIENT
 #define JEXT_COMMON_CODEC
 #define JEXT_JSON_SIMPLE
+#define JEXT_JMONKEYENGINE
 #endif
 
 
 #ifdef PROD_PLACES
 #define SS_JAVA
+#define PROD_JavaVicarIO
 #define JEXT_JAXB
 #define JEXT_LOG4J
 #define JEXT_COMMON_CODEC
@@ -229,10 +234,14 @@
 #define JEXT_FREEMARKER
 #define JEXT_RSA
 #define JEXT_JAVAMAIL
+#define JEXT_JAI
+#define JEXT_JAI_IIO
+#define JEXT_JSON_SIMPLE
 #endif
 
 #ifdef PROD_PLACES_CORE
 #define SS_JAVA
+#define PROD_JavaVicarIO
 #define JEXT_JAXB
 #define JEXT_LOG4J
 #define JEXT_COMMON_CODEC
@@ -247,6 +256,8 @@
 #define JEXT_FREEMARKER
 #define JEXT_RSA
 #define JEXT_JAVAMAIL
+#define JEXT_JAI
+#define JEXT_JAI_IIO
 #endif
 
 #ifdef PROD_PLACES_MER
@@ -303,6 +314,7 @@
 #define PROD_JavaVicarIO
 #define JEXT_JSON_SIMPLE
 #define JEXT_TREEVOTEE
+#define	JEXT_JUNAMI
 #define JEXT_LOG4J
 #define JEXT_SLF4J
 #define JEXT_EHCACHE
@@ -530,9 +542,16 @@
 #define JEXT_JAKARTA_ORO
 #define JEXT_JAI
 #define JEXT_JAI_IIO
+#define JEXT_JAI_EXT
 *Added for Vicar Open Source
 #define JEXT_COMMONS_VFS
 #define JEXT_COMMON_LOGGING
+*Added for Vicar Open Source 3/21/16
+*#define JEXT_PDS4_TOOLS
+*Added for Vicar Open Source 3/22/16
+*#define JEXT_PDS_GENERATE_TOOL
+*Added for Vicar Open Source 3/23/16
+*#define JEXT_PROD_TOOLS
 #endif
 
 #ifdef PROD_JadeDisplay
@@ -570,6 +589,7 @@
 #define JEXT_COMMONS_BEANUTILS
 #define JEXT_COMMONS_LANG
 #define JEXT_PDS_GENERATE_TOOL
+#define JEXT_PDS4_TOOLS
 #endif
 
 ********************

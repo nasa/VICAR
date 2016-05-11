@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module f2
-$! VPACK Version 1.9, Wednesday, July 27, 2011, 18:09:33
+$! VPACK Version 1.9, Monday, August 03, 2015, 14:11:55
 $!
 $! Execute by entering:		$ @f2
 $!
@@ -152,8 +152,7 @@ $ vpack f2.com -mixed -
 	-s f2.f f2.fin -
 	-i f2.imake -
 	-p f2.pdf -
-	-t tstf2.pdf tstf2.log_solos tstf2.log_solos_diff tstf2.log_linux_diff -
-	   tstf2_f77C.log
+	-t tstf2.pdf tstf2.log_linux tstf2.log_solos
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -169,6 +168,8 @@ C   **** NOTE: When you Modify this file change the "Version" message!
 C
 C   REVSION HISTORY:
 C
+C     03 Aug 15   ...WLB...   Added parms fu2, fu3, fu4 to extend the possible
+C                             length of function strings.
 C     22 Jul 11   ...LWK...   Hash table fails for both inputs = -32768, added
 C                             special code.  Merged with RJB's changes.
 C     10 Jun 11   ...RJB...   Fixes for linux gcc4.4 compiler, increased func
@@ -252,7 +253,7 @@ C     01 AUG 75   ...ALZ...   PROGRAM WRITTEN BY A ZOBRIST
       INCLUDE 'f2.fin'
       DATA CASE, XKC,ROUND,KFLAGS,FMT /1,0,0.5,1,MAXIN*'    '/
 C==================================================================
-      call xvmessage('F2 version 26-Jul-11', ' ')
+      call xvmessage('F2 version 98-Aug-2015', ' ')
 
       CALL GET_FUNCTION
 
@@ -276,11 +277,31 @@ C---------------------------------------------------------------------
       SUBROUTINE GET_FUNCTION
       INCLUDE 'f2.fin'
       INTEGER*4 COUNT,IER
+      INTEGER*4 DEF,MAXLEN,ML2,ML3,ML4
+      CHARACTER*7 TYPE
+      CHARACTER*2000 BIGBUF
       LOGICAL*4 XVPTST
 
 C ---    grab and parse the function
       CALL XVP ('FUNCTION', FCN, COUNT)
-      CALL KNUTH (FCN,FBUF,IER)
+      CALL XVPSTAT ('FUNCTION', COUNT, DEF, MAXLEN, TYPE)
+
+      CALL XVP ('FU2', FCN2, COUNT)
+      CALL XVPSTAT ('FU2', COUNT, DEF, ML2, TYPE)
+
+      CALL XVP ('FU3', FCN3, COUNT)
+      CALL XVPSTAT ('FU3', COUNT, DEF, ML3, TYPE)
+
+      CALL XVP ('FU4', FCN4, COUNT)
+      CALL XVPSTAT ('FU4', COUNT, DEF, ML4, TYPE)
+
+      BIGBUF(:) = " "
+      BIGBUF(1:MAXLEN) = FCN(1:MAXLEN)
+      BIGBUF(MAXLEN+1:MAXLEN+ML2) = FCN2(1:ML2)
+      BIGBUF(MAXLEN+ML2+1:MAXLEN+ML2+ML3) = FCN3(1:ML3)
+      BIGBUF(MAXLEN+ML2+ML3+1:MAXLEN+ML2+ML3+ML4) = FCN4(1:ML4)
+
+      CALL KNUTH (BIGBUF,FBUF,IER)
 
       IF (IER.EQ.2) THEN
          CALL XVMESSAGE('BAD FUNCTION STRING',' ')
@@ -1248,7 +1269,7 @@ C--- INCLUDE FILE FOR VICAR PROGRAM F2.F
       IMPLICIT NONE
 C ---    buffer stuff
       INTEGER MAXIN,MAX_SAMP,MAXFBUF
-      PARAMETER (MAXIN=18,MAX_SAMP=150000,MAXFBUF=300)
+      PARAMETER (MAXIN=18,MAX_SAMP=150000,MAXFBUF=3000)
 
 C ---- Table Stuff
       INTEGER PRIME
@@ -1266,12 +1287,18 @@ C --- Control Parameters
       REAL    EXCLD(20), LIMITS(2), REPLC
       BYTE REPLACE
       LOGICAL AUTOREPLACE, SUBSET
-      CHARACTER*256 FCN
+
+C     Must match taeconf.inp:MAXSTRSIZ
+      CHARACTER*250 FCN
+      CHARACTER*250 FCN2
+      CHARACTER*250 FCN3
+      CHARACTER*250 FCN4
+
       REAL    AMX, AMN, ROUND
       REAL FBUF(MAXFBUF)
       INTEGER CASE,XKC, KFLAGS
 
-      COMMON/F2COM/FCN,FBUF,AMX,AMN,ROUND,
+      COMMON/F2COM/FCN,FCN2,FCN3,FCN4,FBUF,AMX,AMN,ROUND,
      + CASE,XKC,NUMEXC, NUMLMTS, AUTOREPLACE,TYPEXC,EXCLD,
      + LIMITS,REPLC,KFLAGS,SUBSET,REPLACE
 
@@ -1339,6 +1366,9 @@ $ create f2.pdf
  PARM ORG TYPE=STRING   DEFAULT=--  COUNT=0:1 VALID=(BSQ,BIL,BIP)
  PARM FORMAT KEYWORD  VALID=(BYTE,HALF,FULL,REAL) DEFAULT=-- COUNT=0:1
  PARM FUNCTION TYPE=STRING       DEFAULT="IN1"
+ PARM FU2      TYPE=STRING       DEFAULT=""
+ PARM FU3      TYPE=STRING       DEFAULT=""
+ PARM FU4      TYPE=STRING       DEFAULT=""
  PARM TRUNC    TYPE=KEYWORD      DEFAULT=-- COUNT=0:1 VALID=TRUNC
  PARM EXCLUDE  TYPE=REAL         DEFAULT=-- COUNT=0:20
  PARM LIMITS   TYPE=REAL         DEFAULT=-- COUNT=(0,2)
@@ -1384,7 +1414,16 @@ $ create f2.pdf
 
  The function string can include constants, including constants expressed
  in floating point notation. The string can also include TCL variable 
- references.  
+ references. 
+
+ The function string length is limited to 250 characters.
+ However, the fu2, fu3, and fu4 parameters can be used for longer functions.
+ The contents of function, fu2, fu3, and fu4 are concatenated. The fu2, fu3,
+ and fu4 parameters also are limited to 250 characters each. The limit is
+ based on TAE's MAXSTRSIZ value of 250 in taeconf.inp. Adding more fu
+ extensions to function is possible, e.g. fu5, fu6, ... However, MAXCODE in
+ knuth.com may need to be lengthened as the length of compiled code 
+ increases with increasing function string length.
 	
  F2 can operate on zero inputs to generate an output using the
  operands LINE, SAMP, and BAND.
@@ -1597,41 +1636,40 @@ the more general F2 program.
 
  WRITTEN BY: 	A. L. ZOBRIST		18 FEBRUARY 1976
 
- COGNIZANT PROGRAMMER: Ray Bambery  10 June 2011
+ COGNIZANT PROGRAMMER: W. Bunch 2015-08-03
 
  REVISIONS:
-     22 Jul 2011   ...LWK... Hash table fails when both inputs = -32768, added
-                             special code for that case. 
-     24 Jun 2011   ...RJB... Fixed format overrun when pixels >= 10 Gpixels
-     10 Jun 2011   ...RJB... Fixes for linux gcc4.4 compiler, increased func
-                             Char variable to char*512. merged RJB's Jan 10 2008
-                             changes on Solaris with LWK's version 
-     11 Mar 2008   ...LWK... For cube files, check that all have same ORG
-     28 Nov 2006   ...LWK... Initialize INDEX_L/S/B in GET_FUNCTION
-     22 Sep 2006   ...ALZ... The third fix for this AR is going to be in
-                             subroutine XKNUTH      Ref. AR#112949. 
-     22 Sep 2006   ...ALZ... Fixed hash table case for two halfword inputs
-                             where the second input has negative values. see
-                             comments with initials "alz" below Ref. AR#112949. 
-     22 Sep 2006   ...ALZ... Fixed EXCLUDE case when floating output type
-                             hard to recreate case but see code comment
-                             with initials "alz" below Ref. AR#112949. 
-     04 Feb 1994   ...NDR... Fixed Improper handling of 'LINE','SAMP'
-                             arguments when SL != 1. Ref. FR#81717. 
-     24 Aug 1993   ...NDR... Fixed "Goto jumps into IF Block" warning.
-                             REF FR#83013.
-     19 Mar 1993   ...SP.... Corrected initialization of hash table.
-	
-     25 Feb 1993   ...SP...  Merged in the capabilities to handle
-					         3D images from F2_3D.
-	 29 Apr 1992   ...NDR... Moved some routines to KNUTH module.
-     09 Feb 1992   ...NDR... Upgraded for Unix, C - constructs
-     04 Dec 1990   ...JFM... LIMITS with invalid REPLACE parameter
-		                     handled differently.
-	 05 Sep 1990   ...JFM... EXCLUDE, LIMITS AND REPLACE parameters
-				             added to enable the user to selectively
-				             exclude certain input DN values from
-					         arithmetic operations.
+  1990-12-04 JFM - LIMITS with invalid REPLACE parameter handled
+                   differently.
+  1992-02-09 NDR - Upgraded for Unix, C - constructs
+  1992-04-29 NDR - Moved some routines to KNUTH module.
+  1993-02-25 SP  - Merged in the capabilities to handle 3D images from
+                   F2_3D.
+  1993-03-19 SP  - Corrected initialization of hash table.
+  1993-08-24 NDR - Fixed "Goto jumps into IF Block" warning. REF
+                   FR#83013.
+  1994-02-04 NDR - Fixed Improper handling of 'LINE','SAMP' arguments
+                   when SL != 1. Ref. FR#81717.
+  2006-09-22 ALZ - Fixed EXCLUDE case when floating output type hard
+                   to recreate case but see code comment with initials
+                   "alz" below Ref. AR#112949.
+  2006-09-22 ALZ - Fixed hash table case for two halfword inputs where
+                   the second input has negative values. see comments
+                   with initials "alz" below Ref. AR#112949.
+  2006-09-22 ALZ - The third fix for this AR is going to be in
+                   subroutine XKNUTH Ref. AR#112949.
+  2006-11-28 LWK - Initialize INDEX_L/S/B in GET_FUNCTION
+  2008-03-11 LWK - For cube files, check that all have same ORG
+
+  2011-06-10 RJB - Fixes for linux gcc4.4 compiler, increased func
+                   Char variable to char*512. merged RJB's Jan 10 2008 
+                   changes on Solaris with LWK's version
+  2011-06-24 RJB - Fixed format overrun when pixels >= 10 Gpixels
+  2011-07-22 LWK - Hash table fails when both inputs = -32768, added
+                   special code for that case.
+  2015-08-03 WLB - Added parms fu2, fu3, fu4 to extend the possible
+                   length of function strings.
+
 .LEVEL1
 .VARIABLE INP
  0:18 INPUT DATA SETS
@@ -1667,6 +1705,15 @@ in band dimension
 .VARIABLE FUNCTION
  STRING - A FUNCTION TO BE
  APPLIED TO INPUT (<=250 CHARS)
+.VARIABLE FU2
+ STRING - A STRING TO APPEND TO
+ PARAMETER FUNCTION (<=250 CHARS)
+.VARIABLE FU3
+ STRING - A STRING TO APPEND TO
+ PARAMETER FUNCTION (<=250 CHARS)
+.VARIABLE FU4
+ STRING - A STRING TO APPEND TO
+ PARAMETER FUNCTION (<=250 CHARS)
 .VARIABLE TRUNC
  THE RESULT WILL BE TRUNCATED
 .VARIABLE EXCLUDE
@@ -1738,7 +1785,23 @@ image will be BSQ.  Has no effect if there ARE input images.
  set.  The default expression is "IN1".
  The function string can include constants, including constants expressed
  in floating point notation.  The string can also include TCL variable
- references.
+ references. The function string length is limited to 250 characters.
+ However, the fu2, fu3, and fu4 parameters can be used for longer functions.
+ The contents of function, fu2, fu3, and fu4 are concatenated. The fu2, fu3,
+ and fu4 parameters also are limited to 250 characters each. The limit is
+ based on TAE's MAXSTRSIZ value of 250 in taeconf.inp. Adding more fu
+ extensions to function is possible, e.g. fu5, fu6, ... However, MAXCODE in
+ knuth.com may need to be lengthened as the length of compiled code 
+ increases with increasing function string length.
+.VARIABLE FU2
+ A string to append to parameter FUNCTION (<=250 CHARS). See FUNCTION for
+ details.
+.VARIABLE FU3
+ A string to append to parameter FUNCTION (<=250 CHARS). See FUNCTION for
+ details.
+.VARIABLE FU4
+ A string to append to parameter FUNCTION (<=250 CHARS). See FUNCTION for
+ details.
 .VARIABLE TRUNC
  Specifies that the results of the calculation will be truncated.
  Default is that results will be rounded.  This keyword is
@@ -2280,10 +2343,50 @@ f2 (/project/test_work/testdata/sitod1/test_data/gll/s0412460345.sos +
  /project/test_work/testdata/sitod1/test_data/gll/0345.sos) +
  d fun="in1-in2" excl=0.0
 hist d 'nohis
+
+gen x1 nl=10 ns=10 'half
+
+! test 247 char function"
+
+F2 INP=(x1) OUT=x2 FUNCTION="IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1"
+
+list x2
+
+! test 991 char function+fu2+fu3+fu4"
+
+F2 INP=(x1) OUT=x2 FUNCTION="IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1" +
+  FU2="+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1" +
+  FU3="+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1" +
+  FU4="+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1"
+
+list x2
+
 End-proc
 $!-----------------------------------------------------------------------------
-$ create tstf2.log_solos
-tstf2
+$ create tstf2.log_linux
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
 GEN F1 NL=5 NS=20 'FULL
 Beginning VICAR task GEN
 GEN Version 6
@@ -2296,7 +2399,7 @@ LIST F1 'FULL
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
       1              0          1          2          3          4          5          6          7          8          9
@@ -2306,7 +2409,7 @@ Beginning VICAR task LIST
       5              4          5          6          7          8          9         10         11         12         13
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp           11         12         13         14         15         16         17         18         19         20
    Line
       1             10         11         12         13         14         15         16         17         18         19
@@ -2318,7 +2421,7 @@ LIST F2 'FULL
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
       1              0          3          6          9         12         15         18         21         24         27
@@ -2328,7 +2431,7 @@ Beginning VICAR task LIST
       5             12         15         18         21         24         27         30         33         36         39
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp           11         12         13         14         15         16         17         18         19         20
    Line
       1             30         33         36         39         42         45         48         51         54         57
@@ -2338,15 +2441,15 @@ Beginning VICAR task LIST
       5             42         45         48         51         54         57         60         63         66         69
 F2 INP=(F1,F2) OUT=X FUNCTION="IN1+SQRT(IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:47 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
       1              0          3          4          6          7          9         10         12         13         14
@@ -2356,8 +2459,8 @@ Beginning VICAR task LIST
       5              7          9         10         12         13         14         15         17         18         19
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:47 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp           11         12         13         14         15         16         17         18         19         20
    Line
       1             15         17         18         19         20         22         23         24         25         27
@@ -2377,7 +2480,7 @@ LIST R
 Beginning VICAR task LIST
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
@@ -2387,7 +2490,7 @@ Beginning VICAR task LIST
       5       4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp            11          12          13          14          15          16          17          18          19          20
    Line
       1       1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01   1.900E+01
@@ -2399,7 +2502,7 @@ LIST S
 Beginning VICAR task LIST
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:49 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       0.000E+00   1.500E+00   3.000E+00   4.500E+00   6.000E+00   7.500E+00   9.000E+00   1.050E+01   1.200E+01   1.350E+01
@@ -2409,7 +2512,7 @@ Beginning VICAR task LIST
       5       6.000E+00   7.500E+00   9.000E+00   1.050E+01   1.200E+01   1.350E+01   1.500E+01   1.650E+01   1.800E+01   1.950E+01
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:49 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp            11          12          13          14          15          16          17          18          19          20
    Line
       1       1.500E+01   1.650E+01   1.800E+01   1.950E+01   2.100E+01   2.250E+01   2.400E+01   2.550E+01   2.700E+01   2.850E+01
@@ -2419,15 +2522,15 @@ Beginning VICAR task LIST
       5       2.100E+01   2.250E+01   2.400E+01   2.550E+01   2.700E+01   2.850E+01   3.000E+01   3.150E+01   3.300E+01   3.450E+01
 F2 INP=(R,S) OUT=X FUNCTION="IN1+SQRT(IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:48 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:49 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       0.000E+00   2.225E+00   3.732E+00   5.121E+00   6.449E+00   7.739E+00   9.000E+00   1.024E+01   1.146E+01   1.267E+01
@@ -2437,8 +2540,8 @@ Beginning VICAR task LIST
       5       6.449E+00   7.739E+00   9.000E+00   1.024E+01   1.146E+01   1.267E+01   1.387E+01   1.506E+01   1.624E+01   1.742E+01
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:48 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:49 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp            11          12          13          14          15          16          17          18          19          20
    Line
       1       1.387E+01   1.506E+01   1.624E+01   1.742E+01   1.858E+01   1.974E+01   2.090E+01   2.205E+01   2.320E+01   2.434E+01
@@ -2470,7 +2573,7 @@ LIST B
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:49 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -2487,7 +2590,7 @@ LIST H
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
    Line
       1         0     1     2     3     4     5     6     7     8     9    10    11    12    13    14
@@ -2502,7 +2605,7 @@ Beginning VICAR task LIST
      10         9    10    11    12    13    14    15    16    17    18    19    20    21    22    23
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp      16    17    18    19    20
    Line
       1        15    16    17    18    19
@@ -2519,7 +2622,7 @@ LIST L1
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
 
@@ -2536,7 +2639,7 @@ LIST L2
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -2551,15 +2654,15 @@ Beginning VICAR task LIST
      10       0   1   2   3   4   5   6   7   8   9
 F2 INP=B OUT=X FUNCTION="IN1+1"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:49 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:51 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       1   2   3   4   5   6   7   8   9  10
@@ -2574,15 +2677,15 @@ Beginning VICAR task LIST
      10      10  11  12  13  14  15  16  17  18  19
 F2 INP=B OUT=X FUNCTION="INT(IN1/10)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X 'ZERO
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:49 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:51 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       0   0   0   0   0   0   0   0   0   0
@@ -2597,24 +2700,24 @@ Beginning VICAR task LIST
      10       0   1   1   1   1   1   1   1   1   1
 F2 INP=B OUT=X2 FUNCTION="IN1/10" 'TRUNC
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 DIFPIC (X,X2)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
- NUMBER OF DIFFERENCES =   0
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
 F2 INP=G OUT=X FUNCTION="IN1+1"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:49 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:53 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1     126 127 128 129 130 131 132 133 134 135
@@ -2629,7 +2732,7 @@ Beginning VICAR task LIST
      10     135 136 137 138 139 140 141 142 143 144
 F2 INP=B OUT=X FUNCTION="IN1+1" SIZE=(2,3,6,4)
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 LINES TRUNCATED
 SAMPLES TRUNCATED
 F2 using byte table lookup
@@ -2638,8 +2741,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:49 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:54 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3
    Line
       1       4   5   6   7
@@ -2650,15 +2753,15 @@ Beginning VICAR task LIST
       6       9  10  11  12
 F2 B X FUNC="SQRT(IN1**1.1234+7)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:49 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:54 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       3   3   3   3   3   4   4   4   4   4
@@ -2673,15 +2776,15 @@ Beginning VICAR task LIST
      10       4   5   5   5   5   5   5   5   6   6
 F2 B X FUNC="SQRT(IN1**1.1234+7)"   'TRUNC
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:49 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:55 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       2   2   3   3   3   3   3   3   4   4
@@ -2696,15 +2799,15 @@ Beginning VICAR task LIST
      10       4   4   4   4   4   5   5   5   5   5
 F2 INP=H OUT=X  FUNCTION="IN1+1"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 29 TIMES
 LIST X
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:56 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
    Line
       1         1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
@@ -2719,8 +2822,8 @@ Beginning VICAR task LIST
      10        10    11    12    13    14    15    16    17    18    19    20    21    22    23    24
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:56 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp      16    17    18    19    20
    Line
       1        16    17    18    19    20
@@ -2735,7 +2838,7 @@ Beginning VICAR task LIST
      10        25    26    27    28    29
 F2 INP=H OUT=X  FUNCTION="IN1+1"  SIZE=(2,5,6,8)
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 LINES TRUNCATED
 SAMPLES TRUNCATED
 F2 using hash table lookup
@@ -2744,8 +2847,8 @@ LIST X
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:56 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp       1     2     3     4     5     6     7     8
    Line
       1         6     7     8     9    10    11    12    13
@@ -2756,15 +2859,15 @@ Beginning VICAR task LIST
       6        11    12    13    14    15    16    17    18
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1.AND.IN2"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:57 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
 
@@ -2779,15 +2882,15 @@ Beginning VICAR task LIST
      10       0   1   0   1   0   1   0   1   8   9
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1.OR.IN2"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:58 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -2802,15 +2905,15 @@ Beginning VICAR task LIST
      10       9   9  11  11  13  13  15  15   9   9
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1.XOR.IN2"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:58 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -2825,15 +2928,15 @@ Beginning VICAR task LIST
      10       9   8  11  10  13  12  15  14   1   0
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1.LT.IN2"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:43:59 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   1   1   1   1   1   1   1   1
@@ -2847,15 +2950,15 @@ Beginning VICAR task LIST
       9       0   0   0   0   0   0   0   0   0   1
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1.EQ.IN2"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:00 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       1   0   0   0   0   0   0   0   0   0
@@ -2870,15 +2973,15 @@ Beginning VICAR task LIST
      10       0   0   0   0   0   0   0   0   0   1
 F2 INP=(L1,L2) OUT=X  FUNCTION=".NOT.(IN1.GE.IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:00 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   1   1   1   1   1   1   1   1
@@ -2892,7 +2995,7 @@ Beginning VICAR task LIST
       9       0   0   0   0   0   0   0   0   0   1
 F2 INP=L1 OUT=X  FUNCTION="!IN1" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    NOT    1
    RETN   0
 F2 using byte table lookup
@@ -2901,14 +3004,14 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:01 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       1   1   1   1   1   1   1   1   1   1
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 & IN2" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    AND    2
    RETN   0
@@ -2918,8 +3021,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:02 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
 
@@ -2934,7 +3037,7 @@ Beginning VICAR task LIST
      10       0   1   0   1   0   1   0   1   8   9
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 && IN2" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    LAND   2
    RETN   0
@@ -2944,8 +3047,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:02 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
 
@@ -2960,7 +3063,7 @@ Beginning VICAR task LIST
      10       0   1   1   1   1   1   1   1   1   1
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 ^ IN2" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    XOR    2
    RETN   0
@@ -2970,8 +3073,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:03 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -2986,7 +3089,7 @@ Beginning VICAR task LIST
      10       9   8  11  10  13  12  15  14   1   0
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 | IN2" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    OR     2
    RETN   0
@@ -2996,8 +3099,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:04 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -3012,7 +3115,7 @@ Beginning VICAR task LIST
      10       9   9  11  11  13  13  15  15   9   9
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1<<IN2" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    LSHF   2
    RETN   0
@@ -3022,8 +3125,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:04 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
 
@@ -3038,7 +3141,7 @@ Beginning VICAR task LIST
      10       9  18  36  72 144 255 255 255 255 255
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 <= IN2" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    LE     2
    RETN   0
@@ -3048,8 +3151,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:05 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
       1       1   1   1   1   1   1   1   1   1   1
@@ -3064,7 +3167,7 @@ Beginning VICAR task LIST
      10       0   0   0   0   0   0   0   0   0   1
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 % IN2" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    MOD    2
    RETN   0
@@ -3074,8 +3177,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:06 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
 
@@ -3090,7 +3193,7 @@ Beginning VICAR task LIST
      10       0   0   1   0   1   4   3   2   1   0
 F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 > IN2" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    GT     2
    RETN   0
@@ -3100,8 +3203,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:06 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
      Samp     1       3       5       7       9
    Line
 
@@ -3119,7 +3222,7 @@ Beginning VICAR task COPY
  COPY VERSION 12-JUL-1993
 F2 INP=(L1,L2) OUT=X  FUNCTION="MOD(IN2,IN1)" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   2
    MOD    1
    RETN   0
@@ -3129,8 +3232,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:08 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
 
@@ -3144,7 +3247,7 @@ Beginning VICAR task LIST
      10       0   1   2   3   4   5   6   7   8   0
 F2 INP=(L1,L2) OUT=X  FUNCTION="MIN(IN1,IN2)" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    MIN    2
    RETN   0
@@ -3154,8 +3257,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:08 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
 
@@ -3170,7 +3273,7 @@ Beginning VICAR task LIST
      10       0   1   2   3   4   5   6   7   8   9
 F2 INP=(L1,L2,L3) OUT=X  FUNCTION="MIN(IN1,IN2,IN3)" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    MIN    2
    MIN    3
@@ -3181,8 +3284,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:09 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
 
@@ -3197,7 +3300,7 @@ Beginning VICAR task LIST
      10       0   1   2   3   4   5   6   7   8   9
 F2 INP=(L1,L2) OUT=X  FUNCTION="MAX(IN1,IN2)" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    MAX    2
    RETN   0
@@ -3207,8 +3310,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:10 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -3224,7 +3327,7 @@ Beginning VICAR task LIST
 F2 INP=(L1,L2) OUT=X   +
  FUNCTION="100.*SIN(IN1/10.)+100.*COS(IN2/10)" 'DUMP
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
    LOAD   1
    DIV   53
    STOR  93
@@ -3244,8 +3347,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:43:50 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:10 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:16 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
       1     100 100  98  96  92  88  83  76  70  62
@@ -3260,14 +3363,14 @@ Beginning VICAR task LIST
      10     178 178 176 174 170 166 161 155 148 140
 F2 OUT=X  FUNCTION="LINE+SAMP"  SIZE=(1,1,10,10)
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:11 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
       1       2   3   4   5   6   7   8   9  10  11
@@ -3295,7 +3398,7 @@ GEN Version 6
 GEN task completed
     F2 INP=(A,B) OUT=X FUNCTION="IN1+SQRT(IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 SAMPLES TRUNCATED
 F2 using byte table lookup
 FUNCTION EVALUATED 65536 TIMES
@@ -3303,8 +3406,8 @@ FUNCTION EVALUATED 65536 TIMES
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:11 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:12 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
       1       0   2   3   5   6   7   8  10  11  12
@@ -3331,7 +3434,7 @@ GEN Version 6
 GEN task completed
     F2 INP=(A,B) OUT=X FUNCTION="IN1+SQRT(IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 SAMPLES TRUNCATED
 F2 using hash table lookup
 FUNCTION EVALUATED 599 TIMES
@@ -3339,8 +3442,8 @@ FUNCTION EVALUATED 599 TIMES
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:12 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:13 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1         0     2     3     5     6     7     8    10    11    12
@@ -3367,7 +3470,7 @@ GEN Version 6
 GEN task completed
     F2 INP=(A,B) OUT=X FUNCTION="IN1+SQRT(IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 SAMPLES TRUNCATED
 F2 calculating every pixel
 FUNCTION EVALUATED 90000 TIMES
@@ -3375,8 +3478,8 @@ FUNCTION EVALUATED 90000 TIMES
 Beginning VICAR task LIST
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:13 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:14 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       0.000E+00   2.000E+00   3.414E+00   4.732E+00   6.000E+00   7.236E+00   8.449E+00   9.646E+00   1.083E+01   1.200E+01
@@ -3414,15 +3517,15 @@ GEN Version 6
 GEN task completed
     F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'BYTE
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 19 TIMES
     LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:15 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:15 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
       1       0   2   4   6   8  10  12  14  16  18
@@ -3451,15 +3554,15 @@ GEN Version 6
 GEN task completed
     F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'BYTE
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 19 TIMES
     LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:16 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:16 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
       1       0   2   4   6   8  10  12  14  16  18
@@ -3488,15 +3591,15 @@ GEN Version 6
 GEN task completed
     F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'FULL
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     LIST X
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:16 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:17 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
       1              0          2          4          6          8         10         12         14         16         18
@@ -3525,15 +3628,15 @@ GEN Version 6
 GEN task completed
     F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'REAL
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     LIST X
 Beginning VICAR task LIST
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:17 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:18 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       0.000E+00   2.000E+00   4.000E+00   6.000E+00   8.000E+00   1.000E+01   1.200E+01   1.400E+01   1.600E+01   1.800E+01
@@ -3562,15 +3665,15 @@ GEN Version 6
 GEN task completed
     F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'BYTE
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:18 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:19 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
       1       0   2   4   6   8  10  12  14  16  18
@@ -3599,15 +3702,15 @@ GEN Version 6
 GEN task completed
     F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'BYTE
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:19 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:20 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
       1       0   2   4   6   8  10  12  14  16  18
@@ -3636,15 +3739,15 @@ GEN Version 6
 GEN task completed
     F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'FULL
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     LIST X
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:20 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:21 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
       1              0          2          4          6          8         10         12         14         16         18
@@ -3681,21 +3784,21 @@ GEN Version 6
 GEN task completed
 F2 (A,B,C,D) X FUNC="IN1+100*IN2+10000*IN3+1000000*IN4" 'FULL
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:21 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:22 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
-      1              0    4030201    8060402   12090604   16120804   20151004   24181206   28211408   32241608   36271808
-      2        4030201    8060402   12090604   16120804   20151004   24181206   28211408   32241608   36271808   40302008
-      3        8060402   12090604   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212
-      4       12090604   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412
+      1              0    4030201    8060402   12090603   16120804   20151004   24181206   28211408   32241608   36271808
+      2        4030201    8060402   12090603   16120804   20151004   24181206   28211408   32241608   36271808   40302008
+      3        8060402   12090603   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212
+      4       12090603   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412
       5       16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412   52392612
       6       20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412   52392612   56422816
       7       24181206   28211408   32241608   36271808   40302008   44332212   48362412   52392612   56422816   60453016
@@ -3714,15 +3817,15 @@ F2 INP=(F1,F2) OUT=X FUNCTION= +
 "(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+ +
  (IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 2 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:44:22 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:44:23 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:17 2015
      Samp     1       3       5       7       9
    Line
       1      12  12  12  12  12  12  12  12  12  12
@@ -3798,27 +3901,27 @@ Beginning VICAR task COPY
     F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'BYTE     +
    FUNC="MIN(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B1)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
- NUMBER OF DIFFERENCES =   0
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
     F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'BYTE     +
    FUNC="MAX(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B1)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
- NUMBER OF DIFFERENCES =   0
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
     LET i=i+1
 END-LOOP
     LET FORMAT=FORMATS(I)
@@ -3881,26 +3984,26 @@ Beginning VICAR task COPY
     F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'HALF     +
    FUNC="MIN(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B1)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'HALF     +
    FUNC="MAX(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B1)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     LET i=i+1
 END-LOOP
@@ -3964,26 +4067,26 @@ Beginning VICAR task COPY
     F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'FULL     +
    FUNC="MIN(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B1)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'FULL     +
    FUNC="MAX(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B1)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     LET i=i+1
 END-LOOP
@@ -4047,26 +4150,26 @@ Beginning VICAR task COPY
     F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'REAL     +
    FUNC="MIN(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B1)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'REAL     +
    FUNC="MAX(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B1)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     LET i=i+1
 END-LOOP
@@ -4096,26 +4199,26 @@ Beginning VICAR task COPY
  COPY VERSION 12-JUL-1993
     F2 (B1,B2) B 'BYTE  FUNC="MIN(IN1,IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 65536 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B0)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
- NUMBER OF DIFFERENCES =   0
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
     F2 (B1,B2) B 'BYTE FUNC="MAX(IN1,IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 65536 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B0)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
- NUMBER OF DIFFERENCES =   0
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
     LET i=i+1
 END-LOOP
     LET FORMAT=FORMATS(I)
@@ -4135,25 +4238,25 @@ Beginning VICAR task COPY
  COPY VERSION 12-JUL-1993
     F2 (B1,B2) B 'HALF  FUNC="MIN(IN1,IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 320000 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B0)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     F2 (B1,B2) B 'HALF FUNC="MAX(IN1,IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 320000 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B0)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     LET i=i+1
 END-LOOP
@@ -4174,25 +4277,25 @@ Beginning VICAR task COPY
  COPY VERSION 12-JUL-1993
     F2 (B1,B2) B 'HALF  FUNC="MIN(IN1,IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 160000 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B0)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     F2 (B1,B2) B 'HALF FUNC="MAX(IN1,IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 160000 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B0)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     LET i=i+1
 END-LOOP
@@ -4213,25 +4316,25 @@ Beginning VICAR task COPY
  COPY VERSION 12-JUL-1993
     F2 (B1,B2) B 'HALF  FUNC="MIN(IN1,IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 160000 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B0)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     F2 (B1,B2) B 'HALF FUNC="MAX(IN1,IN2)"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 160000 TIMES
     WRITE "SHOULD GET 0 DIFFERENCES."
 SHOULD GET 0 DIFFERENCES.
     DIFPIC (B,B0)
 Beginning VICAR task DIFPIC
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  NUMBER OF DIFFERENCES =   0
     LET i=i+1
 END-LOOP
@@ -4247,7 +4350,7 @@ list a
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:45:51 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1      -9.000E+00  -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00
@@ -4262,15 +4365,15 @@ Beginning VICAR task list
      10       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
 f2 a b func="sqrt(in1)"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 list b
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:45:51 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:45:52 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       3.000E+00   2.828E+00   2.646E+00   2.449E+00   2.236E+00   2.000E+00   1.732E+00   1.414E+00   1.000E+00   0.000E+00
@@ -4285,7 +4388,7 @@ Beginning VICAR task list
      10       0.000E+00   1.000E+00   1.414E+00   1.732E+00   2.000E+00   2.236E+00   2.449E+00   2.646E+00   2.828E+00   3.000E+00
 f2 b c func="in1*in1"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 write "Should get c = abs(a)."
@@ -4294,8 +4397,8 @@ list c
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:45:51 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:45:53 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       9.000E+00   8.000E+00   7.000E+00   6.000E+00   5.000E+00   4.000E+00   3.000E+00   2.000E+00   1.000E+00   0.000E+00
@@ -4310,7 +4413,7 @@ Beginning VICAR task list
      10       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
 f2 a b func="sin(in1)*sin(in1) + cos(in1)*cos(in1)"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 write "Should get b = 1.0."
@@ -4319,8 +4422,8 @@ list b
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:45:51 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:45:53 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
@@ -4335,15 +4438,15 @@ Beginning VICAR task list
      10       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
 f2 a b func="10**(in1)"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 list b
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:45:51 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:45:54 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       1.000E-09   1.000E-08   1.000E-07   1.000E-06   1.000E-05   1.000E-04   1.000E-03   1.000E-02   1.000E-01   1.000E+00
@@ -4358,7 +4461,7 @@ Beginning VICAR task list
      10       1.000E+00   1.000E+01   1.000E+02   1.000E+03   1.000E+04   1.000E+05   1.000E+06   1.000E+07   1.000E+08   1.000E+09
 f2 b c func="log10(in1)"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 write "Should get c = max( -6, a)."
@@ -4367,8 +4470,8 @@ list c
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:45:51 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:45:55 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1      -9.000E+00  -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00
@@ -4383,7 +4486,7 @@ Beginning VICAR task list
      10       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
 f2 a b func="atan2(in1,1.0)"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 write "Should get 0.0 and pi/4 = .78..."
@@ -4392,14 +4495,14 @@ list b (2,9,1,2)
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:45:51 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:45:56 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
      Samp             9          10
    Line
       2       0.000E+00   7.854E-01
 f2 b c func="tan(in1)"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 write "Should get c = a."
@@ -4408,8 +4511,8 @@ list c
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:45:51 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:45:57 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1      -9.000E+00  -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00
@@ -4424,7 +4527,7 @@ Beginning VICAR task list
      10       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
 f2 a b func="atan(in1)"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 write "Should get 0.0 and pi/4 = .78..."
@@ -4433,14 +4536,14 @@ list b (2,9,1,2)
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:45:51 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:45:58 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp             9          10
    Line
       2       0.000E+00   7.854E-01
 f2 b c func="tan(in1)"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 write "Should get c = a."
@@ -4449,8 +4552,8 @@ list c
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:45:51 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:45:59 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1      -9.000E+00  -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00
@@ -4465,7 +4568,7 @@ Beginning VICAR task list
      10       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
 f2 a b func="tan(atan2(in1,in1))"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 write "Should get b = 0 on diagonal from (10,1) to (1,10) and b=1 elsewhere."
@@ -4474,8 +4577,8 @@ list b
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:45:51 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:19 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   0.000E+00
@@ -4506,15 +4609,15 @@ GEN Version 6
 GEN task completed
 F2 INP=A OUT=X EXCLUDE=(13,14,18) FUNCTION="IN1+100"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:01 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1     110 110 110 110 110 110 110 110 110 110
@@ -4529,15 +4632,15 @@ Beginning VICAR task LIST
      10     119 119 119 119 119 119 119 119 119 119
 F2 INP=A OUT=X EXCLUDE=(13,14,18) FUNCTION="IN1+100" REPLACE=99
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:02 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1     110 110 110 110 110 110 110 110 110 110
@@ -4552,15 +4655,15 @@ Beginning VICAR task LIST
      10     119 119 119 119 119 119 119 119 119 119
 F2 INP=A OUT=X EXCLUDE=(13,14,18) FUNCTION="IN1+100" REPLACE=280
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:03 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1     110 110 110 110 110 110 110 110 110 110
@@ -4575,15 +4678,15 @@ Beginning VICAR task LIST
      10     119 119 119 119 119 119 119 119 119 119
 F2 INP=A OUT=X EXCLUDE=(13,14,18) FUNCTION="IN1+100" REPLACE=-280
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:04 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1     110 110 110 110 110 110 110 110 110 110
@@ -4597,15 +4700,15 @@ Beginning VICAR task LIST
      10     119 119 119 119 119 119 119 119 119 119
 F2 INP=A OUT=X LIMITS=(5,18) FUNCTION="IN1+100"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:05 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1     110 110 110 110 110 110 110 110 110 110
@@ -4620,15 +4723,15 @@ Beginning VICAR task LIST
      10       5   5   5   5   5   5   5   5   5   5
 F2 INP=A OUT=X LIMITS=(5,18) FUNCTION="IN1+100" REPLACE=99
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:06 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1     110 110 110 110 110 110 110 110 110 110
@@ -4643,15 +4746,15 @@ Beginning VICAR task LIST
      10      99  99  99  99  99  99  99  99  99  99
 F2 INP=A OUT=X LIMITS=(5,18) FUNCTION="IN1+100" REPLACE=280
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:07 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1     110 110 110 110 110 110 110 110 110 110
@@ -4666,15 +4769,15 @@ Beginning VICAR task LIST
      10     255 255 255 255 255 255 255 255 255 255
 F2 INP=A OUT=X LIMITS=(5,18) FUNCTION="IN1+100" REPLACE=-280
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using byte table lookup
 FUNCTION EVALUATED 256 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:08 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1     110 110 110 110 110 110 110 110 110 110
@@ -4688,15 +4791,15 @@ Beginning VICAR task LIST
       9     118 118 118 118 118 118 118 118 118 118
 F2 INP=B OUT=X EXCLUDE=-22768 FUNCTION="IN1+1000"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 10 TIMES
 LIST X
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:08 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1    -31768-31768-31768-31768-31768-31768-31768-31768-31768-31768
@@ -4711,15 +4814,15 @@ Beginning VICAR task LIST
      10     13232 13232 13232 13232 13232 13232 13232 13232 13232 13232
 F2 INP=B OUT=X EXCLUDE=-22768 REPLACE=99
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 10 TIMES
 LIST X
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:09 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
@@ -4734,15 +4837,15 @@ Beginning VICAR task LIST
      10     12232 12232 12232 12232 12232 12232 12232 12232 12232 12232
 F2 INP=B OUT=X EXCLUDE=-27768 REPLACE=40000
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 10 TIMES
 LIST X
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:10 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
@@ -4757,15 +4860,15 @@ Beginning VICAR task LIST
      10     12232 12232 12232 12232 12232 12232 12232 12232 12232 12232
 F2 INP=B OUT=X EXCLUDE=-27768 REPLACE=-40000
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 10 TIMES
 LIST X
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:11 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
@@ -4780,15 +4883,15 @@ Beginning VICAR task LIST
      10     12232 12232 12232 12232 12232 12232 12232 12232 12232 12232
 F2 INP=B OUT=X LIMITS=(-50000, 0)
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 8 TIMES
 LIST X
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:12 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
@@ -4803,15 +4906,15 @@ Beginning VICAR task LIST
      10    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
 F2 INP=B OUT=X LIMITS=(-50000, 0) REPLACE=99
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 8 TIMES
 LIST X
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:13 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
@@ -4826,15 +4929,15 @@ Beginning VICAR task LIST
      10        99    99    99    99    99    99    99    99    99    99
 F2 INP=B OUT=X LIMITS=(-30000, 0) REPLACE=40000
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 7 TIMES
 LIST X
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:14 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1     32767 32767 32767 32767 32767 32767 32767 32767 32767 32767
@@ -4849,15 +4952,15 @@ Beginning VICAR task LIST
      10     32767 32767 32767 32767 32767 32767 32767 32767 32767 32767
 F2 INP=B OUT=X LIMITS=(-30000, 0) REPLACE=-40000
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 7 TIMES
 LIST X
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:15 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
@@ -4872,15 +4975,15 @@ Beginning VICAR task LIST
      10    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
 F2 INP=C OUT=X FUNCTION="IN1+1000" EXCLUDE=(432768,432775)
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:16 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
       1         432768     432768     432768     432768     432768     432768     432768     432768     432768     432768
@@ -4895,15 +4998,15 @@ Beginning VICAR task LIST
      10         433777     433777     433777     433777     433777     433777     433777     433777     433777     433777
 F2 INP=C OUT=X EXCLUDE=(432768,432775) REPLACE=99
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:17 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
       1             99         99         99         99         99         99         99         99         99         99
@@ -4918,15 +5021,15 @@ Beginning VICAR task LIST
      10         432777     432777     432777     432777     432777     432777     432777     432777     432777     432777
 F2 INP=C OUT=X LIMITS=(432770,432775)
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:18 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
       1         432770     432770     432770     432770     432770     432770     432770     432770     432770     432770
@@ -4941,15 +5044,15 @@ Beginning VICAR task LIST
      10         432770     432770     432770     432770     432770     432770     432770     432770     432770     432770
 F2 INP=C OUT=X LIMITS=(432770,432775) REPLACE=99
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:19 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
       1             99         99         99         99         99         99         99         99         99         99
@@ -4964,15 +5067,15 @@ Beginning VICAR task LIST
      10             99         99         99         99         99         99         99         99         99         99
 F2 INP=D OUT=X EXCLUDE=(5432770,5432775) FUNCTION="IN1+100000"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:20 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06
@@ -4987,15 +5090,15 @@ Beginning VICAR task LIST
      10       5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06
 F2 INP=D OUT=X EXCLUDE=(5432770,5432775) REPLACE=99
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:21 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
@@ -5010,15 +5113,15 @@ Beginning VICAR task LIST
      10       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
 F2 INP=D OUT=X LIMITS=(5432770,5432775)
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:22 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
@@ -5033,15 +5136,15 @@ Beginning VICAR task LIST
      10       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
 F2 INP=D OUT=X LIMITS=(5432770,5432775) REPLACE=99
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:22 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01
@@ -5057,15 +5160,15 @@ Beginning VICAR task LIST
 F2 INP=(C,D) OUT=X EXCLUDE=(5432768,432768,432769) FUNCTION="IN1+IN2"  +
  REPLACE=4040
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:00 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:23 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
       1           4040       4040       4040       4040       4040       4040       4040       4040       4040       4040
@@ -5094,7 +5197,7 @@ LIST A
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:24 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
 
@@ -5111,7 +5214,7 @@ LIST B
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:24 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -5128,7 +5231,7 @@ LIST C
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:24 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1      10  10  10  10  10  10  10  10  10  10
@@ -5143,15 +5246,15 @@ Beginning VICAR task LIST
      10      10  10  10  10  10  10  10  10  10  10
 F2 INP=(A,B,C) OUT=X EXCLUDE=(3,4,8) FUNCTION="IN1+IN2+IN3"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:24 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:25 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1      10  11  12   3   4  15  16  17   8  19
@@ -5166,15 +5269,15 @@ Beginning VICAR task LIST
      10      19  20  21   3   4  24  25  26   8  28
 F2 INP=(A,B,C) OUT=X EXCLUDE=(3,4,8) FUNCTION="IN1+IN2+IN3" REPLACE=99
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:24 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:26 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1      10  11  12  99  99  15  16  17  99  19
@@ -5189,15 +5292,15 @@ Beginning VICAR task LIST
      10      19  20  21  99  99  24  25  26  99  28
 F2 INP=(A,B,C) OUT=X EXCLUDE=(3,4,8) FUNCTION="IN1+IN2+IN3" REPLACE=280
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:24 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:26 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1      10  11  12 255 255  15  16  17 255  19
@@ -5212,15 +5315,15 @@ Beginning VICAR task LIST
      10      19  20  21 255 255  24  25  26 255  28
 F2 INP=(A,B,C) OUT=X EXCLUDE=(3,4,8) FUNCTION="IN1+IN2+IN3" REPLACE=-280
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:24 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:27 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1      10  11  12   0   0  15  16  17   0  19
@@ -5234,15 +5337,15 @@ Beginning VICAR task LIST
      10      19  20  21   0   0  24  25  26   0  28
 F2 INP=(A,B,C) OUT=X LIMITS=(3,10) FUNCTION="IN1+IN2+IN3"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:24 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:28 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
      Samp     1       3       5       7       9
    Line
       1       3   3   3   3   3   3   3   3   3   3
@@ -5257,15 +5360,15 @@ Beginning VICAR task LIST
      10       3   3   3  22  23  24  25  26  27  28
 F2 INP=(A,B,C) OUT=X LIMITS=(3,10) FUNCTION="IN1+IN2+IN3" REPLACE=99
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:24 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:29 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp     1       3       5       7       9
    Line
       1      99  99  99  99  99  99  99  99  99  99
@@ -5280,15 +5383,15 @@ Beginning VICAR task LIST
      10      99  99  99  22  23  24  25  26  27  28
 F2 INP=(A,B,C) OUT=X LIMITS=(3,10) FUNCTION="IN1+IN2+IN3" REPLACE=280
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:24 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:29 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp     1       3       5       7       9
    Line
       1     255 255 255 255 255 255 255 255 255 255
@@ -5303,15 +5406,15 @@ Beginning VICAR task LIST
      10     255 255 255  22  23  24  25  26  27  28
 F2 INP=(A,B,C) OUT=X LIMITS=(3,10) FUNCTION="IN1+IN2+IN3" REPLACE=-280
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:24 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:30 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:20 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp     1       3       5       7       9
    Line
 
@@ -5324,19 +5427,19 @@ Beginning VICAR task LIST
      10       0   0   0  22  23  24  25  26  27  28
 f2 out=a nl=5 ns=5 fun="-1.7e38*(line<3)+2" 'real
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 25 TIMES
 f2 out=b nl=5 ns=5 fun="-1.7e38*(line<3)+1" 'real
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 25 TIMES
 list a
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:31 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp             1           2           3           4           5
    Line
       1      -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38
@@ -5348,7 +5451,7 @@ list b
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:32 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp             1           2           3           4           5
    Line
       1      -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38
@@ -5358,15 +5461,15 @@ Beginning VICAR task list
       5       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
 f2 (a,b) c fun="in1-in2" exclude=-1.7e38 replace=-1.7e38
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 25 TIMES
 list c
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:31 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:33 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp             1           2           3           4           5
    Line
       1      -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38
@@ -5383,15 +5486,15 @@ GEN task completed
 f2 OUT=b nl=5 ns=10 nb=12 ORG="BSQ" 'BYTE    +
    FUNC="2*(LINE-1) + 3*(SAMP-1) + 4*(BINC-1) + 5"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 600 TIMES
 write "Should get 0 differences."
 Should get 0 differences.
 difpic (a b)
 Beginning VICAR task difpic
-DIFPIC version 05jul10
- NUMBER OF DIFFERENCES =   0
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
 gen a 5 10 12 ORG="BIL" 'HALF   LINC=2 SINC=3 BINC=4 IVAL=5
 Beginning VICAR task gen
 GEN Version 6
@@ -5399,14 +5502,14 @@ GEN task completed
 f2 OUT=b nl=5 ns=10 nb=12 ORG="BIL" 'HALF    +
    FUNC="2*(LINE-1) + 3*(SAMP-1) + 4*(BINC-1) + 5"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 600 TIMES
 write "Should get 0 differences."
 Should get 0 differences.
 difpic (a b)
 Beginning VICAR task difpic
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  Warning: BIL format may cause performance degradation
  NUMBER OF DIFFERENCES =   0
 gen a 5 10 12 ORG="BIP" 'REAL   LINC=2 SINC=3 BINC=4 IVAL=5
@@ -5416,14 +5519,14 @@ GEN task completed
 f2 OUT=b nl=5 ns=10 nb=12 ORG="BIP" 'REAL    +
    FUNC="2*(LINE-1) + 3*(SAMP-1) + 4*(BINC-1) + 5"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 600 TIMES
 write "Should get 0 differences."
 Should get 0 differences.
 difpic (a b)
 Beginning VICAR task difpic
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  BIP files not supported, use program TRAN to convert to BSQ
 gen a 5 10 12 ORG="BSQ" 'BYTE
 Beginning VICAR task gen
@@ -5434,7 +5537,7 @@ Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 f2   a c size=(2 3 4 5) bands=(5 4) func="IN1"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 LINES TRUNCATED
 SAMPLES TRUNCATED
 BANDS TRUNCATED
@@ -5444,8 +5547,8 @@ write "Should get 0 differences."
 Should get 0 differences.
 difpic (b c)
 Beginning VICAR task difpic
-DIFPIC version 05jul10
- NUMBER OF DIFFERENCES =   0
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
 gen a 5 10 12 ORG="BIL" 'half
 Beginning VICAR task gen
 GEN Version 6
@@ -5455,7 +5558,7 @@ Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 f2   a c size=(2 3 4 5) bands=(5 4) func="IN1"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 LINES TRUNCATED
 SAMPLES TRUNCATED
 BANDS TRUNCATED
@@ -5465,7 +5568,7 @@ write "Should get 0 differences."
 Should get 0 differences.
 difpic (b c)
 Beginning VICAR task difpic
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  Warning: BIL format may cause performance degradation
  NUMBER OF DIFFERENCES =   0
 copy a a1
@@ -5480,7 +5583,7 @@ Beginning VICAR task copy
  COPY VERSION 12-JUL-1993
 f2   a c size=(2 3 4 5) bands=(5 4) func="IN1"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 LINES TRUNCATED
 SAMPLES TRUNCATED
 BANDS TRUNCATED
@@ -5490,11 +5593,11 @@ write "Should get 0 differences."
 Should get 0 differences.
 difpic (b c)
 Beginning VICAR task difpic
-DIFPIC version 05jul10
+DIFPIC version 06Oct11
  BIP files not supported, use program TRAN to convert to BSQ
 f2 (a a1) b func="in1+in2"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
  ALL INPUTS MUST HAVE SAME ORG!
  ** ABEND called **
 continue
@@ -5520,7 +5623,7 @@ LIST A
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:44 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     1
  ***********
@@ -5538,7 +5641,7 @@ Beginning VICAR task LIST
      10       9  10  11  12  13  14  15  16  17  18
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:44 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     2
  ***********
@@ -5558,7 +5661,7 @@ LIST B
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:44 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     1
  ***********
@@ -5576,7 +5679,7 @@ Beginning VICAR task LIST
      10        18    20    22    24    26    28    30    32    34    36
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:44 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     2
  ***********
@@ -5596,7 +5699,7 @@ LIST C
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:44 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     1
  ***********
@@ -5614,7 +5717,7 @@ Beginning VICAR task LIST
      10             27         30         33         36         39         42         45         48         51         54
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:44 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     2
  ***********
@@ -5634,7 +5737,7 @@ LIST D
 Beginning VICAR task LIST
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:45 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     1
  ***********
@@ -5652,7 +5755,7 @@ Beginning VICAR task LIST
      10       3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01   6.000E+01   6.400E+01   6.800E+01   7.200E+01
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:45 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     2
  ***********
@@ -5670,7 +5773,7 @@ Beginning VICAR task LIST
      10       3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01   6.000E+01   6.400E+01   6.800E+01   7.200E+01
 F2 (A,B,C,D) X FUNC="IN1+100*IN2+10000*IN3+1000000*IN4" 'FULL SB=1 NB=1
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 BANDS TRUNCATED
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
@@ -5678,14 +5781,14 @@ LIST X
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:44 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:45 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
-      1              0    4030201    8060402   12090604   16120804   20151004   24181206   28211408   32241608   36271808
-      2        4030201    8060402   12090604   16120804   20151004   24181206   28211408   32241608   36271808   40302008
-      3        8060402   12090604   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212
-      4       12090604   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412
+      1              0    4030201    8060402   12090603   16120804   20151004   24181206   28211408   32241608   36271808
+      2        4030201    8060402   12090603   16120804   20151004   24181206   28211408   32241608   36271808   40302008
+      3        8060402   12090603   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212
+      4       12090603   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412
       5       16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412   52392612
       6       20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412   52392612   56422816
       7       24181206   28211408   32241608   36271808   40302008   44332212   48362412   52392612   56422816   60453016
@@ -5695,7 +5798,7 @@ Beginning VICAR task LIST
 F2 (A,B,C,D) X FUNC="IN1+100*IN2+10000*IN3+1000000*IN4" 'FULL  +
 	SIZE=(5,5,5,5) SB=1 NB=1
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 LINES TRUNCATED
 SAMPLES TRUNCATED
 BANDS TRUNCATED
@@ -5705,8 +5808,8 @@ LIST X
 Beginning VICAR task LIST
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:44 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp            1          2          3          4          5
    Line
       1       32241608   36271808   40302008   44332212   48362412
@@ -5724,15 +5827,15 @@ GEN Version 6
 GEN task completed
 F2 INP=(JSM,JFM) OUT=X FUNCTION="IN1+IN2"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 11 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     1
  ***********
@@ -5750,8 +5853,8 @@ Beginning VICAR task LIST
      10      10  10  10  10  10  10  10  10  10  10
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     2
  ***********
@@ -5769,8 +5872,8 @@ Beginning VICAR task LIST
      10      12  12  12  12  12  12  12  12  12  12
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     3
  ***********
@@ -5788,8 +5891,8 @@ Beginning VICAR task LIST
      10      14  14  14  14  14  14  14  14  14  14
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     4
  ***********
@@ -5807,8 +5910,8 @@ Beginning VICAR task LIST
      10      16  16  16  16  16  16  16  16  16  16
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     5
  ***********
@@ -5826,8 +5929,8 @@ Beginning VICAR task LIST
      10      18  18  18  18  18  18  18  18  18  18
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     6
  ***********
@@ -5845,8 +5948,8 @@ Beginning VICAR task LIST
      10      20  20  20  20  20  20  20  20  20  20
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     7
  ***********
@@ -5864,8 +5967,8 @@ Beginning VICAR task LIST
      10      22  22  22  22  22  22  22  22  22  22
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     8
  ***********
@@ -5883,8 +5986,8 @@ Beginning VICAR task LIST
      10      24  24  24  24  24  24  24  24  24  24
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     9
  ***********
@@ -5902,8 +6005,8 @@ Beginning VICAR task LIST
      10      26  26  26  26  26  26  26  26  26  26
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:47 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =    10
  ***********
@@ -5921,7 +6024,7 @@ Beginning VICAR task LIST
      10      28  28  28  28  28  28  28  28  28  28
 F2 INP=(JSM,JFM) OUT=X FUNCTION="IN1+IN2" SIZE=(5,5,5,5)
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 LINES TRUNCATED
 SAMPLES TRUNCATED
 F2 using hash table lookup
@@ -5930,8 +6033,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     1
  ***********
@@ -5944,8 +6047,8 @@ Beginning VICAR task LIST
       5      10  10  10  10  10
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     2
  ***********
@@ -5958,8 +6061,8 @@ Beginning VICAR task LIST
       5      12  12  12  12  12
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     3
  ***********
@@ -5972,8 +6075,8 @@ Beginning VICAR task LIST
       5      14  14  14  14  14
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     4
  ***********
@@ -5986,8 +6089,8 @@ Beginning VICAR task LIST
       5      16  16  16  16  16
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     5
  ***********
@@ -6000,8 +6103,8 @@ Beginning VICAR task LIST
       5      18  18  18  18  18
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     6
  ***********
@@ -6014,8 +6117,8 @@ Beginning VICAR task LIST
       5      20  20  20  20  20
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     7
  ***********
@@ -6028,8 +6131,8 @@ Beginning VICAR task LIST
       5      22  22  22  22  22
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     8
  ***********
@@ -6042,8 +6145,8 @@ Beginning VICAR task LIST
       5      24  24  24  24  24
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     9
  ***********
@@ -6056,8 +6159,8 @@ Beginning VICAR task LIST
       5      26  26  26  26  26
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =    10
  ***********
@@ -6070,7 +6173,7 @@ Beginning VICAR task LIST
       5      28  28  28  28  28
 F2 INP=(JSM,JFM) OUT=X FUNCTION="IN1+IN2" SB=1 NB=3
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 BANDS TRUNCATED
 F2 using hash table lookup
 FUNCTION EVALUATED 4 TIMES
@@ -6078,8 +6181,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     1
  ***********
@@ -6097,8 +6200,8 @@ Beginning VICAR task LIST
      10      10  10  10  10  10  10  10  10  10  10
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     2
  ***********
@@ -6116,8 +6219,8 @@ Beginning VICAR task LIST
      10      12  12  12  12  12  12  12  12  12  12
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:48 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     3
  ***********
@@ -6135,7 +6238,7 @@ Beginning VICAR task LIST
      10      14  14  14  14  14  14  14  14  14  14
 F2 INP=(JSM,JFM) OUT=X FUNCTION="IN1+IN2" SB=1 NB=3 SIZE=(5,5,5,5)
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 LINES TRUNCATED
 SAMPLES TRUNCATED
 BANDS TRUNCATED
@@ -6145,8 +6248,8 @@ LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:49 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     1
  ***********
@@ -6159,8 +6262,8 @@ Beginning VICAR task LIST
       5      10  10  10  10  10
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:49 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     2
  ***********
@@ -6173,8 +6276,8 @@ Beginning VICAR task LIST
       5      12  12  12  12  12
 
 
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:46 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:49 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     3
  ***********
@@ -6187,14 +6290,14 @@ Beginning VICAR task LIST
       5      14  14  14  14  14
 F2 OUT=X FUNCTION="LINE+SAMP+BAND" SIZE=(1,1,10,10) NB=10
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 1000 TIMES
 LIST X
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:50 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     1
  ***********
@@ -6212,7 +6315,7 @@ Beginning VICAR task LIST
      10      12  13  14  15  16  17  18  19  20  21
 
 
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:50 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     2
  ***********
@@ -6230,7 +6333,7 @@ Beginning VICAR task LIST
      10      13  14  15  16  17  18  19  20  21  22
 
 
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:50 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     3
  ***********
@@ -6248,7 +6351,7 @@ Beginning VICAR task LIST
      10      14  15  16  17  18  19  20  21  22  23
 
 
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:50 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     4
  ***********
@@ -6266,7 +6369,7 @@ Beginning VICAR task LIST
      10      15  16  17  18  19  20  21  22  23  24
 
 
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:50 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     5
  ***********
@@ -6284,7 +6387,7 @@ Beginning VICAR task LIST
      10      16  17  18  19  20  21  22  23  24  25
 
 
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:50 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     6
  ***********
@@ -6302,7 +6405,7 @@ Beginning VICAR task LIST
      10      17  18  19  20  21  22  23  24  25  26
 
 
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:50 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     7
  ***********
@@ -6320,7 +6423,7 @@ Beginning VICAR task LIST
      10      18  19  20  21  22  23  24  25  26  27
 
 
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:50 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     8
  ***********
@@ -6338,7 +6441,7 @@ Beginning VICAR task LIST
      10      19  20  21  22  23  24  25  26  27  28
 
 
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:50 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =     9
  ***********
@@ -6356,7 +6459,7 @@ Beginning VICAR task LIST
      10      20  21  22  23  24  25  26  27  28  29
 
 
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:50 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
  ***********
  Band =    10
  ***********
@@ -6374,14 +6477,14 @@ Beginning VICAR task LIST
      10      21  22  23  24  25  26  27  28  29  30
 F2 OUT=X  FUNCTION="MOD(SAMP,LINE)"   'HALF  SIZE=(1,1,10,20)
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 200 TIMES
 LIST X
 Beginning VICAR task LIST
 
    HALF     samples are interpreted as HALFWORD data
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:51 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
    Line
 
@@ -6396,7 +6499,7 @@ Beginning VICAR task LIST
      10         1     2     3     4     5     6     7     8     9     0     1     2     3     4     5
 
    HALF     samples are interpreted as HALFWORD data
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:51 2011
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp      16    17    18    19    20
    Line
 
@@ -6415,7 +6518,7 @@ GEN Version 6
 GEN task completed
 F2 X Y (3,3,5,5) FUN="LINE*10+SAMP"
 Beginning VICAR task F2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 LINES TRUNCATED
 SAMPLES TRUNCATED
 F2 calculating every pixel
@@ -6424,8 +6527,8 @@ LIST Y
 Beginning VICAR task LIST
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:51 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:52 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp     1       3       5
    Line
       1      33  34  35  36  37
@@ -6439,25 +6542,25 @@ GEN Version 6
 GEN task completed
 f2 a a1 'real func="0.9*in1"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 10000 TIMES
 f2 a a2 'real func="0.9*in1" excl=0.0
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 10000 TIMES
 f2 (a1 a2) d fun="in1-in2"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 10000 TIMES
 hist d 'nohis
 Beginning VICAR task hist
-HIST version 15-NOV-05
+*** HIST version 17 Dec 2012 ***
 
 
-AVERAGE GRAY LEVEL=0.000000       STANDARD DEVIATION=0.000000       NUMBER ELEMENTS=   10000
+AVERAGE GRAY LEVEL=0.000000       STANDARD DEVIATION=0.000000       NUMBER ELEMENTS=     10000
 MIN. DN=0.000000
 MAX. DN=0.000000
 
@@ -6469,7 +6572,7 @@ list tiny.img
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:55 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
      Samp             1           2           3           4           5           6
    Line
       1       1.000E-08   1.100E-08   1.200E-08   1.300E-08   1.400E-08   1.500E-08
@@ -6480,15 +6583,15 @@ Beginning VICAR task list
       6       1.500E-08   1.600E-08   1.700E-08   1.800E-08   1.900E-08   2.000E-08
 f2 tiny.img logtiny.img func="alog10(in1)"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 36 TIMES
 list logtiny.img
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Tue Jul 26 15:46:55 2011
- Task:F2        User:lwk       Date_Time:Tue Jul 26 15:46:56 2011
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:22 2015
      Samp             1           2           3           4           5           6
    Line
       1      -8.000E+00  -7.959E+00  -7.921E+00  -7.886E+00  -7.854E+00  -7.824E+00
@@ -6501,15 +6604,15 @@ f2 (/project/test_work/testdata/sitod1/test_data/gll/s0412460345.sos  +
  /project/test_work/testdata/sitod1/test_data/gll/0345.sos)  +
  d fun="in1-in2"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 16370 TIMES
 hist d 'nohis
 Beginning VICAR task hist
-HIST version 15-NOV-05
+*** HIST version 17 Dec 2012 ***
 
 
-AVERAGE GRAY LEVEL=-3.12E-6       STANDARD DEVIATION=0.001768       NUMBER ELEMENTS=  640000
+AVERAGE GRAY LEVEL=-3.12E-6       STANDARD DEVIATION=0.001768       NUMBER ELEMENTS=    640000
 MIN. DN=        -1
 MAX. DN=         0
 
@@ -6517,46 +6620,1506 @@ f2 (/project/test_work/testdata/sitod1/test_data/gll/s0412460345.sos  +
  /project/test_work/testdata/sitod1/test_data/gll/0345.sos)  +
  d fun="in1-in2" excl=0.0
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 16363 TIMES
 hist d 'nohis
 Beginning VICAR task hist
-HIST version 15-NOV-05
+*** HIST version 17 Dec 2012 ***
 
 
-AVERAGE GRAY LEVEL=-3.12E-6       STANDARD DEVIATION=0.001768       NUMBER ELEMENTS=  640000
+AVERAGE GRAY LEVEL=-3.12E-6       STANDARD DEVIATION=0.001768       NUMBER ELEMENTS=    640000
 MIN. DN=        -1
 MAX. DN=         0
 
-End-proc
-exit
-slogoff
-if ($RUNTYPE = "INTERACTIVE")
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-else
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-end-if
-ulogoff
-END-PROC
-END-PROC
-$!-----------------------------------------------------------------------------
-$ create tstf2.log_solos_diff
-THIS IS THE PORTION OF THE SOLARIS TEST LOG FOR F2 THAT IS DIFFERENT FROM THAT ON LINUX
-
-
-GEN A 10 10 'BYTE
-GEN B 10 10 'HALF LINC=2 SINC=2
-GEN C 10 10 'FULL LINC=3 SINC=3
-GEN D 10 10 'REAL4 LINC=4 SINC=4
-F2 (A,B,C,D) X FUNC="IN1+100*IN2+10000*IN3+1000000*IN4" 'FULL
+gen x1 nl=10 ns=10 'half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+F2 INP=(x1) OUT=x2 FUNCTION="IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN+
+1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+I+
+N1+IN1+IN1+IN1"
 Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 19 TIMES
+list x2
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:22 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:22 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         0    62   124   186   248   310   372   434   496   558
+      2        62   124   186   248   310   372   434   496   558   620
+      3       124   186   248   310   372   434   496   558   620   682
+      4       186   248   310   372   434   496   558   620   682   744
+      5       248   310   372   434   496   558   620   682   744   806
+      6       310   372   434   496   558   620   682   744   806   868
+      7       372   434   496   558   620   682   744   806   868   930
+      8       434   496   558   620   682   744   806   868   930   992
+      9       496   558   620   682   744   806   868   930   992  1054
+     10       558   620   682   744   806   868   930   992  1054  1116
+F2 INP=(x1) OUT=x2 FUNCTION="IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1"  +
+  FU2="+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1"  +
+  FU3="+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1"  +
+  FU4="+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+
++IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 19 TIMES
+list x2
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 13:52:22 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 13:52:22 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         0   248   496   744   992  1240  1488  1736  1984  2232
+      2       248   496   744   992  1240  1488  1736  1984  2232  2480
+      3       496   744   992  1240  1488  1736  1984  2232  2480  2728
+      4       744   992  1240  1488  1736  1984  2232  2480  2728  2976
+      5       992  1240  1488  1736  1984  2232  2480  2728  2976  3224
+      6      1240  1488  1736  1984  2232  2480  2728  2976  3224  3472
+      7      1488  1736  1984  2232  2480  2728  2976  3224  3472  3720
+      8      1736  1984  2232  2480  2728  2976  3224  3472  3720  3968
+      9      1984  2232  2480  2728  2976  3224  3472  3720  3968  4216
+     10      2232  2480  2728  2976  3224  3472  3720  3968  4216  4464
+End-proc
+$!-----------------------------------------------------------------------------
+$ create tstf2.log_solos
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+GEN F1 NL=5 NS=20 'FULL
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN F2 NL=5,NS=20 'FULL LINC=3 SINC=3
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+LIST F1 'FULL
+Beginning VICAR task LIST
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1              0          1          2          3          4          5          6          7          8          9
+      2              1          2          3          4          5          6          7          8          9         10
+      3              2          3          4          5          6          7          8          9         10         11
+      4              3          4          5          6          7          8          9         10         11         12
+      5              4          5          6          7          8          9         10         11         12         13
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp           11         12         13         14         15         16         17         18         19         20
+   Line
+      1             10         11         12         13         14         15         16         17         18         19
+      2             11         12         13         14         15         16         17         18         19         20
+      3             12         13         14         15         16         17         18         19         20         21
+      4             13         14         15         16         17         18         19         20         21         22
+      5             14         15         16         17         18         19         20         21         22         23
+LIST F2 'FULL
+Beginning VICAR task LIST
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1              0          3          6          9         12         15         18         21         24         27
+      2              3          6          9         12         15         18         21         24         27         30
+      3              6          9         12         15         18         21         24         27         30         33
+      4              9         12         15         18         21         24         27         30         33         36
+      5             12         15         18         21         24         27         30         33         36         39
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp           11         12         13         14         15         16         17         18         19         20
+   Line
+      1             30         33         36         39         42         45         48         51         54         57
+      2             33         36         39         42         45         48         51         54         57         60
+      3             36         39         42         45         48         51         54         57         60         63
+      4             39         42         45         48         51         54         57         60         63         66
+      5             42         45         48         51         54         57         60         63         66         69
+F2 INP=(F1,F2) OUT=X FUNCTION="IN1+SQRT(IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
+Beginning VICAR task LIST
+
    FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1              0          3          4          6          7          9         10         12         13         14
+      2              3          4          6          7          9         10         12         13         14         15
+      3              4          6          7          9         10         12         13         14         15         17
+      4              6          7          9         10         12         13         14         15         17         18
+      5              7          9         10         12         13         14         15         17         18         19
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp           11         12         13         14         15         16         17         18         19         20
+   Line
+      1             15         17         18         19         20         22         23         24         25         27
+      2             17         18         19         20         22         23         24         25         27         28
+      3             18         19         20         22         23         24         25         27         28         29
+      4             19         20         22         23         24         25         27         28         29         30
+      5             20         22         23         24         25         27         28         29         30         31
+GEN R NL=5 NS=20 'REAL4
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN S NL=5,NS=20 'REAL4 LINC=1.5 SINC=1.5
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+LIST R
+Beginning VICAR task LIST
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
+      2       1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01
+      3       2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01
+      4       3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01
+      5       4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp            11          12          13          14          15          16          17          18          19          20
+   Line
+      1       1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01   1.900E+01
+      2       1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01   1.900E+01   2.000E+01
+      3       1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01   1.900E+01   2.000E+01   2.100E+01
+      4       1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01   1.900E+01   2.000E+01   2.100E+01   2.200E+01
+      5       1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01   1.900E+01   2.000E+01   2.100E+01   2.200E+01   2.300E+01
+LIST S
+Beginning VICAR task LIST
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       0.000E+00   1.500E+00   3.000E+00   4.500E+00   6.000E+00   7.500E+00   9.000E+00   1.050E+01   1.200E+01   1.350E+01
+      2       1.500E+00   3.000E+00   4.500E+00   6.000E+00   7.500E+00   9.000E+00   1.050E+01   1.200E+01   1.350E+01   1.500E+01
+      3       3.000E+00   4.500E+00   6.000E+00   7.500E+00   9.000E+00   1.050E+01   1.200E+01   1.350E+01   1.500E+01   1.650E+01
+      4       4.500E+00   6.000E+00   7.500E+00   9.000E+00   1.050E+01   1.200E+01   1.350E+01   1.500E+01   1.650E+01   1.800E+01
+      5       6.000E+00   7.500E+00   9.000E+00   1.050E+01   1.200E+01   1.350E+01   1.500E+01   1.650E+01   1.800E+01   1.950E+01
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp            11          12          13          14          15          16          17          18          19          20
+   Line
+      1       1.500E+01   1.650E+01   1.800E+01   1.950E+01   2.100E+01   2.250E+01   2.400E+01   2.550E+01   2.700E+01   2.850E+01
+      2       1.650E+01   1.800E+01   1.950E+01   2.100E+01   2.250E+01   2.400E+01   2.550E+01   2.700E+01   2.850E+01   3.000E+01
+      3       1.800E+01   1.950E+01   2.100E+01   2.250E+01   2.400E+01   2.550E+01   2.700E+01   2.850E+01   3.000E+01   3.150E+01
+      4       1.950E+01   2.100E+01   2.250E+01   2.400E+01   2.550E+01   2.700E+01   2.850E+01   3.000E+01   3.150E+01   3.300E+01
+      5       2.100E+01   2.250E+01   2.400E+01   2.550E+01   2.700E+01   2.850E+01   3.000E+01   3.150E+01   3.300E+01   3.450E+01
+F2 INP=(R,S) OUT=X FUNCTION="IN1+SQRT(IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       0.000E+00   2.225E+00   3.732E+00   5.121E+00   6.449E+00   7.739E+00   9.000E+00   1.024E+01   1.146E+01   1.267E+01
+      2       2.225E+00   3.732E+00   5.121E+00   6.449E+00   7.739E+00   9.000E+00   1.024E+01   1.146E+01   1.267E+01   1.387E+01
+      3       3.732E+00   5.121E+00   6.449E+00   7.739E+00   9.000E+00   1.024E+01   1.146E+01   1.267E+01   1.387E+01   1.506E+01
+      4       5.121E+00   6.449E+00   7.739E+00   9.000E+00   1.024E+01   1.146E+01   1.267E+01   1.387E+01   1.506E+01   1.624E+01
+      5       6.449E+00   7.739E+00   9.000E+00   1.024E+01   1.146E+01   1.267E+01   1.387E+01   1.506E+01   1.624E+01   1.742E+01
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp            11          12          13          14          15          16          17          18          19          20
+   Line
+      1       1.387E+01   1.506E+01   1.624E+01   1.742E+01   1.858E+01   1.974E+01   2.090E+01   2.205E+01   2.320E+01   2.434E+01
+      2       1.506E+01   1.624E+01   1.742E+01   1.858E+01   1.974E+01   2.090E+01   2.205E+01   2.320E+01   2.434E+01   2.548E+01
+      3       1.624E+01   1.742E+01   1.858E+01   1.974E+01   2.090E+01   2.205E+01   2.320E+01   2.434E+01   2.548E+01   2.661E+01
+      4       1.742E+01   1.858E+01   1.974E+01   2.090E+01   2.205E+01   2.320E+01   2.434E+01   2.548E+01   2.661E+01   2.774E+01
+      5       1.858E+01   1.974E+01   2.090E+01   2.205E+01   2.320E+01   2.434E+01   2.548E+01   2.661E+01   2.774E+01   2.887E+01
+GEN B NL=10 NS=10
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN G NL=10 NS=10 IVAL=125
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN H NL=10 NS=20 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN L1 LINC=1. SINC=0. NL=10 NS=10
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN L2 LINC=0. SINC=1. NL=10 NS=10
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+LIST B
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       1   2   3   4   5   6   7   8   9  10
+      3       2   3   4   5   6   7   8   9  10  11
+      4       3   4   5   6   7   8   9  10  11  12
+      5       4   5   6   7   8   9  10  11  12  13
+      6       5   6   7   8   9  10  11  12  13  14
+      7       6   7   8   9  10  11  12  13  14  15
+      8       7   8   9  10  11  12  13  14  15  16
+      9       8   9  10  11  12  13  14  15  16  17
+     10       9  10  11  12  13  14  15  16  17  18
+LIST H
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+      1         0     1     2     3     4     5     6     7     8     9    10    11    12    13    14
+      2         1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+      3         2     3     4     5     6     7     8     9    10    11    12    13    14    15    16
+      4         3     4     5     6     7     8     9    10    11    12    13    14    15    16    17
+      5         4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
+      6         5     6     7     8     9    10    11    12    13    14    15    16    17    18    19
+      7         6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
+      8         7     8     9    10    11    12    13    14    15    16    17    18    19    20    21
+      9         8     9    10    11    12    13    14    15    16    17    18    19    20    21    22
+     10         9    10    11    12    13    14    15    16    17    18    19    20    21    22    23
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp      16    17    18    19    20
+   Line
+      1        15    16    17    18    19
+      2        16    17    18    19    20
+      3        17    18    19    20    21
+      4        18    19    20    21    22
+      5        19    20    21    22    23
+      6        20    21    22    23    24
+      7        21    22    23    24    25
+      8        22    23    24    25    26
+      9        23    24    25    26    27
+     10        24    25    26    27    28
+LIST L1
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp     1       3       5       7       9
+   Line
+
+      2       1   1   1   1   1   1   1   1   1   1
+      3       2   2   2   2   2   2   2   2   2   2
+      4       3   3   3   3   3   3   3   3   3   3
+      5       4   4   4   4   4   4   4   4   4   4
+      6       5   5   5   5   5   5   5   5   5   5
+      7       6   6   6   6   6   6   6   6   6   6
+      8       7   7   7   7   7   7   7   7   7   7
+      9       8   8   8   8   8   8   8   8   8   8
+     10       9   9   9   9   9   9   9   9   9   9
+LIST L2
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       0   1   2   3   4   5   6   7   8   9
+      3       0   1   2   3   4   5   6   7   8   9
+      4       0   1   2   3   4   5   6   7   8   9
+      5       0   1   2   3   4   5   6   7   8   9
+      6       0   1   2   3   4   5   6   7   8   9
+      7       0   1   2   3   4   5   6   7   8   9
+      8       0   1   2   3   4   5   6   7   8   9
+      9       0   1   2   3   4   5   6   7   8   9
+     10       0   1   2   3   4   5   6   7   8   9
+F2 INP=B OUT=X FUNCTION="IN1+1"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp     1       3       5       7       9
+   Line
+      1       1   2   3   4   5   6   7   8   9  10
+      2       2   3   4   5   6   7   8   9  10  11
+      3       3   4   5   6   7   8   9  10  11  12
+      4       4   5   6   7   8   9  10  11  12  13
+      5       5   6   7   8   9  10  11  12  13  14
+      6       6   7   8   9  10  11  12  13  14  15
+      7       7   8   9  10  11  12  13  14  15  16
+      8       8   9  10  11  12  13  14  15  16  17
+      9       9  10  11  12  13  14  15  16  17  18
+     10      10  11  12  13  14  15  16  17  18  19
+F2 INP=B OUT=X FUNCTION="INT(IN1/10)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X 'ZERO
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   0   0   0   0   0   0   0   0   0
+      2       0   0   0   0   0   0   0   0   0   1
+      3       0   0   0   0   0   0   0   0   1   1
+      4       0   0   0   0   0   0   0   1   1   1
+      5       0   0   0   0   0   0   1   1   1   1
+      6       0   0   0   0   0   1   1   1   1   1
+      7       0   0   0   0   1   1   1   1   1   1
+      8       0   0   0   1   1   1   1   1   1   1
+      9       0   0   1   1   1   1   1   1   1   1
+     10       0   1   1   1   1   1   1   1   1   1
+F2 INP=B OUT=X2 FUNCTION="IN1/10" 'TRUNC
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+DIFPIC (X,X2)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+F2 INP=G OUT=X FUNCTION="IN1+1"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:22 2015
+     Samp     1       3       5       7       9
+   Line
+      1     126 127 128 129 130 131 132 133 134 135
+      2     127 128 129 130 131 132 133 134 135 136
+      3     128 129 130 131 132 133 134 135 136 137
+      4     129 130 131 132 133 134 135 136 137 138
+      5     130 131 132 133 134 135 136 137 138 139
+      6     131 132 133 134 135 136 137 138 139 140
+      7     132 133 134 135 136 137 138 139 140 141
+      8     133 134 135 136 137 138 139 140 141 142
+      9     134 135 136 137 138 139 140 141 142 143
+     10     135 136 137 138 139 140 141 142 143 144
+F2 INP=B OUT=X FUNCTION="IN1+1" SIZE=(2,3,6,4)
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+LINES TRUNCATED
+SAMPLES TRUNCATED
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:22 2015
+     Samp     1       3
+   Line
+      1       4   5   6   7
+      2       5   6   7   8
+      3       6   7   8   9
+      4       7   8   9  10
+      5       8   9  10  11
+      6       9  10  11  12
+F2 B X FUNC="SQRT(IN1**1.1234+7)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:22 2015
+     Samp     1       3       5       7       9
+   Line
+      1       3   3   3   3   3   4   4   4   4   4
+      2       3   3   3   3   4   4   4   4   4   5
+      3       3   3   3   4   4   4   4   4   5   5
+      4       3   3   4   4   4   4   4   5   5   5
+      5       3   4   4   4   4   4   5   5   5   5
+      6       4   4   4   4   4   5   5   5   5   5
+      7       4   4   4   4   5   5   5   5   5   5
+      8       4   4   4   5   5   5   5   5   5   5
+      9       4   4   5   5   5   5   5   5   5   6
+     10       4   5   5   5   5   5   5   5   6   6
+F2 B X FUNC="SQRT(IN1**1.1234+7)"   'TRUNC
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:22 2015
+     Samp     1       3       5       7       9
+   Line
+      1       2   2   3   3   3   3   3   3   4   4
+      2       2   3   3   3   3   3   3   4   4   4
+      3       3   3   3   3   3   3   4   4   4   4
+      4       3   3   3   3   3   4   4   4   4   4
+      5       3   3   3   3   4   4   4   4   4   4
+      6       3   3   3   4   4   4   4   4   4   5
+      7       3   3   4   4   4   4   4   4   5   5
+      8       3   4   4   4   4   4   4   5   5   5
+      9       4   4   4   4   4   4   5   5   5   5
+     10       4   4   4   4   4   5   5   5   5   5
+F2 INP=H OUT=X  FUNCTION="IN1+1"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 29 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:22 2015
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+      1         1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+      2         2     3     4     5     6     7     8     9    10    11    12    13    14    15    16
+      3         3     4     5     6     7     8     9    10    11    12    13    14    15    16    17
+      4         4     5     6     7     8     9    10    11    12    13    14    15    16    17    18
+      5         5     6     7     8     9    10    11    12    13    14    15    16    17    18    19
+      6         6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
+      7         7     8     9    10    11    12    13    14    15    16    17    18    19    20    21
+      8         8     9    10    11    12    13    14    15    16    17    18    19    20    21    22
+      9         9    10    11    12    13    14    15    16    17    18    19    20    21    22    23
+     10        10    11    12    13    14    15    16    17    18    19    20    21    22    23    24
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:22 2015
+     Samp      16    17    18    19    20
+   Line
+      1        16    17    18    19    20
+      2        17    18    19    20    21
+      3        18    19    20    21    22
+      4        19    20    21    22    23
+      5        20    21    22    23    24
+      6        21    22    23    24    25
+      7        22    23    24    25    26
+      8        23    24    25    26    27
+      9        24    25    26    27    28
+     10        25    26    27    28    29
+F2 INP=H OUT=X  FUNCTION="IN1+1"  SIZE=(2,5,6,8)
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+LINES TRUNCATED
+SAMPLES TRUNCATED
+F2 using hash table lookup
+FUNCTION EVALUATED 14 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:22 2015
+     Samp       1     2     3     4     5     6     7     8
+   Line
+      1         6     7     8     9    10    11    12    13
+      2         7     8     9    10    11    12    13    14
+      3         8     9    10    11    12    13    14    15
+      4         9    10    11    12    13    14    15    16
+      5        10    11    12    13    14    15    16    17
+      6        11    12    13    14    15    16    17    18
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1.AND.IN2"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:22 2015
+     Samp     1       3       5       7       9
+   Line
+
+      2       0   1   0   1   0   1   0   1   0   1
+      3       0   0   2   2   0   0   2   2   0   0
+      4       0   1   2   3   0   1   2   3   0   1
+      5       0   0   0   0   4   4   4   4   0   0
+      6       0   1   0   1   4   5   4   5   0   1
+      7       0   0   2   2   4   4   6   6   0   0
+      8       0   1   2   3   4   5   6   7   0   1
+      9       0   0   0   0   0   0   0   0   8   8
+     10       0   1   0   1   0   1   0   1   8   9
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1.OR.IN2"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:23 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       1   1   3   3   5   5   7   7   9   9
+      3       2   3   2   3   6   7   6   7  10  11
+      4       3   3   3   3   7   7   7   7  11  11
+      5       4   5   6   7   4   5   6   7  12  13
+      6       5   5   7   7   5   5   7   7  13  13
+      7       6   7   6   7   6   7   6   7  14  15
+      8       7   7   7   7   7   7   7   7  15  15
+      9       8   9  10  11  12  13  14  15   8   9
+     10       9   9  11  11  13  13  15  15   9   9
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1.XOR.IN2"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:23 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       1   0   3   2   5   4   7   6   9   8
+      3       2   3   0   1   6   7   4   5  10  11
+      4       3   2   1   0   7   6   5   4  11  10
+      5       4   5   6   7   0   1   2   3  12  13
+      6       5   4   7   6   1   0   3   2  13  12
+      7       6   7   4   5   2   3   0   1  14  15
+      8       7   6   5   4   3   2   1   0  15  14
+      9       8   9  10  11  12  13  14  15   0   1
+     10       9   8  11  10  13  12  15  14   1   0
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1.LT.IN2"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:23 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   1   1   1   1   1   1   1   1
+      2       0   0   1   1   1   1   1   1   1   1
+      3       0   0   0   1   1   1   1   1   1   1
+      4       0   0   0   0   1   1   1   1   1   1
+      5       0   0   0   0   0   1   1   1   1   1
+      6       0   0   0   0   0   0   1   1   1   1
+      7       0   0   0   0   0   0   0   1   1   1
+      8       0   0   0   0   0   0   0   0   1   1
+      9       0   0   0   0   0   0   0   0   0   1
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1.EQ.IN2"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:23 2015
+     Samp     1       3       5       7       9
+   Line
+      1       1   0   0   0   0   0   0   0   0   0
+      2       0   1   0   0   0   0   0   0   0   0
+      3       0   0   1   0   0   0   0   0   0   0
+      4       0   0   0   1   0   0   0   0   0   0
+      5       0   0   0   0   1   0   0   0   0   0
+      6       0   0   0   0   0   1   0   0   0   0
+      7       0   0   0   0   0   0   1   0   0   0
+      8       0   0   0   0   0   0   0   1   0   0
+      9       0   0   0   0   0   0   0   0   1   0
+     10       0   0   0   0   0   0   0   0   0   1
+F2 INP=(L1,L2) OUT=X  FUNCTION=".NOT.(IN1.GE.IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:23 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   1   1   1   1   1   1   1   1
+      2       0   0   1   1   1   1   1   1   1   1
+      3       0   0   0   1   1   1   1   1   1   1
+      4       0   0   0   0   1   1   1   1   1   1
+      5       0   0   0   0   0   1   1   1   1   1
+      6       0   0   0   0   0   0   1   1   1   1
+      7       0   0   0   0   0   0   0   1   1   1
+      8       0   0   0   0   0   0   0   0   1   1
+      9       0   0   0   0   0   0   0   0   0   1
+F2 INP=L1 OUT=X  FUNCTION="!IN1" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   NOT    1
+   RETN   0
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:23 2015
+     Samp     1       3       5       7       9
+   Line
+      1       1   1   1   1   1   1   1   1   1   1
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 & IN2" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   AND    2
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:23 2015
+     Samp     1       3       5       7       9
+   Line
+
+      2       0   1   0   1   0   1   0   1   0   1
+      3       0   0   2   2   0   0   2   2   0   0
+      4       0   1   2   3   0   1   2   3   0   1
+      5       0   0   0   0   4   4   4   4   0   0
+      6       0   1   0   1   4   5   4   5   0   1
+      7       0   0   2   2   4   4   6   6   0   0
+      8       0   1   2   3   4   5   6   7   0   1
+      9       0   0   0   0   0   0   0   0   8   8
+     10       0   1   0   1   0   1   0   1   8   9
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 && IN2" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   LAND   2
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:23 2015
+     Samp     1       3       5       7       9
+   Line
+
+      2       0   1   1   1   1   1   1   1   1   1
+      3       0   1   1   1   1   1   1   1   1   1
+      4       0   1   1   1   1   1   1   1   1   1
+      5       0   1   1   1   1   1   1   1   1   1
+      6       0   1   1   1   1   1   1   1   1   1
+      7       0   1   1   1   1   1   1   1   1   1
+      8       0   1   1   1   1   1   1   1   1   1
+      9       0   1   1   1   1   1   1   1   1   1
+     10       0   1   1   1   1   1   1   1   1   1
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 ^ IN2" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   XOR    2
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:24 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       1   0   3   2   5   4   7   6   9   8
+      3       2   3   0   1   6   7   4   5  10  11
+      4       3   2   1   0   7   6   5   4  11  10
+      5       4   5   6   7   0   1   2   3  12  13
+      6       5   4   7   6   1   0   3   2  13  12
+      7       6   7   4   5   2   3   0   1  14  15
+      8       7   6   5   4   3   2   1   0  15  14
+      9       8   9  10  11  12  13  14  15   0   1
+     10       9   8  11  10  13  12  15  14   1   0
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 | IN2" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   OR     2
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:24 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       1   1   3   3   5   5   7   7   9   9
+      3       2   3   2   3   6   7   6   7  10  11
+      4       3   3   3   3   7   7   7   7  11  11
+      5       4   5   6   7   4   5   6   7  12  13
+      6       5   5   7   7   5   5   7   7  13  13
+      7       6   7   6   7   6   7   6   7  14  15
+      8       7   7   7   7   7   7   7   7  15  15
+      9       8   9  10  11  12  13  14  15   8   9
+     10       9   9  11  11  13  13  15  15   9   9
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1<<IN2" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   LSHF   2
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:24 2015
+     Samp     1       3       5       7       9
+   Line
+
+      2       1   2   4   8  16  32  64 128 255 255
+      3       2   4   8  16  32  64 128 255 255 255
+      4       3   6  12  24  48  96 192 255 255 255
+      5       4   8  16  32  64 128 255 255 255 255
+      6       5  10  20  40  80 160 255 255 255 255
+      7       6  12  24  48  96 192 255 255 255 255
+      8       7  14  28  56 112 224 255 255 255 255
+      9       8  16  32  64 128 255 255 255 255 255
+     10       9  18  36  72 144 255 255 255 255 255
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 <= IN2" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   LE     2
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:24 2015
+     Samp     1       3       5       7       9
+   Line
+      1       1   1   1   1   1   1   1   1   1   1
+      2       0   1   1   1   1   1   1   1   1   1
+      3       0   0   1   1   1   1   1   1   1   1
+      4       0   0   0   1   1   1   1   1   1   1
+      5       0   0   0   0   1   1   1   1   1   1
+      6       0   0   0   0   0   1   1   1   1   1
+      7       0   0   0   0   0   0   1   1   1   1
+      8       0   0   0   0   0   0   0   1   1   1
+      9       0   0   0   0   0   0   0   0   1   1
+     10       0   0   0   0   0   0   0   0   0   1
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 % IN2" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   MOD    2
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:24 2015
+     Samp     1       3       5       7       9
+   Line
+
+      2       0   0   1   1   1   1   1   1   1   1
+      3       0   0   0   2   2   2   2   2   2   2
+      4       0   0   1   0   3   3   3   3   3   3
+      5       0   0   0   1   0   4   4   4   4   4
+      6       0   0   1   2   1   0   5   5   5   5
+      7       0   0   0   0   2   1   0   6   6   6
+      8       0   0   1   1   3   2   1   0   7   7
+      9       0   0   0   2   0   3   2   1   0   8
+     10       0   0   1   0   1   4   3   2   1   0
+F2 INP=(L1,L2) OUT=X  FUNCTION="IN1 > IN2" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   GT     2
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:24 2015
+     Samp     1       3       5       7       9
+   Line
+
+      2       1   0   0   0   0   0   0   0   0   0
+      3       1   1   0   0   0   0   0   0   0   0
+      4       1   1   1   0   0   0   0   0   0   0
+      5       1   1   1   1   0   0   0   0   0   0
+      6       1   1   1   1   1   0   0   0   0   0
+      7       1   1   1   1   1   1   0   0   0   0
+      8       1   1   1   1   1   1   1   0   0   0
+      9       1   1   1   1   1   1   1   1   0   0
+     10       1   1   1   1   1   1   1   1   1   0
+COPY L2 L3
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+F2 INP=(L1,L2) OUT=X  FUNCTION="MOD(IN2,IN1)" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   2
+   MOD    1
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:24 2015
+     Samp     1       3       5       7       9
+   Line
+
+      3       0   1   0   1   0   1   0   1   0   1
+      4       0   1   2   0   1   2   0   1   2   0
+      5       0   1   2   3   0   1   2   3   0   1
+      6       0   1   2   3   4   0   1   2   3   4
+      7       0   1   2   3   4   5   0   1   2   3
+      8       0   1   2   3   4   5   6   0   1   2
+      9       0   1   2   3   4   5   6   7   0   1
+     10       0   1   2   3   4   5   6   7   8   0
+F2 INP=(L1,L2) OUT=X  FUNCTION="MIN(IN1,IN2)" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   MIN    2
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:25 2015
+     Samp     1       3       5       7       9
+   Line
+
+      2       0   1   1   1   1   1   1   1   1   1
+      3       0   1   2   2   2   2   2   2   2   2
+      4       0   1   2   3   3   3   3   3   3   3
+      5       0   1   2   3   4   4   4   4   4   4
+      6       0   1   2   3   4   5   5   5   5   5
+      7       0   1   2   3   4   5   6   6   6   6
+      8       0   1   2   3   4   5   6   7   7   7
+      9       0   1   2   3   4   5   6   7   8   8
+     10       0   1   2   3   4   5   6   7   8   9
+F2 INP=(L1,L2,L3) OUT=X  FUNCTION="MIN(IN1,IN2,IN3)" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   MIN    2
+   MIN    3
+   RETN   0
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:25 2015
+     Samp     1       3       5       7       9
+   Line
+
+      2       0   1   1   1   1   1   1   1   1   1
+      3       0   1   2   2   2   2   2   2   2   2
+      4       0   1   2   3   3   3   3   3   3   3
+      5       0   1   2   3   4   4   4   4   4   4
+      6       0   1   2   3   4   5   5   5   5   5
+      7       0   1   2   3   4   5   6   6   6   6
+      8       0   1   2   3   4   5   6   7   7   7
+      9       0   1   2   3   4   5   6   7   8   8
+     10       0   1   2   3   4   5   6   7   8   9
+F2 INP=(L1,L2) OUT=X  FUNCTION="MAX(IN1,IN2)" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   MAX    2
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:25 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       1   1   2   3   4   5   6   7   8   9
+      3       2   2   2   3   4   5   6   7   8   9
+      4       3   3   3   3   4   5   6   7   8   9
+      5       4   4   4   4   4   5   6   7   8   9
+      6       5   5   5   5   5   5   6   7   8   9
+      7       6   6   6   6   6   6   6   7   8   9
+      8       7   7   7   7   7   7   7   7   8   9
+      9       8   8   8   8   8   8   8   8   8   9
+     10       9   9   9   9   9   9   9   9   9   9
+F2 INP=(L1,L2) OUT=X   +
+ FUNCTION="100.*SIN(IN1/10.)+100.*COS(IN2/10)" 'DUMP
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+   LOAD   1
+   DIV   53
+   STOR  93
+   SIN   93
+   MUL   52
+   STOR  95
+   LOAD   2
+   DIV   55
+   STOR  97
+   COS   97
+   MUL   54
+   ADD   95
+   RETN   0
+F2 using hash table lookup
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:21 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:25 2015
+     Samp     1       3       5       7       9
+   Line
+      1     100 100  98  96  92  88  83  76  70  62
+      2     110 109 108 106 102  98  93  86  80  72
+      3     120 119 118 115 112 108 102  96  90  82
+      4     130 129 128 125 122 117 112 106  99  92
+      5     139 138 137 134 131 127 121 115 109 101
+      6     148 147 146 143 140 136 130 124 118 110
+      7     156 156 154 152 149 144 139 133 126 119
+      8     164 164 162 160 157 152 147 141 134 127
+      9     172 171 170 167 164 159 154 148 141 134
+     10     178 178 176 174 170 166 161 155 148 140
+F2 OUT=X  FUNCTION="LINE+SAMP"  SIZE=(1,1,10,10)
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:25 2015
+     Samp     1       3       5       7       9
+   Line
+      1       2   3   4   5   6   7   8   9  10  11
+      2       3   4   5   6   7   8   9  10  11  12
+      3       4   5   6   7   8   9  10  11  12  13
+      4       5   6   7   8   9  10  11  12  13  14
+      5       6   7   8   9  10  11  12  13  14  15
+      6       7   8   9  10  11  12  13  14  15  16
+      7       8   9  10  11  12  13  14  15  16  17
+      8       9  10  11  12  13  14  15  16  17  18
+      9      10  11  12  13  14  15  16  17  18  19
+     10      11  12  13  14  15  16  17  18  19  20
+LET I=1
+LET FORMATS=("BYTE","HALF","REAL4","END")
+LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    GEN  A NL=300 NS=300 'BYTE
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN  B NL=300 NS=600 'BYTE
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    F2 INP=(A,B) OUT=X FUNCTION="IN1+SQRT(IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+SAMPLES TRUNCATED
+F2 using byte table lookup
+FUNCTION EVALUATED 65536 TIMES
+    LIST X,NL=10,NS=10
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:25 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:25 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   2   3   5   6   7   8  10  11  12
+      2       2   3   5   6   7   8  10  11  12  13
+      3       3   5   6   7   8  10  11  12  13  14
+      4       5   6   7   8  10  11  12  13  14  15
+      5       6   7   8  10  11  12  13  14  15  17
+      6       7   8  10  11  12  13  14  15  17  18
+      7       8  10  11  12  13  14  15  17  18  19
+      8      10  11  12  13  14  15  17  18  19  20
+      9      11  12  13  14  15  17  18  19  20  21
+     10      12  13  14  15  17  18  19  20  21  22
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    GEN  A NL=300 NS=300 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN  B NL=300 NS=600 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    F2 INP=(A,B) OUT=X FUNCTION="IN1+SQRT(IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+SAMPLES TRUNCATED
+F2 using hash table lookup
+FUNCTION EVALUATED 599 TIMES
+    LIST X,NL=10,NS=10
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:25 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:25 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         0     2     3     5     6     7     8    10    11    12
+      2         2     3     5     6     7     8    10    11    12    13
+      3         3     5     6     7     8    10    11    12    13    14
+      4         5     6     7     8    10    11    12    13    14    15
+      5         6     7     8    10    11    12    13    14    15    17
+      6         7     8    10    11    12    13    14    15    17    18
+      7         8    10    11    12    13    14    15    17    18    19
+      8        10    11    12    13    14    15    17    18    19    20
+      9        11    12    13    14    15    17    18    19    20    21
+     10        12    13    14    15    17    18    19    20    21    22
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    GEN  A NL=300 NS=300 'REAL4
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN  B NL=300 NS=600 'REAL4
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    F2 INP=(A,B) OUT=X FUNCTION="IN1+SQRT(IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+SAMPLES TRUNCATED
+F2 calculating every pixel
+FUNCTION EVALUATED 90000 TIMES
+    LIST X,NL=10,NS=10
+Beginning VICAR task LIST
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:26 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:26 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       0.000E+00   2.000E+00   3.414E+00   4.732E+00   6.000E+00   7.236E+00   8.449E+00   9.646E+00   1.083E+01   1.200E+01
+      2       2.000E+00   3.414E+00   4.732E+00   6.000E+00   7.236E+00   8.449E+00   9.646E+00   1.083E+01   1.200E+01   1.316E+01
+      3       3.414E+00   4.732E+00   6.000E+00   7.236E+00   8.449E+00   9.646E+00   1.083E+01   1.200E+01   1.316E+01   1.432E+01
+      4       4.732E+00   6.000E+00   7.236E+00   8.449E+00   9.646E+00   1.083E+01   1.200E+01   1.316E+01   1.432E+01   1.546E+01
+      5       6.000E+00   7.236E+00   8.449E+00   9.646E+00   1.083E+01   1.200E+01   1.316E+01   1.432E+01   1.546E+01   1.661E+01
+      6       7.236E+00   8.449E+00   9.646E+00   1.083E+01   1.200E+01   1.316E+01   1.432E+01   1.546E+01   1.661E+01   1.774E+01
+      7       8.449E+00   9.646E+00   1.083E+01   1.200E+01   1.316E+01   1.432E+01   1.546E+01   1.661E+01   1.774E+01   1.887E+01
+      8       9.646E+00   1.083E+01   1.200E+01   1.316E+01   1.432E+01   1.546E+01   1.661E+01   1.774E+01   1.887E+01   2.000E+01
+      9       1.083E+01   1.200E+01   1.316E+01   1.432E+01   1.546E+01   1.661E+01   1.774E+01   1.887E+01   2.000E+01   2.112E+01
+     10       1.200E+01   1.316E+01   1.432E+01   1.546E+01   1.661E+01   1.774E+01   1.887E+01   2.000E+01   2.112E+01   2.224E+01
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+ BREAK
+END-LOOP
+LET I=1
+LET FORMATS =("BYTE","HALF","BYTE","HALF", "FULL", "FULL","BYTE", "END")
+LET FORMATS2=("HALF","BYTE","HALF","BYTE", "REAL4","HALF","REAL4","END")
+LET OFORMATS=("BYTE","BYTE","FULL","REAL","BYTE", "BYTE","FULL", "END")
+LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    LET FORMAT2=FORMATS2(I)
+    LET OFORMAT=OFORMATS(I)
+    GEN  A NL=10 NS=10 'BYTE
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN  B NL=10 NS=10 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'BYTE
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 19 TIMES
+    LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:26 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:26 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   2   4   6   8  10  12  14  16  18
+      2       2   4   6   8  10  12  14  16  18  20
+      3       4   6   8  10  12  14  16  18  20  22
+      4       6   8  10  12  14  16  18  20  22  24
+      5       8  10  12  14  16  18  20  22  24  26
+      6      10  12  14  16  18  20  22  24  26  28
+      7      12  14  16  18  20  22  24  26  28  30
+      8      14  16  18  20  22  24  26  28  30  32
+      9      16  18  20  22  24  26  28  30  32  34
+     10      18  20  22  24  26  28  30  32  34  36
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    LET FORMAT2=FORMATS2(I)
+    LET OFORMAT=OFORMATS(I)
+    GEN  A NL=10 NS=10 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN  B NL=10 NS=10 'BYTE
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'BYTE
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 19 TIMES
+    LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:26 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:26 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   2   4   6   8  10  12  14  16  18
+      2       2   4   6   8  10  12  14  16  18  20
+      3       4   6   8  10  12  14  16  18  20  22
+      4       6   8  10  12  14  16  18  20  22  24
+      5       8  10  12  14  16  18  20  22  24  26
+      6      10  12  14  16  18  20  22  24  26  28
+      7      12  14  16  18  20  22  24  26  28  30
+      8      14  16  18  20  22  24  26  28  30  32
+      9      16  18  20  22  24  26  28  30  32  34
+     10      18  20  22  24  26  28  30  32  34  36
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    LET FORMAT2=FORMATS2(I)
+    LET OFORMAT=OFORMATS(I)
+    GEN  A NL=10 NS=10 'BYTE
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN  B NL=10 NS=10 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'FULL
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    LIST X
+Beginning VICAR task LIST
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:26 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:26 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1              0          2          4          6          8         10         12         14         16         18
+      2              2          4          6          8         10         12         14         16         18         20
+      3              4          6          8         10         12         14         16         18         20         22
+      4              6          8         10         12         14         16         18         20         22         24
+      5              8         10         12         14         16         18         20         22         24         26
+      6             10         12         14         16         18         20         22         24         26         28
+      7             12         14         16         18         20         22         24         26         28         30
+      8             14         16         18         20         22         24         26         28         30         32
+      9             16         18         20         22         24         26         28         30         32         34
+     10             18         20         22         24         26         28         30         32         34         36
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    LET FORMAT2=FORMATS2(I)
+    LET OFORMAT=OFORMATS(I)
+    GEN  A NL=10 NS=10 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN  B NL=10 NS=10 'BYTE
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'REAL
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    LIST X
+Beginning VICAR task LIST
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:26 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:26 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       0.000E+00   2.000E+00   4.000E+00   6.000E+00   8.000E+00   1.000E+01   1.200E+01   1.400E+01   1.600E+01   1.800E+01
+      2       2.000E+00   4.000E+00   6.000E+00   8.000E+00   1.000E+01   1.200E+01   1.400E+01   1.600E+01   1.800E+01   2.000E+01
+      3       4.000E+00   6.000E+00   8.000E+00   1.000E+01   1.200E+01   1.400E+01   1.600E+01   1.800E+01   2.000E+01   2.200E+01
+      4       6.000E+00   8.000E+00   1.000E+01   1.200E+01   1.400E+01   1.600E+01   1.800E+01   2.000E+01   2.200E+01   2.400E+01
+      5       8.000E+00   1.000E+01   1.200E+01   1.400E+01   1.600E+01   1.800E+01   2.000E+01   2.200E+01   2.400E+01   2.600E+01
+      6       1.000E+01   1.200E+01   1.400E+01   1.600E+01   1.800E+01   2.000E+01   2.200E+01   2.400E+01   2.600E+01   2.800E+01
+      7       1.200E+01   1.400E+01   1.600E+01   1.800E+01   2.000E+01   2.200E+01   2.400E+01   2.600E+01   2.800E+01   3.000E+01
+      8       1.400E+01   1.600E+01   1.800E+01   2.000E+01   2.200E+01   2.400E+01   2.600E+01   2.800E+01   3.000E+01   3.200E+01
+      9       1.600E+01   1.800E+01   2.000E+01   2.200E+01   2.400E+01   2.600E+01   2.800E+01   3.000E+01   3.200E+01   3.400E+01
+     10       1.800E+01   2.000E+01   2.200E+01   2.400E+01   2.600E+01   2.800E+01   3.000E+01   3.200E+01   3.400E+01   3.600E+01
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    LET FORMAT2=FORMATS2(I)
+    LET OFORMAT=OFORMATS(I)
+    GEN  A NL=10 NS=10 'FULL
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN  B NL=10 NS=10 'REAL4
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'BYTE
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:26 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:27 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   2   4   6   8  10  12  14  16  18
+      2       2   4   6   8  10  12  14  16  18  20
+      3       4   6   8  10  12  14  16  18  20  22
+      4       6   8  10  12  14  16  18  20  22  24
+      5       8  10  12  14  16  18  20  22  24  26
+      6      10  12  14  16  18  20  22  24  26  28
+      7      12  14  16  18  20  22  24  26  28  30
+      8      14  16  18  20  22  24  26  28  30  32
+      9      16  18  20  22  24  26  28  30  32  34
+     10      18  20  22  24  26  28  30  32  34  36
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    LET FORMAT2=FORMATS2(I)
+    LET OFORMAT=OFORMATS(I)
+    GEN  A NL=10 NS=10 'FULL
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN  B NL=10 NS=10 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'BYTE
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:27 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:27 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   2   4   6   8  10  12  14  16  18
+      2       2   4   6   8  10  12  14  16  18  20
+      3       4   6   8  10  12  14  16  18  20  22
+      4       6   8  10  12  14  16  18  20  22  24
+      5       8  10  12  14  16  18  20  22  24  26
+      6      10  12  14  16  18  20  22  24  26  28
+      7      12  14  16  18  20  22  24  26  28  30
+      8      14  16  18  20  22  24  26  28  30  32
+      9      16  18  20  22  24  26  28  30  32  34
+     10      18  20  22  24  26  28  30  32  34  36
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    LET FORMAT2=FORMATS2(I)
+    LET OFORMAT=OFORMATS(I)
+    GEN  A NL=10 NS=10 'BYTE
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN  B NL=10 NS=10 'REAL4
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    F2 INP=(A,B) OUT=X FUNCTION="IN1+IN2" 'FULL
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    LIST X
+Beginning VICAR task LIST
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:27 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:27 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1              0          2          4          6          8         10         12         14         16         18
+      2              2          4          6          8         10         12         14         16         18         20
+      3              4          6          8         10         12         14         16         18         20         22
+      4              6          8         10         12         14         16         18         20         22         24
+      5              8         10         12         14         16         18         20         22         24         26
+      6             10         12         14         16         18         20         22         24         26         28
+      7             12         14         16         18         20         22         24         26         28         30
+      8             14         16         18         20         22         24         26         28         30         32
+      9             16         18         20         22         24         26         28         30         32         34
+     10             18         20         22         24         26         28         30         32         34         36
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+ BREAK
+END-LOOP
+GEN A 10 10 'BYTE
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN B 10 10 'HALF LINC=2 SINC=2
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN C 10 10 'FULL LINC=3 SINC=3
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN D 10 10 'REAL4 LINC=4 SINC=4
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+F2 (A,B,C,D) X FUNC="IN1+100*IN2+10000*IN3+1000000*IN4" 'FULL
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:27 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:27 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
       1              0    4030201    8060402   12090604   16120804   20151004   24181206   28211408   32241608   36271808
@@ -6569,14 +8132,625 @@ LIST X
       8       28211408   32241608   36271808   40302008   44332212   48362412   52392612   56422816   60453016   64483216
       9       32241608   36271808   40302008   44332212   48362412   52392612   56422816   60453016   64483216   68513416
      10       36271808   40302008   44332212   48362412   52392612   56422816   60453016   64483216   68513416   72543616
+GEN F1 10 10 IVAL=0 SINC=0 LINC=0
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN F2 10 10 IVAL=1 SINC=0 LINC=0
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+F2 INP=(F1,F2) OUT=X FUNCTION= +
+"(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+ +
+ (IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)+(IN1+IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 2 TIMES
+LIST X
+Beginning VICAR task LIST
 
-
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:27 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:27 2015
+     Samp     1       3       5       7       9
+   Line
+      1      12  12  12  12  12  12  12  12  12  12
+      2      12  12  12  12  12  12  12  12  12  12
+      3      12  12  12  12  12  12  12  12  12  12
+      4      12  12  12  12  12  12  12  12  12  12
+      5      12  12  12  12  12  12  12  12  12  12
+      6      12  12  12  12  12  12  12  12  12  12
+      7      12  12  12  12  12  12  12  12  12  12
+      8      12  12  12  12  12  12  12  12  12  12
+      9      12  12  12  12  12  12  12  12  12  12
+     10      12  12  12  12  12  12  12  12  12  12
+LET I=1
+LET FORMATS =("BYTE", "HALF", "FULL", "REAL", "END")
+LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    GEN B1 NL=10 NS=10 'BYTE
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    COPY B1 B2
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B3
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B4
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B5
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B6
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B7
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B8
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B9
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B10
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B11
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B12
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B13
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B14
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B15
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B16
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B17
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B18
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'BYTE     +
+   FUNC="MIN(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B1)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+    F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'BYTE     +
+   FUNC="MAX(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B1)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    GEN B1 NL=10 NS=10 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    COPY B1 B2
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B3
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B4
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B5
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B6
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B7
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B8
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B9
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B10
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B11
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B12
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B13
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B14
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B15
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B16
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B17
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B18
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'HALF     +
+   FUNC="MIN(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B1)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'HALF     +
+   FUNC="MAX(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B1)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    GEN B1 NL=10 NS=10 'FULL
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    COPY B1 B2
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B3
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B4
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B5
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B6
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B7
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B8
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B9
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B10
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B11
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B12
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B13
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B14
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B15
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B16
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B17
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B18
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'FULL     +
+   FUNC="MIN(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B1)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'FULL     +
+   FUNC="MAX(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B1)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    GEN B1 NL=10 NS=10 'REAL
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    COPY B1 B2
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B3
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B4
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B5
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B6
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B7
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B8
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B9
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B10
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B11
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B12
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B13
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B14
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B15
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B16
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B17
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    COPY B1 B18
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'REAL     +
+   FUNC="MIN(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B1)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    F2 (B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16,B17,B18) B 'REAL     +
+   FUNC="MAX(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12,IN13,IN14,IN15,IN16,IN17,IN18)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B1)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+ BREAK
+END-LOOP
+LET I=1
+LET FORMATS =( "BYTE", "HALF", "FULL", "REAL", "END")
+LET FORMATS2 =("BYTE", "HALF", "HALF", "HALF", "END")
+LET VALS=(      64000,  32000,  16000,  16000,  0)
+LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    LET FORMAT2=FORMATS2(I)
+    LET VAL=VALS(I)
+    GEN B0 NL=10 NS=64000 'BYTE
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN B1 NL=10 NS=64000 'BYTE
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    COPY B1 B2
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    F2 (B1,B2) B 'BYTE  FUNC="MIN(IN1,IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 65536 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B0)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+    F2 (B1,B2) B 'BYTE FUNC="MAX(IN1,IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 65536 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B0)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    LET FORMAT2=FORMATS2(I)
+    LET VAL=VALS(I)
+    GEN B0 NL=10 NS=32000 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN B1 NL=10 NS=32000 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    COPY B1 B2
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    F2 (B1,B2) B 'HALF  FUNC="MIN(IN1,IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 320000 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B0)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    F2 (B1,B2) B 'HALF FUNC="MAX(IN1,IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 320000 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B0)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    LET FORMAT2=FORMATS2(I)
+    LET VAL=VALS(I)
+    GEN B0 NL=10 NS=16000 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN B1 NL=10 NS=16000 'FULL
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    COPY B1 B2
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    F2 (B1,B2) B 'HALF  FUNC="MIN(IN1,IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 160000 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B0)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    F2 (B1,B2) B 'HALF FUNC="MAX(IN1,IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 160000 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B0)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+    LET FORMAT2=FORMATS2(I)
+    LET VAL=VALS(I)
+    GEN B0 NL=10 NS=16000 'HALF
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    GEN B1 NL=10 NS=16000 'REAL
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+    COPY B1 B2
+Beginning VICAR task COPY
+ COPY VERSION 12-JUL-1993
+    F2 (B1,B2) B 'HALF  FUNC="MIN(IN1,IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 160000 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B0)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    F2 (B1,B2) B 'HALF FUNC="MAX(IN1,IN2)"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 160000 TIMES
+    WRITE "SHOULD GET 0 DIFFERENCES."
+SHOULD GET 0 DIFFERENCES.
+    DIFPIC (B,B0)
+Beginning VICAR task DIFPIC
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+    LET i=i+1
+END-LOOP
+    LET FORMAT=FORMATS(I)
+    IF (FORMAT="END") BREAK
+ BREAK
+END-LOOP
 gen a 10 10 'real4 ival=-9.0
-f2 a b func="sin(in1)*sin(in1) + cos(in1)*cos(in1)"
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list a
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1      -9.000E+00  -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00
+      2      -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00
+      3      -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00
+      4      -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00
+      5      -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00
+      6      -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00
+      7      -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00
+      8      -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00
+      9      -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00
+     10       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
+f2 a b func="sqrt(in1)"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 list b
+Beginning VICAR task list
+
    REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       3.000E+00   2.828E+00   2.646E+00   2.449E+00   2.236E+00   2.000E+00   1.732E+00   1.414E+00   1.000E+00   0.000E+00
+      2       2.828E+00   2.646E+00   2.449E+00   2.236E+00   2.000E+00   1.732E+00   1.414E+00   1.000E+00   0.000E+00   1.000E+00
+      3       2.646E+00   2.449E+00   2.236E+00   2.000E+00   1.732E+00   1.414E+00   1.000E+00   0.000E+00   1.000E+00   1.414E+00
+      4       2.449E+00   2.236E+00   2.000E+00   1.732E+00   1.414E+00   1.000E+00   0.000E+00   1.000E+00   1.414E+00   1.732E+00
+      5       2.236E+00   2.000E+00   1.732E+00   1.414E+00   1.000E+00   0.000E+00   1.000E+00   1.414E+00   1.732E+00   2.000E+00
+      6       2.000E+00   1.732E+00   1.414E+00   1.000E+00   0.000E+00   1.000E+00   1.414E+00   1.732E+00   2.000E+00   2.236E+00
+      7       1.732E+00   1.414E+00   1.000E+00   0.000E+00   1.000E+00   1.414E+00   1.732E+00   2.000E+00   2.236E+00   2.449E+00
+      8       1.414E+00   1.000E+00   0.000E+00   1.000E+00   1.414E+00   1.732E+00   2.000E+00   2.236E+00   2.449E+00   2.646E+00
+      9       1.000E+00   0.000E+00   1.000E+00   1.414E+00   1.732E+00   2.000E+00   2.236E+00   2.449E+00   2.646E+00   2.828E+00
+     10       0.000E+00   1.000E+00   1.414E+00   1.732E+00   2.000E+00   2.236E+00   2.449E+00   2.646E+00   2.828E+00   3.000E+00
+f2 b c func="in1*in1"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+write "Should get c = abs(a)."
+Should get c = abs(a).
+list c
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       9.000E+00   8.000E+00   7.000E+00   6.000E+00   5.000E+00   4.000E+00   3.000E+00   2.000E+00   1.000E+00   0.000E+00
+      2       8.000E+00   7.000E+00   6.000E+00   5.000E+00   4.000E+00   3.000E+00   2.000E+00   1.000E+00   0.000E+00   1.000E+00
+      3       7.000E+00   6.000E+00   5.000E+00   4.000E+00   3.000E+00   2.000E+00   1.000E+00   0.000E+00   1.000E+00   2.000E+00
+      4       6.000E+00   5.000E+00   4.000E+00   3.000E+00   2.000E+00   1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00
+      5       5.000E+00   4.000E+00   3.000E+00   2.000E+00   1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00
+      6       4.000E+00   3.000E+00   2.000E+00   1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00
+      7       3.000E+00   2.000E+00   1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00
+      8       2.000E+00   1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00
+      9       1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00
+     10       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
+f2 a b func="sin(in1)*sin(in1) + cos(in1)*cos(in1)"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+write "Should get b = 1.0."
+Should get b = 1.0.
+list b
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
      Samp             1           2           3           4           5           6           7           8           9          10
    Line
       1       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
@@ -6589,89 +8763,2258 @@ list b
       8       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
       9       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
      10       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
-$!-----------------------------------------------------------------------------
-$ create tstf2.log_linux_diff
-THIS IS THE PORTION OF THE LINUX TEST LOG FOR F2 THAT IS DIFFERENT FROM THAT ON SOLARIS
+f2 a b func="10**(in1)"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+list b
+Beginning VICAR task list
 
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       1.000E-09   1.000E-08   1.000E-07   1.000E-06   1.000E-05   1.000E-04   1.000E-03   1.000E-02   1.000E-01   1.000E+00
+      2       1.000E-08   1.000E-07   1.000E-06   1.000E-05   1.000E-04   1.000E-03   1.000E-02   1.000E-01   1.000E+00   1.000E+01
+      3       1.000E-07   1.000E-06   1.000E-05   1.000E-04   1.000E-03   1.000E-02   1.000E-01   1.000E+00   1.000E+01   1.000E+02
+      4       1.000E-06   1.000E-05   1.000E-04   1.000E-03   1.000E-02   1.000E-01   1.000E+00   1.000E+01   1.000E+02   1.000E+03
+      5       1.000E-05   1.000E-04   1.000E-03   1.000E-02   1.000E-01   1.000E+00   1.000E+01   1.000E+02   1.000E+03   1.000E+04
+      6       1.000E-04   1.000E-03   1.000E-02   1.000E-01   1.000E+00   1.000E+01   1.000E+02   1.000E+03   1.000E+04   1.000E+05
+      7       1.000E-03   1.000E-02   1.000E-01   1.000E+00   1.000E+01   1.000E+02   1.000E+03   1.000E+04   1.000E+05   1.000E+06
+      8       1.000E-02   1.000E-01   1.000E+00   1.000E+01   1.000E+02   1.000E+03   1.000E+04   1.000E+05   1.000E+06   1.000E+07
+      9       1.000E-01   1.000E+00   1.000E+01   1.000E+02   1.000E+03   1.000E+04   1.000E+05   1.000E+06   1.000E+07   1.000E+08
+     10       1.000E+00   1.000E+01   1.000E+02   1.000E+03   1.000E+04   1.000E+05   1.000E+06   1.000E+07   1.000E+08   1.000E+09
+f2 b c func="log10(in1)"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+write "Should get c = max( -6, a)."
+Should get c = max( -6, a).
+list c
+Beginning VICAR task list
 
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1      -9.000E+00  -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00
+      2      -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00
+      3      -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00
+      4      -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00
+      5      -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00
+      6      -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00
+      7      -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00
+      8      -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00
+      9      -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00
+     10       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
+f2 a b func="atan2(in1,1.0)"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+write "Should get 0.0 and pi/4 = .78..."
+Should get 0.0 and pi/4 = .78...
+list b (2,9,1,2)
+Beginning VICAR task list
 
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+     Samp             9          10
+   Line
+      2       0.000E+00   7.854E-01
+f2 b c func="tan(in1)"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+write "Should get c = a."
+Should get c = a.
+list c
+Beginning VICAR task list
 
-GEN A 10 10 'BYTE
-GEN B 10 10 'HALF LINC=2 SINC=2
-GEN C 10 10 'FULL LINC=3 SINC=3
-GEN D 10 10 'REAL4 LINC=4 SINC=4
-F2 (A,B,C,D) X FUNC="IN1+100*IN2+10000*IN3+1000000*IN4" 'FULL
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1      -9.000E+00  -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00
+      2      -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00
+      3      -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00
+      4      -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00
+      5      -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00
+      6      -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00
+      7      -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00
+      8      -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00
+      9      -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00
+     10       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
+f2 a b func="atan(in1)"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+write "Should get 0.0 and pi/4 = .78..."
+Should get 0.0 and pi/4 = .78...
+list b (2,9,1,2)
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+     Samp             9          10
+   Line
+      2       0.000E+00   7.854E-01
+f2 b c func="tan(in1)"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+write "Should get c = a."
+Should get c = a.
+list c
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1      -9.000E+00  -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00
+      2      -8.000E+00  -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00
+      3      -7.000E+00  -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00
+      4      -6.000E+00  -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00
+      5      -5.000E+00  -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00
+      6      -4.000E+00  -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00
+      7      -3.000E+00  -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00
+      8      -2.000E+00  -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00
+      9      -1.000E+00   0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00
+     10       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
+f2 a b func="tan(atan2(in1,in1))"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+write "Should get b = 0 on diagonal from (10,1) to (1,10) and b=1 elsewhere."
+Should get b = 0 on diagonal from (10,1) to (1,10) and b=1 elsewhere.
+list b
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:38 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   0.000E+00
+      2       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   0.000E+00   1.000E+00
+      3       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   0.000E+00   1.000E+00   1.000E+00
+      4       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   0.000E+00   1.000E+00   1.000E+00   1.000E+00
+      5       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   0.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+      6       1.000E+00   1.000E+00   1.000E+00   1.000E+00   0.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+      7       1.000E+00   1.000E+00   1.000E+00   0.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+      8       1.000E+00   1.000E+00   0.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+      9       1.000E+00   0.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+     10       0.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+GEN A 10 10 IVAL=10 SINC=0 LINC=1
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN B 10 10 'HALF IVAL=-32768 SINC=0 LINC=5000
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN C 10 10 'FULL IVAL=432768 SINC=0 LINC=1
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN D 10 10 'REAL IVAL=5432768 SINC=0 LINC=1
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+F2 INP=A OUT=X EXCLUDE=(13,14,18) FUNCTION="IN1+100"
 Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:40 2015
+     Samp     1       3       5       7       9
+   Line
+      1     110 110 110 110 110 110 110 110 110 110
+      2     111 111 111 111 111 111 111 111 111 111
+      3     112 112 112 112 112 112 112 112 112 112
+      4      13  13  13  13  13  13  13  13  13  13
+      5      14  14  14  14  14  14  14  14  14  14
+      6     115 115 115 115 115 115 115 115 115 115
+      7     116 116 116 116 116 116 116 116 116 116
+      8     117 117 117 117 117 117 117 117 117 117
+      9      18  18  18  18  18  18  18  18  18  18
+     10     119 119 119 119 119 119 119 119 119 119
+F2 INP=A OUT=X EXCLUDE=(13,14,18) FUNCTION="IN1+100" REPLACE=99
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:40 2015
+     Samp     1       3       5       7       9
+   Line
+      1     110 110 110 110 110 110 110 110 110 110
+      2     111 111 111 111 111 111 111 111 111 111
+      3     112 112 112 112 112 112 112 112 112 112
+      4      99  99  99  99  99  99  99  99  99  99
+      5      99  99  99  99  99  99  99  99  99  99
+      6     115 115 115 115 115 115 115 115 115 115
+      7     116 116 116 116 116 116 116 116 116 116
+      8     117 117 117 117 117 117 117 117 117 117
+      9      99  99  99  99  99  99  99  99  99  99
+     10     119 119 119 119 119 119 119 119 119 119
+F2 INP=A OUT=X EXCLUDE=(13,14,18) FUNCTION="IN1+100" REPLACE=280
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:40 2015
+     Samp     1       3       5       7       9
+   Line
+      1     110 110 110 110 110 110 110 110 110 110
+      2     111 111 111 111 111 111 111 111 111 111
+      3     112 112 112 112 112 112 112 112 112 112
+      4     255 255 255 255 255 255 255 255 255 255
+      5     255 255 255 255 255 255 255 255 255 255
+      6     115 115 115 115 115 115 115 115 115 115
+      7     116 116 116 116 116 116 116 116 116 116
+      8     117 117 117 117 117 117 117 117 117 117
+      9     255 255 255 255 255 255 255 255 255 255
+     10     119 119 119 119 119 119 119 119 119 119
+F2 INP=A OUT=X EXCLUDE=(13,14,18) FUNCTION="IN1+100" REPLACE=-280
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:40 2015
+     Samp     1       3       5       7       9
+   Line
+      1     110 110 110 110 110 110 110 110 110 110
+      2     111 111 111 111 111 111 111 111 111 111
+      3     112 112 112 112 112 112 112 112 112 112
+
+      6     115 115 115 115 115 115 115 115 115 115
+      7     116 116 116 116 116 116 116 116 116 116
+      8     117 117 117 117 117 117 117 117 117 117
+
+     10     119 119 119 119 119 119 119 119 119 119
+F2 INP=A OUT=X LIMITS=(5,18) FUNCTION="IN1+100"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:40 2015
+     Samp     1       3       5       7       9
+   Line
+      1     110 110 110 110 110 110 110 110 110 110
+      2     111 111 111 111 111 111 111 111 111 111
+      3     112 112 112 112 112 112 112 112 112 112
+      4     113 113 113 113 113 113 113 113 113 113
+      5     114 114 114 114 114 114 114 114 114 114
+      6     115 115 115 115 115 115 115 115 115 115
+      7     116 116 116 116 116 116 116 116 116 116
+      8     117 117 117 117 117 117 117 117 117 117
+      9     118 118 118 118 118 118 118 118 118 118
+     10       5   5   5   5   5   5   5   5   5   5
+F2 INP=A OUT=X LIMITS=(5,18) FUNCTION="IN1+100" REPLACE=99
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:40 2015
+     Samp     1       3       5       7       9
+   Line
+      1     110 110 110 110 110 110 110 110 110 110
+      2     111 111 111 111 111 111 111 111 111 111
+      3     112 112 112 112 112 112 112 112 112 112
+      4     113 113 113 113 113 113 113 113 113 113
+      5     114 114 114 114 114 114 114 114 114 114
+      6     115 115 115 115 115 115 115 115 115 115
+      7     116 116 116 116 116 116 116 116 116 116
+      8     117 117 117 117 117 117 117 117 117 117
+      9     118 118 118 118 118 118 118 118 118 118
+     10      99  99  99  99  99  99  99  99  99  99
+F2 INP=A OUT=X LIMITS=(5,18) FUNCTION="IN1+100" REPLACE=280
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:40 2015
+     Samp     1       3       5       7       9
+   Line
+      1     110 110 110 110 110 110 110 110 110 110
+      2     111 111 111 111 111 111 111 111 111 111
+      3     112 112 112 112 112 112 112 112 112 112
+      4     113 113 113 113 113 113 113 113 113 113
+      5     114 114 114 114 114 114 114 114 114 114
+      6     115 115 115 115 115 115 115 115 115 115
+      7     116 116 116 116 116 116 116 116 116 116
+      8     117 117 117 117 117 117 117 117 117 117
+      9     118 118 118 118 118 118 118 118 118 118
+     10     255 255 255 255 255 255 255 255 255 255
+F2 INP=A OUT=X LIMITS=(5,18) FUNCTION="IN1+100" REPLACE=-280
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:40 2015
+     Samp     1       3       5       7       9
+   Line
+      1     110 110 110 110 110 110 110 110 110 110
+      2     111 111 111 111 111 111 111 111 111 111
+      3     112 112 112 112 112 112 112 112 112 112
+      4     113 113 113 113 113 113 113 113 113 113
+      5     114 114 114 114 114 114 114 114 114 114
+      6     115 115 115 115 115 115 115 115 115 115
+      7     116 116 116 116 116 116 116 116 116 116
+      8     117 117 117 117 117 117 117 117 117 117
+      9     118 118 118 118 118 118 118 118 118 118
+F2 INP=B OUT=X EXCLUDE=-22768 FUNCTION="IN1+1000"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 10 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:41 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1    -31768-31768-31768-31768-31768-31768-31768-31768-31768-31768
+      2    -26768-26768-26768-26768-26768-26768-26768-26768-26768-26768
+      3    -22768-22768-22768-22768-22768-22768-22768-22768-22768-22768
+      4    -16768-16768-16768-16768-16768-16768-16768-16768-16768-16768
+      5    -11768-11768-11768-11768-11768-11768-11768-11768-11768-11768
+      6     -6768 -6768 -6768 -6768 -6768 -6768 -6768 -6768 -6768 -6768
+      7     -1768 -1768 -1768 -1768 -1768 -1768 -1768 -1768 -1768 -1768
+      8      3232  3232  3232  3232  3232  3232  3232  3232  3232  3232
+      9      8232  8232  8232  8232  8232  8232  8232  8232  8232  8232
+     10     13232 13232 13232 13232 13232 13232 13232 13232 13232 13232
+F2 INP=B OUT=X EXCLUDE=-22768 REPLACE=99
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 10 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:41 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+      2    -27768-27768-27768-27768-27768-27768-27768-27768-27768-27768
+      3        99    99    99    99    99    99    99    99    99    99
+      4    -17768-17768-17768-17768-17768-17768-17768-17768-17768-17768
+      5    -12768-12768-12768-12768-12768-12768-12768-12768-12768-12768
+      6     -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768
+      7     -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768
+      8      2232  2232  2232  2232  2232  2232  2232  2232  2232  2232
+      9      7232  7232  7232  7232  7232  7232  7232  7232  7232  7232
+     10     12232 12232 12232 12232 12232 12232 12232 12232 12232 12232
+F2 INP=B OUT=X EXCLUDE=-27768 REPLACE=40000
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 10 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:41 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+      2     32767 32767 32767 32767 32767 32767 32767 32767 32767 32767
+      3    -22768-22768-22768-22768-22768-22768-22768-22768-22768-22768
+      4    -17768-17768-17768-17768-17768-17768-17768-17768-17768-17768
+      5    -12768-12768-12768-12768-12768-12768-12768-12768-12768-12768
+      6     -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768
+      7     -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768
+      8      2232  2232  2232  2232  2232  2232  2232  2232  2232  2232
+      9      7232  7232  7232  7232  7232  7232  7232  7232  7232  7232
+     10     12232 12232 12232 12232 12232 12232 12232 12232 12232 12232
+F2 INP=B OUT=X EXCLUDE=-27768 REPLACE=-40000
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 10 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:41 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+      2    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+      3    -22768-22768-22768-22768-22768-22768-22768-22768-22768-22768
+      4    -17768-17768-17768-17768-17768-17768-17768-17768-17768-17768
+      5    -12768-12768-12768-12768-12768-12768-12768-12768-12768-12768
+      6     -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768
+      7     -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768
+      8      2232  2232  2232  2232  2232  2232  2232  2232  2232  2232
+      9      7232  7232  7232  7232  7232  7232  7232  7232  7232  7232
+     10     12232 12232 12232 12232 12232 12232 12232 12232 12232 12232
+F2 INP=B OUT=X LIMITS=(-50000, 0)
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 8 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:41 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+      2    -27768-27768-27768-27768-27768-27768-27768-27768-27768-27768
+      3    -22768-22768-22768-22768-22768-22768-22768-22768-22768-22768
+      4    -17768-17768-17768-17768-17768-17768-17768-17768-17768-17768
+      5    -12768-12768-12768-12768-12768-12768-12768-12768-12768-12768
+      6     -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768
+      7     -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768
+      8    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+      9    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+     10    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+F2 INP=B OUT=X LIMITS=(-50000, 0) REPLACE=99
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 8 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:41 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+      2    -27768-27768-27768-27768-27768-27768-27768-27768-27768-27768
+      3    -22768-22768-22768-22768-22768-22768-22768-22768-22768-22768
+      4    -17768-17768-17768-17768-17768-17768-17768-17768-17768-17768
+      5    -12768-12768-12768-12768-12768-12768-12768-12768-12768-12768
+      6     -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768
+      7     -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768
+      8        99    99    99    99    99    99    99    99    99    99
+      9        99    99    99    99    99    99    99    99    99    99
+     10        99    99    99    99    99    99    99    99    99    99
+F2 INP=B OUT=X LIMITS=(-30000, 0) REPLACE=40000
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 7 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:41 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1     32767 32767 32767 32767 32767 32767 32767 32767 32767 32767
+      2    -27768-27768-27768-27768-27768-27768-27768-27768-27768-27768
+      3    -22768-22768-22768-22768-22768-22768-22768-22768-22768-22768
+      4    -17768-17768-17768-17768-17768-17768-17768-17768-17768-17768
+      5    -12768-12768-12768-12768-12768-12768-12768-12768-12768-12768
+      6     -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768
+      7     -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768
+      8     32767 32767 32767 32767 32767 32767 32767 32767 32767 32767
+      9     32767 32767 32767 32767 32767 32767 32767 32767 32767 32767
+     10     32767 32767 32767 32767 32767 32767 32767 32767 32767 32767
+F2 INP=B OUT=X LIMITS=(-30000, 0) REPLACE=-40000
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 7 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:41 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+      2    -27768-27768-27768-27768-27768-27768-27768-27768-27768-27768
+      3    -22768-22768-22768-22768-22768-22768-22768-22768-22768-22768
+      4    -17768-17768-17768-17768-17768-17768-17768-17768-17768-17768
+      5    -12768-12768-12768-12768-12768-12768-12768-12768-12768-12768
+      6     -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768 -7768
+      7     -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768 -2768
+      8    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+      9    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+     10    -32768-32768-32768-32768-32768-32768-32768-32768-32768-32768
+F2 INP=C OUT=X FUNCTION="IN1+1000" EXCLUDE=(432768,432775)
+Beginning VICAR task F2
+F2 version 98-Aug-2015
 F2 calculating every pixel
 FUNCTION EVALUATED 100 TIMES
 LIST X
+Beginning VICAR task LIST
+
    FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:41 2015
      Samp            1          2          3          4          5          6          7          8          9         10
    Line
-      1              0    4030201    8060402   12090603   16120804   20151004   24181206   28211408   32241608   36271808
-      2        4030201    8060402   12090603   16120804   20151004   24181206   28211408   32241608   36271808   40302008
-      3        8060402   12090603   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212
-      4       12090603   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412
+      1         432768     432768     432768     432768     432768     432768     432768     432768     432768     432768
+      2         433769     433769     433769     433769     433769     433769     433769     433769     433769     433769
+      3         433770     433770     433770     433770     433770     433770     433770     433770     433770     433770
+      4         433771     433771     433771     433771     433771     433771     433771     433771     433771     433771
+      5         433772     433772     433772     433772     433772     433772     433772     433772     433772     433772
+      6         433773     433773     433773     433773     433773     433773     433773     433773     433773     433773
+      7         433774     433774     433774     433774     433774     433774     433774     433774     433774     433774
+      8         432775     432775     432775     432775     432775     432775     432775     432775     432775     432775
+      9         433776     433776     433776     433776     433776     433776     433776     433776     433776     433776
+     10         433777     433777     433777     433777     433777     433777     433777     433777     433777     433777
+F2 INP=C OUT=X EXCLUDE=(432768,432775) REPLACE=99
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1             99         99         99         99         99         99         99         99         99         99
+      2         432769     432769     432769     432769     432769     432769     432769     432769     432769     432769
+      3         432770     432770     432770     432770     432770     432770     432770     432770     432770     432770
+      4         432771     432771     432771     432771     432771     432771     432771     432771     432771     432771
+      5         432772     432772     432772     432772     432772     432772     432772     432772     432772     432772
+      6         432773     432773     432773     432773     432773     432773     432773     432773     432773     432773
+      7         432774     432774     432774     432774     432774     432774     432774     432774     432774     432774
+      8             99         99         99         99         99         99         99         99         99         99
+      9         432776     432776     432776     432776     432776     432776     432776     432776     432776     432776
+     10         432777     432777     432777     432777     432777     432777     432777     432777     432777     432777
+F2 INP=C OUT=X LIMITS=(432770,432775)
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1         432770     432770     432770     432770     432770     432770     432770     432770     432770     432770
+      2         432770     432770     432770     432770     432770     432770     432770     432770     432770     432770
+      3         432770     432770     432770     432770     432770     432770     432770     432770     432770     432770
+      4         432771     432771     432771     432771     432771     432771     432771     432771     432771     432771
+      5         432772     432772     432772     432772     432772     432772     432772     432772     432772     432772
+      6         432773     432773     432773     432773     432773     432773     432773     432773     432773     432773
+      7         432774     432774     432774     432774     432774     432774     432774     432774     432774     432774
+      8         432775     432775     432775     432775     432775     432775     432775     432775     432775     432775
+      9         432770     432770     432770     432770     432770     432770     432770     432770     432770     432770
+     10         432770     432770     432770     432770     432770     432770     432770     432770     432770     432770
+F2 INP=C OUT=X LIMITS=(432770,432775) REPLACE=99
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1             99         99         99         99         99         99         99         99         99         99
+      2             99         99         99         99         99         99         99         99         99         99
+      3         432770     432770     432770     432770     432770     432770     432770     432770     432770     432770
+      4         432771     432771     432771     432771     432771     432771     432771     432771     432771     432771
+      5         432772     432772     432772     432772     432772     432772     432772     432772     432772     432772
+      6         432773     432773     432773     432773     432773     432773     432773     432773     432773     432773
+      7         432774     432774     432774     432774     432774     432774     432774     432774     432774     432774
+      8         432775     432775     432775     432775     432775     432775     432775     432775     432775     432775
+      9             99         99         99         99         99         99         99         99         99         99
+     10             99         99         99         99         99         99         99         99         99         99
+F2 INP=D OUT=X EXCLUDE=(5432770,5432775) FUNCTION="IN1+100000"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06
+      2       5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06
+      3       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      4       5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06
+      5       5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06
+      6       5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06
+      7       5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06
+      8       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      9       5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06
+     10       5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06   5.533E+06
+F2 INP=D OUT=X EXCLUDE=(5432770,5432775) REPLACE=99
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      2       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      3       9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01
+      4       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      5       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      6       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      7       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      8       9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01
+      9       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+     10       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+F2 INP=D OUT=X LIMITS=(5432770,5432775)
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      2       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      3       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      4       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      5       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      6       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      7       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      8       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      9       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+     10       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+F2 INP=D OUT=X LIMITS=(5432770,5432775) REPLACE=99
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01
+      2       9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01
+      3       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      4       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      5       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      6       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      7       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      8       5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06   5.433E+06
+      9       9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01
+     10       9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01   9.900E+01
+F2 INP=(C,D) OUT=X EXCLUDE=(5432768,432768,432769) FUNCTION="IN1+IN2"  +
+ REPLACE=4040
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:39 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1           4040       4040       4040       4040       4040       4040       4040       4040       4040       4040
+      2           4040       4040       4040       4040       4040       4040       4040       4040       4040       4040
+      3        5865540    5865540    5865540    5865540    5865540    5865540    5865540    5865540    5865540    5865540
+      4        5865542    5865542    5865542    5865542    5865542    5865542    5865542    5865542    5865542    5865542
+      5        5865544    5865544    5865544    5865544    5865544    5865544    5865544    5865544    5865544    5865544
+      6        5865546    5865546    5865546    5865546    5865546    5865546    5865546    5865546    5865546    5865546
+      7        5865548    5865548    5865548    5865548    5865548    5865548    5865548    5865548    5865548    5865548
+      8        5865550    5865550    5865550    5865550    5865550    5865550    5865550    5865550    5865550    5865550
+      9        5865552    5865552    5865552    5865552    5865552    5865552    5865552    5865552    5865552    5865552
+     10        5865554    5865554    5865554    5865554    5865554    5865554    5865554    5865554    5865554    5865554
+GEN A 10 10 IVAL=0 SINC=0 LINC=1
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN B 10 10 IVAL=0 SINC=1 LINC=0
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN C 10 10 IVAL=10 SINC=0 LINC=0
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+LIST A
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+     Samp     1       3       5       7       9
+   Line
+
+      2       1   1   1   1   1   1   1   1   1   1
+      3       2   2   2   2   2   2   2   2   2   2
+      4       3   3   3   3   3   3   3   3   3   3
+      5       4   4   4   4   4   4   4   4   4   4
+      6       5   5   5   5   5   5   5   5   5   5
+      7       6   6   6   6   6   6   6   6   6   6
+      8       7   7   7   7   7   7   7   7   7   7
+      9       8   8   8   8   8   8   8   8   8   8
+     10       9   9   9   9   9   9   9   9   9   9
+LIST B
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:43 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       0   1   2   3   4   5   6   7   8   9
+      3       0   1   2   3   4   5   6   7   8   9
+      4       0   1   2   3   4   5   6   7   8   9
+      5       0   1   2   3   4   5   6   7   8   9
+      6       0   1   2   3   4   5   6   7   8   9
+      7       0   1   2   3   4   5   6   7   8   9
+      8       0   1   2   3   4   5   6   7   8   9
+      9       0   1   2   3   4   5   6   7   8   9
+     10       0   1   2   3   4   5   6   7   8   9
+LIST C
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:43 2015
+     Samp     1       3       5       7       9
+   Line
+      1      10  10  10  10  10  10  10  10  10  10
+      2      10  10  10  10  10  10  10  10  10  10
+      3      10  10  10  10  10  10  10  10  10  10
+      4      10  10  10  10  10  10  10  10  10  10
+      5      10  10  10  10  10  10  10  10  10  10
+      6      10  10  10  10  10  10  10  10  10  10
+      7      10  10  10  10  10  10  10  10  10  10
+      8      10  10  10  10  10  10  10  10  10  10
+      9      10  10  10  10  10  10  10  10  10  10
+     10      10  10  10  10  10  10  10  10  10  10
+F2 INP=(A,B,C) OUT=X EXCLUDE=(3,4,8) FUNCTION="IN1+IN2+IN3"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:43 2015
+     Samp     1       3       5       7       9
+   Line
+      1      10  11  12   3   4  15  16  17   8  19
+      2      11  12  13   3   4  16  17  18   8  20
+      3      12  13  14   3   4  17  18  19   8  21
+      4       3   3   3   3   3   3   3   3   3   3
+      5       4   4   4   4   4   4   4   4   4   4
+      6      15  16  17   3   4  20  21  22   8  24
+      7      16  17  18   3   4  21  22  23   8  25
+      8      17  18  19   3   4  22  23  24   8  26
+      9       8   8   8   8   8   8   8   8   8   8
+     10      19  20  21   3   4  24  25  26   8  28
+F2 INP=(A,B,C) OUT=X EXCLUDE=(3,4,8) FUNCTION="IN1+IN2+IN3" REPLACE=99
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:43 2015
+     Samp     1       3       5       7       9
+   Line
+      1      10  11  12  99  99  15  16  17  99  19
+      2      11  12  13  99  99  16  17  18  99  20
+      3      12  13  14  99  99  17  18  19  99  21
+      4      99  99  99  99  99  99  99  99  99  99
+      5      99  99  99  99  99  99  99  99  99  99
+      6      15  16  17  99  99  20  21  22  99  24
+      7      16  17  18  99  99  21  22  23  99  25
+      8      17  18  19  99  99  22  23  24  99  26
+      9      99  99  99  99  99  99  99  99  99  99
+     10      19  20  21  99  99  24  25  26  99  28
+F2 INP=(A,B,C) OUT=X EXCLUDE=(3,4,8) FUNCTION="IN1+IN2+IN3" REPLACE=280
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:43 2015
+     Samp     1       3       5       7       9
+   Line
+      1      10  11  12 255 255  15  16  17 255  19
+      2      11  12  13 255 255  16  17  18 255  20
+      3      12  13  14 255 255  17  18  19 255  21
+      4     255 255 255 255 255 255 255 255 255 255
+      5     255 255 255 255 255 255 255 255 255 255
+      6      15  16  17 255 255  20  21  22 255  24
+      7      16  17  18 255 255  21  22  23 255  25
+      8      17  18  19 255 255  22  23  24 255  26
+      9     255 255 255 255 255 255 255 255 255 255
+     10      19  20  21 255 255  24  25  26 255  28
+F2 INP=(A,B,C) OUT=X EXCLUDE=(3,4,8) FUNCTION="IN1+IN2+IN3" REPLACE=-280
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:43 2015
+     Samp     1       3       5       7       9
+   Line
+      1      10  11  12   0   0  15  16  17   0  19
+      2      11  12  13   0   0  16  17  18   0  20
+      3      12  13  14   0   0  17  18  19   0  21
+
+      6      15  16  17   0   0  20  21  22   0  24
+      7      16  17  18   0   0  21  22  23   0  25
+      8      17  18  19   0   0  22  23  24   0  26
+
+     10      19  20  21   0   0  24  25  26   0  28
+F2 INP=(A,B,C) OUT=X LIMITS=(3,10) FUNCTION="IN1+IN2+IN3"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:43 2015
+     Samp     1       3       5       7       9
+   Line
+      1       3   3   3   3   3   3   3   3   3   3
+      2       3   3   3   3   3   3   3   3   3   3
+      3       3   3   3   3   3   3   3   3   3   3
+      4       3   3   3  16  17  18  19  20  21  22
+      5       3   3   3  17  18  19  20  21  22  23
+      6       3   3   3  18  19  20  21  22  23  24
+      7       3   3   3  19  20  21  22  23  24  25
+      8       3   3   3  20  21  22  23  24  25  26
+      9       3   3   3  21  22  23  24  25  26  27
+     10       3   3   3  22  23  24  25  26  27  28
+F2 INP=(A,B,C) OUT=X LIMITS=(3,10) FUNCTION="IN1+IN2+IN3" REPLACE=99
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:43 2015
+     Samp     1       3       5       7       9
+   Line
+      1      99  99  99  99  99  99  99  99  99  99
+      2      99  99  99  99  99  99  99  99  99  99
+      3      99  99  99  99  99  99  99  99  99  99
+      4      99  99  99  16  17  18  19  20  21  22
+      5      99  99  99  17  18  19  20  21  22  23
+      6      99  99  99  18  19  20  21  22  23  24
+      7      99  99  99  19  20  21  22  23  24  25
+      8      99  99  99  20  21  22  23  24  25  26
+      9      99  99  99  21  22  23  24  25  26  27
+     10      99  99  99  22  23  24  25  26  27  28
+F2 INP=(A,B,C) OUT=X LIMITS=(3,10) FUNCTION="IN1+IN2+IN3" REPLACE=280
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:43 2015
+     Samp     1       3       5       7       9
+   Line
+      1     255 255 255 255 255 255 255 255 255 255
+      2     255 255 255 255 255 255 255 255 255 255
+      3     255 255 255 255 255 255 255 255 255 255
+      4     255 255 255  16  17  18  19  20  21  22
+      5     255 255 255  17  18  19  20  21  22  23
+      6     255 255 255  18  19  20  21  22  23  24
+      7     255 255 255  19  20  21  22  23  24  25
+      8     255 255 255  20  21  22  23  24  25  26
+      9     255 255 255  21  22  23  24  25  26  27
+     10     255 255 255  22  23  24  25  26  27  28
+F2 INP=(A,B,C) OUT=X LIMITS=(3,10) FUNCTION="IN1+IN2+IN3" REPLACE=-280
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:42 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:44 2015
+     Samp     1       3       5       7       9
+   Line
+
+      4       0   0   0  16  17  18  19  20  21  22
+      5       0   0   0  17  18  19  20  21  22  23
+      6       0   0   0  18  19  20  21  22  23  24
+      7       0   0   0  19  20  21  22  23  24  25
+      8       0   0   0  20  21  22  23  24  25  26
+      9       0   0   0  21  22  23  24  25  26  27
+     10       0   0   0  22  23  24  25  26  27  28
+f2 out=a nl=5 ns=5 fun="-1.7e38*(line<3)+2" 'real
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 25 TIMES
+f2 out=b nl=5 ns=5 fun="-1.7e38*(line<3)+1" 'real
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 25 TIMES
+list a
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:44 2015
+     Samp             1           2           3           4           5
+   Line
+      1      -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38
+      2      -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38
+      3       2.000E+00   2.000E+00   2.000E+00   2.000E+00   2.000E+00
+      4       2.000E+00   2.000E+00   2.000E+00   2.000E+00   2.000E+00
+      5       2.000E+00   2.000E+00   2.000E+00   2.000E+00   2.000E+00
+list b
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:44 2015
+     Samp             1           2           3           4           5
+   Line
+      1      -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38
+      2      -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38
+      3       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+      4       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+      5       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+f2 (a,b) c fun="in1-in2" exclude=-1.7e38 replace=-1.7e38
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 25 TIMES
+list c
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:44 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:44 2015
+     Samp             1           2           3           4           5
+   Line
+      1      -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38
+      2      -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38  -1.700E+38
+      3       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+      4       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+      5       1.000E+00   1.000E+00   1.000E+00   1.000E+00   1.000E+00
+write "Test F2 on multiband images"
+Test F2 on multiband images
+gen a 5 10 12 ORG="BSQ" 'BYTE   LINC=2 SINC=3 BINC=4 IVAL=5
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+f2 OUT=b nl=5 ns=10 nb=12 ORG="BSQ" 'BYTE    +
+   FUNC="2*(LINE-1) + 3*(SAMP-1) + 4*(BINC-1) + 5"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 600 TIMES
+write "Should get 0 differences."
+Should get 0 differences.
+difpic (a b)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+gen a 5 10 12 ORG="BIL" 'HALF   LINC=2 SINC=3 BINC=4 IVAL=5
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+f2 OUT=b nl=5 ns=10 nb=12 ORG="BIL" 'HALF    +
+   FUNC="2*(LINE-1) + 3*(SAMP-1) + 4*(BINC-1) + 5"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 600 TIMES
+write "Should get 0 differences."
+Should get 0 differences.
+difpic (a b)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ Warning: BIL format may cause performance degradation
+ NUMBER OF DIFFERENCES =   0
+gen a 5 10 12 ORG="BIP" 'REAL   LINC=2 SINC=3 BINC=4 IVAL=5
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+f2 OUT=b nl=5 ns=10 nb=12 ORG="BIP" 'REAL    +
+   FUNC="2*(LINE-1) + 3*(SAMP-1) + 4*(BINC-1) + 5"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 600 TIMES
+write "Should get 0 differences."
+Should get 0 differences.
+difpic (a b)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ BIP files not supported, use program TRAN to convert to BSQ
+gen a 5 10 12 ORG="BSQ" 'BYTE
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+copy a b size=(2 3 4 5) bands=(5 4)
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+f2   a c size=(2 3 4 5) bands=(5 4) func="IN1"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+LINES TRUNCATED
+SAMPLES TRUNCATED
+BANDS TRUNCATED
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+write "Should get 0 differences."
+Should get 0 differences.
+difpic (b c)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+gen a 5 10 12 ORG="BIL" 'half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+copy a b size=(2 3 4 5) bands=(5 4)
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+f2   a c size=(2 3 4 5) bands=(5 4) func="IN1"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+LINES TRUNCATED
+SAMPLES TRUNCATED
+BANDS TRUNCATED
+F2 using hash table lookup
+FUNCTION EVALUATED 12 TIMES
+write "Should get 0 differences."
+Should get 0 differences.
+difpic (b c)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ Warning: BIL format may cause performance degradation
+ NUMBER OF DIFFERENCES =   0
+copy a a1
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+gen a 5 10 12 ORG="BIP" 'REAL4
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+copy a b size=(2 3 4 5) bands=(5 4)
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+f2   a c size=(2 3 4 5) bands=(5 4) func="IN1"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+LINES TRUNCATED
+SAMPLES TRUNCATED
+BANDS TRUNCATED
+F2 calculating every pixel
+FUNCTION EVALUATED 80 TIMES
+write "Should get 0 differences."
+Should get 0 differences.
+difpic (b c)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ BIP files not supported, use program TRAN to convert to BSQ
+f2 (a a1) b func="in1+in2"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+ ALL INPUTS MUST HAVE SAME ORG!
+ ** ABEND called **
+continue
+write "should get abend"
+should get abend
+GEN A 10 10 2 'BYTE BINC=0
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN B 10 10 2 'HALF LINC=2 SINC=2 BINC=0
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN C 10 10 2 'FULL LINC=3 SINC=3 BINC=0
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN D 10 10 2 'REAL4 LINC=4 SINC=4 BINC=0
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+LIST A
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     1
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       1   2   3   4   5   6   7   8   9  10
+      3       2   3   4   5   6   7   8   9  10  11
+      4       3   4   5   6   7   8   9  10  11  12
+      5       4   5   6   7   8   9  10  11  12  13
+      6       5   6   7   8   9  10  11  12  13  14
+      7       6   7   8   9  10  11  12  13  14  15
+      8       7   8   9  10  11  12  13  14  15  16
+      9       8   9  10  11  12  13  14  15  16  17
+     10       9  10  11  12  13  14  15  16  17  18
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     2
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       1   2   3   4   5   6   7   8   9  10
+      3       2   3   4   5   6   7   8   9  10  11
+      4       3   4   5   6   7   8   9  10  11  12
+      5       4   5   6   7   8   9  10  11  12  13
+      6       5   6   7   8   9  10  11  12  13  14
+      7       6   7   8   9  10  11  12  13  14  15
+      8       7   8   9  10  11  12  13  14  15  16
+      9       8   9  10  11  12  13  14  15  16  17
+     10       9  10  11  12  13  14  15  16  17  18
+LIST B
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     1
+ ***********
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         0     2     4     6     8    10    12    14    16    18
+      2         2     4     6     8    10    12    14    16    18    20
+      3         4     6     8    10    12    14    16    18    20    22
+      4         6     8    10    12    14    16    18    20    22    24
+      5         8    10    12    14    16    18    20    22    24    26
+      6        10    12    14    16    18    20    22    24    26    28
+      7        12    14    16    18    20    22    24    26    28    30
+      8        14    16    18    20    22    24    26    28    30    32
+      9        16    18    20    22    24    26    28    30    32    34
+     10        18    20    22    24    26    28    30    32    34    36
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     2
+ ***********
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         0     2     4     6     8    10    12    14    16    18
+      2         2     4     6     8    10    12    14    16    18    20
+      3         4     6     8    10    12    14    16    18    20    22
+      4         6     8    10    12    14    16    18    20    22    24
+      5         8    10    12    14    16    18    20    22    24    26
+      6        10    12    14    16    18    20    22    24    26    28
+      7        12    14    16    18    20    22    24    26    28    30
+      8        14    16    18    20    22    24    26    28    30    32
+      9        16    18    20    22    24    26    28    30    32    34
+     10        18    20    22    24    26    28    30    32    34    36
+LIST C
+Beginning VICAR task LIST
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     1
+ ***********
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1              0          3          6          9         12         15         18         21         24         27
+      2              3          6          9         12         15         18         21         24         27         30
+      3              6          9         12         15         18         21         24         27         30         33
+      4              9         12         15         18         21         24         27         30         33         36
+      5             12         15         18         21         24         27         30         33         36         39
+      6             15         18         21         24         27         30         33         36         39         42
+      7             18         21         24         27         30         33         36         39         42         45
+      8             21         24         27         30         33         36         39         42         45         48
+      9             24         27         30         33         36         39         42         45         48         51
+     10             27         30         33         36         39         42         45         48         51         54
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     2
+ ***********
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1              0          3          6          9         12         15         18         21         24         27
+      2              3          6          9         12         15         18         21         24         27         30
+      3              6          9         12         15         18         21         24         27         30         33
+      4              9         12         15         18         21         24         27         30         33         36
+      5             12         15         18         21         24         27         30         33         36         39
+      6             15         18         21         24         27         30         33         36         39         42
+      7             18         21         24         27         30         33         36         39         42         45
+      8             21         24         27         30         33         36         39         42         45         48
+      9             24         27         30         33         36         39         42         45         48         51
+     10             27         30         33         36         39         42         45         48         51         54
+LIST D
+Beginning VICAR task LIST
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     1
+ ***********
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       0.000E+00   4.000E+00   8.000E+00   1.200E+01   1.600E+01   2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01
+      2       4.000E+00   8.000E+00   1.200E+01   1.600E+01   2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01
+      3       8.000E+00   1.200E+01   1.600E+01   2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01
+      4       1.200E+01   1.600E+01   2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01
+      5       1.600E+01   2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01
+      6       2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01
+      7       2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01   6.000E+01
+      8       2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01   6.000E+01   6.400E+01
+      9       3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01   6.000E+01   6.400E+01   6.800E+01
+     10       3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01   6.000E+01   6.400E+01   6.800E+01   7.200E+01
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     2
+ ***********
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       0.000E+00   4.000E+00   8.000E+00   1.200E+01   1.600E+01   2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01
+      2       4.000E+00   8.000E+00   1.200E+01   1.600E+01   2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01
+      3       8.000E+00   1.200E+01   1.600E+01   2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01
+      4       1.200E+01   1.600E+01   2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01
+      5       1.600E+01   2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01
+      6       2.000E+01   2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01
+      7       2.400E+01   2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01   6.000E+01
+      8       2.800E+01   3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01   6.000E+01   6.400E+01
+      9       3.200E+01   3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01   6.000E+01   6.400E+01   6.800E+01
+     10       3.600E+01   4.000E+01   4.400E+01   4.800E+01   5.200E+01   5.600E+01   6.000E+01   6.400E+01   6.800E+01   7.200E+01
+F2 (A,B,C,D) X FUNC="IN1+100*IN2+10000*IN3+1000000*IN4" 'FULL SB=1 NB=1
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+BANDS TRUNCATED
+F2 calculating every pixel
+FUNCTION EVALUATED 100 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1              0    4030201    8060402   12090604   16120804   20151004   24181206   28211408   32241608   36271808
+      2        4030201    8060402   12090604   16120804   20151004   24181206   28211408   32241608   36271808   40302008
+      3        8060402   12090604   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212
+      4       12090604   16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412
       5       16120804   20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412   52392612
       6       20151004   24181206   28211408   32241608   36271808   40302008   44332212   48362412   52392612   56422816
       7       24181206   28211408   32241608   36271808   40302008   44332212   48362412   52392612   56422816   60453016
       8       28211408   32241608   36271808   40302008   44332212   48362412   52392612   56422816   60453016   64483216
       9       32241608   36271808   40302008   44332212   48362412   52392612   56422816   60453016   64483216   68513416
      10       36271808   40302008   44332212   48362412   52392612   56422816   60453016   64483216   68513416   72543616
-
-
-gen a 10 10 'real4 ival=-9.0
-f2 a b func="sin(in1)*sin(in1) + cos(in1)*cos(in1)"
+F2 (A,B,C,D) X FUNC="IN1+100*IN2+10000*IN3+1000000*IN4" 'FULL  +
+	SIZE=(5,5,5,5) SB=1 NB=1
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+LINES TRUNCATED
+SAMPLES TRUNCATED
+BANDS TRUNCATED
 F2 calculating every pixel
-FUNCTION EVALUATED 100 TIMES
-list b
-   REAL     samples are interpreted as  REAL*4  data
-     Samp             1           2           3           4           5           6           7           8           9          10
-   Line
-      1       1.000E+00   1.000E+00   1.000E+00   1.000E-00   1.000E+00   1.000E+00   1.000E+00   1.000E-00   1.000E-00   1.000E+00
-      2       1.000E+00   1.000E+00   1.000E-00   1.000E+00   1.000E+00   1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E-00
-      3       1.000E+00   1.000E-00   1.000E+00   1.000E+00   1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E-00   1.000E-00
-      4       1.000E-00   1.000E+00   1.000E+00   1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E-00   1.000E-00   1.000E+00
-      5       1.000E+00   1.000E+00   1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E+00
-      6       1.000E+00   1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E+00   1.000E+00
-      7       1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E+00   1.000E+00   1.000E-00
-      8       1.000E-00   1.000E-00   1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E+00   1.000E+00   1.000E-00   1.000E+00
-      9       1.000E-00   1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E+00   1.000E+00   1.000E-00   1.000E+00   1.000E+00
-     10       1.000E+00   1.000E-00   1.000E-00   1.000E+00   1.000E+00   1.000E+00   1.000E-00   1.000E+00   1.000E+00   1.000E+00
-$!-----------------------------------------------------------------------------
-$ create tstf2_f77C.log
-enable-script tstf2x
+FUNCTION EVALUATED 25 TIMES
+LIST X
+Beginning VICAR task LIST
 
-gen a 4 4 'half linc=0 sinc=0
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+     Samp            1          2          3          4          5
+   Line
+      1       32241608   36271808   40302008   44332212   48362412
+      2       36271808   40302008   44332212   48362412   52392612
+      3       40302008   44332212   48362412   52392612   56422816
+      4       44332212   48362412   52392612   56422816   60453016
+      5       48362412   52392612   56422816   60453016   64483216
+GEN JFM 10 10 10 IVAL=0 SINC=0 LINC=0
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+GEN JSM 10 10 10 IVAL=10 SINC=0 LINC=0
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+F2 INP=(JSM,JFM) OUT=X FUNCTION="IN1+IN2"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 11 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     1
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      10  10  10  10  10  10  10  10  10  10
+      2      10  10  10  10  10  10  10  10  10  10
+      3      10  10  10  10  10  10  10  10  10  10
+      4      10  10  10  10  10  10  10  10  10  10
+      5      10  10  10  10  10  10  10  10  10  10
+      6      10  10  10  10  10  10  10  10  10  10
+      7      10  10  10  10  10  10  10  10  10  10
+      8      10  10  10  10  10  10  10  10  10  10
+      9      10  10  10  10  10  10  10  10  10  10
+     10      10  10  10  10  10  10  10  10  10  10
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     2
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      12  12  12  12  12  12  12  12  12  12
+      2      12  12  12  12  12  12  12  12  12  12
+      3      12  12  12  12  12  12  12  12  12  12
+      4      12  12  12  12  12  12  12  12  12  12
+      5      12  12  12  12  12  12  12  12  12  12
+      6      12  12  12  12  12  12  12  12  12  12
+      7      12  12  12  12  12  12  12  12  12  12
+      8      12  12  12  12  12  12  12  12  12  12
+      9      12  12  12  12  12  12  12  12  12  12
+     10      12  12  12  12  12  12  12  12  12  12
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     3
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      14  14  14  14  14  14  14  14  14  14
+      2      14  14  14  14  14  14  14  14  14  14
+      3      14  14  14  14  14  14  14  14  14  14
+      4      14  14  14  14  14  14  14  14  14  14
+      5      14  14  14  14  14  14  14  14  14  14
+      6      14  14  14  14  14  14  14  14  14  14
+      7      14  14  14  14  14  14  14  14  14  14
+      8      14  14  14  14  14  14  14  14  14  14
+      9      14  14  14  14  14  14  14  14  14  14
+     10      14  14  14  14  14  14  14  14  14  14
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     4
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      16  16  16  16  16  16  16  16  16  16
+      2      16  16  16  16  16  16  16  16  16  16
+      3      16  16  16  16  16  16  16  16  16  16
+      4      16  16  16  16  16  16  16  16  16  16
+      5      16  16  16  16  16  16  16  16  16  16
+      6      16  16  16  16  16  16  16  16  16  16
+      7      16  16  16  16  16  16  16  16  16  16
+      8      16  16  16  16  16  16  16  16  16  16
+      9      16  16  16  16  16  16  16  16  16  16
+     10      16  16  16  16  16  16  16  16  16  16
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     5
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      18  18  18  18  18  18  18  18  18  18
+      2      18  18  18  18  18  18  18  18  18  18
+      3      18  18  18  18  18  18  18  18  18  18
+      4      18  18  18  18  18  18  18  18  18  18
+      5      18  18  18  18  18  18  18  18  18  18
+      6      18  18  18  18  18  18  18  18  18  18
+      7      18  18  18  18  18  18  18  18  18  18
+      8      18  18  18  18  18  18  18  18  18  18
+      9      18  18  18  18  18  18  18  18  18  18
+     10      18  18  18  18  18  18  18  18  18  18
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     6
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      20  20  20  20  20  20  20  20  20  20
+      2      20  20  20  20  20  20  20  20  20  20
+      3      20  20  20  20  20  20  20  20  20  20
+      4      20  20  20  20  20  20  20  20  20  20
+      5      20  20  20  20  20  20  20  20  20  20
+      6      20  20  20  20  20  20  20  20  20  20
+      7      20  20  20  20  20  20  20  20  20  20
+      8      20  20  20  20  20  20  20  20  20  20
+      9      20  20  20  20  20  20  20  20  20  20
+     10      20  20  20  20  20  20  20  20  20  20
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     7
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      22  22  22  22  22  22  22  22  22  22
+      2      22  22  22  22  22  22  22  22  22  22
+      3      22  22  22  22  22  22  22  22  22  22
+      4      22  22  22  22  22  22  22  22  22  22
+      5      22  22  22  22  22  22  22  22  22  22
+      6      22  22  22  22  22  22  22  22  22  22
+      7      22  22  22  22  22  22  22  22  22  22
+      8      22  22  22  22  22  22  22  22  22  22
+      9      22  22  22  22  22  22  22  22  22  22
+     10      22  22  22  22  22  22  22  22  22  22
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     8
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      24  24  24  24  24  24  24  24  24  24
+      2      24  24  24  24  24  24  24  24  24  24
+      3      24  24  24  24  24  24  24  24  24  24
+      4      24  24  24  24  24  24  24  24  24  24
+      5      24  24  24  24  24  24  24  24  24  24
+      6      24  24  24  24  24  24  24  24  24  24
+      7      24  24  24  24  24  24  24  24  24  24
+      8      24  24  24  24  24  24  24  24  24  24
+      9      24  24  24  24  24  24  24  24  24  24
+     10      24  24  24  24  24  24  24  24  24  24
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     9
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      26  26  26  26  26  26  26  26  26  26
+      2      26  26  26  26  26  26  26  26  26  26
+      3      26  26  26  26  26  26  26  26  26  26
+      4      26  26  26  26  26  26  26  26  26  26
+      5      26  26  26  26  26  26  26  26  26  26
+      6      26  26  26  26  26  26  26  26  26  26
+      7      26  26  26  26  26  26  26  26  26  26
+      8      26  26  26  26  26  26  26  26  26  26
+      9      26  26  26  26  26  26  26  26  26  26
+     10      26  26  26  26  26  26  26  26  26  26
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =    10
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      28  28  28  28  28  28  28  28  28  28
+      2      28  28  28  28  28  28  28  28  28  28
+      3      28  28  28  28  28  28  28  28  28  28
+      4      28  28  28  28  28  28  28  28  28  28
+      5      28  28  28  28  28  28  28  28  28  28
+      6      28  28  28  28  28  28  28  28  28  28
+      7      28  28  28  28  28  28  28  28  28  28
+      8      28  28  28  28  28  28  28  28  28  28
+      9      28  28  28  28  28  28  28  28  28  28
+     10      28  28  28  28  28  28  28  28  28  28
+F2 INP=(JSM,JFM) OUT=X FUNCTION="IN1+IN2" SIZE=(5,5,5,5)
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+LINES TRUNCATED
+SAMPLES TRUNCATED
+F2 using hash table lookup
+FUNCTION EVALUATED 11 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     1
+ ***********
+     Samp     1       3       5
+   Line
+      1      10  10  10  10  10
+      2      10  10  10  10  10
+      3      10  10  10  10  10
+      4      10  10  10  10  10
+      5      10  10  10  10  10
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     2
+ ***********
+     Samp     1       3       5
+   Line
+      1      12  12  12  12  12
+      2      12  12  12  12  12
+      3      12  12  12  12  12
+      4      12  12  12  12  12
+      5      12  12  12  12  12
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     3
+ ***********
+     Samp     1       3       5
+   Line
+      1      14  14  14  14  14
+      2      14  14  14  14  14
+      3      14  14  14  14  14
+      4      14  14  14  14  14
+      5      14  14  14  14  14
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     4
+ ***********
+     Samp     1       3       5
+   Line
+      1      16  16  16  16  16
+      2      16  16  16  16  16
+      3      16  16  16  16  16
+      4      16  16  16  16  16
+      5      16  16  16  16  16
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     5
+ ***********
+     Samp     1       3       5
+   Line
+      1      18  18  18  18  18
+      2      18  18  18  18  18
+      3      18  18  18  18  18
+      4      18  18  18  18  18
+      5      18  18  18  18  18
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     6
+ ***********
+     Samp     1       3       5
+   Line
+      1      20  20  20  20  20
+      2      20  20  20  20  20
+      3      20  20  20  20  20
+      4      20  20  20  20  20
+      5      20  20  20  20  20
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     7
+ ***********
+     Samp     1       3       5
+   Line
+      1      22  22  22  22  22
+      2      22  22  22  22  22
+      3      22  22  22  22  22
+      4      22  22  22  22  22
+      5      22  22  22  22  22
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     8
+ ***********
+     Samp     1       3       5
+   Line
+      1      24  24  24  24  24
+      2      24  24  24  24  24
+      3      24  24  24  24  24
+      4      24  24  24  24  24
+      5      24  24  24  24  24
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =     9
+ ***********
+     Samp     1       3       5
+   Line
+      1      26  26  26  26  26
+      2      26  26  26  26  26
+      3      26  26  26  26  26
+      4      26  26  26  26  26
+      5      26  26  26  26  26
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ ***********
+ Band =    10
+ ***********
+     Samp     1       3       5
+   Line
+      1      28  28  28  28  28
+      2      28  28  28  28  28
+      3      28  28  28  28  28
+      4      28  28  28  28  28
+      5      28  28  28  28  28
+F2 INP=(JSM,JFM) OUT=X FUNCTION="IN1+IN2" SB=1 NB=3
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+BANDS TRUNCATED
+F2 using hash table lookup
+FUNCTION EVALUATED 4 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     1
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      10  10  10  10  10  10  10  10  10  10
+      2      10  10  10  10  10  10  10  10  10  10
+      3      10  10  10  10  10  10  10  10  10  10
+      4      10  10  10  10  10  10  10  10  10  10
+      5      10  10  10  10  10  10  10  10  10  10
+      6      10  10  10  10  10  10  10  10  10  10
+      7      10  10  10  10  10  10  10  10  10  10
+      8      10  10  10  10  10  10  10  10  10  10
+      9      10  10  10  10  10  10  10  10  10  10
+     10      10  10  10  10  10  10  10  10  10  10
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     2
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      12  12  12  12  12  12  12  12  12  12
+      2      12  12  12  12  12  12  12  12  12  12
+      3      12  12  12  12  12  12  12  12  12  12
+      4      12  12  12  12  12  12  12  12  12  12
+      5      12  12  12  12  12  12  12  12  12  12
+      6      12  12  12  12  12  12  12  12  12  12
+      7      12  12  12  12  12  12  12  12  12  12
+      8      12  12  12  12  12  12  12  12  12  12
+      9      12  12  12  12  12  12  12  12  12  12
+     10      12  12  12  12  12  12  12  12  12  12
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     3
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      14  14  14  14  14  14  14  14  14  14
+      2      14  14  14  14  14  14  14  14  14  14
+      3      14  14  14  14  14  14  14  14  14  14
+      4      14  14  14  14  14  14  14  14  14  14
+      5      14  14  14  14  14  14  14  14  14  14
+      6      14  14  14  14  14  14  14  14  14  14
+      7      14  14  14  14  14  14  14  14  14  14
+      8      14  14  14  14  14  14  14  14  14  14
+      9      14  14  14  14  14  14  14  14  14  14
+     10      14  14  14  14  14  14  14  14  14  14
+F2 INP=(JSM,JFM) OUT=X FUNCTION="IN1+IN2" SB=1 NB=3 SIZE=(5,5,5,5)
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+LINES TRUNCATED
+SAMPLES TRUNCATED
+BANDS TRUNCATED
+F2 using hash table lookup
+FUNCTION EVALUATED 4 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     1
+ ***********
+     Samp     1       3       5
+   Line
+      1      10  10  10  10  10
+      2      10  10  10  10  10
+      3      10  10  10  10  10
+      4      10  10  10  10  10
+      5      10  10  10  10  10
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     2
+ ***********
+     Samp     1       3       5
+   Line
+      1      12  12  12  12  12
+      2      12  12  12  12  12
+      3      12  12  12  12  12
+      4      12  12  12  12  12
+      5      12  12  12  12  12
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:46 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     3
+ ***********
+     Samp     1       3       5
+   Line
+      1      14  14  14  14  14
+      2      14  14  14  14  14
+      3      14  14  14  14  14
+      4      14  14  14  14  14
+      5      14  14  14  14  14
+F2 OUT=X FUNCTION="LINE+SAMP+BAND" SIZE=(1,1,10,10) NB=10
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 1000 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     1
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1       3   4   5   6   7   8   9  10  11  12
+      2       4   5   6   7   8   9  10  11  12  13
+      3       5   6   7   8   9  10  11  12  13  14
+      4       6   7   8   9  10  11  12  13  14  15
+      5       7   8   9  10  11  12  13  14  15  16
+      6       8   9  10  11  12  13  14  15  16  17
+      7       9  10  11  12  13  14  15  16  17  18
+      8      10  11  12  13  14  15  16  17  18  19
+      9      11  12  13  14  15  16  17  18  19  20
+     10      12  13  14  15  16  17  18  19  20  21
+
+
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     2
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1       4   5   6   7   8   9  10  11  12  13
+      2       5   6   7   8   9  10  11  12  13  14
+      3       6   7   8   9  10  11  12  13  14  15
+      4       7   8   9  10  11  12  13  14  15  16
+      5       8   9  10  11  12  13  14  15  16  17
+      6       9  10  11  12  13  14  15  16  17  18
+      7      10  11  12  13  14  15  16  17  18  19
+      8      11  12  13  14  15  16  17  18  19  20
+      9      12  13  14  15  16  17  18  19  20  21
+     10      13  14  15  16  17  18  19  20  21  22
+
+
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     3
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1       5   6   7   8   9  10  11  12  13  14
+      2       6   7   8   9  10  11  12  13  14  15
+      3       7   8   9  10  11  12  13  14  15  16
+      4       8   9  10  11  12  13  14  15  16  17
+      5       9  10  11  12  13  14  15  16  17  18
+      6      10  11  12  13  14  15  16  17  18  19
+      7      11  12  13  14  15  16  17  18  19  20
+      8      12  13  14  15  16  17  18  19  20  21
+      9      13  14  15  16  17  18  19  20  21  22
+     10      14  15  16  17  18  19  20  21  22  23
+
+
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     4
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1       6   7   8   9  10  11  12  13  14  15
+      2       7   8   9  10  11  12  13  14  15  16
+      3       8   9  10  11  12  13  14  15  16  17
+      4       9  10  11  12  13  14  15  16  17  18
+      5      10  11  12  13  14  15  16  17  18  19
+      6      11  12  13  14  15  16  17  18  19  20
+      7      12  13  14  15  16  17  18  19  20  21
+      8      13  14  15  16  17  18  19  20  21  22
+      9      14  15  16  17  18  19  20  21  22  23
+     10      15  16  17  18  19  20  21  22  23  24
+
+
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     5
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1       7   8   9  10  11  12  13  14  15  16
+      2       8   9  10  11  12  13  14  15  16  17
+      3       9  10  11  12  13  14  15  16  17  18
+      4      10  11  12  13  14  15  16  17  18  19
+      5      11  12  13  14  15  16  17  18  19  20
+      6      12  13  14  15  16  17  18  19  20  21
+      7      13  14  15  16  17  18  19  20  21  22
+      8      14  15  16  17  18  19  20  21  22  23
+      9      15  16  17  18  19  20  21  22  23  24
+     10      16  17  18  19  20  21  22  23  24  25
+
+
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     6
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1       8   9  10  11  12  13  14  15  16  17
+      2       9  10  11  12  13  14  15  16  17  18
+      3      10  11  12  13  14  15  16  17  18  19
+      4      11  12  13  14  15  16  17  18  19  20
+      5      12  13  14  15  16  17  18  19  20  21
+      6      13  14  15  16  17  18  19  20  21  22
+      7      14  15  16  17  18  19  20  21  22  23
+      8      15  16  17  18  19  20  21  22  23  24
+      9      16  17  18  19  20  21  22  23  24  25
+     10      17  18  19  20  21  22  23  24  25  26
+
+
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     7
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1       9  10  11  12  13  14  15  16  17  18
+      2      10  11  12  13  14  15  16  17  18  19
+      3      11  12  13  14  15  16  17  18  19  20
+      4      12  13  14  15  16  17  18  19  20  21
+      5      13  14  15  16  17  18  19  20  21  22
+      6      14  15  16  17  18  19  20  21  22  23
+      7      15  16  17  18  19  20  21  22  23  24
+      8      16  17  18  19  20  21  22  23  24  25
+      9      17  18  19  20  21  22  23  24  25  26
+     10      18  19  20  21  22  23  24  25  26  27
+
+
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     8
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      10  11  12  13  14  15  16  17  18  19
+      2      11  12  13  14  15  16  17  18  19  20
+      3      12  13  14  15  16  17  18  19  20  21
+      4      13  14  15  16  17  18  19  20  21  22
+      5      14  15  16  17  18  19  20  21  22  23
+      6      15  16  17  18  19  20  21  22  23  24
+      7      16  17  18  19  20  21  22  23  24  25
+      8      17  18  19  20  21  22  23  24  25  26
+      9      18  19  20  21  22  23  24  25  26  27
+     10      19  20  21  22  23  24  25  26  27  28
+
+
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =     9
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      11  12  13  14  15  16  17  18  19  20
+      2      12  13  14  15  16  17  18  19  20  21
+      3      13  14  15  16  17  18  19  20  21  22
+      4      14  15  16  17  18  19  20  21  22  23
+      5      15  16  17  18  19  20  21  22  23  24
+      6      16  17  18  19  20  21  22  23  24  25
+      7      17  18  19  20  21  22  23  24  25  26
+      8      18  19  20  21  22  23  24  25  26  27
+      9      19  20  21  22  23  24  25  26  27  28
+     10      20  21  22  23  24  25  26  27  28  29
+
+
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ ***********
+ Band =    10
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      12  13  14  15  16  17  18  19  20  21
+      2      13  14  15  16  17  18  19  20  21  22
+      3      14  15  16  17  18  19  20  21  22  23
+      4      15  16  17  18  19  20  21  22  23  24
+      5      16  17  18  19  20  21  22  23  24  25
+      6      17  18  19  20  21  22  23  24  25  26
+      7      18  19  20  21  22  23  24  25  26  27
+      8      19  20  21  22  23  24  25  26  27  28
+      9      20  21  22  23  24  25  26  27  28  29
+     10      21  22  23  24  25  26  27  28  29  30
+F2 OUT=X  FUNCTION="MOD(SAMP,LINE)"   'HALF  SIZE=(1,1,10,20)
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 200 TIMES
+LIST X
+Beginning VICAR task LIST
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+
+      2         1     0     1     0     1     0     1     0     1     0     1     0     1     0     1
+      3         1     2     0     1     2     0     1     2     0     1     2     0     1     2     0
+      4         1     2     3     0     1     2     3     0     1     2     3     0     1     2     3
+      5         1     2     3     4     0     1     2     3     4     0     1     2     3     4     0
+      6         1     2     3     4     5     0     1     2     3     4     5     0     1     2     3
+      7         1     2     3     4     5     6     0     1     2     3     4     5     6     0     1
+      8         1     2     3     4     5     6     7     0     1     2     3     4     5     6     7
+      9         1     2     3     4     5     6     7     8     0     1     2     3     4     5     6
+     10         1     2     3     4     5     6     7     8     9     0     1     2     3     4     5
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+     Samp      16    17    18    19    20
+   Line
+
+      2         0     1     0     1     0
+      3         1     2     0     1     2
+      4         0     1     2     3     0
+      5         1     2     3     4     0
+      6         4     5     0     1     2
+      7         2     3     4     5     6
+      8         0     1     2     3     4
+      9         7     8     0     1     2
+     10         6     7     8     9     0
+GEN X nl=10 ns=10
+Beginning VICAR task GEN
+GEN Version 6
+GEN task completed
+F2 X Y (3,3,5,5) FUN="LINE*10+SAMP"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+LINES TRUNCATED
+SAMPLES TRUNCATED
+F2 calculating every pixel
+FUNCTION EVALUATED 25 TIMES
+LIST Y
+Beginning VICAR task LIST
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:47 2015
+     Samp     1       3       5
+   Line
+      1      33  34  35  36  37
+      2      43  44  45  46  47
+      3      53  54  55  56  57
+      4      63  64  65  66  67
+      5      73  74  75  76  77
+gen a 100 100 sinc=2
 Beginning VICAR task gen
 GEN Version 6
 GEN task completed
-
-genthis b 4 4 'half dn=(  +
- -9047 -19956 -30865 0  +
- -9047 -19956 -30865 0  +
- -9047 -19956 -30865 0  +
- -9047 -19956 -30865 0)
-Beginning VICAR task genthis
- GENTHIS VERSION 2
- GENTHIS TASK COMPLETED
-
-! both versions of F2 were compiled with the 
-! #define FORTRAN_OPTIONS -C
-! option
-
-! this one is the new code:
-f2 (a b) c fun="in1+in2"
+f2 a a1 'real func="0.9*in1"
 Beginning VICAR task f2
-F2 version 12-Oct-06
-F2 using hash table lookup
-FUNCTION EVALUATED 13 TIMES
-
-! this one is the old code:
-f2 (test_solos/a test_solos/b) c fun="in1+in2"
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 10000 TIMES
+f2 a a2 'real func="0.9*in1" excl=0.0
 Beginning VICAR task f2
-F2 version 2-04-94
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 10000 TIMES
+f2 (a1 a2) d fun="in1-in2"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 10000 TIMES
+hist d 'nohis
+Beginning VICAR task hist
+*** HIST version 17 Dec 2012 ***
+
+
+AVERAGE GRAY LEVEL=0.000000       STANDARD DEVIATION=0.000000       NUMBER ELEMENTS=     10000
+MIN. DN=0.000000
+MAX. DN=0.000000
+
+gen tiny.img 6 6 'real ival=1.0e-8 sinc=1.0e-9 linc=1.0e-9
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list tiny.img
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:48 2015
+     Samp             1           2           3           4           5           6
+   Line
+      1       1.000E-08   1.100E-08   1.200E-08   1.300E-08   1.400E-08   1.500E-08
+      2       1.100E-08   1.200E-08   1.300E-08   1.400E-08   1.500E-08   1.600E-08
+      3       1.200E-08   1.300E-08   1.400E-08   1.500E-08   1.600E-08   1.700E-08
+      4       1.300E-08   1.400E-08   1.500E-08   1.600E-08   1.700E-08   1.800E-08
+      5       1.400E-08   1.500E-08   1.600E-08   1.700E-08   1.800E-08   1.900E-08
+      6       1.500E-08   1.600E-08   1.700E-08   1.800E-08   1.900E-08   2.000E-08
+f2 tiny.img logtiny.img func="alog10(in1)"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 36 TIMES
+list logtiny.img
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:48 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:48 2015
+     Samp             1           2           3           4           5           6
+   Line
+      1      -8.000E+00  -7.959E+00  -7.921E+00  -7.886E+00  -7.854E+00  -7.824E+00
+      2      -7.959E+00  -7.921E+00  -7.886E+00  -7.854E+00  -7.824E+00  -7.796E+00
+      3      -7.921E+00  -7.886E+00  -7.854E+00  -7.824E+00  -7.796E+00  -7.770E+00
+      4      -7.886E+00  -7.854E+00  -7.824E+00  -7.796E+00  -7.770E+00  -7.745E+00
+      5      -7.854E+00  -7.824E+00  -7.796E+00  -7.770E+00  -7.745E+00  -7.721E+00
+      6      -7.824E+00  -7.796E+00  -7.770E+00  -7.745E+00  -7.721E+00  -7.699E+00
+f2 (/project/test_work/testdata/sitod1/test_data/gll/s0412460345.sos  +
+ /project/test_work/testdata/sitod1/test_data/gll/0345.sos)  +
+ d fun="in1-in2"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
 F2 using hash table lookup
-[TAE-PRCSTRM] Abnormal process termination; process status code = 6.
+FUNCTION EVALUATED 16370 TIMES
+hist d 'nohis
+Beginning VICAR task hist
+*** HIST version 17 Dec 2012 ***
+
+
+AVERAGE GRAY LEVEL=-3.12E-6       STANDARD DEVIATION=0.001768       NUMBER ELEMENTS=    640000
+MIN. DN=        -1
+MAX. DN=         0
+
+f2 (/project/test_work/testdata/sitod1/test_data/gll/s0412460345.sos  +
+ /project/test_work/testdata/sitod1/test_data/gll/0345.sos)  +
+ d fun="in1-in2" excl=0.0
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 16363 TIMES
+hist d 'nohis
+Beginning VICAR task hist
+*** HIST version 17 Dec 2012 ***
+
+
+AVERAGE GRAY LEVEL=-3.12E-6       STANDARD DEVIATION=0.001768       NUMBER ELEMENTS=    640000
+MIN. DN=        -1
+MAX. DN=         0
+
+gen x1 nl=10 ns=10 'half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+F2 INP=(x1) OUT=x2 FUNCTION="IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN+
+1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+I+
+N1+IN1+IN1+IN1"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 19 TIMES
+list x2
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:48 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:48 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         0    62   124   186   248   310   372   434   496   558
+      2        62   124   186   248   310   372   434   496   558   620
+      3       124   186   248   310   372   434   496   558   620   682
+      4       186   248   310   372   434   496   558   620   682   744
+      5       248   310   372   434   496   558   620   682   744   806
+      6       310   372   434   496   558   620   682   744   806   868
+      7       372   434   496   558   620   682   744   806   868   930
+      8       434   496   558   620   682   744   806   868   930   992
+      9       496   558   620   682   744   806   868   930   992  1054
+     10       558   620   682   744   806   868   930   992  1054  1116
+F2 INP=(x1) OUT=x2 FUNCTION="IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1"  +
+  FU2="+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1"  +
+  FU3="+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1"  +
+  FU4="+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+
++IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1+IN1"
+Beginning VICAR task F2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 19 TIMES
+list x2
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Aug  3 14:01:48 2015
+ Task:F2        User:wlb       Date_Time:Mon Aug  3 14:01:49 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         0   248   496   744   992  1240  1488  1736  1984  2232
+      2       248   496   744   992  1240  1488  1736  1984  2232  2480
+      3       496   744   992  1240  1488  1736  1984  2232  2480  2728
+      4       744   992  1240  1488  1736  1984  2232  2480  2728  2976
+      5       992  1240  1488  1736  1984  2232  2480  2728  2976  3224
+      6      1240  1488  1736  1984  2232  2480  2728  2976  3224  3472
+      7      1488  1736  1984  2232  2480  2728  2976  3224  3472  3720
+      8      1736  1984  2232  2480  2728  2976  3224  3472  3720  3968
+      9      1984  2232  2480  2728  2976  3224  3472  3720  3968  4216
+     10      2232  2480  2728  2976  3224  3472  3720  3968  4216  4464
+End-proc
 $ Return
 $!#############################################################################

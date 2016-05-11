@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module galsos
-$! VPACK Version 1.9, Monday, April 23, 2012, 21:23:49
+$! VPACK Version 2.1, Saturday, February 13, 2016, 00:49:16
 $!
 $! Execute by entering:		$ @galsos
 $!
@@ -165,7 +165,7 @@ $ vpack galsos.com -mixed -
 	-p galsos.pdf -
 	-d get_ssi_ph2_prefix.hlp gll_ssi_bin.hlp gllcalname.hlp -
 	   get_ssi_prefix.hlp gll_ssi_bin_ph2.hlp -
-	-t tstgalsos.pdf tstgalsos.log_solos tstgalsos.log_linux
+	-t tstgalsos.pdf tstgalsos_lin32.log tstgalsos_lin64.log
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -364,7 +364,7 @@ void main44()
        gll.rad_fn[i] = '\0';
        gll.dc_fn[i]  = '\0';
   }
-  zvmessage(" GALSOS version 19-Jul-11","");
+  zvmessage(" GALSOS version 2016-02-13","");
   debug = zvptst("DEBUG");
 	/* Open input and get label & data information */
   ind = openinp(&iunit,&badlabel,&blemcor,&sflag,&nl,&ns,&nlb,
@@ -2234,9 +2234,9 @@ ssi_bdvh_typ *lfw;	/* LFWP bad-data-record		*/
      if (lfw_flag[(zap_index->samp-1)]) zap_index->sat_dn=0;
      if (zap_index->sat_dn != 0) { 
 	current_pixel = current_line + zap_index->samp - 1;
-	if (((int) (*current_pixel) > zap_index->sat_dn) && 
-	   (ss1 <= zap_index->samp) && (es1 >= zap_index->samp) ||
-	   (ss2 <= zap_index->samp) && (es2 >= zap_index->samp)) {
+	if ((((int) (*current_pixel) > zap_index->sat_dn) && 
+	     (ss1 <= zap_index->samp) && (es1 >= zap_index->samp)) ||
+	    ((ss2 <= zap_index->samp) && (es2 >= zap_index->samp))) {
 	      lfw_flag[(zap_index->samp-1)] = TRUE;
 	      zap_index->sat_dn = 0;
 	      if (ounit >= 0)
@@ -7140,162 +7140,94 @@ The values for G29 are from Klaasen's memo, Feb 11, 2002.
 The current system gain constants are from a memo by Klaasen dated April 1992.
 
 Revisions:
-  13 Dec 10   LWK  Revised pgm to work on PDS REDRs only.
-  22 Feb 02   GMY  Add reflectance and radiance coversion tables for G29.
-  19 MAY 99   HBM           Update help for UBWC and IOF
-  26 Oct 98   GMY           Extract solar range from label or SPICE.
-  13 AUG 98...R.R.PATEL.....REMOVED TRANS_BLEM SINCE IT WAS CAUSING PROBLEM
-                            ON VMS. IT IS NOW REPLACED WITH ZVREAD (REFER TO
-                            AR-100482).
-  30 MAR 98...R.R.PATEL.....UPDATED TO WORK WITH SUMMATION MODE FLIGHT-IMAGES
-                            WITH NO BINARY HEADER.
-   7 Dec 97   G. Yagi       Update radiance scale to Nov 18 memo
-  30 APR 97...R.R.PATEL.....REMOVED THE CHECK FOR HISTORY LABEL ENTROPY AND
-                            ADDED CHECK TO SEE IF BADLABELS HAS BEEN RUN ON
-                            INPUT.
-   7 Feb 97   G. Yagi	    Correct call to zlget to retrieve ENTROPY from
-                            label (FR 89917)
-  14 Aug 96   G. Yagi	    Add SSI readout mode to call to GLLCALNAME
-                            (FR 89118)
-   1 Jul 96   G. Yagi       Update Gaspra reflectance/radiance scale factors
-  21 Jun 95   G. Yagi       Fix badlabels (FR 85892)
-                            Modify so it compiles when Sybase is not available.
-  10 May 95   G. Yagi       Update reflectivity and radiance constants as per
-                            Klaasen memo dated May 8 1995 (FR 85151).
-  10 Apr 95   G. Yagi       Check for invalid SEGMENTS field in Ph2 UDRs
-                                (FR 85642).
-  27 Mar 95   G. Yagi       Fix bug getting PICSCALE for halfword DC (FR 85641).
-  10 Mar 95   G. Yagi       More Phase2 changes
-  18 Nov 94   T. Truong	    Added PhaseII and Sybase interface
-                            Removed support for XED telemetry format
-   5 May 94   G. Yagi       Recognize Ida as a target (FR 85136).
-  15 Dec 93   G. Yagi       Skip blemish removal if line is missing (FR 81894).
-  13 Dec 93   G. Yagi       Changed to accept 800x800 summation-mode dark
-                            current files (FR 81876).
-                            Changed to extract last instance of PICSCALE in the
-                            VICAR label (FR 81877).
-                            Increase blemish file size to 10,000.
-  03 Aug 93   G. Yagi       Added Ida and Moon as valid targets (FR 81828)
-  13 Jul 93   G. Yagi       Fixed low-full-well bug (FR 81855)
-                            Store FTLTORAD and FTLTOIOF in catalog (FR 81826)
-                            Get SCLK from ABLE86 (FR 81747)
-  04 Sep 92...W. Lee........Resolved Catalog probelm (FR #75744)
-  02 Sep 92...W. Lee........Fixed Entropy calculation for Reed-Solomon UDR
-                            (FR #76878)
-  08 Jul 92...W. Lee........Fixed "White Spot" troubles associated with 
-                            GLLBLEMCORed REDR (FR #75754 -- GLLBLEMCOR)
-  02 Jul 92...W. Lee........Removed Gain-Constant-Ratio dependency in Radio-
-                            metric correction (FR #76877)
-  30 Jun 92...W. Lee........Removed Reed-Solomon Overflows from Entropy Cal-
-                            culations (FR #76878)
-  25 Jun 92...W. Lee........Disabled the usage of Reed-Solomon Overflow for
-                            LFW corrections (FR #75724)
-  15 Jun 92...W. Lee........Restructured Input Logical Mechanism for Cali-
-                            bration Files (FR #75726)
-  10 Jun 92...W. Lee........Added informative messages about the loading of
-                            the SSI_CORRECTED catalogue (FR #75744) 
-  01 Jun 92...G. Yagi.......Major upgrade to help file.  
-  25 Feb 92...W. Lee........Miscellaneous Upgrades:  (NO FRs !)
-                            Updated HELPs, Included EXT for calibration 
-                            files in Label, Rejected Input if it is a BLEM-
-                            ished UDR etc.  
-  25 Feb 92...W. Lee........Implemented the "Consolidated Slope" approach
-                            ONLY for the RADIOMETRIC mode (FR #68966)
-  18 Feb 92...W. Lee........Removed large discrepancies among EDRs generated 
-                            via different "routes" (FR #73797)
-  12 Feb 92...W. Lee........Updated Gain Ratios to the 1991 values
-                            (FR #66567)
-  07 Feb 92...W. Lee........Resolved problem associated with the "GLLBLEMCOR" 
-                            message (FR #73795)  
-  05 Feb 92...W. Lee........Resolved DIR & DISK issue for CALIBRATION file in
-                            association with the RADIOMETRIC mode (FR #73800)
-  24 Jan 92...W. Lee........Fixed DEV crash problem  (FR #73782)
-  27 Dec 91...W. Lee........Changed "BLM" Label insertion so that output EDR can
-                            be processed by BADSHOW (FR #73714)
-  16 Dec 91...W. Lee........Modified to correctly verify BADLABEL & GLLBLEMCOR
-                            processings for an input CDROM REDR (FR #70966)
-  14 Nov 91...W. Lee........Closed FR #70937 with NO software corrections 
-  07 Nov 91...W. Lee........Incorporated PCA Capability
-  28 Oct 91...W. Lee........ON-OFF changed to UBWC-NOUBWC (#70927)
-  28 Oct 91...W. Lee........All References to VIO changed to VLT (FR #70926)
-  07 Oct 91...W. Lee........Added a preceding statement about the 'DISALLOW 
-                            keyword (FR #70928)
-  30 Aug 91...W. Lee........Conversion Factors depend on Mission PHASE
-                            (FR #70924)
-  30 Aug 91...W. Lee........Fixed Empty Blank problem for OFFSET in binary
-                            header (FR # 70925)
-  14 Aug 91...W. Lee........Fixed Ground Summation problem (FR #70904)
-  09 Aug 91...W. Lee........Updated Conversion Factors based on latest memo
-                            by K. Klaasen (FR #70902)
-  30 Jul 91...W. Lee........Implemented modifications to process REDR image
-                            (SCR #B071)
-  24 Jun 91...W. Lee........Put Dark-Current file in the OFFSET location in
-                            Binary Header (FR #66503)
-  10 Jun 91...W. Lee........Added Radiometric Table Interface for Calibration
-                            Files extraction
-  05 Jun 91...W. Lee........Changed "ON/OFF" to "UBWC/NOUBWC" for Bit-Weighting
-                            (LKW320 Mail, dated June-04-91) 
-  17 May 91...W. Lee........Added "RS_OVERFLOW" BDV in Binary Header
-                            (IOM 384-91-3 by GMY, dated May-14-91, FR #63282)
-  07 May 91...W. Lee........Set Edr_Status = 1 (= On DISK) in Corrected Table
-                            (FR #68831) 
-  30 Apr 91...W. Lee........Implemented Independent Directories for Calibra-
-                            tion Files (FR #68858)
-  25 Apr 91...W. Lee........Updated Filter Paramters for Venus and Earth-1
-                            Mission (FR #64651) 
-  09 Apr 91...W. Lee........Added "GALSOS_DONE" in Overview Table (FR #64653)
-  02 Apr 91...W. Lee........Added GASPRA to TARGET (FRs #64650 & 66673)
-                            If TARGET is NOT specified by User, pull the Target
-                            name from VICAR label
-  01 Apr 91...W. Lee........Disabled Frame-Rate inconsistency check between
-                            input Image and Blemish file (FR #64617)
-  31 Mar 91...W. Lee........Moved ground calibration parameters to the bottom
-                            of the PDF parameter list (FR #66589)
-  30 Nov 90...A.Runkle......Changed VICAR label keyword ENTRPY to ENTROPY
-  11 Nov 90...A.Runkle......Changed parameters so GALSOS can run in a
-                            proceedure properly
-                            Added assignment of RAW_VERSION in catalog update
-                            Added Blemish file checks for filter, gain & rate
-                            Corrects summation mode usage of shutter offset
-                            file
-  30 Oct 90...G.Yagi........Adjusted filter factors for optics cover
-  04 Oct 90...A.Runkle......Changed NOCAT parameter to CATALOG and added a
-                            a new default & new values
-                            Changed IOF and CONV parameters to SCALETYP and
-                            SCALEVAL for easier use in procs.
-  23 Aug 90...A.Runkle......Test script update
-                            Replace SOLRANGE when TARGET specified
-  15 Jul 90...A.Runkle......Changed locdation of closing files
-                            Added another status check in catalog code
-  01 Jun 90...A.Runkle......Added PENTROPY keyword & printing code
-  25 Apr 90...A.Runkle......Added NOCAT keyword & catalog entry code
-                            Added BADFILES keyword & bypass code
-                            Changed QPRINTS to XVMESSAGE
-                            Corrected GLLCALNAME call for shutter offset file
-  29 Mar 90...A.Runkle......Added TARGET keyword
-                            Corrected variable declaration and usage
-                            Fixed GLLCALNAME parameter list
-  14 Feb 90...A.Runkle......Corrected algorithm for calculating A1 & A2 values
-                            Added entropy calculations
-  26 Oct 89...A.Runkle......Corrected test script
-                            New ABLE86 parameter structure
-  14 Jul 89...A.Runkle......Support Bad Data Value records
-  28 Mar 89...A.Runkle......Support flight data (binary headers)
-  12 Mar 89...G.Yagi........Delete halfword input capability.
-  08 Mar 89...G.Yagi........Add uneven-bit-weight correction option.
-  01 Nov 88...G.Yagi........Fix S1 and S2 conversion tables.
-  26 OCT 88...G.Yagi........Fix check for summation mode offsets.
-  20 OCT 88...G.Yagi........Fixed EXPOSURE parameter.
-  28 MAY 88...G.Yagi........Minor changes to help file (FR #36087).
-                            Add processing of double-column blemishes
-                            Add CGAIN, DCGAIN parameters
-  01 APR 88...G.Yagi........Scale output DN to radiometric units
-  10 Dec 87...G.Yagi........New radiometric and offset file formats
-  18 May 87...G.Yagi........Do scaling in DECAL subroutine
-  20 Mar 86...G.M.YAGI......Assembler MDECAL1 & MDECAL2
-  15 MAY 85...D.F.STANFILL..NEW VERSION WITH BLEMGEN IN VAX C
-  24 OCT 84...G.M.YAGI......CONVERSION TO VAX VICAR*2
-  20 APR 84...M.E.MORRILL...REWRITTEN IN VAX FORTRAN VICAR1*
+  1984-04-20 M.E.Morrill Rewritten in VAX FORTRAN VICAR1*
+  1984-10-24 G.M.Yagi Conversion to VAX VICAR*2
+  1985-05-15 D.F.Stanfill New version with blemgen in VAX C
+  1986-03-20 G.M.Yagi Assembler MDECAL1 & MDECAL2
+  1987-05-18 G.Yagi   Do scaling in DECAL subroutine
+  1987-12-10 G.Yagi   New radiometric and offset file formats
+  1988-04-01 G.Yagi   Scale output DN to radiometric units
+  1988-05-28 G.Yagi   Minor changes to help file (FR #36087). Add processing of double-column blemishes Add CGAIN, DCGAIN parameters
+  1988-10-20 G.Yagi   Fixed EXPOSURE parameter.
+  1988-10-26 G.Yagi   Fix check for summation mode offsets.
+  1988-11-01 G.Yagi   Fix S1 and S2 conversion tables.
+  1989-03-08 G.Yagi   Add uneven-bit-weight correction option.
+  1989-03-12 G.Yagi   Delete halfword input capability.
+  1989-03-28 A.Runkle Support flight data (binary headers)
+  1989-07-14 A.Runkle Support Bad Data Value records
+  1989-10-26 A.Runkle Corrected test script. New ABLE86 parameter structure
+  1990-02-14 A.Runkle Corrected algorithm for calculating A1 & A2 values. Added entropy calculations
+  1990-03-29 A.Runkle Added TARGET keyword. Corrected variable declaration and usage. Fixed GLLCALNAME parameter list
+  1990-04-25 A.Runkle Added NOCAT keyword & catalog entry code. Added BADFILES keyword & bypass code. Changed QPRINTS to XVMESSAGE. Corrected GLLCALNAME call for shutter offset file
+  1990-06-01 A.Runkle Added PENTROPY keyword & printing code
+  1990-07-15 A.Runkle Changed locdation of closing files. Added another status check in catalog code.
+  1990-08-23 A.Runkle Test script update. Replace SOLRANGE when TARGET specified.
+  1990-10-04 A.Runkle Changed NOCAT parameter to CATALOG and added a new default & new values. Changed IOF and CONV parameters to SCALETYP and SCALEVAL for easier use in procs.
+  1990-10-30 G.Yagi   Adjusted filter factors for optics cover
+  1990-11-11 A.Runkle Changed parameters so GALSOS can run in a proceedure properly. Added assignment of RAW_VERSION in catalog update. Added Blemish file checks for filter, gain & rate. Corrects summation mode usage of shutter offset file.
+  1990-11-30 A.Runkle Changed VICAR label keyword ENTRPY to ENTROPY
+  1991-03-31 W. Lee   Moved ground calibration parameters to the bottom of the PDF parameter list (FR #66589)
+  1991-04-01 W. Lee   Disabled Frame-Rate inconsistency check between input Image and Blemish file (FR #64617)
+  1991-04-02 W. Lee   Added GASPRA to TARGET (FRs #64650 & 66673) If TARGET is NOT specified by User, pull the Target name from VICAR label
+  1991-04-09 W. Lee   Added "GALSOS_DONE" in Overview Table (FR #64653)
+  1991-04-25 W. Lee   Updated Filter Paramters for Venus and Earth-1 Mission (FR #64651) 
+  1991-04-30 W. Lee   Implemented Independent Directories for Calibration Files (FR #68858)
+  1991-05-07 W. Lee   Set Edr_Status = 1 (= On DISK) in Corrected Table (FR #68831) 
+  1991-05-17 W. Lee   Added "RS_OVERFLOW" BDV in Binary Header (IOM 384-91-3 by GMY, dated May-14-91, FR #63282)
+  1991-06-05 W. Lee   Changed "ON/OFF" to "UBWC/NOUBWC" for Bit-Weighting (LKW320 Mail, dated June-04-91) 
+  1991-06-10 W. Lee   Added Radiometric Table Interface for Calibration Files extraction
+  1991-06-24 W. Lee   Put Dark-Current file in the OFFSET location in Binary Header (FR #66503)
+  1991-07-30 W. Lee   Implemented modifications to process REDR image (SCR #B071)
+  1991-08-09 W. Lee   Updated Conversion Factors based on latest memo by K. Klaasen (FR #70902)
+  1991-08-14 W. Lee   Fixed Ground Summation problem (FR #70904)
+  1991-08-30 W. Lee   Fixed Empty Blank problem for OFFSET in binary header (FR # 70925)
+  1991-08-30 W. Lee   Conversion Factors depend on Mission PHASE (FR #70924)
+  1991-10-07 W. Lee   Added a preceding statement about the 'DISALLOW keyword (FR #70928)
+  1991-10-28 W. Lee   All References to VIO changed to VLT (FR #70926)
+  1991-10-28 W. Lee   ON-OFF changed to UBWC-NOUBWC (#70927)
+  1991-11-07 W. Lee   Incorporated PCA Capability
+  1991-11-14 W. Lee   Closed FR #70937 with NO software corrections 
+  1991-12-16 W. Lee   Modified to correctly verify BADLABEL & GLLBLEMCOR processings for an input CDROM REDR (FR #70966)
+  1991-12-27 W. Lee   Changed "BLM" Label insertion so that output EDR can be processed by BADSHOW (FR #73714)
+  1992-01-24 W. Lee   Fixed DEV crash problem  (FR #73782)
+  1992-02-05 W. Lee   Resolved DIR & DISK issue for CALIBRATION file in association with the RADIOMETRIC mode (FR #73800)
+  1992-02-07 W. Lee   Resolved problem associated with the "GLLBLEMCOR" message (FR #73795)  
+  1992-02-12 W. Lee   Updated Gain Ratios to the 1991 values (FR #66567)
+  1992-02-18 W. Lee   Removed large discrepancies among EDRs generated via different "routes" (FR #73797)
+  1992-02-25 W. Lee   Implemented the "Consolidated Slope" approach ONLY for the RADIOMETRIC mode (FR #68966)
+  1992-02-25 W. Lee   Miscellaneous Upgrades:  (NO FRs !) Updated HELPs, Included EXT for calibration files in Label, Rejected Input if it is a BLEMished UDR etc.  
+  1992-06-01 G. Yagi  Major upgrade to help file.  
+  1992-06-10 W. Lee   Added informative messages about the loading of the SSI_CORRECTED catalogue (FR #75744) 
+  1992-06-15 W. Lee   Restructured Input Logical Mechanism for Calibration Files (FR #75726)
+  1992-06-25 W. Lee   Disabled the usage of Reed-Solomon Overflow for LFW corrections (FR #75724)
+  1992-06-30 W. Lee   Removed Reed-Solomon Overflows from Entropy Calculations (FR #76878)
+  1992-07-02 W. Lee   Removed Gain-Constant-Ratio dependency in Radiometric correction (FR #76877)
+  1992-07-08 W. Lee   Fixed "White Spot" troubles associated with GLLBLEMCORed REDR (FR #75754 -- GLLBLEMCOR)
+  1992-09-02 W. Lee   Fixed Entropy calculation for Reed-Solomon UDR (FR #76878)
+  1992-09-04 W. Lee   Resolved Catalog probelm (FR #75744)
+  1993-07-13 G. Yagi  Fixed low-full-well bug (FR 81855). Store FTLTORAD and FTLTOIOF in catalog (FR 81826). Get SCLK from ABLE86 (FR 81747)
+  1993-08-03 G. Yagi  Added Ida and Moon as valid targets (FR 81828)
+  1993-12-13 G. Yagi  Changed to accept 800x800 summation-mode dark current files (FR 81876). Changed to extract last instance of PICSCALE in the VICAR label (FR 81877). Increase blemish file size to 10,000.
+  1993-12-15 G. Yagi  Skip blemish removal if line is missing (FR 81894).
+  1994-05-05 G. Yagi  Recognize Ida as a target (FR 85136).
+  1994-11-18 T. Truong Added PhaseII and Sybase interface. Removed support for XED telemetry format.
+  1995-03-10 G. Yagi  More Phase2 changes
+  1995-03-27 G. Yagi  Fix bug getting PICSCALE for halfword DC (FR 85641).
+  1995-04-10 G. Yagi  Check for invalid SEGMENTS field in Ph2 UDRs (FR 85642).
+  1995-05-10 G. Yagi  Update reflectivity and radiance constants as per Klaasen memo dated May 8 1995 (FR 85151).
+  1995-06-21 G. Yagi  Fix badlabels (FR 85892) Modify so it compiles when Sybase is not available.
+  1996-07-01 G. Yagi  Update Gaspra reflectance/radiance scale factors
+  1996-08-14 G. Yagi  Add SSI readout mode to call to GLLCALNAME (FR 89118)
+  1997-02-07 G. Yagi  Correct call to zlget to retrieve ENTROPY from label (FR 89917)
+  1997-04-30 R.R.Patel Removed the check for history label entropy and added check to see if badlabels has been run on input.
+  1997-12-07 G. Yagi  Update radiance scale to Nov 18 memo
+  1998-03-30 R.R.Patel Updated to work with summation mode flight-images with no binary header.
+  1998-08-13 R.R.Patel Removed trans_blem since it was causing problem on VMS. It is now replaced with zvread (refer to AR-100482).
+  1998-10-26 GMY      Extract solar range from label or SPICE.
+  1999-05-19 HBM      Update help for UBWC and IOF
+  2002-02-22 GMY      Add reflectance and radiance coversion tables for G29.
+  2010-12-13 LWK      Revised pgm to work on PDS REDRs only.
+  2016-02-13 WLB      Added test logs for 32 and 64-bit Linux.
 
 .LEVEL1
 .VARIABLE INP
@@ -8042,6 +7974,8 @@ refgbl $syschar
 refgbl $autousage
 body
 
+enable-log
+
 local PATH1 TYPE=STRING init="/project/test_work/testdata/gll/"
 
 let _onfail="stop"
@@ -8060,16 +7994,17 @@ hist d 'nohist
 !       - file vlt3f.blm was downloaded from PDS file vlt3f_blm02.img and renamed.
 !
 
+disable-log
+
 end-proc
 $!-----------------------------------------------------------------------------
-$ create tstgalsos.log_solos
-tstgalsos
+$ create tstgalsos_lin32.log
 let $autousage="none"
 galsos /project/test_work/testdata/gll/7213r.img 7213.cal dircal=/p+
 roject/test_work/testdata/gll/ diroff=/project/test_work/testdata/gll/   dirdc=/project/test_work/testdata/gll/ dirblm=/project/tes+
 t_work/testdata/gll/
 Beginning VICAR task galsos
- GALSOS version 19-Jul-11
+ GALSOS version 2016-02-13
 Solar range from image label=752771968.0
 
  
@@ -8091,40 +8026,27 @@ Solar range from image label=752771968.0
  GALSOS task completed
 f2 (7213.cal /project/test_work/testdata/gll/7213.cal) d func="in1-in2"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 3153 TIMES
 hist d 'nohist
 Beginning VICAR task hist
-HIST version 11-SEP-11
+*** HIST version Aug 10 2015 ***
 
 
-AVERAGE GRAY LEVEL=0.000000       STANDARD DEVIATION=0.000000       NUMBER ELEMENTS=  640000
+AVERAGE GRAY LEVEL=0.000000       STANDARD DEVIATION=0.000000       NUMBER ELEMENTS=    640000
 MIN. DN=         0
 MAX. DN=         0
 
-end-proc
-exit
-slogoff
-if ($RUNTYPE = "INTERACTIVE")
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-else
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-end-if
-ulogoff
-END-PROC
-END-PROC
+disable-log
 $!-----------------------------------------------------------------------------
-$ create tstgalsos.log_linux
-tstgalsos
+$ create tstgalsos_lin64.log
 let $autousage="none"
 galsos /project/test_work/testdata/gll/7213r.img 7213.cal dircal=/p+
 roject/test_work/testdata/gll/ diroff=/project/test_work/testdata/gll/   dirdc=/project/test_work/testdata/gll/ dirblm=/project/tes+
 t_work/testdata/gll/
 Beginning VICAR task galsos
- GALSOS version 19-Jul-11
+ GALSOS version 2016-02-13
 Solar range from image label=752771968.0
 
  
@@ -8146,30 +8068,18 @@ Solar range from image label=752771968.0
  GALSOS task completed
 f2 (7213.cal /project/test_work/testdata/gll/7213.cal) d func="in1-in2"
 Beginning VICAR task f2
-F2 version 26-Jul-11
+F2 version 98-Aug-2015
 F2 using hash table lookup
 FUNCTION EVALUATED 3156 TIMES
 hist d 'nohist
 Beginning VICAR task hist
-HIST version 27-JUL-11
+*** HIST version Aug 10 2015 ***
 
 
-AVERAGE GRAY LEVEL=0.000002       STANDARD DEVIATION=0.002165       NUMBER ELEMENTS=  640000
+AVERAGE GRAY LEVEL=0.000002       STANDARD DEVIATION=0.002165       NUMBER ELEMENTS=    640000
 MIN. DN=        -1
 MAX. DN=         1
 
-end-proc
-exit
-slogoff
-if ($RUNTYPE = "INTERACTIVE")
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-else
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-end-if
-ulogoff
-END-PROC
-END-PROC
+disable-log
 $ Return
 $!#############################################################################

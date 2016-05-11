@@ -20,9 +20,9 @@
 #define SystemV           YES
 
 #define HaveTerminalLibrary no
-#define AnsiCCmd gcc
-#define CcCmd gcc
-#define FortranCmd gfortran -fno-second-underscore -std=legacy -ffixed-line-length-none -fPIC
+#define AnsiCCmd gcc44
+#define CcCmd gcc44
+#define FortranCmd gfortran44 -fno-second-underscore -std=legacy -ffixed-line-length-none -fPIC
 #define ExtraCFlags -fPIC
 
 #define InstallCmd install

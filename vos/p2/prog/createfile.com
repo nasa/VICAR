@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module createfile
-$! VPACK Version 1.8, Thursday, January 09, 1997, 16:32:28
+$! VPACK Version 1.9, Thursday, November 19, 2015, 15:00:27
 $!
 $! Execute by entering:		$ @createfile
 $!
@@ -125,10 +125,10 @@ $!#############################################################################
 $Repack_File:
 $ create createfile.repack
 $ DECK/DOLLARS="$ VOKAGLEVE"
-$ vpack createfile.com -
+$ vpack createfile.com -mixed -
 	-i createfile.imake -
 	-p createfile.pdf -
-	-t tstcreatefile.pdf
+	-t tstcreatefile.pdf tstcreatefile.log
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -143,24 +143,17 @@ $PDF_File:
 $ create createfile.pdf
 PROCEDURE help=*
   PARM INPUT    TYPE=STRING
+refgbl $echo
 BODY
+let $echo="no"
 refgbl  $syschar
-write "CREATEFILE version 1-3-97"
-!
-!  IF  VMS 
-if ($syschar(1) = "VAX_VMS")
-  DCL open/write FILENAMES &INPUT
-  DCL close FILENAMES
-!
-!      UNIX: COPY the old empty file.
-else
-  USH cp /dev/null  &INPUT
+write "CREATEFILE version 2015-11-19"
 
-end-if  
+USH cp /dev/null  &INPUT
 
 !# annot function="VICAR Utilities"
 !# annot keywords=("empty file")
-
+!let $echo="yes"
 END-PROC
 .TITLE
 TAE proc to create an empty file
@@ -175,11 +168,24 @@ EXECUTION:
  createfile filename 
 
  where filename is the name to be given to the empty file created.
- 
+
+ This command is normally used to create an ascii text file within
+ a vicar procedure in cases where certain processing steps provide
+ output that needs to go into a table. Most commonly it is used
+ to create a list of file names or items that are an output from
+ a series of files.
+
+ To add items to the created empty file, use add2file. 
+
+
 REVISION HISTORY:
-   06-1-89  HBM   Initial release.
-   01-2-97  SP    Made a UNIX version and a TCL procedure to call either the
-                  DCL version or the UNIX version.
+   1989-06-01 HBM        Initial release.
+   1997-01-02 SP         Made a UNIX version and a TCL procedure to call either the
+                         DCL version or the UNIX version.
+   2013-08-11 R. Bambery Updated documentation and removed unnecessary
+                         text from output.
+   2015-11-19 W. Bunch   Removed VMS support. Added test log to com.
+
 .level1
 .vari input
 Name to be given to the 
@@ -197,26 +203,68 @@ $ create tstcreatefile.pdf
 procedure
 !
 ! To get a full log, you have to do tricks, such as cutting from an xterm window
-!or running the UNIX 'script' cmd since type and cat do not go into session.log.
+! or running the UNIX 'script' cmd since type and cat do not go into session.log.
 !
 refgbl $echo
 refgbl $syschar
 local  diskdir string
 body
-let _onfail="continue"
+let $echo="no"
+
+let _onfail="goto rm"
+defcmd typeit "ush cat"
 let $echo="yes"
-if ($syschar(1) = "UNIX")
-  defcmd typeit "ush cat"
-else
-  defcmd typeit "dcl type"
-end-if
 !
+
 createfile add1.dat1
+
 typeit     add1.dat1
+let $echo="no"
+write "Overwriting file add1.dat1"
+let $echo="yes"
 ! See if it works if file already exists.
+
 createfile add1.dat1
+
 typeit     add1.dat1
+
 !
+rm>
+delcmd typeit
+let $echo="no"
 end-proc
+
+$!-----------------------------------------------------------------------------
+$ create tstcreatefile.log
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+createfile add1.dat1
+let $echo="no"
+CREATEFILE version 2015-11-19
+Overwriting file add1.dat1
+createfile add1.dat1
+let $echo="no"
+CREATEFILE version 2015-11-19
 $ Return
 $!#############################################################################

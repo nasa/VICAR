@@ -212,6 +212,9 @@ if ($?LD_LIBRARY_PATH != 0) then
       if ($?XERCES_C_ROOT != 0) then
          setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" ${XERCES_C_ROOT}/\*`
       endif
+      if ($?FFTWLIB != 0) then
+         setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" ${FFTWLIB}/\*`
+      endif
       if ($?INVENTOR_ROOT != 0) then
          setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" ${INVENTOR_ROOT}/\*`
       endif
@@ -850,7 +853,7 @@ unsetenv VRDIDIB
 # Note that Java is special; V2JDK is NOT relative to these env vars!
 #
 if ($?V2EXTERNAL == 0) then
-   setenv V2EXT $V2TOP/../external
+   setenv V2EXT $V2TOP/external
 else
    setenv V2EXT $V2EXTERNAL
 endif
@@ -1043,13 +1046,24 @@ unsetenv PDS_LABEL_LIB
 #-----------------------------------------------------------------------
 #
 # The following defines the TIFF library. The TIFF library  is a set of
-# routines to read/write TIFF files.  It also includes GEOTIFF, and the
-# ZLIB compression library.
+# routines to read/write TIFF files.  It also includes GEOTIFF library.
 #
-setenv	TIFFLIB $V2EXT/tiff/v3.4/$VICCPU 
+setenv	TIFFLIB $V2EXT/tiff/v4.0.6/$VICCPU 
 #
 @else
 unsetenv TIFFLIB
+@endif
+@ifdef EXT_FFTW
+#-----------------------------------------------------------------------
+#
+# The following defines the FFTW library. The FFTW library is a free 
+# collection of fast C routines for computing the Discrete Fourier 
+# Transform in one or more dimensions.
+#
+setenv	FFTWLIB $V2EXT/fftw/v3.3.4/$VICCPU 
+#
+@else
+unsetenv FFTWLIB
 @endif
 @ifdef EXT_SIMBAD
 #-----------------------------------------------------------------------
@@ -1127,9 +1141,9 @@ unsetenv PGPLOT_DIR
 # and/or a $SPICEROOT/c directory containing the appropriate language toolkit.
 #
 if ($VICCPU == 'x86-macosx') then
- setenv SPICEROOT        $V2EXT/spice/v65_gfortran423
+ setenv SPICEROOT	$V2EXT/spice/v65_gfortran423
 else 
- setenv SPICEROOT        $V2EXT/spice/v64_gfortran
+ setenv SPICEROOT	$V2EXT/spice/v65_gfortran44
 endif
 #
 #
@@ -1313,7 +1327,7 @@ unsetenv CANDELAHOME
 # vsnyder@math.jpl.nasa.gov.  This library has been included under the
 # VICAR tree in the past; it was moved to the external category in Feb. 96.
 #
-setenv MATH77LIB	$V2EXT/math77/v5.0_gfortran/lib/$VICCPU
+setenv MATH77LIB	$V2EXT/math77/v5.0_gfortran44/lib/$VICCPU
 #
 @else
 unsetenv MATH77LIB
@@ -1764,8 +1778,8 @@ unsetenv J2_JAI_IIO
 #
 # Package: treevotee 
 # Classification: external
-# Version: v0.9.7p1ee
-# Source: http://w10n-sci.jpl.nasa.gov/download/treevotee-0.9.7p1ee.jar
+# Version: v0.9.9p1ee
+# Source: http://w10n.jpl.nasa.gov/juneberry/download/treevotee-0.9.9p1ee.jar 
 # Description:  
 #  The treevotee package implements the Webification (w10n) API.
 #  In the view of w10n, a resource is a tree of nodes and leaves,
@@ -1773,10 +1787,26 @@ unsetenv J2_JAI_IIO
 #  it uses JSON to exchange meta information. Full ReSTful style
 #  request/response are supported.
 #
-setenv J2_TREEVOTEE $V2EXT/treevotee/v0.9.7p1ee
+setenv J2_TREEVOTEE $V2EXT/treevotee/v0.9.9p1ee
 #
 @else
 unsetenv J2_TREEVOTEE
+@endif
+@ifdef JEXT_JUNAMI
+#-----------------------------------------------------------------------
+#
+# Package: junami
+# Classification: external
+# Version: 0.7.0p1 
+# Source: http://w10n.jpl.nasa.gov/juneberry/download/junami-0.7.0p1.jar
+# Description: Junami helps to normalize file system directories.
+# It is used by Juneberry to webify data products directories. 
+# It is a jar dependency and does not provide any service.
+#
+setenv J2_JUNAMI $V2EXT/junami/v0.7.0p1
+#
+@else
+unsetenv J2_JUNAMI
 @endif
 @ifdef JEXT_LUCENE
 #----------------------------------------------------------------------
@@ -1934,13 +1964,13 @@ unsetenv J2_XERCES
 #
 # Package: Xalan XSLT
 # Classification: external
-# Version: 2.1.0
-# Source: http://xml.apache.org/xalan-j/dist/xalan-j_2_1_0.tar.gz
+# Version: 2.7.2
+# Source:  https://xalan.apache.org/xalan-j/ 
 # Description:
 # An XSL and XPATH processor for Java that transforms XML into HTML, text, or
 # other XML documents under direction of an XSL stylesheet.
 #
-setenv J2_XALAN $V2EXT/xalan/v2.1.0
+setenv J2_XALAN $V2EXT/xalan/v2.7.2
 #
 @else
 unsetenv J2_XALAN
@@ -2434,8 +2464,8 @@ unsetenv J2_JAF
 #
 # Package: JAVA FITS image access library   
 # Classification: external
-# Version: .97
-# Source: http://heasarc.gsfc.nasa.gov/docs/heasarc/fits/java/v0.9/v0.97
+# Version: 1.1.13 
+# Source: http://heasarc.gsfc.nasa.gov/docs/heasarc/fits/java/v1.0
 # Description:
 # A FITS image access library created by Thomas McGlynn of Goddard.
 # nom.tam.fits
@@ -2443,7 +2473,7 @@ unsetenv J2_JAF
 # purpose, non-commercial  or commercial so long as this copyright notice 
 # is retained  in the source code or included in or referred to in any
 # derived software.
-setenv J2_NOM_TAM_FITS $V2EXT/nom_tam_fits/nom_tam_fits-.97
+setenv J2_NOM_TAM_FITS $V2EXT/nom_tam_fits/nom_tam_fits-1.1.13
 #
 @else
 unsetenv J2_NOM_TAM_FITS
@@ -2506,6 +2536,21 @@ setenv J2_JOGL $V2EXT/jogl/v1.1.1_rc8/
 #
 @else
 unsetenv J2_JOGL
+@endif
+@ifdef JEXT_JMONKEYENGINE
+#-----------------------------------------------------------------------
+#
+# Package: JMonkeyEngine (Java 3D Game Engine)
+# Classification: external
+# Version: 3.0 (build 2014-06-12)
+# Source: http://jmonkeyengine.org/
+# jMonkey Engine (jME) is a high-performance 3D game 
+# engine, written entirely in Java, OpenGL is 
+# supported via LWJGL. 
+setenv J2_JMONKEYENGINE $V2EXT/jmonkeyengine/v3.0/
+#
+@else
+unsetenv J2_JMONKEYENGINE
 @endif
 @ifdef JEXT_XAMPLE
 #-----------------------------------------------------------------------
@@ -2817,14 +2862,40 @@ unsetenv J2_SXN
 #-----------------------------------------------------------------------
 # Package:pds_generate_tool
 # Classification: external
-# Version: v0.7.2
-# Source: http://pds.nasa.gov/pds4/software/generate/v1/index-1201.shtml
+# Version: v0.9.1
+# Source: https://starcell.jpl.nasa.gov/maven2/gov/nasa/pds/2010/preparation/generate/0.9.1/
 # Description: Software for generating PDS4 labels from either a PDS3 label 
 # or PDS3-specific Document Object Model (DOM) object.
 #
-setenv J2_PDS_GENERATE_TOOL $V2EXT/pds_generate_tool/v0.7.2/lib
+setenv J2_PDS_GENERATE_TOOL $V2EXT/pds_generate_tool/v0.9.1/lib
 @else
 unsetenv J2_PDS_GENERATE_TOOL
+@endif
+@ifdef JEXT_PDS4_TOOLS
+#-----------------------------------------------------------------------
+# Package:pds4_tools
+# Classification: external
+# Version: v0.5.0
+# Source: https://pds.nasa.gov/pds4/software/pds4-tools/v1/index-1400.shtml
+# Description: Software for accessing PDS4 data objects including selected 
+# transformations to common formats.
+#
+setenv J2_PDS4_TOOLS $V2EXT/pds4_tools/v0.5.0/lib
+@else
+unsetenv J2_PDS4_TOOLS 
+@endif
+@ifdef JEXT_JAI_EXT
+#-----------------------------------------------------------------------
+# Package: jai_ext
+# Classification: external
+# Version: v1.0.3
+# Source: https://github.com/geosolutions-it/jai-ext/wiki/Releases
+# Description: jai-ext is a set of java libraries which are intended to
+# be a replacement for jai. The current use of these libraries is to support 
+# statistics operations on images.  
+setenv J2_JAI_EXT $V2EXT/jai-ext/v1.0.3/jars
+@else
+unsetenv J2_JAI_EXT
 @endif
 @ifdef JEXT_WEBSOCKET
 #-----------------------------------------------------------------------
@@ -2882,12 +2953,12 @@ else
     source $TAE/bin/csh/taesetupmin
     source $TAE/bin/csh/taesetupclassic
     source $TAE/bin/csh/taesetupsrc
-else if (-f $TAE/bin/csh/taesetup) then
+  else if (-f $TAE/bin/csh/taesetup) then
 # version 5.2
     source $TAE/bin/csh/taesetup
-  else 
+  else
     echo "TAE not detected.  In initial build, this is okay.  If not, this is a problem!"
-  endif 
+  endif
 endif
 #
 #
@@ -3067,6 +3138,9 @@ endif
 @ifdef EXT_XERCES_CXX
    setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${XERCES_C_ROOT}/lib
 @endif
+@ifdef EXT_FFTW
+   setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${FFTWLIB}/lib
+@endif
 @ifdef EXT_INVENTOR
    setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${INVENTOR_ROOT}/lib
 @endif
@@ -3162,9 +3236,9 @@ if ("$CLASSPATH" == "") then
 @endif
 else
 @ifdef EXT_CALLABLE_JDK
-    setenv CLASSPATH ${CLASSPATH}:${V2HTML}/jars/\*:${V2HTML}/jars:${V2HTML}/jars/mdms-komodo-client.jar:${V2HTML}/jars/mdms-komodo-lib.jar:${V2HTML}/jars/xercesImpl.jar:${V2HTML}/jars/mdms.jar
+    setenv CLASSPATH "${CLASSPATH}":${V2HTML}/jars/\*:${V2HTML}/jars:${V2HTML}/jars/mdms-komodo-client.jar:${V2HTML}/jars/mdms-komodo-lib.jar:${V2HTML}/jars/xercesImpl.jar:${V2HTML}/jars/mdms.jar
 @else
-    setenv CLASSPATH ${CLASSPATH}:${V2HTML}/jars/\*:${V2HTML}/jars
+    setenv CLASSPATH "${CLASSPATH}":${V2HTML}/jars/\*:${V2HTML}/jars
 @endif
 endif
 @endif

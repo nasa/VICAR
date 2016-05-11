@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module zfill
-$! VPACK Version 1.9, Tuesday, March 16, 2010, 08:41:19
+$! VPACK Version 2.1, Friday, February 12, 2016, 13:04:56
 $!
 $! Execute by entering:		$ @zfill
 $!
@@ -152,7 +152,7 @@ $ vpack zfill.com -mixed -
 	-s zfill.f -
 	-i zfill.imake -
 	-p zfill.pdf -
-	-t tstzfill.pdf
+	-t tstzfill.pdf tstzfill.log
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -214,7 +214,7 @@ C
      +              NLBI,NSBI 
 	LOGICAL QDENSE/.FALSE./,QMASK/.FALSE./,QBINARY
 C							 call for parameters
-        CALL IFMESSAGE('ZFILL version 24-JAN-2001')
+        CALL IFMESSAGE('ZFILL version 2016-02-12')
         CALL XVEACTION('SA',' ')
 	CALL XVPARM('NLW',NLW,ICNT,IDEF,1)
 	CALL XVPARM('NSW',NSW,ICNT,IDEF,1)
@@ -748,11 +748,14 @@ process help=*
 
  WRITTEN BY:  S. Z. Friedman, March 1983
  COGNIZANT PROGRAMMER:  Ron Alley
- REVISION:  1 6 July 1987
- Jan 24, 2001 AXC  Added support to preserve binary labels per request by
-                   T. Roatsch from DLR. Added a new keyword in the pdf to 
-                   enable the new capability. Updated test pdf and help 
-                   file.
+ REVISION:
+
+  1987-07-16 Ron Alley
+  2001-01-24 AXC Added support to preserve binary labels per request by
+                 T. Roatsch from DLR. Added a new keyword in the pdf to 
+                 enable the new capability. Updated test pdf and help 
+                 file.
+  2016-02-12 WLB Added enable/disable-log to tst pdf.
 
 .LEVEL1
 .VARIABLE INP
@@ -816,6 +819,8 @@ body
 let $autousage="none"
 let _onfail="continue"
 let $echo="yes"
+
+enable-log
 
 local PATH TYPE=STRING 
 
@@ -926,6 +931,579 @@ write "*****************************************************"
 # typetext diff1.out
 # typetext diff2.out
 #let $echo="no"
+
+disable-log
 end-proc
+$!-----------------------------------------------------------------------------
+$ create tstzfill.log
+local PATH TYPE=STRING
+  let PATH = "/project/test_work/testdata/gll/"
+  ush unalias rm
+  ush rm -f test*.img*
+genthis OUT=C1515 NL=15 NS=15 DN=(1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,  +
+                                  1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,  +
+                                  1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,  +
+                                  1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,  +
+                                  1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,  +
+                                  4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,  +
+                                  4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,  +
+                                  4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,  +
+                                  4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,  +
+                                  4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,  +
+                                  7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,  +
+                                  7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,  +
+                                  7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,  +
+                                  7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,  +
+                                  7,7,7,7,7,8,8,8,8,8,9,9,9,9,9)
+Beginning VICAR task genthis
+ GENTHIS VERSION 2
+ GENTHIS TASK COMPLETED
+zfill C1515 OUT
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  3, NSW =  3, REPLACE =    0
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+      7       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+      8       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+      9       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+     10       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT REPL=5
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  3, NSW =  3, REPLACE =    5
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   3   2   2   2   4   6   6   6   6   6
+      7       4   4   4   4   4   4   5   5   5   6   6   6   6   6   6
+      8       4   4   4   4   4   4   5   5   5   6   6   6   6   6   6
+      9       4   4   4   4   4   4   5   5   5   6   6   6   6   6   6
+     10       4   4   4   4   4   6   8   8   8   7   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT REPL=1
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  3, NSW =  3, REPLACE =    1
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   2   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   2   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   2   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   2   2   2   2   2   2   3   3   3   3   3
+      5       4   4   4   4   3   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+      7       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+      8       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+      9       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+     10       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT REPL=6
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  3, NSW =  3, REPLACE =    6
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   5   5   5   5   5   4   3   3   3   3
+      7       4   4   4   4   4   5   5   5   5   5   5   6   6   6   6
+      8       4   4   4   4   4   5   5   5   5   5   5   6   6   6   6
+      9       4   4   4   4   4   5   5   5   5   5   5   6   6   6   6
+     10       4   4   4   4   4   5   5   5   5   5   7   9   9   9   9
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT REPL=5 'DENSE
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  3, NSW =  3, REPLACE =    5
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   3   2   2   2   4   6   6   6   6   6
+      7       4   4   4   4   4   4   5   5   5   6   6   6   6   6   6
+      8       4   4   4   4   4   4   5   5   5   6   6   6   6   6   6
+      9       4   4   4   4   4   4   5   5   5   6   6   6   6   6   6
+     10       4   4   4   4   4   6   8   8   8   7   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT NSW=3 NLW=3 REPL=5
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  3, NSW =  3, REPLACE =    5
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   3   2   2   2   4   6   6   6   6   6
+      7       4   4   4   4   4   4   5   5   5   6   6   6   6   6   6
+      8       4   4   4   4   4   4   5   5   5   6   6   6   6   6   6
+      9       4   4   4   4   4   4   5   5   5   6   6   6   6   6   6
+     10       4   4   4   4   4   6   8   8   8   7   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT NSW=5 NLW=5 REPL=5
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  5, NSW =  5, REPLACE =    5
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   3   2   2   3   4   6   6   6   6   6
+      7       4   4   4   4   4   3   3   2   4   5   6   6   6   6   6
+      8       4   4   4   4   4   4   4   5   6   6   6   6   6   6   6
+      9       4   4   4   4   4   5   6   8   7   7   6   6   6   6   6
+     10       4   4   4   4   4   6   7   8   8   8   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT NSW=5 NLW=5 REPL=5 EXCL=2
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  5, NSW =  5, REPLACE =    5, EXCLUDE =    2
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   3   3   5   5   5   6   6   6   6   6
+      7       4   4   4   4   4   3   3   5   5   5   6   6   6   6   6
+      8       4   4   4   4   4   4   4   5   6   6   6   6   6   6   6
+      9       4   4   4   4   4   5   6   8   7   7   6   6   6   6   6
+     10       4   4   4   4   4   6   7   8   8   8   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT NSW=7 NLW=6 REPL=5
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  7, NSW =  7, REPLACE =    5
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   2   2   3   3   4   6   6   6   6   6
+      7       4   4   4   4   4   3   3   3   4   4   6   6   6   6   6
+      8       4   4   4   4   4   4   4   5   6   6   6   6   6   6   6
+      9       4   4   4   4   4   6   6   7   7   7   6   6   6   6   6
+     10       4   4   4   4   4   6   7   7   8   8   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT NSW=7 NLW=6 REPL=5 EXCL=2
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  7, NSW =  7, REPLACE =    5, EXCLUDE =    2
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   3   3   4   5   5   6   6   6   6   6
+      7       4   4   4   4   4   3   3   4   5   5   6   6   6   6   6
+      8       4   4   4   4   4   5   5   6   7   6   6   6   6   6   6
+      9       4   4   4   4   4   6   6   7   7   7   6   6   6   6   6
+     10       4   4   4   4   4   6   7   7   8   8   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT NSW=1 NLW=5 REPL=5
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  5, NSW =  1, REPLACE =    5
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   2   2   2   2   2   6   6   6   6   6
+      7       4   4   4   4   4   2   2   2   2   2   6   6   6   6   6
+      8       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+      9       4   4   4   4   4   8   8   8   8   8   6   6   6   6   6
+     10       4   4   4   4   4   8   8   8   8   8   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT NSW=5 NLW=1 REPL=5
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  1, NSW =  5, REPLACE =    5
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   4   4   5   6   6   6   6   6   6   6
+      7       4   4   4   4   4   4   4   5   6   6   6   6   6   6   6
+      8       4   4   4   4   4   4   4   5   6   6   6   6   6   6   6
+      9       4   4   4   4   4   4   4   5   6   6   6   6   6   6   6
+     10       4   4   4   4   4   4   4   5   6   6   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 OUT REPL=257 'DENSE
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  3, NSW =  3, REPLACE =  257
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+      7       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+      8       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+      9       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+     10       4   4   4   4   4   5   5   5   5   5   6   6   6   6   6
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+zfill C1515 (OUT,MSK) REPL=6
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  3, NSW =  3, REPLACE =    6
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   5   5   5   5   5   4   3   3   3   3
+      7       4   4   4   4   4   5   5   5   5   5   5   6   6   6   6
+      8       4   4   4   4   4   5   5   5   5   5   5   6   6   6   6
+      9       4   4   4   4   4   5   5   5   5   5   5   6   6   6   6
+     10       4   4   4   4   4   5   5   5   5   5   7   9   9   9   9
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+list MSK
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+      2     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+      3     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+      4     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+      5     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+      6     255 255 255 255 255 255 255 255 255 255   0   0   0   0   0
+      7     255 255 255 255 255 255 255 255 255 255   0 255 255 255 255
+      8     255 255 255 255 255 255 255 255 255 255   0 255 255 255 255
+      9     255 255 255 255 255 255 255 255 255 255   0 255 255 255 255
+     10     255 255 255 255 255 255 255 255 255 255   0   0   0   0   0
+     11     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+     12     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+     13     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+     14     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+     15     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+zfill C1515 (OUT,MSK) REPL=6 NSW=5 NLW=5
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  5, NSW =  5, REPLACE =    6
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      2       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      3       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      4       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      5       1   1   1   1   1   2   2   2   2   2   3   3   3   3   3
+      6       4   4   4   4   4   5   5   5   5   5   4   3   3   3   3
+      7       4   4   4   4   4   5   5   5   5   5   4   4   3   3   3
+      8       4   4   4   4   4   5   5   5   5   5   5   5   6   6   6
+      9       4   4   4   4   4   5   5   5   5   5   6   7   9   9   9
+     10       4   4   4   4   4   5   5   5   5   5   7   8   9   9   9
+     11       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     12       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     13       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     14       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+     15       7   7   7   7   7   8   8   8   8   8   9   9   9   9   9
+list MSK
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7       9      11      13      15
+   Line
+      1     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+      2     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+      3     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+      4     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+      5     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+      6     255 255 255 255 255 255 255 255 255 255   0   0   0   0   0
+      7     255 255 255 255 255 255 255 255 255 255   0   0   0   0   0
+      8     255 255 255 255 255 255 255 255 255 255   0   0 255 255 255
+      9     255 255 255 255 255 255 255 255 255 255   0   0   0   0   0
+     10     255 255 255 255 255 255 255 255 255 255   0   0   0   0   0
+     11     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+     12     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+     13     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+     14     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+     15     255 255 255 255 255 255 255 255 255 255 255 255 255 255 255
+zfill C1515 OUT REPL=5 SIZE=(5,5,4,4)
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  3, NSW =  3, REPLACE =    5
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3
+   Line
+      1       1   2   2   2
+      2       4   3   2   2
+      3       4   4   5   5
+      4       4   4   5   5
+zfill C1515 OUT REPL=5 SIZE=(4,4,7,7)
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  3, NSW =  3, REPLACE =    5
+list OUT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GENTHIS   User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+ Task:ZFILL     User:wlb       Date_Time:Fri Feb 12 13:03:04 2016
+     Samp     1       3       5       7
+   Line
+      1       1   1   2   2   2   2   2
+      2       1   1   2   2   2   2   2
+      3       4   4   3   2   2   2   4
+      4       4   4   4   5   5   5   6
+      5       4   4   4   5   5   5   6
+      6       4   4   4   5   5   5   6
+      7       4   4   6   8   8   8   7
+let $echo="no"
+
+
+***********************************************
+*      TEST CASE COMPARING BINARY LABELS      *
+*                                             *
+*      There shouldn't be any difference      *
+*    between input and output binary lables.  *
+*                                             *
+***********************************************
+ adespike inp=/project/test_work/testdata/gll/s0539939965.r out=test1.img
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST         1126
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST            3083
+ zfill inp=test1.img out=test2.img 'bin
+Beginning VICAR task zfill
+ZFILL version 2016-02-12
+INPUT IMAGE SIZE AND OUTPUT # LINES AND SAMPLE
+ZFILL:  NLW =  3, NSW =  3, REPLACE =    0
+ label-remove test1.img test3.img 'bin
+Beginning VICAR task label
+LABEL version 15-Nov-2010
+ label-create test3.img test1.img nl=829 ns=1000
+Beginning VICAR task label
+LABEL version 15-Nov-2010
+ label-remove test2.img test3.img 'bin
+Beginning VICAR task label
+LABEL version 15-Nov-2010
+ label-create test3.img test2.img nl=829 ns=1000
+Beginning VICAR task label
+LABEL version 15-Nov-2010
+ difpic (test1.img test2.img) size=(1 1 12 1000) 'mod
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+ difpic (test1.img test2.img) size=(30 1 800 200) 'mod
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+let $echo="no"
+*****************************************************
+* There should be 0 differences in the above tests. *
+*****************************************************
 $ Return
 $!#############################################################################

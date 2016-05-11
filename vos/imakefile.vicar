@@ -27,7 +27,7 @@ all: make_mdms make_fei5 make_gens make_subs make_progs make_crumbs make_vids ma
 # uplinktour and tlm are solaris only
 
 v1: make_dirs make_util make_docs make_stae make_shvic make_rtl
-v2: make_vrdi make_motifapp make_mdms make_fei5 make_gens make_subs make_progs make_vids make_done
+v2: make_vrdi make_motifapp make_mdms make_fei5 make_gens make_subs make_progs make_crumbs make_vids make_done
 
 #
 # Target for Open Source Build 
@@ -90,10 +90,10 @@ dlr: make_dirs make_util make_stae make_shvic make_rtl make_motifapp
 dlr: make_subs make_progs make_done
 
 nsyt1: make_dirs make_util make_docs make_stae make_shvic make_rtl
-nsyt2: make_vrdi make_motifapp make_fileservice make_marssubs make_marsprogs make_vids make_done
+nsyt2: make_vrdi make_motifapp make_fileservice make_marssubs make_marsprogs make_vids make_crumbs make_done
 
 nsytall: make_dirs make_util make_stae make_shvic make_rtl make_vrdi make_motifapp
-nsytall: make_fileservice make_marssubs make_marsprogs make_vids make_done
+nsytall: make_fileservice make_marssubs make_marsprogs make_crumbs make_vids make_done
   
 #
  

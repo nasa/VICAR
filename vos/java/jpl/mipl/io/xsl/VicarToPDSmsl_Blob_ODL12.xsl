@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<xsl:stylesheet version="2.0"
-	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<!-- Author: Hyun Hee Lee, Steve Levoe MSL version july 2010 JPL/MIPL - 
 		Steve Levoe MSL chemCAM BLOB version feb 2011 _ Steve Levoe 
 		Steve Levoe MSL archive fixes from 0-89 version mar 2013 _ Steve Levoe -->

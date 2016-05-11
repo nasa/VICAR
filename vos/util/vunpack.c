@@ -2,15 +2,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include "pack.h"
+#include <ctype.h>
 
 /* This must be updated with each new release.                               */
 
-char *version="1.5";
+char *version="1.7";
 
 /* Cognizant Programmer:  Paul Bartholomew      April 15, 1991               */
 /* Revision History:                                                         */
 /* Ver    Date     F/R   Description                                         */
 /* ---  --------  -----  --------------------------------------------------- */
+/* 1.7  08/04/2015       rgd-Converted to ANSI C prototypes		     */
 /* 1.6  10/05/00   n/a   TXH-Disabled the conversion to all lower-cases.     */
 /*                           The default now assumes inputs are mixed cases. */
 /* 1.5  11/15/94   n/a   RGD-Added -mixed option to allow mixed-case names.  */
@@ -32,10 +34,32 @@ struct unpack {
    int  found;
 };
 
+int parse_command(int argc, char *argv[], char *com_filename,
+	int *action, int *num_files, struct unpack files[],
+	int *which_files, int *verbose);
+int unpack_sections(FILE *infile, int *action,
+	int num_files, struct unpack files[], int verbose);
+void missing_section_msg(char *com_filename, int action);
+int unpack_files(char *com_filename, FILE *infile,
+	int num_files, struct unpack files[], int verbose);
+int all_found(int num_files, struct unpack files[]);
+void missing_files_msg(char *com_filename,
+	int num_files, struct unpack files[]);
+void lower_case(char *str);
+void upper_case(char *str);
+void get_file_extension(char *infile, char *ext);
+void print_syntax_message();
+int strip_space(char **ptr);
+int find_next_space(char **ptr);
+int check_keywords(char *cur_arg, int *action, int *which_files);
+int find_section_header(char *str, int *ptr);
+int get_filename(char *instr, char *filename);
+int check_filename(char *filename, int num_files, struct unpack files[]);
+int write_source_file(FILE *infile, char *filename, int *end_of_section);
+int substring(char *str, char *substr);
+
 
-main(argc, argv)
-int  argc;
-char *argv[];
+int main(int argc, char *argv[])
 {
    FILE   *infile;
    struct unpack files[100];
@@ -134,9 +158,7 @@ char *argv[];
 /* If the file does not have an extension, the function returns NULL in the  */
 /* "ext" parameter.                                                          */
 
-get_file_extension(infile, ext)
-char *infile;
-char *ext;
+void get_file_extension(char *infile, char *ext)
 {
    char *ptr;
 
@@ -153,16 +175,9 @@ char *ext;
 /* parameter are set.  If there are arguments, they are evaluated and the    */
 /* corresponding bits are set.                                               */
 
-int parse_command(argc, argv, com_filename, action, num_files, files,
-                  which_files, verbose)
-int  argc;
-char *argv[];
-char *com_filename;
-int  *action;
-int  *num_files;
-struct unpack files[];
-int  *which_files;
-int  *verbose;
+int parse_command(int argc, char *argv[], char *com_filename,
+	int *action, int *num_files, struct unpack files[],
+	int *which_files, int *verbose)
 {
    int  i, arg_ctr, done, end_of_line, length;
    int  com_file_found=FALSE, get_filenames=FALSE;
@@ -286,12 +301,8 @@ int  *verbose;
 /* whether that section has been requested.  If so, it unpacks it--if not, it*/
 /* loops to the next section.                                                */
 
-int unpack_sections(infile, action, num_files, files, verbose)
-FILE   *infile;
-int    *action;
-int    num_files;
-struct unpack files[];
-int    verbose;
+int unpack_sections(FILE *infile, int *action,
+	int num_files, struct unpack files[], int verbose)
 {
    int  done=FALSE, ctr=0, found, section_done, status;
    char str[256], filename[80];
@@ -366,11 +377,8 @@ int    verbose;
 }
 
 
-int unpack_files(com_filename, infile, num_files, files, verbose)
-char *com_filename;
-FILE *infile;
-int  num_files;
-struct unpack files[];
+int unpack_files(char *com_filename, FILE *infile,
+	int num_files, struct unpack files[], int verbose)
 {
    int  done=FALSE, section_done=FALSE;
    char str[256], filename[80];
@@ -415,10 +423,7 @@ struct unpack files[];
 /* file.  If it finds that the file begins with DECK, it ignores the second  */
 /* case above and terminates only when it receives an EOD.                   */
 
-int write_source_file(infile, filename, end_of_section)
-FILE *infile;
-char *filename;
-int  *end_of_section;
+int write_source_file(FILE *infile, char *filename, int *end_of_section)
 {
    FILE *tempfile;
    char str[256];
@@ -489,9 +494,7 @@ int  *end_of_section;
 /* string includes a "newline" character ("\n"), which must be removed from  */
 /* the end of the file name.                                                 */
 
-get_filename(instr, filename)
-char *instr;
-char *filename;
+int get_filename(char *instr, char *filename)
 {
    int length;
 
@@ -507,8 +510,7 @@ char *filename;
 
 /* This function converts a string to upper case.                            */
 
-upper_case(str)
-char *str;
+void upper_case(char *str)
 {
    int i;
 
@@ -519,8 +521,7 @@ char *str;
 
 /* This function converts a string to lower case.                            */
 
-lower_case(str)
-char *str;
+void lower_case(char *str)
 {
    int i;
 
@@ -529,7 +530,7 @@ char *str;
 }
 
 
-print_syntax_message()
+void print_syntax_message()
 {
    printf("\nVUNPACK, Version %s\n", version);
    printf("\nImproper syntax.  This program should be called as follows:\n");
@@ -547,9 +548,7 @@ print_syntax_message()
 /* to the array index, and compare it to the "action" variable in the call-  */
 /* ing routine, we can determine if we need the files from this section.     */
 
-int find_section_header(str, ptr)
-char *str;
-int  *ptr;
+int find_section_header(char *str, int *ptr)
 {
    int found=FALSE, i;
 
@@ -570,10 +569,7 @@ int  *ptr;
 /* and returns FALSE otherwise.  This routine also sets the "found" flag in  */
 /* the files data structure to indicate that the file has been found.        */
 
-int check_filename(filename, num_files, files)
-char   *filename;
-int    num_files;
-struct unpack files[];
+int check_filename(char *filename, int num_files, struct unpack files[])
 {
    int i, found=FALSE;
 
@@ -596,9 +592,7 @@ struct unpack files[];
 /* wasting time checking the remaining flags.  If all of the flags have been */
 /* set to TRUE, this function returns TRUE as well.                          */
 
-int all_found(num_files, files)
-int    num_files;
-struct unpack files[];
+int all_found(int num_files, struct unpack files[])
 {
    int i, all=TRUE;
 
@@ -616,10 +610,8 @@ struct unpack files[];
 /* requested files.  It tells the user which files were not found in the     */
 /* .COM file.                                                                */
 
-missing_files_msg(com_filename, num_files, files)
-char   *com_filename;
-int    num_files;
-struct unpack files[];
+void missing_files_msg(char *com_filename,
+	int num_files, struct unpack files[])
 {
    int i;
 
@@ -636,9 +628,7 @@ struct unpack files[];
 /* set in the unpack "action" parameter (i.e., which sections were not found)*/
 /* and prints an appropriate error message.                                  */
 
-missing_section_msg(com_filename, action)
-char *com_filename;
-int  action;
+void missing_section_msg(char *com_filename, int action)
 {
    if (BIT_TEST(action, REPACK_BIT))
       printf("Unable to locate REPACK file in file %s\n", com_filename);
@@ -661,10 +651,7 @@ int  action;
 }
 
 
-int check_keywords(cur_arg, action, which_files)
-char *cur_arg;
-int  *action;
-int  *which_files;
+int check_keywords(char *cur_arg, int *action, int *which_files)
 {
    int found=FALSE;
 
@@ -728,8 +715,7 @@ int  *which_files;
 /* space character is the end of the line or the end of the string, then     */
 /* the function returns TRUE.  Otherwise, the function returns FALSE.        */
 
-int strip_space(ptr)
-char **ptr;
+int strip_space(char **ptr)
 {
    int end_of_line=FALSE;
 
@@ -750,8 +736,7 @@ char **ptr;
 /* string--i.e., the first separator.  If the pointer is pointing to a new-  */
 /* line or the end of the string, the function returns TRUE.                 */
 
-int find_next_space(ptr)
-char **ptr;
+int find_next_space(char **ptr)
 {
    int end_of_line=FALSE;
 
@@ -771,8 +756,7 @@ char **ptr;
 /* This is similar to the strstr() function, which is not supported on some  */
 /* C compilers.                                                              */
 
-int substring(str, substr)
-char *str, *substr;
+int substring(char *str, char *substr)
 {
    char *ptr;
 
@@ -796,7 +780,7 @@ char *str, *substr;
 /* in the substring, we do a string compare to see if we have a complete     */
 /* match.  If not, we continue checking.  If so, we're done.                 */
 
-   while(ptr = strchr(ptr, *substr)) {
+   while((ptr = strchr(ptr, *substr)) != 0) {
       if (!strncmp(ptr, substr, strlen(substr)))
          return TRUE;
       else

@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module hist
-$! VPACK Version 1.9, Monday, December 17, 2012, 11:48:54
+$! VPACK Version 2.1, Monday, August 10, 2015, 15:03:27
 $!
 $! Execute by entering:		$ @hist
 $!
@@ -197,7 +197,7 @@ C
 
 C==================================================================
 	ibpu = 0
-      call xvmessage( '*** HIST version 17 Dec 2012 ***',' ')
+      call xvmessage( '*** HIST version Aug 10 2015 ***',' ')
 C     ....Open input image
       call xvunit(iunit,'INP',1,ISTAT,' ')
       call xvopen(iunit,istat,'OPEN_ACT','SA','IO_ACT','SA',' ')
@@ -433,7 +433,7 @@ C     ....Output MEAN and SIGMA parameters
 	call xqreal(parb,'SIGMA',1,sngl(SDEV),xadd,istat)  
 	call xqintg(parb,'COUNT',1,npixels,xadd,istat)
 	call xqreal(parb,'SUM',1,sngl(sum),xadd,istat)	    
-	call xqout(parb,istat)
+	call xvqout(parb,istat)
 	return
 	end
 C Compute histogram of input image (IHIST) and compress it (HIST).
@@ -1946,6 +1946,8 @@ REVISIONS:
                  allocation is in bytes.
   2012-07-07  LWK - changes to subr. splot.c for Solaris compiler;  put back fix
                  for divide by zero (BINWID) when image is all zeroes.
+  2015-08-10  WLB - replaced xqout call with xvqout call to pass out vars to shell vicar
+
 .LEVEL1
 .VARIABLE INP
 Input image file
@@ -2360,7 +2362,29 @@ ush rm -f g
 end-proc
 $!-----------------------------------------------------------------------------
 $ create tsthist.log_solos
-tsthist
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
 let $autousage="none"
 gen g1515 15 15
 Beginning VICAR task gen
@@ -2368,7 +2392,7 @@ GEN Version 6
 GEN task completed
 hist g1515 area=(1,1,3,3,10,10,2,2)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
           0        1   *************************
@@ -2397,7 +2421,7 @@ MAX. DN=        20
 
 hist g1515 size= (2,2,14,14) area=(1,1,3,3,10,10,2,2)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
           2*       1   *************************
@@ -2426,7 +2450,7 @@ MAX. DN=        22
 
 hist g1515 linc=2 sinc=3
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
           0        1   ****************
@@ -2463,7 +2487,7 @@ MAX. DN=        26
 
 hist g1515 NLINES=10 LIMITS=(5,24)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        2.1
 < LOW LIMIT       10   ******************
@@ -2487,7 +2511,7 @@ MAX. DN=        28
 
 hist g1515 NLINES=10 LIMITS=(5,23)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        2.0
 < LOW LIMIT       10   ******************
@@ -2511,7 +2535,7 @@ MAX. DN=        28
 
 hist g1515           LIMITS=(5,23) 'wide
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
 FREQUENCY DISTRIBUTION     SL=    1     SS=    1     NL=   15     NS=   15     LINC=  1    SINC=  1
@@ -2545,7 +2569,7 @@ MIN. DN=         0    MAX. DN=        28
 
 hist g1515 SPIKE=5
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
           0        1   ***
@@ -2586,7 +2610,7 @@ MAX. DN=        28
 
 hist g1515 SPIKE=1
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
           0        1   ***
@@ -2627,7 +2651,7 @@ MAX. DN=        28
 
 hist g1515 'nohist
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=14.00000       STANDARD DEVIATION=6.110101       NUMBER ELEMENTS=       225
@@ -2636,7 +2660,7 @@ MAX. DN=        28
 
 hist g1515 'nohist SIGMA=SD  MEAN=AVG sum=sum
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=14.00000       STANDARD DEVIATION=6.110101       NUMBER ELEMENTS=       225
@@ -2647,19 +2671,19 @@ let $echo="no"
 Print average and stdev variables
 disp avg
 
-avg=14.0
+14.0
 
 disp sd
 
-sd=6.11010074615
+6.11010074615
 
 disp sum
 
-sum=3150.0
+3150.0
 
 hist g1515 'screen spike=1
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
               1
              ***
@@ -2690,7 +2714,7 @@ GEN Version 6
 GEN task completed
 hist g 'exclude
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
           0      100   **************************************************  1
@@ -2710,7 +2734,7 @@ let $echo="no"
 Should get mean =128.0 because of exclude
 hist g nlines=10 'exclude
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =       28.3
           0    60000   *************************
@@ -2737,7 +2761,7 @@ GEN Version 6
 GEN task completed
 hist g inc=3
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
           0        4   **************************************************  1
@@ -2755,7 +2779,7 @@ let $echo="no"
 Mean should be 4.5.
 hist g inc=3 'exclude
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
           0        4   **************************************************  1
@@ -2778,7 +2802,7 @@ GEN Version 6
 GEN task completed
 hist g1515 area=(1,1,3,3,10,10,2,2)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =      256.0
       -4000        1   *************************
@@ -2807,7 +2831,7 @@ MAX. DN=    -18000
 
 hist g1515 size= (2,2,14,14) area=(1,1,3,3,10,10,2,2)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =      256.0
       -6000        1   *************************
@@ -2836,7 +2860,7 @@ MAX. DN=    -20000
 
 hist g1515 linc=2 sinc=3
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =      256.0
      -26000        1   ****************
@@ -2873,7 +2897,7 @@ MAX. DN=         0
 
 hist g1515 NLINES=10 LIMITS=(-24000, -5000)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =     2111.1
 < LOW LIMIT        6   ***********
@@ -2897,7 +2921,7 @@ MAX. DN=         0
 
 hist g1515 NLINES=10 LIMITS=(-23000, -5000)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =     2000.0
 < LOW LIMIT       10   ******************
@@ -2921,7 +2945,7 @@ MAX. DN=         0
 
 hist g1515           LIMITS=(-23000, -5000) 'wide
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =       70.6
 FREQUENCY DISTRIBUTION     SL=    1     SS=    1     NL=   15     NS=   15     LINC=  1    SINC=  1
@@ -2973,7 +2997,7 @@ MIN. DN=    -28000    MAX. DN=         0
 
 hist g1515 SPIKE=5
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =      256.0
      -28000        1   ***
@@ -3014,7 +3038,7 @@ MAX. DN=         0
 
 hist g1515 SPIKE=1
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =      256.0
      -28000        1   ***
@@ -3055,7 +3079,7 @@ MAX. DN=         0
 
 hist g1515 'nohist
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=-14000.0       STANDARD DEVIATION=6110.101       NUMBER ELEMENTS=       225
@@ -3064,7 +3088,7 @@ MAX. DN=         0
 
 hist g1515 'nohist sigma=sd  mean=avg sum=sum
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=-14000.0       STANDARD DEVIATION=6110.101       NUMBER ELEMENTS=       225
@@ -3075,15 +3099,15 @@ let $echo="no"
 Print average and stdev variables
 disp AVG
 
-AVG=-14000.0
+-14000.0
 
 disp SD
 
-SD=6110.10107422
+6110.10107422
 
 disp sum
 
-sum=-3150000.0
+-3150000.0
 
 gen g 10 10 linc=1000 'half
 Beginning VICAR task gen
@@ -3091,7 +3115,7 @@ GEN Version 6
 GEN task completed
 hist g nlines=30 spikes=9
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        4.0
           0        2   *************************
@@ -3137,7 +3161,7 @@ GEN Version 6
 GEN task completed
 hist f1515 area=(1,1,3,3,10,10,2,2)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =     1568.6
     -400000        1   *************************
@@ -3166,7 +3190,7 @@ MAX. DN=  -1800000
 
 hist f1515 size= (2,2,14,14) area=(1,1,3,3,10,10,2,2)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =     1568.6
     -600000        1   *************************
@@ -3195,7 +3219,7 @@ MAX. DN=  -2000000
 
 hist f1515 linc=2 sinc=3
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =    10196.1
    -2600000        1   ****************
@@ -3232,7 +3256,7 @@ MAX. DN=         0
 
 hist f1515 NLINES=10 LIMITS=(-2400000, -500000)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =   211111.1
 < LOW LIMIT        6   ***********
@@ -3256,7 +3280,7 @@ MAX. DN=         0
 
 hist f1515 NLINES=10 LIMITS=(-2300000, -500000)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =   200000.0
 < LOW LIMIT       10   ******************
@@ -3280,7 +3304,7 @@ MAX. DN=         0
 
 hist f1515           LIMITS=(-2300000, -500000) 'wide
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =     7058.8
 FREQUENCY DISTRIBUTION     SL=    1     SS=    1     NL=   15     NS=   15     LINC=  1    SINC=  1
@@ -3332,7 +3356,7 @@ MIN. DN=  -2800000    MAX. DN=         0
 
 HIST f1515 SPIKE=5
 Beginning VICAR task HIST
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =    10980.4
    -2800000        1   ***
@@ -3373,7 +3397,7 @@ MAX. DN=         0
 
 HIST f1515 SPIKE=1
 Beginning VICAR task HIST
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =    10980.4
    -2800000        1   ***
@@ -3414,7 +3438,7 @@ MAX. DN=         0
 
 hist f1515 'nohist
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=-1.40E+6       STANDARD DEVIATION=611010.1       NUMBER ELEMENTS=       225
@@ -3423,7 +3447,7 @@ MAX. DN=         0
 
 hist f1515 'nohist SIGMA=SD  MEAN=AVG sum=sum
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=-1.40E+6       STANDARD DEVIATION=611010.1       NUMBER ELEMENTS=       225
@@ -3434,15 +3458,15 @@ let $echo="no"
 Print average and stdev variables
 disp avg
 
-avg=-1400000.0
+-1400000.0
 
 disp sd
 
-sd=611010.0625
+611010.0625
 
 disp sum
 
-sum=-315000000.0
+-315000000.0
 
 gen r1515 15 15 linc=1.e8 sinc=1.e8 'real4
 Beginning VICAR task gen
@@ -3450,7 +3474,7 @@ GEN Version 6
 GEN task completed
 hist r1515 area=(1,1,3,3,10,10,2,2)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =  1568627.5
 0.00000E+00        1   *************************
@@ -3479,7 +3503,7 @@ MAX. DN=2.000E+9
 
 hist r1515 size= (2,2,14,14) area=(1,1,3,3,10,10,2,2)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =  1568627.5
 2.00000E+08        1   *************************
@@ -3508,7 +3532,7 @@ MAX. DN=2.200E+9
 
 hist r1515 linc=2 sinc=3
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width = 10196078.4
 0.00000E+00        1   ****************
@@ -3545,7 +3569,7 @@ MAX. DN=2.600E+9
 
 hist r1515 NLINES=10 LIMITS=(5.e+8, 24.E+8)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width = **********
 < LOW LIMIT       10   ******************
@@ -3569,7 +3593,7 @@ MAX. DN=2.800E+9
 
 hist r1515 NLINES=10 LIMITS=(5.e+8, 23.E+8)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width = **********
 < LOW LIMIT       10   ******************
@@ -3593,7 +3617,7 @@ MAX. DN=2.800E+9
 
 hist r1515 'nocum          LIMITS=(5.e+8, 23.E+8) 'wide
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =  7058823.5
 FREQUENCY DISTRIBUTION     SL=    1     SS=    1     NL=   15     NS=   15     LINC=  1    SINC=  1
@@ -3645,7 +3669,7 @@ MIN. DN=0.000000      MAX. DN=2.800E+9
 
 hist r1515 SPIKE=5
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width = 10980392.2
 0.00000E+00        1   ***
@@ -3686,7 +3710,7 @@ MAX. DN=2.800E+9
 
 hist r1515 SPIKE=1
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width = 10980392.2
 0.00000E+00        1   ***
@@ -3727,7 +3751,7 @@ MAX. DN=2.800E+9
 
 hist r1515 'nohist
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=1.400E+9       STANDARD DEVIATION=6.110E+8       NUMBER ELEMENTS=       225
@@ -3736,7 +3760,7 @@ MAX. DN=2.800E+9
 
 hist r1515 'nohist SIGMA=SD  MEAN=AVG sum=sum
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=1.400E+9       STANDARD DEVIATION=6.110E+8       NUMBER ELEMENTS=       225
@@ -3747,15 +3771,15 @@ let $echo="no"
 Print average and stdev variables
 disp AVG
 
-AVG=1400000000.0
+1400000000.0
 
 disp SD
 
-SD=611010112.0
+611010112.0
 
 disp sum
 
-sum=314999996416.0
+314999996416.0
 
 gen r1515 15 15 linc=-123456789.e4 sinc=-1234567890.e4 'real4
 Beginning VICAR task gen
@@ -3766,7 +3790,7 @@ let $echo="no"
  Should skip all empty bins and put a * after DN to indicate skip.
 hist r1515 nlines=3000
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width = **********
 -1.9012E+14        1   *************************
@@ -3937,7 +3961,7 @@ GEN Version 6
 GEN task completed
 hist d1515 area=(1,1,3,3,10,10,2,2)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        0.0
 -4.0000E-09        1   *************************
@@ -3966,7 +3990,7 @@ MAX. DN=-1.80E-8
 
 hist d1515 size= (2,2,14,14) area=(1,1,3,3,10,10,2,2)
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        0.0
 -6.0000E-09        1   *************************
@@ -3995,7 +4019,7 @@ MAX. DN=-2.00E-8
 
 hist d1515 linc=2 sinc=3
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        0.0
 -2.6000E-08        1   ****************
@@ -4032,7 +4056,7 @@ MAX. DN=0.000000
 
 HIST d1515 NLINES=10 LIMITS= (-24.e-9, -5.E-9)
 Beginning VICAR task HIST
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        0.0
 < LOW LIMIT        6   ***********
@@ -4056,7 +4080,7 @@ MAX. DN=0.000000
 
 HIST d1515 NLINES=10 LIMITS=(-23.e-9, -5.E-9)
 Beginning VICAR task HIST
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        0.0
 < LOW LIMIT       10   *****************
@@ -4080,7 +4104,7 @@ MAX. DN=0.000000
 
 HIST d1515 'nocum          LIMITS=(-23.e-9, -5.E-9) 'wide
 Beginning VICAR task HIST
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        0.0
 FREQUENCY DISTRIBUTION     SL=    1     SS=    1     NL=   15     NS=   15     LINC=  1    SINC=  1
@@ -4132,7 +4156,7 @@ MIN. DN=-2.80E-8      MAX. DN=0.000000
 
 HIST d1515 SPIKE=5
 Beginning VICAR task HIST
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        0.0
 -2.8000E-08        1   ***
@@ -4173,7 +4197,7 @@ MAX. DN=0.000000
 
 HIST d1515 SPIKE=1
 Beginning VICAR task HIST
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        0.0
 -2.8000E-08        1   ***
@@ -4214,7 +4238,7 @@ MAX. DN=0.000000
 
 hist d1515 'nohist
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=-1.40E-8       STANDARD DEVIATION=6.110E-9       NUMBER ELEMENTS=       225
@@ -4223,7 +4247,7 @@ MAX. DN=0.000000
 
 hist d1515 'nohist SIGMA=SD  MEAN=AVG sum=sum
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=-1.40E-8       STANDARD DEVIATION=6.110E-9       NUMBER ELEMENTS=       225
@@ -4234,15 +4258,15 @@ let $echo="no"
 Print a1verage and stdev variables
 disp AVG
 
-AVG=-1.40000002702e-08
+-1.40000002702e-08
 
 disp SD
 
-SD=6.11010086971e-09
+6.11010086971e-09
 
 disp sum
 
-sum=-3.15000011142e-06
+-3.15000011142e-06
 
 gen x1515 NS=10 NL=10 NB=10
 Beginning VICAR task gen
@@ -4250,7 +4274,7 @@ GEN Version 6
 GEN task completed
 hist x1515
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
           0        1
@@ -4290,7 +4314,7 @@ MAX. DN=        27
 
 hist x1515 NB=4
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
           0        1   *
@@ -4328,7 +4352,7 @@ GEN Version 6
 GEN task completed
 hist x1515
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 Bin Width =        1.0
         200*  122668   **************************************************  1
@@ -4345,7 +4369,7 @@ GEN Version 6
 GEN task completed
 hist g1515 'nohis
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=0.000000       STANDARD DEVIATION=0.000000       NUMBER ELEMENTS=       100
@@ -4358,7 +4382,7 @@ GEN Version 6
 GEN task completed
 hist g1515 'nohis
 Beginning VICAR task hist
-*** HIST version 17 Dec 2012 ***
+*** HIST version Aug 10 2015 ***
 
 
 AVERAGE GRAY LEVEL=0.000000       STANDARD DEVIATION=0.000000       NUMBER ELEMENTS=       100
@@ -4366,11 +4390,31 @@ MIN. DN=0.000000
 MAX. DN=0.000000
 
 let $echo="no"
-exit
-slogoff
 $!-----------------------------------------------------------------------------
 $ create tsthist.log_linux
-tsthist
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
 let $autousage="none"
 gen g1515 15 15
 Beginning VICAR task gen
@@ -4657,15 +4701,15 @@ let $echo="no"
 Print average and stdev variables
 disp avg
 
-avg=14.0
+14.0
 
 disp sd
 
-sd=6.11010074615
+6.11010074615
 
 disp sum
 
-sum=3150.0
+3150.0
 
 hist g1515 'screen spike=1
 Beginning VICAR task hist
@@ -5085,15 +5129,15 @@ let $echo="no"
 Print average and stdev variables
 disp AVG
 
-AVG=-14000.0
+-14000.0
 
 disp SD
 
-SD=6110.10107422
+6110.10107422
 
 disp sum
 
-sum=-3150000.0
+-3150000.0
 
 gen g 10 10 linc=1000 'half
 Beginning VICAR task gen
@@ -5444,15 +5488,15 @@ let $echo="no"
 Print average and stdev variables
 disp avg
 
-avg=-1400000.0
+-1400000.0
 
 disp sd
 
-sd=611010.0625
+611010.0625
 
 disp sum
 
-sum=-315000000.0
+-315000000.0
 
 gen r1515 15 15 linc=1.e8 sinc=1.e8 'real4
 Beginning VICAR task gen
@@ -5757,15 +5801,15 @@ let $echo="no"
 Print average and stdev variables
 disp AVG
 
-AVG=1400000000.0
+1400000000.0
 
 disp SD
 
-SD=611010112.0
+611010112.0
 
 disp sum
 
-sum=314999996416.0
+314999996416.0
 
 gen r1515 15 15 linc=-123456789.e4 sinc=-1234567890.e4 'real4
 Beginning VICAR task gen
@@ -6244,15 +6288,15 @@ let $echo="no"
 Print a1verage and stdev variables
 disp AVG
 
-AVG=-1.40000002702e-08
+-1.40000002702e-08
 
 disp SD
 
-SD=6.11010086971e-09
+6.11010086971e-09
 
 disp sum
 
-sum=-3.15000011142e-06
+-3.15000011142e-06
 
 gen x1515 NS=10 NL=10 NB=10
 Beginning VICAR task gen
@@ -6376,7 +6420,5 @@ MIN. DN=0.000000
 MAX. DN=0.000000
 
 let $echo="no"
-exit
-slogoff
 $ Return
 $!#############################################################################

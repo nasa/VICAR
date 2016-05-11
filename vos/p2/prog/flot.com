@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module flot
-$! VPACK Version 1.7, Friday, July 09, 1993, 14:08:21
+$! VPACK Version 1.9, Thursday, May 21, 2015, 14:58:30
 $!
 $! Execute by entering:		$ @flot
 $!
@@ -148,10 +148,10 @@ $!#############################################################################
 $Repack_File:
 $ create flot.repack
 $ DECK/DOLLARS="$ VOKAGLEVE"
-$ vpack flot.com -
-	-s flot.f flot_vms.f flot_unix.f -
+$ vpack flot.com -mixed -
+	-s flot.f flot_unix.f -
 	-p flot.pdf -
-	-t tstflot.pdf -
+	-t tstflot.pdf tstflot.log -
 	-i flot.imake
 $ Exit
 $ VOKAGLEVE
@@ -225,6 +225,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       LOGICAL XVPTST                       ! DECLARES XVPTST A LOG. FUNCTION.
       EXTERNAL FLIP,ROTATE
       CHARACTER*8 FMT
+      CHARACTER*32 ORGIN
 
       COMMON /C1/    INFILE, OUTFILE, ISL, ISSAMP, NL, NSAMP, NLO, NSO,
      .               DCODE,  MODE
@@ -240,6 +241,9 @@ C              =2 FOR HORIZONTAL FLIP
 C              =3 FOR CLOCKWISE ROTATION
 C              =4 FOR COUNTER CLOCKWISE ROTATION
 C              =5 FOR TRANSPOSE MATRIX
+
+      CALL IFMESSAGE('FLOT version May 21 2015')
+
       CALL XVEACTION( 'SA', ' ' )
 
       MODE = 3              ! DEFAULT IS CLOCKWISE.
@@ -250,8 +254,11 @@ C  OPEN INPUT FILE
       CALL XVOPEN( INFILE, IND, 'OP', 'READ', ' ' )
 
       CALL XVSIZE( ISL, ISSAMP, NL, NSAMP, NLI, NSI )  ! SIZE PARAMETERS.
+      CALL XVBANDS( SB, NB, NBI)                       ! INPUT BAND COUNT NBI.
+      CALL XVP( 'BAND', BAND, BANDSEL)                 ! SELECTED BAND.
 
-      CALL XVGET(  INFILE, IND, 'FORMAT', FMT, ' ' )   ! BYTES PER PIXEL.
+      CALL XVGET( INFILE, IND, 'FORMAT', FMT, ' ' )   ! BYTES PER PIXEL.
+      CALL XVGET( INFILE, IND, 'ORG', ORGIN, ' ' )    ! INPUT BAND ORG
       IND = XVPIXSIZEU( DCODE, FMT, INFILE )
 
       IF ( XVPTST('ROT180') )         MODE = 0
@@ -260,6 +267,38 @@ C  OPEN INPUT FILE
       IF ( XVPTST('CLOCK') )          MODE = 3
       IF ( XVPTST('COUNTER') )        MODE = 4
       IF ( XVPTST('TRANS') )          MODE = 5
+
+C     IF BAND SELECTED, OUTPUT ONLY THAT BAND
+      IF ( BANDSEL .EQ. 1 ) THEN
+        NBO = 1               ! OUTPUT BAND COUNT
+        FRSTBAND = BAND
+        LASTBAND = BAND
+
+        IF ( BAND .LT. 1 .OR. BAND .GT. NBI )  THEN
+          CALL QPRINT('BAND OUT OF RANGE',17)
+          CALL ABEND
+        END IF
+
+        IF ( ORGIN .NE. 'BSQ' ) THEN
+          CALL QPRINT('ORG MUST BE BSQ',15)
+          CALL ABEND
+        END IF
+
+      ELSE
+        NBO = NBI
+        FRSTBAND = 1
+        LASTBAND = NBI
+      END IF
+
+C     DEBUGGING INSTRUMENTATION
+C      WRITE(*,'(A,I5,A,I5,A,I5,A,I5,A,I5,A,I5)')
+C     . 'ISL',ISL,' ISSAMP',ISSAMP,' NL',NL,' NSAMP',NSAMP,
+C     . 'NLI', NLI,' NSI',NSI
+C      WRITE(*,'(A,I2,A,I2,A,I2,A,I2,A,A)')
+C     . 'SB',SB,' NB',NB,' NBI',NBI,' BAND',BAND,' ORG ',ORGIN
+C      WRITE(*,'(A,I2,A,I2)') 'PIXSIZE', DCODE, ' MODE', MODE
+C      WRITE(*,'(A,I2,A,I2,A,I2)') 'BANDSEL', BANDSEL,
+C     . ' FRSTBAND', FRSTBAND, ' LASTBAND', LASTBAND
 
       IF ( MODE .LT. 3 )  THEN
            NLO = NL                   ! OUTPUT IMAGE SIZE.
@@ -273,25 +312,29 @@ C  OPEN OUTPUT FILE.
 
       CALL XVUNIT( OUTFILE, 'OUT', 1, IND, ' ' )
       CALL XVOPEN( OUTFILE, IND, 'OP', 'WRITE', 'U_NL', NLO,'U_NS', NSO,
-     . ' ')
+     . 'U_NB', NBO, ' ')
 
 C  USE STACKA TO ALLOCATE BUFFER AND CALL APPROPRIATE ROUTINE.
 
       IF ( MODE .LT. 3 )   THEN
            NBYT = NSAMP * DCODE                      ! HORIZONTAL OR
-           CALL STACKA( 4, FLIP, 1, 2*NBYT, NBYT )   ! VERTICAL FLIP.
+           DO BANDI = FRSTBAND, LASTBAND
+             CALL STACKA( 5, FLIP, 1, 2*NBYT, NBYT, BANDI ) ! VERTICAL FLIP.
+           END DO
       ELSE
            CALL GET_MEM_SIZE(MAXBYT,NSAMP,DCODE)   ! TRY TO INCREASE WORKING SET
                                        ! LEAVE A LITTLE ROOM FOR DISK BUFFERS
                                        ! AND ANYTHING ELSE.
            NBYT = NSAMP * DCODE * ( NL+1 )        ! CLOCKWISE, COUNTERCLOCK.,
-           NBYT = MIN0( NBYT, MAXBYT )                        ! (AVOID PAGING.)
-           CALL STACKA( 3, ROTATE, 1, NBYT )         ! OR TRANSPOSE.
+           NBYT = MIN0( NBYT, MAXBYT )                    ! (AVOID PAGING.)
+           DO BANDI = FRSTBAND, LASTBAND
+             CALL STACKA( 4, ROTATE, 1, NBYT, BANDI )       ! OR TRANSPOSE.
+           END DO
       END IF
 
       RETURN
       END
-      SUBROUTINE ROTATE(BUF,NBUF)
+      SUBROUTINE ROTATE(BUF,NBUF,BANDI)
 C ROUTINE TO ROTATE A PICTURE 90 DEGREES CLOCKWISE OR COUNTER-CLOCKWISE
 C OR TRANSPOSE
 
@@ -368,7 +411,7 @@ C
           DO  L = 1, NL
               LINE = ISL + L - 1
               CALL XVREAD( INFILE, BUF, IND, 'LINE', LINE, 'SAMP', ISS,
-     .                     'NSAMPS', NLB, ' ' )
+     .                     'NSAMPS', NLB, 'BAND', BANDI, ' ' )
               CALL MVE( DCODE, NLB, BUF, BUF(IPT), 1, LI )
               IPT = IPT + SI
           END DO
@@ -384,7 +427,7 @@ C
 
       RETURN
       END
-      SUBROUTINE FLIP(BUF,NBUF, NBYT)
+      SUBROUTINE FLIP(BUF,NBUF, NBYT, BANDI)
 C          ROUTINE TO FLIP A PICTURE ON VERTICAL OR HORIZONTAL AXIS
 C          OR ROTATE BY 180 DEGREES.
       IMPLICIT INTEGER(A-Z)
@@ -423,7 +466,7 @@ C          IF VERTICAL, LINC = -1
 C
       DO 120 L=1,NL
          CALL XVREAD( INFILE, BUF, IND, 'LINE', REC, 'SAMP', ISSAMP,
-     .                'NSAMPS', NSAMP, ' ' )
+     .                'NSAMPS', NSAMP, 'BAND', BANDI, ' ' )
          REC = REC + LINC
          IF(MODE.EQ.2 .OR. MODE .EQ. 0) 
      .       CALL MVE(DCODE,NSAMP,BUF,BUF(IPT),1,-1)
@@ -432,19 +475,6 @@ C
 
       RETURN
       END
-$ VOKAGLEVE
-$!-----------------------------------------------------------------------------
-$ create flot_vms.f
-$ DECK/DOLLARS="$ VOKAGLEVE"
-C SUBROUTINE TO GET PHYSICAL MEMORY SIZE
-        SUBROUTINE GET_MEM_SIZE(MEMSIZE,SAMP,CODE)
-        INTEGER MEMSIZE,WSLIM 		! WSA IS ADJUSTMENT FOR BUFFERS ETC 
-	INTEGER SAMP, CODE
-
-	CALL SYS$ADJWSL(6000,WSLIM) ! TRY TO INCREASE WORKING SET
-	MEMSIZE = MAX(200000, WSLIM*512 - 3*SAMP*CODE)
-        RETURN
-        END
 $ VOKAGLEVE
 $!-----------------------------------------------------------------------------
 $ create flot_unix.f
@@ -474,6 +504,7 @@ PARM SL      TYPE=INTEGER  COUNT=0:1     DEFAULT=1
 PARM SS      TYPE=INTEGER  COUNT=0:1     DEFAULT=1
 PARM NL      TYPE=INTEGER  COUNT=0:1     DEFAULT=0
 PARM NS      TYPE=INTEGER  COUNT=0:1     DEFAULT=0
+PARM BAND    TYPE=INTEGER  COUNT=0:1     DEFAULT=1
 !
 PARM MODE    TYPE=KEYWORD  COUNT=(0:1)			    +
              VALID=(CLOCK,COUNTER,VERT,HORIZ,TRANS,ROT180)  +
@@ -502,7 +533,8 @@ performed on the image.  The six operations available are:
 The input image may have any valid data format (byte, halfword, ...).
 The data format is obtained from the label of the input file.
 The output image has the same data format  (byte or halfword) as the input 
-image.  No size restrictions are imposed on the input image.
+image.  No size restrictions are imposed on the input image.  If BAND is
+provided, then the output will include only that band.
 .PAGE
 TAE COMMAND LINE FORMAT
       The following command line formats show the major allowable forms:
@@ -524,14 +556,17 @@ EXAMPLE
 RESTRICTIONS
 1. The input file should not be on magnetic tape unless a horizontal flip
    is being performed.
+2. BAND must be in the range 1 .. NB
+3. Multi-band input must be organized BSQ
 
  WRITTEN BY:             Steve Pohorsky              19 Sep 1984
+ COGNIZANT PROGRAMMER:   Walt Bunch                  May 21 2015
 
- COGNIZANT PROGRAMMER:   Steve Pohorsky              19 Sep 1984
+ PROGRAM HISTORY:
+  1984-09-19 Steve Pohorsky - Initial version
+  1993-07-09 George A. Madrid Jr. - Ported to UNIX
+  2015-05-21 Walt Bunch - Added BAND parm and support for multi-band input
 
- REVISION:               2                           19 Sep 1984
-
- PORTED TO UNIX:	 George A. Madrid Jr.	      9 Jul 1993
 .LEVEL1
 .VARIABLE INP
 Input file name
@@ -555,6 +590,8 @@ Starting sample number
 Number of lines
 .VARIABLE NS
 Number of samples
+.VARIABLE BAND
+Single band to rotate and output
 .VARIABLE MODE
 Operation performed on image:
 CLOCK,COUNTER,VERT,HORIZ,TRANS,
@@ -563,6 +600,11 @@ ROT180
 Physical memory available
 (megabytes). non-VMS systems
 .LEVEL2
+.VARIABLE BAND
+The BAND parameter, defaulting to 1, must be in the range 0 .. inp NB,
+else abend. If not specified, all bands will be rotated and output, so
+NB out = NB inp. If BAND is specified, then NB out = 1 and BAND
+selects the input band to be rotated and output.
 .VARIABLE MODE
 The MODE parameter is used to select the operation that will be
 performed on the image.  The six operations available are:
@@ -679,8 +721,552 @@ list FLOTDO3
 flot FLOTD FLOTDO4 'TRANS
 list FLOTDO4
 !
+!    try multi-band input
+!
+gen FLOTRED NL=10 NS=12 IVAL=1
+gen FLOTGRN NL=10 NS=12 IVAL=101
+gen FLOTBLU NL=10 NS=12 IVAL=201
+viccub (FLOTRED,FLOTGRN,FLOTBLU) FLOTCOLOR
+flot FLOTCOLOR FLOTCOLORROT
+list FLOTCOLORROT
+flot FLOTCOLOR FLOTCOLORROT BAND=2
+list FLOTCOLORROT
+!
 !    clean up
 !
+ush rm FLOTA* FLOTB* FLOTC* FLOTD* FLOTG* FLOTR*
+END-PROC
+$!-----------------------------------------------------------------------------
+$ create tstflot.log
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+gen FLOTA NL=10 NS=12
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+flot INP=FLOTA OUT=FLOTAO
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTAO
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp     1       3       5       7       9
+   Line
+      1       9   8   7   6   5   4   3   2   1   0
+      2      10   9   8   7   6   5   4   3   2   1
+      3      11  10   9   8   7   6   5   4   3   2
+      4      12  11  10   9   8   7   6   5   4   3
+      5      13  12  11  10   9   8   7   6   5   4
+      6      14  13  12  11  10   9   8   7   6   5
+      7      15  14  13  12  11  10   9   8   7   6
+      8      16  15  14  13  12  11  10   9   8   7
+      9      17  16  15  14  13  12  11  10   9   8
+     10      18  17  16  15  14  13  12  11  10   9
+     11      19  18  17  16  15  14  13  12  11  10
+     12      20  19  18  17  16  15  14  13  12  11
+flot INP=FLOTA OUT=FLOTAO2 SIZE=(2,3,8,7) 'HORIZ
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTAO2
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp     1       3       5       7
+   Line
+      1       9   8   7   6   5   4   3
+      2      10   9   8   7   6   5   4
+      3      11  10   9   8   7   6   5
+      4      12  11  10   9   8   7   6
+      5      13  12  11  10   9   8   7
+      6      14  13  12  11  10   9   8
+      7      15  14  13  12  11  10   9
+      8      16  15  14  13  12  11  10
+flot FLOTA FLOTAO3 'COUNTER
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTAO3
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp     1       3       5       7       9
+   Line
+      1      11  12  13  14  15  16  17  18  19  20
+      2      10  11  12  13  14  15  16  17  18  19
+      3       9  10  11  12  13  14  15  16  17  18
+      4       8   9  10  11  12  13  14  15  16  17
+      5       7   8   9  10  11  12  13  14  15  16
+      6       6   7   8   9  10  11  12  13  14  15
+      7       5   6   7   8   9  10  11  12  13  14
+      8       4   5   6   7   8   9  10  11  12  13
+      9       3   4   5   6   7   8   9  10  11  12
+     10       2   3   4   5   6   7   8   9  10  11
+     11       1   2   3   4   5   6   7   8   9  10
+     12       0   1   2   3   4   5   6   7   8   9
+flot FLOTA FLOTAO4 'VERT
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTAO4
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp     1       3       5       7       9      11
+   Line
+      1       9  10  11  12  13  14  15  16  17  18  19  20
+      2       8   9  10  11  12  13  14  15  16  17  18  19
+      3       7   8   9  10  11  12  13  14  15  16  17  18
+      4       6   7   8   9  10  11  12  13  14  15  16  17
+      5       5   6   7   8   9  10  11  12  13  14  15  16
+      6       4   5   6   7   8   9  10  11  12  13  14  15
+      7       3   4   5   6   7   8   9  10  11  12  13  14
+      8       2   3   4   5   6   7   8   9  10  11  12  13
+      9       1   2   3   4   5   6   7   8   9  10  11  12
+     10       0   1   2   3   4   5   6   7   8   9  10  11
+flot FLOTA FLOTAO5 'ROT180
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTAO5
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp     1       3       5       7       9      11
+   Line
+      1      20  19  18  17  16  15  14  13  12  11  10   9
+      2      19  18  17  16  15  14  13  12  11  10   9   8
+      3      18  17  16  15  14  13  12  11  10   9   8   7
+      4      17  16  15  14  13  12  11  10   9   8   7   6
+      5      16  15  14  13  12  11  10   9   8   7   6   5
+      6      15  14  13  12  11  10   9   8   7   6   5   4
+      7      14  13  12  11  10   9   8   7   6   5   4   3
+      8      13  12  11  10   9   8   7   6   5   4   3   2
+      9      12  11  10   9   8   7   6   5   4   3   2   1
+     10      11  10   9   8   7   6   5   4   3   2   1   0
+gen FLOTB NL=10 NS=12 'HALF
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+flot INP=FLOTB OUT=FLOTBO
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTBO
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         9     8     7     6     5     4     3     2     1     0
+      2        10     9     8     7     6     5     4     3     2     1
+      3        11    10     9     8     7     6     5     4     3     2
+      4        12    11    10     9     8     7     6     5     4     3
+      5        13    12    11    10     9     8     7     6     5     4
+      6        14    13    12    11    10     9     8     7     6     5
+      7        15    14    13    12    11    10     9     8     7     6
+      8        16    15    14    13    12    11    10     9     8     7
+      9        17    16    15    14    13    12    11    10     9     8
+     10        18    17    16    15    14    13    12    11    10     9
+     11        19    18    17    16    15    14    13    12    11    10
+     12        20    19    18    17    16    15    14    13    12    11
+flot INP=FLOTB OUT=FLOTBO2 SIZE=(2,3,8,7) 'VERT
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTBO2
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp       1     2     3     4     5     6     7
+   Line
+      1        10    11    12    13    14    15    16
+      2         9    10    11    12    13    14    15
+      3         8     9    10    11    12    13    14
+      4         7     8     9    10    11    12    13
+      5         6     7     8     9    10    11    12
+      6         5     6     7     8     9    10    11
+      7         4     5     6     7     8     9    10
+      8         3     4     5     6     7     8     9
+flot FLOTB FLOTBO3 'CLOCK
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTBO3
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         9     8     7     6     5     4     3     2     1     0
+      2        10     9     8     7     6     5     4     3     2     1
+      3        11    10     9     8     7     6     5     4     3     2
+      4        12    11    10     9     8     7     6     5     4     3
+      5        13    12    11    10     9     8     7     6     5     4
+      6        14    13    12    11    10     9     8     7     6     5
+      7        15    14    13    12    11    10     9     8     7     6
+      8        16    15    14    13    12    11    10     9     8     7
+      9        17    16    15    14    13    12    11    10     9     8
+     10        18    17    16    15    14    13    12    11    10     9
+     11        19    18    17    16    15    14    13    12    11    10
+     12        20    19    18    17    16    15    14    13    12    11
+flot FLOTB FLOTBO4 'TRANS
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTBO4
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         0     1     2     3     4     5     6     7     8     9
+      2         1     2     3     4     5     6     7     8     9    10
+      3         2     3     4     5     6     7     8     9    10    11
+      4         3     4     5     6     7     8     9    10    11    12
+      5         4     5     6     7     8     9    10    11    12    13
+      6         5     6     7     8     9    10    11    12    13    14
+      7         6     7     8     9    10    11    12    13    14    15
+      8         7     8     9    10    11    12    13    14    15    16
+      9         8     9    10    11    12    13    14    15    16    17
+     10         9    10    11    12    13    14    15    16    17    18
+     11        10    11    12    13    14    15    16    17    18    19
+     12        11    12    13    14    15    16    17    18    19    20
+gen FLOTC NL=10 NS=12 'FULL
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+flot INP=FLOTC OUT=FLOTCO
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTCO
+Beginning VICAR task list
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1              9          8          7          6          5          4          3          2          1          0
+      2             10          9          8          7          6          5          4          3          2          1
+      3             11         10          9          8          7          6          5          4          3          2
+      4             12         11         10          9          8          7          6          5          4          3
+      5             13         12         11         10          9          8          7          6          5          4
+      6             14         13         12         11         10          9          8          7          6          5
+      7             15         14         13         12         11         10          9          8          7          6
+      8             16         15         14         13         12         11         10          9          8          7
+      9             17         16         15         14         13         12         11         10          9          8
+     10             18         17         16         15         14         13         12         11         10          9
+     11             19         18         17         16         15         14         13         12         11         10
+     12             20         19         18         17         16         15         14         13         12         11
+flot INP=FLOTC OUT=FLOTCO2 SIZE=(2,3,8,7) 'CLOCK
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTCO2
+Beginning VICAR task list
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp            1          2          3          4          5          6          7          8
+   Line
+      1             10          9          8          7          6          5          4          3
+      2             11         10          9          8          7          6          5          4
+      3             12         11         10          9          8          7          6          5
+      4             13         12         11         10          9          8          7          6
+      5             14         13         12         11         10          9          8          7
+      6             15         14         13         12         11         10          9          8
+      7             16         15         14         13         12         11         10          9
+flot FLOTC FLOTCO3 'COUNTER
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTCO3
+Beginning VICAR task list
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1             11         12         13         14         15         16         17         18         19         20
+      2             10         11         12         13         14         15         16         17         18         19
+      3              9         10         11         12         13         14         15         16         17         18
+      4              8          9         10         11         12         13         14         15         16         17
+      5              7          8          9         10         11         12         13         14         15         16
+      6              6          7          8          9         10         11         12         13         14         15
+      7              5          6          7          8          9         10         11         12         13         14
+      8              4          5          6          7          8          9         10         11         12         13
+      9              3          4          5          6          7          8          9         10         11         12
+     10              2          3          4          5          6          7          8          9         10         11
+     11              1          2          3          4          5          6          7          8          9         10
+     12              0          1          2          3          4          5          6          7          8          9
+flot FLOTC FLOTCO4 'VERT
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTCO4
+Beginning VICAR task list
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1              9         10         11         12         13         14         15         16         17         18
+      2              8          9         10         11         12         13         14         15         16         17
+      3              7          8          9         10         11         12         13         14         15         16
+      4              6          7          8          9         10         11         12         13         14         15
+      5              5          6          7          8          9         10         11         12         13         14
+      6              4          5          6          7          8          9         10         11         12         13
+      7              3          4          5          6          7          8          9         10         11         12
+      8              2          3          4          5          6          7          8          9         10         11
+      9              1          2          3          4          5          6          7          8          9         10
+     10              0          1          2          3          4          5          6          7          8          9
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp           11         12
+   Line
+      1             19         20
+      2             18         19
+      3             17         18
+      4             16         17
+      5             15         16
+      6             14         15
+      7             13         14
+      8             12         13
+      9             11         12
+     10             10         11
+gen FLOTD NL=10 NS=12 'REAL4
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+flot INP=FLOTD OUT=FLOTDO
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTDO
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:14 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       9.000E+00   8.000E+00   7.000E+00   6.000E+00   5.000E+00   4.000E+00   3.000E+00   2.000E+00   1.000E+00   0.000E+00
+      2       1.000E+01   9.000E+00   8.000E+00   7.000E+00   6.000E+00   5.000E+00   4.000E+00   3.000E+00   2.000E+00   1.000E+00
+      3       1.100E+01   1.000E+01   9.000E+00   8.000E+00   7.000E+00   6.000E+00   5.000E+00   4.000E+00   3.000E+00   2.000E+00
+      4       1.200E+01   1.100E+01   1.000E+01   9.000E+00   8.000E+00   7.000E+00   6.000E+00   5.000E+00   4.000E+00   3.000E+00
+      5       1.300E+01   1.200E+01   1.100E+01   1.000E+01   9.000E+00   8.000E+00   7.000E+00   6.000E+00   5.000E+00   4.000E+00
+      6       1.400E+01   1.300E+01   1.200E+01   1.100E+01   1.000E+01   9.000E+00   8.000E+00   7.000E+00   6.000E+00   5.000E+00
+      7       1.500E+01   1.400E+01   1.300E+01   1.200E+01   1.100E+01   1.000E+01   9.000E+00   8.000E+00   7.000E+00   6.000E+00
+      8       1.600E+01   1.500E+01   1.400E+01   1.300E+01   1.200E+01   1.100E+01   1.000E+01   9.000E+00   8.000E+00   7.000E+00
+      9       1.700E+01   1.600E+01   1.500E+01   1.400E+01   1.300E+01   1.200E+01   1.100E+01   1.000E+01   9.000E+00   8.000E+00
+     10       1.800E+01   1.700E+01   1.600E+01   1.500E+01   1.400E+01   1.300E+01   1.200E+01   1.100E+01   1.000E+01   9.000E+00
+     11       1.900E+01   1.800E+01   1.700E+01   1.600E+01   1.500E+01   1.400E+01   1.300E+01   1.200E+01   1.100E+01   1.000E+01
+     12       2.000E+01   1.900E+01   1.800E+01   1.700E+01   1.600E+01   1.500E+01   1.400E+01   1.300E+01   1.200E+01   1.100E+01
+flot INP=FLOTD OUT=FLOTDO2 SIZE=(2,3,8,7) 'HORIZ
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTDO2
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:15 2015
+     Samp             1           2           3           4           5           6           7
+   Line
+      1       9.000E+00   8.000E+00   7.000E+00   6.000E+00   5.000E+00   4.000E+00   3.000E+00
+      2       1.000E+01   9.000E+00   8.000E+00   7.000E+00   6.000E+00   5.000E+00   4.000E+00
+      3       1.100E+01   1.000E+01   9.000E+00   8.000E+00   7.000E+00   6.000E+00   5.000E+00
+      4       1.200E+01   1.100E+01   1.000E+01   9.000E+00   8.000E+00   7.000E+00   6.000E+00
+      5       1.300E+01   1.200E+01   1.100E+01   1.000E+01   9.000E+00   8.000E+00   7.000E+00
+      6       1.400E+01   1.300E+01   1.200E+01   1.100E+01   1.000E+01   9.000E+00   8.000E+00
+      7       1.500E+01   1.400E+01   1.300E+01   1.200E+01   1.100E+01   1.000E+01   9.000E+00
+      8       1.600E+01   1.500E+01   1.400E+01   1.300E+01   1.200E+01   1.100E+01   1.000E+01
+flot FLOTD FLOTDO3 'COUNTER
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTDO3
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:15 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01   1.900E+01   2.000E+01
+      2       1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01   1.900E+01
+      3       9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01
+      4       8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01
+      5       7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01
+      6       6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01
+      7       5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01
+      8       4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01
+      9       3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01
+     10       2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01
+     11       1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01
+     12       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
+flot FLOTD FLOTDO4 'TRANS
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTDO4
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:14 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:15 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       0.000E+00   1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00
+      2       1.000E+00   2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01
+      3       2.000E+00   3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01
+      4       3.000E+00   4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01
+      5       4.000E+00   5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01
+      6       5.000E+00   6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01
+      7       6.000E+00   7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01
+      8       7.000E+00   8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01
+      9       8.000E+00   9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01
+     10       9.000E+00   1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01
+     11       1.000E+01   1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01   1.900E+01
+     12       1.100E+01   1.200E+01   1.300E+01   1.400E+01   1.500E+01   1.600E+01   1.700E+01   1.800E+01   1.900E+01   2.000E+01
+gen FLOTRED NL=10 NS=12 IVAL=1
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen FLOTGRN NL=10 NS=12 IVAL=101
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen FLOTBLU NL=10 NS=12 IVAL=201
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+viccub (FLOTRED,FLOTGRN,FLOTBLU) FLOTCOLOR
+Beginning VICAR task viccub
+flot FLOTCOLOR FLOTCOLORROT
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTCOLORROT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:15 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:15 2015
+ ***********
+ Band =     1
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      10   9   8   7   6   5   4   3   2   1
+      2      11  10   9   8   7   6   5   4   3   2
+      3      12  11  10   9   8   7   6   5   4   3
+      4      13  12  11  10   9   8   7   6   5   4
+      5      14  13  12  11  10   9   8   7   6   5
+      6      15  14  13  12  11  10   9   8   7   6
+      7      16  15  14  13  12  11  10   9   8   7
+      8      17  16  15  14  13  12  11  10   9   8
+      9      18  17  16  15  14  13  12  11  10   9
+     10      19  18  17  16  15  14  13  12  11  10
+     11      20  19  18  17  16  15  14  13  12  11
+     12      21  20  19  18  17  16  15  14  13  12
+
+
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:15 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:15 2015
+ ***********
+ Band =     2
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1     110 109 108 107 106 105 104 103 102 101
+      2     111 110 109 108 107 106 105 104 103 102
+      3     112 111 110 109 108 107 106 105 104 103
+      4     113 112 111 110 109 108 107 106 105 104
+      5     114 113 112 111 110 109 108 107 106 105
+      6     115 114 113 112 111 110 109 108 107 106
+      7     116 115 114 113 112 111 110 109 108 107
+      8     117 116 115 114 113 112 111 110 109 108
+      9     118 117 116 115 114 113 112 111 110 109
+     10     119 118 117 116 115 114 113 112 111 110
+     11     120 119 118 117 116 115 114 113 112 111
+     12     121 120 119 118 117 116 115 114 113 112
+
+
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:15 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:15 2015
+ ***********
+ Band =     3
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1     210 209 208 207 206 205 204 203 202 201
+      2     211 210 209 208 207 206 205 204 203 202
+      3     212 211 210 209 208 207 206 205 204 203
+      4     213 212 211 210 209 208 207 206 205 204
+      5     214 213 212 211 210 209 208 207 206 205
+      6     215 214 213 212 211 210 209 208 207 206
+      7     216 215 214 213 212 211 210 209 208 207
+      8     217 216 215 214 213 212 211 210 209 208
+      9     218 217 216 215 214 213 212 211 210 209
+     10     219 218 217 216 215 214 213 212 211 210
+     11     220 219 218 217 216 215 214 213 212 211
+     12     221 220 219 218 217 216 215 214 213 212
+flot FLOTCOLOR FLOTCOLORROT BAND=2
+Beginning VICAR task flot
+FLOT version May 21 2015
+list FLOTCOLORROT
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Thu May 21 14:58:15 2015
+ Task:FLOT      User:wlb       Date_Time:Thu May 21 14:58:15 2015
+     Samp     1       3       5       7       9
+   Line
+      1     110 109 108 107 106 105 104 103 102 101
+      2     111 110 109 108 107 106 105 104 103 102
+      3     112 111 110 109 108 107 106 105 104 103
+      4     113 112 111 110 109 108 107 106 105 104
+      5     114 113 112 111 110 109 108 107 106 105
+      6     115 114 113 112 111 110 109 108 107 106
+      7     116 115 114 113 112 111 110 109 108 107
+      8     117 116 115 114 113 112 111 110 109 108
+      9     118 117 116 115 114 113 112 111 110 109
+     10     119 118 117 116 115 114 113 112 111 110
+     11     120 119 118 117 116 115 114 113 112 111
+     12     121 120 119 118 117 116 115 114 113 112
+ush rm FLOTA* FLOTB* FLOTC* FLOTD* FLOTG* FLOTR*
 END-PROC
 $ Return
 $!#############################################################################
@@ -688,13 +1274,7 @@ $Imake_File:
 $ create flot.imake
 #define PROGRAM flot
 
-#if VMS_OS
-#define MODULE_LIST flot.f flot_vms.f 
-#define CLEAN_OTHER_LIST flot_unix.f 
-#else
 #define MODULE_LIST flot.f flot_unix.f 
-#define CLEAN_OTHER_LIST flot_vms.f 
-#endif
 
 #define MAIN_LANG_FORTRAN
 #define R2LIB

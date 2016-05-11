@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module power
-$! VPACK Version 1.9, Wednesday, January 09, 2013, 14:12:58
+$! VPACK Version 1.9, Thursday, April 23, 2015, 17:15:35
 $!
 $! Execute by entering:		$ @power
 $!
@@ -152,7 +152,7 @@ $ vpack power.com -mixed -
 	-s power.f -
 	-i power.imake -
 	-p power.pdf -
-	-t tstpower.pdf tstpower.log_solos
+	-t tstpower.pdf tstpower.log.solos tstpower.log.linux
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -198,22 +198,25 @@ c	Inv
 cc      COMMON /C1/ NLI,NSI
 	integer*2 BUF(1024)
 	integer*4 STATUS,COUNT,DEF,SL,SS
-	integer*4 PLOTT,PTR,EL
+	integer*4 PTR,EL
 	integer*4 icnt,inunit,j,k,kp,line,nhdr,nl,ns,nleft,np,nmid
 	integer*4 jj,nli,nsi,ntitle,ntitx,ntot,ntbl,nplotgpi
-	integer*4 i,ii,nplotfile,plotwid,plotht,nheadr(70)
+	integer*4 i,ii,nploteps,plotwid,plotht,nheadr(70)
+	integer*4 nplotgpi2,nplotf,isize,isize2,psize
 	real*4 SCAL,KPP,BSCALE,fq,fmax,rn,rnn,rnor,vqav,vscl,x
 	real*4 vav,y,ylen,fpos,labstep,tmp
 	real*4 pow(513),plat(1025)
 	real*8 dnor,dvr,dav,vf,vvr
-	logical*4 XVPTST
+	logical*4 XVPTST,epsplot
 	character*1 tab
-	character*4 eps/'.eps'/,gpi/'.gpi'/
+	character*4 eps/'.eps'/,gpi/'.gpi'/,asc/'.asc'/
+        character*8 plotfmt
 	character*24 tity,mess,msg3,msg5,msg6
-	character*52 htitx,htitle
+	character*81 htitx,htitle
 	character*60 msg2
 	character*80  HEADR(70)    !strings for the plot header ala OTF1.
-	character*255 filename,plotfile,pfile,tbl,plotgpi,filemsg
+	character*255 filename,ploteps,plotout,tbl,plotgpi,filemsg,plotgpi2
+	character*255 plotfile
 
       EQUIVALENCE (C(181),PLAT(1))
 
@@ -224,11 +227,15 @@ cc      COMMON /C1/ NLI,NSI
       DATA MSG5/'    MEAN (DN) =         '/
       DATA MSG6/'    SIGMA(DN) =         '/
 
-	call xvmessage('power - Jul 3, 2012',' ')
-	PLOTT = 0			!default = noplot to be saved
-      htitx(1:52)=' '
-      htitle(1:52)=' '
+	call xvmessage('power - Jul 13, 2013 (64-bit gnuplot) - rjb',' ')
 
+	epsplot=.false.				!default = noplot to be saved
+      htitx(1:80)=' '
+      htitle(1:80)=' '
+
+	nplotgpi=0
+	nplotgpi2=0
+	nploteps=0
 C       OPEN INPUT DATA 
       CALL XVUNIT(INUNIT,'INP',1,STATUS,' ')
       CALL XVOPEN(INUNIT,STATUS,'U_FORMAT','HALF','OPEN_ACT', 'SA',
@@ -291,25 +298,37 @@ C       PARAM 'YLEN'
 C
 C	IF (XVPTST('PRINT')) PRINT=1
 C
-	IF (XVPTST('PLOT')) PLOTT=1
+	epsplot = .false.
+	CALL XVPARM ('PLOTFMT',plotfmt,count,def,1)
+	    if (plotfmt .eq. 'EPS' .or. plotfmt .eq. 'eps') epsplot = .true.
 c	if FILE called then create a postscript file
-	CALL XVPARM('FILE',PLOTFILE,COUNT,DEF,1)
+	CALL XVPARM('PLOTOUT',PLOTFILE,COUNT,DEF,1)
 	IF (COUNT .EQ. 1) THEN
-		PLOTT=1
-		pfile = plotfile
-		nplotfile=index(pfile,' ') - 1
-		plotfile=pfile(1:nplotfile)//eps
-		plotgpi=pfile(1:nplotfile)//gpi
+		plotout = plotfile
+		nplotf=index(plotout,'  ') - 1
+		ploteps=plotout(1:nplotf)//eps
+		nploteps=index(ploteps,'  ') - 1
+		plotgpi=plotout(1:nplotf)//gpi
 		nplotgpi=index(plotgpi,' ') - 1		!replaced len with index
+	       plotgpi2=plotout(1:nplotf)//eps//gpi
+               nplotgpi2=index(plotgpi2,'  ') - 1
+            tbl = plotout(1:nplotf)//asc
+            ntbl = index(tbl,'  ') - 1
+	
 	ELSE
-	    if (plott .eq. 1) then
-		PLOTFILE='power.eps'
+	    if (epsplot) then
+		ploteps='power.eps'
+		nploteps=index(ploteps,' ') - 1
 	    else
 		PLOTFILE='NONE'
 	    endif
-	    nplotfile=index(plotfile,' ') - 1
 	    plotgpi='power.gpi'
 	    nplotgpi=index(plotgpi,' ') - 1
+	    plotgpi2='power.eps.gpi'
+	    nplotgpi2=index(plotgpi2,'  ') - 1
+	    tbl = 'power.asc'
+            ntbl = index(tbl,'  ') - 1
+
 	END IF
 C
 C----------------------------------------------------------
@@ -425,15 +444,15 @@ C      DNOR=1.0D+00/(DFLOAT(NS)*DFLOAT(NL))
 
 C------------------------------------------------------
 C-------OPEN OUTPUT TEXT FILE TO PRINT ALL POINTS TO NMID
-	tbl="tmp.tbl"
-	CALL XVPARM('TABLE',TBL,COUNT,DEF,1)
-	ntbl=index(tbl,' ') - 1
+c	tbl="tmp.tbl"
+c	CALL XVPARM('TABLE',TBL,COUNT,DEF,1)
+c	ntbl=index(tbl,' ') - 1
 cc	IF(COUNT .GT. 0) THEN
  	  TAB=CHAR(9)
-	  OPEN(99,FILE=TBL,STATUS='UNKNOWN',IOSTAT=J,ERR=998)
+	  OPEN(99,FILE=TBL(1:ntbl),STATUS='UNKNOWN',IOSTAT=J,ERR=998)
 
 	  IF (XVPTST('COLHDR')) 
-     1            WRITE(99,121) 'FREQUENCY',TAB,'RMS_POWER'
+     1            WRITE(99,121) '# FREQUENCY',TAB,'RMS_POWER'
 
 	  DO 119 K=1,NMID
 	    FQ = (K-1)*0.5/NMID         !FREQ. 0.5 IS AT ELEMENT NMID
@@ -556,7 +575,8 @@ c GNUPLOT default 640x480 plot - increase vertical size if lots of vicar labels
 	plotht = 480
 	plotwid = 640
 	labstep = 0.04
-	
+	isize = 10
+	psize = 16
 	if (nhdr .gt. 16) then
 	   tmp = nhdr/16
 	   plotht = int(plotht * tmp)
@@ -578,11 +598,12 @@ ccc	print *, tbl(1:ntbl), plotwid,plotht,htitx(1:ntitx),ylen,fmax,headr(1)(1:nhe
         write(98,fmt=10105,iostat=jj,err=995) 
 10110 format('# Data in ',a)
         write(98,fmt=10110,iostat=jj,err=995) tbl(1:ntbl)
-10115 format('set term x11 font ariel 10 size ',i4,', ',i4)
-        write(98,fmt=10115,iostat=jj,err=995) plotwid,plotht
+10115 format('set term x11 font "ariel,',i2,'" size ',i4,', ',i4)
+C size is XX,YY
+        write(98,fmt=10115,iostat=jj,err=995) isize,plotwid,plotht
 10116 format('set output')				!set output to screen
 	write(98,fmt=10116,iostat=jj,err=995)
-10120 format('set grid ')
+10120 format('set grid')
        write(98,fmt=10120,iostat=jj,err=995)
 10125 format("set ylab 'AMPLITUDE   (DN P-P)'" )
        write(98,fmt=10125,iostat=jj,err=995) 
@@ -596,20 +617,21 @@ ccc	print *, tbl(1:ntbl), plotwid,plotht,htitx(1:ntitx),ylen,fmax,headr(1)(1:nhe
 	write(98,fmt=10142,iostat=jj,err=995)
 10142 format("set clip two")				!how to deal with connecting lines out of range
         write(98,fmt=10141,iostat=jj,err=995)
-10145 format("set title '",a,"'")
-       write(98,fmt=10145,iostat=jj,err=995) headr(1)(1:nheadr(1))
+10145 format('set title "',a,'" font "Ariel,',i2,'"')
+       write(98,fmt=10145,iostat=jj,err=995) headr(1)(1:nheadr(1)),isize
 ccc	print *, "here2"
 c
 
 c output labels for only top 60% of plot
+	isize2 = isize - 1
 	fpos=1.0
 	do ii=2,nhdr
 		i = ii - 1
 		fpos = fpos - labstep
 10160 format('set label ',i2,' "',a,'" at graph .40 ,',f5.2,
-     1 ' font "ariel, 9" front nopoint tc def')
+     1 ' font "ariel,',i2,'" front nopoint tc def')
 c	1 ' font "ariel 8" front nopoint tc def')
-	write(98,fmt=10160,iostat=jj,err=995) i,headr(ii)(1:nheadr(ii)), fpos
+	write(98,fmt=10160,iostat=jj,err=995) i,headr(ii)(1:nheadr(ii)), fpos, isize2
 cc	print 10160, i,headr(ii)(1:nheadr(ii)), fpos
 cc10155 format("set label 2 '",a,"' at graph 0.4, 0.90 front nopoint tc def")
 cc        write(98,fmt=10155,iostat=jj,err=995) headr(3)
@@ -622,19 +644,56 @@ c10250 format("plot '",a,"' u 1:2 t '' smooth frequency ls 3 w linespoints")
        write(98,fmt=10250,iostat=jj,err=995) tbl(1:ntbl)
 10255 format("pause mouse any")			!allows plot to display on screen until mouse click
        write(98,fmt=10255,iostat=jj,err=995)
+	close (98)
 c	
 c   if desired, create eps output plot
-	if (plott .eq. 1) then
-10300 format("set terminal postscript eps enhanced")
-	write(98,fmt=10300,iostat=jj,err=995)
+	if (epsplot) then
+       open(97,file=plotgpi2(1:nplotgpi2),status='UNKNOWN',iostat=jj,err=995)
+C10100 format('# Created by program power')              !#'s are ignored in gnuplot
+        write(97,fmt=10100,iostat=jj,err=995)
+C10105 format('# Gnuplot commands for power plot')
+        write(97,fmt=10105,iostat=jj,err=995)
+C10110 format('# Data in ',a)
+        write(97,fmt=10110,iostat=jj,err=995) tbl(1:ntbl)
+10300 format('set terminal postscript eps enhanced color "Ariel" ',i2,'  size 11 ,8')
+        write(97,fmt=10300,iostat=jj,err=995) psize
 10305 format("set output '",a,"'")
-	write(98,fmt=10305,iostat=jj,err=995) plotfile(1:nplotfile)
-10310 format("replot")
-	write(98,fmt=10310,iostat=jj,err=995)
+c	print *,'ploteps = ',ploteps(1:nploteps)
+        write(97,fmt=10305,iostat=jj,err=995) ploteps(1:nploteps)
+C10120 format('set grid ')
+       write(97,fmt=10120,iostat=jj,err=995)
+C10125 format("set ylab 'AMPLITUDE   (DN P-P)'" )
+       write(97,fmt=10125,iostat=jj,err=995)
+C10130 format("set xlab '",a,"'")
+       write(97,fmt=10130,iostat=jj,err=995) htitx(1:ntitx)
+C10135 format("set yrange [0:",f6.2,"]")
+       write(97,fmt=10135,iostat=jj,err=995) ylen
+C10140 format("set xrange [0.0:",f5.2,"]")
+       write(97,fmt=10140,iostat=jj,err=995) fmax
+C10141 format("set clip points")                         !how to deal with points out of range
+        write(97,fmt=10142,iostat=jj,err=995)
+C10142 format("set clip two")                            !how to deal with connecting lines out of range
+        write(97,fmt=10141,iostat=jj,err=995)
+C10145 format("set title '",a,"'")
+       write(97,fmt=10145,iostat=jj,err=995) headr(1)(1:nheadr(1)), psize
 
-	endif
+c output labels for only top 60% of plot
+        fpos=1.0
+          do ii=2,nhdr
+                i = ii - 1
+                fpos = fpos - labstep
+C10160 format('set label ',i2,' "',a,'" at graph .40 ,',f5.2,
+C     1 ' font "ariel,9" front nopoint tc def')
+c       1 ' font "ariel 8" front nopoint tc def')
+        write(97,fmt=10160,iostat=jj,err=995) i,headr(ii)(1:nheadr(ii)), fpos, psize
+cc      print 10160, i,headr(ii)(1:nheadr(ii)), fpos
+cc10155 format("set label 2 '",a,"' at graph 0.4, 0.90 front nopoint tc def")
+cc        write(98,fmt=10155,iostat=jj,err=995) headr(3)
+          enddo
+	write(97,fmt=10250,iostat=jj,err=995) tbl(1:ntbl)
+	endif 	!epsplot
 
-	close(98)
+	close(97)
 cc      END IF	!IF (PLOTT .EQ. 1) THEN	
 C------------------------------------------------------
 	CALL XVCLOSE(INUNIT,STATUS,' ')
@@ -910,19 +969,19 @@ process help=*
  PARM SS          TYPE=INTEGER  COUNT=1          DEFAULT=1
  PARM NL          TYPE=INTEGER  COUNT=1          DEFAULT=0
  PARM NS          TYPE=INTEGER  COUNT=1          DEFAULT=0
+ PARM PLOTFMT     TYPE=STRING   COUNT=(0:1) VALID=(GNUPLOT,EPS) DEFAULT=--
+ PARM PLOTOUT     TYPE=STRING   COUNT=0:1       DEFAULT=--
  PARM EXPONENT    TYPE=INTEGER  COUNT=(0:1) VALID=(3:10) DEFAULT=--
  PARM SCALE       TYPE=REAL     COUNT=1          DEFAULT=2.
  PARM DNSCALE     TYPE=REAL     COUNT=1          DEFAULT=1.0
  PARM FMAX        TYPE=REAL     COUNT=1          DEFAULT=0.5
  PARM YLEN        TYPE=REAL     COUNT=1          DEFAULT=7.0
- PARM TYPE	      TYPE=KEYWORD  COUNT=(0:1) VALID=(PLOT) DEFAULT=--
- PARM FILE	      TYPE=STRING          COUNT=0:1 DEFAULT=-- 
- PARM TITLE       TYPE=(STRING,52)     COUNT=0:1 DEFAULT=--
- PARM TITLEX      TYPE=(STRING,52)     COUNT=0:1 DEFAULT="FREQUENCY (CPS)"
- PARM TABLE       TYPE=STRING	COUNT=(0:1)	     DEFAULT=--
- PARM COLUMNS     TYPE=KEYWORD  COUNT=(0:1) VALID=(COLHDR,NOCOLHDR) +
-                    DEFAULT=COLHDR
- PARM NODISP      TYPE=KEYWORD  COUNT=(0:1) VALID=NODISP   DEFAULT=--
+ PARM TITLE       TYPE=(STRING,80)     COUNT=0:1 DEFAULT=--
+ PARM TITLEX      TYPE=(STRING,80)     COUNT=0:1 DEFAULT="FREQUENCY (CPS)"
+! PARM TABLE       TYPE=STRING	COUNT=(0:1)	     DEFAULT=--
+! PARM COLUMNS     TYPE=KEYWORD  COUNT=(0:1) VALID=(COLHDR,NOCOLHDR) +
+!                    DEFAULT=COLHDR
+! PARM NODISP      TYPE=KEYWORD  COUNT=(0:1) VALID=NODISP   DEFAULT=--
  END-PROC
 .TITLE
  VICAR Application program POWER - AFIDS Version with GNUPLOT
@@ -955,67 +1014,135 @@ process help=*
 
   POWER will take the image format from the input's system label.
 
-  The parameter TABLE is used to specify the name of the file 
-  to contain the tab-delimited ASCII table of Frequency and Power values.
 
-  If TYPE=PLOT is selected, the plot is generate as a POSTSCRIPT (EPS) file.  (See 
-  FILE parameter.)  
+ PARAMETERS:
 
-  The following is from MIPL Version with the xrt commercial geraphics package:
-    The plot is also displayed on the X display unless the
-    NODISP keyword is specified.  (An X display appears to be necessary even
-    if NODISP is specified and no plot is displayed.)
+  Formerly the parameter TABLE was used to specify the name of the file 
+  to contain the tab-delimited ASCII table of Frequency and Power values 
+  to be plotted. This is now automatically created by the name in the
+  PLOTOUT parameter. TABLE  now has the name PLOTOUT.asc. The table
+  is always created even if PLOTOUT is not entered.
+
+  COLUMNS
 
 
-  FILE='filename' is used to name the output plot file.  Specifying FILE 
-  implies TYPE=PLOT. The default value of FILE is POWER.PLT.
+  If PLOTFMT=EPS is selected, the plot is generate as a POSTSCRIPT (EPS) file.  (See 
+  PLOTOUT parameter.)  
 
-  Example to plot on a X device:
+  PLOTOUT='filename' is used to name the output plot file.  Specifying PLOTOUT
+  implies TYPE=GNUPLOT. The default value of PLOTOUT is power.eps.
+
+  EXPONENT
+
+  SCALE
+
+  DNSCALE
+
+  FMAX is the highest frequency in the plotted spectrum
+
+
+  YLEN = length of Y-axis 
+
+  TITLE and TITLEX are the Title to be placed on the graph and the X-axis units
+  No entry for the y-axis. It is always "AMPLITUDE (DN P-P)". P-P is peak to peak. 
+
   
-         (..select an X display if not already done..)
-         power inp=a.img 'plot
-         
-  Example to plot on the postscript printer:
 
-         (..select an X display if not already done..)
-         power inp=a.img 'plot FILE=P.PLT
-         (..send P.PLT to a POSTSCRIPT printer using some OS command..)
 
   Example to request only tab-delimited ASCII file output:
 
- 	 power inp=a.img table=pow.tbl
+ 	 power inp=a.img
+  
+  tab delimited file will be power.asc 
+
+NOTES:
+
+  The common plotting routines used in MIPL were removed in this version
+  and converted to gnuplot commands. The Mipl version in 2011 uses the
+  xrt commercial plotting package.
+
+
+OUTPUTS:
+
+  Up to two types of outputs can be produced, interactive plots using 
+  gnuplot and hardcopy plots suitable for publications using gnuplot and ghostscript
+  or gimp.
+
+  The first type of plot is rendered via the creation of a gnuplot instruction, or
+  command file. This is indicated by the file extension of .gpi.  After completion
+  of the power task this file creates an interactive plot on the desktop, e.g.,
+  if PLOTOUT=mypower
+     ush gnuplot mypower.gpi.
+  This display stays active until mouse-clicked somewhere on the plot panel.
+  The terminal window prompt is inactive until the panel is closed.
+
+  If you wish, you can issue the following gnuplot command to keep the plot on
+  the desktop.
+
+  ush gnuplot -persist mypower.gpi
+
+  Again the terminal prompt is inactive until the plot panel has been mouse-clicked.
+  After the mouse click the panel remains but the terminal prompt is restored. This
+  makes it easy to compare outputs from several power commands.
+
+  A second output is derived from the PLOTOUT parameter. By default this parameter is
+  set to "NONE" so no hardcopy output is produced.  If you give a filename such as
+  mypower then two gpi files are created mypower.gpi and mypower.2.gpi.
+
+  ush gnuplot mypower.2.gpi 
+ 
+  then no interactive plot panel is created but it produces a file mypower.eps. This
+  file can be displayed using ghostscript (the usual unix command is gs).
+
+  gs mypopwer.eps
+
+  or gimp, e.g.,
+
+  gimp mypower.eps
+
+
 
 HISTORY
+
   ORIGINAL PROGRAMMER: T. C. Rindfleisch
   CURRENT COGNIZANT PROGRAMMER: Ray Bambery - AFIDS/Vicar version  
 
-
-     07/02/2012   RJB  ... Renamed power2 for delivery to MIPL
-                        power still uses XRT/Graph package, removed debug
-                        statements, Removed <tab> in front of continuation
-                        lines to make backward compatible with
-                        32-bit Linux gfortran 4.2.1, otherwise
-                         compatible 64-bit Linux gfortran 4.6.3</tab>
-     06/09/2011   RJB  ... Changed from commercial plotting package, xrt, to gnuplot
-                            create gnuplot commands and always create a table file
-                           all xrt calls commented out. Completely rewrote test file.
-     04/29/97  ... SP  ... Made portable for UNIX.  Adapted for XRT pltting
-                           package.  Changed COUNT for FILE parameter to 0:1
-                           so that POWER can run without setting an X DISPLAY
-                           by specifying neither 'PLOT nor FILE.  (Previously
-                           the COUNT received by the program was always 1.)
-     11/16/95  ... CCA ... MADE SCAL R*4
-     07/18/94  ... CCA ... ADD OPTION OF NO TABLE COLUMN HEADERS
-     10/20/94  ... CCA ... Corrected accumulation of amplitude
-     06/14/94  ... CCA ... FIXED FMAX, DELETED HISTOGRAM PLOT
-     04/11/94  ... CCA ... ADDED DNSCALE
-     02/22/94  ... CCA ... MAJOR CODE CLEANUP, REWORK OF LABEL HANDLING,
-			   TEST FILE AND PLOTTING OF LABELS
-     11/22/93  ... CCA ... ADD ASCII TABLE OUTPUT, CHECKS FOR OPEN
-                           ERRORS, FIX TEST, MOD SELECTION OF PLOT
-                           OR PRINT
-     09/01/84  ... FFM ... CONVERT FROM IBM TO VAX
-               T. RINDFLEISCH ... ORIGINAL RELEASE
+  1984-09-01 FFM Convert from IBM to VAX
+  1993-11-22 CCA Add ASCII table output, checks for open errors, fix test, mod 
+                 selection of plot or print
+  1994-02-22 CCA Major code cleanup, rework of label handling, test file and plotting 
+                 of labels
+  1994-04-11 CCA Added dnscale
+  1994-06-14 CCA Fixed fmax, deleted histogram plot
+  1994-10-20 CCA Corrected accumulation of amplitude
+  1994-07-18 CCA Add option of no table column headers
+  1995-11-16 CCA Made scal r*4
+  1997-04-29  SP Made portable for UNIX.  Adapted for XRT pltting
+                 package.  Changed COUNT for FILE parameter to 0:1
+                 so that POWER can run without setting an X DISPLAY
+                 by specifying neither 'PLOT nor FILE.  (Previously
+                 the COUNT received by the program was always 1.)
+  2011-06-09 RJB Changed from commercial plotting package, xrt, to gnuplot
+                 create gnuplot commands and always create a table file
+                 all xrt calls commented out. Completely rewrote test file.
+  2012-07-02 RJB Renamed power2 for delivery to MIPL
+                 power still uses XRT/Graph package, removed debug
+                 statements, Removed <tab> in front of continuation
+                 lines to make backward compatible with
+                 32-bit Linux gfortran 4.2.1, otherwise
+                 compatible 64-bit Linux gfortran 4.6.3</tab>
+  2012-10-11 RJB Renamed back to power, in agreement
+                 with Lucas Kamp of mipl. The XRT graph package
+                 is to be removed from mipl. XRT was never used by
+                 cartlab. 
+  2012-10-14 RJB Revised the scheme for producing eps files
+                 Old scheme used 1 gpi script to produce both
+                 gnuplot panel and eps file. This scheme forced
+                 power to be interactive when producing eps file
+                 Scheme like qplot2 and statplt is now used.
+  2013-07-08 RJB Redesigned plot naming conventions 
+  2013-07-13 RJB Adjusted eps format to more readable fonts
+                 Remove vestiges of debug statments
 
 .LEVEL1
 
@@ -1054,11 +1181,12 @@ Number of samples
 .VARIABLE YLEN
  length of Y axis
 
-.VARIABLE TYPE
+.VARIABLE PLOTFMT
  specification 
  of plotter output
+ Gnuplot or eps
 
-.VARIABLE FILE
+.VARIABLE PLOTOUT
  specification of output 
  plot filename
 
@@ -1070,17 +1198,9 @@ Number of samples
  user specified label of X
  axis to the plotter only
 
-.VARIABLE TABLE
- name of file to contain
- tab-delimited plot data
-
 .VARIABLE COLUMNS
  selects table column
  headers or not
-
-.VARIABLE NODISP
- If present, no plot
- is displayed on screen
 
 .LEVEL2
 
@@ -1128,16 +1248,15 @@ as  (SL,SS,NL,NS), where
 .VARIABLE YLEN
  specifies the length in inches of the Y axis.(default=7.0,max=30.)
 
-.VARIABLE TYPE
- KEYWORD - VALID=(PLOT)
- Specifies POSTSCRIPT plotting.  If 'PLOT or FILE are specified,
- then the program needs permission to write to an X display.
- If neither 'PLOT nor FILE are specified, an X device is not required and
- no POSTSCIPT plotting is generated. (See also under NODISP parameter.)
+.VARIABLE PLOTFMT
+ KEYWORD - VALID=(GNUPLOT,EPS)
+ EPS Specifies POSTSCRIPT plotting, else GNUPLOT is assumed.
+ If neither 'PLOTFMT nor PLOTOUT are specified the output table
+ will still be generated with the name power.asc
 
-.VARIABLE FILE
+.VARIABLE PLOTOUT
  Specifies the filename of the file to which the POSTSCRIPT plot is written.
- If FILE is specified, PLOT is unnecessary.  Defaults to POWER.PLT.
+ If PLOTOUT is specified, PLOT is unnecessary.  Defaults to POWER.PLT.
 
 .VARIABLE TITLE
  string - this parameter is used to add labeling to both the line printer
@@ -1151,171 +1270,253 @@ as  (SL,SS,NL,NS), where
  is FREQUENCY(CPS) where CPS can be interpreted as cycles per second or 
  cycles per sample.
 
-.VARIABLE TABLE
- string - this parameter specifies that the plot data be output to a file
- in tab-delimited ASCII form.  It also specifies the name of the file to 
- contain the plot data.  The first column of data is the FREQ
- value.  A tab character separates this from the second column of data. 
- The second column contains the square root of the power spectrum.
 
-.VARIABLE COLUMNS
- keyword - COLHDR specifies to put column headers into the ASCII table.
-           NOCOLHDR specifies no headers in the table. 
- The headers are "FREQUENCY" and "RMS POWER".  
- Default is to put headers in the table.
-
-.VARIABLE NODISP
- Keyword--Optional
- If present, no display is shown in interactive mode and output plot files
- are automatically saved.  When not present, plot is displayed and files are
- saved.
 .END
 $ Return
 $!#############################################################################
 $Test_File:
 $ create tstpower.pdf
 procedure
-!
-! removed VMS - tailored to linux/macosx on AFIDS/Vicar
-!
-
+parm    mode    type=string count=(0:1) valid=(batch,nobatch,inter) default=batch
 local   afidsroot   type=string count=1
-
+local   aftestdata  type=string count=1
 local DIR    TYPE=STRING 
 local INPIC   TYPE=STRING
 
-refgbl $echo
-refgbl $syschar
-! Jun 25, 2012 - RJB
+! Aug 23, 2013 - RJB
 ! TEST SCRIPT FOR POWER
 ! tests BYTE, HALF images
 !
 ! Vicar Programs:
 !       translog f2 typetext label-list 
 ! 
-! parameters:
-!   <none>
+! External programs
+!       gnuplot 4.6 or greater
+! 
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no display but creates .eps files
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!
+!   In batch mode it produces files testx.eps by calling gnuplot
+!       to create the encapsulated postscript file which can be
+!       later viewed with ghostscript or gimp
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
 !
 ! Requires external test data: 
 !   cartlab or mipl dependent pointers
 !
-! Requires an external graphics package - gnuplot
+!
+!   Cartlab defines env var $AFIDS_ROOT, mipl doesn't
+!   The test data in cartlab is on /raid1/test_data 
+!   but in other facilities it might be somewhere else. 
+!   
+!   To facilitate this test you can define an
+!   environment variable $AFIDS_TESTDATA to point to
+!   that data. The cartlab system does not. In the git archive
+!   on pistol there is softlink to the test data in vdev that
+!   allows this test to pass 
+
+! 
 !  the *.gpi data produced by power are gnuplot scripts
+refgbl $echo
+refgbl $syschar
+
+
 body
 !
-let _onfail="goto rm"
+let _onfail="stop"
 let $echo="yes"
 
 !check to see if mipl or cartlab for certain programs
 !cartlab defines env var $AFIDS_ROOT, mipl doesm't
 translog INP=AFIDS_ROOT TRANS=afidsroot
-
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
 if (afidsroot = "")
 !MIPL
     ush ln -s /project/test_work/testdata/cassini/iss cs
 else
 !CARTLAB
-    ush ln -s /raid1/vicar_test_images/testdata/cassini/iss cs
+    if (aftestdata = "")
+        ush ln -s /raid1/vicar_test_images/testdata/cassini/iss cs
+    else
+        ush ln -s $AFIDS_TESTDATA/vicar_test_images/testdata/cassini/iss cs
+    end-if
 end-if
 
 
 ! THIS IS A TEST SCRIPT FOR THE PROGRAM - POWER
-
+let _onfail="goto rm"
 let $echo="no"
 write "TESTS USING AN IMAGE CONTAINING A ONE CYCLE SINE WAVE OVER 256 SAMPLES"
 write "THE MEAN IS 100 DN AND THE AMPLITUDE (PEAK-TO-PEAK) IN DN IS 200."
 write "So the first element of the table should be the mean:  100 and the" 
 write "max value should be about 200 at a frequency of 1/256 = .0039"
 let $echo="yes"
-! 1
+! TEST 1
 f2 out=A.h size=(1,1,50,256) 'half func="100*(1+sin(3.1415926*samp/128.))"
-power A.h 'plot file=sin1 table=sin1.tbl scale=30 fmax=.1 'nocolhdr +
-    title="SIN1 RMS POWER SPECTRUM"
-typetext sin1.tbl
-ush gnuplot sin1.gpi
-! 2
+power A.h plotfmt=eps plotout=sin1  scale=30 fmax=.1  +
+    title="TEST 1 - RMS POWER SPECTRUM FOR FILE sin1" 
+typetext sin1.asc
+    ush gnuplot sin1.eps.gpi
+if (mode = "nobatch" or mode = "inter") 
+    ush gnuplot sin1.gpi
+end-if
+
+! TEST 2
 f2 out=A.b1 size=(1,1,50,256) 'byte func="100*(1+sin(3.1415926*samp/128.))"
-power A.b1 'plot file=sin2 table=sin2.tbl scale=30 fmax=.1 'nocolhdr +
-    TITLE="SIN2 RMS POWER SPECTRUM"
-typetext sin2.tbl
-ush gnuplot sin2.gpi
+power A.b1  plotout=sin2 scale=30 fmax=.1  +
+    TITLE="TEST 2 - RMS POWER SPECTRUM FOR BYTE FILE sin2"
+typetext sin2.asc
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot sin2.gpi
+end-if
 
 let $echo="no"
 write "TRY A SINE WAVE OVER 256 LINES"
 let $echo="yes"
-! 3
+! TEST 3
 f2 out=A.b2 size=(1,1,256,50) 'byte func="100*(1+sin(3.1415926*line/128.))"
-power A.b2 'plot file=sin3 table=sin3.tbl scale=20 fmax=.1 'nocolhdr +
-    title="SIN3 RMS POWER SPECTRUM"
-typetext sin3.tbl
-ush gnuplot sin3.gpi
+power A.b2 plotout=sin3 scale=20 fmax=.1 +
+    title="TEST 3 - RMS POWER SPECTRUM FOR BYTE FILE sin3"
+typetext sin3.asc
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot sin3.gpi
+end-if
+
 
 let $echo="no"
 write "HALFWORD DATA TESTS on Cassini data"
 let $echo="yes"
-! 4
-power cs/sum2.38 (11,11,50,140) 'PLOT file=case1 'nocolhdr +
-    title="CASE1 RMS POWER SPECTRUM"
-ush gnuplot case1.gpi
-! 5 - change x axis to FREQ 
-power cs/sum2.38 (1,1,100,500) 'PLOT FILE=case2 EXPONENT=9 TITLEX="FREQ" 'nocolhdr +
-    title="CASE2 RMS POWER SPECTRUM"
-ush gnuplot case2.gpi
-! 6 - change title to FLORANCE (for Florance Moss)   - expand x-axis to 2.0
-! although max plotted is 0.5
-power cs/sum2.38 (1,1,150,64) 'PLOT EXPONENT=6 FMAX=2.0 +
-    TITLE="FLORANCE CASE3 RMS POWER SPECTRUM" 
-ush gnuplot power.gpi
+! TEST 4
+power cs/sum2.38 (11,11,50,140) plotout=case1  +
+    title="TEST 4 - RMS POWER SPECTRUM FOR HALF FILE sum2.38"
 
-   ush mv power.eps case3.eps
-! 7 - Title is FLORANCE - DNSCALE = 20.0 times 1.0 inches
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot case1.gpi
+end-if
+
+! TEST 5 - change x axis to FREQ 
+power cs/sum2.38 (1,1,100,500) plotout=case2 EXPONENT=9 TITLEX="FREQ"  +
+    title="TEST 5 - RMS POWER SPECTRUM FOR HALF FILE sum2.38"
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot case2.gpi
+end-if
+! TEST 6 - change title to FLORANCE (for Florance Moss)   - expand x-axis to 2.0
+! although max plotted is 0.5
+! xrtgraph only allowed title to be 52 chars
+power cs/sum2.38 (1,1,150,64)  EXPONENT=6 FMAX=2.0 +
+    TITLE="TEST 6 - FLORANCE CASE3 RMS POWER SPECTRUM FOR HAF FILE sum2.38" 
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot power.gpi
+end-if
+
+! TEST 7 - Title is FLORANCE - DNSCALE = 20.0 times 1.0 inches
 f2 cs/sum2.38 T FUNC="IN1*20."
-power T (1,1,150,64) 'PLOT EXPONENT=6 FMAX=2.0  DNSCALE=20. +
-          file=case4 TITLE="FLORANCE CASE4"
-ush gnuplot case4.gpi
-! 8
-power cs/sum2.38 (1,1,120,50) EXPONENT=6 'PLOT TITLE="PLOT ONLY - CASE5" file=case5
-ush gnuplot case5.gpi
-! 9
+power T (1,1,150,64)  EXPONENT=6 FMAX=2.0  DNSCALE=20. +
+          plotout=case4 TITLE="TEST 7 - FLORANCE CASE4"
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot case4.gpi
+end-if
+! TEST 8
+power cs/sum2.38 (1,1,120,50) EXPONENT=6 TITLE="TEST 8 - PLOT ONLY - CASE5" plotout=case5
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot case5.gpi
+end-if
+! TEST 9
 ush rm power.gpi
-power cs/sum2.38 (1,1,120,50) TABLE=case6.tbl 'nocolhdr +
-    title="CASE6 RMS POWER SPECTRUM"
-typetext case6.tbl
-ush gnuplot power.gpi
+power cs/sum2.38 (1,1,120,50)  plotout=case6  +
+    title="TEST 9 - CASE6 RMS POWER SPECTRUM FOR FILE sum2.38"
+typetext case6.asc
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot case6.gpi
+end-if
+
+!ush gnuplot power.gpi
 
 let $echo="no"
 write "BYTE DATA TESTS"
 let $echo="yes"
 
 !LET INPIC = "&DIR"//"grid.byte"      
-! 10
+! TEST 10
 label-li cs/grid.byte
-ush rm power.gpi
-power cs/grid.byte (1,1,50,50) EXPONENT=6  TITLE="BYTE TEST"
-ush gnuplot power.gpi
-! 11
-power cs/grid.byte (1,1,50,50) EXPO=6 TABLE=grid1.tbl 'nocolhdr +
-    title="GRID1 RMS POWER SPECTRUN"
-typetext grid1.tbl
-ush gnuplot power.gpi
-! 12 - should get "??W - Number of samples truncated" 
-power cs/grid.byte (1,1,60,60) EXPO=6 TABLE=grid2.tbl 'nocolhdr +
-    title="GRID2 RMS POWER SPECTRUN"
-typetext grid2.tbl
-ush gnuplot power.gpi
+!ush rm power.gpi
+power cs/grid.byte (1,1,50,50) EXPONENT=6  TITLE="TEST 10 - BYTE TEST FOR FILE grid.byte" +
+     plotout=grid0
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot grid0.gpi
+end-if
+
+! TEST 11
+power cs/grid.byte (1,1,50,50) EXPO=6 PLOTOUT=grid1  +
+    title="TEST 11 - RMS POWER SPECTRUN FOR FILE grid.byte"
+typetext grid1.asc
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot grid1.gpi
+end-if
+
+! TEST 12 - should get "??W - Number of samples truncated" 
+power cs/grid.byte (1,1,60,60) EXPO=6 PLOTOUT=grid2  +
+    title="TEST 12 - RMS POWER SPECTRUN FOR FILE grid.byte"
+typetext grid2.asc
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot grid2.gpi
+end-if
+
 rm>
 ush rm cs
 let $echo="no"
 
 end-proc
 $!-----------------------------------------------------------------------------
-$ create tstpower.log_solos
-tstpower
+$ create tstpower.log.solos
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
 translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
 if (afidsroot = "")
     ush ln -s /project/test_work/testdata/cassini/iss cs
 else
+    if (aftestdata = "")
+    else
+    end-if
 end-if
+let _onfail="goto rm"
 let $echo="no"
 TESTS USING AN IMAGE CONTAINING A ONE CYCLE SINE WAVE OVER 256 SAMPLES
 THE MEAN IS 100 DN AND THE AMPLITUDE (PEAK-TO-PEAK) IN DN IS 200.
@@ -1326,16 +1527,16 @@ Beginning VICAR task f2
 F2 version 26-Jul-11
 F2 calculating every pixel
 FUNCTION EVALUATED 12800 TIMES
-power A.h 'plot file=sin1 table=sin1.tbl scale=30 fmax=.1 'nocolhdr  +
-    title="SIN1 RMS POWER SPECTRUM"
+power A.h plotfmt=eps plotout=sin1  scale=30 fmax=.1   +
+    title="TEST 1 - RMS POWER SPECTRUM FOR FILE sin1"
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
    TRANSFORM  SL =    1   SS =    1   NL =   50   NS =  256
     256 POINT TRANSFORM
    MEAN (DN) = 100.0000
    SIGMA(DN) =  70.6929
-typetext sin1.tbl
+typetext sin1.asc
 Beginning VICAR task typetext
   0.0000	   100.000
   0.0039	   199.948
@@ -1466,22 +1667,24 @@ Beginning VICAR task typetext
   0.4884	     0.000
   0.4922	     0.004
   0.4961	     0.000
-ush gnuplot sin1.gpi
+    ush gnuplot sin1.eps.gpi
+if (mode = "nobatch" or mode = "inter")
+end-if
 f2 out=A.b1 size=(1,1,50,256) 'byte func="100*(1+sin(3.1415926*samp/128.))"
 Beginning VICAR task f2
 F2 version 26-Jul-11
 F2 calculating every pixel
 FUNCTION EVALUATED 12800 TIMES
-power A.b1 'plot file=sin2 table=sin2.tbl scale=30 fmax=.1 'nocolhdr  +
-    TITLE="SIN2 RMS POWER SPECTRUM"
+power A.b1  plotout=sin2 scale=30 fmax=.1   +
+    TITLE="TEST 2 - RMS POWER SPECTRUM FOR BYTE FILE sin2"
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
    TRANSFORM  SL =    1   SS =    1   NL =   50   NS =  256
     256 POINT TRANSFORM
    MEAN (DN) = 100.0000
    SIGMA(DN) =  70.6929
-typetext sin2.tbl
+typetext sin2.asc
 Beginning VICAR task typetext
   0.0000	   100.000
   0.0039	   199.948
@@ -1612,7 +1815,8 @@ Beginning VICAR task typetext
   0.4884	     0.000
   0.4922	     0.004
   0.4961	     0.000
-ush gnuplot sin2.gpi
+if (mode = "nobatch" or mode = "inter")
+end-if
 let $echo="no"
 TRY A SINE WAVE OVER 256 LINES
 f2 out=A.b2 size=(1,1,256,50) 'byte func="100*(1+sin(3.1415926*line/128.))"
@@ -1620,16 +1824,16 @@ Beginning VICAR task f2
 F2 version 26-Jul-11
 F2 calculating every pixel
 FUNCTION EVALUATED 12800 TIMES
-power A.b2 'plot file=sin3 table=sin3.tbl scale=20 fmax=.1 'nocolhdr  +
-    title="SIN3 RMS POWER SPECTRUM"
+power A.b2 plotout=sin3 scale=20 fmax=.1  +
+    title="TEST 3 - RMS POWER SPECTRUM FOR BYTE FILE sin3"
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
    TRANSFORM  SL =    1   SS =    1   NL =  256   NS =   32
      32 POINT TRANSFORM
    MEAN (DN) = 100.0000
    SIGMA(DN) =  70.6929
-typetext sin3.tbl
+typetext sin3.asc
 Beginning VICAR task typetext
   0.0000	   100.000
   0.0294	     0.000
@@ -1648,75 +1852,80 @@ Beginning VICAR task typetext
   0.4118	     0.000
   0.4412	     0.000
   0.4706	     0.000
-ush gnuplot sin3.gpi
+if (mode = "nobatch" or mode = "inter")
+end-if
 let $echo="no"
 HALFWORD DATA TESTS on Cassini data
-power cs/sum2.38 (11,11,50,140) 'PLOT file=case1 'nocolhdr  +
-    title="CASE1 RMS POWER SPECTRUM"
+power cs/sum2.38 (11,11,50,140) plotout=case1   +
+    title="TEST 4 - RMS POWER SPECTRUM FOR HALF FILE sum2.38"
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
    TRANSFORM  SL =   11   SS =   11   NL =   50   NS =  128
     128 POINT TRANSFORM
    MEAN (DN) = 154.9716
    SIGMA(DN) =   3.4179
-ush gnuplot case1.gpi
-power cs/sum2.38 (1,1,100,500) 'PLOT FILE=case2 EXPONENT=9 TITLEX="FREQ" 'nocolhdr  +
-    title="CASE2 RMS POWER SPECTRUM"
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/sum2.38 (1,1,100,500) plotout=case2 EXPONENT=9 TITLEX="FREQ"   +
+    title="TEST 5 - RMS POWER SPECTRUM FOR HALF FILE sum2.38"
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
    TRANSFORM  SL =    1   SS =    1   NL =  100   NS =  500
     512 POINT TRANSFORM
    MEAN (DN) = 152.2320
    SIGMA(DN) =   5.1071
-ush gnuplot case2.gpi
-power cs/sum2.38 (1,1,150,64) 'PLOT EXPONENT=6 FMAX=2.0  +
-    TITLE="FLORANCE CASE3 RMS POWER SPECTRUM"
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/sum2.38 (1,1,150,64)  EXPONENT=6 FMAX=2.0  +
+    TITLE="TEST 6 - FLORANCE CASE3 RMS POWER SPECTRUM FOR HAF FILE sum2.38"
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
    TRANSFORM  SL =    1   SS =    1   NL =  150   NS =   64
      64 POINT TRANSFORM
    MEAN (DN) = 153.6343
    SIGMA(DN) =   9.4866
-ush gnuplot power.gpi
-   ush mv power.eps case3.eps
+if (mode = "nobatch" or mode = "inter")
+end-if
 f2 cs/sum2.38 T FUNC="IN1*20."
 Beginning VICAR task f2
 F2 version 26-Jul-11
 F2 using hash table lookup
 FUNCTION EVALUATED 133 TIMES
-power T (1,1,150,64) 'PLOT EXPONENT=6 FMAX=2.0  DNSCALE=20.  +
-          file=case4 TITLE="FLORANCE CASE4"
+power T (1,1,150,64)  EXPONENT=6 FMAX=2.0  DNSCALE=20.  +
+          plotout=case4 TITLE="TEST 7 - FLORANCE CASE4"
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
    TRANSFORM  SL =    1   SS =    1   NL =  150   NS =   64
      64 POINT TRANSFORM
    MEAN (DN) = 153.6343
    SIGMA(DN) =   9.4866
-ush gnuplot case4.gpi
-power cs/sum2.38 (1,1,120,50) EXPONENT=6 'PLOT TITLE="PLOT ONLY - CASE5" file=case5
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/sum2.38 (1,1,120,50) EXPONENT=6 TITLE="TEST 8 - PLOT ONLY - CASE5" plotout=case5
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
    TRANSFORM  SL =    1   SS =    1   NL =  120   NS =   50
      64 POINT TRANSFORM
    MEAN (DN) = 152.8627
    SIGMA(DN) =  10.5103
-ush gnuplot case5.gpi
+if (mode = "nobatch" or mode = "inter")
+end-if
 ush rm power.gpi
-power cs/sum2.38 (1,1,120,50) TABLE=case6.tbl 'nocolhdr  +
-    title="CASE6 RMS POWER SPECTRUM"
+power cs/sum2.38 (1,1,120,50)  plotout=case6   +
+    title="TEST 9 - CASE6 RMS POWER SPECTRUM FOR FILE sum2.38"
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
    TRANSFORM  SL =    1   SS =    1   NL =  120   NS =   32
      32 POINT TRANSFORM
    MEAN (DN) = 151.6779
    SIGMA(DN) =  12.7927
-typetext case6.tbl
+typetext case6.asc
 Beginning VICAR task typetext
   0.0000	   151.678
   0.0294	     8.568
@@ -1735,7 +1944,8 @@ Beginning VICAR task typetext
   0.4118	     9.127
   0.4412	     8.929
   0.4706	     8.859
-ush gnuplot power.gpi
+if (mode = "nobatch" or mode = "inter")
+end-if
 let $echo="no"
 BYTE DATA TESTS
 label-li cs/grid.byte
@@ -1756,26 +1966,27 @@ LABEL version 15-Nov-2010
 FUNCTION='100*(1+sin(3.1415926*line/128.))'
  
 ************************************************************
-ush rm power.gpi
-power cs/grid.byte (1,1,50,50) EXPONENT=6  TITLE="BYTE TEST"
+power cs/grid.byte (1,1,50,50) EXPONENT=6  TITLE="TEST 10 - BYTE TEST FOR FILE grid.byte"  +
+     plotout=grid0
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
    TRANSFORM  SL =    1   SS =    1   NL =   50   NS =   50
      64 POINT TRANSFORM
    MEAN (DN) = 154.9200
    SIGMA(DN) =  27.7675
-ush gnuplot power.gpi
-power cs/grid.byte (1,1,50,50) EXPO=6 TABLE=grid1.tbl 'nocolhdr  +
-    title="GRID1 RMS POWER SPECTRUN"
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/grid.byte (1,1,50,50) EXPO=6 PLOTOUT=grid1   +
+    title="TEST 11 - RMS POWER SPECTRUN FOR FILE grid.byte"
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
    TRANSFORM  SL =    1   SS =    1   NL =   50   NS =   50
      64 POINT TRANSFORM
    MEAN (DN) = 154.9200
    SIGMA(DN) =  27.7675
-typetext grid1.tbl
+typetext grid1.asc
 Beginning VICAR task typetext
   0.0000	   198.298
   0.0152	     0.000
@@ -1810,18 +2021,19 @@ Beginning VICAR task typetext
   0.4545	     0.000
   0.4697	     0.000
   0.4848	     0.000
-ush gnuplot power.gpi
-power cs/grid.byte (1,1,60,60) EXPO=6 TABLE=grid2.tbl 'nocolhdr  +
-    title="GRID2 RMS POWER SPECTRUN"
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/grid.byte (1,1,60,60) EXPO=6 PLOTOUT=grid2   +
+    title="TEST 12 - RMS POWER SPECTRUN FOR FILE grid.byte"
 Beginning VICAR task power
-power - Jul 3, 2012
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
 MIPL RMS POWER SPECTRUM
 ??W - Number of samples truncated
    TRANSFORM  SL =    1   SS =    1   NL =   60   NS =   50
      64 POINT TRANSFORM
    MEAN (DN) = 162.0500
    SIGMA(DN) =  29.9519
-typetext grid2.tbl
+typetext grid2.asc
 Beginning VICAR task typetext
   0.0000	   207.424
   0.0152	     0.000
@@ -1856,10 +2068,599 @@ Beginning VICAR task typetext
   0.4545	     0.000
   0.4697	     0.000
   0.4848	     0.000
-ush gnuplot power.gpi
+if (mode = "nobatch" or mode = "inter")
+end-if
 ush rm cs
 let $echo="no"
-exit
-slogoff
+$!-----------------------------------------------------------------------------
+$ create tstpower.log.linux
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
+if (afidsroot = "")
+    ush ln -s /project/test_work/testdata/cassini/iss cs
+else
+    if (aftestdata = "")
+    else
+    end-if
+end-if
+let _onfail="goto rm"
+let $echo="no"
+TESTS USING AN IMAGE CONTAINING A ONE CYCLE SINE WAVE OVER 256 SAMPLES
+THE MEAN IS 100 DN AND THE AMPLITUDE (PEAK-TO-PEAK) IN DN IS 200.
+So the first element of the table should be the mean:  100 and the
+max value should be about 200 at a frequency of 1/256 = .0039
+f2 out=A.h size=(1,1,50,256) 'half func="100*(1+sin(3.1415926*samp/128.))"
+Beginning VICAR task f2
+F2 version 26-Jul-11
+F2 calculating every pixel
+FUNCTION EVALUATED 12800 TIMES
+power A.h plotfmt=eps plotout=sin1  scale=30 fmax=.1   +
+    title="TEST 1 - RMS POWER SPECTRUM FOR FILE sin1"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =   50   NS =  256
+    256 POINT TRANSFORM
+   MEAN (DN) = 100.0000
+   SIGMA(DN) =  70.6929
+typetext sin1.asc
+Beginning VICAR task typetext
+  0.0000	   100.000
+  0.0039	   199.948
+  0.0078	     0.000
+  0.0116	     0.032
+  0.0155	     0.000
+  0.0194	     0.203
+  0.0233	     0.000
+  0.0271	     0.160
+  0.0310	     0.000
+  0.0349	     0.111
+  0.0388	     0.000
+  0.0426	     0.023
+  0.0465	     0.000
+  0.0504	     0.063
+  0.0543	     0.000
+  0.0581	     0.079
+  0.0620	     0.000
+  0.0659	     0.155
+  0.0698	     0.000
+  0.0736	     0.017
+  0.0775	     0.000
+  0.0814	     0.075
+  0.0853	     0.000
+  0.0891	     0.015
+  0.0930	     0.000
+  0.0969	     0.081
+  0.1008	     0.000
+  0.1047	     0.206
+  0.1085	     0.000
+  0.1124	     0.199
+  0.1163	     0.000
+  0.1202	     0.121
+  0.1240	     0.000
+  0.1279	     0.128
+  0.1318	     0.000
+  0.1357	     0.015
+  0.1395	     0.000
+  0.1434	     0.098
+  0.1473	     0.000
+  0.1512	     0.179
+  0.1550	     0.000
+  0.1589	     0.003
+  0.1628	     0.000
+  0.1667	     0.204
+  0.1705	     0.000
+  0.1744	     0.028
+  0.1783	     0.000
+  0.1822	     0.017
+  0.1860	     0.000
+  0.1899	     0.120
+  0.1938	     0.000
+  0.1977	     0.076
+  0.2016	     0.000
+  0.2054	     0.034
+  0.2093	     0.000
+  0.2132	     0.018
+  0.2171	     0.000
+  0.2209	     0.093
+  0.2248	     0.000
+  0.2287	     0.051
+  0.2326	     0.000
+  0.2364	     0.113
+  0.2403	     0.000
+  0.2442	     0.108
+  0.2481	     0.000
+  0.2519	     0.079
+  0.2558	     0.000
+  0.2597	     0.041
+  0.2636	     0.000
+  0.2674	     0.013
+  0.2713	     0.000
+  0.2752	     0.107
+  0.2791	     0.000
+  0.2829	     0.046
+  0.2868	     0.000
+  0.2907	     0.106
+  0.2946	     0.000
+  0.2984	     0.120
+  0.3023	     0.000
+  0.3062	     0.036
+  0.3101	     0.000
+  0.3140	     0.035
+  0.3178	     0.000
+  0.3217	     0.254
+  0.3256	     0.000
+  0.3295	     0.083
+  0.3333	     0.000
+  0.3372	     0.105
+  0.3411	     0.000
+  0.3450	     0.076
+  0.3488	     0.000
+  0.3527	     0.110
+  0.3566	     0.000
+  0.3605	     0.061
+  0.3643	     0.000
+  0.3682	     0.073
+  0.3721	     0.000
+  0.3760	     0.028
+  0.3798	     0.000
+  0.3837	     0.254
+  0.3876	     0.000
+  0.3915	     0.174
+  0.3953	     0.000
+  0.3992	     0.182
+  0.4031	     0.000
+  0.4070	     0.034
+  0.4109	     0.000
+  0.4147	     0.025
+  0.4186	     0.000
+  0.4225	     0.075
+  0.4264	     0.000
+  0.4302	     0.099
+  0.4341	     0.000
+  0.4380	     0.033
+  0.4419	     0.000
+  0.4457	     0.170
+  0.4496	     0.000
+  0.4535	     0.099
+  0.4574	     0.000
+  0.4612	     0.030
+  0.4651	     0.000
+  0.4690	     0.068
+  0.4729	     0.000
+  0.4767	     0.081
+  0.4806	     0.000
+  0.4845	     0.001
+  0.4884	     0.000
+  0.4922	     0.004
+  0.4961	     0.000
+    ush gnuplot sin1.eps.gpi
+if (mode = "nobatch" or mode = "inter")
+end-if
+f2 out=A.b1 size=(1,1,50,256) 'byte func="100*(1+sin(3.1415926*samp/128.))"
+Beginning VICAR task f2
+F2 version 26-Jul-11
+F2 calculating every pixel
+FUNCTION EVALUATED 12800 TIMES
+power A.b1  plotout=sin2 scale=30 fmax=.1   +
+    TITLE="TEST 2 - RMS POWER SPECTRUM FOR BYTE FILE sin2"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =   50   NS =  256
+    256 POINT TRANSFORM
+   MEAN (DN) = 100.0000
+   SIGMA(DN) =  70.6929
+typetext sin2.asc
+Beginning VICAR task typetext
+  0.0000	   100.000
+  0.0039	   199.948
+  0.0078	     0.000
+  0.0116	     0.032
+  0.0155	     0.000
+  0.0194	     0.203
+  0.0233	     0.000
+  0.0271	     0.160
+  0.0310	     0.000
+  0.0349	     0.111
+  0.0388	     0.000
+  0.0426	     0.023
+  0.0465	     0.000
+  0.0504	     0.063
+  0.0543	     0.000
+  0.0581	     0.079
+  0.0620	     0.000
+  0.0659	     0.155
+  0.0698	     0.000
+  0.0736	     0.017
+  0.0775	     0.000
+  0.0814	     0.075
+  0.0853	     0.000
+  0.0891	     0.015
+  0.0930	     0.000
+  0.0969	     0.081
+  0.1008	     0.000
+  0.1047	     0.206
+  0.1085	     0.000
+  0.1124	     0.199
+  0.1163	     0.000
+  0.1202	     0.121
+  0.1240	     0.000
+  0.1279	     0.128
+  0.1318	     0.000
+  0.1357	     0.015
+  0.1395	     0.000
+  0.1434	     0.098
+  0.1473	     0.000
+  0.1512	     0.179
+  0.1550	     0.000
+  0.1589	     0.003
+  0.1628	     0.000
+  0.1667	     0.204
+  0.1705	     0.000
+  0.1744	     0.028
+  0.1783	     0.000
+  0.1822	     0.017
+  0.1860	     0.000
+  0.1899	     0.120
+  0.1938	     0.000
+  0.1977	     0.076
+  0.2016	     0.000
+  0.2054	     0.034
+  0.2093	     0.000
+  0.2132	     0.018
+  0.2171	     0.000
+  0.2209	     0.093
+  0.2248	     0.000
+  0.2287	     0.051
+  0.2326	     0.000
+  0.2364	     0.113
+  0.2403	     0.000
+  0.2442	     0.108
+  0.2481	     0.000
+  0.2519	     0.079
+  0.2558	     0.000
+  0.2597	     0.041
+  0.2636	     0.000
+  0.2674	     0.013
+  0.2713	     0.000
+  0.2752	     0.107
+  0.2791	     0.000
+  0.2829	     0.046
+  0.2868	     0.000
+  0.2907	     0.106
+  0.2946	     0.000
+  0.2984	     0.120
+  0.3023	     0.000
+  0.3062	     0.036
+  0.3101	     0.000
+  0.3140	     0.035
+  0.3178	     0.000
+  0.3217	     0.254
+  0.3256	     0.000
+  0.3295	     0.083
+  0.3333	     0.000
+  0.3372	     0.105
+  0.3411	     0.000
+  0.3450	     0.076
+  0.3488	     0.000
+  0.3527	     0.110
+  0.3566	     0.000
+  0.3605	     0.061
+  0.3643	     0.000
+  0.3682	     0.073
+  0.3721	     0.000
+  0.3760	     0.028
+  0.3798	     0.000
+  0.3837	     0.254
+  0.3876	     0.000
+  0.3915	     0.174
+  0.3953	     0.000
+  0.3992	     0.182
+  0.4031	     0.000
+  0.4070	     0.034
+  0.4109	     0.000
+  0.4147	     0.025
+  0.4186	     0.000
+  0.4225	     0.075
+  0.4264	     0.000
+  0.4302	     0.099
+  0.4341	     0.000
+  0.4380	     0.033
+  0.4419	     0.000
+  0.4457	     0.170
+  0.4496	     0.000
+  0.4535	     0.099
+  0.4574	     0.000
+  0.4612	     0.030
+  0.4651	     0.000
+  0.4690	     0.068
+  0.4729	     0.000
+  0.4767	     0.081
+  0.4806	     0.000
+  0.4845	     0.001
+  0.4884	     0.000
+  0.4922	     0.004
+  0.4961	     0.000
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+TRY A SINE WAVE OVER 256 LINES
+f2 out=A.b2 size=(1,1,256,50) 'byte func="100*(1+sin(3.1415926*line/128.))"
+Beginning VICAR task f2
+F2 version 26-Jul-11
+F2 calculating every pixel
+FUNCTION EVALUATED 12800 TIMES
+power A.b2 plotout=sin3 scale=20 fmax=.1  +
+    title="TEST 3 - RMS POWER SPECTRUM FOR BYTE FILE sin3"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  256   NS =   32
+     32 POINT TRANSFORM
+   MEAN (DN) = 100.0000
+   SIGMA(DN) =  70.6929
+typetext sin3.asc
+Beginning VICAR task typetext
+  0.0000	   100.000
+  0.0294	     0.000
+  0.0588	     0.000
+  0.0882	     0.000
+  0.1176	     0.000
+  0.1471	     0.000
+  0.1765	     0.000
+  0.2059	     0.000
+  0.2353	     0.000
+  0.2647	     0.000
+  0.2941	     0.000
+  0.3235	     0.000
+  0.3529	     0.000
+  0.3824	     0.000
+  0.4118	     0.000
+  0.4412	     0.000
+  0.4706	     0.000
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+HALFWORD DATA TESTS on Cassini data
+power cs/sum2.38 (11,11,50,140) plotout=case1   +
+    title="TEST 4 - RMS POWER SPECTRUM FOR HALF FILE sum2.38"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =   11   SS =   11   NL =   50   NS =  128
+    128 POINT TRANSFORM
+   MEAN (DN) = 154.9716
+   SIGMA(DN) =   3.4178
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/sum2.38 (1,1,100,500) plotout=case2 EXPONENT=9 TITLEX="FREQ"   +
+    title="TEST 5 - RMS POWER SPECTRUM FOR HALF FILE sum2.38"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  100   NS =  500
+    512 POINT TRANSFORM
+   MEAN (DN) = 152.2320
+   SIGMA(DN) =   5.1070
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/sum2.38 (1,1,150,64)  EXPONENT=6 FMAX=2.0  +
+    TITLE="TEST 6 - FLORANCE CASE3 RMS POWER SPECTRUM FOR HAF FILE sum2.38"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  150   NS =   64
+     64 POINT TRANSFORM
+   MEAN (DN) = 153.6343
+   SIGMA(DN) =   9.4866
+if (mode = "nobatch" or mode = "inter")
+end-if
+f2 cs/sum2.38 T FUNC="IN1*20."
+Beginning VICAR task f2
+F2 version 26-Jul-11
+F2 using hash table lookup
+FUNCTION EVALUATED 133 TIMES
+power T (1,1,150,64)  EXPONENT=6 FMAX=2.0  DNSCALE=20.  +
+          plotout=case4 TITLE="TEST 7 - FLORANCE CASE4"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  150   NS =   64
+     64 POINT TRANSFORM
+   MEAN (DN) = 153.6343
+   SIGMA(DN) =   9.4866
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/sum2.38 (1,1,120,50) EXPONENT=6 TITLE="TEST 8 - PLOT ONLY - CASE5" plotout=case5
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  120   NS =   50
+     64 POINT TRANSFORM
+   MEAN (DN) = 152.8627
+   SIGMA(DN) =  10.5103
+if (mode = "nobatch" or mode = "inter")
+end-if
+ush rm power.gpi
+power cs/sum2.38 (1,1,120,50)  plotout=case6   +
+    title="TEST 9 - CASE6 RMS POWER SPECTRUM FOR FILE sum2.38"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  120   NS =   32
+     32 POINT TRANSFORM
+   MEAN (DN) = 151.6779
+   SIGMA(DN) =  12.7927
+typetext case6.asc
+Beginning VICAR task typetext
+  0.0000	   151.678
+  0.0294	     8.568
+  0.0588	     9.138
+  0.0882	     9.161
+  0.1176	     8.661
+  0.1471	     8.746
+  0.1765	     9.059
+  0.2059	     9.084
+  0.2353	     8.957
+  0.2647	     8.831
+  0.2941	     8.955
+  0.3235	     8.869
+  0.3529	     8.841
+  0.3824	     8.739
+  0.4118	     9.127
+  0.4412	     8.929
+  0.4706	     8.859
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+BYTE DATA TESTS
+label-li cs/grid.byte
+Beginning VICAR task label
+LABEL version 15-Nov-2010
+************************************************************
+ 
+        ************  File cs/grid.byte ************
+                3 dimensional IMAGE file
+                File organization is BSQ
+                Pixels are in BYTE format from a VAX-VMS host
+                1 bands
+                256 lines per band
+                50 samples per line
+                0 lines of binary header
+                0 bytes of binary prefix per line
+---- Task: F2 -- User: SXP812 -- Tue Apr 15 09:35:56 1997 ----
+FUNCTION='100*(1+sin(3.1415926*line/128.))'
+ 
+************************************************************
+power cs/grid.byte (1,1,50,50) EXPONENT=6  TITLE="TEST 10 - BYTE TEST FOR FILE grid.byte"  +
+     plotout=grid0
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =   50   NS =   50
+     64 POINT TRANSFORM
+   MEAN (DN) = 154.9200
+   SIGMA(DN) =  27.7675
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/grid.byte (1,1,50,50) EXPO=6 PLOTOUT=grid1   +
+    title="TEST 11 - RMS POWER SPECTRUN FOR FILE grid.byte"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =   50   NS =   50
+     64 POINT TRANSFORM
+   MEAN (DN) = 154.9200
+   SIGMA(DN) =  27.7675
+typetext grid1.asc
+Beginning VICAR task typetext
+  0.0000	   198.298
+  0.0152	     0.000
+  0.0303	     0.000
+  0.0455	     0.000
+  0.0606	     0.000
+  0.0758	     0.000
+  0.0909	     0.000
+  0.1061	     0.000
+  0.1212	     0.000
+  0.1364	     0.000
+  0.1515	     0.000
+  0.1667	     0.000
+  0.1818	     0.000
+  0.1970	     0.000
+  0.2121	     0.000
+  0.2273	     0.000
+  0.2424	     0.000
+  0.2576	     0.000
+  0.2727	     0.000
+  0.2879	     0.000
+  0.3030	     0.000
+  0.3182	     0.000
+  0.3333	     0.000
+  0.3485	     0.000
+  0.3636	     0.000
+  0.3788	     0.000
+  0.3939	     0.000
+  0.4091	     0.000
+  0.4242	     0.000
+  0.4394	     0.000
+  0.4545	     0.000
+  0.4697	     0.000
+  0.4848	     0.000
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/grid.byte (1,1,60,60) EXPO=6 PLOTOUT=grid2   +
+    title="TEST 12 - RMS POWER SPECTRUN FOR FILE grid.byte"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+??W - Number of samples truncated
+   TRANSFORM  SL =    1   SS =    1   NL =   60   NS =   50
+     64 POINT TRANSFORM
+   MEAN (DN) = 162.0500
+   SIGMA(DN) =  29.9519
+typetext grid2.asc
+Beginning VICAR task typetext
+  0.0000	   207.424
+  0.0152	     0.000
+  0.0303	     0.000
+  0.0455	     0.000
+  0.0606	     0.000
+  0.0758	     0.000
+  0.0909	     0.000
+  0.1061	     0.000
+  0.1212	     0.000
+  0.1364	     0.000
+  0.1515	     0.000
+  0.1667	     0.000
+  0.1818	     0.000
+  0.1970	     0.000
+  0.2121	     0.000
+  0.2273	     0.000
+  0.2424	     0.000
+  0.2576	     0.000
+  0.2727	     0.000
+  0.2879	     0.000
+  0.3030	     0.000
+  0.3182	     0.000
+  0.3333	     0.000
+  0.3485	     0.000
+  0.3636	     0.000
+  0.3788	     0.000
+  0.3939	     0.000
+  0.4091	     0.000
+  0.4242	     0.000
+  0.4394	     0.000
+  0.4545	     0.000
+  0.4697	     0.000
+  0.4848	     0.000
+if (mode = "nobatch" or mode = "inter")
+end-if
+ush rm cs
+let $echo="no"
 $ Return
 $!#############################################################################

@@ -1,5 +1,5 @@
 /*
-* jConvertIIO.java
+fullRead* jConvertIIO.java
 *
 *  @version 1.0 11-15-2000
 *
@@ -26,13 +26,13 @@ import com.sun.media.jai.codec.*;
 
 import javax.media.jai.*;
 
+import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Iterator;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.imageio.metadata.*;
-
 import javax.imageio.*;
 import javax.imageio.spi.*;
 import javax.imageio.event.*;
@@ -40,18 +40,15 @@ import javax.imageio.stream.*;
 
 import org.apache.commons.vfs2.FileSystemException;
 import org.w3c.dom.*;
-// import jpl.mipl.io.codec.*;
 
 import jpl.mipl.io.vicar.*;
 import jpl.mipl.io.plugins.*;
 import jpl.mipl.io.util.*;
 import jpl.mipl.util.*;
-
 import jpl.mipl.jade.*;
 
 // import java.lang.Package ;
 import java.net.*;
-
 import java.lang.Runtime;
 
 /***
@@ -165,6 +162,10 @@ int outputDataType;
 String inputFileName = "";
 String outputFileName = "-";
 
+int imageIndex = 0;
+
+boolean flip_image = false;
+
 // String inputFileNameFullPath = "";
 // String outputFileNameFullPath = "";
 
@@ -187,9 +188,10 @@ String xslFileName = "-";
 String findInJar = "-";
 String pds4namespaceFile = "";
 
-boolean getAsRenderedImage =  false; // true;
+// boolean getAsRenderedImage =  false; // true;
+boolean getAsRenderedImage =  true;
 
-String RI = "false";
+String RI = "true";
 boolean jedi = false; // Myche test for JEDI image reader
 boolean marsViewerJAI = false; // Test for MarsViewer use which uses JAI.create
 boolean marsViewerFull = false; // Test for MarsViewer use which uses JAI.create
@@ -284,10 +286,14 @@ int sourceWidth  	= 0;
 int sourceHeight 	= 0;
 
 int tileSize = 256;
-// int tileSizeX = 256;
-// int tileSizeY = 256;
-int tileSizeX = 0;
-int tileSizeY = 0;
+int tileSizeX = 256;
+int tileSizeY = 256;
+// int tileSizeX = 0;
+// int tileSizeY = 0;
+
+// tif write tiles
+int tifTileSizeX = 0;
+int tifTileSizeY = 0;
 boolean useRawReader = false;
 String rawReaderName = "raw";
 
@@ -300,6 +306,27 @@ int srcRenderSizeHeight = 0;
 boolean readerBandSelect = false;
 int readerBandList[] = {0,1,2};
 
+
+// PDS4 Table reader support
+// could also use format or just ignore it if any table values are seen
+// if we are reading a Table but creating a PDS4 label (not available yet)
+// we could want to have format useable ??
+boolean pds4_table_list = false;
+boolean pds4_table_is_the_output = false; // set this if we see any other values
+String pds4_table_fields = ""; // list of fields to use in the output "1,2,3,5" 
+int pds4_table_index = 1; // index of the table to read 
+// String pds4_table_index = "1";
+String pds4_table_field_separator = " ";
+// String table_platform = "platform"; // also "unix" "windows"
+String pds4_table_output_format = "csv"; // "fixed-width" or "csv"
+
+// output_filename we will use outputFileName from the out= argument
+// also available String table_line_separator // options are "platform" "unix" "windows"
+// String table_quote_character
+// these values will be 
+
+// set the marsviewer getImageInputStreamCallback
+boolean useMarsviewerCallback = false;
 
 
 /***************************************/
@@ -341,7 +368,7 @@ public jConvertIIO(String args[])
     // codecInfo();
     conv(args);   
     // should print args if silent == false
-	if (silent != false) {
+	if (silent == false) {
 		String key, value;
 		System.out.println("JConvertIIO");
 		for (int i=0; i<args.length ;i++) {
@@ -355,7 +382,7 @@ public jConvertIIO(String args[])
 				key = arg;
 				value = "true";
 			}
-	    System.out.println(i+") "+key+" = "+value);
+	    System.out.println(i+") "+key+" = "+value+"");
 		}
 	}
     }
@@ -744,7 +771,10 @@ public void printHelp() {
 	System.out.println("RAW_READER_NAME=[raw,rW2] raw uses the jai_imageio.jar raw reader. raw2 uses rawImageReader.jar");
 	// SOURCE_RENDERSIZE, USE_RAW_READER
 	System.out.println("SOURCE_RENDERSIZE=(width,height) values are ints, no spaces allowed, NOT SUPPORTED by our readers.");
+	// ImageWriteParam tile_size=(x,y)
+	System.out.println("TIF_WRITE_TILE_SIZE=(X,Y) used in tif ImageWriteParam.setTiling() Sets then output tile size");
 	
+	// MARSVIEWER_CALLBACK useMarsviewerCallback
 	
 	// JAI operators after image data has been read
 	System.out.println("JAI operators applied to Image data after it has been read");
@@ -770,6 +800,8 @@ public void printHelp() {
 	System.out.println("PLUGINS registered reader and writer names are printed ");
 	System.out.println("SILENT eliminate all printing to stdout, could be useful when OUT=- which writes output");
 	System.out.println(" file to stdout. Useful for piping to another process like ImageMagick \"convert\" ");
+	System.out.println("IMAGE_INDEX=n sets the image index to read from the file. Defaults to 0.");	
+	System.out.println("  Few files will contain more than one image. "); 
 	
 	System.out.println("********** new for MSL ********************");
 	System.out.println("PDS_LABEL_TYPE=[MSL_ODL,ODL3,PDS3,PDS4] default is PDS3. Applys only to a PDS output file. Controls if ");
@@ -793,6 +825,35 @@ public void printHelp() {
 	* System.out.println(" files are available on the system. Otherwise the MIPL/vicar PDS label parser/writer");
 	* System.out.println(" is used. The formatting of the PIRL label writer is different than the MIPL/vicar writer.");
 	*****/
+	System.out.println("**** PDS4 Table reader support ****************");
+	System.out.println("PDS4_TABLE_LIST=[true,false], boolean flag, if true will list all products in the file. '0;");
+	System.out.println("	Overides all other PDS4_TABLE_ flags");
+	System.out.println("PDS4_TABLE_INDEX=n - index n starts at 1, default is 1. Specify the index of the table to access.");
+	System.out.println("PDS4_TABLE_FIELDS=1,2,3  comma separated list of filed names or numbers. Default is all fields.");
+	System.out.println("	Run once with PDS4_TABLE_LIST to get a list of the field names.");
+	System.out.println("PDS4_TABLE_OUPUT_FORMAT=[csv,fixed-width]  default is fixed-width.");
+	System.out.println("The only output available at this time for PDS4 Tables is as a text file. ");
+	System.out.println("The output filename for PDS4 Tables is out filename (out=filename) ");
+	System.out.println("CSV (Comma Separated Value) or fixed width.");
+	System.out.println("All of the writers in the system only understand image data. They can't do anything with table data.");
+	/*** PDS4 Table reader support
+	String table_format = "fixed-width"; // "csv"
+	// could also use format or just ignore it if any table values are seen
+	// if we are reading a Table but creating a PDS4 label (not available yet)
+	// we could want to have format useable ??
+	boolean list_table = false;
+	boolean table_is_the_output = false; // set this if we see any other values
+	String table_fields = null; // list of fields to use in the output "1,2,3,5" 
+	int table_index = 1; // index of the table to read 
+	String table_field_separator = " ";
+
+	// output_filename we will use outputFileName from the out= argument
+	// also available String table_line_separator // options are "platform" "unix" "windows"
+	// String table_quote_character
+	// these values will be 
+	 * ***/
+	 
+
 }
 
 /*************************************************
@@ -1071,7 +1132,8 @@ public IIOImage fullRead(String fileName) {
 		RenderedImage renderedImage = null;
 		
 		if ((readerFormat.equalsIgnoreCase("vicar") || readerFormat.equalsIgnoreCase("pds") ||
-			readerFormat.equalsIgnoreCase("pds4") || readerFormat.equalsIgnoreCase("isis")) && RI.equalsIgnoreCase("true")) { 
+			readerFormat.equalsIgnoreCase("pds4") || readerFormat.equalsIgnoreCase("isis")) 
+			&& !RI.equalsIgnoreCase("FALSE")) { 
 			getAsRenderedImage = true;
 		}
 		else {
@@ -1135,12 +1197,8 @@ public IIOImage fullRead(String fileName) {
 		 try {
      			bufferedImage = reader.read(0);
      			
-     			if (readerFormat.equalsIgnoreCase("pds") ) {
-     				fakeImage = ((PDSImageReader) reader).getFakeImageNoRead();
-     			}
-     			
      			if (debug) {
-     				System.out.println("jConvertIIO.fullRead() ");
+     				System.out.println("jConvertIIO.fullRead() reader.read(0); bufferedImage");
      				System.out.println("readerFormat "+readerFormat);
      				System.out.println("fakeImage "+fakeImage);
      			}
@@ -1149,6 +1207,13 @@ public IIOImage fullRead(String fileName) {
                 System.out.println("I/O exception !");
                 System.exit(1); // 1 is error return
             }
+		}
+		
+		if (readerFormat.equalsIgnoreCase("pds") ) {
+			fakeImage = ((PDSImageReader) reader).getFakeImageNoRead();
+			System.out.println("******************* pds reader *********************************");
+			System.out.println("readerFormat "+readerFormat+"   fakeImage "+fakeImage);
+			System.out.println("*********************************************************");
 		}
 
 		// this forces the reader to read in and store the metadata
@@ -1428,6 +1493,9 @@ public boolean conv(String argv[]) {
 	}
 	System.out.println("--------------------------------" );
 	***/
+    
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter  argsOut = new PrintWriter(stringWriter);
 	
 	for (int i=0; i<argv.length ;i++) {
 	    // System.out.println(i+") "+argv[i]);
@@ -1443,7 +1511,10 @@ public boolean conv(String argv[]) {
 	    
 	    key = key.toUpperCase(); // make compares easier
 		// if (silent != false)
-		System.out.println(i+") "+key+" = "+value);
+		// System.out.println(i+") "+key+" = "+value);
+	    // write to a String. print afetr all the arguments have been processed if SILENT == true
+	    argsOut.println(i+") "+key+" = "+value+" yy");
+	    
 			
 	    if (key.equalsIgnoreCase("INP") || key.equalsIgnoreCase("IN") ) {
 	        inputFileName = value;
@@ -1468,6 +1539,10 @@ public boolean conv(String argv[]) {
 	        	RI = value;
 	        	if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("t") || value.equalsIgnoreCase("")  ) {
 	        		getAsRenderedImage = true;
+	        		RI = "true";
+	        	} else if (value.equalsIgnoreCase("false") || value.equalsIgnoreCase("f")  ) {
+	        		getAsRenderedImage = false;
+	        		RI = "false";
 	        	}
 	    	
 	    }
@@ -1760,7 +1835,7 @@ public boolean conv(String argv[]) {
 			// the input image
 			String s[] = value.split("[\\[\\(,\\)\\]]") ;
 			readerBandSelect = true;
-			useRawReader = true;
+			// useRawReader = true;
 			// System.out.println("BANDS value="+value+"  length="+s.length);  
 			int ii = 0;
 			int bandCt = 0;
@@ -1804,7 +1879,7 @@ public boolean conv(String argv[]) {
 	    else if (key.equalsIgnoreCase("SOURCE_RENDERSIZE")  || key.equalsIgnoreCase("SRC_RENDERSIZE")) {
 	    	if (debug) System.out.println("SOURCE_RENDERSIZE "+value);
 	    	sourceRenderSize = true;
-	    	useRawReader = true;
+	    	// useRawReader = true;
 	    	int[] ff = getValuesInt(value);
 	    	if (ff.length == 2) {
 	    		srcRenderSizeWidth = ff[0];
@@ -1816,7 +1891,7 @@ public boolean conv(String argv[]) {
 	    	// SCALE=(Xfactor,Yfactor,Xtranslation,Ytranslation) values are floats, no spaces allowed");
 	    	if (debug) System.out.println("SUBSAMPLING "+value);
 	    	subsampleImage = true;
-	    	useRawReader = true;
+	    	// useRawReader = true;
 	    	int[] ff = getValuesInt(value);
 	    	if (ff.length == 2) {	    		
 	    		sourceXsubsampling = ff[0];
@@ -1850,11 +1925,24 @@ public boolean conv(String argv[]) {
 	    		
 	    	if (debug) System.out.println("TILE_SIZE "+value+",  "+tileSizeX+" x "+tileSizeY);
 	    }
+	    else if (key.equalsIgnoreCase("TIF_WRITE_TILE_SIZE") ) {
+	    	int[] ff = getValuesInt(value);
+	    	if (ff.length == 2) {
+	    		tifTileSizeX = ff[0];
+	    		tifTileSizeY = ff[1];
+	    	} else if (ff.length == 1) {
+	    		tifTileSizeX = ff[0];
+	    		tifTileSizeY = ff[0];
+	    	} 
+	    	
+	    		
+	    	if (debug) System.out.println("TIF_WRITE_TILE_SIZE "+value+",  "+tileSizeX+" x "+tileSizeY);
+	    }
 	    else if (key.equalsIgnoreCase("SOURCE_REGION") ) {
 	    	// CROP=(cropX,cropY,cropHeight,cropWidth) values are floats, no spaces allowed");
 	    	if (debug) System.out.println("SOURCE_REGION "+value);
 	    	sourceRegion=true;
-	    	useRawReader = true;
+	    	// useRawReader = true;
 	    	int[] ff = getValuesInt(value);
 	    	if (ff.length == 2) {
 	    		// if width and height are 0 use the rest of the image 
@@ -1898,6 +1986,12 @@ public boolean conv(String argv[]) {
 	    	// INFO=[true,false]
 	    	if (value == null || value.equalsIgnoreCase("true")) {
 	        	printInfo = true;
+	    	}
+	    }
+	    else if (key.equalsIgnoreCase("MARSVIEWER_CALLBACK") ) {
+	    	// MARSVIEWER_CALLBACK=[true,false]
+	    	if (value == null || value.equalsIgnoreCase("true") || value.equalsIgnoreCase("yes")) {
+	    		useMarsviewerCallback = true;
 	    	}
 	    }
 	    // velcoity engine template file to use for this conversion
@@ -1944,16 +2038,92 @@ public boolean conv(String argv[]) {
 				addBLOB = false;
 	    	}
 	    	if (debug) System.out.println("ADD_BLOB "+value);
+	    }  // PDS4 Table reader support
+	    else if (key.equalsIgnoreCase("PDS4_TABLE_LIST") ) {
+	    	
+	    	if (value == null || value.equalsIgnoreCase("true")) {
+	    		pds4_table_list = true;
+	    	} else {
+	    		pds4_table_list = false;
+	    	}
+	    	pds4_table_is_the_output = true;
+	    	if (debug) System.out.println("PDS4_TABLE_LIST "+value);
+	    	
+	    } else if (key.equalsIgnoreCase("PDS4_TABLE_FIELDS") ) { 
+	    	
+	    	if (value != null ) {
+	    		pds4_table_fields = value;
+	    	} 
+	    	pds4_table_is_the_output = true;
+	    	if (debug) System.out.println("PDS4_TABLE_FIELDS "+value);
+	    }  else if (key.equalsIgnoreCase("PDS4_TABLE_OUTPUT_FORMAT") ) { 
+	    	 // could also use format or just ignore it if any table values are seen
+		    // if we are reading a Table but creating a PDS4 label (not available yet)
+		    // we could want to have format useable ??
+	    	
+	    	if (value != null) { // check "csv" or "fixed-width"
+	    		value = value.toLowerCase();
+	    		if (value.equals("csv")  ) {
+	    			pds4_table_output_format = "csv";
+	    		} else if (value.startsWith("fixed")  || value.equals("fixed-width")) {
+	    			pds4_table_output_format = "fixed-width";
+	    		}
+	    	} 
+	    	pds4_table_is_the_output = true;
+	    	if (debug) System.out.println("PDS4_TABLE_OUTPUT_FORMAT "+value+" "+pds4_table_output_format);
+	    }  else if (key.equalsIgnoreCase("PDS4_TABLE_INDEX") ) { 
+	    	
+	    	// is this a String or an int
+	    	if (value != null ) { // check "csv" or "fixed-width"
+	    		int[] ff = getValuesInt(value);
+	    		pds4_table_index = ff[0];
+	    		
+	    	} 
+	    	pds4_table_is_the_output = true;
+	    	if (debug) System.out.println("PDS4_TABLE_INDEX "+pds4_table_index+" "+ value);
+	    }  else if (key.equalsIgnoreCase("TABLE_FIELD_SEPARATOR") ) { 
+	    	// don't use??
+	    	if (value != null ) { // check "csv" or "fixed-width"
+	    		pds4_table_field_separator = value;
+	    	} 
+	    	pds4_table_is_the_output = true;
+	    	if (debug) System.out.println("TABLE_FIELD_SEPARATOR "+value);
+	    }  else if (key.equalsIgnoreCase("IMAGE_INDEX") ) { 
+	    	
+	    	if (value != null ) { 
+	    		int[] ff = getValuesInt(value);
+	    		imageIndex = ff[0];
+	    	} 
+	    	
+	    	if (debug) System.out.println("IMAGE_INDEX "+imageIndex+" "+ value+" ");
 	    }
+		    // output_filename we will use outputFileName from the out= argument
+		    // also available String table_line_separator // options are "platform" "unix" "windows"
+		    // String table_quote_character
+		    // these values will be 
 	    
 	    // pdsLabelType   addBinaryHeader = false;
 	    
 	    if (printPlugins) codecInfo();
 	    
+	    
+	    
+	
+
+	    
 
 	    
 	} // end of loop thru arguments
-	  
+	
+	/**
+	System.out.println("silent =  "+silent+" ");
+    if (!silent) {	  
+    	System.out.println("!silent");
+    	System.out.println(argsOut.toString());
+    } else {
+    	System.out.println("silent");
+    }
+	**/ 
 	
 	 
 	 
@@ -1985,7 +2155,24 @@ public boolean conv(String argv[]) {
 		  System.out.println("calling ImageUtils.fullRead tileSizeX = "+tileSizeX+" tileSizeY = "+tileSizeY+"  useRawReader "+useRawReader);
 		  System.out.println("getAsRenderedImage = "+getAsRenderedImage);
 		  System.out.println("ImageReadParam = "+irp);
+		 
 	  }
+	  
+	  /**
+	  if (table_is_the_output == true) {
+		  PDS4TableReadParam pds4TableReadParam = new PDS4TableReadParam();
+		  // fill in the values
+		  pds4TableReadParam.setFields(table_fields);
+		  pds4TableReadParam.setIndex(table_index);
+		  System.out.println("table_format ="+table_format+"<");
+		  pds4TableReadParam.setOutput_format(table_format);
+		  pds4TableReadParam.setOutputFileName(outputFileName);
+		  pds4TableReadParam.setLabelFileName(inputFileName);
+		  pds4TableReadParam.setFieldSeparator(table_field_separator);
+		  // add fakeImage
+		  irp = pds4TableReadParam ;		  
+	  }
+	  ***/
 	  
 	  /** old way
 	  iioImage = fullRead(inputFileName);	
@@ -1999,10 +2186,12 @@ public boolean conv(String argv[]) {
 	  imUtil.setUseRawReader(useRawReader);
 	  imUtil.setRawReaderName(rawReaderName);
 	  imUtil.setGetAsRenderedImage(getAsRenderedImage);
-	   
+	  /** InputStreamWrapper **/
+	  imUtil.setUseMarsviewerCallback(useMarsviewerCallback);
 	    
 	  
 	  // check flags and set ImageReadParam values if they are available
+	  // all of these values will wok for any ImageReadParam
 	  if (readerBandSelect == true) {
 	    irp.setSourceBands(readerBandList);
 	  }
@@ -2035,20 +2224,135 @@ public boolean conv(String argv[]) {
 			  ((PDSImageReadParam) irp).setTileSizeY(tileSizeY);
 		  }
 	  }
-	    	
+	  
+	 
+	 
 	 try {
+		imUtil.setImageIndex(imageIndex);
+		
+		if (debug) {
+			  System.out.println("jConvertIIO.conv irp="+irp+" inputFileName="+inputFileName);
+		  }
+		
 	    iioImage = imUtil.fullRead(inputFileName, irp);
 	    
+	    // check if metadata is being read in??
 	    reader = imUtil.getImageReader();
+	    if (debug) {
+			  System.out.println("jConvertIIO.conv reader = "+reader);
+		  }
 	    readerFormat = reader.getFormatName();
+	    // could check if the reader is pds, cast and get fakeImage directly
+	    fakeImage = imUtil.getFakeImage();
+	    
+	    if (readerFormat.equalsIgnoreCase("pds") ) {
+			fakeImage = ((PDSImageReader) reader).getFakeImageNoRead();
+		}
+	    
+	    RenderedImage rii = iioImage.getRenderedImage();
+	    
+	    /**** pds4table ***
+	    if (readerFormat.equalsIgnoreCase("pds4table")) {
+	    	if (reader instanceof PDS4TableReader) {
+	    		if (debug) {
+	    			System.out.printf("jConvertIIO readerFormat = %s instanceof PDS4TableReader \n", readerFormat);
+	    		}
+	    		((PDS4TableReader) reader).setDebug(debug);
+	    	}
+	    	if (debug) {
+	    		System.out.println("jConvertIIO AFTER calling imUtil.fullRead() readerFormat = "+readerFormat);
+	    		System.out.println("jConvertIIO renderedImage from iioImage is: "+rii);
+	    		// force a new read of the file with an ImageReadParam set?
+	    		// get the data and do something with it?
+	    		// it is a String, not a RenderedImage
+	    		// eventually write as something alse//
+	    		// get the metadata and print it
+	    		String format = "";
+	    		String[] formats ;
+	    		String docName = "";
+	    		DOMutils domUtils = new DOMutils();
+	    	
+	    		im = iioImage.getMetadata();
+	    		System.out.println("readerFormat = "+readerFormat);
+	    		System.out.println("im = "+im);
+			
+	    		formats = im.getMetadataFormatNames();    
+						
+	    		System.out.println("im.getMetadataFormatNames()"); 
+	    		for (int i=0 ; i< formats.length ;i++) {
+	    			String formatName = formats[i];
+	    			docName = docName + formatName+"_";
+	    			System.out.println(" formats["+i+"] " +formats[i]+" - "+formatName+" docName = "+docName); 		
+				
+	    			// get the metadata and seriaize
+	    			Node m = im.getAsTree(formatName);
+	    			// String xmlName = formatName+".xml";
+	    			String xmlName = String.format("%s.xml", formatName);
+	    			domUtils.serializeNode(m, xmlName, "xml");
+	    		}
+	    	}
+			
+			// put all the PDS4 table read params into a PDS4TableReadParam 
+			PDS4TableReadParam pds4TableReadParam = (PDS4TableReadParam) reader.getDefaultReadParam();
+			
+			pds4TableReadParam.setListTables(pds4_table_list);
+			pds4TableReadParam.setFields(pds4_table_fields);
+			pds4TableReadParam.setFieldSeparator(pds4_table_field_separator);
+			pds4TableReadParam.setOutput_format(pds4_table_output_format);
+			// pds4TableReadParam.setOutputFileName(outputFileName);
+			pds4TableReadParam.setOutputFileName("string");
+			
+			// this shouldn't be used
+			// File outputFile = imUtil.getFile(outputFileName) ;
+			// pds4TableReadParam.setOutputFile(outputFileName);
+			
+			pds4TableReadParam.setLabelFileName(inputFileName);			
+			// open this file since the Ames utilities expect a File
+			File inputFile = imUtil.getFile(inputFileName) ;
+			pds4TableReadParam.setLabelFile(inputFile);
+			// pds4TableReadParam.getLabelFile();
+			
+			if (debug) { 
+				System.out.println("jConvertIIO line 2297  outputFileName = "+outputFileName ); 
+				}	
+			
+			// set that into the imUtls
+			// now do the read using readAsString()
+			int imageIndex = pds4_table_index; // does this get used at all??
+			// probably the read param does the work
+			String table = ((PDS4TableReader) reader).readAsString(imageIndex, pds4TableReadParam);
+			// the string may be used for something ??
+			// write to a file for now
+			if (debug) { 
+				System.out.println("jConvertIIO line 2308 ################# ((PDS4TableReader) reader).readAsString ####"); 
+				System.out.println("outputFileName = "+outputFileName ); 
+				}	
+			
+			// outputFileName, outputFormat
+			// imUtil.writeStringToFile("string_"+outputFileName, table);
+			if (outputFileName.equals("")) {
+				System.out.println(table);
+			} else {
+				imUtil.writeStringToFile(outputFileName, table);
+			}
+			if (debug) { 
+				System.out.println("jConvertIIO line 2315 ################# imUtil.writeStringToFile ##############"); 
+				}	
+	    	return true;
+	    }
+	     *** pds4table ***/
+	    
 	    if (displayImage) {
 	    	RenderedImage ri = iioImage.getRenderedImage();
 	    	imUtil.displayImage(ri);
 	    }
 	    
+	    
+	    
 			
 	} catch (Exception e) {
 		System.out.println("jConvertIIO calling imUtil.fullRead() Exception "+e);
+		e.printStackTrace();
 		System.out.println("jConvertIIO exiting");
 		return false;
 	}
@@ -2121,12 +2425,12 @@ public boolean conv(String argv[]) {
 	          
 		  // }
 	 	
-		  /*****
+		
 		   // can we get image size from iioImage? imageMetadata
 		  if (readerFormat.equalsIgnoreCase("pds") ) {
 				fakeImage = ((PDSImageReader) reader).getFakeImageNoRead();
 			}
-			******/	
+			
 		try {
 			sourceImage = iioImage.getRenderedImage();
 		} catch (java.lang.IllegalArgumentException iie) {
@@ -2162,12 +2466,20 @@ public boolean conv(String argv[]) {
 			***/
 		}
 	  
-	
+	 	try {
+			sourceImage = iioImage.getRenderedImage();
+		} catch (Exception e) {
+			 System.out.println("Exception "+e );
+			 e.printStackTrace();
+			 sourceImage = null;
+		}
 	  
-      sourceImage = iioImage.getRenderedImage();
+      // sourceImage = iioImage.getRenderedImage();
+	 
       if (debug) {
 			System.out.println("sourceImage = "+sourceImage+"  ");
 		}
+      
       
       
       
@@ -2203,7 +2515,12 @@ public boolean conv(String argv[]) {
 	  outputDataType = DataBuffer.TYPE_BYTE;
 	  // get the input data type from b0size ???
 	  
-	  if (printInfo) {
+	  if (readerFormat.equalsIgnoreCase("fits") && getAsRenderedImage == true) {
+			// BufferedImage is flipped in the reader
+			flip_image = true;
+		}
+	  
+	  if (printInfo || debug) {
 	 	System.out.println("print INFO ***************************");
 	 	// printInfo(inputFileName);
 	 	System.out.println("File: "+inputFileName );
@@ -2212,11 +2529,15 @@ public boolean conv(String argv[]) {
 	    System.out.println(" samples "+width+", lines "+height+", bands "+bands);
 	    System.out.println(" sample size "+b0size+", lements "+elements);
 		System.out.println(" rescaleOnFormat "+rescaleOnFormat);
+		System.out.println(" sourceImage.getTileHeight() "+sourceImage.getTileHeight()+"  sourceImage.getTileWidth() "+sourceImage.getTileWidth()+" ");
 		// add organization "BSQ" etc
-		// show Operator values for the ones which are in use
-		getExtrema(sourceImage) ;
+		// show Operator values for the ones which are in use		
+		System.out.println(" flip_imge "+flip_image);
 		System.out.println("print INFO ***************************");
-	 	return true;
+	 	if (debug == false) {
+	 		getExtrema(sourceImage) ;
+	 		return true;
+	 	}
 	 }
 	 
 	 if (debug) System.out.println("calling processFilters ***************************");
@@ -2225,6 +2546,7 @@ public boolean conv(String argv[]) {
 	  if (debug) {
 	  	System.out.println("after calling processFilters filteredImage "+filteredImage);			
 	  	System.out.println("filteredImage "+filteredImage.getWidth()+" "+filteredImage.getHeight());
+	  	System.out.println(" filteredImage.getTileHeight() "+filteredImage.getTileHeight()+"  filteredImage.getTileWidth() "+filteredImage.getTileWidth()+" ");
 	  }
 	  // filteredImage ???
 	  
@@ -2280,6 +2602,23 @@ public boolean conv(String argv[]) {
 	    processedImage = processFormat(filteredImage, outputDataType, rescaleOnFormat);
 	    imageHasBeenProcessed = true;	    
 	    }
+	  
+	  if (flip_image) {
+		  ParameterBlock pb = new ParameterBlock();
+			
+		  javax.media.jai.operator.TransposeType 
+		  type = javax.media.jai.operator.TransposeDescriptor.FLIP_VERTICAL;
+		          // type = javax.media.jai.operator.TransposeDescriptor.FLIP_HORIZONTAL;
+		  pb.addSource(processedImage).add(type);
+		  if (debug) { 
+			  System.out.println("Flip (transpose) the image");
+		  }
+		  // PlanarImage flippedImage = (PlanarImage) JAI.create("transpose", pb);
+		  RenderedImage flippedImage =  JAI.create("transpose", pb);
+			  
+		  processedImage = flippedImage;
+	      imageHasBeenProcessed = true;	
+	  }
 	    
 	   if (debug) {
 	    System.out.println("File: "+inputFileName );	    
@@ -2438,9 +2777,16 @@ public boolean conv(String argv[]) {
                 	System.out.println("node "+ node );
                 	System.out.println("docInfo(node) "+ docInfo(node) );
                 	// convert this to Document
-                	IIOMetadataNode iomNode = (IIOMetadataNode) node;
-                	IIOMetadataToDOM iomDOM = new IIOMetadataToDOM (iomNode) ;
-                	document = iomDOM.getDocument();
+                	try {
+                		IIOMetadataNode iomNode = (IIOMetadataNode) node;
+                		IIOMetadataToDOM iomDOM = new IIOMetadataToDOM (iomNode) ;
+                		document = iomDOM.getDocument();
+                	} catch (Exception e) {
+                		System.out.println("Exception "+ e);
+                		if (outputXML && node != null)  {
+                			domUtils.serializeNode((Node) node, "node.xml","xml");
+                		}
+                	}
                 	// if (debug) System.out.println("document "+ docInfo(document) );
                 }              
             }
@@ -2585,6 +2931,9 @@ public boolean conv(String argv[]) {
 	    
 	    
 	    // processSave takes care of any transcoding needed
+	if (debug) {
+		System.out.println("jConvertIIO processSave 2875 calling processSave %%% fakeImage "+fakeImage+" %%%%%%%%%%%%%%%%%%%");
+	}
 	    processSave(iioImageOut, inputFileName, outputFileName, outputFormat); 
 	    System.out.println("Image write Done");
 	    
@@ -2794,6 +3143,7 @@ public void jediTest(String inputFileName, boolean displayImage) {
     System.out.println("jediTest: " + inputFileName+"  *********************");
     
     ImageUtils imUtil = new ImageUtils(inputFileName) ;
+    imUtil.setDebug(debug);
     
 	try {
     imUtil.fullRead();
@@ -2809,10 +3159,53 @@ public void jediTest(String inputFileName, boolean displayImage) {
     imUtil.printImageInfo();
 	// get the metadata
     System.out.println("2 ====================================================");
-	imUtil.displayMetadata();
+	imUtil.displayAllMetadata();
 	
 	// convert metadata to a hash
 	// Hashtable imHash = imUtil.getMetadataHash();
+	System.out.println("2.5 ====================================================");
+	
+	im = imUtil.getIIOMetadata();
+	String[] formats = im.getMetadataFormatNames();    
+	
+	
+	System.out.println("im.getMetadataFormatNames()"); 
+	for (int i=0 ; i< formats.length ;i++) {
+		String formatName = formats[i];
+		System.out.println(" formats["+i+"] " +formats[i]+" - "+formatName); 
+		Hashtable h= imUtil.getHashFromMetadata(formatName);
+		BufferedWriter bw = imUtil.getBufferedWriter(formatName+"_hash.txt");
+		imUtil.printHashToFile(h, bw);
+		try {
+			bw.close();
+		} catch (IOException e) {
+			System.out.println("ImageUtils.printHashToFile IOException" );
+			if (debug) e.printStackTrace();
+		}		
+	}
+	
+	System.out.println("2.6 ====================================================");
+	
+	im = imUtil.getIIOMetadata();
+	formats = im.getMetadataFormatNames();    
+	
+	
+	System.out.println("im.getMetadataFormatNames()"); 
+	for (int i=0 ; i< formats.length ;i++) {
+		String formatName = formats[i];
+		System.out.println(" formats["+i+"] " +formats[i]+" - "+formatName); 
+		Hashtable h= imUtil.getHashFromMetadata(formatName);
+		BufferedWriter bw = imUtil.getBufferedWriter(formatName+"_hashString.txt");
+		String hs = imUtil.printHashToString(h);
+		try {
+			bw.write(hs);
+			bw.close();
+		} catch (IOException e) {
+			System.out.println("ImageUtils.printHashToFile IOException" );
+			if (debug) e.printStackTrace();
+		}		
+	}
+	
 	System.out.println("3 ====================================================");
 	imUtil.doHash();
 	
@@ -3256,6 +3649,7 @@ public void jediTest(String inputFileName, boolean displayImage) {
 			System.out.println( "  MODE_EXPLICIT "+ImageWriteParam.MODE_EXPLICIT);
 			System.out.println( "  MODE_COPY_FROM_METADATA "+ImageWriteParam.MODE_COPY_FROM_METADATA);
 			System.out.println( "canWriteTiles "+ writeParam.canWriteTiles());
+			System.out.println( "tifTileSizeX="+tifTileSizeX+"  tifTileSizeY="+tifTileSizeY);
 			}
 			writeParam.setTilingMode(ImageWriteParam.MODE_EXPLICIT);
 			
@@ -3273,8 +3667,20 @@ public void jediTest(String inputFileName, boolean displayImage) {
 				System.out.println( "image size "+w+"x"+h);
 				}
 			// calculate an optimal tile height for writing
+			// same as the input file??
+			
 			int tileWidth = w;
 			int tileHeight = 100;
+			
+			/** try 256 x 256 to enable reader to naturally use 256x256 **/
+			if (tifTileSizeX != 0 && tifTileSizeY != 0) {
+				tileWidth = tifTileSizeX;
+				tileHeight = tifTileSizeY;
+			}
+			if (debug) {
+				System.out.println( "tifTileSizeX="+tifTileSizeX+"  tifTileSizeY="+tifTileSizeY);
+				System.out.println( "Tilewidth="+tileWidth+"  tileHeight="+tileHeight);
+			}
 			
 			int tileGridXoffset = 0;
 			int tileGridYoffset = 0;
@@ -3330,7 +3736,7 @@ public void jediTest(String inputFileName, boolean displayImage) {
       		// add ODL too?
         
         	if (debug) {
-        		System.out.println( "processSave pds - format="+format);
+        		System.out.println( "processSave pds - format="+format+"   ++++++++++++++++++++++++++");
         		System.out.println( "embedVicarLabel "+embedVicarLabel);       		
         		
         		System.out.println( "inputFileName "+inputFileName);
@@ -3411,6 +3817,11 @@ public void jediTest(String inputFileName, boolean displayImage) {
             		// ((PDSImageWriteParam)  writeParam).setImageStartByte(front_label_size);
         		}
             	
+            	if (debug) {
+	        		System.out.println( "jConvertIIO.processSave() ");
+	        		System.out.println( "  fakeImage = "+fakeImage);
+            	}
+            	
             	((PDSImageWriteParam)  writeParam).setFakeImage(fakeImage);
             	
             	if (useOutputFilename) {
@@ -3450,6 +3861,11 @@ public void jediTest(String inputFileName, boolean displayImage) {
 				// PDS4 writer values
 				((PDSImageWriteParam)writeParam).setVelocityTemplateFilename(velocityTemplateFilename);
 				((PDSImageWriteParam)writeParam).setVelocityConfigPath(velocityConfigPath);
+				
+				
+				ImageInputStream iis = (ImageInputStream) reader.getInput() ;				
+				((PDSImageWriteParam)writeParam).setImageInputStream(iis);
+				
 				
 				// find the binaryHeader.
 				// add it to the image writeparam
@@ -4032,12 +4448,55 @@ public void jediTest(String inputFileName, boolean displayImage) {
 		// round max up to the nearest power of 2. 
 		// max=Math.pow(2.0,Math.round(Math.log(max)/Math.log(2)));
 		// min=0;
-	
+		
+		if (Double.isNaN(min) || Double.isNaN(max)) {
+			if (debug) {
+				System.out.println("processFormat(1.5) extrema min max are NaN. Using InageStatistics Operator");
+			}
+		
+			// try using the image Statistics - only do this if Extrema returns NaN for min and max
+			ImageStatistics imStats = new ImageStatistics(image);
+			// check that the statistics have been calculated
+			boolean calculated = imStats.getStatisticsCollected();
+			int min_i = 0;
+			int max_i = 0;
+			double max_d = 0.0;
+			double min_d = 0.0;
+			if (calculated) {
+				int bands = imStats.getNumBands();
+				int dataType = imStats.getDataType();
+				String dataTypeName = imStats.getDataTypeName(dataType);
+
+				if (debug) 
+				{  
+					System.out.println("*************************************************************");
+					System.out.println("****          PDSimageStatistics                        *****");
+					System.out.println("*************************************************************");
+					System.out.println("-- PDSimageStatistics --- calculated "+calculated+ "  dataType "+dataType+"  dataTypeName "+dataTypeName);
+					imStats.printAllValues();
+					System.out.println("*************************************************************");
+				}
+
+				// replacxe the min, max values
+				max = imStats.getMax(0);
+				min = imStats.getMin(0);
+			}
+		}
 	
 		// this will be for BYTE output
 		double constant[] = new double[]{1.0};
 		double offset[] = new double[]{0.0};
+		
+		if (max == 0.0) {
+			max = ceiling;
+			if (debug) {
+				System.out.println("processFormat(1) new max "+max);
+			}
+		}
 	
+		if (Double.isNaN(min) || Double.isNaN(max)) {
+			System.err.println("Warning... Could not obtain valid min and max values to rescale this image");			
+		}
 	
 		// dst[x][y][b] = src[x][y][b]*constant + offset;
 		// offset is added after the value is scaled
@@ -4051,8 +4510,7 @@ public void jediTest(String inputFileName, boolean displayImage) {
 		// offset[0] = min * -1.0; // offset is added only for unsigned ??
 	
 		if (debug) {
-			System.out.println("processFormat(2) constant="+constant[0]+"  offset="+offset[0]);
-		
+			System.out.println("processFormat(2) constant="+constant[0]+"  offset="+offset[0]);		
 			double min1 = (min * constant[0]) + offset[0];
 			double max1 = (max * constant[0]) + offset[0];
 			System.out.println("processFormat(3)  min="+min+"  min1="+min1+"  max="+max+"  max1="+max1);
@@ -4061,6 +4519,7 @@ public void jediTest(String inputFileName, boolean displayImage) {
 		PB=new ParameterBlock();
 		// PB.addSource(temp).add(new double[]{ceiling/(max-min)}).add(new double[]{ceiling*min/(min-max)});
 		PB.addSource(temp).add(constant).add(offset);
+		
 		temp=JAI.create("rescale",PB);
     } else {
     	if (debug) System.out.println("processFormat rescaleOnFormat is FALSE - NO rescaling !!!");

@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module qplot2
-$! VPACK Version 1.9, Tuesday, July 01, 2014, 18:14:05
+$! VPACK Version 2.1, Wednesday, August 19, 2015, 17:51:39
 $!
 $! Execute by entering:		$ @qplot2
 $!
@@ -152,7 +152,7 @@ $ vpack qplot2.com -mixed -
 	-s qplot2.f -
 	-i qplot2.imake -
 	-p qplot2.pdf -
-	-t tstqplot2.pdf tstqplot2.log
+	-t tstqplot2.pdf tstqplot2_linux32.log tstqplot2_sun.log
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -184,47 +184,49 @@ C
 C
 	implicit none
       EXTERNAL EQUIV
-      COMMON/C1/ SIZE,DSPLAC,RDS,XMIN,XMAX,YMIN,YMAX
+      COMMON/C1/ SIZE,displace,RDS,XMIN,XMAX,YMIN,YMAX
      &          ,XSCLMN,XSCLMX,YSCLMN,YSCLMX,XSCLDT
      &          ,YSCLDT,XLNGTH,YLNGTH,FORMAT,NORM,NCHAN
      &          ,xsclset,ysclset
       COMMON/C2/ SL,SS,EL,ES,IN,UNIT,ILINE,NLINES
      &          ,NLI,NSI,NSCHAN,GTYPE,XPAGE,LB,LABTOP
+      common/files/filename
       common/commonheader/headermsg,nheadermsg,iiline,i2line
 
-      integer*4    iiline,i2line,nheadermsg(220)  !! index into header strings
-      INTEGER*4 IN(10),SL(10),SS(10),EL(10),ES(10),UNIT(10)
-      INTEGER*4 GTYPE,TTLTOP,NLI(10),NSI(10),NBI(10)
+      	integer*4    iiline,i2line,nheadermsg(220)  !! index into header strings
+      	INTEGER*4 IN(10),SL(10),SS(10),EL(10),ES(10),UNIT(10)
+      	INTEGER*4 GTYPE,TTLTOP,NLI(10),NSI(10),NBI(10)
 	integer*4 STAT,IPARM(256),TICS
 	integer*4 i,ii,j,jj,n,icount,idef,iline,ind,isize,psize
 	integer*4 labtop,lcheck,lx,ly,lb,ni,nlines,np,nschan,ntest
 	integer*4 ntics,ntitle,ntitx,ntity,nx,ny,nchan,naline
 	integer*4 plotwid,plotht,ntbl,nplotgpi,nplotout
-	integer*4 nplotgpi2,nploteps,ntmptbl
+	integer*4 nplotgpi2,nploteps,ntmptbl,charsize,charsteps
         integer*4 pttype(20),lntype(20),ptcolorl(20)
 
-      REAL*4 RPARM(256),XAXIS(4),YAXIS(4)
-      REAL*4 XMAX(10),XMIN(10),YMAX(10),YMIN(10)
-      REAL*4 XSCLMN,XSCLMX,YSCLMN,YSCLMX,XLNGTH,YLNGTH
-	real*4 dsplac,rds,size,xpage,xscldt,yscldt
-	real*4 fpos,labstep,tmp
-	logical*4 XVPTST, NORM, xsclset, ysclset, epsplot
+      	REAL*4 RPARM(256),XAXIS(4),YAXIS(4)
+      	REAL*4 XMAX(10),XMIN(10),YMAX(10),YMIN(10)
+      	REAL*4 XSCLMN,XSCLMX,YSCLMN,YSCLMX,XLNGTH,YLNGTH
+	real*4 displace,rds,size,xpage,xscldt,yscldt
+	logical*4 XVPTST, NORM, xsclset, ysclset, epsplot, nolabel
         character*1 LPARM(1024)
 	character*4 FORMAT(10),aline
         character*8 plotfmt
-	character*10 labels (11)
         character*24 tbl,tmptbl
 	character*30 alinenum
 
-      CHARACTER*63 XTTL,YTTL,TTL,CBUF,XTITLE,YTITLE,TITLE
-      character*63 msg,plotgpi,plotgpi2,ploteps
-      character*56 headermsg(220) !! Labels * (lines per label+2) 
+      	CHARACTER*63 XTTL,YTTL,TTL,CBUF,XTITLE,YTITLE,TITLE
+      	character*63 msg,plotgpi,plotgpi2,ploteps
+      	character*56 headermsg(220) !! Labels * (lines per label+2) 
 	CHARACTER*63 plotout
+	character*120 filename(10)
 c
         character*8 ptcolor(20),lncolor(20)
 	character*4 gpi/'.gpi'/,eps/'.eps'/,asc/'.asc'/
 c
         character*1 num(5)
+
+        character bash
 c
         data num/'1','2','3','4','5'/
         data tmptbl/'tmptbl.'/
@@ -242,7 +244,8 @@ C
      2 'green','cyan','purple','blue','orange',
      3 'magenta','beige','red','green','cyan'/
 c
-      call xvmessage('qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb',' ')
+      call xvmessage('qplot2 version 2015-08-19',' ')
+      bash=achar(92)
 C
 C   SET DEFAULTS AND INITIALIZE
 c	tbl='tmptbl.x'
@@ -320,13 +323,14 @@ c            epsplot = .false.
       SIZE=.10
 	isize = 10		!gnuplot file
 	psize = 16		!eps file
-      DSPLAC=0.
+      displace=0.
       RDS=0.
       NTITX=22
       NTITY=8
       NTITLE=13
       NORM=.FALSE.
-      TICS=0
+	nolabel=.false.	!Put vicar labels on graph
+      TICS=1			!set default to tics
       LABTOP=1
       TTLTOP=1
       XLNGTH=9.0
@@ -366,6 +370,8 @@ c	print *, 'Number of bands = ',nbi(i)
 	    call abend
 	endif
    10 CONTINUE
+c
+      CALL XVP('INP',FILENAME,ICOUNT)   !INPUT FILENAMES
 C
 C        *** PROCESS PARAMETERS ***
 C
@@ -449,10 +455,12 @@ C  'LABELSIZ'
 c	print *, 'size = ',isize	
 C  'LOLABEL'
       IF (XVPTST('LOLABEL')) LABTOP=0
+c  'Nolabel'
+	if (XVPTST('NOLABEL')) nolabel=.true.
 C  'TICS'
-      IF (XVPTST('TICS')) TICS=1
+      IF (XVPTST('NOTICS')) TICS=0
 C  'DISPLACEMENT'
-      CALL XVPARM('DISPLACE',DSPLAC,ICOUNT,IDEF,1)
+      CALL XVPARM('DISPLACE',displace,ICOUNT,IDEF,1)
 
         plotwid =  648  !640 @72dpi = 8.888.. inches    9 inch = 648
         plotht  =  504  !480 @72dpi = 6.666.. inches    7 inch = 504
@@ -608,16 +616,18 @@ C           SMALL
 C
 C  DRAW TITLE  (DEFAULT = 'IPL LINE PLOT')
       headermsg(iiline) = title
-      iiline = iiline + 3
+      iiline = iiline + 1		!+ 3
 
 c -- the following is not really needed with gnuplot
 c  here is where "line" is called
-      labels (1) = ' '
-      do II = 1, 11
-         write (msg (1:),'(a)') 'Line   ' 
-         write (msg (6:),'(i2)') II 
-         labels (II+1) = msg 
-      end do
+c      labels (1) = ' '
+c      do II = 1, 10
+c         write (msg (1:),'(a)') 'Line   ' 
+c         write (msg (6:),'(i2)') II
+c         write (msg (9:50),'(a)') filename(ii)(1:40) 
+c         labels (II+1) = msg
+c	print *,'label (ii+1) = ', labels (II+1)
+c      end do
 
 
 c	print *,'before DO 850 ILINE=1,NLINES  tbl = ',tbl(1:ntbl)
@@ -648,19 +658,32 @@ c	print *, 'after CALL STACKA(9,EQUIV,.... tmptbl = ',tmptbl(1:ntbl)
   850 CONTINUE
 c        print *, "y-",ysclmn, ysclmx
 c        print *, "x-",xsclmn, xsclmx
-
-        labstep = 0.04
-
-        if (iiline .gt. 16) then
-           tmp = iiline/16
-           plotht = int(plotht * 0.75*tmp)
-           labstep =(labstep/tmp)
-        endif
+c This calculation is used for positioning the labels on the chart
+c	original method was percentage of height in fpos
+cc        labstep = 0.04
+	iiline = iiline - 2
+cc	go to 10000
+c c       if (iiline .gt. 16) then
+cc           tmp = iiline/16
+cc           plotht = int(plotht * 0.75*tmp)
+cc           labstep =(labstep/tmp)
+cc        endif
 c	compute y-scale height
-	tmp = ysclmx - ysclmn
-	ysclmx = ysclmx + 50*labstep*ysclmx
-	if ((ysclmx-ysclmn) .gt. 2*tmp) ysclmx = 2*tmp	
+cc	tmp = ysclmx - ysclmn
+cc	ysclmx = ysclmx + 50*labstep*ysclmx
+cc	if ((ysclmx-ysclmn) .gt. 2*tmp) ysclmx = 2*tmp	
 
+cc10000 continue
+	charsize = 9
+	charsteps = (plotht)/(charsize*2) + 4		!divide by 2 for line spacing
+	if (charsteps .gt. 54) charsteps = charsteps - 1	!adjust for floating point
+c	print *, 'charsteps = ',charsteps
+
+	if (iiline .gt. (charsteps - 5).and. .not.nolabel) then
+	   write (msg,10010) 
+10010 format ('Plot needs to be taller for all labels to print' )
+	   call xvmessage(msg,' ')
+	endif 
 cc
 cc  open gpi data set
 cc
@@ -679,6 +702,11 @@ C  size = XX,YY
         if (tics .eq. 1) then
 10120 format('set grid ')
                 write(98,fmt=10120,iostat=jj,err=995)
+	else
+10121 format ("set noxtics")
+	        write(98,fmt=10121,iostat=jj,err=995)
+10122 format ("set noytics")
+	        write(98,fmt=10122,iostat=jj,err=995)
         endif
 10125 format("set ylab '",a,"'" )
        write(98,fmt=10125,iostat=jj,err=995) ytitle(1:ntity)
@@ -696,22 +724,32 @@ C  size = XX,YY
 10140 format("set xrange [",f8.0,":",f7.0,"]")
        write(98,fmt=10140,iostat=jj,err=995) xsclmn,xsclmx
 
-
+cc	go to 11000
 c output labels for only top 60% of plot
-        fpos=1.0 + labstep
-        do ii=2,iiline
-                i = ii - 1
-                fpos = fpos - labstep
-10160 format('set label ',i2,' "',a,'" at graph .30 ,',f5.2,
-     1 ' font "ariel,9" front nopoint tc def')
+cc        fpos=1.0 !			+ labstep
+cc        do ii=2,iiline
+cc                i = ii - 1
+cc                fpos = fpos - labstep
+cc10160 format('set label ',i2,' "',a,'" at graph .30 ,',f5.2,
+cc     1 ' font "ariel,9" front nopoint tc def')
 c       1 ' font "ariel 8" front nopoint tc def')
-        write(98,fmt=10160,iostat=jj,err=995) i,headermsg(ii)(1:nheadermsg(ii)), fpos
+cc        write(98,fmt=10160,iostat=jj,err=995) i,headermsg(ii)(1:nheadermsg(ii)), fpos
 cc      print 10160, i,headr(ii)(1:nheadr(ii)), fpos
 cc10155 format("set label 2 '",a,"' at graph 0.4, 0.90 front nopoint tc def")
 cc        write(98,fmt=10155,iostat=jj,err=995) headr(3)
-        enddo
+cc        enddo
 
+cc11000 continue
+	if (.not.nolabel) then
+	do ii=2,iiline
+	   i = ii - 1
+           j = charsteps - ii  	       
+10170 format('set label ',i2,' "',a,'" at character 15 ,',i2,
+     1 ' font "ariel,9" front nopoint tc def')
+c       1 ' font "ariel 8" front nopoint tc def')
+        write(98,fmt=10170,iostat=jj,err=995) i,headermsg(ii)(1:nheadermsg(ii)), j
 
+	enddo	
       !! Display labels on the 2nd and possibly the 3rd page 
       if (i2line .eq. 0) then
          !! If i2line == 0, then 5 or less samples
@@ -719,6 +757,8 @@ ccc---         call header (headermsg, iiline, 0) !! Title string, lines, adjust
       else
          !! Display first set of labels and header
       endif
+	
+	endif !if (.not.nlabel
 
         if (nlines .eq. 1) then
 	   iline=1
@@ -734,7 +774,6 @@ c	print *, 'if (nlines .eq. 1) tbl = ',tbl(1:ntbl)
 10248 format("pixel[",i4,",",i4,"]") 
 		naline=index(alinenum,'     ') - 1
 	   endif
-
 
 
 10250 format("plot '",a,"' u 1:2 t '",a,"' w linespoints lt ",i2,
@@ -757,10 +796,13 @@ c	print *, 'if (nlines .eq. 2) tbl = ',tbl(1:ntbl)
                 write (alinenum,10248) sl(iline),ss(iline)
                 naline=index(alinenum,'     ') - 1
            endif
+c     terminated with bash
 10251 format("plot '",a,"' u 1:2 t '",a,"' w linespoints lt ",i2,
-     1 " pt ",i2," ps 2 lc rgb '",a,"', \")
-        write(98,fmt=10251,iostat=jj,err=995) tbl(1:ntbl),alinenum(1:naline),
-     1 lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline))
+     1 " pt ",i2," ps 2 lc rgb '",a,"', ",a)
+      write(98,fmt=10251,iostat=jj,err=995) tbl(1:ntbl),
+     1 alinenum(1:naline),
+     1 lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline)),
+     1 bash
            iline = 2
            ntmptbl=index(tmptbl,'  ') - 1
            tbl=tmptbl(1:ntmptbl)//num(iline)
@@ -792,8 +834,10 @@ c	print *, 'elseif (nlines .gt. 2) tbl = ',tbl(1:ntbl)
                 write (alinenum,10248) sl(iline),ss(iline)
                 naline=index(alinenum,'     ') - 1
 	   endif
-        write(98,fmt=10251,iostat=jj,err=995) tbl(1:ntbl),alinenum(1:naline),
-     1 lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline))
+        write(98,fmt=10251,iostat=jj,err=995) tbl(1:ntbl),
+     1   alinenum(1:naline),
+     1   lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline)),
+     1   bash
 
         do iline=2,nlines-1
            ntmptbl=index(tmptbl,'  ') - 1
@@ -808,9 +852,11 @@ c	  print *, 'do iline=2,nlines-1 ntbl = ',tbl(1:ntbl)
                 naline=index(alinenum,'     ') - 1
 	   endif
 10253 format (" '",a,"' u 1:2 t '",a,"' w linespoints lt ",i2,
-     1 " pt ",i2," ps 2 lc rgb '",a,"', \")
-        write(98,fmt=10253,iostat=jj,err=995) tbl(1:ntbl),alinenum(1:naline),
-     1 lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline))
+     1 " pt ",i2," ps 2 lc rgb '",a,"', ",a)
+      write(98,fmt=10253,iostat=jj,err=995) tbl(1:ntbl),
+     1  alinenum(1:naline),
+     1  lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline)),
+     1  bash
 
         enddo
             iline = nlines
@@ -848,7 +894,10 @@ cc
 10305 format("set output '",a,"'")
         write(97,fmt=10305,iostat=jj,err=996) ploteps(1:nploteps)
         if (tics .eq. 1) then
-            write(97,fmt=10120,iostat=jj,err=996)
+                write(97,fmt=10120,iostat=jj,err=995)
+        else
+                write(97,fmt=10121,iostat=jj,err=995)
+                write(97,fmt=10122,iostat=jj,err=995)
         endif
        write(97,fmt=10125,iostat=jj,err=996) ytitle(1:ntity)
        write(97,fmt=10130,iostat=jj,err=996) xtitle(1:ntitx)
@@ -859,17 +908,26 @@ cc
        write(97,fmt=10140,iostat=jj,err=996) xsclmn,xsclmx
 
 c output labels for only top 60% of plot
-        fpos=1.0 + labstep
-        do ii=2,iiline
-                i = ii - 1
-                fpos = fpos - labstep
-10161 format('set label ',i2,' "',a,'" at graph .30 ,',f5.2,
-     1 ' font "ariel,16" front nopoint tc def')
+cc        fpos=1.0 + labstep
+cc        do ii=2,iiline
+cc                i = ii - 1
+cc                fpos = fpos - labstep
+cc10161 format('set label ',i2,' "',a,'" at graph .30 ,',f5.2,
+cc     1 ' font "ariel,16" front nopoint tc def')
 c       1 ' font "ariel 8" front nopoint tc def')
-        write(97,fmt=10161,iostat=jj,err=996) i,headermsg(ii)(1:nheadermsg(ii)), fpos
+cc        write(97,fmt=10161,iostat=jj,err=996) i,headermsg(ii)(1:nheadermsg(ii)), fpos
 cc      print 10160, i,headr(ii)(1:nheadr(ii)), fpos
 cc10155 format("set label 2 '",a,"' at graph 0.4, 0.90 front nopoint tc def")
 cc        write(98,fmt=10155,iostat=jj,err=995) headr(3)
+cc        enddo
+
+c
+       do ii=2,iiline
+           i = ii - 1
+           j = charsteps - ii
+c       1 ' font "ariel 8" front nopoint tc def')
+        write(97,fmt=10170,iostat=jj,err=995) i,headermsg(ii)(1:nheadermsg(ii)), j
+
         enddo
 
        if (nlines .eq. 1) then
@@ -899,8 +957,10 @@ cc        write(98,fmt=10155,iostat=jj,err=995) headr(3)
                 write (alinenum,10248) sl(iline),ss(iline)
                 naline=index(alinenum,'     ') - 1
            endif
-        write(97,fmt=10251,iostat=jj,err=996) tbl(1:ntbl),alinenum(1:naline),
-     1 lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline))
+        write(97,fmt=10251,iostat=jj,err=996) tbl(1:ntbl),
+     1    alinenum(1:naline),
+     1    lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline)),
+     1    bash
            iline = 2
            ntmptbl=index(tmptbl,'  ') - 1
            tbl=tmptbl(1:ntmptbl)//num(iline)
@@ -928,8 +988,10 @@ cc        write(98,fmt=10155,iostat=jj,err=995) headr(3)
                 write (alinenum,10248) sl(iline),ss(iline)
                 naline=index(alinenum,'     ') - 1
            endif
-        write(97,fmt=10251,iostat=jj,err=996) tbl(1:ntbl),alinenum(1:naline),
-     1 lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline))
+        write(97,fmt=10251,iostat=jj,err=996) tbl(1:ntbl),
+     1    alinenum(1:naline),
+     1    lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline)),
+     1    bash
 
         do iline=2,nlines-1
            ntmptbl=index(tmptbl,'  ') - 1
@@ -942,8 +1004,10 @@ cc        write(98,fmt=10155,iostat=jj,err=995) headr(3)
                 write (alinenum,10248) sl(iline),ss(iline)
                 naline=index(alinenum,'     ') - 1
            endif
-        write(97,fmt=10253,iostat=jj,err=996) tbl(1:ntbl),alinenum(1:naline),
-     1 lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline))
+       write(97,fmt=10253,iostat=jj,err=996) tbl(1:ntbl),
+     1   alinenum(1:naline),
+     1   lntype(iline),pttype(iline),ptcolor(iline)(1:ptcolorl(iline)),
+     1   bash
 
         enddo
             iline = nlines
@@ -1015,39 +1079,42 @@ C
       SUBROUTINE GRAPH(X,RBUF,Y,line,tmptbl,ntbl)					!,tbl,ntbl)
 	implicit none
 C
-      COMMON/C1/ SIZE,DSPLAC,RDS,XMIN,XMAX,YMIN,YMAX
+      COMMON/C1/ SIZE,displace,RDS,XMIN,XMAX,YMIN,YMAX
      &          ,XSCLMN,XSCLMX,YSCLMN,YSCLMX,XSCLDT
      &          ,YSCLDT,XLNGTH,YLNGTH,FORMAT,NORM,NCHAN
      &          ,xsclset,ysclset
       COMMON/C2/ SLX,SSX,ELX,ESX,INX,UNIT,ILINE,NLINES
      &          ,NLI,NSI,NSCHAN,GTYPE,XPAGE,LB,LABTOP
+      common/files/filename
       common/commonheader/headermsg,nheadermsg,iiline,i2line
 c
       integer*4  iiline,i2line,nheadermsg(220)  !! index into header strings
 
 C
-      REAL*8 MEAN,SIGMA,DBLV
-      REAL*4 XMAX(10),XMIN(10),YMAX(10),YMIN(10)
-      REAL*4 XSCLMN,XSCLMX,YSCLMN,YSCLMX
+      	REAL*8 MEAN,SIGMA,DBLV
+      	REAL*4 XMAX(10),XMIN(10),YMAX(10),YMIN(10)
+      	REAL*4 XSCLMN,XSCLMX,YSCLMN,YSCLMX
 	REAL*4 TXSCLMN,TXSCLMX,TYSCLMN,TYSCLMX
-      REAL*4 XLNGTH,YLNGTH
-      REAL*4 X(1),RBUF(1),Y(1),YT(4)
-	real*4 adx,ady,dnmax,dsplac,dx,dy,dz,rds,size
+      	REAL*4 XLNGTH,YLNGTH
+      	REAL*4 X(1),RBUF(1),Y(1),YT(4)
+	real*4 adx,ady,dnmax,displace,dx,dy,dz,rds,size
 	real*4 xinc,xl,xl1,xl2,xpage,xscldt,yinc,ypage,ypeak,yscldt
-      INTEGER*4 INX(10),SLX(10),SSX(10),ELX(10),ESX(10),NLI(10),NSI(10)
-      INTEGER*4 UNIT(10),SN,SL,SS,EL,ES,STAT,GTYPE,sinc
+      	INTEGER*4 INX(10),SLX(10),SSX(10),ELX(10),ESX(10),NLI(10),NSI(10)
+      	INTEGER*4 UNIT(10),SN,SL,SS,EL,ES,STAT,GTYPE,sinc
 	integer*4 id,idense,ilab,iline,in,inline,inteq,ipt,iq
 	integer*4 labtop,lb,linc,ln,ln2,nchan,nlab,nlines,npts
 	integer*4 nsamp,nschan,nx,ny,ntmptbl,ntbl
 	integer*4 i,j,line
-      LOGICAL*4 NORM,xsclset,ysclset
+      	LOGICAL*4 NORM,xsclset,ysclset
 	character*1 tab
 	character*4 format(10)
 	character*24 tbl,tmptbl
-      CHARACTER*24 STLAB1
-      CHARACTER*12 STLAB2
-      CHARACTER*56  LABEL(20),xheadermsg
+      	CHARACTER*24 STLAB1
+      	CHARACTER*12 STLAB2
+      	CHARACTER*56  LABEL(20),xheadermsg
 	character*56 headermsg(220) !! Labels * (lines per label+2)
+        character*120 filename(10)
+
 C
         character*1 num(5)
 c
@@ -1252,10 +1319,11 @@ cc        enddo
 C
 C        ADD DISPLACEMENT
 640   continue
-      IF (DSPLAC .EQ. 0.) GO TO 650
-      DO 645 ID=1,NPTS
-         Y(ID)=Y(ID)+INTEQ*DSPLAC
-  645 CONTINUE
+      IF (displace .NE. 0.) then
+      	DO  ID=1,NPTS
+            Y(ID)=Y(ID)+INTEQ*displace
+	ENDDO
+      ENDIF
 cc        print *,"ADD DISPLACEMENT:"
 cc        do i=1,npts
 cc                print *,"-", x(i),y(i)
@@ -1263,7 +1331,7 @@ cc        enddo
 
 C
 C        COMPUTE MEAN AND STANDARD DEVIATION
-650   MEAN=MEAN/NPTS
+      MEAN=MEAN/NPTS
       SIGMA=DSQRT(DABS(SIGMA/NPTS-MEAN*MEAN))
 c	print *, "MEAN, STDDEV:"
 c        print *, mean,sigma
@@ -1380,6 +1448,9 @@ C        PRINT LABELS
       xheadermsg = ' '
       write (xheadermsg (1:),'(a)') 'Line   ' 
       write (xheadermsg (6:),'(i2)') ILINE
+      write (xheadermsg (9:),'(a)') ' - '
+      write (xheadermsg (12:50),'(a)') filename(iline)(1:38)
+
       headermsg (iiline) = xheadermsg 
       nheadermsg (iiline)=56	!index(xheadermsg,'        ') - 1
       iiline = iiline + 1 
@@ -1594,6 +1665,7 @@ process help=*
  PARM XTITLE     TYPE=STRING   DEFAULT="RELATIVE SAMPLE NUMBER"
  PARM YTITLE     TYPE=STRING                   DEFAULT="DN VALUE"
  PARM LABELSIZ   TYPE=INTEGER                  DEFAULT=12
+ PARM NOLABEL    TYPE=KEYWORD  VALID=(LABEL,NOLABEL) DEFAULT=LABEL
  PARM LOLABEL    TYPE=KEYWORD  VALID=(LOLABEL,HILABEL)  DEFAULT=HILABEL
  PARM TICS       TYPE=KEYWORD  VALID=(TICS,NOTICS)      DEFAULT=TICS
  PARM NORM       TYPE=KEYWORD  VALID=(NORM,NONORM)      DEFAULT=NONORM
@@ -1621,24 +1693,22 @@ PURPOSE:
 
 OPERATION:
 
-   There are two operatinal modes for qplot2. One is for one or more
-   single band images and the other for a mutliple band image in MSS format.
+   QPLOT2 operates on single or multiple single-band BSQ imgages in
+   BYTE, HALF, FULL or REAL format. For FULL and REAL formats the DN 
+   ranges are internally limited to -65536 to +65535 DN ranges. It does
+   work for multi-band BSQ (MSS) images.
 
    Plots for up to 10 input image files are allowed for Single Band images.
    and up to 50 lines (profiles) for each image is allowed. The straight lines
    may be oriented in any direction, horizontal, vertical or at a slant.
 
-   Only 1 input file can be used for MSS images. Furthermore, the basic
-   unit is not a line but a point. Up tp 20 points may requested. 
-
-   
-   The modes are distinguished via the PROCESS and SPROCESS parameters. 
+   Modes are distinguished via the PROCESS and SPROCESS parameters. 
 
    PROCESS parameter is used for One band BSQ files
-   SPROCESS parameter is used for MSS files. NCHAN parameter is required
-   since MSS files are one BAND with files lying side-by-side.
+   SPROCESS parameter is used for multiple BSQ files.
    These parameters are mutually exclusive
 
+    
 PARAMETERS:
 
   There are two types of parameters:
@@ -1681,8 +1751,9 @@ PARAMETERS:
   The LABELSIZ parameter refers to the font size in points for all the text in the
   graph. This is suitable for changes of XLENGTH and YLENGTH when different 
   from the default. Note, the internal font is Ariel and cannot be changed.
+  The label data superimposed on graph is always 9-point Ariel.
 
-  XSCALE and YSCALE are the max size of the x plot values and y plot values.
+  XSCALE and YSCALE are the max size of the X plot values and Y plot values.
 
   The parameter NORM is used to normalize the DN values to 1. The
   DN values are ratioed to the max DN of the line. Especially useful
@@ -1695,20 +1766,16 @@ PARAMETERS:
   The parameter TICS refers to placing crosshatching on the plot along
   with the axis tic marks which are in units of 10.
 
-  The parameter RDS refers to ????
+  The parameter RDS causes DN values to be scaled by the following equation:
+               OUT=SQRT(IN**2-RDS**2).
+  Where RDS is the value in the RDS parameter.
+ 
+  For plots containing multiple lines, the parameter DISPLACE forces 
+  each line to be displaced successively by the DISPLACE=DN on the
+  It does not work on plots containing a single line. 
 
-  The parameter DISPLACE forces each line to be displaced upward successively
-  by the DISPLACE=number units in DN.
 
-  The NCHAN parameter is used with MSS images to select how many of the
-  channels (bands) for the data points in SPROCESS.
-
-
-  LOTITILE and LOLABEL keywords are not supported.
-  There is internal code to put statistics (mean,stddev) on
-  graphs. This has not been implemented. (Not even in MIPL).
-  There is internal code to place vicar labels on the graphs
-  This has not been implemented. (Not even in MIPL).
+  LOTITILE and LOLABEL keywords are no longer supported (gnuplot).
 
   
 NOTES:
@@ -1766,9 +1833,10 @@ OUTPUTS:
 RESTRICTIONS:
 
   (1) Maximum number of lines plotted is 10.
-  (2) Spectral plots require a single input in mss format.
+  (2) Spectral plots require the SPROCESS parameter.
   (3) Cannot use PROCESS and SPROCESS parameters simultaneously
-  (4) Multi Band BSQ files are not supported
+  (4) Spectral plots on multiple files are not supported
+  (5) Maximum of 10 input files
 
 Note:  This program makes use of multiple intermediate data sets.
   If this program is run under a directory which does not allow the
@@ -1781,27 +1849,39 @@ Note:  This program makes use of multiple intermediate data sets.
 HISTORY:
 
   Original Programmer:  John H. Reimer,  22 Aug. 1982
-  Converted to Vicar2 by:  John H. Reimer,  22 April 1985
   Cognizant Programmer:  Ray Bambery   
-  Ported to Unix (MSTP S/W Conversion) C. Randy Schenk (CRI) 10 JUly 1995
 
-  6-13-2011 - Ray Bambery - Converted to use gnuplot, and work
-                     under gfortran 4.4.4 on liunx
-  6-05-2012 - Ray Bambery - fixed dimensions of x,y in subroutine equiv
-  7-10-2012 - Ray Bambery - Renamed qplot2g for delivery to MIPL
-                        qplot2 still uses XRT/Graph package, 
-                        Removed <tab> in front of continuation
-                        lines to make backward compatible with
-                        32-bit Linux gfortran 4.2.1, otherwise
-                        compatible 64-bit Linux gfortran 4.6.3</tab>
-  10-13-2012 - Ray Bambery - Renamed back to qplot2, in agreement
-                        with Lucas Kamp of mipl. The XRT graph package
-                        is to be removed from mipl. XRT was never used by
-                        cartlab. Implemented LABELSIZ parameter
-  07-09-2013 - Ray Bambery - Fixed truncated plot labeling
-                        created unique names for data sets for plots to
-                        prevent confusion in long scripts. Added PLOTFMT
-  07-12-2013 - Ray Bambery - Adjusted eps format to more readable fonts
+  Revisions:
+  1985-04-22 John H. Reimer - Converted to Vicar2
+  1995-07-10 C. Randy Schenk (CRI) - Ported to Unix (MSTP S/W Conversion)
+  2011-06-13 Ray Bambery - Converted to use gnuplot, and work
+             under gfortran 4.4.4 on liunx
+  2012-06-05 Ray Bambery - fixed dimensions of x,y in subroutine equiv
+  2012-07-10 Ray Bambery - Renamed qplot2g for delivery to MIPL
+             qplot2 still uses XRT/Graph package, 
+             Removed <tab> in front of continuation
+             lines to make backward compatible with
+             32-bit Linux gfortran 4.2.1, otherwise
+             compatible 64-bit Linux gfortran 4.6.3</tab>
+  2012-10-13 Ray Bambery - Renamed back to qplot2, in agreement
+             with Lucas Kamp of mipl. The XRT graph package
+             is to be removed from mipl. XRT was never used by
+             cartlab. Implemented LABELSIZ parameter
+  2013-07-09 Ray Bambery - Fixed truncated plot labeling
+             created unique names for data sets for plots to
+             prevent confusion in long scripts. Added PLOTFMT
+  2013-07-12 Ray Bambery - Adjusted eps format to more readable fonts
+  2013-08-21 Ray Bambery - Fixed grid, notics code in gpi output. Fixed
+             DISPLACE parmeter, Changed mode of placing labels
+             on plots from proportional to character mode. 
+             Added filenames to plot
+  2013-08-28 Ray Bambery - Added NOLABEL parameter to inhibit overprinting
+             of VICAR labels on graph (Sometimes way too many labels)
+             It can corrupt the gnuplot script which will give an
+             error like "line 54: invalid expression"
+             on entering the command gnuplot xx.gpi                        
+  2015-08-19 Walt Bunch - Fixed end of line encoding so linux and sun
+                will yield same output.
 
 .page
 .level1
@@ -1820,8 +1900,6 @@ string - specification
 
 .variable process
 INTEGER - DSN1,SL1,SS1,EL1,ES1, DSN2,SL2,SS2,EL2,ES2, ...
-.variable nchan
-INTEGER - Number of channels in mss formatted input data set
 .variable sprocess
 INTEGER - LINE1,SAMPLE1, LINE2,SAMPLE2, ...
 .variable title
@@ -1835,6 +1913,9 @@ STRING - Y axis title
 .variable labelsiz
 INTEGER - Font Size, in points, of plot text.
 Default=12
+.variable nolabel
+KEYWORD - Inhibit overprinting of VICAR
+    labels on plot
 .variable lolabel
 KEYWORD - Lower position for label.
 .variable tics
@@ -1844,7 +1925,7 @@ KEYWORD - Normalizes data to 1.
 .variable rds
 REAL - DN scaling factor.
 .variable displace
-REAL - Displacement for subsequent lines.
+REAL - Displacement from first line for subsequent lines.
 .variable xlength
 REAL - Length of X axis (inches).
 .variable ylength
@@ -1879,10 +1960,6 @@ values specify the Starting Line, Starting Sample, Ending Line, and Ending
 Sample. (No Default).  NOTE:  The line plotted will cover
 SQRT((EL-SL)**2+(ES-SS)**2) "relative samples" along the horizontal axis
 and will start at "relative sample" 1.
-.variable nchan
-Specifies the number of spectral channels in an input data set in mss
-format. This keyword is used in conjunction with the SPROCESS keyword.
-(Default is 1)
 .variable sprocess
 Specifies one or more spectral plots. This keyword requires that the input
 be in mss format and that NCHAN is specified. Following the keyword,
@@ -1906,6 +1983,10 @@ Specifies the title for the Y axis (Max length of 52 characters). (Default is
 .variable labelsiz
 Specifies the Font size, in points, for Plot Text
 (Default is 12)
+.variable nolabel
+Inhibit overprinting of VICAR labels on plot
+Sometimes there are just way too many labels
+(default is LABELS) 
 .variable lolabel
 Specifies that labels will be written within the 8.5 x 11 space.
 (Default is to place the labels at the top of the page.)
@@ -2106,7 +2187,7 @@ end-if
 
 !
 !TEST 10  - SLANT
-qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 10 - SLANT PROFILE") +
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 10 - SLANT PROFILE - RDS=20") +
    xtitle=("Relative DN Position") ytitle=("DN Value") +
     rds=20.0 plotout=test10
 
@@ -2116,7 +2197,7 @@ end-if
 
 !
 !TEST 11  - SLANT
-qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 11 - SLANT PROFILE") +
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 11 - SLANT PROFILE - RDS=-5") +
    xtitle=("Relative DN Position") ytitle=("DN Value") +
     rds=-5.0 plotout=test11
 
@@ -2129,7 +2210,8 @@ let $echo="no"
 write "Multiple lines on one band"
 let $echo="yes"
 !TEST 12 - SLANT
-qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) title=("QPLOT2 TEST 12") +
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) +
+   title=("QPLOT2 TEST 12 - 2 Files - same ranges") +
     plotout=test12
 
 if (mode = "nobatch" or mode = "inter")
@@ -2137,7 +2219,8 @@ if (mode = "nobatch" or mode = "inter")
 end-if
 
 !TEST 13  - SLANT
-qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) title=("QPLOT2 TEST 13") +
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) +
+    title=("QPLOT2 TEST 13 - 2 files - Scaling") +
     xscale=(1,40) yscale=(1,255)  plotout=test13
 
 if (mode = "nobatch" or mode = "inter")
@@ -2145,7 +2228,8 @@ if (mode = "nobatch" or mode = "inter")
 end-if
 
 !TEST 14 - SLANT
-qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) title=("QPLOT2 TEST 14") +
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) +
+    title=("QPLOT2 TEST 14 - 2 files - smaller scale") +
     xscale=(1,25) yscale=(1,50) plotout=test14
 
 if (mode = "nobatch" or mode = "inter")
@@ -2153,7 +2237,8 @@ if (mode = "nobatch" or mode = "inter")
 end-if
 
 !TEST 15 
-qplot2 (inp2,inp3) proc=(1,1,1,20,20, 2,50,50,70,70) title=("QPLOT2 TEST 15") +
+qplot2 (inp2,inp3) proc=(1,1,1,20,20, 2,50,50,70,70) +
+    title=("QPLOT2 TEST 15 - 2 files - different ranges") +
     xscale=(1,25) yscale=(1,255) plotout=test15
 
 if (mode = "nobatch" or mode = "inter")
@@ -2163,7 +2248,7 @@ end-if
 
 !TEST 16
 qplot2 (inp1,inp2,inp3) proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70) +
-        title=("QPLOT2 TEST 16") plotout=test16
+        title=("QPLOT2 TEST 16 - 3 files - different ranges") plotout=test16
 
 if (mode = "nobatch" or mode = "inter")
     ush gnuplot test16.gpi
@@ -2192,7 +2277,7 @@ let $echo="no"
 write "HALF WORD data sets"
 let $echo="yes"
 !TEST 18
-qplot2 (half1,half2,half3,half1a) title=("QPLOT2 TEST 18") +
+qplot2 (half1,half2,half3,half1a) title=("QPLOT2 TEST 18 - HALF") +
     proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
     plotout=test18
 
@@ -2203,7 +2288,7 @@ end-if
 !
 !TEST 19
 qplot2 (half1,half1b) proc=(1,1,1,20,20, 2,1,1,20,20) +
-    title=("QPLOT2 TEST 19 - LINE 2 displaced by 5 upward") +
+    title=("QPLOT2 TEST 19 - HALF - LINE 2 displaced by 5 upward") +
     displace=5 plotout=test19
 
 if (mode = "nobatch" or mode = "inter")
@@ -2219,7 +2304,7 @@ let $echo="no"
 write "FULL WORD data sets"
 let $echo="yes"
 !TEST 20
-qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 20") +
+qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 20 - FULL WORD") +
     proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
     plotout=test20
 
@@ -2227,7 +2312,7 @@ if (mode = "nobatch" or mode = "inter")
     ush gnuplot test20.gpi
 end-if
 !TEST 21
-qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 21") +
+qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 21 - FULL - Y-scale") +
     proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
     yscale=(0,5000.) plotout=test21
 
@@ -2244,7 +2329,7 @@ let $echo="no"
 write "REAL data sets"
 let $echo="yes"
 !TEST 22
-qplot2 (real1,real2,real3,real1a) title=("QPLOT2 TEST 22") +
+qplot2 (real1,real2,real3,real1a) title=("QPLOT2 TEST 22 - REAL") +
     proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
     plotout=test22
 
@@ -2256,6 +2341,8 @@ let $echo="no"
 write "MIXED data sets"
 let $echo="yes"
 !TEST 23
+! should get warning that:
+! Plot needs to be taller for all labels to print
 qplot2 (inp1,half2,full3,real1a)  +
     proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
     title=("QPLOT TEST 23 -MIXED Data Types - BYTE,HALF,FULL,REAL") +
@@ -2263,6 +2350,16 @@ qplot2 (inp1,half2,full3,real1a)  +
 
 if (mode = "nobatch" or mode = "inter")
     ush gnuplot test23.gpi
+end-if
+! TEST 24 
+! Remove warning by eliminating labels
+qplot2 (inp1,half2,full3,real1a)  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
+    title=("QPLOT TEST 24 -MIXED Data Types - BYTE,HALF,FULL,REAL") +
+    nolabel=nolabel plotout=test24
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test24.gpi
 end-if
 
 gen b1 nl=50 ns=50
@@ -2279,41 +2376,41 @@ let $echo="no"
 write "MSS data sets"
 let $echo="yes"
 !
-!TEST 24 - 1 line on 1st channel of a 4 band MSS image
+!TEST 25 - 1 line on 1st channel of a 4 band MSS image
 qplot2 mss4a proc=(1,1,1,20,20) nchan=2 +
-    title=("QPLOT2 TEST 24 - One Line from Channel 1 - MSS Data") +
-    plotout=test24
-
-if (mode = "nobatch" or mode = "inter")
-    ush gnuplot test24.gpi
-end-if
-
-!TEST 25 - 1 pixel in spectral plot
-qplot2 mss4a sproc=(10,10) nchan=4 +
-    title=("QPLOT2 TEST 25 - Spectral Plot") +
+    title=("QPLOT2 TEST 25 - One Line from Channel 1 - MSS Data") +
     plotout=test25
 
 if (mode = "nobatch" or mode = "inter")
     ush gnuplot test25.gpi
 end-if
 
-!TSET 26 - Spectral Plot for 4 points on MSS image
-qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4 +
-    title=("QPLOT2 TEST 26 - Spectral Plot on MSS image") +
+!TEST 26 - 1 pixel in spectral plot
+qplot2 mss4a sproc=(10,10) nchan=4 +
+    title=("QPLOT2 TEST 26 - Spectral Plot - Pixel (10,10)") +
     plotout=test26
 
 if (mode = "nobatch" or mode = "inter")
     ush gnuplot test26.gpi
 end-if
 
-!TEST 27 - Spectral plot for 4 points on MSS image only first
-! 3 channels
-qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=3 +
-    title=("QPLOT2 TEST 27 - Spectral Plot 3 channels on MSS image") +
+!TSET 27 - Spectral Plot for 4 points on MSS image
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4 +
+    title=("QPLOT2 TEST 27 - Spectral Plot on MSS image - 4 points") +
     plotout=test27
 
 if (mode = "nobatch" or mode = "inter")
     ush gnuplot test27.gpi
+end-if
+
+!TEST 28 - Spectral plot for 4 points on MSS image only first
+! 3 channels
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=3 +
+    title=("QPLOT2 TEST 28 - Spectral Plot 3 channels on MSS image") +
+    plotout=test28
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test28.gpi
 end-if
 
 let $echo="no"
@@ -2324,7 +2421,7 @@ let $echo="yes"
 !TEST - failure of 4-band bsq image 
 let _onfail="continue"
 qplot2 spec4a sproc=(10,10,10,11,11,10,11,11) nchan=4 +
-    title=("QPLOT2 TEST 28 - Spectral Plot on Multiband image")
+    title=("QPLOT2 TEST 29 - Spectral Plot on Multiband image")
 let _onfail="stop"
 
 let $echo="no"
@@ -2332,7 +2429,7 @@ write "Test eps output"
 let $echo="yes"
 !TEST 28 - default name - qplot.eps
 qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4 +
-    title=("QPLOT2 TEST 28X - Spectral Plot on MSS image") +
+    title=("QPLOT2 TEST 29X - Spectral Plot on MSS image") +
     plotout="yes" plotfmt="eps"
 
 if (mode = "nobatch" or mode = "inter")
@@ -2342,19 +2439,41 @@ ush gnuplot qplot.eps.gpi
 
 !TEST 29 - provide name for eps file
 qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4 +
-    title=("QPLOT2 TEST 29 - Spectral Plot on MSS image") +
-    plotout="test29" plotfmt="eps"
+    title=("QPLOT2 TEST 30 - Spectral Plot on MSS image") +
+    plotout="test30" plotfmt="eps"
 
 if (mode = "nobatch" or mode = "inter")
-    ush gnuplot test29.gpi
+    ush gnuplot test30.gpi
 end-if
-ush gnuplot test29.eps.gpi
+ush gnuplot test30.eps.gpi
 
 let $echo="no"
 end-proc
 $!-----------------------------------------------------------------------------
-$ create tstqplot2.log
-tstqplot2
+$ create tstqplot2_linux32.log
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
 gen inp1 nl=20 ns=20
 Beginning VICAR task gen
 GEN Version 6
@@ -2373,32 +2492,32 @@ GEN Version 6
 GEN task completed
 qplot2 inp1 proc=(1, 1,1,1,20) title=("QPLOT2 TEST 1")
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 inp1 proc=(1, 1,20,20,20) title=("QPLOT2 TEST 2")  +
     labelsiz=14 plotout=test2
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 inp1 proc=(1, 1,1,20,20) title=("QPLOT2 TEST 3")  +
     plotout=test3
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 inp1 proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 4 - SLANT PROFILE")  +
     xtitle=("DN Position") ytitle=("DN Value") plotout=test4
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 5 - SLANT PROFILE")  +
     xtitle=("DN Position") ytitle=("DN Value")  +
     xscale=(1,40) yscale=(1,255) plotout=test5
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 inp1a proc=(1, 1,1,20,20, 1, 3,3,13,13, 1, 12,12,1,1)   +
@@ -2406,7 +2525,7 @@ qplot2 inp1a proc=(1, 1,1,20,20, 1, 3,3,13,13, 1, 12,12,1,1)   +
    xtitle=("DN Position") ytitle=("DN Value")  +
    xscale=(1,50) yscale=(1,255) plotout=test6
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 7 - SLANT PROFILE")  +
@@ -2414,74 +2533,79 @@ qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 7 - SLANT PROFILE")  +
    xscale=(1,30) yscale=(1,100) xlength=4 ylength=3 labelsiz=8  +
     plotout=test7
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 8 - SLANT PROFILE")  +
    xtitle=("DN Position") ytitle=("Normalized DN Value")  +
    norm="norm" plotout=test8
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 9 - SLANT PROFILE")  +
    xtitle=("Relative DN Position") ytitle=("DN Value")  +
    tics="notics" plotout=test9
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
-qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 10 - SLANT PROFILE")  +
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 10 - SLANT PROFILE - RDS=20")  +
    xtitle=("Relative DN Position") ytitle=("DN Value")  +
     rds=20.0 plotout=test10
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
-qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 11 - SLANT PROFILE")  +
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 11 - SLANT PROFILE - RDS=-5")  +
    xtitle=("Relative DN Position") ytitle=("DN Value")  +
     rds=-5.0 plotout=test11
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 let $echo="no"
 Multiple lines on one band
-qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) title=("QPLOT2 TEST 12")  +
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20)  +
+   title=("QPLOT2 TEST 12 - 2 Files - same ranges")  +
     plotout=test12
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
-qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) title=("QPLOT2 TEST 13")  +
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20)  +
+    title=("QPLOT2 TEST 13 - 2 files - Scaling")  +
     xscale=(1,40) yscale=(1,255)  plotout=test13
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
-qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) title=("QPLOT2 TEST 14")  +
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20)  +
+    title=("QPLOT2 TEST 14 - 2 files - smaller scale")  +
     xscale=(1,25) yscale=(1,50) plotout=test14
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
-qplot2 (inp2,inp3) proc=(1,1,1,20,20, 2,50,50,70,70) title=("QPLOT2 TEST 15")  +
+qplot2 (inp2,inp3) proc=(1,1,1,20,20, 2,50,50,70,70)  +
+    title=("QPLOT2 TEST 15 - 2 files - different ranges")  +
     xscale=(1,25) yscale=(1,255) plotout=test15
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 (inp1,inp2,inp3) proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70)  +
-        title=("QPLOT2 TEST 16") plotout=test16
+        title=("QPLOT2 TEST 16 - 3 files - different ranges") plotout=test16
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 (inp1,inp2,inp3,inp1a)  title=("QPLOT2 TEST 17 - Four Images")   +
     proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
     plotout=test17
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
 if (mode = "nobatch" or mode = "inter")
 end-if
 gen half1 nl=20 ns=20 linc=20 modulo=32767 format=half
@@ -2506,18 +2630,19 @@ GEN Version 6
 GEN task completed
 let $echo="no"
 HALF WORD data sets
-qplot2 (half1,half2,half3,half1a) title=("QPLOT2 TEST 18")  +
+qplot2 (half1,half2,half3,half1a) title=("QPLOT2 TEST 18 - HALF")  +
     proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
     plotout=test18
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 (half1,half1b) proc=(1,1,1,20,20, 2,1,1,20,20)  +
-    title=("QPLOT2 TEST 19 - LINE 2 displaced by 5 upward")  +
+    title=("QPLOT2 TEST 19 - HALF - LINE 2 displaced by 5 upward")  +
     displace=5 plotout=test19
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 gen full1 nl=20 ns=20 linc=30 modulo=512 format=full
@@ -2542,18 +2667,20 @@ GEN Version 6
 GEN task completed
 let $echo="no"
 FULL WORD data sets
-qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 20")  +
+qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 20 - FULL WORD")  +
     proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
     plotout=test20
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
 if (mode = "nobatch" or mode = "inter")
 end-if
-qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 21")  +
+qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 21 - FULL - Y-scale")  +
     proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
     yscale=(0,5000.) plotout=test21
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
 if (mode = "nobatch" or mode = "inter")
 end-if
 gen real1 nl=20 ns=20 linc=30 modulo=512 format=real
@@ -2578,11 +2705,12 @@ GEN Version 6
 GEN task completed
 let $echo="no"
 REAL data sets
-qplot2 (real1,real2,real3,real1a) title=("QPLOT2 TEST 22")  +
+qplot2 (real1,real2,real3,real1a) title=("QPLOT2 TEST 22 - REAL")  +
     proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
     plotout=test22
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
 if (mode = "nobatch" or mode = "inter")
 end-if
 let $echo="no"
@@ -2592,7 +2720,16 @@ qplot2 (inp1,half2,full3,real1a)   +
     title=("QPLOT TEST 23 -MIXED Data Types - BYTE,HALF,FULL,REAL")  +
     plotout=test23
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp1,half2,full3,real1a)   +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    title=("QPLOT TEST 24 -MIXED Data Types - BYTE,HALF,FULL,REAL")  +
+    nolabel=nolabel plotout=test24
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 gen b1 nl=50 ns=50
@@ -2629,40 +2766,40 @@ TRAN version 06-04-98
 let $echo="no"
 MSS data sets
 qplot2 mss4a proc=(1,1,1,20,20) nchan=2  +
-    title=("QPLOT2 TEST 24 - One Line from Channel 1 - MSS Data")  +
-    plotout=test24
+    title=("QPLOT2 TEST 25 - One Line from Channel 1 - MSS Data")  +
+    plotout=test25
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 mss4a sproc=(10,10) nchan=4  +
-    title=("QPLOT2 TEST 25 - Spectral Plot")  +
-    plotout=test25
+    title=("QPLOT2 TEST 26 - Spectral Plot - Pixel (10,10)")  +
+    plotout=test26
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
-    title=("QPLOT2 TEST 26 - Spectral Plot on MSS image")  +
-    plotout=test26
+    title=("QPLOT2 TEST 27 - Spectral Plot on MSS image - 4 points")  +
+    plotout=test27
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=3  +
-    title=("QPLOT2 TEST 27 - Spectral Plot 3 channels on MSS image")  +
-    plotout=test27
+    title=("QPLOT2 TEST 28 - Spectral Plot 3 channels on MSS image")  +
+    plotout=test28
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 let $echo="no"
 MULTIBAND images  - should FAIL
 let _onfail="continue"
 qplot2 spec4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
-    title=("QPLOT2 TEST 28 - Spectral Plot on Multiband image")
+    title=("QPLOT2 TEST 29 - Spectral Plot on Multiband image")
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 ??E - Multiband images not supported
       Convert to MSS format with TRAN
  ** ABEND called **
@@ -2671,23 +2808,402 @@ let _onfail="stop"
 let $echo="no"
 Test eps output
 qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
-    title=("QPLOT2 TEST 28X - Spectral Plot on MSS image")  +
+    title=("QPLOT2 TEST 29X - Spectral Plot on MSS image")  +
     plotout="yes" plotfmt="eps"
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 ush gnuplot qplot.eps.gpi
 qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
-    title=("QPLOT2 TEST 29 - Spectral Plot on MSS image")  +
-    plotout="test29" plotfmt="eps"
+    title=("QPLOT2 TEST 30 - Spectral Plot on MSS image")  +
+    plotout="test30" plotfmt="eps"
 Beginning VICAR task qplot2
-qplot2 version 12-Jul-2013 (64-bit gnuplot) - rjb
+qplot2 version 2015-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
-ush gnuplot test29.eps.gpi
+ush gnuplot test30.eps.gpi
 let $echo="no"
-exit
-slogoff
+$!-----------------------------------------------------------------------------
+$ create tstqplot2_sun.log
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+gen inp1 nl=20 ns=20
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen inp1a nl=40 ns=40 linc=2 sinc=2
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen inp2 nl=20 ns=20 linc=10 sinc=10
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen inp3 nl=128 ns=128 linc=5 sinc=5
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+qplot2 inp1 proc=(1, 1,1,1,20) title=("QPLOT2 TEST 1")
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1 proc=(1, 1,20,20,20) title=("QPLOT2 TEST 2")  +
+    labelsiz=14 plotout=test2
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1 proc=(1, 1,1,20,20) title=("QPLOT2 TEST 3")  +
+    plotout=test3
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1 proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 4 - SLANT PROFILE")  +
+    xtitle=("DN Position") ytitle=("DN Value") plotout=test4
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 5 - SLANT PROFILE")  +
+    xtitle=("DN Position") ytitle=("DN Value")  +
+    xscale=(1,40) yscale=(1,255) plotout=test5
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20, 1, 3,3,13,13, 1, 12,12,1,1)   +
+   title=("QPLOT2 TEST 6 - SLANT PROFILES OF 3 LINES")  +
+   xtitle=("DN Position") ytitle=("DN Value")  +
+   xscale=(1,50) yscale=(1,255) plotout=test6
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 7 - SLANT PROFILE")  +
+   xtitle=("DN Position") ytitle=("DN Value")  +
+   xscale=(1,30) yscale=(1,100) xlength=4 ylength=3 labelsiz=8  +
+    plotout=test7
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 8 - SLANT PROFILE")  +
+   xtitle=("DN Position") ytitle=("Normalized DN Value")  +
+   norm="norm" plotout=test8
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 9 - SLANT PROFILE")  +
+   xtitle=("Relative DN Position") ytitle=("DN Value")  +
+   tics="notics" plotout=test9
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 10 - SLANT PROFILE - RDS=20")  +
+   xtitle=("Relative DN Position") ytitle=("DN Value")  +
+    rds=20.0 plotout=test10
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 11 - SLANT PROFILE - RDS=-5")  +
+   xtitle=("Relative DN Position") ytitle=("DN Value")  +
+    rds=-5.0 plotout=test11
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+Multiple lines on one band
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20)  +
+   title=("QPLOT2 TEST 12 - 2 Files - same ranges")  +
+    plotout=test12
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20)  +
+    title=("QPLOT2 TEST 13 - 2 files - Scaling")  +
+    xscale=(1,40) yscale=(1,255)  plotout=test13
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20)  +
+    title=("QPLOT2 TEST 14 - 2 files - smaller scale")  +
+    xscale=(1,25) yscale=(1,50) plotout=test14
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp2,inp3) proc=(1,1,1,20,20, 2,50,50,70,70)  +
+    title=("QPLOT2 TEST 15 - 2 files - different ranges")  +
+    xscale=(1,25) yscale=(1,255) plotout=test15
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp1,inp2,inp3) proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70)  +
+        title=("QPLOT2 TEST 16 - 3 files - different ranges") plotout=test16
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp1,inp2,inp3,inp1a)  title=("QPLOT2 TEST 17 - Four Images")   +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    plotout=test17
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+gen half1 nl=20 ns=20 linc=20 modulo=32767 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen half1b nl=20 ns=20 linc=20 modulo=32767 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen half1a nl=40 ns=40 linc=200 sinc=2 ival=20 modulo=2048 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen half2 nl=20 ns=20 linc=100 sinc=10 ival=44 modulo=3096 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen half3 nl=128 ns=128 linc=50 sinc=5 ival=75 modulo=1024 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+let $echo="no"
+HALF WORD data sets
+qplot2 (half1,half2,half3,half1a) title=("QPLOT2 TEST 18 - HALF")  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    plotout=test18
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (half1,half1b) proc=(1,1,1,20,20, 2,1,1,20,20)  +
+    title=("QPLOT2 TEST 19 - HALF - LINE 2 displaced by 5 upward")  +
+    displace=5 plotout=test19
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+gen full1 nl=20 ns=20 linc=30 modulo=512 format=full
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen full1b nl=20 ns=20 linc=20 modulo=32767 format=full
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen full1a nl=40 ns=40 linc=100 sinc=2 ival=20 modulo=2048 format=full
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen full2 nl=20 ns=20 linc=100 sinc=10 ival=44 modulo=3096 format=full
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen full3 nl=128 ns=128 linc=50 sinc=5 ival=75 modulo=1024 format=full
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+let $echo="no"
+FULL WORD data sets
+qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 20 - FULL WORD")  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    plotout=test20
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 21 - FULL - Y-scale")  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    yscale=(0,5000.) plotout=test21
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+gen real1 nl=20 ns=20 linc=30 modulo=512 format=real
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen real1b nl=20 ns=20 linc=20 modulo=32767 format=real
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen real1a nl=40 ns=40 linc=100 sinc=2 ival=20 modulo=2048 format=real
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen real2 nl=20 ns=20 linc=100 sinc=10 ival=44 modulo=3096 format=real
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen real3 nl=128 ns=128 linc=50 sinc=5 ival=75 modulo=1024 format=real
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+let $echo="no"
+REAL data sets
+qplot2 (real1,real2,real3,real1a) title=("QPLOT2 TEST 22 - REAL")  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    plotout=test22
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+MIXED data sets
+qplot2 (inp1,half2,full3,real1a)   +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    title=("QPLOT TEST 23 -MIXED Data Types - BYTE,HALF,FULL,REAL")  +
+    plotout=test23
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp1,half2,full3,real1a)   +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    title=("QPLOT TEST 24 -MIXED Data Types - BYTE,HALF,FULL,REAL")  +
+    nolabel=nolabel plotout=test24
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+gen b1 nl=50 ns=50
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen b2 nl=50 ns=50 ival=5 linc=1 sinc=1
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen b3 nl=50 ns=50 ival=20 linc=2 sinc=2
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen b4 nl=50 ns=50 ival=40 linc=3 sinc=3
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen b5 nl=50 ns=50 ival=100 linc=3 sinc=3
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+mss (b1,b2,b3,b4) out=mss4a
+Beginning VICAR task mss
+* OUTPUT CONTAINS   4INTERLEAVED DATA SETS **
+* ACTUAL OUTPUT RECORD LENGTH    200SAMPLES **
+ Note: IEEE floating-point exception flags raised: 
+    Invalid Operation; 
+ See the Numerical Computation Guide, ieee_flags(3M) 
+mss (b5,b2,b3,b4) out=mss4b
+Beginning VICAR task mss
+* OUTPUT CONTAINS   4INTERLEAVED DATA SETS **
+* ACTUAL OUTPUT RECORD LENGTH    200SAMPLES **
+ Note: IEEE floating-point exception flags raised: 
+    Invalid Operation; 
+ See the Numerical Computation Guide, ieee_flags(3M) 
+tran mss4a spec4a outorg=bsq nbands=4
+Beginning VICAR task tran
+TRAN version 06-04-98
+let $echo="no"
+MSS data sets
+qplot2 mss4a proc=(1,1,1,20,20) nchan=2  +
+    title=("QPLOT2 TEST 25 - One Line from Channel 1 - MSS Data")  +
+    plotout=test25
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 mss4a sproc=(10,10) nchan=4  +
+    title=("QPLOT2 TEST 26 - Spectral Plot - Pixel (10,10)")  +
+    plotout=test26
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
+    title=("QPLOT2 TEST 27 - Spectral Plot on MSS image - 4 points")  +
+    plotout=test27
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=3  +
+    title=("QPLOT2 TEST 28 - Spectral Plot 3 channels on MSS image")  +
+    plotout=test28
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+MULTIBAND images  - should FAIL
+let _onfail="continue"
+qplot2 spec4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
+    title=("QPLOT2 TEST 29 - Spectral Plot on Multiband image")
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+??E - Multiband images not supported
+      Convert to MSS format with TRAN
+ ** ABEND called **
+continue
+let _onfail="stop"
+let $echo="no"
+Test eps output
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
+    title=("QPLOT2 TEST 29X - Spectral Plot on MSS image")  +
+    plotout="yes" plotfmt="eps"
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+ush gnuplot qplot.eps.gpi
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
+    title=("QPLOT2 TEST 30 - Spectral Plot on MSS image")  +
+    plotout="test30" plotfmt="eps"
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+ush gnuplot test30.eps.gpi
+let $echo="no"
 $ Return
 $!#############################################################################

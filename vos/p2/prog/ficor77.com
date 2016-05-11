@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module ficor77
-$! VPACK Version 1.9, Monday, July 21, 2014, 15:38:59
+$! VPACK Version 2.1, Thursday, September 03, 2015, 15:38:57
 $!
 $! Execute by entering:		$ @ficor77
 $!
@@ -200,7 +200,7 @@ C      COMMON/C1/WORK(10000)		!A large work area
       CHARACTER*8 DATE			!Version date of SCF
       LOGICAL XVPTST
 C
-      CALL IFMESSAGE('FICOR77 version 21 Jul 2014')
+      CALL IFMESSAGE('FICOR77 version Sep 3 2015')
 C
       IBUG = 0
       IF (XVPTST('DBUG')) IBUG=1	!Set flag for diagnostic messages
@@ -245,13 +245,13 @@ C     ...Scale DNs of output image
       CALL OPSCALE(ICAM,IFILT,IPLAN,ISPEED,MAXDN,NC,IBUG,
      &       ltbl,dtbl,emax,a1,a2,badscale,fscale,date,*999)
 C
-      CALL FCOSET(LTBL,DTBL,NC,CNS,MAXDN,EMAX,NONEGS) !Set LCOR constants
+      CALL FCOSET2(LTBL,DTBL,NC,CNS,MAXDN,EMAX,NONEGS) !Set LCOR constants
 C
 C     ...Correct the input image
       CALL LICOR(IUNIT,IUNITC,IUNITD,OUNIT,LUT,DCSCALE,
      &			SLO,SSO,NLO,NSO,NSI,CNS,NC)
 C
-      CALL FCOEND(msp,mup,nsp,nnp,itot)  !Get processing statistics
+      CALL FCOEND2(msp,mup,nsp,nnp,itot)  !Get processing statistics
 C
 C     ...Add labels to output image
       IFDS = IDARK(2)		!FDS count of dark-current frame
@@ -1128,9 +1128,12 @@ C
       INTEGER*2 DBUF(*),D(NC,*)
       REAL*4 LUT(*),LTBL(10),DTBL(9),LTBL1(*),DTBL1(*),LUM
       REAL*4 OBUF(*)
-      SAVE LTBL,DTBL,CNS,RMAXDN,EMAX,NONEGS
-      SAVE RMSP,RMUP,NSP,NNP,ITOT
       INTEGER DN,DC,S,CNS,CNS1
+
+C     Common globals
+      COMMON/CFCOR/LTBL,DTBL,CNS,RMAXDN,EMAX,NONEGS,RMSP,RMUP,NSP,NNP,
+     +             ITOT
+
       INCLUDE 'fortport'    !for dn and lval byte2int and int2byte
 
 C     ...RMSP = minimum luminance of a saturated pixel
@@ -1229,6 +1232,71 @@ C     ...Routine to return lcor statistics
       IITOT = ITOT
       RETURN
       END
+
+      SUBROUTINE FCOSET2(LTBL1,DTBL1,NC1,CNS1,MAXDN,EMAX1,NONEGS1)
+C     Parms
+      REAL*4 LTBL1(10)
+      REAL*4 DTBL1(9)
+      INTEGER*4 NC1,CNS1,MAXDN
+      REAL*4 EMAX1
+      INTEGER*4 NONEGS1
+
+C     Common globals
+      REAL*4 LTBL(10)
+      REAL*4 DTBL(9)
+      INTEGER*4 CNS
+      REAL*4 RMAXDN
+      REAL*4 EMAX
+      INTEGER*4 NONEGS
+      REAL*4 RMSP
+      REAL*4 RMUP
+      INTEGER*4 NSP
+      INTEGER*4 NNP
+      INTEGER*4 ITOT
+      COMMON/CFCOR/LTBL,DTBL,CNS,RMAXDN,EMAX,NONEGS,RMSP,RMUP,NSP,NNP,
+     +             ITOT
+
+      CALL MVE(7,10,LTBL1,LTBL,1,1)
+      CALL MVE(7,9,DTBL1,DTBL,1,1)
+      CNS    = CNS1
+      RMAXDN  = MAXDN
+      EMAX   = EMAX1
+      NONEGS = NONEGS1
+      RMSP   = RMAXDN
+      RMUP   = 0.
+      NSP    = 0
+      NNP    = 0
+      ITOT   = 0
+      RETURN
+      END
+
+      SUBROUTINE FCOEND2(MSP,MUP,INSP,INNP,IITOT)
+C     Parms
+      INTEGER*4 MSP,MUP,INSP,INNP,IITOT
+
+C     Common globals
+      REAL*4 LTBL(10)
+      REAL*4 DTBL(9)
+      INTEGER*4 CNS
+      REAL*4 RMAXDN
+      REAL*4 EMAX
+      INTEGER*4 NONEGS
+      REAL*4 RMSP
+      REAL*4 RMUP
+      INTEGER*4 NSP
+      INTEGER*4 NNP
+      INTEGER*4 ITOT
+      COMMON/CFCOR/LTBL,DTBL,CNS,RMAXDN,EMAX,NONEGS,RMSP,RMUP,NSP,NNP,
+     +             ITOT
+
+      MSP = RMSP
+      MUP = RMUP
+      INSP = NSP
+      INNP = NNP
+      IITOT = ITOT
+      RETURN
+      END
+
 C Add radiometric scale and processing info to picture label and
 C output label.  All arguments are inputs.
 C
@@ -1239,7 +1307,7 @@ C
       INTEGER*4 OUNIT,MSP,NSP,IND,IFDS
       REAL*4 A1,A2,FDSDC,FSCALE
       LOGICAL BADSCALE
-      CHARACTER*8 PNAME
+      CHARACTER*7 PNAME
       CHARACTER*8 DATE
       CHARACTER*62 MSG1, MSG2, MSG3, MSG4, MSG5, MSG6
 
@@ -1733,17 +1801,9 @@ Written by: Joel A. Mosher	Jan 78
 UCL Implementors: M.L. Kendall & R.F.T. BARREY	Jan 82
 Cognizant programmer: Gary Yagi
 Revisions:
-  21 Jul 14  WLB  ...Initialized camera mode variables MODE and MODEDC to
-                     get consistent results between linux and sun.
-  24 May 99  GMY  ...Corrected problem with negative and 0 DNs.
-  09 Nov 98  GMY  ...Updated test script to point to where test files are.
-  31 Oct 94  AMS  ...(CRI) Made portable for UNIX
-  09 Jul 93  GMY  ...Check for input image with zero exposure (FR 79136)
-  24 May 92  GMY  ...Update test script (FR 64507)
-  21 DEC 88  GMY  ...Fix processing of parameters passed via procedures.
-  07 JUN 88  GMY  ...Fix processing of EXPO keyword.
-  25 FEB 88  GMY  ...Fix SCAN=10, bad mode (FR 33244)
-  01 FEB 88  GMY  ...Major code clean-up and enhancements:
+  1985-10-01 FFM  ...Change to VICAR2 I/O and convert subroutine
+	             LCOR from fortran to assembler
+  1988-02-01 GMY  ...Major code clean-up and enhancements:
 			0) Rewrite help file.
 			1) Add FIXVGR scale correction factors.
 			2) Delete redundant keywords SN,FP,HSAT,SUN
@@ -1754,8 +1814,18 @@ Revisions:
 			7) Delete FORMAT keyword
 			8) Fix bug in processing high-gain pictures
 			9) Accept input of summed dark-current frames.
-  01 OCT 85  FFM  ...Change to VICAR2 I/O and convert subroutine
-	             LCOR from fortran to assembler
+  1988-02-25 GMY  ...Fix SCAN=10, bad mode (FR 33244)
+  1988-06-07 GMY  ...Fix processing of EXPO keyword.
+  1988-12-21 GMY  ...Fix processing of parameters passed via procedures.
+  1992-05-24 GMY  ...Update test script (FR 64507)
+  1993-07-09 GMY  ...Check for input image with zero exposure (FR 79136)
+  1994-10-31 AMS  ...(CRI) Made portable for UNIX
+  1998-11-09 GMY  ...Updated test script to point to where test files are.
+  1999-05-24 GMY  ...Corrected problem with negative and 0 DNs.
+  2014-07-21 WLB  ...Initialized camera mode variables MODE and MODEDC to
+                     get consistent results between linux and sun.
+  2015-09-03 WLB  ...Replaced calls to entries with calls to subroutines.
+
 RESTRICTIONS:
 
 The vgrscf.dat input file is generated on the MIPLs only.
@@ -2170,7 +2240,7 @@ ficor77 (/project/test_work/testdata/mipl/vgr/f1636832.raw,/proj+
 ect/test_work/testdata/mipl/vgr/ficor77.cal,/project/test_work/testdata/mipl/vgr/dc.cal)                  A (500,500,10,10) 'NOCO C+
 ONV=1.
 Beginning VICAR task ficor77
-FICOR77 version 24 May 1999
+FICOR77 version Sep 3 2015
 Dark-Current File input=          3
 Calibration File input=          2
 DARK-CURRENT LABEL...
@@ -2245,6 +2315,7 @@ SECOND CONV FACTOR =  4.9446E+00
 FIXVGR task completed
 label-l B
 Beginning VICAR task label
+LABEL version 15-Nov-2010
 ************************************************************
  
         ************  File B ************
@@ -2280,12 +2351,12 @@ LAB10=
 LAB11=
 'INSERT            05 06 83 13:12:50          JAM                      GL'
 NLABS=11
----- Task: FICOR77 -- User: wlb -- Mon Jul 21 13:32:06 2014 ----
+---- Task: FICOR77 -- User: wlb -- Thu Sep  3 15:31:26 2015 ----
 LABEL1='FICOR77  MINSAT=32767 NUMSAT=     0'
 LABEL2='FOR NANOWATTS/CM**2/STER/NM MULTIPLY DN VALUE BY     1.00000'
 LABEL3='FOR (I/F)*10000., MULTIPLY DN VALUE BY               4.94459'
 LABEL4='FICOR77  DARK CURRENT FDS = 13852.12'
----- Task: FIXVGR -- User: wlb -- Mon Jul 21 13:32:06 2014 ----
+---- Task: FIXVGR -- User: wlb -- Thu Sep  3 15:31:26 2015 ----
 COMMENT=' PICTURE MULTIPLIED BY    4.60      FIXVGR     8/06/90 VERSION'
 SCALE='JUPITER'
  
@@ -2294,7 +2365,7 @@ ficor77 (/project/test_work/testdata/mipl/vgr/f1636832.raw,/proj+
 ect/test_work/testdata/mipl/vgr/ficor77.cal,/project/test_work/testdata/mipl/vgr/dc.cal)          C (500,500,10,10) CONV=1. scf=/pr+
 oject/test_work/testdata/mipl/vgr/vgrscf.dat
 Beginning VICAR task ficor77
-FICOR77 version 24 May 1999
+FICOR77 version Sep 3 2015
 Dark-Current File input=          3
 Calibration File input=          2
 DARK-CURRENT LABEL...
@@ -2365,7 +2436,7 @@ Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
  Task:CONV12    User:DFS       Date_Time:Thu May  3 11:31:13 1984
- Task:FICOR77   User:wlb       Date_Time:Mon Jul 21 13:32:06 2014
+ Task:FICOR77   User:wlb       Date_Time:Thu Sep  3 15:31:26 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1       746   750   740   733   732   754   758   775   793   760
@@ -2383,7 +2454,7 @@ Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
  Task:CONV12    User:DFS       Date_Time:Thu May  3 11:31:13 1984
- Task:FIXVGR    User:wlb       Date_Time:Mon Jul 21 13:32:06 2014
+ Task:FIXVGR    User:wlb       Date_Time:Thu Sep  3 15:31:26 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1      3434  3453  3407  3374  3370  3471  3489  3568  3651  3499
@@ -2401,7 +2472,7 @@ Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
  Task:CONV12    User:DFS       Date_Time:Thu May  3 11:31:13 1984
- Task:FICOR77   User:wlb       Date_Time:Mon Jul 21 13:32:06 2014
+ Task:FICOR77   User:wlb       Date_Time:Thu Sep  3 15:31:26 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1       694   699   689   682   681   702   706   721   738   708
@@ -2420,7 +2491,7 @@ ficor77 (/project/test_work/testdata/mipl/vgr/f1636832.raw,/proj+
 ect/test_work/testdata/mipl/vgr/ficor77.cal,/project/test_work/testdata/mipl/vgr/dc.cal)                  A (500,500,10,10) IOF=.5 +
 'NOCO
 Beginning VICAR task ficor77
-FICOR77 version 24 May 1999
+FICOR77 version Sep 3 2015
 Dark-Current File input=          3
 Calibration File input=          2
 DARK-CURRENT LABEL...
@@ -2494,6 +2565,7 @@ SECOND CONV FACTOR =  5.0000E-01
 FIXVGR task completed
 label-l B
 Beginning VICAR task label
+LABEL version 15-Nov-2010
 ************************************************************
  
         ************  File B ************
@@ -2529,12 +2601,12 @@ LAB10=
 LAB11=
 'INSERT            05 06 83 13:12:50          JAM                      GL'
 NLABS=11
----- Task: FICOR77 -- User: wlb -- Mon Jul 21 13:32:06 2014 ----
+---- Task: FICOR77 -- User: wlb -- Thu Sep  3 15:31:26 2015 ----
 LABEL1='FICOR77  MINSAT=32767 NUMSAT=     0'
 LABEL2='FOR NANOWATTS/CM**2/STER/NM MULTIPLY DN VALUE BY     0.10112'
 LABEL3='FOR (I/F)*10000., MULTIPLY DN VALUE BY               0.50000'
 LABEL4='FICOR77  DARK CURRENT FDS = 13852.12'
----- Task: FIXVGR -- User: wlb -- Mon Jul 21 13:32:06 2014 ----
+---- Task: FIXVGR -- User: wlb -- Thu Sep  3 15:31:26 2015 ----
 COMMENT=' PICTURE MULTIPLIED BY    0.47      FIXVGR     8/06/90 VERSION'
 SCALE='JUPITER'
  
@@ -2543,7 +2615,7 @@ ficor77 (/project/test_work/testdata/mipl/vgr/f1636832.raw,/proj+
 ect/test_work/testdata/mipl/vgr/ficor77.cal,/project/test_work/testdata/mipl/vgr/dc.cal)               C (500,500,10,10)scf=/projec+
 t/test_work/testdata/mipl/vgr/vgrscf.dat
 Beginning VICAR task ficor77
-FICOR77 version 24 May 1999
+FICOR77 version Sep 3 2015
 Dark-Current File input=          3
 Calibration File input=          2
 DARK-CURRENT LABEL...
@@ -2610,6 +2682,7 @@ Total number of negative pixels=          0
 FICOR task completed
 label-l C
 Beginning VICAR task label
+LABEL version 15-Nov-2010
 ************************************************************
  
         ************  File C ************
@@ -2645,7 +2718,7 @@ LAB10=
 LAB11=
 'INSERT            05 06 83 13:12:50          JAM                      GL'
 NLABS=11
----- Task: FICOR77 -- User: wlb -- Mon Jul 21 13:32:06 2014 ----
+---- Task: FICOR77 -- User: wlb -- Thu Sep  3 15:31:26 2015 ----
 LABEL1='FICOR77  MINSAT=32767 NUMSAT=     0'
 LABEL2='FOR NANOWATTS/CM**2/STER/NM MULTIPLY DN VALUE BY     0.20224'
 LABEL3='FOR (I/F)*10000., MULTIPLY DN VALUE BY               1.00000'
@@ -2659,7 +2732,7 @@ Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
  Task:CONV12    User:DFS       Date_Time:Thu May  3 11:31:13 1984
- Task:FICOR77   User:wlb       Date_Time:Mon Jul 21 13:32:06 2014
+ Task:FICOR77   User:wlb       Date_Time:Thu Sep  3 15:31:26 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1      7380  7425  7324  7253  7243  7463  7500  7665  7845  7523
@@ -2677,7 +2750,7 @@ Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
  Task:CONV12    User:DFS       Date_Time:Thu May  3 11:31:13 1984
- Task:FIXVGR    User:wlb       Date_Time:Mon Jul 21 13:32:06 2014
+ Task:FIXVGR    User:wlb       Date_Time:Thu Sep  3 15:31:26 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1      3435  3456  3409  3376  3372  3474  3491  3568  3652  3502
@@ -2695,7 +2768,7 @@ Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
  Task:CONV12    User:DFS       Date_Time:Thu May  3 11:31:13 1984
- Task:FICOR77   User:wlb       Date_Time:Mon Jul 21 13:32:06 2014
+ Task:FICOR77   User:wlb       Date_Time:Thu Sep  3 15:31:26 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1      3435  3456  3409  3376  3371  3474  3491  3568  3652  3502

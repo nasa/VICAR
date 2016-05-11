@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module qsar
-$! VPACK Version 1.9, Monday, December 07, 2009, 16:57:59
+$! VPACK Version 1.9, Thursday, May 07, 2015, 11:59:07
 $!
 $! Execute by entering:		$ @qsar
 $!
@@ -152,7 +152,7 @@ $ vpack qsar.com -mixed -
 	-s qsar.f -
 	-i qsar.imake -
 	-p qsar.pdf -
-	-t tstqsar.pdf new_session_3d.log old_session_3d.log
+	-t tstqsar.pdf tstqsar.log
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -160,7 +160,7 @@ $!#############################################################################
 $Source_File:
 $ create qsar.f
 $ DECK/DOLLARS="$ VOKAGLEVE"
-       PROGRAM  QSAR
+	PROGRAM  QSAR
 C#######################################################################
 C  NAME OF ROUTINE
 C      QSAR ( Quadrilateral Segment Averaging Routine )
@@ -274,52 +274,56 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
 C   THIS PROGRAM FOLLOWS THE STANDARD FORTRAN NAMING CONVENTION FOR VARIABLES:
 C   VARIABLES STARTING WITH I-N ARE INTEGERS UNLESS EXPLICITLY DECLARED.
-
+	IMPLICIT NONE
+	INTEGER*4 LSIZE_PAR
       PARAMETER ( LSIZE_PAR = 64000 )      ! MAX NUMBER OF PIXELS PER LINE.
       INTEGER*4 OUNIT,STAT,SS,SLO,SSO,IPARM(1800),ES,ADJ,SBO,NBO,NBI,LBO
-      INTEGER*4 BANDOUT,LINEOUT,BAND,LINE
+      INTEGER*4 BANDOUT,LINEOUT,BAND,LINE,IUNIT,I,NLO,NSO,NLI,NSI,ICOUNT
+      INTEGER*4 IDEF,J,K,INT,LLO
+      CHARACTER*48 ERR3
       INTEGER*2 IBUF(LSIZE_PAR)
       CHARACTER*8 FORMAT
       CHARACTER*3 ORGIN
+      DATA ERR3/' NUMBER OF PARAMETERS NOT A MULTIPLE OF FIVE'/
 
-      CALL IFMESSAGE('QSAR version 08-SEP-03')
+      CALL IFMESSAGE('QSAR version 14 Feb 2010 (64-bit) - RJB')
       CALL XVEACTION('SA',' ')
 
 C          OPEN INPUT DATA SET
       CALL XVUNIT(IUNIT,'INP',1,STAT,' ')
-      CALL XVOPEN(IUNIT,STAT,'U_FORMAT','HALF',' ')
+      CALL XVOPEN(IUNIT,STAT,'U_FORMAT','HALF',' ')		!import data as HALF
 
 C        GET DATA FORMAT AND CHECK
       CALL XVGET(IUNIT,STAT,'FORMAT',FORMAT,' ')
       IF(FORMAT.NE.'BYTE'.AND.FORMAT.NE.'HALF') THEN
-         CALL XVMESSAGE('QSAR ACCEPTS BYTE AND HALFWORD DATA ONLY',' ')
+         CALL XVMESSAGE('??E - QSAR ACCEPTS BYTE AND HALFWORD DATA ONLY',' ')
          CALL ABEND
       END IF
 
 C     CHECK FORMAT
-      CALL XVGET(IUNIT,I,'ORG',ORGIN, ' ')
+      CALL XVGET(IUNIT,I,'ORG',ORGIN, ' ')			!IUN to IUNIT - 14Feb2010
       IF (ORGIN.EQ.'BIP') CALL MABEND(
-     +  'BIP files not supported, use program TRAN to convert to BSQ')
+     +  '??E - BIP files not supported, use program TRAN to convert to BSQ')
 
 C        GET SIZE INFORMATION AND CHECK
       CALL XVSIZE(SLO,SSO,NLO,NSO,NLI,NSI)
       IF(SLO+NLO-1 .GT. NLI) THEN
          CALL XVMESSAGE(
-     & 'NUMBER OF LINES REQUESTED EXCEEDS INPUT SIZE',' ')
+     & '??E - NUMBER OF LINES REQUESTED EXCEEDS INPUT SIZE',' ')
          CALL ABEND
       END IF
       IF(SSO+NSO-1 .GT. NSI) THEN
          CALL XVMESSAGE(
-     & 'NUMBER OF SAMPLES REQUESTED EXCEEDS INPUT SIZE',' ')
+     & '??E - NUMBER OF SAMPLES REQUESTED EXCEEDS INPUT SIZE',' ')
          CALL ABEND
       END IF
       CALL XVBANDS(SBO,NBO,NBI)
 
       IF ( SBO .GT. NBO ) CALL MABEND(
-     +  'SB is greater than the total number of bands')
+     +  '??E - SB is greater than the total number of bands')
                  
       IF ( SBO + NBO - 1 .GT. NBI) THEN
-        CALL XVMESSAGE('***Number of bands truncated', ' ')
+        CALL XVMESSAGE('??W - Number of bands truncated', ' ')
         NBO = NBI + 1 - SBO
       ENDIF
 
@@ -333,8 +337,7 @@ C        OPEN OUTPUT DATA SET
 C        PROCESS PARAMETERS
       CALL XVPARM('AREA',IPARM,ICOUNT,IDEF,1800)
       IF(MOD(ICOUNT,5).NE.0) THEN
-         CALL XVMESSAGE(' NUMBER OF PARAMETERS NOT A MULTIPLE OF FIVE',
-     +			' ')
+         CALL XVMESSAGE(ERR3,' ')			!CALL XVMESSAGE(ERR3,44,' ')
          CALL ABEND
       END IF
 
@@ -357,12 +360,12 @@ C              CHECK FOR MODS TO THIS LINE
             IF(LINE.LT.IPARM(J).OR.LINE.GE.IPARM(J)+IPARM(J+2)) GO TO 50
             SS=IPARM(J+1)                ! STARTING PIXEL.
             IF(SS.LT.1) THEN
-               CALL XVMESSAGE('INVALID SS PARAMETER SPECIFIED',' ')
+               CALL XVMESSAGE('??E - INVALID SS PARAMETER SPECIFIED',' ')
                CALL ABEND
             END IF
             ES=IPARM(J+3)+SS-1           ! ENDING PIXEL.
             IF(ES.GT.NSI) THEN
-               CALL XVMESSAGE('INPUT SAMPLE SIZE EXCEEDED',' ')
+               CALL XVMESSAGE('??E - INPUT SAMPLE SIZE EXCEEDED',' ')
                CALL ABEND
             END IF
             ADJ=IPARM(J+4)               ! ADJUSTMENT TO BE ADDED.
@@ -518,7 +521,30 @@ RESTRICTIONS
  COGNIZANT PROGRAMMER:   Joel Mosher                 29 May 1980
 
  REVISION:  
-     08 Sep 2003   NTT   Enabled for 3D images.
+  1975-06-27 DAH - Changes for conversion to 360/os
+  1979-07-25 JBS - Max line length to 4000 bytes
+  1980-06-05 JAM - Add halfword option
+  1983-10    SP - Corrected program to not store variable int into ibuf
+    array when the value of int had not been set properly ( i.e. when loop
+    index k was not in range.); Modified program so that starting pixel
+    value in the area parameter refers to position in input image even
+    when the starting sample in the size field is not 1. (the starting
+    line value in the area parameter already was set to refer to the
+    position in input image even when the starting line in the size field
+    is not 1.); Changed label processing of output file to always include
+    correct data format in label; Changed half parameter to
+    format=half/byte so user can override label when label says half;
+    Changed label processing of input file by using labelc to find the
+    data format and using format in label as default; Increased maximum
+    line size to 64000 pixels; Converted from ibm vicar version:
+    miscellaneous cleanup.
+  1985-07    JHR - Converted to vicar2
+  1994-04    CRI - MSTP s/w conversion (vicar porting)
+  2003-09-08 NTT - Enabled for 3d images
+  2009-03-23 Smyth - Make compatible with macosx/linux
+  2010-02-14 R. J. Bambery - Change iun to iunit to fix 
+    [vic2-noschun] **! undefined unit: call xvunit first in tststretch.pdf 
+    unit test
 
 .LEVEL1
 .VARIABLE INP
@@ -578,87 +604,122 @@ $ create tstqsar.pdf
 procedure
 refgbl $echo
 refgbl $autousage
+! Jun 25, 2012 - RJB
+! TEST SCRIPT FOR QSAR   
+! tests BYTE, HALF images
+!
+! Vicar Programs:
+!       gen list   
+!
+! External Programs:
+!   <none> 
+!
+! Parameters:
+!   <none>
+!
+! Requires NO external test data: 
+
 body
 let $autousage="none"
-let _onfail="continue"
+let _onfail="stop"
 let $echo="yes"
 !
 !  THIS IS A TEST OF PROGRAM qsar
 !
-!      first make a rectangle against a zero background.
+!  TEST 1 - first make a rectangle against a zero background.
 !
 gen qsara NL=10 NS=10 IVAL=0 LINC=0 SINC=0
 qsar INP=qsara OUT=qsarao AREA=( 2 4 8 3 111 )
 list qsarao 'ZEROES
 !
-!    try SL and SS not equal to 1.
+!  TEST 2  -try SL and SS not equal to 1.
 !
 gen qsarb NL=10 NS=10
 list qsarb
 qsar INP=qsarb OUT=qsarbo SIZE=(2,3,8,7) AREA=(4,6,3,1,100) 
 list qsarbo
 !
-!    try with no optional parameters. should do a copy.
+!  TEST 3 - try with no optional parameters. should do a copy.
 !
 qsar qsarb qsarb1
 list qsarb1
 !
-!    try out the cutoff at 0 and 255.
+!  TEST 4 - try out the cutoff at 0 and 255.
 !
 qsar qsarb qsarb2 AREA=( 2 2 5 5 -3,   5 5 5 5 240 )
 list qsarb2     
 !
 !  Repeat above tests for halfword images.
-!      first make a rectangle against a zero background.
+!  TEST 5 - first make a rectangle against a zero background.
 !
 gen qsard NL=10 NS=10 IVAL=0 LINC=0 SINC=0 'HALF
 qsar INP=qsard OUT=qsardo AREA=( 2 4 8 3 111 )
 list qsardo 'ZEROES
 !
-!    try SL and SS not equal to 1.
+!  TEST 6 - try SL and SS not equal to 1.
 !
 gen qsare NL=10 NS=10 'HALF
 list qsare
 qsar INP=qsare OUT=qsareo SIZE=(2,3,8,7) AREA=(4,6,3,1,100)
 list qsareo
 !
-!    try with no optional parameters. should do a copy.
+!  TEST 7 - try with no optional parameters. should do a copy.
 !
 qsar qsare qsare1
 list qsare1
 !
-!    try out the cutoff at -32768 and 32767.
+!  TEST 8 - try out the cutoff at -32768 and 32767.
 !
 qsar qsare qsare2 AREA=( 2 2 5 5 -32771,   5 5 5 5 32760 )
 list qsare2     
 !
-! TEST 3D IMAGES
+!  TEST 9 - TEST 3D IMAGES
 !
 gen qsar3d 10 10 3 'HALF
 list qsar3d
 qsar INP=qsar3d OUT=qsar3do SIZE=(2,3,8,7) AREA=(4,6,3,1,100)
 list qsar3do
 !
-!    clean up
-!
-! DCL DELETE QSAR*.Z*;*
+let $echo="no"
 end-proc
 $!-----------------------------------------------------------------------------
-$ create new_session_3d.log
-tstqsar
+$ create tstqsar.log
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
 gen qsara NL=10 NS=10 IVAL=0 LINC=0 SINC=0
 Beginning VICAR task gen
 GEN Version 6
 GEN task completed
 qsar INP=qsara OUT=qsarao AREA=( 2 4 8 3 111 )
 Beginning VICAR task qsar
-QSAR version 08-SEP-03
+QSAR version 14 Feb 2010 (64-bit) - RJB
 list qsarao 'ZEROES
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:29 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:03:29 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:38 2015
+ Task:QSAR      User:wlb       Date_Time:Thu May  7 11:42:38 2015
      Samp     1       3       5       7       9
    Line
       1       0   0   0   0   0   0   0   0   0   0
@@ -679,7 +740,7 @@ list qsarb
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:29 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:38 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -694,13 +755,13 @@ Beginning VICAR task list
      10       9  10  11  12  13  14  15  16  17  18
 qsar INP=qsarb OUT=qsarbo SIZE=(2,3,8,7) AREA=(4,6,3,1,100)
 Beginning VICAR task qsar
-QSAR version 08-SEP-03
+QSAR version 14 Feb 2010 (64-bit) - RJB
 list qsarbo
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:29 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:03:29 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:38 2015
+ Task:QSAR      User:wlb       Date_Time:Thu May  7 11:42:38 2015
      Samp     1       3       5       7
    Line
       1       3   4   5   6   7   8   9
@@ -713,13 +774,13 @@ Beginning VICAR task list
       8      10  11  12  13  14  15  16
 qsar qsarb qsarb1
 Beginning VICAR task qsar
-QSAR version 08-SEP-03
+QSAR version 14 Feb 2010 (64-bit) - RJB
 list qsarb1
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:29 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:03:30 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:38 2015
+ Task:QSAR      User:wlb       Date_Time:Thu May  7 11:42:38 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -734,13 +795,13 @@ Beginning VICAR task list
      10       9  10  11  12  13  14  15  16  17  18
 qsar qsarb qsarb2 AREA=( 2 2 5 5 -3,   5 5 5 5 240 )
 Beginning VICAR task qsar
-QSAR version 08-SEP-03
+QSAR version 14 Feb 2010 (64-bit) - RJB
 list qsarb2
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:29 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:03:30 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:38 2015
+ Task:QSAR      User:wlb       Date_Time:Thu May  7 11:42:38 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -759,13 +820,13 @@ GEN Version 6
 GEN task completed
 qsar INP=qsard OUT=qsardo AREA=( 2 4 8 3 111 )
 Beginning VICAR task qsar
-QSAR version 08-SEP-03
+QSAR version 14 Feb 2010 (64-bit) - RJB
 list qsardo 'ZEROES
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:30 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:03:31 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:38 2015
+ Task:QSAR      User:wlb       Date_Time:Thu May  7 11:42:38 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1         0     0     0     0     0     0     0     0     0     0
@@ -786,7 +847,7 @@ list qsare
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:31 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:38 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1         0     1     2     3     4     5     6     7     8     9
@@ -801,13 +862,13 @@ Beginning VICAR task list
      10         9    10    11    12    13    14    15    16    17    18
 qsar INP=qsare OUT=qsareo SIZE=(2,3,8,7) AREA=(4,6,3,1,100)
 Beginning VICAR task qsar
-QSAR version 08-SEP-03
+QSAR version 14 Feb 2010 (64-bit) - RJB
 list qsareo
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:31 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:03:31 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:38 2015
+ Task:QSAR      User:wlb       Date_Time:Thu May  7 11:42:38 2015
      Samp       1     2     3     4     5     6     7
    Line
       1         3     4     5     6     7     8     9
@@ -820,13 +881,13 @@ Beginning VICAR task list
       8        10    11    12    13    14    15    16
 qsar qsare qsare1
 Beginning VICAR task qsar
-QSAR version 08-SEP-03
+QSAR version 14 Feb 2010 (64-bit) - RJB
 list qsare1
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:31 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:03:31 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:38 2015
+ Task:QSAR      User:wlb       Date_Time:Thu May  7 11:42:38 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1         0     1     2     3     4     5     6     7     8     9
@@ -841,13 +902,13 @@ Beginning VICAR task list
      10         9    10    11    12    13    14    15    16    17    18
 qsar qsare qsare2 AREA=( 2 2 5 5 -32771,   5 5 5 5 32760 )
 Beginning VICAR task qsar
-QSAR version 08-SEP-03
+QSAR version 14 Feb 2010 (64-bit) - RJB
 list qsare2
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:31 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:03:32 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:38 2015
+ Task:QSAR      User:wlb       Date_Time:Thu May  7 11:42:39 2015
      Samp       1     2     3     4     5     6     7     8     9    10
    Line
       1         0     1     2     3     4     5     6     7     8     9
@@ -868,7 +929,7 @@ list qsar3d
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:32 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:39 2015
  ***********
  Band =     1
  ***********
@@ -886,7 +947,7 @@ Beginning VICAR task list
      10         9    10    11    12    13    14    15    16    17    18
 
 
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:32 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:39 2015
  ***********
  Band =     2
  ***********
@@ -904,7 +965,7 @@ Beginning VICAR task list
      10        10    11    12    13    14    15    16    17    18    19
 
 
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:32 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:39 2015
  ***********
  Band =     3
  ***********
@@ -922,13 +983,13 @@ Beginning VICAR task list
      10        11    12    13    14    15    16    17    18    19    20
 qsar INP=qsar3d OUT=qsar3do SIZE=(2,3,8,7) AREA=(4,6,3,1,100)
 Beginning VICAR task qsar
-QSAR version 08-SEP-03
+QSAR version 14 Feb 2010 (64-bit) - RJB
 list qsar3do
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:32 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:03:32 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:39 2015
+ Task:QSAR      User:wlb       Date_Time:Thu May  7 11:42:39 2015
  ***********
  Band =     1
  ***********
@@ -944,8 +1005,8 @@ Beginning VICAR task list
       8        10    11    12    13    14    15    16
 
 
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:32 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:03:32 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:39 2015
+ Task:QSAR      User:wlb       Date_Time:Thu May  7 11:42:39 2015
  ***********
  Band =     2
  ***********
@@ -961,8 +1022,8 @@ Beginning VICAR task list
       8        11    12    13    14    15    16    17
 
 
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:03:32 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:03:32 2003
+ Task:GEN       User:wlb       Date_Time:Thu May  7 11:42:39 2015
+ Task:QSAR      User:wlb       Date_Time:Thu May  7 11:42:39 2015
  ***********
  Band =     3
  ***********
@@ -976,297 +1037,6 @@ Beginning VICAR task list
       6        10    11    12    13    14    15    16
       7        11    12    13    14    15    16    17
       8        12    13    14    15    16    17    18
-end-proc
-disable-log
-$!-----------------------------------------------------------------------------
-$ create old_session_3d.log
-tstqsar
-gen qsara NL=10 NS=10 IVAL=0 LINC=0 SINC=0
-Beginning VICAR task gen
-GEN Version 6
-GEN task completed
-qsar INP=qsara OUT=qsarao AREA=( 2 4 8 3 111 )
-Beginning VICAR task qsar
-QSAR version 02-MAY-94
-list qsarao 'ZEROES
-Beginning VICAR task list
-
-   BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:00 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:04:01 2003
-     Samp     1       3       5       7       9
-   Line
-      1       0   0   0   0   0   0   0   0   0   0
-      2       0   0   0 111 111 111   0   0   0   0
-      3       0   0   0 111 111 111   0   0   0   0
-      4       0   0   0 111 111 111   0   0   0   0
-      5       0   0   0 111 111 111   0   0   0   0
-      6       0   0   0 111 111 111   0   0   0   0
-      7       0   0   0 111 111 111   0   0   0   0
-      8       0   0   0 111 111 111   0   0   0   0
-      9       0   0   0 111 111 111   0   0   0   0
-     10       0   0   0   0   0   0   0   0   0   0
-gen qsarb NL=10 NS=10
-Beginning VICAR task gen
-GEN Version 6
-GEN task completed
-list qsarb
-Beginning VICAR task list
-
-   BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:01 2003
-     Samp     1       3       5       7       9
-   Line
-      1       0   1   2   3   4   5   6   7   8   9
-      2       1   2   3   4   5   6   7   8   9  10
-      3       2   3   4   5   6   7   8   9  10  11
-      4       3   4   5   6   7   8   9  10  11  12
-      5       4   5   6   7   8   9  10  11  12  13
-      6       5   6   7   8   9  10  11  12  13  14
-      7       6   7   8   9  10  11  12  13  14  15
-      8       7   8   9  10  11  12  13  14  15  16
-      9       8   9  10  11  12  13  14  15  16  17
-     10       9  10  11  12  13  14  15  16  17  18
-qsar INP=qsarb OUT=qsarbo SIZE=(2,3,8,7) AREA=(4,6,3,1,100)
-Beginning VICAR task qsar
-QSAR version 02-MAY-94
-list qsarbo
-Beginning VICAR task list
-
-   BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:01 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:04:01 2003
-     Samp     1       3       5       7
-   Line
-      1       3   4   5   6   7   8   9
-      2       4   5   6   7   8   9  10
-      3       5   6   7 108   9  10  11
-      4       6   7   8 109  10  11  12
-      5       7   8   9 110  11  12  13
-      6       8   9  10  11  12  13  14
-      7       9  10  11  12  13  14  15
-      8      10  11  12  13  14  15  16
-qsar qsarb qsarb1
-Beginning VICAR task qsar
-QSAR version 02-MAY-94
-list qsarb1
-Beginning VICAR task list
-
-   BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:01 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:04:01 2003
-     Samp     1       3       5       7       9
-   Line
-      1       0   1   2   3   4   5   6   7   8   9
-      2       1   2   3   4   5   6   7   8   9  10
-      3       2   3   4   5   6   7   8   9  10  11
-      4       3   4   5   6   7   8   9  10  11  12
-      5       4   5   6   7   8   9  10  11  12  13
-      6       5   6   7   8   9  10  11  12  13  14
-      7       6   7   8   9  10  11  12  13  14  15
-      8       7   8   9  10  11  12  13  14  15  16
-      9       8   9  10  11  12  13  14  15  16  17
-     10       9  10  11  12  13  14  15  16  17  18
-qsar qsarb qsarb2 AREA=( 2 2 5 5 -3,   5 5 5 5 240 )
-Beginning VICAR task qsar
-QSAR version 02-MAY-94
-list qsarb2
-Beginning VICAR task list
-
-   BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:01 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:04:02 2003
-     Samp     1       3       5       7       9
-   Line
-      1       0   1   2   3   4   5   6   7   8   9
-      2       1   0   0   1   2   3   7   8   9  10
-      3       2   0   1   2   3   4   8   9  10  11
-      4       3   1   2   3   4   5   9  10  11  12
-      5       4   2   3   4 245 246 250 251 252  13
-      6       5   3   4   5 246 247 251 252 253  14
-      7       6   7   8   9 250 251 252 253 254  15
-      8       7   8   9  10 251 252 253 254 255  16
-      9       8   9  10  11 252 253 254 255 255  17
-     10       9  10  11  12  13  14  15  16  17  18
-gen qsard NL=10 NS=10 IVAL=0 LINC=0 SINC=0 'HALF
-Beginning VICAR task gen
-GEN Version 6
-GEN task completed
-qsar INP=qsard OUT=qsardo AREA=( 2 4 8 3 111 )
-Beginning VICAR task qsar
-QSAR version 02-MAY-94
-list qsardo 'ZEROES
-Beginning VICAR task list
-
-   HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:02 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:04:02 2003
-     Samp       1     2     3     4     5     6     7     8     9    10
-   Line
-      1         0     0     0     0     0     0     0     0     0     0
-      2         0     0     0   111   111   111     0     0     0     0
-      3         0     0     0   111   111   111     0     0     0     0
-      4         0     0     0   111   111   111     0     0     0     0
-      5         0     0     0   111   111   111     0     0     0     0
-      6         0     0     0   111   111   111     0     0     0     0
-      7         0     0     0   111   111   111     0     0     0     0
-      8         0     0     0   111   111   111     0     0     0     0
-      9         0     0     0   111   111   111     0     0     0     0
-     10         0     0     0     0     0     0     0     0     0     0
-gen qsare NL=10 NS=10 'HALF
-Beginning VICAR task gen
-GEN Version 6
-GEN task completed
-list qsare
-Beginning VICAR task list
-
-   HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:02 2003
-     Samp       1     2     3     4     5     6     7     8     9    10
-   Line
-      1         0     1     2     3     4     5     6     7     8     9
-      2         1     2     3     4     5     6     7     8     9    10
-      3         2     3     4     5     6     7     8     9    10    11
-      4         3     4     5     6     7     8     9    10    11    12
-      5         4     5     6     7     8     9    10    11    12    13
-      6         5     6     7     8     9    10    11    12    13    14
-      7         6     7     8     9    10    11    12    13    14    15
-      8         7     8     9    10    11    12    13    14    15    16
-      9         8     9    10    11    12    13    14    15    16    17
-     10         9    10    11    12    13    14    15    16    17    18
-qsar INP=qsare OUT=qsareo SIZE=(2,3,8,7) AREA=(4,6,3,1,100)
-Beginning VICAR task qsar
-QSAR version 02-MAY-94
-list qsareo
-Beginning VICAR task list
-
-   HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:02 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:04:03 2003
-     Samp       1     2     3     4     5     6     7
-   Line
-      1         3     4     5     6     7     8     9
-      2         4     5     6     7     8     9    10
-      3         5     6     7   108     9    10    11
-      4         6     7     8   109    10    11    12
-      5         7     8     9   110    11    12    13
-      6         8     9    10    11    12    13    14
-      7         9    10    11    12    13    14    15
-      8        10    11    12    13    14    15    16
-qsar qsare qsare1
-Beginning VICAR task qsar
-QSAR version 02-MAY-94
-list qsare1
-Beginning VICAR task list
-
-   HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:02 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:04:03 2003
-     Samp       1     2     3     4     5     6     7     8     9    10
-   Line
-      1         0     1     2     3     4     5     6     7     8     9
-      2         1     2     3     4     5     6     7     8     9    10
-      3         2     3     4     5     6     7     8     9    10    11
-      4         3     4     5     6     7     8     9    10    11    12
-      5         4     5     6     7     8     9    10    11    12    13
-      6         5     6     7     8     9    10    11    12    13    14
-      7         6     7     8     9    10    11    12    13    14    15
-      8         7     8     9    10    11    12    13    14    15    16
-      9         8     9    10    11    12    13    14    15    16    17
-     10         9    10    11    12    13    14    15    16    17    18
-qsar qsare qsare2 AREA=( 2 2 5 5 -32771,   5 5 5 5 32760 )
-Beginning VICAR task qsar
-QSAR version 02-MAY-94
-list qsare2
-Beginning VICAR task list
-
-   HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:02 2003
- Task:QSAR      User:ntt       Date_Time:Mon Sep  8 13:04:03 2003
-     Samp       1     2     3     4     5     6     7     8     9    10
-   Line
-      1         0     1     2     3     4     5     6     7     8     9
-      2         1-32768-32768-32767-32766-32765     7     8     9    10
-      3         2-32768-32767-32766-32765-32764     8     9    10    11
-      4         3-32767-32766-32765-32764-32763     9    10    11    12
-      5         4-32766-32765-32764    -3    -2 32767 32767 32767    13
-      6         5-32765-32764-32763    -2    -1 32767 32767 32767    14
-      7         6     7     8     9 32767 32767 32767 32767 32767    15
-      8         7     8     9    10 32767 32767 32767 32767 32767    16
-      9         8     9    10    11 32767 32767 32767 32767 32767    17
-     10         9    10    11    12    13    14    15    16    17    18
-gen qsar3d 10 10 3 'HALF
-Beginning VICAR task gen
-GEN Version 6
-GEN task completed
-list qsar3d
-Beginning VICAR task list
-
-   HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:04 2003
- ***********
- Band =     1
- ***********
-     Samp       1     2     3     4     5     6     7     8     9    10
-   Line
-      1         0     1     2     3     4     5     6     7     8     9
-      2         1     2     3     4     5     6     7     8     9    10
-      3         2     3     4     5     6     7     8     9    10    11
-      4         3     4     5     6     7     8     9    10    11    12
-      5         4     5     6     7     8     9    10    11    12    13
-      6         5     6     7     8     9    10    11    12    13    14
-      7         6     7     8     9    10    11    12    13    14    15
-      8         7     8     9    10    11    12    13    14    15    16
-      9         8     9    10    11    12    13    14    15    16    17
-     10         9    10    11    12    13    14    15    16    17    18
-
-
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:04 2003
- ***********
- Band =     2
- ***********
-     Samp       1     2     3     4     5     6     7     8     9    10
-   Line
-      1         1     2     3     4     5     6     7     8     9    10
-      2         2     3     4     5     6     7     8     9    10    11
-      3         3     4     5     6     7     8     9    10    11    12
-      4         4     5     6     7     8     9    10    11    12    13
-      5         5     6     7     8     9    10    11    12    13    14
-      6         6     7     8     9    10    11    12    13    14    15
-      7         7     8     9    10    11    12    13    14    15    16
-      8         8     9    10    11    12    13    14    15    16    17
-      9         9    10    11    12    13    14    15    16    17    18
-     10        10    11    12    13    14    15    16    17    18    19
-
-
- Task:GEN       User:ntt       Date_Time:Mon Sep  8 13:04:04 2003
- ***********
- Band =     3
- ***********
-     Samp       1     2     3     4     5     6     7     8     9    10
-   Line
-      1         2     3     4     5     6     7     8     9    10    11
-      2         3     4     5     6     7     8     9    10    11    12
-      3         4     5     6     7     8     9    10    11    12    13
-      4         5     6     7     8     9    10    11    12    13    14
-      5         6     7     8     9    10    11    12    13    14    15
-      6         7     8     9    10    11    12    13    14    15    16
-      7         8     9    10    11    12    13    14    15    16    17
-      8         9    10    11    12    13    14    15    16    17    18
-      9        10    11    12    13    14    15    16    17    18    19
-     10        11    12    13    14    15    16    17    18    19    20
-qsar INP=qsar3d OUT=qsar3do SIZE=(2,3,8,7) AREA=(4,6,3,1,100)
-Beginning VICAR task qsar
-QSAR version 02-MAY-94
-[VIC2-GENERR] Exception in XVREAD, processing file: qsar3d
-[VIC2-STRTREC] Bad starting record for read or write operation; program error.
- Current line in image = 0
- ** ABEND called **
-continue
-list qsar3do
-Beginning VICAR task list
- ** The specified window is all zero.
-end-proc
-disable-log
+let $echo="no"
 $ Return
 $!#############################################################################

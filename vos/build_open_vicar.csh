@@ -18,24 +18,25 @@ echo "**********************************************************"
 echo "*** VICAR OPEN SOURCE BUILD LOG"
 echo "**********************************************************"
 
-# Create "external" softlink
-
-cd $V2TOP
-cd ..
-ln -s vos-ext-$VICCPU external
+unalias rm
+unalias mv
+unalias cp
+unset noclobber
 
 # Create vicset1 file
+
+# Prep the build
+cd $V2TOP
+util/prep.csh
+util/fetch_tae.csh |& tee fetch_tae.log
+echo "*** Ignore errors related to tae52 above"
+
 cd $V2TOP
 util/process_project_file.csh vicset1.source PROJ_OS >vicset1.csh
 source $V2TOP/vicset1.csh
 source $V2TOP/vicset2.csh
 
-# Prep the build, build imake on mac
-
-util/prep.csh
-util/fetch_tae.csh |& tee fetch_tae.log
-echo "*** Ignore errors related to tae52 above"
-
+# Build imake on mac
 if ("$VICCPU" == "x86-macosx") then
   cd util/imake-x86-macosx
   make -f Makefile

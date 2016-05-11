@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module img2ascii
-$! VPACK Version 1.9, Monday, March 09, 2015, 18:29:57
+$! VPACK Version 2.1, Monday, August 10, 2015, 15:08:54
 $!
 $! Execute by entering:		$ @img2ascii
 $!
@@ -231,7 +231,7 @@ C		+=================+
 	ZMAX = -3.0e10
 	STATS = .FALSE.
 
-        CALL IFMESSAGE ('IMG2ASCII version 2015-03-09 (64-bit) - rjb')
+        CALL IFMESSAGE ('IMG2ASCII version 2015-08-10')
 c        CALL XVEACTION ('SA',' ')
 
 C	Open up the input image
@@ -671,8 +671,8 @@ c
       call xqini (parb,1000,xcont)
       call xqreal (parb,'minval',1,zmin,xadd,stat)
       call xqreal (parb,'maxval',1,zmax,xadd,stat)
-      call xqout (parb,stat)
-      call chkstat (stat,'??E - XQout error',0,0,0)
+      call xvqout (parb,stat)
+      call chkstat (stat,'??E - XVQout error',0,0,0)
 
 	return
 	end
@@ -802,6 +802,8 @@ Revisions:
                            parameters MINVAL and MAXVAL. Allow
                            BYTE, HALF, FULL and REAL images. 
   2015-03-09  W. Bunch     Fixed WRITE format error.
+  2015-08-10  W. Bunch - replaced xqout call with xvqout call 
+                         to pass out vars to shell vicar
 
 .LEVEL1
 .VARIABLE INP
@@ -1075,7 +1077,7 @@ GEN Version 6
 GEN task completed
 img2ascii byte2.img bout2.txt
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext bout2.txt
 Beginning VICAR task typetext
       0     1     2     3     4     5     6     7     8     9    10    11
@@ -1280,7 +1282,7 @@ Beginning VICAR task typetext
      85    86
 img2ascii byte1.img bout1.txt size=(1,1,20,20)
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext bout1.txt
 Beginning VICAR task typetext
       0     1     2     3     4     5     6     7
@@ -1305,7 +1307,7 @@ Beginning VICAR task typetext
      19    20    21    22    23    24    25    26
 img2ascii byte1.img bout1a.txt size=(1,1,20,20) org=COLUMNS
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext bout1a.txt
 Beginning VICAR task typetext
       1       0
@@ -1711,7 +1713,7 @@ Beginning VICAR task typetext
 img2ascii byte1.img bout1b.txt size=(1,1,20,20) org=COLUMNS  +
     index=yes
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext bout1b.txt
 Beginning VICAR task typetext
       1       0
@@ -2117,7 +2119,7 @@ Beginning VICAR task typetext
 img2ascii byte1.img bout1c.txt size=(1,1,20,20) org=COLUMNS  +
     index=yes notes=on minval=minval maxval=maxval
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 Minimum value:      0 Maximum value:     38
 The output text file is dimensioned   20 by      2
 let $echo="no"
@@ -2526,7 +2528,7 @@ Beginning VICAR task typetext
     400      38
 img2ascii half2.img hout2.txt
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext hout2.txt
 Beginning VICAR task typetext
     300   301   302   303   304   305   306   307   308   309   310   311
@@ -2731,7 +2733,7 @@ Beginning VICAR task typetext
     385   386
 img2ascii half1.img hout1.txt size=(1,1,20,20)
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext hout1.txt
 Beginning VICAR task typetext
     300   301   302   303   304   305   306   307
@@ -2756,7 +2758,7 @@ Beginning VICAR task typetext
     319   320   321   322   323   324   325   326
 img2ascii half1.img hout1a.txt size=(1,1,20,20) org=COLUMNS
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext hout1a.txt
 Beginning VICAR task typetext
       1     300
@@ -3162,7 +3164,7 @@ Beginning VICAR task typetext
 img2ascii half1.img hout1b.txt size=(1,1,20,20) org=COLUMNS  +
     index=yes
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext hout1b.txt
 Beginning VICAR task typetext
       1     300
@@ -3568,7 +3570,7 @@ Beginning VICAR task typetext
 img2ascii half1.img hout1c.txt size=(1,1,20,20) org=COLUMNS  +
     index=yes notes=on minval=minval maxval=maxval
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 Minimum value:    300 Maximum value:    338
 The output text file is dimensioned   20 by      2
 let $echo="no"
@@ -3977,7 +3979,7 @@ Beginning VICAR task typetext
     400     338
 img2ascii full2.img fout2.txt
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext fout2.txt
 Beginning VICAR task typetext
   36000 36001 36002 36003 36004 36005 36006 36007 36008 36009 36010 36011
@@ -4182,7 +4184,7 @@ Beginning VICAR task typetext
   36085 36086
 img2ascii full1.img fout1.txt size=(1,1,20,20)
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext fout1.txt
 Beginning VICAR task typetext
   36000 36001 36002 36003 36004 36005 36006 36007
@@ -4207,7 +4209,7 @@ Beginning VICAR task typetext
   36019 36020 36021 36022 36023 36024 36025 36026
 img2ascii full1.img fout1a.txt size=(1,1,20,20) org=COLUMNS
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext fout1a.txt
 Beginning VICAR task typetext
       1   36000
@@ -4613,7 +4615,7 @@ Beginning VICAR task typetext
 img2ascii full1.img fout1b.txt size=(1,1,20,20) org=COLUMNS  +
     index=yes
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext fout1b.txt
 Beginning VICAR task typetext
       1   36000
@@ -5019,7 +5021,7 @@ Beginning VICAR task typetext
 img2ascii full1.img fout1c.txt size=(1,1,20,20) org=COLUMNS  +
     index=yes notes=on minval=minval maxval=maxval
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 Minimum value:  36000 Maximum value:  36038
 The output text file is dimensioned   20 by      2
 let $echo="no"
@@ -5428,7 +5430,7 @@ Beginning VICAR task typetext
     400   36038
 img2ascii real2.img rout2.txt
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext rout2.txt
 Beginning VICAR task typetext
   0.301E+04 0.301E+04 0.301E+04 0.301E+04 0.301E+04 0.301E+04                                                            
@@ -5633,7 +5635,7 @@ Beginning VICAR task typetext
   0.308E+04 0.309E+04
 img2ascii real1.img rout1.txt size=(1,1,20,20)
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext rout1.txt
 Beginning VICAR task typetext
   0.300E+04 0.300E+04 0.300E+04 0.300E+04 0.300E+04 0.300E+04 0.301E+04 0.301E+04
@@ -5658,7 +5660,7 @@ Beginning VICAR task typetext
   0.302E+04 0.302E+04 0.302E+04 0.302E+04 0.302E+04 0.302E+04 0.302E+04 0.303E+04
 img2ascii real1.img rout1a.txt size=(1,1,20,20) org=COLUMNS
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext rout1a.txt
 Beginning VICAR task typetext
       1   0.300E+04
@@ -6064,7 +6066,7 @@ Beginning VICAR task typetext
 img2ascii real1.img rout1b.txt size=(1,1,20,20) org=COLUMNS  +
     index=yes
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 typetext rout1b.txt
 Beginning VICAR task typetext
       1   0.300E+04
@@ -6470,7 +6472,7 @@ Beginning VICAR task typetext
 img2ascii real1.img rout1c.txt size=(1,1,20,20) org=COLUMNS  +
     index=yes notes=on minval=minval maxval=maxval
 Beginning VICAR task img2ascii
-IMG2ASCII version 2015-03-09 (64-bit) - rjb
+IMG2ASCII version 2015-08-10
 Minimum value:  0.300E+04 Maximum value:  0.304E+04
 The output text file is dimensioned   20 by  2
 let $echo="no"

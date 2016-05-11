@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module lbl_routines
-$! VPACK Version 1.9, Thursday, April 16, 2015, 17:22:18
+$! VPACK Version 2.1, Thursday, October 08, 2015, 09:15:24
 $!
 $! Execute by entering:		$ @lbl_routines
 $!
@@ -912,6 +912,9 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
  *
  * Date		who		Description
  * ----------   --------------- ---------------------------------------------
+ * 2015-08-19   Cecilia Cheng   Added MODEL_COMPONENT__UNIT (should delete MODEL_COMPONENT_UNIT 
+ *                              after confirming that that didn't break anything)
+ * 2015-07-12   Cecilia Cheng   Added CAMERA_SERIAL_NUMBER
  * 2003-05-14   Hyun Lee        Added REFERENCE_COORD_SYSTEM_SOLN_ID
  * 2003-02-11	Payam Zamani	Added FILTER_NAME
  * 2003-01-10	p. Zamani	Changed GEOMETRY_SOURCE_ID,
@@ -935,6 +938,12 @@ static LblApiElement_typ	LabelTbl[] = {
 		LBL_OFFSET(LblCameraModel_typ, CalibrationSourceId.Value),
 		LBL_OFFSET(LblCameraModel_typ, CalibrationSourceId.Valid),
 		LBL_NO_RETURN,	LBL_SIZE(CalibrationSourceId.Value)},
+
+    {"CAMERA_SERIAL_NUMBER",        "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblCameraModel_typ, CameraSerialNumber.Value),
+     LBL_OFFSET(LblCameraModel_typ, CameraSerialNumber.Valid),
+     LBL_NO_RETURN, LBL_SIZE(CameraSerialNumber.Value)},
 
 	{"MODEL_DESC__PTR",			"STRING",	LBL_OPTIONAL,
 		LBL_NO_CONT,	1,	1,	LBL_NULL,
@@ -1121,6 +1130,60 @@ static LblApiElement_typ	LabelTbl[] = {
 		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnit[8].Value),
 		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnit[8].Valid),
 		LBL_NO_RETURN,	LBL_SIZE(ModelComponentUnit[8].Value)},
+
+	{"MODEL_COMPONENT__UNIT",		"STRING",	LBL_OPTIONAL,
+		LBL_NO_CONT,	1,	1,	LBL_NULL,
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[0].Value),
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[0].Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ModelComponentUnitB[0].Value)},
+
+	{"MODEL_COMPONENT__UNIT",		"STRING",	LBL_OPTIONAL,
+		LBL_CONTINUE,	1,	2,	LBL_NULL,
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[1].Value),
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[1].Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ModelComponentUnitB[1].Value)},
+
+	{"MODEL_COMPONENT__UNIT",		"STRING",	LBL_OPTIONAL,
+		LBL_CONTINUE,	1,	3,	LBL_NULL,
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[2].Value),
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[2].Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ModelComponentUnitB[2].Value)},
+
+	{"MODEL_COMPONENT__UNIT",		"STRING",	LBL_OPTIONAL,
+		LBL_CONTINUE,	1,	4,	LBL_NULL,
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[3].Value),
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[3].Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ModelComponentUnitB[3].Value)},
+
+	{"MODEL_COMPONENT__UNIT",		"STRING",	LBL_OPTIONAL,
+		LBL_CONTINUE,	1,	5,	LBL_NULL,
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[4].Value),
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[4].Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ModelComponentUnitB[4].Value)},
+
+	{"MODEL_COMPONENT__UNIT",		"STRING",	LBL_OPTIONAL,
+		LBL_CONTINUE,	1,	6,	LBL_NULL,
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[5].Value),
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[5].Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ModelComponentUnitB[5].Value)},
+
+	{"MODEL_COMPONENT__UNIT",		"STRING",	LBL_OPTIONAL,
+		LBL_CONTINUE,	1,	7,	LBL_NULL,
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[6].Value),
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[6].Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ModelComponentUnitB[6].Value)},
+
+	{"MODEL_COMPONENT__UNIT",		"STRING",	LBL_OPTIONAL,
+		LBL_CONTINUE,	1,	8,	LBL_NULL,
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[7].Value),
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[7].Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ModelComponentUnitB[7].Value)},
+
+	{"MODEL_COMPONENT_UNIT",		"STRING",	LBL_OPTIONAL,
+		LBL_CONTINUE,	1,	9,	LBL_NULL,
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[8].Value),
+		LBL_OFFSET(LblCameraModel_typ, ModelComponentUnitB[8].Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ModelComponentUnitB[8].Value)},
 
 	{"MODEL_COMPONENT_1",			"REAL",		LBL_OPTIONAL,
 		LBL_NO_CONT,	1,	1,	LBL_NULL,
@@ -3401,6 +3464,7 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
  *
  * Date         who             Description
  * ----------   --------------- ---------------------------------------------
+ * 2015-08-19   C. Cheng        Added SiteInstrumentAzimuth and SiteInstrumentElevation
  * 2003-01-07   P. Zamani       Changed DERIVED_GEOMETRY_NAME to be
  *				  LBL_OPTIONAL
  * ?            A. Runkle       Initial development and release
@@ -3445,13 +3509,6 @@ static LblApiElement_typ	LabelTbl[] = {
 		LBL_OFFSET(LblDerivedGeometry_typ, DerivedGeometryType.Valid),
 		LBL_NO_RETURN,	LBL_SIZE(DerivedGeometryType.Value)},
 
-	{"LANDER_INSTRUMENT_AZIMUTH, INSTRUMENT_AZIMUTH",
-		"REAL",		LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblDerivedGeometry_typ, LanderInstrumentAzimuth.Value),
-		LBL_OFFSET(LblDerivedGeometry_typ, LanderInstrumentAzimuth.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(LanderInstrumentAzimuth.Value)},
-
 	{"INSTRUMENT_AZIMUTH__UNIT",
 		"STRING",	LBL_OPTIONAL,
 		LBL_NO_CONT,	1,	1,	LBL_NULL,
@@ -3459,19 +3516,26 @@ static LblApiElement_typ	LabelTbl[] = {
 		LBL_OFFSET(LblDerivedGeometry_typ, InstrumentAzimuthUnit.Valid),
 		LBL_NO_RETURN,	LBL_SIZE(InstrumentAzimuthUnit.Value)},
 
-	{"LANDER_INSTRUMENT_ELEVATION, INSTRUMENT_ELEVATION",
-		"REAL",		LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblDerivedGeometry_typ, LanderInstrumentElevation.Value),
-		LBL_OFFSET(LblDerivedGeometry_typ, LanderInstrumentElevation.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(LanderInstrumentElevation.Value)},
-
 	{"INSTRUMENT_ELEVATION__UNIT",
 		"STRING",	LBL_OPTIONAL,
 		LBL_NO_CONT,	1,	1,	LBL_NULL,
 		LBL_OFFSET(LblDerivedGeometry_typ, InstrumentElevationUnit.Value),
 		LBL_OFFSET(LblDerivedGeometry_typ, InstrumentElevationUnit.Valid),
 		LBL_NO_RETURN,	LBL_SIZE(InstrumentElevationUnit.Value)},
+
+	{"LANDER_INSTRUMENT_AZIMUTH, INSTRUMENT_AZIMUTH",
+		"REAL",		LBL_OPTIONAL,
+		LBL_NO_CONT,	1,	1,	LBL_NULL,
+		LBL_OFFSET(LblDerivedGeometry_typ, LanderInstrumentAzimuth.Value),
+		LBL_OFFSET(LblDerivedGeometry_typ, LanderInstrumentAzimuth.Valid),
+		LBL_NO_RETURN,	LBL_SIZE(LanderInstrumentAzimuth.Value)},
+
+	{"LANDER_INSTRUMENT_ELEVATION, INSTRUMENT_ELEVATION",
+		"REAL",		LBL_OPTIONAL,
+		LBL_NO_CONT,	1,	1,	LBL_NULL,
+		LBL_OFFSET(LblDerivedGeometry_typ, LanderInstrumentElevation.Value),
+		LBL_OFFSET(LblDerivedGeometry_typ, LanderInstrumentElevation.Valid),
+		LBL_NO_RETURN,	LBL_SIZE(LanderInstrumentElevation.Value)},
 
 	{"LANDER_LOCAL_LEVEL_QUATERNION, INST_HOST_TO_FIXED_QUATERNION",
 		"REAL",		LBL_OPTIONAL,
@@ -3590,6 +3654,20 @@ static LblApiElement_typ	LabelTbl[] = {
 		LBL_OFFSET(LblDerivedGeometry_typ, ReferenceCoordSystemSolnId.Value),
 		LBL_OFFSET(LblDerivedGeometry_typ, ReferenceCoordSystemSolnId.Valid),
 		LBL_NO_RETURN,	LBL_SIZE(ReferenceCoordSystemSolnId.Value)},
+
+	{"SITE_INSTRUMENT_AZIMUTH, INSTRUMENT_AZIMUTH",
+		"REAL",		LBL_OPTIONAL,
+		LBL_NO_CONT,	1,	1,	LBL_NULL,
+		LBL_OFFSET(LblDerivedGeometry_typ, SiteInstrumentAzimuth.Value),
+		LBL_OFFSET(LblDerivedGeometry_typ, SiteInstrumentAzimuth.Valid),
+		LBL_NO_RETURN,	LBL_SIZE(SiteInstrumentAzimuth.Value)},
+
+	{"SITE_INSTRUMENT_ELEVATION, INSTRUMENT_ELEVATION",
+		"REAL",		LBL_OPTIONAL,
+		LBL_NO_CONT,	1,	1,	LBL_NULL,
+		LBL_OFFSET(LblDerivedGeometry_typ, SiteInstrumentElevation.Value),
+		LBL_OFFSET(LblDerivedGeometry_typ, SiteInstrumentElevation.Valid),
+		LBL_NO_RETURN,	LBL_SIZE(SiteInstrumentElevation.Value)},
 
 	{"SLANT_DISTANCE",			"REAL",		LBL_OPTIONAL,
 		LBL_NO_CONT,	1,	1,	LBL_NULL,
@@ -3798,9 +3876,9 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
 #include "lbl_identification.h"
 
 /******************************************************************************
- *				LBL_IDENTIFICATION
+ *              LBL_IDENTIFICATION
  *
- *	This module contains routines to help create, read/write and print
+ *  This module contains routines to help create, read/write and print
  *  an Identification property label.  It is part of the MIPL label API package,
  *  using a lower-level label processor to do the real work.  This package
  *  basically defines a table that the lower-level routines use.  The table
@@ -3808,35 +3886,35 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
  *  how the label processor specifies the label components to the VICAR label
  *  Run Time Library (RTL).
  *
- *	The label processor interface structures and routines are defined in
+ *  The label processor interface structures and routines are defined in
  *  the file "lbl_gen_api.h" (Check the label processor documentation for
  *  how to create APIs like this one).  The application program interface
  *  structures are defined in the file "lbl_identification.h".  The
  *  implementation supporting the interface is this module.
  *
- *	The primary routine used by a typical application program is
+ *  The primary routine used by a typical application program is
  *  LblIdentification.  This routine requires exactly 4 parameters.
  *  All label API routines must (should) have the same first three parameters:
- *		INT	VICAR RTL unit number of an opened image file.
- *			This is the file where the label will be read or
- *			written.  It must be open with the appropriate
- *			I/O mode
- *		INT	Read/Write flag.  If the value of this parameter is
- *			non-zero, the label will be read from the file.  If
- *			the value of the parameter is zero, a new label will
- *			be written to the file.
- *		VOID*	The structure that an application program will use
- *			to set or retreive the label element values.  Okay
- *			this really isn't a VOID*, but it is a pointer to
- *			the label specific structure.
- *		INT	The instance of this label type.  They typical value
- *			of this parameter should be '1'.
+ *      INT VICAR RTL unit number of an opened image file.
+ *          This is the file where the label will be read or
+ *          written.  It must be open with the appropriate
+ *          I/O mode
+ *      INT Read/Write flag.  If the value of this parameter is
+ *          non-zero, the label will be read from the file.  If
+ *          the value of the parameter is zero, a new label will
+ *          be written to the file.
+ *      VOID*   The structure that an application program will use
+ *          to set or retreive the label element values.  Okay
+ *          this really isn't a VOID*, but it is a pointer to
+ *          the label specific structure.
+ *      INT The instance of this label type.  They typical value
+ *          of this parameter should be '1'.
  *
- *	The other two routines contined in this module were included for
+ *  The other two routines contined in this module were included for
  *  development and testing purposes and like the label processing code, use
  *  generic lower-level routines.
  *
- *	All routines use the return_status.h macros to identify the
+ *  All routines use the return_status.h macros to identify the
  *  success or failure of the routine.  Basically, a value of zero represents
  *  a successful completion of the label processing, a non-zero value
  *  indicates a failure.
@@ -3846,760 +3924,781 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
  *
  * Date         who             Description
  * -----------  --------------- ----------------------------------------------
+ * 07-Oct-2015  C. Cheng        Removed SEQUENCE_ID. It's already defined!
+ * 02-Jul-2015  C. Cheng        Added MESH_ID, MOSAIC_ID, SEQUENCE_ID and
+ *                              STEREO_MATCH_ID
  * 23-May-2003  Hyun Lee        Changed INSTRUMENT_HOST_ID & INSTRUMENT_ID as
  *                              array values
- * 14-Feb-2003	P. Zamani	Changed PLANET_DAY_NUMBER to INT
- * 12-Feb-2003  Payam Zamani	Added RELEASE_ID, change SOLAR_LONGITUE to REAL
+ * 14-Feb-2003  P. Zamani       Changed PLANET_DAY_NUMBER to INT
+ * 12-Feb-2003  Payam Zamani    Added RELEASE_ID, change SOLAR_LONGITUE to REAL
  * ?            Allan Runkle    Original development and release
  *****************************************************************************/
 
-#define  LBL_SIZE(x)	sizeof(((LblIdentification_typ *)0)->x)
+#define  LBL_SIZE(x)    sizeof(((LblIdentification_typ *)0)->x)
 
-static LblApiElement_typ	LabelTbl[] = {
+static LblApiElement_typ    LabelTbl[] = {
     {"ACTIVE_FLIGHT_STRING_ID",    "STRING",      LBL_OPTIONAL,
-        LBL_NO_CONT,    1,  1,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, ActiveFlightStringId.Value),
-        LBL_OFFSET(LblIdentification_typ, ActiveFlightStringId.Valid),
-        LBL_NO_RETURN,  LBL_SIZE(ActiveFlightStringId.Value)},
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ActiveFlightStringId.Value),
+     LBL_OFFSET(LblIdentification_typ, ActiveFlightStringId.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(ActiveFlightStringId.Value)},
 
-	{"DATA_SET_ID",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, DataSetId.Value),
-		LBL_OFFSET(LblIdentification_typ, DataSetId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(DataSetId.Value)},
+    {"DATA_SET_ID",             "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, DataSetId.Value),
+     LBL_OFFSET(LblIdentification_typ, DataSetId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(DataSetId.Value)},
 
-	{"DATA_SET_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, DataSetName.Value),
-		LBL_OFFSET(LblIdentification_typ, DataSetName.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(DataSetName.Value)},
+    {"DATA_SET_NAME",           "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, DataSetName.Value),
+     LBL_OFFSET(LblIdentification_typ, DataSetName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(DataSetName.Value)},
 
-	{"COMMAND_SEQUENCE_NUMBER",		"INT",		LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, CommandSequenceNumber.Value),
-		LBL_OFFSET(LblIdentification_typ, CommandSequenceNumber.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(CommandSequenceNumber.Value)},
+    {"COMMAND_SEQUENCE_NUMBER",     "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, CommandSequenceNumber.Value),
+     LBL_OFFSET(LblIdentification_typ, CommandSequenceNumber.Valid),
+     LBL_NO_RETURN, LBL_SIZE(CommandSequenceNumber.Value)},
 
-	{"FEATURE_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, FeatureName.Value),
-		LBL_OFFSET(LblIdentification_typ, FeatureName.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(FeatureName.Value)},
+    {"FEATURE_NAME",            "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, FeatureName.Value),
+     LBL_OFFSET(LblIdentification_typ, FeatureName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(FeatureName.Value)},
 
-	{"FEATURE_TYPE",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, FeatureType.Value),
-		LBL_OFFSET(LblIdentification_typ, FeatureType.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(FeatureType.Value)},
+    {"FEATURE_TYPE",            "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, FeatureType.Value),
+     LBL_OFFSET(LblIdentification_typ, FeatureType.Valid),
+     LBL_NO_RETURN, LBL_SIZE(FeatureType.Value)},
 
-	{"FRAME_ID",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, FrameId[0].Value),
-		LBL_OFFSET(LblIdentification_typ, FrameId[0].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(FrameId[0].Value)},
+    {"FRAME_ID",                "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, FrameId[0].Value),
+     LBL_OFFSET(LblIdentification_typ, FrameId[0].Valid),
+     LBL_NO_RETURN, LBL_SIZE(FrameId[0].Value)},
 
-	{"FRAME_ID",				"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	2,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, FrameId[1].Value),
-		LBL_OFFSET(LblIdentification_typ, FrameId[1].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(FrameId[1].Value)},
+    {"FRAME_ID",                "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  2,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, FrameId[1].Value),
+     LBL_OFFSET(LblIdentification_typ, FrameId[1].Valid),
+     LBL_NO_RETURN, LBL_SIZE(FrameId[1].Value)},
 
-	{"FRAME_ID",				"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	3,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, FrameId[2].Value),
-		LBL_OFFSET(LblIdentification_typ, FrameId[2].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(FrameId[2].Value)},
+    {"FRAME_ID",                "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  3,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, FrameId[2].Value),
+     LBL_OFFSET(LblIdentification_typ, FrameId[2].Valid),
+     LBL_NO_RETURN, LBL_SIZE(FrameId[2].Value)},
 
-	{"FRAME_ID",				"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	4,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, FrameId[3].Value),
-		LBL_OFFSET(LblIdentification_typ, FrameId[3].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(FrameId[3].Value)},
+    {"FRAME_ID",                "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  4,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, FrameId[3].Value),
+     LBL_OFFSET(LblIdentification_typ, FrameId[3].Valid),
+     LBL_NO_RETURN, LBL_SIZE(FrameId[3].Value)},
 
-	{"FRAME_ID",				"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	5,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, FrameId[4].Value),
-		LBL_OFFSET(LblIdentification_typ, FrameId[4].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(FrameId[4].Value)},
+    {"FRAME_ID",                "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  5,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, FrameId[4].Value),
+     LBL_OFFSET(LblIdentification_typ, FrameId[4].Valid),
+     LBL_NO_RETURN, LBL_SIZE(FrameId[4].Value)},
 
-	{"FRAME_TYPE",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, FrameType.Value),
-		LBL_OFFSET(LblIdentification_typ, FrameType.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(FrameType.Value)},
+    {"FRAME_TYPE",              "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, FrameType.Value),
+     LBL_OFFSET(LblIdentification_typ, FrameType.Valid),
+     LBL_NO_RETURN, LBL_SIZE(FrameType.Value)},
 
     {"GEOMETRY_PROJECTION_TYPE",            "STRING",       LBL_OPTIONAL,
-        LBL_NO_CONT,    1,      1,      LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, GeometryProjectionType.Value),
-        LBL_OFFSET(LblIdentification_typ, GeometryProjectionType.Valid),
-        LBL_NO_RETURN,  LBL_SIZE(GeometryProjectionType.Value)},
+     LBL_NO_CONT,    1,      1,      LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, GeometryProjectionType.Value),
+     LBL_OFFSET(LblIdentification_typ, GeometryProjectionType.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(GeometryProjectionType.Value)},
 
-	{"IMAGE_ID",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ImageId.Value),
-		LBL_OFFSET(LblIdentification_typ, ImageId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ImageId.Value)},
+    {"IMAGE_ID",                "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ImageId.Value),
+     LBL_OFFSET(LblIdentification_typ, ImageId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ImageId.Value)},
 
-	{"IMAGE_TIME",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ImageTime.Value),
-		LBL_OFFSET(LblIdentification_typ, ImageTime.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ImageTime.Value)},
+    {"IMAGE_TIME",              "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ImageTime.Value),
+     LBL_OFFSET(LblIdentification_typ, ImageTime.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ImageTime.Value)},
 
-	{"IMAGE_TYPE",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ImageType.Value),
-		LBL_OFFSET(LblIdentification_typ, ImageType.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ImageType.Value)},
+    {"IMAGE_TYPE",              "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ImageType.Value),
+     LBL_OFFSET(LblIdentification_typ, ImageType.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ImageType.Value)},
 
     {"IMAGE_ACQUIRE_MODE",      "STRING",      LBL_OPTIONAL,
-        LBL_NO_CONT,    1,  1,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, ImageAcquireMode.Value),
-        LBL_OFFSET(LblIdentification_typ, ImageAcquireMode.Valid),    
-        LBL_NO_RETURN,  LBL_SIZE(ImageAcquireMode.Value)},
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ImageAcquireMode.Value),
+     LBL_OFFSET(LblIdentification_typ, ImageAcquireMode.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(ImageAcquireMode.Value)},
 
-	{"INSTRUMENT_HOST_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostId[0].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostId[0].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentHostId[0].Value)},
+    {"INSTRUMENT_HOST_ID",          "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostId[0].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostId[0].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentHostId[0].Value)},
 
-	{"INSTRUMENT_HOST_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	2,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostId[1].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostId[1].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentHostId[1].Value)},
+    {"INSTRUMENT_HOST_ID",          "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  2,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostId[1].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostId[1].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentHostId[1].Value)},
 
-	{"INSTRUMENT_HOST_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	3,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostId[2].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostId[2].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentHostId[2].Value)},
+    {"INSTRUMENT_HOST_ID",          "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  3,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostId[2].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostId[2].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentHostId[2].Value)},
 
-	{"INSTRUMENT_HOST_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	4,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostId[3].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostId[3].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentHostId[3].Value)},
+    {"INSTRUMENT_HOST_ID",          "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  4,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostId[3].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostId[3].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentHostId[3].Value)},
 
-	{"INSTRUMENT_HOST_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	5,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostId[4].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostId[4].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentHostId[4].Value)},
+    {"INSTRUMENT_HOST_ID",          "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  5,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostId[4].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostId[4].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentHostId[4].Value)},
 
-	{"INSTRUMENT_HOST_NAME",		"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostName[0].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostName[0].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentHostName[0].Value)},
+    {"INSTRUMENT_HOST_NAME",        "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostName[0].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostName[0].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentHostName[0].Value)},
 
-	{"INSTRUMENT_HOST_NAME",		"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	2,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostName[1].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostName[1].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentHostName[1].Value)},
+    {"INSTRUMENT_HOST_NAME",        "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  2,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostName[1].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostName[1].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentHostName[1].Value)},
 
-	{"INSTRUMENT_HOST_NAME",		"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	3,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostName[2].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostName[2].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentHostName[2].Value)},
+    {"INSTRUMENT_HOST_NAME",        "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  3,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostName[2].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostName[2].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentHostName[2].Value)},
 
-	{"INSTRUMENT_HOST_NAME",		"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	4,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostName[3].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostName[3].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentHostName[3].Value)},
+    {"INSTRUMENT_HOST_NAME",        "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  4,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostName[3].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostName[3].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentHostName[3].Value)},
 
-	{"INSTRUMENT_HOST_NAME",		"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	5,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostName[4].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentHostName[4].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentHostName[4].Value)},
+    {"INSTRUMENT_HOST_NAME",        "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  5,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostName[4].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentHostName[4].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentHostName[4].Value)},
 
-	{"INSTRUMENT_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentId[0].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentId[0].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentId[0].Value)},
+    {"INSTRUMENT_ID",           "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentId[0].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentId[0].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentId[0].Value)},
 
-	{"INSTRUMENT_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	2,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentId[1].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentId[1].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentId[1].Value)},
+    {"INSTRUMENT_ID",           "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  2,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentId[1].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentId[1].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentId[1].Value)},
 
-	{"INSTRUMENT_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	3,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentId[2].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentId[2].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentId[2].Value)},
+    {"INSTRUMENT_ID",           "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  3,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentId[2].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentId[2].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentId[2].Value)},
 
-	{"INSTRUMENT_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	4,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentId[3].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentId[3].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentId[3].Value)},
+    {"INSTRUMENT_ID",           "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  4,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentId[3].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentId[3].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentId[3].Value)},
 
-	{"INSTRUMENT_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	5,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentId[4].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentId[4].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentId[4].Value)},
+    {"INSTRUMENT_ID",           "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  5,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentId[4].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentId[4].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentId[4].Value)},
 
-	{"INSTRUMENT_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentName[0].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentName[0].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentName[0].Value)},
+    {"INSTRUMENT_NAME",         "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentName[0].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentName[0].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentName[0].Value)},
 
-	{"INSTRUMENT_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	2,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentName[1].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentName[1].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentName[1].Value)},
+    {"INSTRUMENT_NAME",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  2,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentName[1].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentName[1].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentName[1].Value)},
 
-	{"INSTRUMENT_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	3,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentName[2].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentName[2].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentName[2].Value)},
+    {"INSTRUMENT_NAME",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  3,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentName[2].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentName[2].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentName[2].Value)},
 
-	{"INSTRUMENT_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	4,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentName[3].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentName[3].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentName[3].Value)},
+    {"INSTRUMENT_NAME",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  4,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentName[3].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentName[3].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentName[3].Value)},
 
-	{"INSTRUMENT_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	5,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentName[4].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentName[4].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentName[4].Value)},
+    {"INSTRUMENT_NAME",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  5,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentName[4].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentName[4].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentName[4].Value)},
 
-	{"INSTRUMENT_SERIAL_NUMBER",		"INT",		LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentSerialNumber.Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentSerialNumber.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentSerialNumber.Value)},
+    {"INSTRUMENT_SERIAL_NUMBER",        "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentSerialNumber.Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentSerialNumber.Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentSerialNumber.Value)},
 
-	{"INSTRUMENT_TYPE",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentType[0].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentType[0].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentType[0].Value)},
+    {"INSTRUMENT_TYPE",         "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentType[0].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentType[0].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentType[0].Value)},
 
-	{"INSTRUMENT_TYPE",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	2,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentType[1].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentType[1].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentType[1].Value)},
+    {"INSTRUMENT_TYPE",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  2,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentType[1].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentType[1].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentType[1].Value)},
 
-	{"INSTRUMENT_TYPE",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	3,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentType[2].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentType[2].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentType[2].Value)},
+    {"INSTRUMENT_TYPE",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  3,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentType[2].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentType[2].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentType[2].Value)},
 
-	{"INSTRUMENT_TYPE",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	4,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentType[3].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentType[3].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentType[3].Value)},
+    {"INSTRUMENT_TYPE",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  4,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentType[3].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentType[3].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentType[3].Value)},
 
-	{"INSTRUMENT_TYPE",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	5,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentType[4].Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentType[4].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentType[4].Value)},
+    {"INSTRUMENT_TYPE",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  5,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentType[4].Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentType[4].Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentType[4].Value)},
 
-	{"INSTRUMENT_VERSION_ID",		"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, InstrumentVersionId.Value),
-		LBL_OFFSET(LblIdentification_typ, InstrumentVersionId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(InstrumentVersionId.Value)},
+    {"INSTRUMENT_VERSION_ID",       "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, InstrumentVersionId.Value),
+     LBL_OFFSET(LblIdentification_typ, InstrumentVersionId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(InstrumentVersionId.Value)},
 
     {"LOCAL_MEAN_SOLAR_TIME",               "STRING",       LBL_OPTIONAL,
-        LBL_NO_CONT,    1,      1,      LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, LocalMeanSolarTime.Value),
-        LBL_OFFSET(LblIdentification_typ, LocalMeanSolarTime.Valid),
-        LBL_NO_RETURN,  LBL_SIZE(LocalMeanSolarTime.Value)},
+     LBL_NO_CONT,    1,      1,      LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, LocalMeanSolarTime.Value),
+     LBL_OFFSET(LblIdentification_typ, LocalMeanSolarTime.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(LocalMeanSolarTime.Value)},
 
-	{"LOCAL_TRUE_SOLAR_TIME",		"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, LocalTrueSolarTime.Value),
-		LBL_OFFSET(LblIdentification_typ, LocalTrueSolarTime.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(LocalTrueSolarTime.Value)},
+    {"LOCAL_TRUE_SOLAR_TIME",       "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, LocalTrueSolarTime.Value),
+     LBL_OFFSET(LblIdentification_typ, LocalTrueSolarTime.Valid),
+     LBL_NO_RETURN, LBL_SIZE(LocalTrueSolarTime.Value)},
 
-	{"MAGNET_ID",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, MagnetId.Value),
-		LBL_OFFSET(LblIdentification_typ, MagnetId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(MagnetId.Value)},
+    {"MAGNET_ID",               "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MagnetId.Value),
+     LBL_OFFSET(LblIdentification_typ, MagnetId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(MagnetId.Value)},
 
-	{"MEASUREMENT_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, MeasurementId.Value),
-		LBL_OFFSET(LblIdentification_typ, MeasurementId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(MeasurementId.Value)},
+    {"MEASUREMENT_ID",          "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MeasurementId.Value),
+     LBL_OFFSET(LblIdentification_typ, MeasurementId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(MeasurementId.Value)},
 
-	{"MEASUREMENT_TIME",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, MeasurementTime.Value),
-		LBL_OFFSET(LblIdentification_typ, MeasurementTime.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(MeasurementTime.Value)},
+    {"MEASUREMENT_TIME",            "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MeasurementTime.Value),
+     LBL_OFFSET(LblIdentification_typ, MeasurementTime.Valid),
+     LBL_NO_RETURN, LBL_SIZE(MeasurementTime.Value)},
 
-	{"MEASUREMENT_TYPE",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, MeasurementType.Value),
-		LBL_OFFSET(LblIdentification_typ, MeasurementType.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(MeasurementType.Value)},
+    {"MEASUREMENT_TYPE",            "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MeasurementType.Value),
+     LBL_OFFSET(LblIdentification_typ, MeasurementType.Valid),
+     LBL_NO_RETURN, LBL_SIZE(MeasurementType.Value)},
 
-	{"MISSION_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, MissionName[0].Value),
-		LBL_OFFSET(LblIdentification_typ, MissionName[0].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(MissionName[0].Value)},
+    {"MISSION_NAME",            "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MissionName[0].Value),
+     LBL_OFFSET(LblIdentification_typ, MissionName[0].Valid),
+     LBL_NO_RETURN, LBL_SIZE(MissionName[0].Value)},
 
-	{"MISSION_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	2,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, MissionName[1].Value),
-		LBL_OFFSET(LblIdentification_typ, MissionName[1].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(MissionName[1].Value)},
+    {"MISSION_NAME",            "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  2,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MissionName[1].Value),
+     LBL_OFFSET(LblIdentification_typ, MissionName[1].Valid),
+     LBL_NO_RETURN, LBL_SIZE(MissionName[1].Value)},
 
-	{"MISSION_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	3,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, MissionName[2].Value),
-		LBL_OFFSET(LblIdentification_typ, MissionName[2].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(MissionName[2].Value)},
+    {"MISSION_NAME",            "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  3,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MissionName[2].Value),
+     LBL_OFFSET(LblIdentification_typ, MissionName[2].Valid),
+     LBL_NO_RETURN, LBL_SIZE(MissionName[2].Value)},
 
-	{"MISSION_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	4,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, MissionName[3].Value),
-		LBL_OFFSET(LblIdentification_typ, MissionName[3].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(MissionName[3].Value)},
+    {"MISSION_NAME",            "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  4,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MissionName[3].Value),
+     LBL_OFFSET(LblIdentification_typ, MissionName[3].Valid),
+     LBL_NO_RETURN, LBL_SIZE(MissionName[3].Value)},
 
-	{"MISSION_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	5,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, MissionName[4].Value),
-		LBL_OFFSET(LblIdentification_typ, MissionName[4].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(MissionName[4].Value)},
+    {"MISSION_NAME",            "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  5,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MissionName[4].Value),
+     LBL_OFFSET(LblIdentification_typ, MissionName[4].Valid),
+     LBL_NO_RETURN, LBL_SIZE(MissionName[4].Value)},
 
-	{"MISSION_PHASE_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, MissionPhaseName.Value),
-		LBL_OFFSET(LblIdentification_typ, MissionPhaseName.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(MissionPhaseName.Value)},
+    {"MISSION_PHASE_NAME",          "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MissionPhaseName.Value),
+     LBL_OFFSET(LblIdentification_typ, MissionPhaseName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(MissionPhaseName.Value)},
 
-	{"OBSERVATION_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ObservationId.Value),
-		LBL_OFFSET(LblIdentification_typ, ObservationId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ObservationId.Value)},
+    {"OBSERVATION_ID",          "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ObservationId.Value),
+     LBL_OFFSET(LblIdentification_typ, ObservationId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ObservationId.Value)},
 
-	{"OBSERVATION_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ObservationName.Value),
-		LBL_OFFSET(LblIdentification_typ, ObservationName.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ObservationName.Value)},
+    {"OBSERVATION_NAME",            "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ObservationName.Value),
+     LBL_OFFSET(LblIdentification_typ, ObservationName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ObservationName.Value)},
 
-	{"OBSERVATION_TIME",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ObservationTime.Value),
-		LBL_OFFSET(LblIdentification_typ, ObservationTime.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ObservationTime.Value)},
+    {"OBSERVATION_TIME",            "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ObservationTime.Value),
+     LBL_OFFSET(LblIdentification_typ, ObservationTime.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ObservationTime.Value)},
 
-	{"OBSERVATION_TYPE",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ObservationType.Value),
-		LBL_OFFSET(LblIdentification_typ, ObservationType.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ObservationType.Value)},
+    {"OBSERVATION_TYPE",            "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ObservationType.Value),
+     LBL_OFFSET(LblIdentification_typ, ObservationType.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ObservationType.Value)},
 
-	{"ORBIT_NUMBER",			"REAL",		LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, OrbitNumber.Value),
-		LBL_OFFSET(LblIdentification_typ, OrbitNumber.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(OrbitNumber.Value)},
+    {"ORBIT_NUMBER",            "REAL",     LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, OrbitNumber.Value),
+     LBL_OFFSET(LblIdentification_typ, OrbitNumber.Valid),
+     LBL_NO_RETURN, LBL_SIZE(OrbitNumber.Value)},
 
-	{"PLANET_DAY_NUMBER",			"INT",		LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, PlanetDayNumber.Value),
-		LBL_OFFSET(LblIdentification_typ, PlanetDayNumber.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(PlanetDayNumber.Value)},
+    {"PLANET_DAY_NUMBER",           "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, PlanetDayNumber.Value),
+     LBL_OFFSET(LblIdentification_typ, PlanetDayNumber.Valid),
+     LBL_NO_RETURN, LBL_SIZE(PlanetDayNumber.Value)},
 
     {"LOCAL_TRUE_SOLAR_TIME_SOL",           "INT",      LBL_OPTIONAL,
-        LBL_NO_CONT,    1,  1,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, LocalTrueSolarTimeSol.Value),
-        LBL_OFFSET(LblIdentification_typ, LocalTrueSolarTimeSol.Valid),
-        LBL_NO_RETURN,  LBL_SIZE(LocalTrueSolarTimeSol.Value)},
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, LocalTrueSolarTimeSol.Value),
+     LBL_OFFSET(LblIdentification_typ, LocalTrueSolarTimeSol.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(LocalTrueSolarTimeSol.Value)},
 
-	{"PROCESSING_HISTORY_TEXT",		"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ProcessingHistoryText.Value),
-		LBL_OFFSET(LblIdentification_typ, ProcessingHistoryText.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ProcessingHistoryText.Value)},
+    {"PROCESSING_HISTORY_TEXT",     "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ProcessingHistoryText.Value),
+     LBL_OFFSET(LblIdentification_typ, ProcessingHistoryText.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ProcessingHistoryText.Value)},
 
-	{"PRODUCER_FULL_NAME",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ProducerFullName.Value),
-		LBL_OFFSET(LblIdentification_typ, ProducerFullName.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ProducerFullName.Value)},
+    {"PRODUCER_FULL_NAME",          "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ProducerFullName.Value),
+     LBL_OFFSET(LblIdentification_typ, ProducerFullName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ProducerFullName.Value)},
 
-	{"PRODUCER_ID",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ProducerId.Value),
-		LBL_OFFSET(LblIdentification_typ, ProducerId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ProducerId.Value)},
+    {"PRODUCER_ID",             "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ProducerId.Value),
+     LBL_OFFSET(LblIdentification_typ, ProducerId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ProducerId.Value)},
 
-	{"PRODUCER_INSTITUTION_NAME",		"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ProducerInstitutionName.Value),
-		LBL_OFFSET(LblIdentification_typ, ProducerInstitutionName.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ProducerInstitutionName.Value)},
+    {"PRODUCER_INSTITUTION_NAME",       "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ProducerInstitutionName.Value),
+     LBL_OFFSET(LblIdentification_typ, ProducerInstitutionName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ProducerInstitutionName.Value)},
 
-	{"PRODUCT_CREATION_TIME",		"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ProductCreationTime.Value),
-		LBL_OFFSET(LblIdentification_typ, ProductCreationTime.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ProductCreationTime.Value)},
+    {"PRODUCT_CREATION_TIME",       "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ProductCreationTime.Value),
+     LBL_OFFSET(LblIdentification_typ, ProductCreationTime.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ProductCreationTime.Value)},
 
-	{"PRODUCT_ID",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ProductId.Value),
-		LBL_OFFSET(LblIdentification_typ, ProductId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ProductId.Value)},
+    {"PRODUCT_ID",              "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ProductId.Value),
+     LBL_OFFSET(LblIdentification_typ, ProductId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ProductId.Value)},
 
-	{"PRODUCT_VERSION_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ProductVersionId.Value),
-		LBL_OFFSET(LblIdentification_typ, ProductVersionId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ProductVersionId.Value)},
-	{"RELEASE_ID",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, ReleaseId.Value),
-		LBL_OFFSET(LblIdentification_typ, ReleaseId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ReleaseId.Value)},
+    {"PRODUCT_VERSION_ID",          "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ProductVersionId.Value),
+     LBL_OFFSET(LblIdentification_typ, ProductVersionId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ProductVersionId.Value)},
+    {"RELEASE_ID",              "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, ReleaseId.Value),
+     LBL_OFFSET(LblIdentification_typ, ReleaseId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ReleaseId.Value)},
 
     {"REQUEST_ID",              "STRING",   LBL_OPTIONAL,
-        LBL_NO_CONT,    1,  1,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, RequestId.Value),
-        LBL_OFFSET(LblIdentification_typ, RequestId.Valid),
-        LBL_NO_RETURN,  LBL_SIZE(RequestId.Value)},
-
-	{"ROVER_MOTION_COUNTER",		"INT",		LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[0].Value),
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[0].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(RoverMotionCounter[0].Value)},
-
-	{"ROVER_MOTION_COUNTER",		"INT",		LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	2,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[1].Value),
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[1].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(RoverMotionCounter[1].Value)},
-
-	{"ROVER_MOTION_COUNTER",		"INT",		LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	3,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[2].Value),
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[2].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(RoverMotionCounter[2].Value)},
-
-	{"ROVER_MOTION_COUNTER",		"INT",		LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	4,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[3].Value),
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[3].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(RoverMotionCounter[3].Value)},
-
-	{"ROVER_MOTION_COUNTER",		"INT",		LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	5,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[4].Value),
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[4].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(RoverMotionCounter[4].Value)},
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RequestId.Value),
+     LBL_OFFSET(LblIdentification_typ, RequestId.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RequestId.Value)},
 
     {"ROVER_MOTION_COUNTER",        "INT",      LBL_OPTIONAL,
-        LBL_CONTINUE,   1,  6,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[5].Value),
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[5].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounter[5].Value)},
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[0].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[0].Valid),
+     LBL_NO_RETURN, LBL_SIZE(RoverMotionCounter[0].Value)},
 
     {"ROVER_MOTION_COUNTER",        "INT",      LBL_OPTIONAL,
-        LBL_CONTINUE,   1,  7,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[6].Value),
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[6].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounter[6].Value)},
+     LBL_CONTINUE,  1,  2,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[1].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[1].Valid),
+     LBL_NO_RETURN, LBL_SIZE(RoverMotionCounter[1].Value)},
 
     {"ROVER_MOTION_COUNTER",        "INT",      LBL_OPTIONAL,
-        LBL_CONTINUE,   1,  8,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[7].Value),
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[7].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounter[7].Value)},
+     LBL_CONTINUE,  1,  3,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[2].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[2].Valid),
+     LBL_NO_RETURN, LBL_SIZE(RoverMotionCounter[2].Value)},
 
     {"ROVER_MOTION_COUNTER",        "INT",      LBL_OPTIONAL,
-        LBL_CONTINUE,   1,  9,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[8].Value),
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[8].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounter[8].Value)},
+     LBL_CONTINUE,  1,  4,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[3].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[3].Valid),
+     LBL_NO_RETURN, LBL_SIZE(RoverMotionCounter[3].Value)},
 
     {"ROVER_MOTION_COUNTER",        "INT",      LBL_OPTIONAL,
-        LBL_CONTINUE,   1,  10,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[9].Value),
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[9].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounter[9].Value)},
+     LBL_CONTINUE,  1,  5,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[4].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[4].Valid),
+     LBL_NO_RETURN, LBL_SIZE(RoverMotionCounter[4].Value)},
 
+    {"ROVER_MOTION_COUNTER",        "INT",      LBL_OPTIONAL,
+     LBL_CONTINUE,   1,  6,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[5].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[5].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounter[5].Value)},
 
-	{"ROVER_MOTION_COUNTER_NAME",		"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[0].Value),
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[0].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(RoverMotionCounterName[0].Value)},
+    {"ROVER_MOTION_COUNTER",        "INT",      LBL_OPTIONAL,
+     LBL_CONTINUE,   1,  7,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[6].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[6].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounter[6].Value)},
 
-	{"ROVER_MOTION_COUNTER_NAME",		"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	2,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[1].Value),
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[1].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(RoverMotionCounterName[1].Value)},
+    {"ROVER_MOTION_COUNTER",        "INT",      LBL_OPTIONAL,
+     LBL_CONTINUE,   1,  8,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[7].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[7].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounter[7].Value)},
 
-	{"ROVER_MOTION_COUNTER_NAME",		"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	3,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[2].Value),
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[2].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(RoverMotionCounterName[2].Value)},
+    {"ROVER_MOTION_COUNTER",        "INT",      LBL_OPTIONAL,
+     LBL_CONTINUE,   1,  9,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[8].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[8].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounter[8].Value)},
 
-	{"ROVER_MOTION_COUNTER_NAME",		"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	4,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[3].Value),
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[3].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(RoverMotionCounterName[3].Value)},
+    {"ROVER_MOTION_COUNTER",        "INT",      LBL_OPTIONAL,
+     LBL_CONTINUE,   1,  10,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[9].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounter[9].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounter[9].Value)},
 
-	{"ROVER_MOTION_COUNTER_NAME",		"STRING",	LBL_OPTIONAL,
-		LBL_CONTINUE,	1,	5,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[4].Value),
-		LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[4].Valid),
-		LBL_NO_RETURN,	LBL_SIZE(RoverMotionCounterName[4].Value)},
 
     {"ROVER_MOTION_COUNTER_NAME",       "STRING",   LBL_OPTIONAL,
-        LBL_CONTINUE,   1,  6,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[5].Value),
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[5].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounterName[5].Value)},
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[0].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[0].Valid),
+     LBL_NO_RETURN, LBL_SIZE(RoverMotionCounterName[0].Value)},
 
     {"ROVER_MOTION_COUNTER_NAME",       "STRING",   LBL_OPTIONAL,
-        LBL_CONTINUE,   1,  7,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[6].Value),
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[6].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounterName[6].Value)},
+     LBL_CONTINUE,  1,  2,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[1].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[1].Valid),
+     LBL_NO_RETURN, LBL_SIZE(RoverMotionCounterName[1].Value)},
 
     {"ROVER_MOTION_COUNTER_NAME",       "STRING",   LBL_OPTIONAL,
-        LBL_CONTINUE,   1,  8,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[7].Value),
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[7].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounterName[7].Value)},
+     LBL_CONTINUE,  1,  3,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[2].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[2].Valid),
+     LBL_NO_RETURN, LBL_SIZE(RoverMotionCounterName[2].Value)},
 
     {"ROVER_MOTION_COUNTER_NAME",       "STRING",   LBL_OPTIONAL,
-        LBL_CONTINUE,   1,  9,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[8].Value),
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[8].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounterName[8].Value)},
+     LBL_CONTINUE,  1,  4,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[3].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[3].Valid),
+     LBL_NO_RETURN, LBL_SIZE(RoverMotionCounterName[3].Value)},
 
     {"ROVER_MOTION_COUNTER_NAME",       "STRING",   LBL_OPTIONAL,
-        LBL_CONTINUE,   1,  10,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[9].Value),
-        LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[9].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounterName[9].Value)},
+     LBL_CONTINUE,  1,  5,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[4].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[4].Valid),
+     LBL_NO_RETURN, LBL_SIZE(RoverMotionCounterName[4].Value)},
 
-	{"SEQ_ID,SEQUENCE_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, SequenceId.Value),
-		LBL_OFFSET(LblIdentification_typ, SequenceId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(SequenceId.Value)},
+    {"ROVER_MOTION_COUNTER_NAME",       "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,   1,  6,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[5].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[5].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounterName[5].Value)},
 
-	{"SEQUENCE_NAME, SEQUENCE_TITLE",	"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, SequenceName.Value),
-		LBL_OFFSET(LblIdentification_typ, SequenceName.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(SequenceName.Value)},
+    {"ROVER_MOTION_COUNTER_NAME",       "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,   1,  7,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[6].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[6].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounterName[6].Value)},
 
-	{"SEQUENCE_VERSION_ID",			"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, SequenceVersionId.Value),
-		LBL_OFFSET(LblIdentification_typ, SequenceVersionId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(SequenceVersionId.Value)},
+    {"ROVER_MOTION_COUNTER_NAME",       "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,   1,  8,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[7].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[7].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounterName[7].Value)},
 
-	{"SOLAR_LONGITUDE",			"REAL",		LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, SolarLongitude.Value),
-		LBL_OFFSET(LblIdentification_typ, SolarLongitude.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(SolarLongitude.Value)},
+    {"ROVER_MOTION_COUNTER_NAME",       "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,   1,  9,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[8].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[8].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounterName[8].Value)},
+
+    {"ROVER_MOTION_COUNTER_NAME",       "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,   1,  10,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[9].Value),
+     LBL_OFFSET(LblIdentification_typ, RoverMotionCounterName[9].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RoverMotionCounterName[9].Value)},
+
+    {"SEQ_ID,SEQUENCE_ID",          "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SequenceId.Value),
+     LBL_OFFSET(LblIdentification_typ, SequenceId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(SequenceId.Value)},
+
+    {"SEQUENCE_NAME, SEQUENCE_TITLE",   "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SequenceName.Value),
+     LBL_OFFSET(LblIdentification_typ, SequenceName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(SequenceName.Value)},
+
+    {"SEQUENCE_VERSION_ID",         "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SequenceVersionId.Value),
+     LBL_OFFSET(LblIdentification_typ, SequenceVersionId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(SequenceVersionId.Value)},
+
+    {"SOLAR_LONGITUDE",         "REAL",     LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SolarLongitude.Value),
+     LBL_OFFSET(LblIdentification_typ, SolarLongitude.Valid),
+     LBL_NO_RETURN, LBL_SIZE(SolarLongitude.Value)},
 
     {"SOURCE_PRODUCT_ID",              "STRING",   LBL_OPTIONAL,
-        LBL_NO_CONT,    1,  1,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, SourceProductId[0].Value),
-        LBL_OFFSET(LblIdentification_typ, SourceProductId[0].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(SourceProductId[0].Value)},
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SourceProductId[0].Value),
+     LBL_OFFSET(LblIdentification_typ, SourceProductId[0].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(SourceProductId[0].Value)},
 
     {"SOURCE_PRODUCT_ID",              "STRING",   LBL_OPTIONAL,
-        LBL_NO_CONT,    1,  2,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, SourceProductId[1].Value),
-        LBL_OFFSET(LblIdentification_typ, SourceProductId[1].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(SourceProductId[1].Value)},
+     LBL_NO_CONT,    1,  2,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SourceProductId[1].Value),
+     LBL_OFFSET(LblIdentification_typ, SourceProductId[1].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(SourceProductId[1].Value)},
 
     {"SOURCE_PRODUCT_ID",              "STRING",   LBL_OPTIONAL,
-        LBL_NO_CONT,    1,  3,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, SourceProductId[2].Value),
-        LBL_OFFSET(LblIdentification_typ, SourceProductId[2].Valid),
-        LBL_NO_RETURN,  LBL_SIZE(SourceProductId[2].Value)},
+     LBL_NO_CONT,    1,  3,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SourceProductId[2].Value),
+     LBL_OFFSET(LblIdentification_typ, SourceProductId[2].Valid),
+     LBL_NO_RETURN,  LBL_SIZE(SourceProductId[2].Value)},
 
-	{"SPACECRAFT_CLOCK_CNT_PARTITION",	"INT",		LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, SpacecraftClockCntPartition.Value),
-		LBL_OFFSET(LblIdentification_typ, SpacecraftClockCntPartition.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(SpacecraftClockCntPartition.Value)},
+    {"SPACECRAFT_CLOCK_CNT_PARTITION",  "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SpacecraftClockCntPartition.Value),
+     LBL_OFFSET(LblIdentification_typ, SpacecraftClockCntPartition.Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpacecraftClockCntPartition.Value)},
 
-	{"SPACECRAFT_CLOCK_START_COUNT",	"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, SpacecraftClockStartCount.Value),
-		LBL_OFFSET(LblIdentification_typ, SpacecraftClockStartCount.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(SpacecraftClockStartCount.Value)},
+    {"SPACECRAFT_CLOCK_START_COUNT",    "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SpacecraftClockStartCount.Value),
+     LBL_OFFSET(LblIdentification_typ, SpacecraftClockStartCount.Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpacecraftClockStartCount.Value)},
 
-	{"SPACECRAFT_CLOCK_STOP_COUNT",		"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, SpacecraftClockStopCount.Value),
-		LBL_OFFSET(LblIdentification_typ, SpacecraftClockStopCount.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(SpacecraftClockStopCount.Value)},
+    {"SPACECRAFT_CLOCK_STOP_COUNT",     "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SpacecraftClockStopCount.Value),
+     LBL_OFFSET(LblIdentification_typ, SpacecraftClockStopCount.Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpacecraftClockStopCount.Value)},
 
-	{"START_TIME",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, StartTime.Value),
-		LBL_OFFSET(LblIdentification_typ, StartTime.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(StartTime.Value)},
+    {"START_TIME",              "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, StartTime.Value),
+     LBL_OFFSET(LblIdentification_typ, StartTime.Valid),
+     LBL_NO_RETURN, LBL_SIZE(StartTime.Value)},
 
-	{"STOP_TIME",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, StopTime.Value),
-		LBL_OFFSET(LblIdentification_typ, StopTime.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(StopTime.Value)},
+    {"STOP_TIME",               "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, StopTime.Value),
+     LBL_OFFSET(LblIdentification_typ, StopTime.Valid),
+     LBL_NO_RETURN, LBL_SIZE(StopTime.Value)},
 
-	{"TARGET_NAME",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, TargetName.Value),
-		LBL_OFFSET(LblIdentification_typ, TargetName.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(TargetName.Value)},
+    {"TARGET_NAME",             "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, TargetName.Value),
+     LBL_OFFSET(LblIdentification_typ, TargetName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(TargetName.Value)},
 
-	{"TARGET_TYPE",				"STRING",	LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblIdentification_typ, TargetType.Value),
-		LBL_OFFSET(LblIdentification_typ, TargetType.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(TargetType.Value)},
+    {"TARGET_TYPE",             "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, TargetType.Value),
+     LBL_OFFSET(LblIdentification_typ, TargetType.Valid),
+     LBL_NO_RETURN, LBL_SIZE(TargetType.Value)},
 
     {"OPS_TOKEN",            "STRING",   LBL_OPTIONAL,
-        LBL_NO_CONT,    1,  1,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, OpsToken.Value),
-        LBL_OFFSET(LblIdentification_typ, OpsToken.Valid),
-        LBL_NO_RETURN,  LBL_SIZE(OpsToken.Value)},
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, OpsToken.Value),
+     LBL_OFFSET(LblIdentification_typ, OpsToken.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(OpsToken.Value)},
 
     {"OPS_TOKEN_ACTIVITY",            "STRING",   LBL_OPTIONAL,
-        LBL_NO_CONT,    1,  1,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, OpsTokenActivity.Value),
-        LBL_OFFSET(LblIdentification_typ, OpsTokenActivity.Valid),
-        LBL_NO_RETURN,  LBL_SIZE(OpsTokenActivity.Value)},
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, OpsTokenActivity.Value),
+     LBL_OFFSET(LblIdentification_typ, OpsTokenActivity.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(OpsTokenActivity.Value)},
 
     {"OPS_TOKEN_COMMAND",            "STRING",   LBL_OPTIONAL,
-        LBL_NO_CONT,    1,  1,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, OpsTokenCommand.Value),
-        LBL_OFFSET(LblIdentification_typ, OpsTokenCommand.Valid),
-        LBL_NO_RETURN,  LBL_SIZE(OpsTokenCommand.Value)},
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, OpsTokenCommand.Value),
+     LBL_OFFSET(LblIdentification_typ, OpsTokenCommand.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(OpsTokenCommand.Value)},
 
     {"OPS_TOKEN_PAYLOAD",            "STRING",   LBL_OPTIONAL,
-        LBL_NO_CONT,    1,  1,  LBL_NULL,
-        LBL_OFFSET(LblIdentification_typ, OpsTokenPayload.Value),
-        LBL_OFFSET(LblIdentification_typ, OpsTokenPayload.Valid),
-        LBL_NO_RETURN,  LBL_SIZE(OpsTokenPayload.Value)},
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, OpsTokenPayload.Value),
+     LBL_OFFSET(LblIdentification_typ, OpsTokenPayload.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(OpsTokenPayload.Value)},
 
-/*
+    /*
+      {"RCE_SEQUENCE_EXECUTION_CNT", "INT",      LBL_OPTIONAL,
+      LBL_NO_CONT,    1,  1,  LBL_NULL,
+      LBL_OFFSET(LblIdentification_typ, RecSequenceExecutionCnt.Value),
+      LBL_OFFSET(LblIdentification_typ, RecSequenceExecutionCnt.Valid),
+      LBL_NO_RETURN,  LBL_SIZE(RecSequenceExecutionCnt.Value)},
+    */
 
-  {"RCE_SEQUENCE_EXECUTION_CNT", "INT",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblIdentification_typ, RecSequenceExecutionCnt.Value),
-   LBL_OFFSET(LblIdentification_typ, RecSequenceExecutionCnt.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(RecSequenceExecutionCnt.Value)},
-*/
-  {"SOURCE_SC_CLOCK_START_CNT", "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblIdentification_typ, SourceSCClockStartCnt.Value),
-   LBL_OFFSET(LblIdentification_typ, SourceSCClockStartCnt.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(SourceSCClockStartCnt.Value)},
+    {"SOURCE_SC_CLOCK_START_CNT", "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SourceSCClockStartCnt.Value),
+     LBL_OFFSET(LblIdentification_typ, SourceSCClockStartCnt.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(SourceSCClockStartCnt.Value)},
 
-  {"SOURCE_SC_CLOCK_STOP_CNT", "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblIdentification_typ, SourceSCClockStopCnt.Value),
-   LBL_OFFSET(LblIdentification_typ, SourceSCClockStopCnt.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(SourceSCClockStopCnt.Value)},
+    {"SOURCE_SC_CLOCK_STOP_CNT", "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SourceSCClockStopCnt.Value),
+     LBL_OFFSET(LblIdentification_typ, SourceSCClockStopCnt.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(SourceSCClockStopCnt.Value)},
 
-  {"SOURCE_START_TIME",       "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblIdentification_typ, SourceStartTime.Value),
-   LBL_OFFSET(LblIdentification_typ, SourceStartTime.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(SourceStartTime.Value)},
+    {"SOURCE_START_TIME",       "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, SourceStartTime.Value),
+     LBL_OFFSET(LblIdentification_typ, SourceStartTime.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(SourceStartTime.Value)},
 
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-	
-static LblApiProcess_typ	Label = {
-	LabelTbl,	"PROPERTY",	"PROPERTY",	"IDENTIFICATION",
-	LBL_NULL };
+    {"MESH_ID",       "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MeshId.Value),
+     LBL_OFFSET(LblIdentification_typ, MeshId.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(MeshId.Value)},
+
+    {"MOSAIC_ID",     "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, MosaicId.Value),
+     LBL_OFFSET(LblIdentification_typ, MosaicId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(MosaicId.Value)},
+
+    {"STEREO_MATCH_ID",       "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblIdentification_typ, StereoMatchId.Value),
+     LBL_OFFSET(LblIdentification_typ, StereoMatchId.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(StereoMatchId.Value)},
+
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+
+static LblApiProcess_typ    Label = {
+    LabelTbl,   "PROPERTY", "PROPERTY", "IDENTIFICATION",
+    LBL_NULL };
 
 /******************************************************************************
- *				LBL_IDENTIFIER
+ *              LBL_IDENTIFIER
  *
  *****************************************************************************/
 int     LblIdentification(
-  int   Unit,
-  int   Obtain,
-  LblIdentification_typ      *LabelItems,
-  int	Instance)
+                          int   Unit,
+                          int   Obtain,
+                          LblIdentification_typ      *LabelItems,
+                          int   Instance)
 { int   RtnStatus;
-  LblApiCntrl_typ	Cntrl;
+    LblApiCntrl_typ Cntrl;
 
-  Label.Buffer = (void *)LabelItems;
-  Label.BufferSize = sizeof(LblIdentification_typ);
+    Label.Buffer = (void *)LabelItems;
+    Label.BufferSize = sizeof(LblIdentification_typ);
 
-  memset(&Cntrl,0,sizeof(LblApiCntrl_typ));
-  Cntrl.Instance = Instance;
-  Cntrl.FileUnit = Unit;
-  Cntrl.Obtain = Obtain;
-  Cntrl.ProceedOnError = LBL_TRUE;
+    memset(&Cntrl,0,sizeof(LblApiCntrl_typ));
+    Cntrl.Instance = Instance;
+    Cntrl.FileUnit = Unit;
+    Cntrl.Obtain = Obtain;
+    Cntrl.ProceedOnError = LBL_TRUE;
 
-  RtnStatus = LblProcessor(&Cntrl, &Label);
+    RtnStatus = LblProcessor(&Cntrl, &Label);
 
-  return (RtnStatus);
+    return (RtnStatus);
 }
 
 /******************************************************************************
- *				LBL_PRINT_IDENTIFIER
+ *              LBL_PRINT_IDENTIFIER
  *
  *****************************************************************************/
 void     LblPrintIdentification(
-  LblIdentification_typ	*LabelItems)
+                                LblIdentification_typ   *LabelItems)
 {
-  Label.Buffer = (void *)LabelItems;
+    Label.Buffer = (void *)LabelItems;
 
-  PrintLabelElements( &Label );
+    PrintLabelElements( &Label );
 
-  return;
+    return;
 }
 
 /******************************************************************************
- *				LBL_TEST_IDENTIFIER
+ *              LBL_TEST_IDENTIFIER
  *
  *****************************************************************************/
 void     LblTestIdentification(
-  LblIdentification_typ	*LabelItems)
+                               LblIdentification_typ    *LabelItems)
 {
-  Label.Buffer = (void *)LabelItems;
+    Label.Buffer = (void *)LabelItems;
 
-  TestLoadLabelElements( &Label );
+    TestLoadLabelElements( &Label );
 
-  return;
+    return;
 }
 $ VOKAGLEVE
 $!-----------------------------------------------------------------------------
@@ -5308,6 +5407,7 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
  *========
  * Date         Who             Description
  * ============ =============== =============================================
+ * 2015-09-24   C. Cheng        Added SHUTTER_CORRECTION_MODE
  * 2003-05-12   H. Lee          Changed SUN_FIND_PARM to REAL
  * 2003-04-18   H. Lee          Changed DETECTOR_TO_IMAGE_ROTATION to REAL
  * 2003-01-13   P. Zamani       Changed BadPixelReplaceFlag to
@@ -6433,6 +6533,12 @@ static LblApiElement_typ	LabelTbl[] = {
 		LBL_OFFSET(LblInstrumentState_typ, SampleBitModeId.Valid),
 		LBL_NO_RETURN,	LBL_SIZE(SampleBitModeId.Value)},
 
+	{"SHUTTER_CORRECTION_MODE",	"STRING",	LBL_OPTIONAL,
+		LBL_NO_CONT,	1,	1,	LBL_NULL,
+		LBL_OFFSET(LblInstrumentState_typ, ShutterCorrectionMode.Value),
+		LBL_OFFSET(LblInstrumentState_typ, ShutterCorrectionMode.Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ShutterCorrectionMode.Value)},
+
 	{"SHUTTER_EFFECT_CORRECTION_FLAG",	"STRING",	LBL_OPTIONAL,
 		LBL_NO_CONT,	1,	1,	LBL_NULL,
 		LBL_OFFSET(LblInstrumentState_typ, ShutterEffectCorrectionFlag.Value),
@@ -6661,9 +6767,9 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
 #include "lbl_telemetry.h"
 
 /******************************************************************************
- *				LBL_TELEMETRY
+ *              LBL_TELEMETRY
  *
- *	This module contains routines to help create, read/write and print
+ *  This module contains routines to help create, read/write and print
  *  a Telemetry property label.  It is part of the MIPL label API package,
  *  using a lower-level label processor to do the real work.  This package
  *  basically defines a table that the lower-level routines use.  The table
@@ -6671,35 +6777,35 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
  *  how the label processor specifies the label components to the VICAR label
  *  Run Time Library (RTL).
  *
- *	The label processor interface structures and routines are defined in
+ *  The label processor interface structures and routines are defined in
  *  the file "lbl_gen_api.h" (Check the label processor documentation for
  *  how to create APIs like this one).  The application program interface
  *  structures are defined in the file "lbl_telemetry.h".  The
  *  implementation supporting the interface is this module.
  *
- *	The primary routine used by a typical application program is
+ *  The primary routine used by a typical application program is
  *  LblTelemetry.  This routine requires exactly 4 parameters.
  *  All label API routines must (should) have the same first three parameters:
- *		INT	VICAR RTL unit number of an opened image file.
- *			This is the file where the label will be read or
- *			written.  It must be open with the appropriate
- *			I/O mode
- *		INT	Read/Write flag.  If the value of this parameter is
- *			non-zero, the label will be read from the file.  If
- *			the value of the parameter is zero, a new label will
- *			be written to the file.
- *		VOID*	The structure that an application program will use
- *			to set or retreive the label element values.  Okay
- *			this really isn't a VOID*, but it is a pointer to
- *			the label specific structure.
- *		INT	The instance of this label type.  They typical value
- *			of this parameter should be '1'.
+ *      INT VICAR RTL unit number of an opened image file.
+ *          This is the file where the label will be read or
+ *          written.  It must be open with the appropriate
+ *          I/O mode
+ *      INT Read/Write flag.  If the value of this parameter is
+ *          non-zero, the label will be read from the file.  If
+ *          the value of the parameter is zero, a new label will
+ *          be written to the file.
+ *      VOID*   The structure that an application program will use
+ *          to set or retreive the label element values.  Okay
+ *          this really isn't a VOID*, but it is a pointer to
+ *          the label specific structure.
+ *      INT The instance of this label type.  They typical value
+ *          of this parameter should be '1'.
  *
- *	The other two routines contined in this module were included for
+ *  The other two routines contined in this module were included for
  *  development and testing purposes and like the label processing code, use
  *  generic lower-level routines.
  *
- *	All routines use the return_status.h macros to identify the
+ *  All routines use the return_status.h macros to identify the
  *  success or failure of the routine.  Basically, a value of zero represents
  *  a successful completion of the label processing, a non-zero value
  *  indicates a failure.
@@ -6708,413 +6814,426 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
  *========
  * Date         Who             Description
  * ============ =============== =============================================
- * 2008-07-07   H. Lee          
+ * 2015-07-02   C. Cheng        Added ERROR_PIXEL_LINE and EROR_PIXEL_SAMPLE
+ * 2008-07-07   H. Lee
  *****************************************************************************/
 
-#define  LBL_SIZE(x)	sizeof(((LblTelemetry_typ *)0)->x)
+#define  LBL_SIZE(x)    sizeof(((LblTelemetry_typ *)0)->x)
 
-static LblApiElement_typ	LabelTbl[] = {
+static LblApiElement_typ    LabelTbl[] = {
 
-    {"APPLICATION_PACKET_ID",		"INT",		LBL_OPTIONAL,
-    LBL_NO_CONT,	1,	1,	LBL_NULL,
-    LBL_OFFSET(LblTelemetry_typ, ApplicationPacketId.Value),
-    LBL_OFFSET(LblTelemetry_typ, ApplicationPacketId.Valid),
-    LBL_NO_RETURN,	LBL_SIZE(ApplicationPacketId.Value)},
+    {"APPLICATION_PACKET_ID",       "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ApplicationPacketId.Value),
+     LBL_OFFSET(LblTelemetry_typ, ApplicationPacketId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ApplicationPacketId.Value)},
 
-    {"APPLICATION_PACKET_NAME",		"STRING",	LBL_OPTIONAL,
-    LBL_NO_CONT,	1,	1,	LBL_NULL,
-    LBL_OFFSET(LblTelemetry_typ, ApplicationPacketName.Value),
-    LBL_OFFSET(LblTelemetry_typ, ApplicationPacketName.Valid),
-    LBL_NO_RETURN,	LBL_SIZE(ApplicationPacketName.Value)},
+    {"APPLICATION_PACKET_NAME",     "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ApplicationPacketName.Value),
+     LBL_OFFSET(LblTelemetry_typ, ApplicationPacketName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ApplicationPacketName.Value)},
 
-  {"APPLICATION_PROCESS_ID",		"INT",		LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, ApplicationProcessId.Value),
-   LBL_OFFSET(LblTelemetry_typ, ApplicationProcessId.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(ApplicationProcessId.Value)},
+    {"APPLICATION_PROCESS_ID",      "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ApplicationProcessId.Value),
+     LBL_OFFSET(LblTelemetry_typ, ApplicationProcessId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ApplicationProcessId.Value)},
 
-  {"APPLICATION_PROCESS_NAME",		"STRING",	LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, ApplicationProcessName.Value),
-   LBL_OFFSET(LblTelemetry_typ, ApplicationProcessName.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(ApplicationProcessName.Value)},
+    {"APPLICATION_PROCESS_NAME",        "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ApplicationProcessName.Value),
+     LBL_OFFSET(LblTelemetry_typ, ApplicationProcessName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ApplicationProcessName.Value)},
 
-	{"APPLICATION_PROCESS_SUBTYPE_ID",	"INT",		LBL_OPTIONAL,
-		LBL_NO_CONT,	1,	1,	LBL_NULL,
-		LBL_OFFSET(LblTelemetry_typ, ApplicationProcessSubtypeId.Value),
-		LBL_OFFSET(LblTelemetry_typ, ApplicationProcessSubtypeId.Valid),
-		LBL_NO_RETURN,	LBL_SIZE(ApplicationProcessSubtypeId.Value)},
+    {"APPLICATION_PROCESS_SUBTYPE_ID",  "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ApplicationProcessSubtypeId.Value),
+     LBL_OFFSET(LblTelemetry_typ, ApplicationProcessSubtypeId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ApplicationProcessSubtypeId.Value)},
 
-  {"EARTH_RECEIVED_START_TIME",		"STRING",	LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, EarthReceivedStartTime.Value),
-   LBL_OFFSET(LblTelemetry_typ, EarthReceivedStartTime.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(EarthReceivedStartTime.Value)},
+    {"EARTH_RECEIVED_START_TIME",       "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, EarthReceivedStartTime.Value),
+     LBL_OFFSET(LblTelemetry_typ, EarthReceivedStartTime.Valid),
+     LBL_NO_RETURN, LBL_SIZE(EarthReceivedStartTime.Value)},
 
-  {"EARTH_RECEIVED_STOP_TIME",		"STRING",	LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, EarthReceivedStopTime.Value),
-   LBL_OFFSET(LblTelemetry_typ, EarthReceivedStopTime.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(EarthReceivedStopTime.Value)},
+    {"EARTH_RECEIVED_STOP_TIME",        "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, EarthReceivedStopTime.Value),
+     LBL_OFFSET(LblTelemetry_typ, EarthReceivedStopTime.Valid),
+     LBL_NO_RETURN, LBL_SIZE(EarthReceivedStopTime.Value)},
 
-  {"EXPECTED_PACKETS",			"INT",		LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, ExpectedPackets.Value),
-   LBL_OFFSET(LblTelemetry_typ, ExpectedPackets.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(ExpectedPackets.Value)},
-    
-  {"PACKET_MAP_MASK",			"STRING",	LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, PacketMapMask.Value),
-   LBL_OFFSET(LblTelemetry_typ, PacketMapMask.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(PacketMapMask.Value)},
+    {"EXPECTED_PACKETS",            "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ExpectedPackets.Value),
+     LBL_OFFSET(LblTelemetry_typ, ExpectedPackets.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ExpectedPackets.Value)},
 
-  {"RECEIVED_PACKETS",			"INT",		LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, ReceivedPackets.Value),
-   LBL_OFFSET(LblTelemetry_typ, ReceivedPackets.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(ReceivedPackets.Value)},
+    {"PACKET_MAP_MASK",         "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, PacketMapMask.Value),
+     LBL_OFFSET(LblTelemetry_typ, PacketMapMask.Valid),
+     LBL_NO_RETURN, LBL_SIZE(PacketMapMask.Value)},
 
-  {"SPICE_FILE_ID",			"STRING",	LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileId[0].Value),
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileId[0].Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SpiceFileId[0].Value)},
+    {"RECEIVED_PACKETS",            "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ReceivedPackets.Value),
+     LBL_OFFSET(LblTelemetry_typ, ReceivedPackets.Valid),
+     LBL_NO_RETURN, LBL_SIZE(ReceivedPackets.Value)},
 
-  {"SPICE_FILE_ID",			"STRING",	LBL_OPTIONAL,
-   LBL_CONTINUE,	1,	2,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileId[1].Value),
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileId[1].Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SpiceFileId[1].Value)},
+    {"SPICE_FILE_ID",           "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileId[0].Value),
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileId[0].Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpiceFileId[0].Value)},
 
-  {"SPICE_FILE_ID",			"STRING",	LBL_OPTIONAL,
-   LBL_CONTINUE,	1,	3,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileId[2].Value),
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileId[2].Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SpiceFileId[2].Value)},
+    {"SPICE_FILE_ID",           "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  2,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileId[1].Value),
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileId[1].Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpiceFileId[1].Value)},
 
-  {"SPICE_FILE_ID",			"STRING",	LBL_OPTIONAL,
-   LBL_CONTINUE,	1,	4,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileId[3].Value),
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileId[3].Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SpiceFileId[3].Value)},
+    {"SPICE_FILE_ID",           "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  3,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileId[2].Value),
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileId[2].Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpiceFileId[2].Value)},
 
-  {"SPICE_FILE_ID",			"STRING",	LBL_OPTIONAL,
-   LBL_CONTINUE,	1,	5,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileId[4].Value),
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileId[4].Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SpiceFileId[4].Value)},
+    {"SPICE_FILE_ID",           "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  4,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileId[3].Value),
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileId[3].Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpiceFileId[3].Value)},
 
-  {"SPICE_FILE_NAME",			"STRING",	LBL_REQUIRED,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileName[0].Value),
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileName[0].Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SpiceFileName[0].Value)},
+    {"SPICE_FILE_ID",           "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  5,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileId[4].Value),
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileId[4].Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpiceFileId[4].Value)},
 
-  {"SPICE_FILE_NAME",			"STRING",	LBL_OPTIONAL,
-   LBL_CONTINUE,	1,	2,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileName[1].Value),
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileName[1].Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SpiceFileName[1].Value)},
+    {"SPICE_FILE_NAME",         "STRING",   LBL_REQUIRED,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileName[0].Value),
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileName[0].Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpiceFileName[0].Value)},
 
-  {"SPICE_FILE_NAME",			"STRING",	LBL_OPTIONAL,
-   LBL_CONTINUE,	1,	3,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileName[2].Value),
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileName[2].Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SpiceFileName[2].Value)},
+    {"SPICE_FILE_NAME",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  2,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileName[1].Value),
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileName[1].Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpiceFileName[1].Value)},
 
-  {"SPICE_FILE_NAME",			"STRING",	LBL_OPTIONAL,
-   LBL_CONTINUE,	1,	4,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileName[3].Value),
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileName[3].Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SpiceFileName[3].Value)},
+    {"SPICE_FILE_NAME",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  3,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileName[2].Value),
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileName[2].Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpiceFileName[2].Value)},
 
-  {"SPICE_FILE_NAME",			"STRING",	LBL_OPTIONAL,
-   LBL_CONTINUE,	1,	5,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileName[4].Value),
-   LBL_OFFSET(LblTelemetry_typ, SpiceFileName[4].Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SpiceFileName[4].Value)},
+    {"SPICE_FILE_NAME",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  4,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileName[3].Value),
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileName[3].Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpiceFileName[3].Value)},
 
-  {"TELEMETRY_PROVIDER_ID",		"STRING",	LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TelemetryProviderId.Value),
-   LBL_OFFSET(LblTelemetry_typ, TelemetryProviderId.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(TelemetryProviderId.Value)},
+    {"SPICE_FILE_NAME",         "STRING",   LBL_OPTIONAL,
+     LBL_CONTINUE,  1,  5,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileName[4].Value),
+     LBL_OFFSET(LblTelemetry_typ, SpiceFileName[4].Valid),
+     LBL_NO_RETURN, LBL_SIZE(SpiceFileName[4].Value)},
 
- {"TELEMETRY_SOURCE_HOST_NAME",         "STRING",       LBL_OPTIONAL,
-   LBL_NO_CONT, 1,      1,      LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceHostName.Value),
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceHostName.Valid),
-   LBL_NO_RETURN,       LBL_SIZE(TelemetrySourceHostName.Value)},
+    {"TELEMETRY_PROVIDER_ID",       "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TelemetryProviderId.Value),
+     LBL_OFFSET(LblTelemetry_typ, TelemetryProviderId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(TelemetryProviderId.Value)},
 
-  {"TELEMETRY_SOURCE_NAME",		"STRING",	LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceName.Value),
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceName.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(TelemetrySourceName.Value)},
+    {"TELEMETRY_SOURCE_HOST_NAME",         "STRING",       LBL_OPTIONAL,
+     LBL_NO_CONT, 1,      1,      LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceHostName.Value),
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceHostName.Valid),
+     LBL_NO_RETURN,       LBL_SIZE(TelemetrySourceHostName.Value)},
 
-  {"TELEMETRY_PROVIDER_TYPE",		"STRING",	LBL_OPTIONAL,
-    LBL_NO_CONT,	1,	1,	LBL_NULL,
-    LBL_OFFSET(LblTelemetry_typ, TelemetryProviderType.Value),
-    LBL_OFFSET(LblTelemetry_typ, TelemetryProviderType.Valid),
-    LBL_NO_RETURN,	LBL_SIZE(TelemetryProviderType.Value)},
+    {"TELEMETRY_SOURCE_NAME",       "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceName.Value),
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(TelemetrySourceName.Value)},
 
-  {"TELEMETRY_SOURCE_TYPE",		"STRING",	LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceType.Value),
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceType.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(TelemetrySourceType.Value)},
+    {"TELEMETRY_PROVIDER_TYPE",     "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TelemetryProviderType.Value),
+     LBL_OFFSET(LblTelemetry_typ, TelemetryProviderType.Valid),
+     LBL_NO_RETURN, LBL_SIZE(TelemetryProviderType.Value)},
 
-  {"CHANNEL_ID",  "INT",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, ChannelId.Value),
-   LBL_OFFSET(LblTelemetry_typ, ChannelId.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(ChannelId.Value)},
+    {"TELEMETRY_SOURCE_TYPE",       "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceType.Value),
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceType.Valid),
+     LBL_NO_RETURN, LBL_SIZE(TelemetrySourceType.Value)},
 
-  {"COMMUNICATION_SESSION_ID",  "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, CommunicationSessionId.Value),
-   LBL_OFFSET(LblTelemetry_typ, CommunicationSessionId.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(CommunicationSessionId.Value)},
+    {"CHANNEL_ID",  "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ChannelId.Value),
+     LBL_OFFSET(LblTelemetry_typ, ChannelId.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(ChannelId.Value)},
+
+    {"COMMUNICATION_SESSION_ID",  "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, CommunicationSessionId.Value),
+     LBL_OFFSET(LblTelemetry_typ, CommunicationSessionId.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(CommunicationSessionId.Value)},
 
     {"DOWNLOAD_PRIORITY",  "INT",      LBL_OPTIONAL,
-    LBL_NO_CONT,    1,  1,  LBL_NULL,
-    LBL_OFFSET(LblTelemetry_typ, DownloadPriority.Value),
-    LBL_OFFSET(LblTelemetry_typ, DownloadPriority.Valid),
-    LBL_NO_RETURN,  LBL_SIZE(DownloadPriority.Value)},
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, DownloadPriority.Value),
+     LBL_OFFSET(LblTelemetry_typ, DownloadPriority.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(DownloadPriority.Value)},
 
-  {"EXPECTED_TRANSMISSION_PATH", "STRING",   LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, ExpectedTransmissionPath.Value),
-   LBL_OFFSET(LblTelemetry_typ, ExpectedTransmissionPath.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(ExpectedTransmissionPath.Value)},
+    {"EXPECTED_TRANSMISSION_PATH", "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ExpectedTransmissionPath.Value),
+     LBL_OFFSET(LblTelemetry_typ, ExpectedTransmissionPath.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(ExpectedTransmissionPath.Value)},
 
-  {"FLIGHT_SOFTWARE_MODE",    "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, FlightSoftwareMode.Value),
-   LBL_OFFSET(LblTelemetry_typ, FlightSoftwareMode.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(FlightSoftwareMode.Value)},
+    {"FLIGHT_SOFTWARE_MODE",    "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, FlightSoftwareMode.Value),
+     LBL_OFFSET(LblTelemetry_typ, FlightSoftwareMode.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(FlightSoftwareMode.Value)},
 
-  {"FLIGHT_SOFTWARE_VERSION_ID",  "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, FlightSoftwareVersionId.Value),
-   LBL_OFFSET(LblTelemetry_typ, FlightSoftwareVersionId.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(FlightSoftwareVersionId.Value)},
+    {"FLIGHT_SOFTWARE_VERSION_ID",  "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, FlightSoftwareVersionId.Value),
+     LBL_OFFSET(LblTelemetry_typ, FlightSoftwareVersionId.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(FlightSoftwareVersionId.Value)},
 
-    {"PACKET_CREATION_SCLK",		"STRING",	LBL_OPTIONAL,
+    {"PACKET_CREATION_SCLK",        "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, PacketCreationSclk.Value),
+     LBL_OFFSET(LblTelemetry_typ, PacketCreationSclk.Valid),
+     LBL_NO_RETURN, LBL_SIZE(PacketCreationSclk.Value)},
+
+    {"PACKET_SEQUENCE_NUMBER",      "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, PacketSequenceNumber.Value),
+     LBL_OFFSET(LblTelemetry_typ, PacketSequenceNumber.Valid),
+     LBL_NO_RETURN, LBL_SIZE(PacketSequenceNumber.Value)},
+
+    {"PRODUCT_COMPLETION_STATUS",          "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ProductCompletionStatus.Value),
+     LBL_OFFSET(LblTelemetry_typ, ProductCompletionStatus.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(ProductCompletionStatus.Value)},
+
+    {"PRODUCT_TAG",             "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ProductTag.Value),
+     LBL_OFFSET(LblTelemetry_typ, ProductTag.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(ProductTag.Value)},
+
+    {"SEQUENCE_EXECUTION_COUNT", "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SequenceExecutionCnt.Value),
+     LBL_OFFSET(LblTelemetry_typ, SequenceExecutionCnt.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(SequenceExecutionCnt.Value)},
+
+    {"ROVER_COMPUTE_ELEMENT",    "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, RoverComputeElement.Value),
+     LBL_OFFSET(LblTelemetry_typ, RoverComputeElement.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(RoverComputeElement.Value)},
+
+    {"TELEMETRY_SOURCE_SIZE",  "INT",  LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceSize.Value),
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceSize.Valid),
+     LBL_NO_RETURN, LBL_SIZE(TelemetrySourceSize.Value)},
+
+    {"SOURCE_PRODUCT_BYTES",  "INT",  LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SourceProductBytes.Value),
+     LBL_OFFSET(LblTelemetry_typ, SourceProductBytes.Valid),
+     LBL_NO_RETURN, LBL_SIZE(SourceProductBytes.Value)},
+
+    {"TELEMETRY_SOURCE_CHECKSUM",  "INT",  LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceProductCheckSum.Value),
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceProductCheckSum.Valid),
+     LBL_NO_RETURN, LBL_SIZE(TelemetrySourceProductCheckSum.Value)},
+
+    {"SOURCE_PRODUCT_CHECKSUM",  "INT",  LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SourceProductCheckSum.Value),
+     LBL_OFFSET(LblTelemetry_typ, SourceProductCheckSum.Valid),
+     LBL_NO_RETURN, LBL_SIZE(SourceProductCheckSum.Value)},
+
+    {"SOURCE_START_TIME",       "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SourceStartTime.Value),
+     LBL_OFFSET(LblTelemetry_typ, SourceStartTime.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(SourceStartTime.Value)},
+
+    {"TELEMETRY_SOURCE_START_TIME",       "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceStartTime.Value),
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceStartTime.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(TelemetrySourceStartTime.Value)},
+
+    {"TELEMETRY_SOURCE_SCLK_START", "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceSCClockStartCnt.Value),
+     LBL_OFFSET(LblTelemetry_typ, TelemetrySourceSCClockStartCnt.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(TelemetrySourceSCClockStartCnt.Value)},
+
+    {"SOURCE_SC_CLOCK_START_CNT", "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SourceSCClockStartCnt.Value),
+     LBL_OFFSET(LblTelemetry_typ, SourceSCClockStartCnt.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(SourceSCClockStartCnt.Value)},
+
+    {"SOURCE_SC_CLOCK_STOP_CNT", "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SourceSCClockStopCnt.Value),
+     LBL_OFFSET(LblTelemetry_typ, SourceSCClockStopCnt.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(SourceSCClockStopCnt.Value)},
+
+    {"SOFTWARE_NAME",           "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SoftwareName.Value),
+     LBL_OFFSET(LblTelemetry_typ, SoftwareName.Valid),
+     LBL_NO_RETURN, LBL_SIZE(SoftwareName.Value)},
+
+    {"SOFTWARE_VERSION_ID",         "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, SoftwareVersionId.Value),
+     LBL_OFFSET(LblTelemetry_typ, SoftwareVersionId.Valid),
+     LBL_NO_RETURN, LBL_SIZE(SoftwareVersionId.Value)},
+
+    {"STRIPING_COUNT",      "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, StripingCount.Value),
+     LBL_OFFSET(LblTelemetry_typ, StripingCount.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(Stripes.Value)},
+
+    {"STRIPING_OVERLAP_ROWS",      "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, Stripes.Value),
+     LBL_OFFSET(LblTelemetry_typ, Stripes.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(Stripes.Value)},
+
+    {"TLM_CMD_DISCREPANCY_FLAG",        "STRING",   LBL_OPTIONAL,
+     LBL_NO_CONT,   1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TlmCmdDiscrepancyFlag.Value),
+     LBL_OFFSET(LblTelemetry_typ, TlmCmdDiscrepancyFlag.Valid),
+     LBL_NO_RETURN, LBL_SIZE(TlmCmdDiscrepancyFlag.Value)},
+
+    {"TOTAL_PARTS",            "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TotalParts.Value),
+     LBL_OFFSET(LblTelemetry_typ, TotalParts.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(TotalParts.Value)},
+
+    {"AUTO_DELETE_FLAG", "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, AutoDeleteFlag.Value),
+     LBL_OFFSET(LblTelemetry_typ, AutoDeleteFlag.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(AutoDeleteFlag.Value)},
+
+    {"TRANSMISSION_INDICATOR", "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TransmissionIndicator.Value),
+     LBL_OFFSET(LblTelemetry_typ, TransmissionIndicator.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(TransmissionIndicator.Value)},
+
+    {"TRANSMISSION_PATH",      "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, TransmissionPath.Value),
+     LBL_OFFSET(LblTelemetry_typ, TransmissionPath.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(TransmissionPath.Value)},
+
+    {"VIRTUAL_CHANNEL_ID",  "STRING",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, VirtualChannelId.Value),
+     LBL_OFFSET(LblTelemetry_typ, VirtualChannelId.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(VirtualChannelId.Value)},
+
+    {"IMAGE_DATA_SIZE",            "INT",      LBL_OPTIONAL,
+     LBL_NO_CONT,    1,  1,  LBL_NULL,
+     LBL_OFFSET(LblTelemetry_typ, ImageDataSize.Value),
+     LBL_OFFSET(LblTelemetry_typ, ImageDataSize.Valid),
+     LBL_NO_RETURN,  LBL_SIZE(ImageDataSize.Value)},
+
+    {"ERROR_PIXEL_LINE",		"INT",		LBL_OPTIONAL,
     LBL_NO_CONT,	1,	1,	LBL_NULL,
-    LBL_OFFSET(LblTelemetry_typ, PacketCreationSclk.Value),
-    LBL_OFFSET(LblTelemetry_typ, PacketCreationSclk.Valid),
-    LBL_NO_RETURN,	LBL_SIZE(PacketCreationSclk.Value)},
+    LBL_OFFSET(LblTelemetry_typ, ErrorPixelLine.Value),
+    LBL_OFFSET(LblTelemetry_typ, ErrorPixelLine.Valid),
+    LBL_NO_RETURN,	LBL_SIZE(ErrorPixelLine.Value)},
 
-    {"PACKET_SEQUENCE_NUMBER",		"INT",		LBL_OPTIONAL,
+    {"ERROR_PIXEL_SAMPLE",		"INT",		LBL_OPTIONAL,
     LBL_NO_CONT,	1,	1,	LBL_NULL,
-    LBL_OFFSET(LblTelemetry_typ, PacketSequenceNumber.Value),
-    LBL_OFFSET(LblTelemetry_typ, PacketSequenceNumber.Valid),
-    LBL_NO_RETURN,	LBL_SIZE(PacketSequenceNumber.Value)},
+    LBL_OFFSET(LblTelemetry_typ, ErrorPixelSample.Value),
+    LBL_OFFSET(LblTelemetry_typ, ErrorPixelSample.Valid),
+    LBL_NO_RETURN,	LBL_SIZE(ErrorPixelSample.Value)},
 
-  {"PRODUCT_COMPLETION_STATUS",          "STRING",   LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, ProductCompletionStatus.Value),
-   LBL_OFFSET(LblTelemetry_typ, ProductCompletionStatus.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(ProductCompletionStatus.Value)},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
-  {"PRODUCT_TAG",             "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, ProductTag.Value),
-   LBL_OFFSET(LblTelemetry_typ, ProductTag.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(ProductTag.Value)},
-
-  {"SEQUENCE_EXECUTION_COUNT", "INT",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SequenceExecutionCnt.Value),
-   LBL_OFFSET(LblTelemetry_typ, SequenceExecutionCnt.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(SequenceExecutionCnt.Value)},
-
-  {"ROVER_COMPUTE_ELEMENT",    "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, RoverComputeElement.Value),
-   LBL_OFFSET(LblTelemetry_typ, RoverComputeElement.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(RoverComputeElement.Value)},
-
-  {"TELEMETRY_SOURCE_SIZE",  "INT",  LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceSize.Value),
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceSize.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(TelemetrySourceSize.Value)},
-
-  {"SOURCE_PRODUCT_BYTES",  "INT",  LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SourceProductBytes.Value),
-   LBL_OFFSET(LblTelemetry_typ, SourceProductBytes.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SourceProductBytes.Value)},
-
-  {"TELEMETRY_SOURCE_CHECKSUM",  "INT",  LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceProductCheckSum.Value),
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceProductCheckSum.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(TelemetrySourceProductCheckSum.Value)},
-
-  {"SOURCE_PRODUCT_CHECKSUM",  "INT",  LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SourceProductCheckSum.Value),
-   LBL_OFFSET(LblTelemetry_typ, SourceProductCheckSum.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SourceProductCheckSum.Value)},
-
-  {"SOURCE_START_TIME",       "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SourceStartTime.Value),
-   LBL_OFFSET(LblTelemetry_typ, SourceStartTime.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(SourceStartTime.Value)},
-
-  {"TELEMETRY_SOURCE_START_TIME",       "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceStartTime.Value),
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceStartTime.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(TelemetrySourceStartTime.Value)},
-
-  {"TELEMETRY_SOURCE_SCLK_START", "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceSCClockStartCnt.Value),
-   LBL_OFFSET(LblTelemetry_typ, TelemetrySourceSCClockStartCnt.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(TelemetrySourceSCClockStartCnt.Value)},
-
-  {"SOURCE_SC_CLOCK_START_CNT", "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SourceSCClockStartCnt.Value),
-   LBL_OFFSET(LblTelemetry_typ, SourceSCClockStartCnt.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(SourceSCClockStartCnt.Value)},
-
-  {"SOURCE_SC_CLOCK_STOP_CNT", "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SourceSCClockStopCnt.Value),
-   LBL_OFFSET(LblTelemetry_typ, SourceSCClockStopCnt.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(SourceSCClockStopCnt.Value)},
-
-  {"SOFTWARE_NAME",			"STRING",	LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SoftwareName.Value),
-   LBL_OFFSET(LblTelemetry_typ, SoftwareName.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SoftwareName.Value)},
-
-  {"SOFTWARE_VERSION_ID",			"STRING",	LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, SoftwareVersionId.Value),
-   LBL_OFFSET(LblTelemetry_typ, SoftwareVersionId.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(SoftwareVersionId.Value)},
-
-  {"STRIPING_COUNT",      "INT",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, StripingCount.Value),
-   LBL_OFFSET(LblTelemetry_typ, StripingCount.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(Stripes.Value)},
-
-  {"STRIPING_OVERLAP_ROWS",      "INT",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, Stripes.Value),
-   LBL_OFFSET(LblTelemetry_typ, Stripes.Valid),    
-   LBL_NO_RETURN,  LBL_SIZE(Stripes.Value)},
-
-  {"TLM_CMD_DISCREPANCY_FLAG",		"STRING",	LBL_OPTIONAL,
-   LBL_NO_CONT,	1,	1,	LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TlmCmdDiscrepancyFlag.Value),
-   LBL_OFFSET(LblTelemetry_typ, TlmCmdDiscrepancyFlag.Valid),
-   LBL_NO_RETURN,	LBL_SIZE(TlmCmdDiscrepancyFlag.Value)},
-
-  {"TOTAL_PARTS",            "INT",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TotalParts.Value),
-   LBL_OFFSET(LblTelemetry_typ, TotalParts.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(TotalParts.Value)},
-
-  {"AUTO_DELETE_FLAG", "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, AutoDeleteFlag.Value),
-   LBL_OFFSET(LblTelemetry_typ, AutoDeleteFlag.Valid),    
-   LBL_NO_RETURN,  LBL_SIZE(AutoDeleteFlag.Value)},
-
-  {"TRANSMISSION_INDICATOR", "INT",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TransmissionIndicator.Value),
-   LBL_OFFSET(LblTelemetry_typ, TransmissionIndicator.Valid),    
-   LBL_NO_RETURN,  LBL_SIZE(TransmissionIndicator.Value)},
-
-  {"TRANSMISSION_PATH",      "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, TransmissionPath.Value),
-   LBL_OFFSET(LblTelemetry_typ, TransmissionPath.Valid),    
-   LBL_NO_RETURN,  LBL_SIZE(TransmissionPath.Value)},
-
-  {"VIRTUAL_CHANNEL_ID",  "STRING",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, VirtualChannelId.Value),
-   LBL_OFFSET(LblTelemetry_typ, VirtualChannelId.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(VirtualChannelId.Value)},
-
-  {"IMAGE_DATA_SIZE",            "INT",      LBL_OPTIONAL,
-   LBL_NO_CONT,    1,  1,  LBL_NULL,
-   LBL_OFFSET(LblTelemetry_typ, ImageDataSize.Value),
-   LBL_OFFSET(LblTelemetry_typ, ImageDataSize.Valid),
-   LBL_NO_RETURN,  LBL_SIZE(ImageDataSize.Value)},
-
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
-
-static LblApiProcess_typ	Label = {
-  LabelTbl,       "PROPERTY",     "PROPERTY",     "TELEMETRY",
-  LBL_NULL };
+static LblApiProcess_typ    Label = {
+    LabelTbl,       "PROPERTY",     "PROPERTY",     "TELEMETRY",
+    LBL_NULL };
 
 /******************************************************************************
- *				LBL_TELEMETRY
+ *              LBL_TELEMETRY
  *
  *****************************************************************************/
 int     LblTelemetry(
-			int   Unit,
-			int   Obtain,
-			LblTelemetry_typ      *LabelItems,
-			int	Instance)
+                     int   Unit,
+                     int   Obtain,
+                     LblTelemetry_typ      *LabelItems,
+                     int    Instance)
 { int   RtnStatus;
- LblApiCntrl_typ	Cntrl;
+    LblApiCntrl_typ Cntrl;
 
- Label.Buffer = (void *)LabelItems;
- Label.BufferSize = sizeof(LblTelemetry_typ);
+    Label.Buffer = (void *)LabelItems;
+    Label.BufferSize = sizeof(LblTelemetry_typ);
 
- memset(&Cntrl,0,sizeof(LblApiCntrl_typ));
- Cntrl.Instance = Instance;
- Cntrl.FileUnit = Unit;
- Cntrl.Obtain = Obtain;
- Cntrl.ProceedOnError = LBL_TRUE;
+    memset(&Cntrl,0,sizeof(LblApiCntrl_typ));
+    Cntrl.Instance = Instance;
+    Cntrl.FileUnit = Unit;
+    Cntrl.Obtain = Obtain;
+    Cntrl.ProceedOnError = LBL_TRUE;
 
- RtnStatus = LblProcessor(&Cntrl, &Label);
+    RtnStatus = LblProcessor(&Cntrl, &Label);
 
- return (RtnStatus);
+    return (RtnStatus);
 }
 
 /******************************************************************************
- *				LBL_PRINT_TELEMETRY
+ *              LBL_PRINT_TELEMETRY
  *
  *****************************************************************************/
-void	LblPrintTelemetry(
-			  LblTelemetry_typ	*LabelItems)
+void    LblPrintTelemetry(
+                          LblTelemetry_typ  *LabelItems)
 {
-  Label.Buffer = (void *)LabelItems;
+    Label.Buffer = (void *)LabelItems;
 
-  PrintLabelElements( &Label );
+    PrintLabelElements( &Label );
 
-  return;
+    return;
 }
 
 /******************************************************************************
- *				LBL_TEST_TELEMETRY
+ *              LBL_TEST_TELEMETRY
  *
  *****************************************************************************/
-void	LblTestTelemetry(
-			 LblTelemetry_typ	*LabelItems)
+void    LblTestTelemetry(
+                         LblTelemetry_typ   *LabelItems)
 {
-  Label.Buffer = (void *)LabelItems;
+    Label.Buffer = (void *)LabelItems;
 
-  TestLoadLabelElements( &Label );
+    TestLoadLabelElements( &Label );
 
-  return;
+    return;
 }
 $ VOKAGLEVE
 $!-----------------------------------------------------------------------------
@@ -8068,6 +8187,9 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
  *========
  * Date         Who             Description
  * ============ =============== =============================================
+ * 2015-08-19   C. Cheng        Added ArticulationDeviceTempCount
+ * 2015-07-01   C. Cheng        Added GravityAcceleration
+ * 2015-07-01   C. Cheng        Added ArticulationDevicePhase
  * 2003-01-13   P. Zamani       Added ArticulationDevInstrumentId
  *****************************************************************************/
 
@@ -8876,6 +8998,36 @@ static LblApiElement_typ	LabelTbl[] = {
 		LBL_OFFSET(LblArticulation_typ, ArticulationDeviceMode.Valid),
 		LBL_NO_RETURN,	LBL_SIZE(ArticulationDeviceMode.Value)},
 
+	{"ARTICULATION_DEVICE_TEMP_COUNT",		"REAL",		LBL_OPTIONAL,
+		LBL_NO_CONT,	1,	1,	LBL_NULL,
+		LBL_OFFSET(LblArticulation_typ, ArticulationDeviceTempCount[0].Value),
+		LBL_OFFSET(LblArticulation_typ, ArticulationDeviceTempCount[0].Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ArticulationDeviceTempCount[0].Value)},
+
+	{"ARTICULATION_DEVICE_TEMP_COUNT",		"REAL",		LBL_OPTIONAL,
+		LBL_CONTINUE,	1,	2,	LBL_NULL,
+		LBL_OFFSET(LblArticulation_typ, ArticulationDeviceTempCount[1].Value),
+		LBL_OFFSET(LblArticulation_typ, ArticulationDeviceTempCount[1].Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ArticulationDeviceTempCount[1].Value)},
+
+    {"ARTICULATION_DEVICE_TEMP_COUNT",        "REAL",     LBL_OPTIONAL,
+        LBL_CONTINUE,   1,  3,  LBL_NULL,
+        LBL_OFFSET(LblArticulation_typ, ArticulationDeviceTempCount[2].Value),
+        LBL_OFFSET(LblArticulation_typ, ArticulationDeviceTempCount[2].Valid),
+        LBL_NO_RETURN,  LBL_SIZE(ArticulationDeviceTempCount[2].Value)},
+
+    {"ARTICULATION_DEVICE_TEMP_COUNT",        "REAL",     LBL_OPTIONAL,
+        LBL_CONTINUE,   1,  4,  LBL_NULL,
+        LBL_OFFSET(LblArticulation_typ, ArticulationDeviceTempCount[3].Value),
+        LBL_OFFSET(LblArticulation_typ, ArticulationDeviceTempCount[3].Valid),
+        LBL_NO_RETURN,  LBL_SIZE(ArticulationDeviceTempCount[3].Value)},
+
+    {"ARTICULATION_DEVICE_TEMP_COUNT",        "REAL",     LBL_OPTIONAL,
+        LBL_CONTINUE,   1,  5,  LBL_NULL,
+        LBL_OFFSET(LblArticulation_typ, ArticulationDeviceTempCount[4].Value),
+        LBL_OFFSET(LblArticulation_typ, ArticulationDeviceTempCount[4].Valid),
+        LBL_NO_RETURN,  LBL_SIZE(ArticulationDeviceTempCount[4].Value)},
+
 	{"ARTICULATION_DEVICE_TEMP",		"REAL",		LBL_OPTIONAL,
 		LBL_NO_CONT,	1,	1,	LBL_NULL,
 		LBL_OFFSET(LblArticulation_typ, ArticulationDeviceTemp[0].Value),
@@ -9229,6 +9381,18 @@ static LblApiElement_typ	LabelTbl[] = {
 		LBL_OFFSET(LblArticulation_typ, ArticulationDeviceStateName[11].Value),
 		LBL_OFFSET(LblArticulation_typ, ArticulationDeviceStateName[11].Valid),
 		LBL_NO_RETURN,	LBL_SIZE(ArticulationDeviceStateName[11].Value)},
+
+	{"GRAVITY_ACCELERATION",		"REAL",		LBL_OPTIONAL,
+		LBL_NO_CONT,	1,	1,	LBL_NULL,
+        LBL_OFFSET(LblArticulation_typ, GravityAcceleration.Value),
+		LBL_OFFSET(LblArticulation_typ, GravityAcceleration.Valid),
+		LBL_NO_RETURN,	LBL_SIZE(GravityAcceleration.Value)},
+
+	{"ARTICULATION_DEVICE_PHASE",		"STRING",	LBL_OPTIONAL,
+		LBL_NO_CONT,	1,	1,	LBL_NULL,
+        LBL_OFFSET(LblArticulation_typ, ArticulationDevicePhase.Value),
+        LBL_OFFSET(LblArticulation_typ, ArticulationDevicePhase.Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ArticulationDevicePhase.Value)},
 
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
@@ -11193,6 +11357,12 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
  *  success or failure of the routine.  Basically, a value of zero represents
  *  a successful completion of the label processing, a non-zero value
  *  indicates a failure.
+ *****************************************************************************
+ * History
+ *========
+ * Date		Who		Description
+ * ============ =============== =============================================
+ * 2015-09-24   C. Cheng        Added SHUTTER_CORRECTION_MODE
  *****************************************************************************/
 
 #define  LBL_SIZE(x)	sizeof(((LblObsRequest_typ *)0)->x)
@@ -11395,6 +11565,12 @@ static LblApiElement_typ	LabelTbl[] = {
 		LBL_OFFSET(LblObsRequest_typ, MaxAutoExposIterationCount.Value),
                 LBL_OFFSET(LblObsRequest_typ, MaxAutoExposIterationCount.Valid),
                 LBL_NO_RETURN,  LBL_SIZE(MaxAutoExposIterationCount.Value)},
+
+	{"SHUTTER_CORRECTION_MODE",		"STRING",	LBL_OPTIONAL,
+		LBL_NO_CONT,	1,	1,	LBL_NULL,
+		LBL_OFFSET(LblObsRequest_typ, ShutterCorrectionMode.Value),
+		LBL_OFFSET(LblObsRequest_typ, ShutterCorrectionMode.Valid),
+		LBL_NO_RETURN,	LBL_SIZE(ShutterCorrectionMode.Value)},
 
 	{"SHUTTER_CORRECTION_MODE_ID",		"STRING",	LBL_OPTIONAL,
 		LBL_NO_CONT,	1,	1,	LBL_NULL,

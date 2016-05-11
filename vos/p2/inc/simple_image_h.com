@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module simple_image_h
-$! VPACK Version 1.9, Tuesday, March 04, 2014, 11:01:00
+$! VPACK Version 2.1, Monday, January 11, 2016, 10:14:06
 $!
 $! Execute by entering:		$ @simple_image_h
 $!
@@ -196,6 +196,10 @@ class SimpleImage {
         inline int getNL() { return _nl; }
         inline int getNS() { return _ns; }
         inline int getPhysWidth() { return _array_width; }
+
+	/** Convenience routines */
+	inline int inBounds(int line, int samp)
+		{ return (line >= 0 && samp >= 0 && line < _nl && samp < _ns); }
 
 	/** Pixel accessors/setters */
         inline T get(int line, int samp)

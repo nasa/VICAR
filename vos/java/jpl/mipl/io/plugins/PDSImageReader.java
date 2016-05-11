@@ -78,7 +78,7 @@ import com.sun.media.jai.codec.SeekableStream;
 public class PDSImageReader extends ImageReader {
 
    private boolean debug = false;
-   //private boolean debug = true;
+   // private boolean debug = true;
    
     private boolean imageTypeRetryFailed = false;
     // private boolean debug = true;
@@ -148,8 +148,10 @@ public class PDSImageReader extends ImageReader {
     public PDSImageReader (ImageReaderSpi mySpi) {
         super(mySpi);
         if (debug)   {
-            System.out.println("**********************");  
-            System.out.println("PDSImageReader constructor");
+            System.out.println("*******************************");  
+            System.out.println("PDSImageReader constructor. stackTrace:");
+            Exception e = new Exception();
+            e.printStackTrace();
         }
     }
 
@@ -271,8 +273,9 @@ public class PDSImageReader extends ImageReader {
             readHeader();
         }
 
-        if (debug) 
+        if (debug) {
             System.out.println("PdsImageReader.readAsRenderedImage() after readHeader() ");
+        }
         // printParam(param);
         // look at the param, decide what to do.
         // for now ignore it
@@ -290,7 +293,9 @@ public class PDSImageReader extends ImageReader {
             image = new VicarRenderedImage(pif, param);
         }
         catch (Exception e) {
-            System.err.println("readAsRenderedImage ERROR: "+e);
+        	if (debug) { 
+        		System.err.println("readAsRenderedImage ERROR: "+e);
+        	}
         }
         
         if (debug) { 
@@ -331,10 +336,11 @@ public class PDSImageReader extends ImageReader {
             
         }
         
+        
         if (stream == null && seekableStream == null && 
-            inputStreamWrapper == null && filename == null) {
-            throw new IllegalStateException ("Input stream not set");
-        }
+                inputStreamWrapper == null && filename == null) {
+                throw new IllegalStateException ("Input stream not set");
+        } 
         
         
         
@@ -375,9 +381,9 @@ public class PDSImageReader extends ImageReader {
                         System.out.println("using pure java ");
                     }
                     // create a stream from the file and read with pure java
-                                        // 20110709, xing
-                                        //pif = new PDSInputFile();
-                                        pif = new PDSInputFile(this.pdsImageReadParam);
+                    // 20110709, xing
+                    //pif = new PDSInputFile();
+                    pif = new PDSInputFile(this.pdsImageReadParam);
                     FileInputStream fis = new FileInputStream(new File(filename));
                     if (debug) System.out.println("using pure java fis "+fis);
                     pif.open( fis );
@@ -388,9 +394,25 @@ public class PDSImageReader extends ImageReader {
                 if (debug) {     
                   System.out.println("stream " + stream.getClass().getName()+" *@#$%^&* ");
                 }
-                                // 20110709, xing
-                                //pif = new PDSInputFile();
-                                pif = new PDSInputFile(this.pdsImageReadParam);
+                // 20110709, xing
+                //pif = new PDSInputFile();
+                
+                try {
+                	pif = new PDSInputFile(this.pdsImageReadParam);
+                } catch (Exception e) {
+		            System.out.println("Exception pif = new PDSInputFile(this.pdsImageReadParam); "+e);
+		            e.printStackTrace();
+		            
+		        } catch (java.lang.NoClassDefFoundError e2) {
+		            System.out.println("Exception pif = new PDSInputFile(this.pdsImageReadParam); \n"+e2);
+		            e2.printStackTrace();
+		            
+		        }
+                
+                pif.setDebug(debug);
+                if (debug) {     
+                	System.out.println("PDSImageReader.readHeader calling pif.open()");  
+                  }
                 pif.open( stream);
             }
             else if (inputStreamWrapper != null) {
@@ -399,9 +421,10 @@ public class PDSImageReader extends ImageReader {
                 }
                 
                 // vif.open(inputStreamWrapper);
-                                // 20110709, xing
-                                //pif = new PDSInputFile();
-                                pif = new PDSInputFile(this.pdsImageReadParam);
+                // 20110709, xing
+                //pif = new PDSInputFile();
+                pif = new PDSInputFile(this.pdsImageReadParam);
+                pif.setDebug(debug);
                 pif.open(inputStreamWrapper);
                 // public void open(InputStream is) throws IOException
                 // public synchronized void open(InputStream is, boolean sequential_only) throws IOException
@@ -411,9 +434,10 @@ public class PDSImageReader extends ImageReader {
                   System.out.println("seekableStream " + seekableStream.getClass().getName());
                 }
                 // vif.open(seekableStream);
-                                // 20110709, xing
-                                //pif = new PDSInputFile();
-                                pif = new PDSInputFile(this.pdsImageReadParam);
+                // 20110709, xing
+                //pif = new PDSInputFile();
+                pif = new PDSInputFile(this.pdsImageReadParam);
+                pif.setDebug(debug);
                 pif.open(seekableStream);
             }
            
@@ -594,11 +618,31 @@ public class PDSImageReader extends ImageReader {
        if (document != null) {
             if (debug) {
                 System.out.println("PDSImageReader new PDSMetadata with document");
+                System.out.println("pdsImageReadParam "+pdsImageReadParam);
                 System.out.println("++ lblsize_front "+lblsize_front+"  +++");
             }
+            
+            if (pdsImageReadParam != null) {
+            	boolean calcMd5sum = pdsImageReadParam.getMd5sum();
+            	if (calcMd5sum) {
+	            	// do we do this for the data file of detached label?
+	            	// how do we know?? hold that info in pif??
+	            	// pif.isDetachedLabel()
+	            	// pif.getDataFile_Stream() pif.getDataFile_Lblsize_front() pif.getDataFile_filename()
+	            	// Md5sum_calc md5sum_calc = new Md5sum_calc
+	            	// document = calcMd5Sum.sums(stream, document, lblsize_front, filename);
+	            	// this does all the md5 sum with the info available to the pif
+	            	/// or // document = pif.calcMd5Sum();
+            	}
+       		}
+            
+            
+            
             pdsMetadata = new PDSMetadata(document);
             pdsMetadata.setFront_label_size(lblsize_front);
             gotMetadata = true;
+            
+            
             // return ;
        } else {
             if (debug) {
@@ -608,11 +652,22 @@ public class PDSImageReader extends ImageReader {
             return;
        }
        
-       if (debug)  System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++");
+       if (debug)  {
+    	   System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++");
+    	   System.out.println("++  pif.getHasEmbeddedVicarLabel() "+pif.getHasEmbeddedVicarLabel()+" ");
+       }
+       
+       if ( pif.getHasEmbeddedVicarLabel() ) {
+    	   document = pif.getVicarDocument();
+    	   if (document != null) {
+    		   if (debug)  System.out.println("setVicarDocument to PDSMetadata");
+    		   pdsMetadata.setFromTree(PDSMetadata.vicarImageMetadataFormatName, document);
+    	   }
+       }
         
         
        // PDSLabelToDOM(BufferedReader input, PrintWriter output);
-       // creaste a BufferedReader from whatever input type we have
+       // create a BufferedReader from whatever input type we have
        
        /***
        BufferedReader input = null;
@@ -823,6 +878,16 @@ public class PDSImageReader extends ImageReader {
          }
          System.out.println("------------------------------------------");
     }
+    
+    public BufferedImage read() throws IIOException {
+    	
+    	return read(0, (ImageReadParam) null);
+    }
+    
+    public BufferedImage read(int imageIndex) throws IIOException {
+    	
+    	return read(imageIndex, (ImageReadParam) null);
+    }
 
     /**
      * This implementation performs a simple read, leaving any ImageReadParam
@@ -834,6 +899,13 @@ public class PDSImageReader extends ImageReader {
     public BufferedImage read(int imageIndex, ImageReadParam param)
 
         throws IIOException {
+    	
+    	/***
+    	boolean useRenderedImage = true;
+    	if (useRenderedImage) {
+    		return (BufferedImage) readAsRenderedImage(imageIndex, param);
+    	}
+    	***/
             
         if (debug) {
             System.out.println("*** read read read read read *******");
@@ -910,7 +982,7 @@ public class PDSImageReader extends ImageReader {
                 System.out.println("imageType.createBufferedImage ");
                 System.out.println("imageType "+imageType);
                 } 
-            // let imageTypeSpecifier create the buffered iamge for us
+            // let imageTypeSpecifier create the buffered image for us
             theImage = imageType.createBufferedImage(width, height);
             sampleModel = theImage.getSampleModel();
             colorModel = theImage.getColorModel();

@@ -1,0 +1,14 @@
+## This template includes Mission-specific global variables to
+## be used through the velocity templates.
+## 
+## To include this file in your template and use the macros, add the following
+## at the top of your Velocity template:
+##
+##		#parse ( "insight_velocity_globals.txt" )
+##
+
+#set ($PRODUCT_LID_PREFIX = "urn:nasa:pds:insight_cameras")
+#set ($MODEL_VERSION = "1.5.0.0")
+#set ($WAVELENGTH_RANGE = "Visible")
+#set ($DOMAIN = "Surface")
+#set ($DISCIPLINE = "Imaging")

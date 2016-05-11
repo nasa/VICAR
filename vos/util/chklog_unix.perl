@@ -62,13 +62,19 @@ $errmsg = " ";
 #     plotint, pltgraf, power,qplot2, statplt and tieplot. 5/8/13
 # 19) Removed from exception list:galsos,ccdnoise,ccdrecip,ccdslope,mosplot,otf1,plot3d,plotint,pltgraf,qplot2,tieplot
 #     and statplt. 1/28/15
+# 20) Added: nsyt_instruments,nsyt_telemlib,marsinterp,nsyt_camera_packetizer,nsyt_camera_telemproc,nsyt_ida_science_telemproc,
+#     nsyt_ida_telemproc,nsyt_twins_telemproc,nsytrough,nsyttilt,nsyttpdf. 9/17/15
+# 21) Added: vtiff3o 10/19/15 
+# 22) Removed xrtps due to it being obsoleted. 11/17/15 
+# 23) Removed l7cal. Now builds on sun-solr.  11/17/15 
 #####################################################################################
 #
 # 
-@exceptsolr=("diviner_ckern","diviner_l1b","l7cal","tcal2",
+@exceptsolr=("tcal2","diviner_ckern","diviner_l1b",
 "temis","tlm_Test_Test_stream",
 "sim_subs","simscan","libdivl1b_so","libdivl1b_a","divl1b","mslreach","mslfilter",
-"xrtps");
+"nsyt_instruments","nsyt_telemlib","marsinterp","nsyt_camera_packetizer","nsyt_camera_telemproc",
+"nsyt_ida_science_telemproc","nsyt_ida_telemproc","nsyt_twins_telemproc","nsytrough","nsyttilt","nsyttpdf","vtiff3o");
 #
 #######################################################################################
 #
@@ -183,11 +189,16 @@ $errmsg = " ";
 #     plotint, pltgraf, power,qplot2, statplt and tieplot. No XRT license available.  5/8/13
 # 24) Removed from exception list:galsos,ccdnoise,ccdrecip,ccdslope,mosplot,otf1,plot3d,plotint,pltgraf,qplot2,tieplot
 #     1/28/15
+# 25) Added marsinterp,nsyt_instruments,nsytrough,nsyttilt. 9/17/15
+# 26) Removed xrpts because it's been obsoleted.  11/17/15
+# 27) Removed marsinterp,nsyt_instruments,nsytrough,nsyttilt, plotit, rovernav, xyznet because they now build on linux.  11/17/15
 #
 #######################################################################################
 #
-@exceptlinux=("tcal2","temis","vic2srf","casissstdtlmproc","rovernav","tlm_Test_Test_stream","plotit","xyznet",
-"xrtps");
+@exceptlinux=("tcal2","temis","vic2srf","casissstdtlmproc","tlm_Test_Test_stream","casisslosslessdecompsource",
+"casisssource","casswat","PEWrapper");
+
+
 #
 #######################################################################################
 #
@@ -301,13 +312,16 @@ $errmsg = " ";
 #
 # 24) Removed from exception list:galsos,ccdnoise,ccdrecip,ccdslope,mosplot,otf1,plot3d,plotint,pltgraf,qplot2,tieplot
 #     statplt, plotit. 1/28/15
+#
+# 25) Added marsinterp.  9/17/15
+# 26) Removed rovernav,xyznet because they now build on linux64. 11/17/15
+# 
 #######################################################################################
 #
-@exceptlinux64=("tcal2","temis","vic2srf","casissstdtlmproc","casisslosslessdecompsource","casisssource","rovernav",
-"tlm_Test_Test_stream","xyznet",
-"mslreach","libpig_native","PEWrapper","xrtps","libdivl1b_a","libdivl1b_so",
-"power","isslab","suffix2core","vimslab","casswat","casvimsstdtlmproc","divl1b",
-"usedisp","mslfilter");
+@exceptlinux64=("usedisp","tcal2","temis","vic2srf","casissstdtlmproc","casisslosslessdecompsource","casisssource",
+"tlm_Test_Test_stream","mslreach",
+"mslreach","libpig_native","PEWrapper","libdivl1b_a","libdivl1b_so","isslab","suffix2core","vimslab","casswat",
+"casvimsstdtlmproc","divl1b","mslfilter","marsinterp");
 
 ERROR: 
 

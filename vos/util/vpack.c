@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
 #include "pack.h"
 
 #define COMMENT		fputs("$!\n", output_file);
@@ -13,12 +14,13 @@
 
 /* This must be updated with each new release.                               */
 
-char *version="1.9";
+char *version="2.1";
 
 /* Cognizant Programmer:  Paul Bartholomew	April 15, 1991               */
 /* Revision History:                                                         */
 /* Ver    Date     F/R   Description                                         */
 /* ---  --------  -----  --------------------------------------------------- */
+/* 2.1  08/04/2015       rgd-Converted to ANSI C prototypes		     */
 /* 2.0  10/05/00   n/a   TXH-Disabled the conversion to all lower-cases.     */
 /*                           The default now assumes inputs are mixed cases. */
 /* 1.9  10/27/97   n/a   VXP-Added 'newline' symbol to the end of a file if  */
@@ -68,10 +70,30 @@ struct pack {
    int  filetype;
 };
 
-
-main(argc, argv)
-int  argc;
-char *argv[];
+void print_syntax_message();
+int parse_file(char *repack_filename, char *com_filename,
+	int *num_files, struct pack files[],
+	int *action, int *ported, int *mixed_case);
+int parse_command(int argc, char *argv[], char *com_filename,
+	int *num_files, struct pack files[],
+	int *action, int *ported, int *mixed_case);
+int write_header(FILE *output_file, char *output_filename,
+	int num_files, struct pack files[],
+	int action, int ported, int mixed_case);
+void create_repack(FILE *output_file, char *filename,
+	int num_files, struct pack files[], int ported, int mixed_case);
+int add_files(FILE *output_file, int num_files, struct pack files[]);
+void lower_case(char *str);
+void upper_case(char *str);
+int get_com_filename(FILE *repack_file, char *com_filename,
+	char *str, char **ptr, int *end_of_line, int mixed_case);
+int strip_space(char **ptr);
+int find_next_space(char **ptr);
+void get_file_extension(char *infile, char *ext);
+void remove_file_extension(char *infile, char *outfile);
+void current_date(char *datestr);
+
+int main(int argc, char *argv[])
 {
    int  num_files=0, action=0, ported=TRUE;
    struct pack files[100];
@@ -200,13 +222,9 @@ int  *found;
 /* This routine parses a repack file to find the name of the .COM file to be */
 /* created and the names of the file to be packed into the file.             */
 
-int parse_file(repack_filename, com_filename, num_files, files, action, ported, mixed_case)
-char *repack_filename;
-char *com_filename;
-int  *num_files;
-struct pack files[];
-int  *action, *ported;
-int *mixed_case;
+int parse_file(char *repack_filename, char *com_filename,
+	int *num_files, struct pack files[],
+	int *action, int *ported, int *mixed_case)
 {
    FILE *repack_file;
    char str[256], *ptr, cur_arg[256], *temp;
@@ -350,12 +368,8 @@ int *mixed_case;
 /* tion back in the end_of_line parameter.  If there is an error reading from*/
 /* the file, this functions returns FAILURE.  Otherwise, it returns SUCCESS. */
 
-int get_com_filename(repack_file, com_filename, str, ptr, end_of_line, mixed_case)
-FILE *repack_file;
-char *com_filename;
-char *str, **ptr;
-int  *end_of_line;
-int mixed_case;
+int get_com_filename(FILE *repack_file, char *com_filename,
+	char *str, char **ptr, int *end_of_line, int mixed_case)
 {
    char *temp, *substring();
 
@@ -424,14 +438,9 @@ int mixed_case;
 /* would all be present in one parameter rather than a separate file for each*/
 /* parameter.                                                                */
 
-int parse_command(argc, argv, com_filename, num_files, files, action, ported, mixed_case)
-int  argc;
-char *argv[];
-char *com_filename;
-int  *num_files;
-struct pack files[];
-int  *action, *ported;
-int  *mixed_case;
+int parse_command(int argc, char *argv[], char *com_filename,
+	int *num_files, struct pack files[],
+	int *action, int *ported, int *mixed_case)
 {
    int  arg_ctr, done, option = -1, com_file_found=FALSE, end_of_line, length;
    int  found, valid, prev = -1;
@@ -552,10 +561,7 @@ int  *mixed_case;
 /* and before the test file(s).  We use the file type in the files array     */
 /* to let us know when we are shifting from one type to the next.            */
 
-int add_files(output_file, num_files, files)
-FILE *output_file;
-int  num_files;
-struct pack files[];
+int add_files(FILE *output_file, int num_files, struct pack files[])
 {
    FILE *tmpfile;
    char *tmpchar, file_ext[10], tmpstr[256];
@@ -666,9 +672,7 @@ struct pack files[];
 /* filename is untouched.  If there is no file extension, this routine just  */
 /* performs a string copy from the input file name to the output file name.  */
 
-remove_file_extension(infile, outfile)
-char *infile;
-char *outfile;
+void remove_file_extension(char *infile, char *outfile)
 {
    char *ptr;
 
@@ -683,9 +687,7 @@ char *outfile;
 /* If the file does not have an extension, the function returns NULL in the  */
 /* "ext" parameter.                                                          */
 
-get_file_extension(infile, ext)
-char *infile;
-char *ext;
+void get_file_extension(char *infile, char *ext)
 {
    char *ptr;
 
@@ -698,8 +700,7 @@ char *ext;
 
 /* This function converts a string to upper case.                            */
 
-upper_case(str)
-char *str;
+void upper_case(char *str)
 {
    int i;
 
@@ -710,8 +711,7 @@ char *str;
 
 /* This function converts a string to lower case.                            */
 
-lower_case(str)
-char *str;
+void lower_case(char *str)
 {
    int i;
 
@@ -725,13 +725,8 @@ char *str;
 /* with the UNPACK option, this file will be created, allowing you to easily */
 /* repack the .COM file when you are finished with any modifications.        */
 
-create_repack(output_file, filename, num_files, files, ported, mixed_case)
-FILE *output_file;
-char *filename;
-int  num_files;
-struct pack files[];
-int  ported;
-int  mixed_case;
+void create_repack(FILE *output_file, char *filename,
+	int num_files, struct pack files[], int ported, int mixed_case)
 {
    int  i, length, type = -1;
    char tempfile[90];
@@ -764,14 +759,13 @@ int  mixed_case;
    fprintf(output_file, "%s\n", EOFSTRING);
    fputs("$ Return\n", output_file);
    SECTION_SEP;
-   return SUCCESS;
+   return;
 }
 
 
 /* This function determines the current time/date and returns it in a string */
 /* formatted as follows:  dayofweek, month, dd, yyyy, hh:mm:ss.              */
-current_date(datestr)
-char *datestr;
+void current_date(char *datestr)
 {
    static char *day[] = {"Sunday", "Monday", "Tuesday", "Wednesday",
                          "Thursday", "Friday", "Saturday", "Sunday"};
@@ -783,7 +777,7 @@ char *datestr;
 
    temptime = time(NULL);
    temptm = localtime(&temptime);
-   sprintf(datestr, "%s, %s %02d, %4d, %02d:%02d:%02d\0",
+   sprintf(datestr, "%s, %s %02d, %4d, %02d:%02d:%02d",
 		day[temptm->tm_wday],
 		mon[temptm->tm_mon],
 		temptm->tm_mday,
@@ -798,13 +792,9 @@ char *datestr;
 /* The header includes all the script commands necessary to make the .COM    */
 /* file self-extracting/compiling/linking in the VMS environment.            */
 
-int write_header(output_file, output_filename, num_files, files, action, ported, mixed_case)
-FILE *output_file;
-char *output_filename;
-int  num_files;
-struct pack files[];
-int  action, ported;
-int mixed_case;
+int write_header(FILE *output_file, char *output_filename,
+	int num_files, struct pack files[],
+	int action, int ported, int mixed_case)
 {
    char tempfile[80], *ptr, datestr[50];
    int  length, i, first;
@@ -1293,7 +1283,7 @@ int mixed_case;
 
 /* This routine prints an error message to the operator telling him the proper*/
 /* syntax to follow when using this program.                                  */
-print_syntax_message()
+void print_syntax_message()
 {
    printf("\nImproper syntax.  You must give the vpack program at least one parameter.\n");
    printf("You may call the program in one of two ways:\n");
@@ -1322,8 +1312,7 @@ print_syntax_message()
 /* space character is the end of the line or the end of the string, then     */
 /* the function returns TRUE.  Otherwise, the function returns FALSE.        */
 
-int strip_space(ptr)
-char **ptr;
+int strip_space(char **ptr)
 {
    int end_of_line=FALSE;
 
@@ -1344,8 +1333,7 @@ char **ptr;
 /* string--i.e., the first separator.  If the pointer is pointing to a new-  */
 /* line or the end of the string, the function returns TRUE.                 */
 
-int find_next_space(ptr)
-char **ptr;
+int find_next_space(char **ptr)
 {
    int end_of_line=FALSE;
 
@@ -1390,7 +1378,7 @@ char *str, *substr;
 /* in the substring, we do a string compare to see if we have a complete     */
 /* match.  If not, we continue checking.  If so, we're done.                 */
 
-   while(ptr = strchr(ptr, *substr)) {
+   while((ptr = strchr(ptr, *substr)) != 0) {
       if (!strncmp(ptr, substr, strlen(substr)))
          return ptr;
       else

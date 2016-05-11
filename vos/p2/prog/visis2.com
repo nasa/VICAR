@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module visis2
-$! VPACK Version 1.9, Friday, February 10, 2012, 13:23:50
+$! VPACK Version 2.1, Wednesday, February 24, 2016, 14:15:15
 $!
 $! Execute by entering:		$ @visis2
 $!
@@ -151,8 +151,7 @@ $ DECK/DOLLARS="$ VOKAGLEVE"
 $ vpack visis2.com -mixed -
 	-s visis2.c -
 	-p visis2.pdf rvisis2.pdf -
-	-t tstvisis2.pdf tstvisis2.pdf_old tstvisis2.log_solos -
-	   tstvisis2.log_linux -
+	-t tstvisis2.pdf tstvisis2.log -
 	-i visis2.imake
 $ Exit
 $ VOKAGLEVE
@@ -406,6 +405,8 @@ TBD:
  * 23- 9-1989   N/A                          - Added MINIMUM and MAXIMUM macros
  ******************************************************************************
  */
+
+#include <stdlib.h>
 
 /*
  *=============================================================================
@@ -831,10 +832,10 @@ int	cubefiles,		/* Number of cube files: MM, GEO, SII   */
 	ndrks,			/* # of dark files		 	*/
 	tube,			/* flag that cube object is tube 	*/
 	ptub,			/* flag that tube is P-tube 	*/
-	cubsiz[2],		/* projected cube size (if tube) 	*/
-	inptr,			/* Input file pointer 	     		*/
-	outptr,			/* Output file pointer          	*/
-	labend;			/* Pointer to end of label */
+        cubsiz[2];		/* projected cube size (if tube) 	*/
+long	inptr,			/* Input file pointer 	     		*/
+        outptr;			/* Output file pointer          	*/
+int	labend;			/* Pointer to end of label */
 char 	*bufpoint,		/* Pointer for PDS item parsing 	*/
 	*histpoint,		/* Pointer for History object   	*/
 	value[8][7],		/* Object pointers	             	*/
@@ -850,7 +851,9 @@ int histfile;			/* History file stuff */
 char hfilnam[100];
 FILE *hfile,*fopen();
 
-char cubtasks[20][8];		/* Task names in cube label */
+#define TASK_LIST_LEN 30
+#define TASK_LEN 33
+char cubtasks[TASK_LIST_LEN * TASK_LEN]; /* Task names in cube label */
 int ncubtasks;
 
 int specialp=0;			/* flag for SPECIAL_PROCESSING labels */
@@ -900,8 +903,8 @@ void main44()
   int 	direction;			/* Direction of transformation 	     */
 
   /* inform user of Program version & update VERSION_DATE for label */
-  zvmessage("*** VISIS2 Version 10-Feb-2012 ***","");
-  strcpy( verdat, "2012-02-10");
+  zvmessage("*** VISIS2 Version 2016-02-24 ***","");
+  strcpy( verdat, "2016-02-24");
 
   free(malloc(4096*4096));		/* 	Guarantee sufficient memory  */
 
@@ -2114,15 +2117,15 @@ if (specplots > 0)
 if (cubefiles == 3)
   strcat(histpoint,"      NIMSFLOAT, F2, and INSERT3D to create the SII cube;\r\n");
 for (x=0; x<ncubtasks; x++) {
-  if (strncmp( cubtasks[x], "NIMSR2IO", 8) == 0) {
+  if (strncmp(&cubtasks[x * TASK_LEN], "NIMSR2IO", 8) == 0) {
     strcat(histpoint,
      "      NIMSR2IOF to convert Radiance to BDRF;\r\n");
   }
-  if (strncmp( cubtasks[x], "NIMSXCA", 7) == 0) {
+  if (strncmp(&cubtasks[x * TASK_LEN], "NIMSXCA", 7) == 0) {
     strcat(histpoint,
      "      NIMSXCA to correct for the cross-cone sensitivity function;\r\n");
   }
-  if (strncmp( cubtasks[x], "NIMSBBFI", 8) == 0) {
+  if (strncmp(&cubtasks[x * TASK_LEN], "NIMSBBFI", 8) == 0) {
     strcat(histpoint,
      "      NIMSBBFIT to fit Temperatures and write these to backplanes;\r\n");
   }
@@ -2519,13 +2522,13 @@ char string[],type[];
 
 
 /*****************************************************************************/
-int FUNCTION find_keyword(keyword,buf,labptr,endptr)
+int FUNCTION find_keyword(char* keyword, char* buf, int* labptr, int* endptr)
 /*
  * Find the keyword and prepare for reading its value 
  */
-char	keyword[],buf[];			/* Item to be found          */
-int	*labptr;				/* Pointer to label element  */
-int	*endptr;				/* end of label to search    */
+/*char	keyword[],buf[];			   Item to be found          */
+/*int	*labptr;				   Pointer to label element  */
+/*int	*endptr;				   end of label to search    */
 {						/* Local Variables           */
 int	count,					/* Counter/index             */
 	found,					/* Item found indicator      */
@@ -3875,7 +3878,7 @@ int 	count;				/* Number of input files	     */
 	object,				/* Loop control variable	     */
 	stat1,stat2,			/* lsef flags for history labels   */
 	x,y,z;				/* Loop control variables	     */
-  char	task[20][8];			/* Task names			     */
+  char	task[TASK_LIST_LEN * TASK_LEN]; /* Task names			     */
   int	instances[20],			/* Array of instances of history lbl */
 	file_indices[6],		/* Output file indices		     */
 	numtasks;			/* Number of tasks of history label  */
@@ -3902,7 +3905,7 @@ int 	count;				/* Number of input files	     */
   vstat = zlhinfo(inunit[object],task,instances,&numtasks,"ERR_ACT","SA",NULL);
   vstat = x = 0;
   while( vstat == 0 && x < numtasks )
-    if(strncmp(task[x],"VISIS2",5)==0 || strncmp(task[x++],"HIST2D",6)==0)
+    if(strncmp(&task[x * TASK_LEN],"VISIS2",5)==0 || strncmp(&task[x++ * TASK_LEN],"HIST2D",6)==0)
       vstat = 1;
   if( vstat!=1 ) zmabend(" INVALID HISTOGRAM INPUT FILE","");
 
@@ -3916,7 +3919,7 @@ int 	count;				/* Number of input files	     */
     vstat = zlhinfo(inunit[++object],task,instances,&numtasks,"ERR_ACT","SA",NULL);
     stat1 = x = 0;
     while( stat1 == 0 && x < numtasks )
-      if(strncmp(task[x++],"SPECPLOT",8)==0) {
+      if(strncmp(&task[x++ * TASK_LEN],"SPECPLOT",8)==0) {
         specplots++;
         stat1 = 1;
         if( nb[object] != 1 )
@@ -3939,8 +3942,8 @@ int 	count;				/* Number of input files	     */
    "ERR_ACT", "SA", NULL);
   vstat = x = 0;
   while( x < ncubtasks ) {
-    if (strncmp(cubtasks[x],tasknam,8)==0) vstat = 1;
-    if (strncmp(cubtasks[x++],"NIMSR2IO",8)==0) iofcub = 1;
+    if (strncmp(&cubtasks[x * TASK_LEN],tasknam,8)==0) vstat = 1;
+    if (strncmp(&cubtasks[x++ * TASK_LEN],"NIMSR2IO",8)==0) iofcub = 1;
   }
   if( vstat!=1 || (bytes[object]!=2 && bytes[object]!=4) )
     zmabend(" *** INVALID CUBE FILE ***");
@@ -3960,13 +3963,13 @@ int 	count;				/* Number of input files	     */
     vstat = stat1 = stat2 = 0;
     for(x=0;x<numtasks;x++) {
       if( vstat==0 )
-        if(strncmp(task[x],"NIMSFLOAT",9)==0)
+        if(strncmp(&task[x * TASK_LEN],"NIMSFLOAT",9)==0)
           vstat = 1;
       if( stat1==0 )
-        if(strncmp(task[x],tasknam,7)==0)
+        if(strncmp(&task[x * TASK_LEN],tasknam,7)==0)
           stat1 = 1;
       if( stat2==0 )
-        if(strncmp(task[x],"INSERT3D",8)==0)
+        if(strncmp(&task[x * TASK_LEN],"INSERT3D",8)==0)
           stat2 = 1;
     }
     if(( vstat!=1 && stat1!=1 && stat2!=1 ) || nb[object] > 15 ) 
@@ -4247,8 +4250,10 @@ int dir,	/* Direction of processing */
   nrecs; 	/* Number of file records */
 
 {
-  int band, bufsample, bufptr, count, extrasamples, index, indx, ln, object,
-   record, sample, size1, testvalues[2], x, y, y1, z;
+  int band, bufsample;
+  long bufptr;
+  int count, extrasamples, index, indx, ln, object,
+    record, sample, size1, testvalues[2], x, y, y1, z;
   unsigned char  buf[1000];  /* Object file buffer           */
   unsigned char  *nibbles;  /* Object file buffer in nibbles       */  
   unsigned char  nibbuf;    /* Holding value for test of nibble   */
@@ -5534,58 +5539,233 @@ PROGRAM HISTORY:
 
 Program VISIS written by: Justin McNeill, October, 1989
 
-Ported to Alpha, converted to GLL Phase 2 requirements, and renamed VISIS2 by:
-L.W.Kamp, Dec.1994
-
-Current cognizant programmer: L.W.Kamp
+Current cognizant programmer: W. Bunch
 
 Revisions: 
-  Sep.95  LWK:	VISIS2 extended to support Phase 0 also;  VISIS will not
+  1994-12-10 LWK Ported to Alpha, converted to GLL Phase 2 requirements, and renamed VISIS2
+  1995-02-10 LWK added Sybase interface
+  1995-09-11 LWK VISIS2 extended to support Phase 0 also;  VISIS will not
 		be ported separately.
-  Feb.96  LWK:	Corrected SSC and OAL Line/Samps in inverse mode:  the label 
-		items are _offsets_ (relative to 1,1), although the MP items 
-		are not!
-  Mar.96  LWK-	Removed JR/JSA Target Id's per PDS decision.
-  May.96  LWK-	Added BAND_BIN_SELECTED_BAND label array;  allow for variable 
+  1995-09-19 LWK fixed error that caused WAVELENGTHS, etc., to be missing;  added
+	     pointing source & start/stop sub-solar label items;  added 1 to map
+	     offsets per PDS def'n;  fixed slew_tol in inverse mode
+  1995-11-28 LWK fixed code for East Long. determination 
+  1995-12-14 LWK MOSNUM is now in phase-1 label too
+  1996-01-10 LWK fixed East Long. determination in inverse mode
+  1996-02-16 LWK fixed NATIVE_..._TIME mf format; band_bin mode determination;
+             zlgets for DRK_AVE and RAD_SENS; North Angle is mpNORTH_ANGLE, not
+             mpCARTESIAN_AZIMUTH for Perspective;
+  1996-02-21 LWK Corrected SSC and OAL Line/Samps in inverse mode:  the label 
+             items are _offsets_ (relative to 1,1), although the MP items 
+             are not!
+  1996-02-28 LWK initialize astretch[] & r/g/b_siid items to prevent illegal
+             floating-point errors
+  1996-03-06 LWK fixed NATIVE_..._TIMEs again to avoid embedded blanks
+  1996-03-20 LWK- minor fixes to avoid Unix build warnings
+  1996-03-23 LWK Removed JR/JSA Target Id's per PDS decision.
+  1996-05-10 LWK Added BAND_BIN_SELECTED_BAND label array;  allow for variable 
 		number of backplanes due to deselected GP's.
-  Aug.96  LWK-	Removed BAND_BIN_SELECTED_BAND, changed BAND_BIN_ORIGINAL_BAND
+  1996-06-29 LWK removed underscores from NEAR_INFRARED_MAPPING_SPECTROMETER ISIS
+             label item
+  1996-08-06 LWK ensure OBSNAME is zero-terminated;  changed waves arrays since
+             NIMSCMM2 now gives array after WET deselection
+  1996-08-15 LWK- fixed special values in floating-point case (missing final #,
+             and low/hi instr.rep. keywords)
+  1996-08-25 LWK added BAND_MASK to output cube label in inverse mode
+  1996-08-27 LWK Removed BAND_BIN_SELECTED_BAND, changed BAND_BIN_ORIGINAL_BAND
 		to the latter's definition.
-  Sep.96  LWK-	Removed all planetocentric/detic latitude conversions, because
-		NIMSCMM2 now writes either one consistently.
-  Oct.96  LWK-	removed underscores (_) from keyword names inside comment NOTES
-		to avoid the parser confusing these with the keywords themselves
-		in inverse mode
-  May 97  LWK:	changes to support intermediate processing by ISIS NIMSGEOM
+  1996-09-11 LWK fixed error in COORDINATE_SYSTEM_NAME when Planetocentric
+  1996-09-27 LWK Removed all planetocentric/detic latitude conversions, because
+             NIMSCMM2 now writes either one consistently.
+  1996-10-05 LWK removed underscores (_) from keyword names inside comment NOTES
+             to avoid the parser confusing these with the keywords themselves
+             in inverse mode
+  1996-10-09 LWK added photometric correction cutoff
+  1996-10-31 LWK allowed multiple Cal files; added min/max central body label items
+  1996-11-05 LWK added grating correction and instrument threshold label items;  
+             changed min/max "target_center" distances to "slant"
+  1996-11-08 LWK fixed POINTING_OFFSET label item
+  1997-02-28 LWK added PHOTOMETRIC_CORRECTION_NOTE, moved POINTING_OFFSET to next
+             to other pointing stuff (in History) per RM request
+  1997-05    LWK changes to support intermediate processing by ISIS NIMSGEOM
 		on MIPS Systematic cubes:  added GR_POS_nn_RIGHT_EDGE_PROJ_LINE
 		and -SAMPLE backplanes in Footprint tubes;  added parameter
 		HISTFILE and the capability of storing ISIS history labels;
 		fixed long-standing bug whereby GR_POS_nn_PROJECTED_LINE & 
 		-SAMPLE backplane names were interchanged in the 
 		BAND_SUFFIX_NAME array (!)
-  Oct 97  lwk-  changed SINUSOIDAL to 'SINUSOIDAL_EQUAL-AREA' in Map proj'n type
-                to satisfy ISIS; write true GP in the GR_POS_nn tube backplanes;
-                changes for Unix ISIS compatibility:  added EAST/WESTERNMOST_LONG
-                keywords (redundant with MINUMUM/MAXIMUM);  added OFFSET_DIRECTION,
-                with switch of signs in LINE/SAMPLE_PROJECTION_OFFSET when TO_ORIGIN;
-                also, LINE/SAMPLE_PROJECTION_OFFSET should *not* have 1 added if
-                obtained thru MP calls, as those are already relative to (1,1)
-                (since jan'94) -- only if mpo2buf/buf2mpo used, and for Perspective,
-                where PLANET_CENTER_LINE/SAMPLE are not offsets;  only convert
-                Longitudes if POSITIVE_LONGITUDE_DIRECTION needs to be changed!
-  Dec 98  lwk-  changes for Unix:  made all functions that return values "int";
+  1997-05-13 LWK changed SUB_SOLAR_AZIMUTH to SOLAR_AZIMUTH; put a copy of
+             POINTING_OFFSET back into Label so that ISIS s/w can access it
+  1997-05-15 LWK added GR_POS_nn_RIGHT_EDGE_PROJ_LINE/SAMPLE backplane names in 
+             footprint tube;  increased LABELMEMORY (from 60000 to 72000) to
+             acommodate extra backplanes
+  1997-05-22 LWK fixed bug whereby the GR_POS_nn_PROJECTED_LINE & _SAMPLE 
+             backplane names were interchanged in the BAND_SUFFIX_NAME array;
+             move STD_DEV_SELECTED_BACKPLANE from history to label in order to
+             make it available to ISIS label routines
+  1997-05-27 LWK added Lommel-Seeliger photometric correction;  removed reference
+             to tube/cube in "Qube structure" label comment
+  1997-05-29 LWK fixed NATIVE_START/STOP_TIME format in inverse mode for cube
+             output, removed these from 2D-hist and specplots;  added parameter
+             HISTFILE and the capability of storing ISIS history labels
+  1997-06-01 LWK get obsext/mosnum from qube name in inverse mode and write them
+             to vicar label, so that a following forward-mode run will be able
+             to retrieve them (needed for catalog lookup)
+  1997-07-10 LWK save list of cube history tasknames and use these to add to
+             the ISIS VICAR history
+  1997-08-08 LWK added quotes to Lommel-Seeliger keyword (for Unix ISIS)
+  1997-09-14 LWK label changes (NATIVE_TIMEs in quotes, most _NOTEs converted
+             to comments) requested by PDS;  fixed conversion of NATIVE_TIME in
+             inverse mode:  make get_string_value ignore double quotes (");  
+             omit single quotes (') from OBSERVATION_NAME
+  1997-09-16 LWK remove quotes from NATIVE_TIMEs for now, in order to give ISIS
+             s/w a chance to prepare for this
+  1997-09-20 LWK added SPECIALP parameter and SPECIAL_PROCESSING label stuff
+  1997-10    LWK changed SINUSOIDAL to 'SINUSOIDAL_EQUAL-AREA' in Map proj'n type
+             to satisfy ISIS; write true GP in the GR_POS_nn tube backplanes;
+             changes for Unix ISIS compatibility:  added EAST/WESTERNMOST_LONG
+             keywords (redundant with MINUMUM/MAXIMUM);  added OFFSET_DIRECTION,
+             with switch of signs in LINE/SAMPLE_PROJECTION_OFFSET when TO_ORIGIN;
+             also, LINE/SAMPLE_PROJECTION_OFFSET should *not* have 1 added if
+             obtained thru MP calls, as those are already relative to (1,1)
+             (since jan'94) -- only if mpo2buf/buf2mpo used, and for Perspective,
+             where PLANET_CENTER_LINE/SAMPLE are not offsets;  only convert
+             Longitudes if POSITIVE_LONGITUDE_DIRECTION needs to be changed!
+  1997-10-01 LWK added SUPPNOTE, combined all qube NOTEs into one; removed NOTEs 
+             from 2D-Hist and Spectra in inverse mode;  revised SPECIAL_PROCESSING 
+             comment per RM intructions and moved it to the label (after the _TYPE 
+             item)
+  1997-10-06 LWK don't write geometry blackplanes and many label items for 
+             CALIBRATION data;  fixed a few label bugs in inverse mode (SCET format,
+             GRATING_STEPS/DELTA)
+  1997-10-15 LWK add single quotes (') back to OBSERVATION_NAME since these begin 
+             with a numeric from C10 on;  not double quotes, since this item is a
+             "literal", not a "string" (PDS distinction!)
+  1997-10-16 LWK changed SINUSOIDAL to 'SINUSOIDAL_EQUAL-AREA' in Map proj'n type;
+             write true GP in the GR_POS_nn tube backplanes
+  1997-10-19 LWK changes for Unix ISIS compatibility:  added EAST/WESTERNMOST_LONG
+             keywords (redundant with MINUMUM/MAXIMUM);  added OFFSET_DIRECTION, with
+             switch of signs in LINE/SAMPLE_PROJECTION_OFFSET when TO_ORIGIN;  also,
+             LINE/SAMPLE_PROJECTION_OFFSET should *not* have 1 added if obtained 
+             thru MP calls, as those are already relative to (1,1) (since jan'94)
+             -- only if mpo2buf/buf2mpo used, and for Perspective, where 
+             PLANET_CENTER_LINE/SAMPLE are not offsets;  only convert Longitudes
+             if POSITIVE_LONGITUDE_DIRECTION needs to be changed!
+  1997-10-05 LWK added RADIANCE_FACTOR to core types
+  1997-10-29 LWK added MAXIMUM_PIXEL_DISTORTION label item, and comments 
+             describing the footprint algorithm and label items
+  1997-12-09 LWK write TO_ORIGIN keyword to label for Perspective too!  added 
+             TO_ORI parameter to allow user to correct for cubes made without this;
+             support B_AXIS_RADIUS in inverse mode (mpbuf2mpo uses this only for
+             POV case, so should really convert to pure MP calls if this is 
+             significant for other projections)
+  1998-02-13 LWK fixed precision of NATIVE_..._TIME conversion;  allowed multiple
+             dark files (for NIMS98 calibration)
+  1998-02-15 LWK partially re-enabled quotes around NATIVE_..._TIMEs, since ISIS 
+             is now supposed to be able to handle this -- however, for now just
+             write spaces where the quotes will go, as a safer course (this allows
+             simple hand-editing);  write CUBE_SIZE label item in inverse mode for 
+             tube, so that a subsequent forward VISIS2 can recognize it as tube
+  1998-02-18 LWK fully re-enabled quotes around NATIVE_..._TIMEs
+  1998-03-08 LWK added RTI to NATIVE_START_TIME for the sake of the Spike file
+             conversion program
+  1998-03-12 LWK added keyword USECAT/NOCAT to allow suppression of catalog use
+  1998-04-06 LWK- don't use AACSFILE item for Calibration data;  write more items
+             to label for Calibration file (solar/cenbody distances, band_suffix...
+             items)
+  1998-04-08 LWK fixed START/STOP times to handle cubes made in inverse mode;
+             don't check task of cocube
+  1998-04-21 LWK changed double quotes around LOMMEL-SEELIGER to single
+  1998-04-29 LWK fixed code reading NATIVE_START_TIME in inverse mode to cover 
+             case of old cubes where this has only two fields;  also fixed 
+             NATIVE_STOP_TIME
+  1998-05-07 LWK allowed CORE_UNIT = DIMENSIONLESS (inverse mode)
+  1998-05-13 LWK removed references to BELOW_THRESH  & MISSING_SENSITIVITY from 
+             label
+  1998-05-14 LWK changes due to renaming of CALIBRATION target to CAL/SKY
+  1998-05-25 LWK changed CORE_NAME, CORE_UNIT, PRODUCT_ID for IOF cube
+  1998-05-27 LWK added BREAK to Histogram description;  also, get this from
+             HIST2D label since that's always present (but spec.plots may not be)
+  1998-06-07 LWK revisions to support PTUB/GTUBs (note that Inverse mode for 
+             this is TBD -- may never be needed!);  increased LABELMEMORY again 
+             (to 84000) for extra backplanes
+  1998-06-09 LWK revised Special Processing comment;  fixed "Footprint" note for
+             tube case
+  1998-06-22 LWK added cutoff & sensitivity ratios for hi-gain thermal regime
+             (label items only)
+  1998-06-24 LWK fixed processing of HISTFILE & associated label items
+  1998-06-29 LWK more fixes to HISTFILE (etc.) processing, for 2nd VISIS2 run
+             on a cube;  ensure that VERSION_DATE reflects pgm. version
+  1998-07-12 LWK ensure that COORDINATE_SYSTEM_NAME=PLANETOGRAPHIC is written
+             correctly in inverse mode (same fix as for NIMSCMM2 in feb97)
+  1998-07-28 LWK add check for zero meridian being in image when determining
+             EAST/WESTERNMOST_LONGITUDE
+  1998-08-12 LWK added message to above check;  adjust cen_lon to (-180,180)
+             range if min/max lon's are in this too
+  1998-08-13 LWK fixed mpxy2ll call for tube case
+  1998-08-14 LWK disabled mpxy2ll call and entire zero meridian check (since
+             nimscmm2 does it right now), because it still fails for certain
+             tube cases (e.g., R/T)
+  1998-08-15 LWK moved THERMAL_DETECTOR arrays out of BAND_BIN group because
+             they don't have the Band dimension
+  1998-09-19 LWK fixed MAP_SCALE in Perspective case (take target radius into
+             account)
+  1998-12-15 LWK changes for Unix:  made all functions that return values "int";
                 replaced variable "string" with "xstring" to avoid RTL collision
-  Apr 99  lwk-  removed MINIMUM/MAXIMUM_LONGITUDE items, revised EASTERNMOST/
+  1999-02-04 LWK changed CODMAC part of DATA_SET_ID to 3 for Tube case
+  1999-02-17 LWK added GRATING_STEP_INFLATION to history, renamed 
+             GRATING_CORRECTION to GRATING_POSITION_CORRECTION
+  1999-03-07 LWK allowed nbpln=5 when writing BAND_SUFFIX_NAME/UNIT for special
+             (non-NIMS) processing support
+  1999-03-21 LWK added 2 more decimals places to precision of pshift/ainfl in label
+  1999-04-04 LWK fixed CORE_UNITS comment for RADIANCE_FACTOR case (PI was wrong)
+  1999-04-09 LWK removed MINIMUM/MAXIMUM_LONGITUDE items, revised EASTERNMOST/
                 WESTERNMOST_LONGITUDE algorithm (yet again!) to ensure both items
                 are always positive;  note that current NIMSCMM2 always makes
                 min_lon < max_lon in VICAR label, but this will no longer be true
                 when an ISIS cube has been converted back to VICAR by VISIS2
                 (shouldn't matter!)
-  Aug 02  lwk-  added support for platform-dependent special-pixel values and
+  1999-04-11 LWK fixed determination of mphase, which was incorrect when 
+             TASK=VISIS2:  in forward mode need special keyword, in inverse must
+             search cube History;  fixed OBSNAME/OBSEXT processing for phase-0
+  1999-04-14 LWK fixed a bug processing BAND_BIN_ORIGINAL_BAND introduced by
+             previous change
+  1999-04-26 LWK added wobble parameters to History (only)
+  1999-05-17 LWK added wobble cone estimate 
+  1999-05-25 LWK removed WOBBLE_MODE item (per change in nimscmm2)
+  1999-07-19 LWK fixed mphase determination when task=NIMSCMM_SM
+  2000-01-26 LWK fixed Y2K bug in PRODUCT_CREATION_DATE
+  2000-01-25 LWK added SATURATION_THRESHOLD_WEIGHT label item and SCLK_GAPS
+             history item
+  2000-05-28 LWK check for SK_ID if SP_KERNEL is missing
+  2000-06-20 LWK fixed bug (found by BAM in VISISX on Linux, where it is fatal!)
+             in get_real_value where float/double are confused:  added routine 
+             get_double
+  2000-07-03 LWK changes for histogram-binning case
+  2001-01-10 LWK added label comment defining slant distance backplane
+  2001-08    LWK added support for platform-dependent special-pixel values and
                 label items
-  Mar 11  lwk-  added EAST_LON keyword for C.Phillips ISIS3 work
-  Nov 11  lwk-  changed format of START/STOP_TIME to conform to PDS stds
-  Feb 12  lwk-  changed 'SINUSOIDAL_EQUAL-AREA' back to SINUSOIDAL (see change in
+  2001-10-29 LWK replaced get_string_value by get_qstring_value in keyword_value
+             for string contstants
+  2002-08-17 LWK added code to support platform-dependent special-pixel values
+  2002-08-20 LWK also to support other platform-dependent label items
+  2002-09-17 LWK added U_NL,U_NS to zvopen calls with NOLABELS
+  2004-08-19 LWK fixed bug in get_recinfo() (inverse mode only)
+  2006-06-09 LWK disabled special code to read BEG/END_SCET (will give problems
+             for certain formats!  Fix is TBD as it seems non-urgent ...)
+  2006-06-14 LWK added check following xlgets on RAD_CONV/BASE
+  2007-04-07 LWK disable NOTE processing as it crashes 14ensucomp mosaic cube;
+             removed get_cat() and catalog include file; added quotes to
+             START/STOP_TIMEs to satisfy ISIS on Shifty
+  2009-09-17 LWK disabled PRODID (not used under unix)
+  2010-02-05 LWK added code in write_object to update the host information in TOVIC
+             mode
+  2011-03-14 LWK added EAST_LON keyword for C.Phillips ISIS3 work
+  2011-11-13 LWK changed format of START/STOP_TIME to conform to PDS stds
+  2012-02-03 LWK changed 'SINUSOIDAL_EQUAL-AREA' back to SINUSOIDAL (see change in
                 1997 above) -- Unix ISIS seems to have changed its syntax
+  2012-02-10 LWK added PC for Linux to list of hosts
+  2016-02-24 WLB Fixed 64-bit bugs and library call errors.
 
 .LEVEL1
 .VARI INP
@@ -5967,6 +6147,8 @@ body
 let _onfail="continue"
 let $echo="yes"     
 
+enable-log
+
 write "This is the test file for Program VISIS2"
 
 ush cp /project/test_work/testdata/gll/g7jnfeap4101a.3 edr_file
@@ -6016,591 +6198,11 @@ ush rm dbm_file
 ush rm sol_file
 ush rm CAL_FILE
 
-end-proc
-$!-----------------------------------------------------------------------------
-$ create tstvisis2.pdf_old
-procedure
-refgbl $echo
-refgbl $syschar
-parm user   (string,30) default=""
-parm password  (string,30) default=""
-parm server (string,30) default="MIPSDB1"
-parm db     (string,30) default="devCat"
-body
-let _onfail="continue"
-let $echo="yes"     
-
-
-THIS IS THE OLD TEST PROCEDURE FOR VISIS2 ON VMS.  IT WILL NOT RUN ON OUR
-CURRENT SYSTEM BECAUSE IT USES SYBASE, BUT IS INCLUDED IN THIS DELIVERY
-IN ORDER TO ILLUSTRATE THE VARIOUS WAYS IN WHICH VISIS2 CAN BE RUN.
-(09-Feb-2012, L.W.Kamp)
-
-
-write "This is the test file for Program VISIS2"
-
-!dcl assign dev:[lwk059.nims.data] test_data		! disable on delivery
-dcl assign wms_test_work:[testdata.sitod1.test_data.gll] test_data ! enable on delivery
-
-!dcl assign dev:[lwk059.nims.data] test_data1		! disable on delivery
-dcl assign wms_test_work:[testdata.gll] test_data1	! enable on delivery
-
-!dcl assign scr:[lwk059] test_output			! disable on delivery
-dcl assign scr:[mipl] test_output			! enable on delivery
-
-dcl isql/username="&user" /server_name="&server" /password="&password" /input=tstvisis2_rm2.isql
-
-catnims2 REQST_ID=101 REQUESTR="L.Kamp" +
-        aacsfil=test_data1:G7JNFEAP4101A.aacs  +
-        calfil=test_data1:NIMS94B_GS2_REF_V_01.CAL +
-        ikernel=spice$nims:nims_ikernel_mab.dat  +
-        OBSNAME="tstmos" obsext=A MOS_NUM=1 +
-        obsnote="testbed EDR with simulated pointing"  +
-        target=GANYMEDE phase=GANYMEDE_7_ENCOUNTER +
-        proj=ORTHO slew_tol=-1. +
-	SCLK=(389703400 389703878) +
-	SII_IMGS=1 FUNC1="(IN1+IN2)/2" BAND1=(4,7) +
-	PLOTS=1 AREA1=(2,2,3,3) 'MASK +
-	ASTRETCH=(1.0,0.0) RSTRETCH=(700.,1023.) +
-	GSTRETCH=(400.,1023.) BSTRETCH=(700.,1023.) +
-	RFORMUL="RED 700-1023" GFORMUL="GREEN 400-1023" +
-	BFORMUL="RED 700-1023" +
-	red_sii=1 grn_siid=6 blu_siid=6 +
-	catusr="&user" catpw="&password" 
-
-NIMSCMM2 edr=test_data1:G7JNFEAP4101A.3 +
-        cube=test_output:tst1.cub  +
-        aacsfil=test_data1:G7JNFEAP4101A.aacs  +
-        calfil=test_data1:NIMS94B_GS2_REF_V_01.CAL +
-        ikernel=spice$nims:nims_ikernel_mab.dat  +
-        OBSNAME="tstmos" obsext=A MOS_NUM=1 +
-        prodnote="testbed EDR with simulated pointing"  +
-        obsnote="testbed EDR with simulated pointing"  +
-        target=GANYMEDE phase=GANYMEDE_7_ENCOUNTER +
-        proj=ORTHO slew_tol=-1. +
-	'catupdt catusr="&user" catpw="&password" 
-
-!  LIST ONE BAND FOR CHECK ON INVERSE MODE, BELOW:
-list test_output:tst1.cub nb=1
-
-hist2d test_output:tst1.cub test_output:tst1.h2d out_nl=256 out_ns=408 'DN
-
-specplot test_output:tst1.cub test_output:tst1.spec1 AREA1=(2,2,3,3) 
-
-VISIS2 (test_output:tst1.h2d, test_output:tst1.spec1, +
-	test_output:tst1.cub, test_output:tst1.coc) +
-	test_output:tst1.qub +
-	catusr="&user" catpw="&password" 
-
-isislab test_output:tst1.qub 
-
-dcl isql/username="&user" /server_name="&server" /password="&password" /input=tstvisis2_prnt2.isql
-
-!  TEST INVERSE MODE:  OUTPUT (TST1.CUB) MUST BE SAME AS INPUT ABOVE
-
-VISIS2 test_output:tst1.qub +
-	(test_output:h, test_output:s, +
-	test_output:tst1.cub, test_output:tst1.coc) +
-	catusr="&user" catpw="&password" 
-
-! COMPARE THIS WITH ABOVE LIST:
-list test_output:tst1.cub nb=1
-
-! now execute the old test proc for VISIS to test phase-1 capability:
-
-dcl isql/username="&user" /server_name="&server" /password="&password" /input=tstvisis2_rm.isql
-
-! (specify obsext=1 to conform to SYSNIMS & NIMSCMM convention)
-
-catnims2 obsname="tstmos" obsext=1 mos_num=1 +
-	obsnote="standard test case for nimscmm" +
-	requestr="mcneill" reqst_id=1 +
-	sclk=(18044737,18046171) phase=venus_enc target=venus +
-	sii_imgs=8 plots=6 +
-	func1="in1" band1=1 +
-	func2="in1" band2=3 +
-	func3="in1" band3=5 +
-	func4="in1" band4=7 +
-	func5="in1" band5=9 +
-	func6="in1" band6=11 +
-	func7="in1" band7=13 +
-	func8="in1" band8=15 +
-	astretch=(1.0,0.05) +
-	rstretch=(10,1000) gstretch=(10,1000) bstretch=(10,1000) +
-	red_siid=20 grn_siid=139 blu_siid=94 +
-	rformula="(B89+B10+B400)/B32" +
-	gformula="(B8+B60+B400)/B32" +
-	bformula="(B129+B50+B400)/B300" +
-	b_picno="34428" e_picno="34437" +
-	calfile=test_data:venus.calx +
-	proj=mercator tielat=30 tielon=30 scale=45 +
-	outsiz=(180,266) 'fill 'mask +
-	area1=(1,1,50,10) area2=(20,1,50,10) area3=(40,1,50,10) +
-	area4=(60,1,50,10) area5=(80,1,50,10) area6=(100,1,50,10) 'procg +
-	catusr="&user" catpw="&password" 
-
-WRITE "DISPLAY PROCESSING DOMAIN RECORDS"
-
-dcl isql/username="&user" /server_name="&server" /password="&password" /input=tstvisis2_prnt.isql
-
-WRITE "CREATE FIXED GRATING CUBE:"
-
-NIMSCMM edr=test_data:n0018044737.e +
-	calfile=test_data:venus.calx +
-        cube=test_output:venus.cub  +
-	wtfil=wtfil +
-	obsname="tstmos" prodnote="standard test case for NIMSCMM" +
-	obsnote="Venus Partial Disk Imaging #1" +
-	target=VENUS phase=VENUS_ENC catalog=CATUPDT +
-	proj=MERCATOR tielat=30 tielon=330 scale=45 +
-	outsiz=(180,266) 'FILL +
-	'catupdt catusr="&user" catpw="&password" 
-
-WRITE "LIST VICAR LABEL OF CUBE"
-
-label-l test_output:venus.cub 
-
-WRITE "EXTRACT EIGHT BANDS FROM THE CUBE"
-
-tran test_output:venus.cub (p1,p2,p3,p4,p5,p6,p7,p8) bands=(1,3,5,7,9,11,13,15)
-
-WRITE "CONVERT BANDS TO REAL FORMAT"
-
-f2 p1 p1r 'real
-f2 p2 p2r 'real
-f2 p3 p3r 'real
-f2 p4 p4r 'real
-f2 p5 p5r 'real
-f2 p6 p6r 'real
-f2 p6 p7r 'real
-f2 p6 p8r 'real
-
-WRITE "CREATE PSEUDO-SPECTRAL-INDEX-IMAGE FROM THE EIGHT BANDS"
-
-gen sii nl=180 ns=266 nb=8 ival=0 'real
-
-insert3d (sii,p1r) a   band=1 'over
-insert3d (a,p2r)   sii band=2 'over
-insert3d (sii,p3r) a   band=3 'over 
-insert3d (a,p4r)   sii Band=4 'over
-insert3d (sii,p5r) a   band=5 'over 
-insert3d (a,p6r)   sii band=6 'over 
-insert3d (sii,p7r) a   band=7 'over 
-insert3d (a,p8r)   sii band=8 'over 
-
-WRITE "CREATE 2-D HISTOGRAM FROM CUBE"
-
-hist2d test_output:venus.cub hist out_nl=256 out_ns=408 'DN
-
-WRITE "GENERATE SPECTRAL PLOTS FROM CUBE"
-
-specplot test_output:venus.cub (s1,s2,s3,s4,s5,s6) +
-	area1=(1,1,50,10) area2=(20,1,50,10) area3=(40,1,50,10) +
-	area4=(60,1,50,10) area5=(80,1,50,10) area6=(100,1,50,10)
-
-WRITE "THE FOLLOWING THREE CALLS TO VISIS SHOULD RESULT IN ERRORS"
-
-visis2 (test_output:venus.cub, test_output:venus.coc) +
- test_output:venus.qub requestr="mcneill" 
-
-visis2 ( test_output:venus.cub, hist, test_output:venus.coc) +
- test_output:venus.qub requestr="mcneill"
-
-visis2 ( test_output:venus.coc, hist, test_output:venus.cub) +
- test_output:venus.qub requestr="mcneill"
-
-WRITE "THE FOLLOWING CALL TO VISIS SHOULD BE SUCCESSFUL."
-
-visis2 (hist, test_output:venus.cub, test_output:venus.coc) +
- test_output:venus.qub requestr="mcneill" task=nimscmm  +
- catusr="&user" catpw="&password" 
-
-WRITE "DISPLAY THE PDS LABEL"
-
-isislab test_output:venus.qub 
-
-WRITE "TEST INVERSE MODE:"
-
-WRITE "THE FOLLOWING TWO CALLS TO VISIS SHOULD RESULT IN ERRORS."
-
-visis2 test_output:venus.qub (venuscb, test_output:venuscc) 
-
-visis2 test_output:venus.qub (h, s1, test_output:venuscb, test_output:venuscc) 
-
-write "The following call to VISIS should be successful."
-
-visis2 test_output:venus.qub (h, test_output:venuscb, test_output:venuscc) +
- task=nimscmm catusr="&user" catpw="&password" 
-
-WRITE "COMPARE NEW VICAR LABEL WITH THE ORIGINAL"
-label-list test_output:venus.cub
-label-list test_output:venuscb
-
-WRITE "EXTRACT BANDS FROM CUBES AND ENSURE VICAR FILES"
-WRITE "LOADED INTO ISIS CUBE ARE THE SAME AS VICAR FILES"
-WRITE "EXTRACTED FROM SAME ISIS CUBE."
-
-tran test_output:venuscb (a,b,c) bands=(3,5,7)
-tran test_output:venus.cub (aa,bb,cc) bands=(3,5,7)
-difpic (a,aa)
-difpic (b,bb)
-difpic (c,cc)
-
-tran test_output:venuscc (a,b,c) bands=(3,5,7)
-tran test_output:venus.coc (aa,bb,cc) bands=(3,5,7)
-difpic (a,aa)
-difpic (b,bb)
-difpic (c,cc)
-
-difpic (h,hist)
-
-WRITE "NOW USE ONE SPECTRAL PLOT AND THE SPECTRAL INDEX IMAGE FILE"
-
-visis2 (hist,s1,test_output:venus.cub,test_output:venus.coc,sii) +
- test_output:venus.qub requestr="mcneill" task=nimscmm  +
- catusr="&user" catpw="&password" 
-
-visis2 test_output:venus.qub (h, s, test_output:venuscb, +
- test_output:venuscc, si) task=nimscmm +
- catusr="&user" catpw="&password" 
-
-tran test_output:venuscb (a,b,c) bands=(3,5,7)
-tran test_output:venus.cub (aa,bb,cc) bands=(3,5,7)
-difpic (a,aa)
-difpic (b,bb)
-difpic (c,cc)
-
-tran test_output:venuscc (a,b,c) bands=(3,5,7)
-tran test_output:venus.coc (aa,bb,cc) bands=(3,5,7)
-difpic (a,aa)
-difpic (b,bb)
-difpic (c,cc)
-
-tran sii (a,b,c) bands=(3,5,7)
-tran si (aa,bb,cc) bands=(3,5,7)
-difpic (a,aa)
-difpic (b,bb)
-difpic (c,cc)
-
-difpic (h,hist)
-difpic (s,s1)
-
-WRITE "NOW USE SIX SPECTRAL PLOTS AND THE SPECTRAL INDEX IMAGE FILE"
-
-visis2 (hist,s1,s2,s3,s4,s5,s6,test_output:venus.cub,test_output:venus.coc, +
- sii) test_output:venus.qub requestr="mcneill" task=nimscmm +
- catusr="&user" catpw="&password" 
-
-visis2 test_output:venus.qub (h,sone,stwo,sthree,sfour,sfive,ssix, +
- test_output:venuscb,test_output:venuscc,sii) task=nimscmm +
- catusr="&user" catpw="&password" 
-
-tran test_output:venuscb (a,b,c) bands=(3,5,7)
-tran test_output:venus.cub (aa,bb,cc) bands=(3,5,7)
-difpic (a,aa)
-difpic (b,bb)
-difpic (c,cc)
-
-tran test_output:venuscc (a,b,c) bands=(3,5,7)
-tran test_output:venus.coc (aa,bb,cc) bands=(3,5,7)
-difpic (a,aa)
-difpic (b,bb)
-difpic (c,cc)
-
-tran sii (a,b,c) bands=(3,5,7)
-tran si (aa,bb,cc) bands=(3,5,7)
-difpic (a,aa)
-difpic (b,bb)
-difpic (c,cc)
-
-difpic (h,hist)
-difpic (s1,sone)
-difpic (s2,stwo)
-difpic (s3,sthree)
-difpic (s4,sfour)
-difpic (s5,sfive)
-difpic (s6,ssix)
-
-WRITE "NEXT TEST USES RADIANCE CUBE"
-
-WRITE "STORE NEW TEST RECORDS"
-
-dcl isql/username="&user" /server_name="&server" /password="&password" /input=tstvisis2_rm1.isql
-
-catnims2 obsname="SSI" obsext=1 mos_num=1 +
-	obsnote="first SSI ridealong data" +
-	requestr="mcneill" reqst_id=2 +
-	sclk=(18494403,18494490) phase=venus_enc target=venus +
-	proj=ortho outsiz=(30,3) +
-	photfunc=lambertf caltype=rad +
-	darkfile=test_data:venus.drk +
-	calfile=test_data:venus.calx +
-	solfile=test_data:nims_solar.dat +
-	sii_imgs=8 plots=3 +
-	func1="in1" band1=1 +
-	func2="in1" band2=3 +
-	func3="in1" band3=5 +
-	func4="in1" band4=7 +
-	func5="in1" band5=9 +
-	func6="in1" band6=11 +
-	func7="in1" band7=13 +
-	func8="in1" band8=15 +
-	astretch=(1.0,0.05) +
-	rstretch=(10,1000) gstretch=(10,1000) bstretch=(10,1000) +
-	red_siid=20 grn_siid=139 blu_siid=94 +
-	rformula="(B89+B10+B400)/B32" +
-	gformula="(B8+B60+B400)/B32" +
-	bformula="(B129+B50+B400)/B300" +
-	filpar=(3,3) delrad=140.0 +
-	b_picno="34428" e_picno="34437" +
-	area1=(1,1,20,3) area2=(20,1,5,3) area3=(15,1,5,3) 'fill +
-	'procg +
-	catusr="&user" catpw="&password" 
-
-WRITE "DISPLAY PROCESSING DOMAIN RECORDS"
-
-dcl isql/username="&user" /server_name="&server" /password="&password" /input=tstvisis2_prnt1.isql
-
-WRITE "CREATE SSI RIDEALONG CUBE:"
-
-NIMSCMM edr=test_data:n0018494403.e +
-	calfile=test_data:venus.calx +
-	darkfile=test_data:venus.drk +
-	solfile=test_data:nims_solar.dat +
-        cube=test_output:venus.cub  +
-	wtfil=wtfil +
-	obsname="SSI" prodnote="first SSI ridealong data" +
-	obsnote="first SSI ridealong data" +
-	phase=VENUS_ENC target=VENUS +
-	outsiz=(30,3) 'FILL FILPAR=(3,3) +
-	proj=ORTHO DELRAD=140.0 +
-	PHOTFUNC=LAMBERTF CALTYPE=RAD +
-	'catupdt catusr="&user" catpw="&password" 
-
-WRITE "EXTRACT THREE BANDS FROM THE CUBE"
-
-nimsfloat test_output:venus.cub p1 snb=(10,1)
-nimsfloat test_output:venus.cub p2 snb=(50,1)
-nimsfloat test_output:venus.cub p3 snb=(400,1)
-
-WRITE "CREATE PSEUDO-SPECTRAL-INDEX-IMAGE FROM THESE BANDS"
-
-gen sii nl=24 ns=3 nb=3 ival=0 'real
-insert3d (sii,p1) a   band=1 'over
-insert3d (a,p2)   sii band=2 'over
-insert3d (sii,p3) a   band=3 'over 
-
-WRITE "CREATE 2-D HISTOGRAM FROM CUBE"
-
-hist2d test_output:venus.cub hist out_nl=256 out_ns=408 'DN
-
-visis2 (hist, test_output:venus.cub, test_output:venus.coc) +
- test_output:venus.qub requestr="mcneill" task=nimscmm +
- catusr="&user" catpw="&password" 
-
-isislab test_output:venus.qub
-
-visis2 test_output:venus.qub (h, test_output:venuscb, test_output:venuscc) +
- task=nimscmm catusr="&user" catpw="&password" 
-
-WRITE "COMPARE VICAR LABEL WITH ORIGINAL"
-label-list test_output:venus.cub
-label-list test_output:venuscb
-
-WRITE "GENERATE SPECTRAL PLOTS AND PUT THESE INTO ISIS CUBE"
-
-specplot test_output:venus.cub (s1,s2,s3) +
-	area1=(1,1,20,3) area2=(20,1,5,3) area3=(15,1,5,3) 
-
-visis2 (hist,s1,s2,s3,test_output:venus.cub,test_output:venus.coc,sii) +
- test_output:venus.qub requestr="mcneill" task=nimscmm +
- catusr="&user" catpw="&password" 
-
-isislab test_output:venus.qub
-
-visis2 test_output:venus.qub (h,sone,stwo,sthree,test_output:venuscb, +
- test_output:venuscc,sii) task=nimscmm +
- catusr="&user" catpw="&password" 
-
-WRITE "REPEAT ABOVE PROCEDURE FOR VARIOUS CUBE TYPES"
-
-WRITE "FIRST POV PROJECTION -- also test FOOTPRINT parameters"
-
-dcl isql/username="&user" /server_name="&server" /password="&password" /input=tstvisis2_rm.isql
-
-catnims2 obsname=tstmos obsext=1 mos_num=1 +
-	obsnote="standard test case for nimscmm" +
-	requestr="mcneill" reqst_id=3 +
-	sclk=(18044737,18046171) phase=venus_enc target=venus +
-	proj=pov outsiz=(180,266) +
-	'footprnt fpngrid=8 +
-	calfile=test_data:venus.calx +
-	sii_imgs=8 plots=3 +
-	func1="in1" band1=1 +
-	func2="in1" band2=3 +
-	func3="in1" band3=5 +
-	func4="in1" band4=7 +
-	func5="in1" band5=9 +
-	func6="in1" band6=11 +
-	func7="in1" band7=13 +
-	func8="in1" band8=15 +
-	astretch=(1.0,0.05) +
-	rstretch=(10,1000) gstretch=(10,1000) bstretch=(10,1000) +
-	red_siid=20 grn_siid=139 blu_siid=94 +
-	rformula="(B89+B10+B400)/B32" +
-	gformula="(B8+B60+B400)/B32" +
-	bformula="(B129+B50+B400)/B300" +
-	b_picno="34428" e_picno="34437" +
-	area1=(1,1,50,10) area2=(20,1,50,10) area3=(40,1,50,10) +
-	'procg +
-	catusr="&user" catpw="&password" 
-
-dcl isql/username="&user" /server_name="&server" /password="&password" /input=tstvisis2_prnt.isql
-
-nimscmm edr=test_data:n0018044737.e +
-	calfile=test_data:venus.calx +
-        cube=test_output:venus.cub  +
-	wtfil=wtfil +
-	obsname="tstmos" prodnote="standard test case for nimscmm" +
-	obsnote="Venus Partial Disk Imaging #1" +
-	target=VENUS phase=VENUS_ENC proj=pov outsiz=(180,266) +
-	'footprnt fpngrid=8 +
-	'catupdt catusr="&user" catpw="&password" 
-
-tran test_output:venus.cub (p1,p2,p3,p4,p5,p6,p7,p8) bands=(1,3,5,7,9,11,13,15)
-
-f2 p1 p1r 'real
-f2 p2 p2r 'real
-f2 p3 p3r 'real
-f2 p4 p4r 'real
-f2 p5 p5r 'real
-f2 p6 p6r 'real
-f2 p7 p7r 'real
-f2 p8 p8r 'real
-
-gen sii nl=180 ns=266 nb=8 ival=0 'real
-
-insert3d (sii,p1r) a   band=1 'over
-insert3d (a,p2r)   sii band=2 'over
-insert3d (sii,p3r) a   band=3 'over 
-insert3d (a,p4r)   sii Band=4 'over
-insert3d (sii,p5r) a   band=5 'over 
-insert3d (a,p6r)   sii band=6 'over 
-insert3d (sii,p7r) a   band=7 'over 
-insert3d (a,p8r)   sii band=8 'over 
-
-hist2d test_output:venus.cub hist out_nl=256 out_ns=408 'DN
-
-specplot test_output:venus.cub (s1,s2,s3) +
-	area1=(1,1,50,10) area2=(20,1,50,10) area3=(40,1,50,10) 
-
-visis2 (hist,s1,s2,s3,test_output:venus.cub,test_output:venus.coc,sii) +
- test_output:venus.qub task=nimscmm +
- catusr="&user" catpw="&password" 
-
-isislab test_output:venus.qub
-
-visis2 test_output:venus.qub (h,sone,stwo,sthree,test_output:venuscb, +
- test_output:venuscc,si) task=nimscmm +
- catusr="&user" catpw="&password" 
-
-WRITE "COMPARE VICAR LABEL WITH ORIGINAL"
-label-list test_output:venus.cub
-label-list test_output:venuscb
-
-WRITE "COMPARE SELECTED CUBE BANDS:"
-tran test_output:venuscb (a,b,c) bands=(3,5,7)
-tran test_output:venus.cub (aa,bb,cc) bands=(3,5,7)
-difpic (a,aa)
-difpic (b,bb)
-difpic (c,cc)
-
-WRITE "COMPARE SELECTED COCUBE BANDS:"
-tran test_output:venuscc (a,b,c) bands=(3,5,7)
-tran test_output:venus.coc (aa,bb,cc) bands=(3,5,7)
-difpic (a,aa)
-difpic (b,bb)
-difpic (c,cc)
-
-WRITE "COMPARE SELECTED SPECTRAL-IMAGE BANDS:"
-tran sii (a,b,c) bands=(3,5,7)
-tran si (aa,bb,cc) bands=(3,5,7)
-difpic (a,aa)
-difpic (b,bb)
-difpic (c,cc)
-
-WRITE "COMPARE HIST & SPECPLOTS:"
-difpic (h,hist)
-difpic (s1,sone)
-difpic (s2,stwo)
-difpic (s3,sthree)
-
-WRITE " TEST ONE OF THE E-2 SPECIAL MODES:"
-
-NIMSCMM EDR=test_data1:N0165067500.1 udrinp=1 +
-	cube=test_output:tst2.cub +
-	calfile=test_data:venus.calx +
-	dbmfile=test_data1:boom_obscuration.nim +
-	OBSNA=E2WNLOWCAL01 +
-	OBSNOT="E-2 Low Light Calibration" +
-	PHASE=EARTH_2_ENC TARGET=earth PROJ=ORTHO scale=76. +
-	'catnoup catusr="&user" catpw="&password" 
-
-visis2 (hist,test_output:tst2.cub,test_output:tst2.coc) +
- test_output:tst2.qub task=nimscmm +
- catusr="&user" catpw="&password" 
-
-isislab test_output:tst2.qub
-
-WRITE " REPEAT WITH POV PROJECTION TO SEE LATITUDE NOTE:"
-
-NIMSCMM EDR=test_data1:N0165067500.1 udrinp=1 +
-	cube=test_output:tst3.cub +
-	calfile=test_data:venus.calx +
-	dbmfile=test_data1:boom_obscuration.nim +
-	OBSNA=E2WNLOWCAL01 +
-	OBSNOT="E-2 Low Light Calibration" +
-	PHASE=EARTH_2_ENC TARGET=earth PROJ=pov +
-	'catnoup catusr="&user" catpw="&password" 
-
-visis2 (hist,test_output:tst3.cub,test_output:tst3.coc) +
- test_output:tst3.qub task=nimscmm +
- catusr="&user" catpw="&password" 
-
-isislab test_output:tst3.qub
-
-WRITE " TEST SAFE MODE:"
-
-NIMSCMM EDR=test_data1:n0164907900.1 udrinp=1 +
-        cube=test_output:tst4.cub +
-        calfile=test_data:venus.calx +
-	dbmfile=test_data1:boom_obscuration.nim +
-        OBSNA=E2LPLUNFAZ01 +
-        OBSNOT="SAFE mode UVS ridealong" +
-        PHASE=EARTH_2_ENC TARGET=moon PROJ=ORTHO scale=100. +
-	'catnoup catusr="&user" catpw="&password" 
-
-visis2 (hist,test_output:tst4.cub,test_output:tst4.coc) +
- test_output:tst4.qub task=nimscmm +
- catusr="&user" catpw="&password" 
-
-isislab test_output:tst4.qub
-
-!  clean up:
-dcl isql/username="&user" /server_name="&server" /password="&password" /input=tstvisis2_rm.isql
-dcl isql/username="&user" /server_name="&server" /password="&password" /input=tstvisis2_rm1.isql
-dcl isql/username="&user" /server_name="&server" /password="&password" /input=tstvisis2_rm2.isql
-dcl del test_output:venus.cub.*
-dcl del test_output:venus.coc.*
-dcl del test_output:venus.qub.*
-dcl del test_output:tst%.cub.*,test_output:tst%.coc.*,test_output:tst%.qub.*
+disable-log
 
 end-proc
 $!-----------------------------------------------------------------------------
-$ create tstvisis2.log_solos
-tstvisis2
-let _onfail="continue"
-let $echo="yes"
+$ create tstvisis2.log
 write "This is the test file for Program VISIS2"
 This is the test file for Program VISIS2
 ush cp /project/test_work/testdata/gll/g7jnfeap4101a.3 edr_file
@@ -6623,7 +6225,7 @@ NIMSCMM2 edr=edr_file  +
         proj=pov slew_tol=-1.  +
 	outsiz=(9,5)
 Beginning VICAR task NIMSCMM2
- *** NIMSCMM2 Version 10-jan-2012 ***
+ *** NIMSCMM2 Version 11-jan-2012 ***
  ** Body is not a spheroid, planetographic is undefined
  
  No radiance calibration done, raw DN is output
@@ -6674,7 +6276,7 @@ list G7JNFEAP4101A.CUB nb=1
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:NIMSCMM2  User:lwk       Date_Time:Thu Feb  9 15:02:07 2012
+ Task:NIMSCMM2  User:wlb       Date_Time:Wed Feb 24 14:12:42 2016
  ***********
  Band =     1
  ***********
@@ -6694,500 +6296,7 @@ Beginning VICAR task hist2d
  *** Program HIST2D version 26-May-03 ***
 VISIS2 (tst1.h2d G7JNFEAP4101A.CUB G7JNFEAP4101A.COC) G7JNFEAP4101A.QUB
 Beginning VICAR task VISIS2
-*** VISIS2 Version 03-Feb-2012 ***
- Forward mode:  ISIS cube will be generated from VICAR files
-FILE 1 copied
-FILE 2 copied
-FILE 3 copied
-isislab G7JNFEAP4101A.QUB
-Beginning VICAR task isislab
-*** ISISLAB version 3-Nov-05 ***
- 
-********** LABEL OBJECT **********
- 
-CSD3ZF0000100000001NJPL3IF0PDS200000001 = SFDU_LABEL
-
-/* File Structure */
-
-RECORD_TYPE = FIXED_LENGTH
-RECORD_BYTES = 512
-FILE_RECORDS =    274
-LABEL_RECORDS =     31
-FILE_STATE = CLEAN
-
-^HISTORY =     32
-OBJECT = HISTORY
-END_OBJECT = HISTORY
-
-^HISTOGRAM_IMAGE =     55
-OBJECT = HISTOGRAM_IMAGE
-/* Two dim histogram image structure */
- LINES = 256
- LINE_SAMPLES = 408
- SAMPLE_TYPE = UNSIGNED_INTEGER
- SAMPLE_BITS = 8
- SAMPLE_NAME = BAND
- LINE_NAME = INTENSITY
- NOTE = "This is an unannotated two-dimensional histogram 'image' showing
-  frequency of measured 'Intensity' versus band number.  The 'Intensity'
-  may be DN, Radiance, or BDRF (Bi-Directional Reflectance), or a
-  combination of BDRF with Radiance, with BDRF below a cutoff band
-  number and radiance above.  The cutoff is defined by:
-  BDRF_RAD_TRANSITION_BAND_NUMBER.
-  The 'Intensity' is DN only if CORE_NAME in the QUBE object is
-  RAW_DATA_NUMBER."
- BDRF_RAD_TRANSITION_BAND_NUMBER = 1
-END_OBJECT = HISTOGRAM_IMAGE
-
-^QUBE =    259
-OBJECT = QUBE
-
-/* Qube structure */
-
- AXES = 3
- AXIS_NAME = (SAMPLE,LINE,BAND)
-
-/*  Core description */
-
- CORE_ITEMS = (5,9,68)
- CORE_ITEM_BYTES = 2
- CORE_ITEM_TYPE = SUN_INTEGER
- CORE_BASE = 0.0
- CORE_MULTIPLIER = 1.0
-/* Core scaling is:  True_value = base + (multiplier * stored_value) */
- CORE_VALID_MINIMUM =         -32752
- CORE_HIGH_REPR_SATURATION =  -32764
- CORE_HIGH_INSTR_SATURATION = -32765
- CORE_LOW_INSTR_SATURATION =  -32766
- CORE_LOW_REPR_SATURATION =   -32767
- CORE_NULL =                  -32768
- CORE_NAME = RAW_DATA_NUMBER
- CORE_UNIT = DIMENSIONLESS
-
- SPATIAL_BINNING_TYPE = FOOTPRINT_AVERAGE
- THRESHOLD_WEIGHT = 0.10000
- FOOTPRINT_GRID_SIZE = 10
- SATURATION_THRESHOLD_WEIGHT = 0.50000
-/* Each NIMS raw DN was averaged over its entire footprint, which was */
-/* approximated by computing the location of its four corner points and */
-/* covering the resulting quadrilateral with a grid;  the weight of each DN */
-/* in a given output pixel is the number of grid points falling in that */
-/* pixel, weighted by the instrument response function. */
-/* FOOTPRINT_GRID_SIZE is the number of points used in each dimension for */
-/* the grid. */
-/* THRESHOLD_WEIGHT is the lower limit for the average: if the total weight */
-/* contributing to an output pixel is below this limit, then the output DN */
-/* is set to NULL. */
-
- DARK_UPDATE_TYPE = NOUPDAT
- FILL_BOX_SIZE = 0
- FILL_MIN_VALID_PIXELS = 0
- PHOTOMETRIC_CORRECTION_TYPE = NONE
-
-/*  Suffix description  */
-
- SUFFIX_BYTES = 4
- SUFFIX_ITEMS = (0,0,9)
- BAND_SUFFIX_NAME = (LATITUDE,LONGITUDE,INCIDENCE_ANGLE,
-  EMISSION_ANGLE,PHASE_ANGLE,SLANT_DISTANCE,INTERCEPT_ALTITUDE,
-  PHASE_ANGLE_STD_DEV,RAW_DATA_NUMBER_STD_DEV)
- BAND_SUFFIX_UNIT = (DEGREE,DEGREE,DEGREE,DEGREE,DEGREE,KILOMETER,
-  KILOMETER,DEGREE,DIMENSIONLESS)
- BAND_SUFFIX_ITEM_BYTES = (4,4,4,4,4,4,4,4,4)
- BAND_SUFFIX_ITEM_TYPE = (SUN_REAL,SUN_REAL,SUN_REAL,SUN_REAL,
-     SUN_REAL,SUN_REAL,SUN_REAL,SUN_REAL,SUN_REAL)
- BAND_SUFFIX_BASE = (0.000000,0.000000,0.000000,0.000000,0.000000,
-     0.000000,0.000000,0.000000,0.000000)
- BAND_SUFFIX_MULTIPLIER = (1.000000,1.000000,1.000000,1.000000,
-     1.000000,1.000000,1.000000,1.000000,1.000000)
- BAND_SUFFIX_VALID_MINIMUM  = (16#FF7FFFFA#,16#FF7FFFFA#,16#FF7FFFFA#,
-     16#FF7FFFFA#,16#FF7FFFFA#,16#FF7FFFFA#,16#FF7FFFFA#,16#FF7FFFFA#,
-     16#FF7FFFFA#)
- BAND_SUFFIX_NULL           = (16#FF7FFFFB#,16#FF7FFFFB#,16#FF7FFFFB#,
-     16#FF7FFFFB#,16#FF7FFFFB#,16#FF7FFFFB#,16#FF7FFFFB#,16#FF7FFFFB#,
-     16#FF7FFFFB#)
- BAND_SUFFIX_LOW_REPR_SAT   = (16#FF7FFFFC#,16#FF7FFFFC#,16#FF7FFFFC#,
-     16#FF7FFFFC#,16#FF7FFFFC#,16#FF7FFFFC#,16#FF7FFFFC#,16#FF7FFFFC#,
-     16#FF7FFFFC#)
- BAND_SUFFIX_LOW_INSTR_SAT  = (16#FF7FFFFD#,16#FF7FFFFD#,16#FF7FFFFD#,
-     16#FF7FFFFD#,16#FF7FFFFD#,16#FF7FFFFD#,16#FF7FFFFD#,16#FF7FFFFD#,
-     16#FF7FFFFD#)
- BAND_SUFFIX_HIGH_INSTR_SAT = (16#FF7FFFFE#,16#FF7FFFFE#,16#FF7FFFFE#,
-     16#FF7FFFFE#,16#FF7FFFFE#,16#FF7FFFFE#,16#FF7FFFFE#,16#FF7FFFFE#,
-     16#FF7FFFFE#)
- BAND_SUFFIX_HIGH_REPR_SAT  = (16#FF7FFFFF#,16#FF7FFFFF#,16#FF7FFFFF#,
-     16#FF7FFFFF#,16#FF7FFFFF#,16#FF7FFFFF#,16#FF7FFFFF#,16#FF7FFFFF#,
-     16#FF7FFFFF#)
-
-/* The backplanes contain 7 geometric parameters, the standard deviation */
-/* of one of them, the standard deviation of a selected data band, */
-/* and 0 to 10 'spectral index' bands, each a user-specified function of the */
-/* data bands.  (See the BAND SUFFIX NAME values.) */
-
-/* Longitude ranges from 0 to 360 degrees, with positive direction */
-/* specified by POSITIVE LONGITUDE DIRECTION in the IMAGE MAP PROJECTION */
-/*  group.  Latitudes are planetocentric. */
-
-/* SLANT DISTANCE contains the distance from the observer to the */
-/* intercept point of the line of sight with the target body surface. */
-/* Normally, this is the distance at the time of observation (or */
-/* the mean time, when projected pixels are averaged).  However, */
-/* in the case of a Perspective projection, the distance is measured */
-/* from the perspective point of the projection. */
-
-/* INTERCEPT ALTITUDE contains values for the DIFFERENCE between */
-/* the length of the normal from the center of the target body to the */
-/* line of sight AND the radius of the target body.  On-target points */
-/* have zero values.  Points beyond the maximum expanded radius have */
-/* null values.  This plane thus also serves as a set of "off-limb" */
-/* flags.  It is meaningful only for the ORTHOGRAPHIC and */
-/* POINT PERSPECTIVE projections; otherwise all values are zero. */
-
-/* The geometric standard deviation backplane contains the standard */
-/* deviation of the geometry backplane indicated in its NAME. */
-
-/* The data band standard deviation plane is computed for the NIMS data */
-/* band specified by STD DEV SELECTED BAND NUMBER.  This may be either */
-/* a raw data number, or spectral radiance, whichever is indicated by */
-/* CORE NAME. */"
-
- STD_DEV_SELECTED_BAND_NUMBER = 34
- STD_DEV_SELECTED_BACKPLANE = 5
-
-/*  Data description: general */
-
- DATA_SET_ID = 'GO-J-NIMS-4-MOSAIC-V1.0'
- SPACECRAFT_NAME = GALILEO_ORBITER
- MISSION_PHASE_NAME = GANYMEDE_7_ENCOUNTER
- INSTRUMENT_NAME = 'NEAR INFRARED MAPPING SPECTROMETER'
- INSTRUMENT_ID = NIMS
- ^INSTRUMENT_DESCRIPTION = "NIMSINST.TXT"
-
- TARGET_NAME = GANYMEDE
- START_TIME = "1997-04-03T17:31:10Z"
- STOP_TIME = "1997-04-03T17:36:05Z"
- NATIVE_START_TIME = "3897034.00.0"
- NATIVE_STOP_TIME = "3897038.78"
-
- OBSERVATION_NAME = ' '
- PRODUCT_ID = ""
- PRODUCT_CREATION_DATE = 2012-02-09
- IMAGE_ID = NULL
-
- INCIDENCE_ANGLE = 89.06
- EMISSION_ANGLE = 11.84
- PHASE_ANGLE = 95.53
- SOLAR_AZIMUTH = 38.90
- SUB_SPACECRAFT_AZIMUTH = 101.03
- START_SUB_SPACECRAFT_LATITUDE = -0.31
- START_SUB_SPACECRAFT_LONGITUDE = 315.12
- STOP_SUB_SPACECRAFT_LATITUDE = -0.31
- STOP_SUB_SPACECRAFT_LONGITUDE = 315.18
- START_SUB_SOLAR_LATITUDE = -0.77
- START_SUB_SOLAR_LONGITUDE = 219.60
- STOP_SUB_SOLAR_LATITUDE = -0.77
- STOP_SUB_SOLAR_LONGITUDE = 219.77
- MINIMUM_SLANT_DISTANCE = 1325470.00
- MAXIMUM_SLANT_DISTANCE = 1328470.00
- SCAN_RATE_TOLERANCE = -0.071429
- MEAN_SCAN_RATE = 0.021041
-/* The unit of SCAN RATE TOLERANCE is mrad/s. */
-/* The unit of MEAN SCAN RATE is the Nyquist scanning rate, which depends on */
-/* the instrument mode: it is one-half FOV (0.5 mrad) per grating cycle. */
- MIN_SPACECRAFT_SOLAR_DISTANCE = 7.62945e+08
- MAX_SPACECRAFT_SOLAR_DISTANCE = 7.62946e+08
- MINIMUM_CENTRAL_BODY_DISTANCE = 990939.00
- MAXIMUM_CENTRAL_BODY_DISTANCE = 993348.00
-
-/*  Data description: instrument status  */
-
- INSTRUMENT_MODE_ID = SHORT_MAP
- GAIN_MODE_ID = 2
- CHOPPER_MODE_ID = REFERENCE
- START_GRATING_POSITION = 01
- OFFSET_GRATING_POSITION = 04
- GRATING_POSITION_INCREMENT = 04
- GRATING_POSITIONS = 06
-
- MEAN_FOCAL_PLANE_TEMPERATURE = 65.00
- MEAN_RAD_SHIELD_TEMPERATURE = 0.00
- MEAN_TELESCOPE_TEMPERATURE = 0.00
- MEAN_GRATING_TEMPERATURE = 130.00
- MEAN_CHOPPER_TEMPERATURE = 0.00
- MEAN_ELECTRONICS_TEMPERATURE = 0.00
-
- GROUP = BAND_BIN
-
-/*  Spectral axis description */
-
-  BAND_BIN_CENTER = (0.7101,0.7361,0.7621,0.7882,0.8490,0.8751,
-     0.9012,0.9273,1.0028,1.0548,1.1067,1.1587,1.2807,1.3328,
-     1.3848,1.4368,1.5591,1.6112,1.6633,1.7154,1.8394,1.8916,
-     1.9438,1.9960,2.1207,2.1730,2.2253,2.2775,2.4008,2.4531,
-     2.5054,2.5578,2.6860,2.7384,2.7908,2.8432,2.9655,3.0180,
-     3.0704,3.1229,3.2489,3.3014,3.3539,3.4064,3.5315,3.5841,
-     3.6367,3.6892,3.8146,3.8672,3.9199,3.9725,4.0978,4.1505,
-     4.2032,4.2559,4.3818,4.4345,4.4872,4.5399,4.6638,4.7166,
-     4.7693,4.8221,4.9462,4.9990,5.0518,5.1046)
-  BAND_BIN_UNIT = MICROMETER
-  BAND_BIN_ORIGINAL_BAND = (1,2,3,4,7,8,9,10,13,14,15,16,19,20,
-     21,22,25,26,27,28,31,32,33,34,37,38,39,40,43,44,45,46,49,
-     50,51,52,55,56,57,58,61,62,63,64,67,68,69,70,73,74,75,76,
-     79,80,81,82,85,86,87,88,91,92,93,94,97,98,99,100)
-  BAND_BIN_GRATING_POSITION = (0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,
-     3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,
-     3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3)
-  BAND_BIN_DETECTOR = (1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,
-     5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,11,11,11,11,
-     12,12,12,12,13,13,13,13,14,14,14,14,15,15,15,15,16,16,16,
-     16,17,17,17,17)
- END_GROUP = BAND_BIN
-
- GROUP = IMAGE_MAP_PROJECTION
-/* Projection description */
-  MAP_PROJECTION_TYPE = POINT_PERSPECTIVE
-  MAP_SCALE = 663.187
-  MAP_RESOLUTION =  0.069
-  SUB_SPACECRAFT_LATITUDE =  -0.31
-  SUB_SPACECRAFT_LONGITUDE = 315.15
-  LINE_SUB_SPACECRAFT_OFFSET =  -3.36
-  SAMPLE_SUB_SPACECRAFT_OFFSET =  -1.76
-  TARGET_CENTER_DISTANCE = 1329005.9
-  LINE_OPTICAL_AXIS_OFFSET =  -4.55
-  SAMPLE_OPTICAL_AXIS_OFFSET =  -0.90
-  FOCAL_LENGTH = 800.0
-  FOCAL_PLANE_SCALE =  2.500
-  OFFSET_DIRECTION = TO_ORIGIN
-  MINIMUM_LATITUDE = -57.49
-  MAXIMUM_LATITUDE =  59.06
-  EASTERNMOST_LONGITUDE = 257.56
-  WESTERNMOST_LONGITUDE =  26.77
-  COORDINATE_SYSTEM_TYPE = "BODY-FIXED ROTATING"
-  COORDINATE_SYSTEM_NAME = PLANETOCENTRIC
-  POSITIVE_LONGITUDE_DIRECTION = WEST
-  A_AXIS_RADIUS = 2632.40
-  B_AXIS_RADIUS = 2632.29
-  C_AXIS_RADIUS = 2632.35
-  MAP_PROJECTION_ROTATION =  38.05
-  SAMPLE_FIRST_PIXEL = 1
-  SAMPLE_LAST_PIXEL = 5
-  LINE_FIRST_PIXEL = 1
-  LINE_LAST_PIXEL = 9
-
- END_GROUP = IMAGE_MAP_PROJECTION
-
-END_OBJECT = QUBE
-END
-                                                                                                                                    
-                                                                                                                                    
- 
-********** END OF LABEL OBJECT **********
- 
- 
-********** HISTORY OBJECT **********
- 
-ROUP = VISIS2
-
-  VERSION_DATE = 2012-02-03
-  DATE_TIME = 2012-02-09T15:02:10
-  NODE_NAME = "MIPL"
-  USER_NAME = "NIMS Team"
-  SOFTWARE_DESC = "ISIS cube file with PDS label has been generated as
-    systematic product by MIPL using the following programs:
-      NIMSMERGE2 to create EDRs;
-      NIMSCMM2 to create the merged mosaic & geometry cube;
-      HIST2D to create a two-dimensional histogram;
-      VISIS2 to create the ISIS cube."
-
-  USERNOTE = "testbed EDR with simulated pointing"
-
-  GROUP = PARAMETERS
-
-    EDR_FILE_NAME = "edr_file"
-    AACS_FILE_NAME = "aacs_file"
-    SP_KERNEL_FILE_NAME = "spk_file"
-    I_KERNEL_FILE_NAME = "ik_file"
-    SPIKE_FILE_NAME = "DUMMY_DSPK.DAT"
-    BOOM_FILE_NAME = "dbm_file"
-    DARK_VALUE_FILE_NAME = " "
-    CALIBRATION_FILE_NAME = "CAL_FILE"
-    SOLAR_FLUX_FILE_NAME = " "
-    MERGED_MOSAIC_FILE_NAME = "G7JNFEAP4101A.CUB"
-    GRATING_POSITION_CORRECTION = -1.3000
-    GRATING_STEP_INFLATION = 0.0000
-/* The "Grating Position Correction" and "Grating Step Inflation" are */
-/* adjustments to the nominal grating positions, based on flight calibrations */
-/* and known sharp spectral features of the target, used in determination of */
-/* wavelengths.  GRATING_POSITION_CORRECTION is an additive term to the */
-/* grating position and (1.0 + GRATING_STEP_INFLATION) is a multiplicative */
-/* term modifying the grating stepsize. */
-
-  END_GROUP = PARAMETERS
-
-END_GROUP = VISIS2
-
-END
- 
-********** END OF HISTORY OBJECT **********
- 
-VISIS2 G7JNFEAP4101A.QUB (tst1.h2d G7JNFEAP4101A.CUB G7JNFEAP4101A.COC)
-Beginning VICAR task VISIS2
-*** VISIS2 Version 03-Feb-2012 ***
-Inverse mode:  VICAR files will be generated from ISIS cube
- SUPPNOTE & PRODNOTE not found!
- Keyword PHOTO_CORR_CUTOFF_WAVELENGTH not found in cube label
- Keyword MINNAERT_EXPONENT not found in cube label
- Keyword EXPANDED_RADIUS not found in cube label
- Keyword PLATFORM_CKERNEL_NAME not found in cube label
- Keyword ROTOR_CKERNEL_NAME not found in cube label
- Keyword POINTING_OFFSET not found in cube label
- Keyword WOBBLE_AMPLITUDE not found in cube label
- Keyword WOBBLE_FREQUENCY not found in cube label
- Keyword WOBBLE_PHASE not found in cube label
- Keyword WOBBLE_CONE_ESTIMATE not found in cube label
- Keyword SCLK_GAPS not found in cube label
- Keyword STOP_SLIDE_MODE_ID not found in cube label
- Keyword INSTRUMENT_THRESHOLD not found in cube label
-FILE 1 created
-FILE 2 created
-FILE 3 created
-list G7JNFEAP4101A.CUB nb=1
-Beginning VICAR task list
-
-   HALF     samples are interpreted as HALFWORD data
- Task:VISIS2    User:lwk       Date_Time:Thu Feb  9 15:02:12 2012
- ***********
- Band =     1
- ***********
-     Samp       1     2     3     4     5
-   Line
-      1       112   112   112   112-32768
-      2       114   113   112   112-32768
-      3       115   114   114   113-32768
-      4       116   115   115   115-32768
-      5       117   117   116   116-32768
-      6       118   118   118   117-32768
-      7       119   119   118-32768-32768
-      8       119   119   119-32768-32768
-      9    -32768-32768-32768-32768-32768
-ush rm edr_file
-ush rm aacs_file
-ush chmod 777 spk_file
-ush rm spk_file
-ush rm ik_file
-ush rm dbm_file
-ush rm sol_file
-ush rm CAL_FILE
-end-proc
-exit
-slogoff
-if ($RUNTYPE = "INTERACTIVE")
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-else
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-end-if
-ulogoff
-END-PROC
-END-PROC
-$!-----------------------------------------------------------------------------
-$ create tstvisis2.log_linux
-tstvisis2
-write "This is the test file for Program VISIS2"
-This is the test file for Program VISIS2
-ush cp /project/test_work/testdata/gll/g7jnfeap4101a.3 edr_file
-ush cp /project/test_work/testdata/gll/g7jnfeap4101a.aacs aacs_file
-ush cp /project/test_work/testdata/gll/nims98a_gs4_ref_g1_01.tab CAL_FILE
-ush cp /project/spice/ops/sun-solr/s980326b.bsp spk_file
-ush cp /project/test_work/testdata/gll/nims_ikernel_mab.dat ik_file
-ush cp /project/test_work/testdata/gll/nims_solar.dat sol_file
-ush cp /project/test_work/testdata/gll/boom_obscuration.nim dbm_file
-NIMSCMM2 edr=edr_file  +
-        cube=G7JNFEAP4101A.CUB 'NOCAL  +
-	aacsfil=aacs_file  +
-	calfil=CAL_FILE  +
-	spkernel=spk_file  +
-	ikernel=ik_file solfile=sol_file  +
-	dbmfile=dbm_file  +
-        prodnote="testbed EDR with simulated pointing"   +
-        obsnote="testbed EDR with simulated pointing"   +
-        target=GANYMEDE phase=GANYMEDE_7_ENCOUNTER  +
-        proj=pov slew_tol=-1.  +
-	outsiz=(9,5)
-Beginning VICAR task NIMSCMM2
- *** NIMSCMM2 Version 10-jan-2012 ***
- ** Body is not a spheroid, planetographic is undefined
- 
- No radiance calibration done, raw DN is output
- Output image will be in perspective (POV) projection
- Warning: user Target does not match Target in ObsTab!
- User Target = GANYMEDE,  ObsTab Target = JUPITER
- Gain state = 2
- 
- Instrument mode is SHORT MAP
- 
- Extracting pointing
- mean slew rate = 0.02 * Nyquist, computed from 442 pairs of mfs
- 443 mfs will be used
- REFSCLK = 3897036.39, MP=9
- Scale at sub-s/c point [km/pix] is: 663.187
- 305 pixels were back of planet in set_pov
- output image size: NL= 9, NS=5
- OAL,OAS set to (   5.55,    1.90)
- 
- Beginning data extraction
- processing range 3897034.00 to 3897038.78 
-  10% of data extracted
-  20% of data extracted
-  30% of data extracted
-  40% of data extracted
-  50% of data extracted
-  60% of data extracted
-  70% of data extracted
-  80% of data extracted
-  90% of data extracted
- 6360 combs skipped or dummy in EDR 
- 40 combs rejected for bad compression status
- 7478 combs were off the planet
- 11 combs fell outside the image
- min/max lat/lon determined in write_latlon
- 
- Focal Length (mm) = 800.0, Camera Scale (pix/mm) = 2.5
- Optical Axis Line/Sample = 5.548, 1.903
- Spacecraft-Target Range (km) = 1329005.9, North Angle = 38.05
- Subspacecraft Lat/Long (deg) = -0.31, 315.15
- Subspacecraft Line/Samp = 4.362, 2.763
- Min/max latitudes: -57.49, 59.06
- Min/max longitudes: -102.44, 26.77
- Min/max incidence angles: 57.80, 147.44
- Min/max emission angles: 3.13, 61.11
- Min/max phase angles: 95.48, 95.61
-list G7JNFEAP4101A.CUB nb=1
-Beginning VICAR task list
-
-   HALF     samples are interpreted as HALFWORD data
- Task:NIMSCMM2  User:lwk       Date_Time:Fri Feb 10 12:54:20 2012
- ***********
- Band =     1
- ***********
-     Samp       1     2     3     4     5
-   Line
-      1       112   112   112   112-32768
-      2       114   113   112   112-32768
-      3       115   114   114   113-32768
-      4       116   115   115   115-32768
-      5       117   117   116   116-32768
-      6       118   118   118   117-32768
-      7       119   119   118-32768-32768
-      8       119   119   119-32768-32768
-      9    -32768-32768-32768-32768-32768
-hist2d G7JNFEAP4101A.CUB tst1.h2d out_nl=256 out_ns=408 'DN
-Beginning VICAR task hist2d
- *** Program HIST2D version 26-May-03 ***
-VISIS2 (tst1.h2d G7JNFEAP4101A.CUB G7JNFEAP4101A.COC) G7JNFEAP4101A.QUB
-Beginning VICAR task VISIS2
-*** VISIS2 Version 10-Feb-2012 ***
+*** VISIS2 Version 2016-02-24 ***
  Forward mode:  ISIS cube will be generated from VICAR files
 FILE 1 copied
 FILE 2 copied
@@ -7364,7 +6473,7 @@ OBJECT = QUBE
 
  OBSERVATION_NAME = ' '
  PRODUCT_ID = ""
- PRODUCT_CREATION_DATE = 2012-02-10
+ PRODUCT_CREATION_DATE = 2016-02-24
  IMAGE_ID = NULL
 
  INCIDENCE_ANGLE = 89.06
@@ -7481,8 +6590,8 @@ END
  
 ROUP = VISIS2
 
-  VERSION_DATE = 2012-02-10
-  DATE_TIME = 2012-02-10T12:54:21
+  VERSION_DATE = 2016-02-24
+  DATE_TIME = 2016-02-24T14:12:43
   NODE_NAME = "MIPL"
   USER_NAME = "NIMS Team"
   SOFTWARE_DESC = "ISIS cube file with PDS label has been generated as
@@ -7525,7 +6634,7 @@ END
  
 VISIS2 G7JNFEAP4101A.QUB (tst1.h2d G7JNFEAP4101A.CUB G7JNFEAP4101A.COC)
 Beginning VICAR task VISIS2
-*** VISIS2 Version 10-Feb-2012 ***
+*** VISIS2 Version 2016-02-24 ***
 Inverse mode:  VICAR files will be generated from ISIS cube
  SUPPNOTE & PRODNOTE not found!
  Keyword PHOTO_CORR_CUTOFF_WAVELENGTH not found in cube label
@@ -7548,7 +6657,7 @@ list G7JNFEAP4101A.CUB nb=1
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:VISIS2    User:lwk       Date_Time:Fri Feb 10 12:54:21 2012
+ Task:VISIS2    User:wlb       Date_Time:Wed Feb 24 14:12:43 2016
  ***********
  Band =     1
  ***********
@@ -7571,19 +6680,7 @@ ush rm ik_file
 ush rm dbm_file
 ush rm sol_file
 ush rm CAL_FILE
-end-proc
-exit
-slogoff
-if ($RUNTYPE = "INTERACTIVE")
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-else
-  if ($syschar(1) = "VAX_VMS")
-  end-if
-end-if
-ulogoff
-END-PROC
-END-PROC
+disable-log
 $ Return
 $!#############################################################################
 $Imake_File:

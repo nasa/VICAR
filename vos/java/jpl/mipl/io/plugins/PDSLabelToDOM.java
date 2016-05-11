@@ -231,12 +231,16 @@ public final class PDSLabelToDOM {
           System.out.println(lineCt+") ProcessLine    currentNode = "+currentNode+ " ");          
       }
       
+	  /***
+	   * 
+	  //  this produces a zillion .xml files enable if needed to see what the parser is doing
       if (debug) {
           String xmlFile = "x"+lineCt+".xml";
           // serializeNode(Node node, String file, String type)
           System.out.println("  serializeNode "+ xmlFile);
           domUtils.serializeNode(currentNode, xmlFile, "xml");
       } 
+      ***/
       
       // Pattern commentP = Pattern.compile("\\Q/*\\E");
       // Pattern sfduP = Pattern.compile("SFDU_LABEL",Pattern.CASE_INSENSITIVE);
@@ -258,8 +262,13 @@ public final class PDSLabelToDOM {
       if (sv.length > 1) {          
           value = sv[1].trim();
       }
-          
-      if (line.startsWith( "END_OBJECT")) {
+       
+      // the test for END_GROUP etc must use trim() because sometimes the String may be indented since it is inside something else
+      // can I do:
+      // line = line.trim(); // and not break anything else ??
+      
+      // if (line.startsWith( "END_OBJECT")) {
+      if (line.trim().startsWith( "END_OBJECT")) {
           if (debug) System.out.println("END_OBJECT *****************************");
           // close the current object. Move UP one level
           level--;
@@ -270,7 +279,8 @@ public final class PDSLabelToDOM {
           // move back up one level
           currentNode = currentNode.getParentNode();          
       }
-      else if (line.startsWith( "OBJECT ")) {
+      // else if (line.startsWith( "OBJECT ")) {
+      else if (line.trim().startsWith( "OBJECT ")) {
           // open a new object, put new items inside this one
           if (debug) {
               for (int i=0 ; i< level ; i++) { _output.print(" "); }
@@ -295,7 +305,8 @@ public final class PDSLabelToDOM {
           }
           currentNode = (Node) element;
       }
-      else if (line.startsWith( "END_GROUP")) {
+      // else if (line.startsWith( "END_GROUP")) {
+      else if (line.trim().startsWith( "END_GROUP")) {
           // close the current object. Move UP one level
           level--;
           if (debug) {
@@ -310,7 +321,8 @@ public final class PDSLabelToDOM {
           // move back up one level
           currentNode = currentNode.getParentNode();          
       }
-      else if (line.startsWith( "GROUP ")) {
+      // else if (line.startsWith( "GROUP ")) {
+      else if (line.trim().startsWith( "GROUP ")) {
     	  // it is possibel to have an item which is GROUP_SOMETHING
           // open a new object, put new items inside this one
           if (debug) {
@@ -1156,14 +1168,25 @@ public final class PDSLabelToDOM {
                   } else if (trLine.equals("END_GROUP") || trLine.equals("END_OBJECT")) {
                       
                 	  if (debug) { 
-                		  System.out.println(lineCt+")  ####### END_GROUP or END_OBJECT trLine >"+trLine+"<");
-                		  
+                		  System.out.println(lineCt+")  ####### END_GROUP or END_OBJECT trLine >"+trLine+"<");                		  
                 	  }
-                      // close the xml document
+                      // close the GROUP or OBJECT
                       nodeLevelHM = processLine(collectedLine, lineCt, nodeLevelHM);
                       collectedLine = trLine;
                       inValue = false;
-                  }
+                  } else if (trLine.startsWith("END_GROUP") || trLine.startsWith("END_OBJECT")) {
+              
+          			if (debug) { 
+          				System.out.println(lineCt+")  ####### END_GROUP or END_OBJECT trLine >"+trLine+"<"); 
+          				// END_GROUP                         = SITE_DERIVED_GEOMETRY_PARMS
+          				//   END_OBJECT                  = COLUMN
+          				// check that the name after the =  matches?? 
+          			}
+          			// close the GROUP or OBJECT
+          			nodeLevelHM = processLine(collectedLine, lineCt, nodeLevelHM);
+          			collectedLine = trLine;
+          			inValue = false;
+          		  }
                   else if (commentLineM.find()) {
                 	  if (debug) { System.out.println(lineCt+")  ####### commentLine trLine >"+trLine+"<"); }
                       // the previous line is complete
@@ -2253,6 +2276,8 @@ public static final void main(String args[]) {
     Document d = pds.getDocument();
   }  /// end of main. Used for testing
 
+
+	
 
 
 } // end of the class

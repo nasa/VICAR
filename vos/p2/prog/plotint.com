@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module plotint
-$! VPACK Version 1.9, Wednesday, April 22, 2015, 21:00:03
+$! VPACK Version 2.1, Friday, January 08, 2016, 13:01:01
 $!
 $! Execute by entering:		$ @plotint
 $!
@@ -262,7 +262,7 @@ c
 C&
 C& ********************************************
 C
-	call xvmessage('PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb',' ')
+	call xvmessage('PLOTINT - 2013-08-19',' ')
 C---- READ PARAMETERS 
 C
 C---- GET THE NUMBERS OF THE X-COL AND THE Y-COL AND CONTROL COL
@@ -846,6 +846,8 @@ c
 	character*20 ycolstr(20),asymtyp(20)
 	character*80 tbl
 	character*100 outline
+        character bash
+        bash=achar(92)
 
         if (mycol .eq. 1) then
            gcol = 1
@@ -869,18 +871,20 @@ c  decide on pts and linepoints vs, lines only
            gycol = gcol + 1
 
 	   if (asymtyp(gcol)(1:asyml(gcol)).eq."lines") then
+c     terminated with bash
 10351 format ("plot '",a,"' u ",i2,":",i2," t '",a,"' w ",a," lt ",i2,
-     1 " lc rgb '",a,"', \")
-               write(unit,fmt=10351,iostat=jj,err=995) tbl(1:ntbl),ncolx,ncoly(gcol),
+     1 " lc rgb '",a,"', ",a)
+           write(unit,fmt=10351,iostat=jj,err=995) tbl(1:ntbl),ncolx,ncoly(gcol),
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),
-     2 ptcolor(gcol)(1:ptcolorl(gcol))
+     2 ptcolor(gcol)(1:ptcolorl(gcol)),bash
 
 	   else	
+c     terminated with bash
 10251 format("plot '",a,"' u ",i2,":",i2," t '",a,"' w ",a," lt ",i2,
-     1 " pt ",i2," ps 2 pi ",i2," lc rgb '",a,"', \")
-               write(unit,fmt=10251,iostat=jj,err=995) tbl(1:ntbl),ncolx,ncoly(gcol),
+     1 " pt ",i2," ps 2 pi ",i2," lc rgb '",a,"', ",a)
+           write(unit,fmt=10251,iostat=jj,err=995) tbl(1:ntbl),ncolx,ncoly(gcol),
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),
-     2 pttype(gcol),freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol))
+     2 pttype(gcol),freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol)),bash
 
 	   endif
 
@@ -909,28 +913,30 @@ c  decide on pts and linepoints vs, lines only
 	   if (asymtyp(gcol)(1:asyml(gcol)).eq."lines") then
 	      write(unit,fmt=10351,iostat=jj,err=995) tbl(1:ntbl),ncolx,ncoly(gcol),
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),
-     2 ptcolor(gcol)(1:ptcolorl(gcol))
+     2 ptcolor(gcol)(1:ptcolorl(gcol)),bash
 	   else
               write(unit,fmt=10251,iostat=jj,err=995) tbl(1:ntbl),ncolx,ncoly(gcol),
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),pttype(gcol),
-     2 freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol))
+     2 freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol)),bash
 	   endif
 
            do gcol=2,mycol-1
                gycol = gcol + 1
 	       if (asymtyp(gcol)(1:asyml(gcol)).eq."lines") then
+c     terminated with bash
 10353 format (" '",a,"' u ",i2,":",i2," t '",a,"' w ",a," lt ",i2,
-     1 " lc rgb '",a,"', \")
-                   write(unit,fmt=10353,iostat=jj,err=995) tbl(1:ntbl),ncolx,ncoly(gcol),
+     1 " lc rgb '",a,"', ",a)
+           write(unit,fmt=10353,iostat=jj,err=995) tbl(1:ntbl),ncolx,ncoly(gcol),
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),
-     2 ptcolor(gcol)(1:ptcolorl(gcol))
+     2 ptcolor(gcol)(1:ptcolorl(gcol)),bash
 	       else
 	   
+c     terminated with bash
 10253 format (" '",a,"' u ",i2,":",i2," t '",a,"' w ",a," lt ",i2,
-     1 " pt ",i2," ps 2 pi ",i2," lc rgb '",a,"', \")
-                   write(unit,fmt=10253,iostat=jj,err=995) tbl(1:ntbl),ncolx,ncoly(gcol),
+     1 " pt ",i2," ps 2 pi ",i2," lc rgb '",a,"', ",a)
+           write(unit,fmt=10253,iostat=jj,err=995) tbl(1:ntbl),ncolx,ncoly(gcol),
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),pttype(gcol),
-     2 freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol))
+     2 freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol)),bash
 	      endif
            enddo
 
@@ -983,6 +989,8 @@ c
         character*20 ycolstr(20),asymtyp(20)
         character*80 tbl
         character*100 outline
+        character bash
+        bash=achar(92)
 
 	if (ncontr < 10) then
 	    write (ascont,19000) ncontr
@@ -1034,18 +1042,20 @@ c
            endif
 
            if (asymtyp(gcol)(1:asyml(gcol)).eq."lines") then
+c     terminated with bash
 10351 format ("plot '",a,"' u ",i2,":(",a," == ",i2," ? ",a," : 1/0) t '",a,"' w ",a," lt ",i2,
-     1 " lc rgb '",a,"', \")
-               write(unit,fmt=10351,iostat=jj,err=995) tbl(1:ntbl),ncolx,ascont,iplot,asncoly,
+     1 " lc rgb '",a,"', ",a)
+           write(unit,fmt=10351,iostat=jj,err=995) tbl(1:ntbl),ncolx,ascont,iplot,asncoly,
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),
-     2 ptcolor(gcol)(1:ptcolorl(gcol))
+     2 ptcolor(gcol)(1:ptcolorl(gcol)),bash
 
            else
+c     terminated with bash
 10251 format ("plot '",a,"' u ",i2,":(",a," == ",i2," ? ",a," : 1/0) t '",a,"' w ",a," lt ",i2,
-     1 " pt ",i2," ps 2 pi ",i2," lc rgb '",a,"', \")
-               write(unit,fmt=10251,iostat=jj,err=995) tbl(1:ntbl),ncolx,ascont,iplot,asncoly,
+     1 " pt ",i2," ps 2 pi ",i2," lc rgb '",a,"', ",a)
+           write(unit,fmt=10251,iostat=jj,err=995) tbl(1:ntbl),ncolx,ascont,iplot,asncoly,
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),
-     2 pttype(gcol),freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol))
+     2 pttype(gcol),freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol)),bash
 
            endif
 
@@ -1084,11 +1094,11 @@ c
            if (asymtyp(gcol)(1:asyml(gcol)).eq."lines") then
                write(unit,fmt=10351,iostat=jj,err=995) tbl(1:ntbl),ncolx,ascont,iplot,asncoly,
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),
-     2 ptcolor(gcol)(1:ptcolorl(gcol))
+     2 ptcolor(gcol)(1:ptcolorl(gcol)),bash
            else
                write(unit,fmt=10251,iostat=jj,err=995) tbl(1:ntbl),ncolx,ascont,iplot,asncoly,
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),pttype(gcol),
-     2 freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol))
+     2 freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol)),bash
            endif
 
            do gcol=2,mycol-1
@@ -1099,17 +1109,19 @@ c
                endif
                gycol = gcol + 1
                if (asymtyp(gcol)(1:asyml(gcol)).eq."lines") then
+c     terminated with bash
 10353 format (" '",a,"' u ",i2,":(",a," == ",i2," ? ",a," : 1/0) t '",a,"' w ",a," lt ",i2,
-     1 " lc rgb '",a,"', \")
-                   write(unit,fmt=10353,iostat=jj,err=995) tbl(1:ntbl),ncolx,ascont,iplot,asncoly,
+     1 " lc rgb '",a,"', ",a)
+           write(unit,fmt=10353,iostat=jj,err=995) tbl(1:ntbl),ncolx,ascont,iplot,asncoly,
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),
-     2 ptcolor(gcol)(1:ptcolorl(gcol))
+     2 ptcolor(gcol)(1:ptcolorl(gcol)),bash
               else
+c     terminated with bash
 10253 format (" '",a,"' u ",i2,":(",a," == ",i2," ? ",a," : 1/0) t '",a,"' w ",a," lt ",i2,
-     1 " pt ",i2," ps 2 pi ",i2," lc rgb '",a,"', \")
-                   write(unit,fmt=10253,iostat=jj,err=995) tbl(1:ntbl),ncolx,ascont,iplot,asncoly,
+     1 " pt ",i2," ps 2 pi ",i2," lc rgb '",a,"', ",a)
+           write(unit,fmt=10253,iostat=jj,err=995) tbl(1:ntbl),ncolx,ascont,iplot,asncoly,
      1 ycolstr(gcol)(1:ystrl(gcol)),asymtyp(gcol)(1:asyml(gcol)),lintyp(gcol),pttype(gcol),
-     2 freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol))
+     2 freq(gcol),ptcolor(gcol)(1:ptcolorl(gcol)),bash
               endif
            enddo
 
@@ -1454,6 +1466,8 @@ REVISIONS:
                 values will never be 0. Fixed logic for plot ranges
                 that are defaulted vs. inputs
   2013-09-06 R. Bambery - Added COMMENT1, COMMENT2, COMMENT3 parameters
+  2015-08-19 W. Bunch - Fixed end of line encoding so linux and sun
+                will yield same output.
       
 .LEVEL1
 .VARIABLE INP
@@ -1661,6 +1675,7 @@ parm    mode    type=keyword count=(0:1) valid=(batch,nobatch,inter) default=bat
 refgbl $echo
 refgbl $autousage
 body
+enable-log
 let $autousage="none"
 let _onfail="stop"
 
@@ -1844,33 +1859,10 @@ if (mode = "nobatch" or mode = "inter")
 end-if
 
 let $echo="no"
+disable-log
 end-proc
-
 $!-----------------------------------------------------------------------------
 $ create tstplotint.log
-                Version 5C/16C
-
-      ***********************************************************
-      *                                                         *
-      * VICAR Supervisor version 5C, TAE V5.2                   *
-      *   Debugger is now supported on all platforms            *
-      *   USAGE command now implemented under Unix              *
-      *                                                         *
-      * VRDI and VIDS now support X-windows and Unix            *
-      * New X-windows display program: xvd (for all but VAX/VMS)*
-      *                                                         *
-      * VICAR Run-Time Library version 16C                      *
-      *   '+' form of temp filename now avail. on all platforms *
-      *   ANSI C now fully supported                            *
-      *                                                         *
-      * See B.Deen(RGD059) with problems                        *
-      *                                                         *
-      ***********************************************************
-
-  --- Type NUT for the New User Tutorial ---
-
-  --- Type MENU for a menu of available applications ---
-
 tstplotint script
 TEST 1 
 
@@ -1879,18 +1871,12 @@ Beginning VICAR task ibis
   mf3 demo.int function=("c1=@index"$"c4=1")
 Beginning VICAR task mf3
 mf3 version Wed Oct 07 2008
-function string = c1=@index$c4=1
-100 records in
   mf3 demo.int function=("c2=(c1*c1)*@sin(c1)")
 Beginning VICAR task mf3
 mf3 version Wed Oct 07 2008
-function string = c2=(c1*c1)*@sin(c1)
-100 records in
   mf3 demo.int function=("c3=3+(c2+c2)")
 Beginning VICAR task mf3
 mf3 version Wed Oct 07 2008
-function string = c3=3+(c2+c2)
-100 records in
   ibis-list demo.int sr=1 nr=10
 Beginning VICAR task ibis
  
@@ -1918,28 +1904,18 @@ Beginning VICAR task ibis
   mf3 xxA function=("c1=@index"$"c4=1")
 Beginning VICAR task mf3
 mf3 version Wed Oct 07 2008
-function string = c1=@index$c4=1
-100 records in
   mf3 xxA function=("c2=(c1*c1)*@sin(c1)")
 Beginning VICAR task mf3
 mf3 version Wed Oct 07 2008
-function string = c2=(c1*c1)*@sin(c1)
-100 records in
   mf3 xxB function=("c1=@index"$"c4=2")
 Beginning VICAR task mf3
 mf3 version Wed Oct 07 2008
-function string = c1=@index$c4=2
-100 records in
   mf3 xxB function=("c3=(c1*c1)*@sin(c1)")
 Beginning VICAR task mf3
 mf3 version Wed Oct 07 2008
-function string = c3=(c1*c1)*@sin(c1)
-100 records in
   mf3 xxB function=("c2=3+(c3+c3)")
 Beginning VICAR task mf3
 mf3 version Wed Oct 07 2008
-function string = c2=3+(c3+c3)
-100 records in
   ibis-cat (xxA,xxB) mult.int
 Beginning VICAR task ibis
   ibis-list mult.int sr=1 nr=10
@@ -1986,7 +1962,7 @@ Rows: 101:110
     xlabel="Test X" ylabel="Test Y"  +
     title="TEST 1 - Minimum Parameters - points only - file: demo.int"
 Beginning VICAR task plotint
-PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb
+PLOTINT - 2013-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
   plotint inp=demo.int  xcol=1 ycol=(2,3) cont=4  +
@@ -1994,7 +1970,7 @@ end-if
     title="TEST 2 - Minimum Parameters file - File: demo.int"  +
     plotout=test2
 Beginning VICAR task plotint
-PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb
+PLOTINT - 2013-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
   plotint inp=demo.int  xcol=1 ycol=(2) cont=4  +
@@ -2002,7 +1978,7 @@ end-if
     title="TEST 2A - Minimum Parameters Column 2 only - File: demo.int"  +
     plotout=test2a
 Beginning VICAR task plotint
-PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb
+PLOTINT - 2013-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
  plotint inp=demo.int  xcol=1 ycol=(3) cont=4  +
@@ -2010,7 +1986,7 @@ end-if
     title="TEST 2B - Minimum Parameters Column 3 only - File: demo.int"  +
     plotout=test2b
 Beginning VICAR task plotint
-PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb
+PLOTINT - 2013-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
   plotint inp=mult.int  xcol=1 ycol=(2) cont=4  +
@@ -2018,7 +1994,7 @@ end-if
     title="TEST 3 - Minimum Parameters with multiple control - File: mult.int"  +
     plotout=test3
 Beginning VICAR task plotint
-PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb
+PLOTINT - 2013-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
   plotint inp=demo.int  xcol=1 ycol=(2,3) cont=4  symt=(3,3)  +
@@ -2026,7 +2002,7 @@ end-if
     title="TEST 4 - Minimum Parameters with lines only: demo.int"  +
     plotout=test4
 Beginning VICAR task plotint
-PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb
+PLOTINT - 2013-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
   plotint inp=demo.int  xcol=1 ycol=(2,3) cont=4 symt=(2,2)   freq=(2,2)  +
@@ -2036,7 +2012,7 @@ end-if
     xrange = (0.0,15.) yrange=(0.0,150.)  +
     plotout=test5
 Beginning VICAR task plotint
-PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb
+PLOTINT - 2013-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 let $echo="no"
@@ -2047,14 +2023,10 @@ Beginning VICAR task ibis
    mf3 new.int function=("c1=@index"$"c5=1")
 Beginning VICAR task mf3
 mf3 version Wed Oct 07 2008
-function string = c1=@index$c5=1
-100 records in
    mf3 new.int function=("c2=@sin(c1)*@cos(c1)"$"c3=.5*c1/20"$  +
 	"c4=@tan(c1)*c2")
 Beginning VICAR task mf3
 mf3 version Wed Oct 07 2008
-function string = c2=@sin(c1)*@cos(c1)$c3=.5*c1/20$c4=@tan(c1)*c2
-100 records in
    ibis-list new.int
 Beginning VICAR task ibis
  
@@ -2187,7 +2159,7 @@ Rows: 91:100
     title="TEST 6 - interface file of 3 funcs - small print - File: new.int"  +
     plotout=test6
 Beginning VICAR task plotint
-PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb
+PLOTINT - 2013-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 let $echo="no"
@@ -2200,7 +2172,7 @@ TEST 7 - TEST in postscript format
     title="TEST 7 - interface file of 3 funcs - File: new.int"  +
     plotout=test7
 Beginning VICAR task plotint
-PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb
+PLOTINT - 2013-08-19
     ush gnuplot test7.eps.gpi
 if (mode = "nobatch" or mode = "inter")
 end-if
@@ -2211,7 +2183,7 @@ end-if
     title="TEST 8 - LARGE PLOT - Interface file of 3 funcs - File: new.int"  +
         plotout=test8
 Beginning VICAR task plotint
-PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb
+PLOTINT - 2013-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
    plotint inp=new.int xcol=1 ycol=(2,3,4) cont=5  +
@@ -2223,7 +2195,7 @@ end-if
     comment3="Function 3: tangent of sine times cosine"  +
     plotout=test9
 Beginning VICAR task plotint
-PLOTINT - 06-Sep-2013 (64-bit - gnuplot) - rjb
+PLOTINT - 2013-08-19
 if (mode = "nobatch" or mode = "inter")
 end-if
 let $echo="no"

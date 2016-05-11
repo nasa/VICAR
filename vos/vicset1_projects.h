@@ -160,7 +160,6 @@
 #define EXT_CASISS
 #define EXT_ISIS
 #define EXT_PDS_LABEL
-#define EXT_TIFF
 #define EXT_SIMBAD
 #define EXT_MATRACOMP
 #define EXT_PVM
@@ -237,7 +236,9 @@
 #define JEXT_DERBY
 #define JEXT_JAI
 #define JEXT_JAI_IIO
+#define JEXT_JAI_EXT
 #define JEXT_TREEVOTEE
+#define JEXT_JUNAMI
 #define JEXT_JSON_SIMPLE
 #define JEXT_JOPT_SIMPLE
 #define JEXT_SLF4J
@@ -259,7 +260,9 @@
 #define JEXT_COMMONS_BEANUTILS
 #define JEXT_COMMONS_DIGESTER
 #define	JEXT_PDS_GENERATE_TOOL
+#define JEXT_PDS4_TOOLS
 #define JEXT_WEBSOCKET
+#define JEXT_JMONKEYENGINE
 *--------
 * Python Externals
 *--------
@@ -313,7 +316,6 @@
 #define SS_VRDI
 *
 #define EXT_SPICE
-#define EXT_TIFF
 #define EXT_MATRACOMP
 #define EXT_CASISS
 #define EXT_ISIS
@@ -401,7 +403,6 @@
 #define EXT_MATH77
 #define EXT_PVM
 #define EXT_SPICE
-#define EXT_TIFF
 #define EXT_PDS_LABEL
 #define EXT_PGPLOT	/* only for rovernav, eventually obsolete */
 #define EXT_EXPAT	/* only for xmln, whatever that is... */
@@ -539,7 +540,6 @@
 *--------
 #define EXT_SPICE
 #define EXT_JNI
-#define EXT_TIFF
 #define EXT_MATH77
 *
 *--------
@@ -638,7 +638,6 @@
 #define EXT_PDS
 #define EXT_ISIS
 #define EXT_PDS_LABEL
-#define EXT_TIFF
 #define EXT_SIMBAD
 #define EXT_PVM
 #define EXT_PGPLOT
@@ -722,7 +721,6 @@
 #define EXT_PDS
 *#define EXT_ISIS
 #define EXT_PDS_LABEL
-*#define EXT_TIFF
 *#define EXT_SIMBAD
 *#define EXT_PVM
 *#define EXT_PGPLOT

@@ -312,7 +312,23 @@ public class DOMtoHashtable  {
                 	} 
             	} 	
           
-          } else if (nodeName.equalsIgnoreCase("IMAGE")) {
+          } else if (nodeName.equalsIgnoreCase("HISTORY")) {
+            	
+        		String aName = getNameAttribute(node);
+        		rootHash.put(aName, childHash); // should this be childName ?
+        		if (debug) System.out.println("put to rootHash: "+nodeName+" "+aName+" childHash %%%%%%%%%%%");
+        		Node child = node.getFirstChild();
+        		int childCt = 0;
+        		String childValue = "";
+        		String childName = "";
+        		if (child != null) {
+        			while (child != null) {              		
+        				convertMetadata(child, childHash, level + 1);
+        				child = child.getNextSibling();                 	
+              	} 
+          	} 	
+        
+        } else if (nodeName.equalsIgnoreCase("IMAGE")) {
           	
           		String aName = getNameAttribute(node);
           		rootHash.put(aName, childHash); // should this be childName ?
@@ -425,6 +441,7 @@ public class DOMtoHashtable  {
           		// }
           		
           		nodeValue = getNodeValueString(node);
+          		// does this handle sub_item ??
 			//                indent(level);
                 
                 // if (iName.equalsIgnoreCase("ARTICULATION_DEVICE_ANGLE_NAME")) {
@@ -438,6 +455,7 @@ public class DOMtoHashtable  {
           			rootHash.put(iName, nodeValue);
           		}
           		else {
+          			
           			rootHash.put(iName, "NULL");
           			if (debug) System.out.println("**** ERROR *** put to rootHash: item  "+nodeName +" iName="+iName+" nodeValue="+nodeValue);
           		}
@@ -477,6 +495,7 @@ public class DOMtoHashtable  {
     		String attrNodeName = "";
     		String attrNodeValue = "";
     		String itemName = "";
+    		// also "subitem" ???
     		if (nodeName.equalsIgnoreCase("item") == false) return itemName;
     		
           	if (cmap != null) {
@@ -497,6 +516,44 @@ public class DOMtoHashtable  {
             }
            return itemName;
     }
+    
+    /**
+     * Given a Node this will check to see if the nodeName is "item"
+     * If it is, the attributes will be searched to get the String associated 
+     * with the "name" or "key" attribute.
+     * @param n
+     * @return String null or the value of the "name" or "key" attribute
+     */
+    
+    public String getItemValueAttribute(Node n) {
+    	
+    		NamedNodeMap cmap = n.getAttributes();
+    		String nodeName = n.getNodeName();
+    		String attrNodeName = "";
+    		String attrNodeValue = "";
+    		String itemValue = "";
+    		if (nodeName.equalsIgnoreCase("item") == false && nodeName.equalsIgnoreCase("subitem") == false) 
+    			return itemValue;
+    		
+          	if (cmap != null) {
+            	int length = cmap.getLength();
+            	for (int i = 0; i < length; i++) {
+                	Node attr = cmap.item(i);
+                	attrNodeName = attr.getNodeName();
+                	attrNodeValue = attr.getNodeValue();
+                	// this will be an Attribute nodeType
+                	// iioNode.setAttribute(attrNodeName, attrNodeValue);
+                		
+          			// System.out.println("child attr "+attrNodeName+" "+attrNodeValue);
+          			// might also look for "key"
+          			if (attrNodeName.equalsIgnoreCase("value") ) {
+          					itemValue = attrNodeValue;
+          			}
+             	} 
+            }
+           return itemValue;
+    }
+    
     
     
     /**
@@ -609,6 +666,7 @@ public class DOMtoHashtable  {
                     		// return null;
                     	}
                     	else {
+                    		nodeValue = getItemValueAttribute(child);
                     		// tv = getNodeValueString(child);
                     		// if (tv != null) nodeValue = nodeValue + tv;
                     		// return null; 
@@ -618,6 +676,8 @@ public class DOMtoHashtable  {
                        nodeValue = nodeValue+child.getNodeValue(); 
                     } else if (type == CDATA_TYPE) {
                         nodeValue = nodeValue+child.getNodeValue(); 
+                    } else {
+                    	nodeValue = nodeValue+"v="+getItemValueAttribute(child);
                     }
                     child = child.getNextSibling();
                 }
@@ -632,8 +692,9 @@ public class DOMtoHashtable  {
    		
    		String nodeValue = "";
    		String attrKey = "";
-   		String   attrQuotedValue = null;
+   		String attrQuotedValue = null;
    		String attrUnitValue = null;
+   		String attrValue = null;
          if (map != null) {
            	int length = map.getLength();
             for (int i = 0; i < length; i++) {
@@ -649,10 +710,16 @@ public class DOMtoHashtable  {
                 if (attrNodeName.equalsIgnoreCase("quoted")) {
                     attrQuotedValue = attr.getNodeValue();
                	}
+                
+                if (attrNodeName.equalsIgnoreCase("value")) {
+                    attrValue = attr.getNodeValue();
+               	}
                	
                	if (attrNodeName.equalsIgnoreCase("unit") || attrNodeName.equalsIgnoreCase("units")) {
                     attrUnitValue = attr.getNodeValue();
                	}
+               	// these are not passed thru, could be added
+               	// <history dat_tim="Wed Jan  8 05:42:44 2014" task="TASK" user="mslopgs" />
              } 
           // get value from the text or CDATA node
          }
@@ -688,6 +755,7 @@ public class DOMtoHashtable  {
                     		// return null;
                     	}
                     	else {
+                    		nodeValue = getItemValueAttribute(child);
                     		// tv = getNodeValueString(child);
                     		// if (tv != null) nodeValue = nodeValue + tv;
                     		// return null; 
@@ -697,6 +765,8 @@ public class DOMtoHashtable  {
                        nodeValue = nodeValue+child.getNodeValue(); 
                     } else if (type == CDATA_TYPE) {
                         nodeValue = nodeValue+child.getNodeValue(); 
+                    } else {
+                    	nodeValue = nodeValue+"vs="+getItemValueAttribute(child);
                     }
                     child = child.getNextSibling();
                 }
@@ -705,10 +775,14 @@ public class DOMtoHashtable  {
                 nodeValue = "";
             }
         
+            
+        System.out.println("nodeName="+nodeName+" attrKey="+attrKey+" nodeValue="+nodeValue+"  attrValue="+attrValue+" hasSubItems="+hasSubItems);
         // nodeValue is just the text part
         
         // now add any units and quotes
-        if (attrQuotedValue != null && attrQuotedValue.equalsIgnoreCase("true") ) {
+        if (nodeValue == "" && attrValue != null) {
+        	value = attrValue;
+        } else if (attrQuotedValue != null && attrQuotedValue.equalsIgnoreCase("true") ) {
         	if (hasSubItems) {
         		value = "("+nodeValue+")" ;
         		// subItems will already be properly quoted
@@ -729,7 +803,11 @@ public class DOMtoHashtable  {
          if (attrUnitValue != null ) {
          	// something with Units will NEVER have quotes ???
          	// add a space between the value and the <unit>
-        	value = value+" <" +attrUnitValue+">";// append the units value (capitalize ???)
+        	 if (value.endsWith(")") ) {
+        		 // do nothing, this is a multi-valued thing from subitems, individual vales in the array will have units
+        	 } else {
+        		 value = value+" <" +attrUnitValue+">";// append the units value (capitalize ???)
+        	 }
         }
         
         

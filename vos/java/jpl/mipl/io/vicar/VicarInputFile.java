@@ -7,10 +7,14 @@ import com.sun.media.jai.codec.*;
 import java.lang.reflect.*;
 import java.beans.*;
 import java.awt.image.*;
+
 import javax.media.jai.*;
 import javax.imageio.stream.*;
 import java.nio.ByteOrder;
 import java.awt.Rectangle;
+import java.awt.Dimension;
+import java.awt.Point;
+import javax.imageio.ImageReadParam;
 
 import jpl.mipl.io.util.DOMutils;
 
@@ -89,7 +93,28 @@ public class VicarInputFile implements VicarInput
    // boolean debug = true; 
    boolean debug_tile = false;
    // boolean debug_tile = true;
+   
    boolean debug = false;
+   
+   // new ImageReadParam values to handle subsampling, cropping and band select
+   // these could either be null if unused or the values set to whole image
+   protected ImageReadParam _param ;
+   protected Rectangle _sourceRegion;
+   protected int[] _sourceBands;
+   protected int _sourceBandsLen = 0;
+   protected int[] _destBands;
+   protected int _sourceXSubsample = 1;
+   protected int _sourceYSubsample = 1;
+   protected int _subsamplingXOffset = 0;
+   protected int _subsamplingYOffset = 0;
+   protected Rectangle _originalRegion;
+   protected Rectangle _destinationRegion;
+   protected Dimension originalDimension;
+   protected Point sourceOrigin;
+   protected int maxXTile, maxYTile;
+   
+   
+   // add getters and setters for these
 ////////////////////////////////////////////////////////////////////////
 
 /***********************************************************************
@@ -146,6 +171,14 @@ public class VicarInputFile implements VicarInput
 	_float_bufsize = -1;
 	_double_buffer = null;
 	_double_bufsize = -1;
+	// set defaults or null for imageReadParams derived values
+	ImageReadParam _param = null;
+	Rectangle _sourceRegion = null; // default is whole image, set once gheader is read
+	// int[] sourceBands = [0]; // can;t set this until we have read the header
+	_sourceXSubsample = 1;
+	_sourceYSubsample = 1;
+	_subsamplingXOffset = 0;
+	_subsamplingYOffset = 0;
     }
 
 /***********************************************************************
@@ -324,6 +357,8 @@ public class VicarInputFile implements VicarInput
 
 	_lblsize_front = 0;
 	_lblsize_eol = 0;
+	
+	
 
 	setupLabels();
 
@@ -353,6 +388,7 @@ public class VicarInputFile implements VicarInput
 	
 	if (debug) {
 		System.out.println("VicarInputFile.openInternal()");
+		System.out.println("_input_stream = "+_input_stream);
 		System.out.println("_system "+_system.toString());
 		System.out.println("_data_format="+_data_format);
 		// Get the host and data formats and set up the VicarDataFormat object.
@@ -1296,6 +1332,18 @@ Disabled */
 	int data_buffer_type = DataBuffer.TYPE_BYTE;
 
 	num_bands = _system.getNB();
+	
+	_sourceBandsLen = 0;
+	if (this._sourceBands != null) {
+		_sourceBandsLen = this._sourceBands.length ;
+		num_bands = _sourceBandsLen;
+	}
+	
+	if (debug) {
+		System.out.println("VicarInputFile.createSampleModel() num_bands = "+num_bands+"  _sourceBandsLen = "+ _sourceBandsLen);
+	}
+	
+	
 	if (_system.getFormatCode() == SystemLabel.TYPE_COMP)
 	    num_bands *= 2;
 
@@ -1356,9 +1404,16 @@ Disabled */
 		// One bank per band of data
 		pixel_stride = 1;
 		scanline_stride = tileWidth;
-		for (i=0; i < num_bands; i++) {
-		    band_offsets[i] = 0;
-		    bank_indices[i] = i;
+		if (_sourceBandsLen != 0 && _sourceBandsLen <= num_bands ) {
+			for (i=0; i < _sourceBandsLen; i++) {
+				band_offsets[i] = 0;
+				bank_indices[i] = _sourceBands[i];
+			}			
+		} else {		
+			for (i=0; i < num_bands; i++) {
+				band_offsets[i] = 0;
+				bank_indices[i] = i;
+			}
 		}
 		
 		
@@ -1385,6 +1440,7 @@ Disabled */
 		// One bank for all bands of data
 		pixel_stride = 1;
 		scanline_stride = tileWidth * num_bands;
+		// modify for _sourceBands
 		for (i=0; i < num_bands; i++) {
 		    band_offsets[i] = tileWidth * i;
 		    bank_indices[i] = 0;
@@ -1402,6 +1458,7 @@ Disabled */
 
 	    case SystemLabel.ORG_BIP:
 		// One bank for all bands of data
+	    // modify for _sourceBands
 		pixel_stride = num_bands;
 		scanline_stride = tileWidth * num_bands;
 		for (i=0; i < num_bands; i++) {
@@ -1460,8 +1517,8 @@ Disabled */
 	int i;
 	int buffer_needed;
 	int line, samp;
-	int band, band_ind;
-	int offset;
+	int band, band_ind, srcBand, destBand;
+	int offset, us_offset;
 	boolean bandListGiven;
 	// Array pointers that are filled in from UnpackedImageData.getXxxData()
 	byte bdata[], bbdata[][];
@@ -1469,43 +1526,192 @@ Disabled */
 	int idata[], iidata[][];
 	float fdata[], ffdata[][];
 	double ddata[], dddata[][];
-
+	
+	byte us_bdata[], us_bbdata[][];
+	short us_sdata[], us_ssdata[][];
+	int us_idata[], us_iidata[][];
+	float us_fdata[], us_ffdata[][];
+	double us_ddata[], us_dddata[][];
+	
+	// check if _sourceBands is null or not. try just using that if it is set
+	// make sure size is <= bands infile
+	// does 
+	
+	
+	
+	// sampleModel was already adjusted to only use _sourceBands
 	int num_bands = sm.getNumBands();
 	if (bandList != null && num_bands > bandList.length)
 	    num_bands = bandList.length;
 
+	// dest bands are in order. data will be read from the band specified in _sourceBands and placed 
+	// into the _destBand
+	_destBands = new int[num_bands];
+	for (i=0; i<num_bands; i++) {
+		_destBands[i] = i;
+	}
 	bandListGiven = (bandList != null);	// flag if it was given
-	if (!bandListGiven) {			// make one for convenience
-	    bandList = new int[num_bands];
-	    for (i=0; i<num_bands; i++)
-		bandList[i] = i;
+	
+	if (!bandListGiven) {			
+		if (_sourceBandsLen != 0 && _sourceBandsLen <= num_bands ) {
+			num_bands = _sourceBandsLen;
+			bandList = new int[_sourceBandsLen];
+			for (i=0; i < _sourceBandsLen; i++) {
+				bandList[i]  = _sourceBands[i];
+			}	
+		} else {	
+			// make one for convenience
+			bandList = new int[num_bands];
+			for (i=0; i<num_bands; i++) {
+				bandList[i] = i;
+			}
+		}
 	}
 
-	// System.out.println("       VicarInputFile.readTile "+x+","+y+" "+w+"x"+h);
+
+	// tile size was adjusted in computeTiles. it is the desired output size
+	// we need to determine the size of the tile to read to subsample to the output size
+	
+	int out_h = h ;
+	int out_w = w ;
+	
+	int out_x = x ;
+	int out_y = y ;
+	
+	int in_h = h * _sourceYSubsample;	
+	int in_w = w * _sourceXSubsample;
+	
+	// special case subsample and crop
+	// maybe only if sourceRegion.x != 0
+	// _sourceRegion.x or _sourceRegion.y 
+	// other wise we jump too far into the image
+	
+	int in_x = x * _sourceXSubsample;
+	
+	int in_x_crop = in_x;
+	if (_sourceXSubsample == 1) {
+		in_x_crop = in_x;
+	} else {
+		in_x_crop = (x * _sourceXSubsample) - _sourceRegion.x;
+	}
+	// int in_x = x ;
+	// int in_y = y ;
+	int in_y = y * _sourceYSubsample;
+	int in_y_crop = in_y;
+	if (_sourceYSubsample == 1) {
+		in_y_crop = in_y;
+	} else {
+		in_y_crop = (y * _sourceYSubsample) - _sourceRegion.y ;
+	}
+	
+	in_x = in_x_crop;
+	in_y = in_y_crop;
+	
+	
+	// is this always 0 ?? seems to be
+	int in_x_off = x_off * _sourceXSubsample;
+	int in_y_off = y_off * _sourceYSubsample;
+		
+	// is there or could there be a ss_x_off and ss_y_off which are different than x_off andf y_off??
+	// looks like we always get here thru readTile(int x, int y, SampleModel m, DataBuffer b) 
+	// which always sets x_off and y_off to 0
+	
+	// System.out.println("VicarInputFile.readTile "+x+","+y+" "+w+"x"+h+"   out_h "+out_h+"  in_h "+in_h+"  sourceYSubsampling = "+sourceYSubsampling+" ");
+	// Throwable t = new Throwable("Check where we were called from");
+	// t.printStackTrace();
 	
 	if (debug_tile) {
-		System.out.println("VicarInputFile.readTile "+x+","+y+" "+w+"x"+h);
-		System.out.println(" _system.getNS() "+_system.getNS()+"  _system.getNL() "+_system.getNL()+"  _system.getNB() "+_system.getNB());
-		System.out.println(" _system.getN1() "+_system.getN1()+"  _system.getN2() "+_system.getN2()+"  _system.getN3() "+_system.getN3());
-		System.out.println(" num_bands="+num_bands+" bandList ");
-		for (i=0; i<num_bands; i++) {
-			System.out.print("  "+i+"> " +bandList[i] );
+		System.out.println("VicarInputFile.readTile  --- "+x+","+y+" ---------------------------------------------------");
+		System.out.println(" _sourceBands =" +_sourceBands+"   _sourceBandsLen =" +_sourceBandsLen+"  sampleModel num_bands = "+num_bands );
+		if (_sourceBands != null) {
+			System.out.println(" _sourceBands.length = "+_sourceBands.length );
+			for (int j=0 ; j< _sourceBands.length ; j++) {
+				System.out.println(" _sourceBands["+j+"] = "+_sourceBands[j] );
+			}				
 		}
-		System.out.println(" ----------------------------------------------------------------");
+		for (i=0; i<num_bands; i++) {
+			System.out.println(" bandList["+i+"] = "+bandList[i] );
+			System.out.println(" _destBands["+i+"] = "+_destBands[i] );
+		}
+		// Throwable t = new Throwable("Check where we were called from");
+		// t.printStackTrace();
+		System.out.println("VicarInputFile.readTile  ---- "+x+","+y+" "+w+"x"+h+"  x_off="+x_off+"  y_off="+y_off);
+		
+		System.out.println("VicarInputFile.readTile   in_ "+in_x+","+in_y+" "+in_w+"x"+in_h+"  x_off="+x_off+"  y_off="+y_off);
+		System.out.println("VicarInputFile.readTile in_cr "+in_x_crop+","+in_y_crop+" "+in_w+"x"+in_h+"  x_off="+x_off+"  y_off="+y_off);
+		System.out.println("VicarInputFile.readTile  out_ "+out_x+","+out_y+" "+out_w+"x"+out_h+"  x_off="+x_off+"  y_off="+y_off);
+		System.out.println(" _sourceXSubsample = "+_sourceXSubsample+"  _sourceYSubsample = "+_sourceYSubsample+" ");
+		System.out.println("     _system.getNS() "+_system.getNS()+"    _system.getNL() "+_system.getNL()+" ");
+		System.out.println(" _sourceRegion.width "+_sourceRegion.width+"  _sourceRegion.height "+_sourceRegion.height+" "+_sourceRegion.x+","+_sourceRegion.y);
+		System.out.println(" _destinationRegion.width "+_destinationRegion.width+"  _destinationRegion.height "+_destinationRegion.height+" "+_destinationRegion.x+","+_destinationRegion.y);
+		// System.out.println(" _system.getNS() "+_system.getNS()+"  _system.getNL() "+_system.getNL()+"  _system.getNB() "+_system.getNB());
+		// System.out.println(" _system.getN1() "+_system.getN1()+"  _system.getN2() "+_system.getN2()+"  _system.getN3() "+_system.getN3());
+		System.out.println("w= " + w + ", x_off=" + x_off + ", ("+(w+x_off)+") sm width=" + sm.getWidth());
+		System.out.println("h= " + h + ", y_off=" + x_off + ", ("+(h+y_off)+") sm height=" + sm.getHeight());
+		System.out.println(" num_bands="+num_bands+" bandList ");
+		// print the readParams values
+		// printImageReadParams()
+		// add all subsample, crop values here
+		for (i=0; i<num_bands; i++) {
+			System.out.print("  "+i+" > " +bandList[i] );
+		}
+		System.out.println(" ");
+		System.out.println("x="+x+" w= " + w + ", (x+w)="+(x+w)+" x_off=" + x_off + ", _destinationRegion.x="+_destinationRegion.x+", _destinationRegion.width="+_destinationRegion.width+"  DW");
+		System.out.println("y="+y+" h= " + h + ", (y+h)="+(y+h)+" , y_off=" + y_off + ", _destinationRegion.y="+_destinationRegion.y+", _destinationRegion.height="+_destinationRegion.height+" DW");
+		
+		int wd = w;
+		int maxXd = (_destinationRegion.width + _destinationRegion.x);
+		if (x + w > _destinationRegion.width + _destinationRegion.x) {
+			// last tile may be incomplete
+			wd = (_destinationRegion.width + _destinationRegion.x ) - x;
+		}
+		System.out.println("x="+x+" w= " + w + "  wd="+wd+"   _destinationRegion.width + _destinationRegion.x = "+maxXd+" DW");
+		
+		
+		System.out.println("x="+x+" w= " + w + ", (x+w)="+(x+w)+" x_off=" + x_off + ", _sourceRegion.x="+_sourceRegion.x+", _sourceRegion.width="+_sourceRegion.width+"  DW");
+		System.out.println("y="+y+" h= " + h + ", (y+h)="+(y+h)+" , y_off=" + y_off + ", _sourceRegion.y="+_sourceRegion.y+", _sourceRegion.height="+_sourceRegion.height+" DW");
+		int ws = w;
+		int maxXs = (_sourceRegion.width + _sourceRegion.x);
+		if (x + w > _sourceRegion.width + _sourceRegion.x) {
+			// last tile may be incomplete
+			ws = (_sourceRegion.width + _sourceRegion.x ) - x;
+		}
+		System.out.println("x="+x+" w= " + w + "  ws="+ws+"   _sourceRegion.width + _sourceRegion.x = "+maxXs+" DW ");
+		
+    }
+	
+	// last tile may be incomplete
+	if (_sourceRegion != null) {
+		if (x + w > _sourceRegion.width + _sourceRegion.x){		
+			w = (_sourceRegion.width + _sourceRegion.x ) - x;
+		}
+		if (y + h > _sourceRegion.height + _sourceRegion.y){
+			h = (_sourceRegion.height + _sourceRegion.y ) - y;
+		}
 	}
-	if (x + w > _system.getNS())		// last tile may be incomplete
-	    w = _system.getNS() - x;
-	if (y + h > _system.getNL())
-	    h = _system.getNL() - y;
-
+	
+	
+	
+	// sourceRegion- this is data read before we subsample
+	// does this also need to take 
+	if (in_x + in_w > _system.getNS())		// last tile may be incomplete
+		in_w = _system.getNS() - in_x;
+	if (in_y + in_h > _system.getNL())
+		in_h = _system.getNL() - in_y;
+	
 	if (debug_tile) {
-		System.out.print(" "+x+","+y+" "+w+"x"+h);
-		System.out.println("  x_off "+x_off+"   y_off "+y_off);
-	}
+		System.out.print(" XX in_x="+in_x+" in_y="+in_y+" in_w="+in_w+" in_h="+in_h+" in_x_off="+in_x_off+" in_y_off="+in_y_off);
+		System.out.println(" _system.getNS()="+_system.getNS()+" getNL()="+_system.getNL()+" ");
+		System.out.print(" XX    x="+x+"    y="+y+"    w="+w+"     h="+h+"  x_off="+x_off+" y_off="+y_off+"  ");
+		System.out.println(" _destinationRegion.width="+_destinationRegion.width+" height="+_destinationRegion.height+"  DW");
+		System.out.println("                                                        DW ");
+		}
+
+	
 
 // Exception e = new Exception("VicarInputFile.readTile");
 // e.printStackTrace();
-
+	// this sm is the one for the output tile
 	if (x_off + w > sm.getWidth())
 	    throw new ArrayIndexOutOfBoundsException(
 		"Illegal width in VICAR readTile: " + w + ", x_off=" + x_off +
@@ -1515,75 +1721,425 @@ Disabled */
 		"Illegal height in VICAR readTile: " + h + ", y_off=" + y_off +
 			", height=" + sm.getHeight());
 
+	// is this where the output data is written?? make one for the subsampled data? new db ??
+	// The input sm etc is what needs to be filled for the output tile
+	// The data is first read from the file and then subsampled to tile
 	PixelAccessor pa = new PixelAccessor(sm, null);
-	Rectangle area = new Rectangle(x_off, y_off, w, h);
+	// out_h instead of h
+	// Rectangle area = new Rectangle(x_off, y_off, w, out_h);
+	Rectangle area = new Rectangle(x_off, y_off, w, h);	
 	UnpackedImageData data = pa.getPixels(
 			Raster.createWritableRaster(sm,db,null),
 			area, db.getDataType(), true);
 
+	
+	
+	// this is the tile and associated data buffer for the full tile (unsampled)
+	// it is always the same size ??
+	
+	SampleModel unsampledTileSampleModel = createSampleModel(in_w, in_h);
+    Point unsampledTileOrg = new Point(0,0);
+	WritableRaster  unsampledTile = Raster.createWritableRaster(unsampledTileSampleModel, unsampledTileOrg);     
+    Rectangle fullTileRect = unsampledTile.getBounds();    
+    DataBuffer db_unsampled = unsampledTile.getDataBuffer(); 
+    /***
+	* what is db ??? DataBuffer db passed in. It is the data buffer of the inputTile
+	* we need a dataBuffer (db) which we will use to read the input data
+	* we will need a tile and databuffer for the tile we read before it is subsampled
+	* can't use db here, must create a buffer sized to hold the data read directly from the file
+	* it will then be subsampled into the output buffer which is db **/
+	PixelAccessor inPa = new PixelAccessor(unsampledTileSampleModel, null);
+	Rectangle inputArea = new Rectangle(in_x_off, in_y_off, in_w, in_h);
+	UnpackedImageData unsubsampledData = inPa.getPixels(
+			Raster.createWritableRaster(unsampledTileSampleModel,db_unsampled,null),
+			inputArea, db_unsampled.getDataType(), true);
+	
 	int data_type = _system.getFormatCode();
 	int org_code = _system.getOrgCode();
+	
+	int bytesPer = bytesForDataType(data_type);
+	int inBytes = bytesPer * w;
+	int outBytes = bytesPer * out_w;
+	boolean doSS = false; // are we subsampling the data??
+	if (_sourceXSubsample> 1 || _sourceXSubsample> 1) doSS = true;
+	
+	if (debug_tile) {
+		System.out.println(" _sourceXSubsample = "+_sourceXSubsample+" in_w "+in_w+"   out_w = "+out_w+"  w="+w+" ");
+		System.out.println(" _sourceYSubsample = "+_sourceYSubsample+" in_h "+in_h+"   out_h = "+out_h+"  h="+h);
+		System.out.print(" "+x+","+y+" "+w+"x"+h+"  in_h "+in_h+"   out_h="+out_h+" bytesPer "+bytesPer+" inBytes="+inBytes+" outBytes="+outBytes);
+		// how big a buffer would I need to read one line?
+		System.out.println("  x_off "+x_off+"   y_off "+y_off+" data_type "+ data_type+"  TYPE_BYTE "+SystemLabel.TYPE_BYTE);
+		System.out.print("  TYPE_BYTE="+SystemLabel.TYPE_BYTE+" TYPE_HALF="+SystemLabel.TYPE_HALF +" TYPE_FULL="+SystemLabel.TYPE_FULL);
+		System.out.println("  TYPE_REAL="+SystemLabel.TYPE_REAL+" TYPE_DOUB="+SystemLabel.TYPE_DOUB +" ");
+		System.out.println(" area = "+area+"  db.getSize()="+db.getSize()+"  data "+data.toString()+" pa="+pa.toString());	
+		
+		System.out.println(" inputArea = "+inputArea+"  db_unsampled.getSize()="+db_unsampled.getSize()+"  db_unsampled "+db_unsampled.toString()+" inPa="+inPa.toString());			
+	}
+	
+	
+	if (doSS && debug) {
+		System.out.println("VicarInputFile.readTile  should call readSubsampled() ########## "+_sourceXSubsample+" "+_sourceYSubsample+" ################");
+	} else if (debug ){
+		System.out.println("VicarInputFile.readTile  should NOT call readSubsampled() ########## "+_sourceXSubsample+" "+_sourceYSubsample+" ################");
+	}
+	
 
 	switch (org_code) {
 
 	    case SystemLabel.ORG_BSQ:
+	    	
 
 		for (band_ind=0; band_ind < num_bands; band_ind++) {
 		    band = bandList[band_ind];
+		    srcBand = bandList[band_ind]; // band data is read from
+		    destBand = _destBands[band_ind]; // band data is written to
 
 		    switch (data_type) {
 			case SystemLabel.TYPE_BYTE:
-			    bdata = data.getByteData(band);
-			    offset = data.getOffset(band);
-			    for (line=0; line < h; line++) {
-				readRecordNS(bdata, x, w, offset,
-					data.pixelStride, line+y,band);
-				offset += data.lineStride;
+				if (doSS) {
+					// destBand is where the data is placed after it has been read
+					// us_  unsampled values
+					// us_bdata = unsubsampledData.getByteData(band);
+					us_bdata = unsubsampledData.getByteData(destBand);
+					// should this always be 0 ?? might be the offset specified with subsampling ??
+					// maybe we won't support it. always use 0,0
+					// us_offset = unsubsampledData.getOffset(band);
+					us_offset = unsubsampledData.getOffset(destBand);
+					
+					// bdata = data.getByteData(band);
+					// offset = data.getOffset(band);
+					bdata = data.getByteData(destBand);
+					offset = data.getOffset(destBand);
+					// int data_offset = offset; 
+					if (debug_tile) {
+					System.out.println("TYPE_BYTE h="+h+" x="+x+" w="+w+" offset="+offset+" y="+y+" band="+band+" srcBand="+srcBand+" destBand="+destBand+" data.pixelStride="+data.pixelStride+" doSS="+doSS);
+					System.out.println("   in_h="+in_h+" in_x="+in_x+" in_w="+in_w+" us_offset="+us_offset+" in_y="+in_y+" band="+band+" unsubsampledData.pixelStride="+unsubsampledData.pixelStride+" doSS="+doSS);
+					System.out.println("   bdata.length = "+bdata.length +"  us_bdata.length = "+us_bdata.length +" h="+h+" "+(bdata.length/w)+"  in_h="+in_h+" "+(us_bdata.length/in_w)+"  ");
+					}
+					/* read the input file data at full resolution */
+			    	for (line=0; line < in_h; line++) {			    	
+			    		// readRecordNS(us_bdata, in_x, in_w, us_offset, unsubsampledData.pixelStride, line+in_y,band);
+			    		readRecordNS(us_bdata, in_x, in_w, us_offset, unsubsampledData.pixelStride, line+in_y,srcBand);	
+			    		us_offset += unsubsampledData.lineStride;
+			    	}
+			    	
+			    	// copy the data to the output buffer, subsampling as we do it
+			    	int us_bdata_i = 0; // index into the us_bdata array
+			    	
+			    	int bdata_i = offset; 
+			    	boolean exit_loop = false;
+			    	for (line=0; line < in_h && !exit_loop ; line += _sourceYSubsample ) {	
+			    		us_bdata_i = line * in_w; // * unsubsampledData.lineStride
+			    		// System.out.println("line="+line+" bdata_i="+bdata_i+" us_bdata_i="+us_bdata_i+"  "+in_w+"  "+in_h );  
+			    		for (int in_i=0; in_i < in_w; in_i = in_i + _sourceXSubsample ) {
+			    			int us_bdata_ii = us_bdata_i + in_i;
+			    			if (us_bdata_ii >= us_bdata.length || bdata_i >= bdata.length) {
+			    				System.out.println("line="+line+" bdata_i="+bdata_i+" us_bdata_i="+us_bdata_i+"  us_bdata_ii="+us_bdata_ii+" "+in_w+" in_i="+in_i+"  break");
+			    				exit_loop = true;
+			    				break;
+			    			}
+			    			bdata[bdata_i++] = us_bdata[us_bdata_ii];	
+			    		}			    	
+			    	}
+			    	if (debug_tile) {
+			    		System.out.println("line="+line+" bdata_i="+bdata_i+" us_bdata_i="+us_bdata_i+"  "+in_w+"  "+in_h+" XXB" );  
+			    	}
+			    	
+			    } else {
+			    	// bdata = data.getByteData(band);
+					// offset = data.getOffset(band);
+					bdata = data.getByteData(destBand);
+					offset = data.getOffset(destBand);
+					if (debug_tile) {
+						System.out.println("TYPE_BYTE h="+h+" x="+x+" w="+w+" offset="+offset+" y="+y+" band="+band+" data.pixelStride="+data.pixelStride+" doSS="+doSS);
+					}
+			    
+			    	for (line=0; line < h; line++) {			    	
+				    	// readRecordNS(bdata, x, w, offset, data.pixelStride, line+y,band);		
+				    	readRecordNS(bdata, x, w, offset, data.pixelStride, line+y,srcBand);		
+				    	// always increment the offset even if the data isn't read
+				    	offset += data.lineStride;
+				    }
 			    }
+			    
+			    
 			    break;
 			case SystemLabel.TYPE_HALF:
-			    sdata = data.getShortData(band);
-			    offset = data.getOffset(band);
-			    for (line=0; line < h; line++) {
-				readRecordNS(sdata, x, w, offset,
-					data.pixelStride, line+y,band);
-				offset += data.lineStride;
-			    }
+				if (doSS) {
+					// destBand is where the data is placed after it has been read
+					// us_  unsampled values
+					us_sdata = unsubsampledData.getShortData(destBand);
+					// should this always be 0 ?? might be the offset specified with subsampling ??
+					// maybe we won't support it. always use 0,0
+					us_offset = unsubsampledData.getOffset(destBand);
+										
+					sdata = data.getShortData(band);
+					offset = data.getOffset(destBand);
+					// int data_offset = offset; 
+					if (debug_tile) {
+					System.out.println("TYPE_HALF h="+h+" x="+x+" w="+w+" offset="+offset+" y="+y+" band="+band+" srcBand="+srcBand+" destBand="+destBand+" data.pixelStride="+data.pixelStride+" doSS="+doSS);
+					System.out.println("   in_h="+in_h+" in_x="+in_x+" in_w="+in_w+" us_offset="+us_offset+" in_y="+in_y+" band="+band+" unsubsampledData.pixelStride="+unsubsampledData.pixelStride+" doSS="+doSS);
+					System.out.println("   sdata.length = "+sdata.length +"  us_bdata.length = "+us_sdata.length +" h="+h+" "+(sdata.length/w)+"  in_h="+in_h+" "+(us_sdata.length/in_w)+"  ");
+					}
+					/* read the input file data at full resolution */
+			    	for (line=0; line < in_h; line++) {			    	
+			    		// readRecordNS(us_bdata, in_x, in_w, us_offset, unsubsampledData.pixelStride, line+in_y,band);
+			    		readRecordNS(us_sdata, in_x, in_w, us_offset, unsubsampledData.pixelStride, line+in_y,srcBand);	
+			    		us_offset += unsubsampledData.lineStride;
+			    	}
+			    	
+			    	// copy the data to the output buffer, subsampling as we do it
+			    	int us_sdata_i = 0; // index into the us_bdata array
+			    	
+			    	int sdata_i = offset; 
+			    	boolean exit_loop = false;
+			    	for (line=0; line < in_h && !exit_loop ; line += _sourceYSubsample ) {	
+			    		us_sdata_i = line * in_w; // * unsubsampledData.lineStride
+			    		// System.out.println("line="+line+" bdata_i="+bdata_i+" us_bdata_i="+us_bdata_i+"  "+in_w+"  "+in_h );  
+			    		for (int in_i=0; in_i < in_w; in_i = in_i + _sourceXSubsample ) {
+			    			int us_sdata_ii = us_sdata_i + in_i;
+			    			if (us_sdata_ii >= us_sdata.length || sdata_i >= sdata.length) {
+			    				System.out.println("line="+line+" sdata_i="+sdata_i+" us_sdata_i="+us_sdata_i+"  us_bdata_ii="+us_sdata_ii+" "+in_w+" in_i="+in_i+"  break");
+			    				exit_loop = true;
+			    				break;
+			    			}
+			    			sdata[sdata_i++] = us_sdata[us_sdata_ii];	
+			    		}			    	
+			    	}
+			    	if (debug_tile) {
+			    		System.out.println("line="+line+" sdata_i="+sdata_i+" us_bdata_i="+us_sdata_i+"  "+in_w+"  "+in_h+" XXH" );  
+			    	}
+
+				} else {
+					sdata = data.getShortData(band);
+					offset = data.getOffset(band);
+					for (line=0; line < h; line++) {
+						readRecordNS(sdata, x, w, offset, data.pixelStride, line+y,band);
+						offset += data.lineStride;
+			    	}
+				}
 			    break;
 			case SystemLabel.TYPE_USHORT:
-			    sdata = data.getShortData(band);
-			    offset = data.getOffset(band);
-			    for (line=0; line < h; line++) {
-				readRecordUshortNS(sdata, x, w, offset,
-					data.pixelStride, line+y,band);
-				offset += data.lineStride;
-			    }
+				if (doSS) {
+					// destBand is where the data is placed after it has been read
+					// us_  unsampled values
+					us_sdata = unsubsampledData.getShortData(destBand);
+					// should this always be 0 ?? might be the offset specified with subsampling ??
+					// maybe we won't support it. always use 0,0
+					us_offset = unsubsampledData.getOffset(destBand);
+										
+					sdata = data.getShortData(band);
+					offset = data.getOffset(destBand);
+					// int data_offset = offset; 
+					if (debug_tile) {
+					System.out.println("TYPE_USHORT h="+h+" x="+x+" w="+w+" offset="+offset+" y="+y+" band="+band+" srcBand="+srcBand+" destBand="+destBand+" data.pixelStride="+data.pixelStride+" doSS="+doSS);
+					System.out.println("   in_h="+in_h+" in_x="+in_x+" in_w="+in_w+" us_offset="+us_offset+" in_y="+in_y+" band="+band+" unsubsampledData.pixelStride="+unsubsampledData.pixelStride+" doSS="+doSS);
+					System.out.println("   sdata.length = "+sdata.length +"  us_bdata.length = "+us_sdata.length +" h="+h+" "+(sdata.length/w)+"  in_h="+in_h+" "+(us_sdata.length/in_w)+"  ");
+					}
+					/* read the input file data at full resolution */
+			    	for (line=0; line < in_h; line++) {			    	
+			    		// readRecordNS(us_bdata, in_x, in_w, us_offset, unsubsampledData.pixelStride, line+in_y,band);
+			    		readRecordNS(us_sdata, in_x, in_w, us_offset, unsubsampledData.pixelStride, line+in_y,srcBand);	
+			    		us_offset += unsubsampledData.lineStride;
+			    	}
+			    	
+			    	// copy the data to the output buffer, subsampling as we do it
+			    	int us_sdata_i = 0; // index into the us_bdata array
+			    	
+			    	int sdata_i = offset; 
+			    	boolean exit_loop = false;
+			    	for (line=0; line < in_h && !exit_loop ; line += _sourceYSubsample ) {	
+			    		us_sdata_i = line * in_w; // * unsubsampledData.lineStride
+			    		// System.out.println("line="+line+" bdata_i="+bdata_i+" us_bdata_i="+us_bdata_i+"  "+in_w+"  "+in_h );  
+			    		for (int in_i=0; in_i < in_w; in_i = in_i + _sourceXSubsample ) {
+			    			int us_sdata_ii = us_sdata_i + in_i;
+			    			if (us_sdata_ii >= us_sdata.length || sdata_i >= sdata.length) {
+			    				System.out.println("line="+line+" sdata_i="+sdata_i+" us_sdata_i="+us_sdata_i+"  us_bdata_ii="+us_sdata_ii+" "+in_w+" in_i="+in_i+"  break");
+			    				exit_loop = true;
+			    				break;
+			    			}
+			    			sdata[sdata_i++] = us_sdata[us_sdata_ii];	
+			    		}			    	
+			    	}
+			    	if (debug_tile) {
+			    		System.out.println("line="+line+" sdata_i="+sdata_i+" us_sdata_i="+us_sdata_i+"  "+in_w+"  "+in_h+" XXUS" );  
+			    	}
+
+				} else {
+					sdata = data.getShortData(band);
+					offset = data.getOffset(band);
+					for (line=0; line < h; line++) {
+						readRecordUshortNS(sdata, x, w, offset, data.pixelStride, line+y,band);
+						offset += data.lineStride;
+					}
+				}
 			    break;
 			case SystemLabel.TYPE_FULL:
-			    idata = data.getIntData(band);
-			    offset = data.getOffset(band);
-			    for (line=0; line < h; line++) {
-				readRecordNS(idata, x, w, offset,
-					data.pixelStride, line+y,band);
-				offset += data.lineStride;
+				if (doSS) {
+					// destBand is where the data is placed after it has been read
+					// us_  unsampled values
+					us_idata = unsubsampledData.getIntData(destBand);
+					// should this always be 0 ?? might be the offset specified with subsampling ??
+					// maybe we won't support it. always use 0,0
+					// us_offset = unsubsampledData.getOffset(band);
+					us_offset = unsubsampledData.getOffset(destBand);
+					
+					// bdata = data.getByteData(band);
+					// offset = data.getOffset(band);
+					idata = data.getIntData(destBand);
+					offset = data.getOffset(destBand);
+					// int data_offset = offset; 
+					if (debug_tile) {
+					System.out.println("TYPE_FULL h="+h+" x="+x+" w="+w+" offset="+offset+" y="+y+" band="+band+" srcBand="+srcBand+" destBand="+destBand+" data.pixelStride="+data.pixelStride+" doSS="+doSS);
+					System.out.println("   in_h="+in_h+" in_x="+in_x+" in_w="+in_w+" us_offset="+us_offset+" in_y="+in_y+" band="+band+" unsubsampledData.pixelStride="+unsubsampledData.pixelStride+" doSS="+doSS);
+					System.out.println("   idata.length = "+idata.length +"  us_bdata.length = "+us_idata.length +" h="+h+" "+(idata.length/w)+"  in_h="+in_h+" "+(us_idata.length/in_w)+"  ");
+					}
+					/* read the input file data at full resolution */
+			    	for (line=0; line < in_h; line++) {			    	
+			    		// readRecordNS(us_bdata, in_x, in_w, us_offset, unsubsampledData.pixelStride, line+in_y,band);
+			    		readRecordNS(us_idata, in_x, in_w, us_offset, unsubsampledData.pixelStride, line+in_y,srcBand);	
+			    		us_offset += unsubsampledData.lineStride;
+			    	}
+			    	
+			    	// copy the data to the output buffer, subsampling as we do it
+			    	int us_idata_i = 0; // index into the us_idata array
+			    	
+			    	int idata_i = offset; 
+			    	boolean exit_loop = false;
+			    	for (line=0; line < in_h && !exit_loop ; line += _sourceYSubsample ) {	
+			    		us_idata_i = line * in_w; // * unsubsampledData.lineStride
+			    		// System.out.println("line="+line+" bdata_i="+bdata_i+" us_bdata_i="+us_bdata_i+"  "+in_w+"  "+in_h );  
+			    		for (int in_i=0; in_i < in_w; in_i = in_i + _sourceXSubsample ) {
+			    			int us_idata_ii = us_idata_i + in_i;
+			    			if (us_idata_ii >= us_idata.length || idata_i >= idata.length) {
+			    				System.out.println("line="+line+" idata_i="+idata_i+" us_idata_i="+us_idata_i+"  us_idata_ii="+us_idata_ii+" "+in_w+" in_i="+in_i+"  break");
+			    				exit_loop = true;
+			    				break;
+			    			}
+			    			idata[idata_i++] = us_idata[us_idata_ii];	
+			    		}			    	
+			    	}
+			    	if (debug_tile) {
+			    		System.out.println("line="+line+" idata_i="+idata_i+" us_idata_i="+us_idata_i+"  "+in_w+"  "+in_h+" XXI" );  
+			    	}
+			    	
+			    } else {
+			    	idata = data.getIntData(band);
+			    	offset = data.getOffset(band);
+			    	for (line=0; line < h; line++) {
+			    		readRecordNS(idata, x, w, offset,data.pixelStride, line+y,band);
+			    		offset += data.lineStride;
+			    	}
 			    }
 			    break;
 			case SystemLabel.TYPE_REAL:
-			    fdata = data.getFloatData(band);
-			    offset = data.getOffset(band);
-			    for (line=0; line < h; line++) {
-				readRecordNS(fdata, x, w, offset,
-					data.pixelStride, line+y,band);
-				offset += data.lineStride;
+				if (doSS) {
+					// us_  unsampled values
+					us_fdata = unsubsampledData.getFloatData(band);
+					// do we need to take real byte count or does lineStride pixelStride handle that??
+					// should this always be 0 ?? might be the offset specified with subsampling
+					// maybe we won't support it. always use 0,0
+					us_offset = unsubsampledData.getOffset(band);
+					
+					// output tile
+					fdata = data.getFloatData(band);
+					offset = data.getOffset(band);
+					// int data_offset = offset; 
+					if (debug_tile) {
+					System.out.println("TYPE_REAL h="+h+" x="+x+" w="+w+" offset="+offset+" y="+y+" band="+band+" data.pixelStride="+data.pixelStride+" doSS="+doSS);
+					System.out.println("   in_h="+in_h+" in_x="+in_x+" in_w="+in_w+" us_offset="+us_offset+" in_y="+in_y+" band="+band+" unsubsampledData.pixelStride="+unsubsampledData.pixelStride+" doSS="+doSS);
+					System.out.println("   fdata.length = "+fdata.length +"  us_fdata.length = "+us_fdata.length +" h="+h+" "+(fdata.length/w)+"  in_h="+in_h+" "+(us_fdata.length/in_w)+"  ");
+					}
+					/* read the input file data at full resolution */
+			    	for (line=0; line < in_h; line++) {			    	
+			    		readRecordNS(us_fdata, in_x, in_w, us_offset, unsubsampledData.pixelStride, line+in_y,srcBand);			    	
+			    		us_offset += unsubsampledData.lineStride;
+			    	}
+			    	
+			    	// copy the data to the output buffer, subsampling as we do it
+			    	int us_fdata_i = 0; // index into the us_bdata array
+			    	
+			    	int fdata_i = offset; 
+			    	boolean exit_loop = false;
+			    	for (line=0; line < in_h && !exit_loop ; line += _sourceYSubsample ) {	
+			    		us_fdata_i = line * in_w; // * unsubsampledData.lineStride
+			    		// System.out.println("line="+line+" bdata_i="+bdata_i+" us_bdata_i="+us_bdata_i+"  "+in_w+"  "+in_h );  
+			    		for (int in_i=0; in_i < in_w; in_i = in_i + _sourceXSubsample ) {
+			    			int us_fdata_ii = us_fdata_i + in_i;
+			    			if (us_fdata_ii >= us_fdata.length || fdata_i >= fdata.length) {
+			    				System.out.println("line="+line+" fdata_i="+fdata_i+" us_fdata_i="+us_fdata_i+"  us_fdata_ii="+us_fdata_ii+" "+in_w+" in_i="+in_i+"  break");
+			    				exit_loop = true;
+			    				break;
+			    			}
+			    			fdata[fdata_i++] = us_fdata[us_fdata_ii];	
+			    		}			    	
+			    	}
+			    	if (debug_tile) {
+			    		System.out.println("line="+line+" fdata_i="+fdata_i+" us_fdata_i="+us_fdata_i+"  "+in_w+"  "+in_h+" XXX" );  
+			    	}
+			    	
+			    } else { // standard read
+			    	fdata = data.getFloatData(band);
+			    	offset = data.getOffset(band);
+			    	for (line=0; line < h; line++) {
+			    		readRecordNS(fdata, x, w, offset, data.pixelStride, line+y,band);
+			    		offset += data.lineStride;
+			    	}
 			    }
 			    break;
 			case SystemLabel.TYPE_DOUB:
-			    ddata = data.getDoubleData(band);
-			    offset = data.getOffset(band);
-			    for (line=0; line < h; line++) {
-				readRecordNS(ddata, x, w, offset,
-					data.pixelStride, line+y,band);
-				offset += data.lineStride;
+				if (doSS) { 
+					// us_  unsampled values
+					us_ddata = unsubsampledData.getDoubleData(band);
+					// do we need to take real byte count or does lineStride pixelStride handle that??
+					// should this always be 0 ?? might be the offset specified with subsampling
+					// maybe we won't support it. always use 0,0
+					us_offset = unsubsampledData.getOffset(band);
+					
+					// output tile
+					ddata = data.getDoubleData(band);
+					offset = data.getOffset(band);
+					// int data_offset = offset; 
+					if (debug_tile) {
+					System.out.println("TYPE_DOUB h="+h+" x="+x+" w="+w+" offset="+offset+" y="+y+" band="+band+" data.pixelStride="+data.pixelStride+" doSS="+doSS);
+					System.out.println("   in_h="+in_h+" in_x="+in_x+" in_w="+in_w+" us_offset="+us_offset+" in_y="+in_y+" band="+band+" unsubsampledData.pixelStride="+unsubsampledData.pixelStride+" doSS="+doSS);
+					System.out.println("   ddata.length = "+ddata.length +"  us_ddata.length = "+us_ddata.length +" h="+h+" "+(ddata.length/w)+"  in_h="+in_h+" "+(us_ddata.length/in_w)+"  ");
+					}
+					/* read the input file data at full resolution */
+			    	for (line=0; line < in_h; line++) {			    	
+			    		readRecordNS(us_ddata, in_x, in_w, us_offset, unsubsampledData.pixelStride, line+in_y,srcBand);			    	
+			    		us_offset += unsubsampledData.lineStride;
+			    	}
+			    	
+			    	// copy the data to the output buffer, subsampling as we do it
+			    	int us_ddata_i = 0; // index into the us_ddata array
+			    	
+			    	int ddata_i = offset; 
+			    	boolean exit_loop = false;
+			    	for (line=0; line < in_h && !exit_loop ; line += _sourceYSubsample ) {	
+			    		us_ddata_i = line * in_w; // * unsubsampledData.lineStride
+			    		// System.out.println("line="+line+" bdata_i="+bdata_i+" us_bdata_i="+us_bdata_i+"  "+in_w+"  "+in_h );  
+			    		for (int in_i=0; in_i < in_w; in_i = in_i + _sourceXSubsample ) {
+			    			int us_ddata_ii = us_ddata_i + in_i;
+			    			if (us_ddata_ii >= us_ddata.length || ddata_i >= ddata.length) {
+			    				System.out.println("line="+line+" ddata_i="+ddata_i+" us_ddata_i="+us_ddata_i+"  us_ddata_ii="+us_ddata_ii+" "+in_w+" in_i="+in_i+"  break");
+			    				exit_loop = true;
+			    				break;
+			    			}
+			    			ddata[ddata_i++] = us_ddata[us_ddata_ii];	
+			    		}			    	
+			    	}
+			    	if (debug_tile) {
+			    		System.out.println("line="+line+" ddata_i="+ddata_i+" us_ddata_i="+us_ddata_i+"  "+in_w+"  "+in_h+" XXD" );  
+			    	}
+			    	
+			    } else { // standard read
+			    	ddata = data.getDoubleData(band);
+			    	offset = data.getOffset(band);
+			    	for (line=0; line < h; line++) {
+			    		readRecordNS(ddata, x, w, offset, data.pixelStride, line+y,band);
+			    		offset += data.lineStride;
+			    	}
 			    }
 			    break;
 			case SystemLabel.TYPE_COMP:
@@ -1932,7 +2488,7 @@ Disabled */
 
 	pos += _file_offset;
 	if (debug) {
-		System.out.println("VicarInputFile.seekToLocation pos="+pos+"   _file_offset="+_file_offset);
+		// System.out.println("VicarInputFile.seekToLocation pos="+pos+"   _file_offset="+_file_offset);
 	}
 
 	// If random, just seek there.  Don't pay attention to _current_file_pos
@@ -2076,6 +2632,139 @@ Disabled */
 	}
 
 	throw new UnsupportedOperationException("Close not supported for this stream type");
+    }
+    
+    /***
+     * protected int _sourceXSubsample = 1;
+   protected int _sourceYSubsample = 1;
+   protected int _subsamplingXOffset = 0;
+   protected int _subsamplingYOffset = 0;
+   protected Rectangle originalRegion;
+   protected Rectangle destinationRegion;
+     * @param sourceXsubsample
+     */
+    
+    public void setSourceXSubsample(int sourceXSubsample) {
+		_sourceXSubsample = sourceXSubsample;
+	}
+	
+	public void setSourceYSubsample(int sourceYSubsample) {
+		_sourceYSubsample = sourceYSubsample;
+	}
+	
+	public void setOriginalRegion(Rectangle r) {
+		_originalRegion = new Rectangle(r);	
+	}
+	
+	public void setSourceRegion(Rectangle r) {
+		_sourceRegion = new Rectangle(r);	
+	}
+	
+	public void setDestinationRegion(Rectangle r) {
+		_destinationRegion = new Rectangle(r);	
+	}
+    
+    // ImageReadParam values setters getters
+    /**
+     * protected ImageReadParam _param ;
+   protected Rectangle sourceRegion;
+   protected int[] sourceBands;
+   protected int sourceXSubsampling;
+   protected int sourceYSubsampling;
+   protected int subsamplingXOffset;
+   protected int subsamplingYOffset;
+   ***/
+    /**
+     * setImageReadParam
+     * @param param
+     */
+    public void setImageReadParam(ImageReadParam param) {
+    	_param = param;
+    	// get the values and set 
+    	_sourceBands = param.getSourceBands();
+		_sourceRegion = param.getSourceRegion();
+		// _sourceRegion.x y width height
+		
+				
+		_sourceXSubsample = param.getSourceXSubsampling();
+		_sourceYSubsample = param.getSourceYSubsampling();
+		_subsamplingXOffset = param.getSubsamplingXOffset();
+		_subsamplingYOffset = param.getSubsamplingYOffset();
+    	
+    }
+    
+    public void printImageReadParams() {
+    	
+    	
+    	System.out.println("VicarInputFile.printImageReadParams");
+    	System.out.println("_param "+_param);
+    	System.out.println("_sourceBands = "+_sourceBands);
+    	if (_sourceBands != null) {
+    		for (int i = 0 ; i< _sourceBands.length ; i++) {
+    			System.out.println("_sourceBands["+i+"] = "+_sourceBands[i]);
+    		}
+    	} else {
+    		System.out.println("_sourceBands are null"); 	
+    	}
+    	
+    	if (_sourceRegion != null) {
+    		System.out.println("_sourceRegion origin "+_sourceRegion.x+","+_sourceRegion.y+
+    				" width="+_sourceRegion.width+" height="+_sourceRegion.height);
+    	} else {
+    		System.out.println("_sourceRegion are null"); 	
+    	}
+    	
+    	System.out.println("_sourceXSubsampling = "+_sourceXSubsample);
+    	System.out.println("_sourceYSubsampling = "+_sourceYSubsample);
+    	System.out.println("_subsamplingXOffset = "+_subsamplingXOffset);
+    	System.out.println("_subsamplingYOffset = "+_subsamplingYOffset);
+    	
+    }
+    
+
+    public int bytesForDataType(int data_type) {
+    	int bytes = 1;
+    	switch (data_type) {
+		case SystemLabel.TYPE_BYTE:
+		    bytes=1;
+		    break;
+		case SystemLabel.TYPE_HALF:
+		    bytes=2;
+		    break;
+		case SystemLabel.TYPE_USHORT:
+		    bytes=2;
+		    break;
+		case SystemLabel.TYPE_FULL:
+		    bytes=4;
+		    break;
+		case SystemLabel.TYPE_REAL:
+		    bytes=4;
+		    break;
+		case SystemLabel.TYPE_DOUB:
+		    bytes=8;
+		    break;
+		case SystemLabel.TYPE_COMP:
+			bytes=16;
+			break;
+    	
+    	}
+    	return bytes;
+    }
+    
+    public void setDebug(boolean d) {
+    	debug = d;
+    }
+    
+    public boolean getDebug() {
+    	return debug;
+    }
+    
+    public void setDebug_tile(boolean d) {
+    	debug_tile = d;
+    }
+    
+    public boolean getDebug_tile() {
+    	return debug_tile;
     }
 
 }

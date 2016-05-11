@@ -56,14 +56,16 @@ extern "C" {
    *
    * Date         who             Description
    * -----------  --------------- ----------------------------------------------
+   * 02-Jul-2015  C. Cheng        Added MESH_ID, MOSAIC_ID, SEQUENCE_ID and
+   *                              STEREO_MATCH_ID
    * 7-July-2008  Hyun Lee        Added RequestId
    * ?            Alice Stanboli  Added OpsToken.....
    * 23-May-2003  Hyun Lee        Changed InstrumentHostId & InstrumentId as 
    *                              array values.
-   * 14-Feb-2003	Payam Zamani	Changed PlanetDayNumber to integer
-   * 12-Feb-2003	Payam Zamani	Added ReleaseId
+   * 14-Feb-2003  Payam Zamani    Changed PlanetDayNumber to integer
+   * 12-Feb-2003  Payam Zamani    Added ReleaseId
    * 11-Feb-2003  Payam Zamani    Moved GeometryProjectionType from
-   *		                lbl_identification.h
+   *		                      lbl_identification.h
    * ?            Allan Runkle    Original development and release
    *****************************************************************************/
 
@@ -134,6 +136,9 @@ extern "C" {
     LblApiTimeItem_typ      SourceSCClockStartCnt;
     LblApiTimeItem_typ      SourceSCClockStopCnt;
     LblApiTimeItem_typ      SourceStartTime;
+    LblApiIdItem_typ        MeshId;
+    LblApiIdItem_typ        MosaicId;
+    LblApiIdItem_typ        StereoMatchId;
   } LblIdentification_typ;
 
 

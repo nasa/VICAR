@@ -1,0 +1,151 @@
+## This template is made up of usable macros for Insight PDS4 Velocity Templates.
+## This file must be placed in the same directory as the Velocity Templates
+## to be used, otherwise the VelocityEngine will not be able to find it.
+##
+## To include this file in your template and use the macros, add the following
+## at the top of your Velocity template:
+##
+##		#parse ( "insight_velocity_macros.txt" )
+##
+
+##################################
+## getProcessingLevel from the product type
+##
+#set ($PROCESSING_LEVEL = {
+"EDR" : "Raw",
+"ERP" : "Raw",
+"DFF" : "Partially Processed",
+"DSP" : "Partially Processed",
+"DSR" : "Partially Processed",
+"ILM" : "Partially Processed",
+"ILT" : "Partially Processed",
+"MDS" : "Partially Processed",
+"RAS" : "Calibrated",
+"RNG" : "Calibrated",
+"SHD" : "Calibrated",
+"SLP" : "Calibrated",
+"UVW" : "Calibrated",
+"XYZ" : "Calibrated",
+"RUH" : "Derived",
+"RUS" : "Derived",
+"TDS" : "Derived",
+"TFH" : "Derived",
+"TFS" : "Derived",
+"TFW" : "Derived",
+"WSH" : "Derived",
+"WSS" : "Derived",
+"UIH" : "Derived",
+"UIS" : "Derived",
+"UIW" : "Derived",
+"ZIH" : "Derived",
+"ZIS" : "Derived",
+"ZIW" : "Derived",
+"EJP" : "Telemetry"
+})
+#macro(getProcessingLevel $ptype)
+$PROCESSING_LEVEL.get($ptype)##
+#end
+##################################
+
+##################################
+## generateLID from the product ID
+##
+## Most of LID is the same but will differ based on:
+## * product type
+## * instrument
+##
+## TODO add other product types
+##
+##
+
+#macro(generateLID $prodtype $pid)
+#if ( $prodtype.equals("BROWSE") )
+  #set ($suffix = "browse")
+#else
+  #set ($suffix = "data")
+#end
+$PRODUCT_LID_PREFIX:$suffix:$pid##
+#end
+##################################
+
+##################################
+## getArrayDefinition
+##
+## Insight produces Array_2D and Array_3D
+## This function will figure out which on it is
+## and return the correct XML block.
+##
+##
+
+#macro(getArrayDefinition $label )
+#set($axes = $label.PDS4_IMAGE.axes[0])
+#if ( $axes == 2 )
+    <Array_2D_Image>
+      <local_identifier>IMAGE DATA</local_identifier>
+      <offset unit="byte">$label.SYSTEM.LBLSIZE</offset>
+      <axes>$label.PDS4_IMAGE.axes</axes>
+      <axis_index_order>Last Index Fastest</axis_index_order>
+      <Element_Array>
+        <data_type>$label.PDS4_IMAGE.pds4_data_type</data_type>
+        <unit>DN</unit>
+      </Element_Array>
+      
+      <Axis_Array>
+        <axis_name>Line</axis_name>
+        <elements>$label.SYSTEM.NL</elements>
+        <sequence_number>1</sequence_number>
+      </Axis_Array>
+      <Axis_Array>
+        <axis_name>Sample</axis_name>
+        <elements>$label.SYSTEM.NS</elements>
+        <sequence_number>2</sequence_number>
+      </Axis_Array>
+      
+      <Special_Constants>
+        <missing_constant>$label.IMAGE_DATA.MISSING_CONSTANT</missing_constant>
+        <invalid_constant>$label.IMAGE_DATA.INVALID_CONSTANT</invalid_constant>
+      </Special_Constants>
+      
+      <Object_Statistics>
+        <bit_mask>#trimBitMask( $label.IMAGE_DATA.SAMPLE_BIT_MASK[0] 8 )</bit_mask>
+      </Object_Statistics>
+    </Array_2D_Image>
+#elseif ( $axes == 3 )
+    <Array_3D_Image>
+      <local_identifier>IMAGE DATA</local_identifier>
+      <offset unit="byte">$label.SYSTEM.LBLSIZE</offset>
+      <axes>$label.PDS4_IMAGE.axes</axes>
+      <axis_index_order>Last Index Fastest</axis_index_order>
+      <Element_Array>
+        <data_type>$label.PDS4_IMAGE.pds4_data_type</data_type>
+        <unit>DN</unit>
+      </Element_Array>
+      
+      <Axis_Array>
+        <axis_name>Band</axis_name>
+        <elements>$label.SYSTEM.NB</elements>
+        <sequence_number>1</sequence_number>
+      </Axis_Array>
+      <Axis_Array>
+        <axis_name>Line</axis_name>
+        <elements>$label.SYSTEM.NL</elements>
+        <sequence_number>2</sequence_number>
+      </Axis_Array>
+      <Axis_Array>
+        <axis_name>Sample</axis_name>
+        <elements>$label.SYSTEM.NS</elements>
+        <sequence_number>3</sequence_number>
+      </Axis_Array>
+      
+      <Special_Constants>
+        <missing_constant>$label.IMAGE_DATA.MISSING_CONSTANT</missing_constant>
+        <invalid_constant>$label.IMAGE_DATA.INVALID_CONSTANT</invalid_constant>
+      </Special_Constants>
+      
+      <Object_Statistics>
+        <bit_mask>#trimBitMask( $label.IMAGE_DATA.SAMPLE_BIT_MASK[0] 8 )</bit_mask>
+      </Object_Statistics>
+    </Array_3D_Image>
+#end
+#end
+##################################

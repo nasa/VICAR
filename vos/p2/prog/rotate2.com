@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module rotate2
-$! VPACK Version 1.9, Wednesday, January 09, 2013, 19:26:44
+$! VPACK Version 2.1, Wednesday, December 16, 2015, 16:10:15
 $!
 $! Execute by entering:		$ @rotate2
 $!
@@ -152,7 +152,7 @@ $ vpack rotate2.com -mixed -
 	-s rotate2.f -
 	-i rotate2.imake -
 	-p rotate2.pdf -
-	-t tstrotate2.pdf tstrotate2.log_solos
+	-t tstrotate2.pdf tstrotate2.log
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -213,7 +213,7 @@ c     	DATA OUT1/' REGION (    ,     ,     ,     ) OF THE INPUT PICTURE I
 c    +S ROTATED         DEGREES ABOUT       ,        '/
 
 C==================================================================
-	call xvmessage ("ROTATE2 - 09-Jan-2013"," ")
+	call xvmessage ("ROTATE2 version 2015-12-16"," ")
       CALL XVEACTION('SA',' ') ! SET XV ERROR ACTION
 
       icent = 0
@@ -287,8 +287,8 @@ C        'ANGLE'
       call xvmessage(out1(2:102),' ')
       write (out2,9900) clo,cso
 9900  format (
-     +' THE CENTER OF ROTATION IN THE OUTPUT PICTURE IS LOCATED AT PIXEL     ',
-     + F6.1,',  ',F6.1)
+     +' THE CENTER OF ROTATION IN THE OUTPUT PICTURE IS LOCATED AT PIXEL
+     +     ',F6.1,',  ',F6.1)
       call xvmessage(out2(2:85),' ')
 
       ang=(-ang)*3.14159/180.
@@ -391,29 +391,33 @@ PURPOSE:
 
 ROTATE2 will compute the geometric transformation parameters for rotating a 
 picture by any amount about a specified point.
-ROTATE2 is typically not called directly by the user but rather from
-procedure ROTATE, which will rotate a picture by any amount about a 
-specified point.
-
-EXECUTION:
-   For the typical usage, see the HELP for procedure ROTATE.
-
-   The following is the execution statement format for ROTATE2:
-		rotate2 inp  params
-   where INP,  and PARAMS	 are parameters discussed in their 
-   respective sections.
 
 OPERATION:
 
-ROTATE2 generates parameters for LGEOM or MGEOM to rotate a picture.  These 
-parameters are passed via ROTATE2's generated parameter data set.
+ROTATE2 cannot called directly by the user since the rotate2 program is
+used only to create a parameter data set for input to LGEOM. The parameter
+data set's name is given by the PDS parameter. The parameter data
+set has a vicar label of 1 line by 512 bytes.
+
+Rotate2 is normally called by the procedure ROTATE which uses the 
+parameter data set as an input to LGEOM which does the rotation.
 
 The rotation is about an axis normal to the picture and intersecting it at
 the specified pixel center of rotation.
 
 The size field should take into account any increase in the number 
 of lines and samples due to the rotation.
-examples:
+
+EXECUTION:
+
+   For the typical usage, see the HELP for procedure ROTATE.
+
+   The following is the execution statement format for ROTATE2:
+        rotate2 inp  params
+   where INP,  and PARAMS    are parameters discussed in their
+   respective sections.
+
+EXAMPLES:
 
 1) rotate2 IN par size=(1,1,100,160) line=15. samp=35. angl=24.2
 ----This example will set up to rotate the 100x160 sample file by 24.2 degrees
@@ -427,19 +431,23 @@ examples:
     translate the rotated picture so that the center of rotation in the 
     output occupies line 50, sample 30.
 .page
- LIMITATIONS
+ LIMITATIONS:
+
   1. The input file must be either BYTE or HALFWORD.
 .page
 
  ORIGINAL PROGRAMMER:    A. R. Gillespie, 25 Jul 1972
- COGNIZANT PROGRAMMER:  L. W. Kamp
+ COGNIZANT PROGRAMMER:  Ray Bambery                  
  PORTED TO UNIX: Steve Pohorsky
 
  REVISION HISTORY
-  93-6-8    SP   Made portable for UNIX.
-  10-Apr-2011  RJB  changed qprint call to xvmessage
-  09 Jan 2013 ...lwk... fixed OUT1/OUT2 assignments due to different behaviour
-                        with the -e compiler flag on Solaris
+  1993-06-08 SP  Made portable for UNIX.
+  2011-04-10 RJB Changed qprint call to xvmessage due to message: 
+        [TAE-PRCSTRM] Abnormal process termination; process status code = 11.;
+  2013-01-09 LWK Fixed OUT1/OUT2 assignments due to different behaviour
+                 with the -e compiler flag on Solaris
+  2013-09-02 RJB Update documentation and test procedure.
+  2015-12-16 WLB Merged LWK's and RJB's changes. Migrated to MIPL.
 
 .level1
 .vari inp
@@ -519,56 +527,90 @@ $Test_File:
 $ create tstrotate2.pdf
 procedure
 refgbl $echo
-! Jun 25, 2012 - RJB
+! Sep 02, 2013 - RJB
 ! TEST SCRIPT FOR ROTATE2
 ! tests BYTE, HALF images
 !
 ! Vicar Programs:
-!       gen list rotate   
+!       gen list rotate lgeom 
 ! 
 ! parameters:
 !   <none>
 !
 ! Requires NO external test data: 
+!
+!   THIS TEST PROCEDURE DOES NOT CALL ROTATE2
+!
+!  NOTE: You cannot call rotate2 directly. rotate2 only
+!       opens a parameter data set which passes the 
+!       information off to lgeom which actually does
+!       the rotation. rotate2 will produce an output of
+!       1 line and 512 bytes but not a rotated image.
+!       No parameter data set is produced by rotate2
+!       unless you enter the PDS parameter 
+!
 body
 let _onfail="stop"
 let $echo="no"
+write "*************************************************"
 write "THIS IS A TEST OF MODULE ROTATE2"
-write "ROTATE calls rotate2"
 write "We will rotate a gen'd image by -45 deg such that"
 write "shading should appear in the sample direction only"
+write "*************************************************"
 let $echo="yes"
 gen A nl=15 ns=15 ival=90
 list A
-rotate A B angle=-45. idsnam=ids.dat idsns=1000
-list B
+rotate A B1 angle=-45.
+list B1
 let $echo="no"
+write "*************************************************"
 write "Shift the output center of rotation and use nointerp"
+write "*************************************************"
 let $echo="yes"
-rotate A B angle=-45. 'noin center=(8,4)
-list B
+rotate A B2 angle=-45. 'noin center=(8,4)
+list B2
 let $echo="no"
+write "*************************************************"
 write "Now lets rotate about (10,6) [104 dn]"
 write " and make it end up at (3,3)....and in halfword"
+write "*************************************************"
 let $echo="yes"
-gen C nl=15 ns=16 ival=90 'half
+gen C nl=15 ns=15 ival=90 'half
 list C
 rotate C D angle=-45. line=10 samp=6 center=(3,3)
 list D
 let $echo="no"
-
-! clean up:
-ush rm -f ?
-ush rm ZZPAR
-
 end-proc
 $!-----------------------------------------------------------------------------
-$ create tstrotate2.log_solos
-tstrotate2
+$ create tstrotate2.log
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+*************************************************
 THIS IS A TEST OF MODULE ROTATE2
-ROTATE calls rotate2
 We will rotate a gen'd image by -45 deg such that
 shading should appear in the sample direction only
+*************************************************
 gen A nl=15 ns=15 ival=90
 Beginning VICAR task gen
 GEN Version 6
@@ -577,7 +619,7 @@ list A
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Wed Jan  9 18:52:13 2013
+ Task:GEN       User:wlb       Date_Time:Wed Dec 16 15:52:03 2015
      Samp     1       3       5       7       9      11      13      15
    Line
       1      90  91  92  93  94  95  96  97  98  99 100 101 102 103 104
@@ -595,25 +637,25 @@ Beginning VICAR task list
      13     102 103 104 105 106 107 108 109 110 111 112 113 114 115 116
      14     103 104 105 106 107 108 109 110 111 112 113 114 115 116 117
      15     104 105 106 107 108 109 110 111 112 113 114 115 116 117 118
-rotate A B angle=-45. idsnam=ids.dat idsns=1000
+rotate A B1 angle=-45.
 ROTATE2	INP=@INP PDS=ZZPAR SIZE=@SIZE	SL=@SL	SS=@SS	NL=@NL	NS=@NS	 +
 	ANGLE=@ANGLE	NOINTERP=@NOINTERP	 +
 	LINE=@LINE	SAMPLE=@SAMPLE	CENTER=@CENTER
 Beginning VICAR task ROTATE2
-ROTATE2 - 09-Jan-2013
+ROTATE2 version 2015-12-16
 REGION (   1,    1,   15,   15) OF THE INPUT PICTURE IS ROTATED   -45.0 DEGREES ABOUT   8.0 ,   8.0
 THE CENTER OF ROTATION IN THE OUTPUT PICTURE IS LOCATED AT PIXEL        8.0,     8.0
 IF ($COUNT(OUT) = 0) RETURN
-LGEOM INP=A OUT=B SIZE=@SIZE NL=@NL NS=@NS        +
-  IDSNAM=@IDSNAM IDSNS=@IDSNS PARMS=ZZPAR
+LGEOM INP=A OUT=B1 SIZE=@SIZE NL=@NL NS=@NS       +
+   IDSNAM=@IDSNAM IDSNS=@IDSNS PARMS=ZZPAR
 Beginning VICAR task LGEOM
 END-PROC
-list B
+list B1
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Wed Jan  9 18:52:13 2013
- Task:LGEOM     User:lwk       Date_Time:Wed Jan  9 18:52:15 2013
+ Task:GEN       User:wlb       Date_Time:Wed Dec 16 15:52:03 2015
+ Task:LGEOM     User:wlb       Date_Time:Wed Dec 16 15:52:04 2015
      Samp     1       3       5       7       9      11      13      15
    Line
       1       0   0   0   0   0 101 103 104 105 107   0   0   0   0   0
@@ -632,26 +674,28 @@ Beginning VICAR task list
      14       0   0   0   0 100 101 103 104 105 107 108   0   0   0   0
      15       0   0   0   0   0 101 103 104 105 107   0   0   0   0   0
 let $echo="no"
+*************************************************
 Shift the output center of rotation and use nointerp
-rotate A B angle=-45. 'noin center=(8,4)
+*************************************************
+rotate A B2 angle=-45. 'noin center=(8,4)
 ROTATE2	INP=@INP PDS=ZZPAR SIZE=@SIZE	SL=@SL	SS=@SS	NL=@NL	NS=@NS	 +
 	ANGLE=@ANGLE	NOINTERP=@NOINTERP	 +
 	LINE=@LINE	SAMPLE=@SAMPLE	CENTER=@CENTER
 Beginning VICAR task ROTATE2
-ROTATE2 - 09-Jan-2013
+ROTATE2 version 2015-12-16
 REGION (   1,    1,   15,   15) OF THE INPUT PICTURE IS ROTATED   -45.0 DEGREES ABOUT   8.0 ,   8.0
 THE CENTER OF ROTATION IN THE OUTPUT PICTURE IS LOCATED AT PIXEL        8.0,     4.0
 IF ($COUNT(OUT) = 0) RETURN
-LGEOM INP=A OUT=B SIZE=@SIZE NL=@NL NS=@NS        +
-  IDSNAM=@IDSNAM IDSNS=@IDSNS PARMS=ZZPAR
+LGEOM INP=A OUT=B2 SIZE=@SIZE NL=@NL NS=@NS       +
+   IDSNAM=@IDSNAM IDSNS=@IDSNS PARMS=ZZPAR
 Beginning VICAR task LGEOM
 END-PROC
-list B
+list B2
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Wed Jan  9 18:52:13 2013
- Task:LGEOM     User:lwk       Date_Time:Wed Jan  9 18:52:16 2013
+ Task:GEN       User:wlb       Date_Time:Wed Dec 16 15:52:03 2015
+ Task:LGEOM     User:wlb       Date_Time:Wed Dec 16 15:52:04 2015
      Samp     1       3       5       7       9      11      13      15
    Line
       1     100 102 102 104 106 106 108   0   0   0   0   0   0   0   0
@@ -670,9 +714,11 @@ Beginning VICAR task list
      14     100 101 103 104 105 107 108 110   0   0   0   0   0   0   0
      15     100 102 102 104 106 106 108   0   0   0   0   0   0   0   0
 let $echo="no"
+*************************************************
 Now lets rotate about (10,6) [104 dn]
  and make it end up at (3,3)....and in halfword
-gen C nl=15 ns=16 ival=90 'half
+*************************************************
+gen C nl=15 ns=15 ival=90 'half
 Beginning VICAR task gen
 GEN Version 6
 GEN task completed
@@ -680,7 +726,7 @@ list C
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Wed Jan  9 18:52:16 2013
+ Task:GEN       User:wlb       Date_Time:Wed Dec 16 15:52:04 2015
      Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
    Line
       1        90    91    92    93    94    95    96    97    98    99   100   101   102   103   104
@@ -698,33 +744,13 @@ Beginning VICAR task list
      13       102   103   104   105   106   107   108   109   110   111   112   113   114   115   116
      14       103   104   105   106   107   108   109   110   111   112   113   114   115   116   117
      15       104   105   106   107   108   109   110   111   112   113   114   115   116   117   118
-
-   HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Wed Jan  9 18:52:16 2013
-     Samp      16
-   Line
-      1       105
-      2       106
-      3       107
-      4       108
-      5       109
-      6       110
-      7       111
-      8       112
-      9       113
-     10       114
-     11       115
-     12       116
-     13       117
-     14       118
-     15       119
 rotate C D angle=-45. line=10 samp=6 center=(3,3)
 ROTATE2	INP=@INP PDS=ZZPAR SIZE=@SIZE	SL=@SL	SS=@SS	NL=@NL	NS=@NS	 +
 	ANGLE=@ANGLE	NOINTERP=@NOINTERP	 +
 	LINE=@LINE	SAMPLE=@SAMPLE	CENTER=@CENTER
 Beginning VICAR task ROTATE2
-ROTATE2 - 09-Jan-2013
-REGION (   1,    1,   15,   16) OF THE INPUT PICTURE IS ROTATED   -45.0 DEGREES ABOUT  10.0 ,   6.0
+ROTATE2 version 2015-12-16
+REGION (   1,    1,   15,   15) OF THE INPUT PICTURE IS ROTATED   -45.0 DEGREES ABOUT  10.0 ,   6.0
 THE CENTER OF ROTATION IN THE OUTPUT PICTURE IS LOCATED AT PIXEL        3.0,     3.0
 IF ($COUNT(OUT) = 0) RETURN
 LGEOM INP=C OUT=D SIZE=@SIZE NL=@NL NS=@NS        +
@@ -735,8 +761,8 @@ list D
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Wed Jan  9 18:52:16 2013
- Task:LGEOM     User:lwk       Date_Time:Wed Jan  9 18:52:17 2013
+ Task:GEN       User:wlb       Date_Time:Wed Dec 16 15:52:04 2015
+ Task:LGEOM     User:wlb       Date_Time:Wed Dec 16 15:52:04 2015
      Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
    Line
       1       101   103   104   105   107   108   110   111   112   114   115   117     0     0     0
@@ -750,7 +776,5 @@ Beginning VICAR task list
       9         0   103   104   105     0     0     0     0     0     0     0     0     0     0     0
      10         0     0   104     0     0     0     0     0     0     0     0     0     0     0     0
 let $echo="no"
-exit
-slogoff
 $ Return
 $!#############################################################################

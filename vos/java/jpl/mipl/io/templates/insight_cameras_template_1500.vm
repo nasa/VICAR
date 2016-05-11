@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1500.sch"
+    schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<?xml-model href="https://pds.nasa.gov/pds4/schema/develop/img/PDS4_IMG_1500.sch"
+    schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<?xml-model href="https://pds.nasa.gov/pds4/schema/develop/geom/PDS4_GEOM_1500.sch"
+    schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<?xml-model href="https://pds.nasa.gov/pds4/schema/develop/mission/insight/PDS4_INSIGHT_1500.sch"
+    schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<?xml-model href="https://pds.nasa.gov/pds4/schema/develop/mission/insight/PDS4_INSIGHT_CAMERAS_RAW_1500.sch"
+    schematypens="http://purl.oclc.org/dsdl/schematron"?>
+
+##
+#parse( "pds_velocity_macros.txt" )##
+#parse( "insight_velocity_macros.txt" )##
+#parse( "insight_velocity_globals.txt" )##
+##
+
+<Product_Observational xmlns="http://pds.nasa.gov/pds4/pds/v1"
+  xmlns:pds="http://pds.nasa.gov/pds4/pds/v1"
+  xmlns:img="http://pds.nasa.gov/pds4/img/v1"
+  xmlns:insight="http://pds.nasa.gov/pds4/mission/insight/v1"
+  xmlns:geom="http://pds.nasa.gov/pds4/geom/v1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://pds.nasa.gov/pds4/pds/v1 https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1500.xsd    
+  http://pds.nasa.gov/pds4/img/v1 https://pds.nasa.gov/pds4/schema/develop/img/PDS4_IMG_1500.xsd
+  http://pds.nasa.gov/pds4/mission/insight/v1 https://pds.nasa.gov/pds4/schema/develop/mission/insight/PDS4_INSIGHT_1500.xsd
+  http://pds.nasa.gov/pds4/geom/v1 https://pds.nasa.gov/pds4/schema/develop/geom/PDS4_GEOM_1500.xsd">
+
+
+#set($pid = $label.IDENTIFICATION.PRODUCT_ID[0].toLowerCase() )
+#set($version_id = $pid.substring(34,35) )
+#set($product_type = $pid.substring(19,22).toUpperCase() )
+
+  <Identification_Area>
+    <logical_identifier>#generateLID( $product_type $pid )</logical_identifier>
+    <version_id>$version_id.0</version_id>
+    <title>$label.IDENTIFICATION.INSTRUMENT_NAME $product_type Observational Product - $pid</title>
+    <information_model_version>$MODEL_VERSION</information_model_version>
+    <product_class>Product_Observational</product_class>
+    <Alias_List>
+      <Alias>
+        <alternate_id>$label.IDENTIFICATION.PRODUCT_ID</alternate_id>
+        <comment>VICAR PRODUCT_ID</comment>
+      </Alias>
+    </Alias_List>
+    <Modification_History>
+      <Modification_Detail>
+        <modification_date>$date.get("yyyy-MM-dd")</modification_date>
+        <version_id>1.0</version_id>
+        <description>Initial version</description>
+      </Modification_Detail>
+    </Modification_History>
+  </Identification_Area>
+  <Observation_Area>
+    <comment>Observational Intent</comment>
+    <Time_Coordinates>
+      <start_date_time>${label.IDENTIFICATION.START_TIME}Z</start_date_time>
+      <stop_date_time>${label.IDENTIFICATION.STOP_TIME}Z</stop_date_time>
+      <local_mean_solar_time>#checkNA( $label.IDENTIFICATION.LOCAL_MEAN_SOLAR_TIME[0] )</local_mean_solar_time>
+      <local_true_solar_time>$label.IDENTIFICATION.LOCAL_TRUE_SOLAR_TIME</local_true_solar_time>
+      <solar_longitude unit="deg">$label.IDENTIFICATION.SOLAR_LONGITUDE</solar_longitude>
+    </Time_Coordinates>
+    <Primary_Result_Summary>
+      <purpose>Science</purpose>
+      <processing_level>#getProcessingLevel($product_type)</processing_level>
+      <Science_Facets>
+        <wavelength_range>$WAVELENGTH_RANGE</wavelength_range>
+        <domain>$DOMAIN</domain>
+        <discipline_name>$DISCIPLINE</discipline_name>
+      </Science_Facets>
+    </Primary_Result_Summary>
+    <Investigation_Area>
+      <name>Insight</name>
+      <type>Mission</type>
+      <Internal_Reference>
+        <lid_reference>urn:nasa:pds:context:investigation:mission.insight</lid_reference>
+        <reference_type>data_to_investigation</reference_type>
+        <comment>This is the PDS4 logical identifier for the Insight mission.</comment>
+      </Internal_Reference>
+    </Investigation_Area>
+    <Observing_System>
+      <Observing_System_Component>
+        <name>Insight Lander</name>
+        <type>Spacecraft</type>
+        <Internal_Reference>
+          <lid_reference>urn:nasa:pds:context:instrument_host:spacecraft.insight</lid_reference>
+          <reference_type>is_instrument_host</reference_type>
+          <comment>This is the PDS4 logical identifier for the Insight spacecraft.</comment>
+        </Internal_Reference>
+      </Observing_System_Component>
+      <Observing_System_Component>
+        #set ($instrument_name = $text.capitalize($label.IDENTIFICATION.INSTRUMENT_NAME[0].toLowerCase()))
+        <name>$instrument_name</name>
+        <type>Instrument</type>
+        <Internal_Reference>
+          <lid_reference>urn:nasa:pds:context:instrument:${label.IDENTIFICATION.INSTRUMENT_ID[0].toLowerCase()}.insight</lid_reference>
+          <reference_type>is_instrument</reference_type>
+          <comment>This is the PDS4 logical identifier for the $instrument_name onboard the Insight spacecraft.</comment>
+        </Internal_Reference>
+      </Observing_System_Component>
+    </Observing_System>
+    <Target_Identification>
+      #set ($target_name = $label.IDENTIFICATION.TARGET_NAME[0].toLowerCase())
+      <name>$text.capitalize($target_name)</name>
+      #set ($target_type = $label.IDENTIFICATION.TARGET_TYPE[0].toLowerCase())
+      <type>$text.capitalize($target_type)</type>
+      <Internal_Reference>
+        <lid_reference>urn:nasa:pds:context:target:${target_type}.${target_name}</lid_reference>
+        <reference_type>data_to_target</reference_type>
+        <comment>This is the PDS4 logical identifier for the $target_type - $target_name.</comment>
+      </Internal_Reference>
+    </Target_Identification>
+    <Mission_Area>
+      <insight:Observation_Information>
+        <insight:release_number>1</insight:release_number>
+        <insight:mission_phase_name>$label.IDENTIFICATION.MISSION_PHASE_NAME[0].replace('_','')</insight:mission_phase_name>
+        <insight:product_type>$product_type</insight:product_type>
+        <insight:spacecraft_clock_start_count>$label.IDENTIFICATION.SPACECRAFT_CLOCK_START_COUNT</insight:spacecraft_clock_start_count>
+        <insight:spacecraft_clock_stop_count>$label.IDENTIFICATION.SPACECRAFT_CLOCK_STOP_COUNT</insight:spacecraft_clock_stop_count>
+        <insight:spacecraft_clock_count_partition>$label.IDENTIFICATION.SPACECRAFT_CLOCK_CNT_PARTITION</insight:spacecraft_clock_count_partition>
+        <insight:sol_number>$label.IDENTIFICATION.PLANET_DAY_NUMBER</insight:sol_number>
+        <insight:local_true_solar_time_sol>$label.IDENTIFICATION.LOCAL_TRUE_SOLAR_TIME_SOL</insight:local_true_solar_time_sol>
+        <insight:sequence_id>$label.IDENTIFICATION.SEQUENCE_ID</insight:sequence_id>
+      </insight:Observation_Information>
+    </Mission_Area>
+
+    <Discipline_Area>
+      <!-- Geometry Discipline Area -->
+      <geom:Geometry>
+        <geom:SPICE_Kernel_Files>
+          <geom:SPICE_Kernel_Identification>
+            <geom:spice_kernel_file_name>$label.TELEMETRY.SPICE_FILE_NAME</geom:spice_kernel_file_name>
+          </geom:SPICE_Kernel_Identification>
+        </geom:SPICE_Kernel_Files>
+        <geom:Geometry_Lander>
+
+          <!-- ARM_ARTICULATION_STATE -->
+          <geom:Articulation_Device_Parameters>
+            <geom:device_id>$label.ARM_ARTICULATION_STATE.ARTICULATION_DEVICE_ID</geom:device_id>
+            <geom:device_name>$label.ARM_ARTICULATION_STATE.ARTICULATION_DEVICE_NAME[0]</geom:device_name>
+            <geom:selected_instrument_id>$label.ARM_ARTICULATION_STATE.ARTICULATION_DEV_INSTRUMENT_ID</geom:selected_instrument_id>
+            <geom:Device_Angle>
+            #set($length = $label.ARM_ARTICULATION_STATE.ARTICULATION_DEVICE_ANGLE_NAME.size())
+            #foreach ( $i in [1..$length] )
+              <geom:Device_Angle_Index>
+                <geom:index_name>$label.ARM_ARTICULATION_STATE.ARTICULATION_DEVICE_ANGLE_NAME.get($foreach.index)</geom:index_name>
+                <geom:index_value_angle unit="$label.ARM_ARTICULATION_STATE.ARTICULATION_DEVICE_ANGLE__UNIT.get($foreach.index)">$label.ARM_ARTICULATION_STATE.ARTICULATION_DEVICE_ANGLE.get($foreach.index)</geom:index_value_angle>
+              </geom:Device_Angle_Index>
+            #end
+            </geom:Device_Angle>
+
+            <geom:Device_Temperature>
+            #set($length = $label.ARM_ARTICULATION_STATE.ARTICULATION_DEVICE_TEMP_NAME.size())
+            #foreach ( $i in [1..$length] )
+                <geom:Device_Temperature_Index>
+                    <geom:index_name>$label.ARM_ARTICULATION_STATE.ARTICULATION_DEVICE_TEMP_NAME.get($foreach.index)</geom:index_name>
+                    <geom:index_value_temperature unit="$label.ARM_ARTICULATION_STATE.ARTICULATION_DEVICE_TEMP__UNIT.get($foreach.index)">$label.ARM_ARTICULATION_STATE.ARTICULATION_DEVICE_TEMP.get($foreach.index)</geom:index_value_temperature>
+                </geom:Device_Temperature_Index>
+            #end
+            </geom:Device_Temperature>
+
+            <geom:Vector_Device_Gravity>
+              <geom:x_unit>$label.ARM_ARTICULATION_STATE.ARTICULATION_DEV_VECTOR[0]</geom:x_unit>
+              <geom:y_unit>$label.ARM_ARTICULATION_STATE.ARTICULATION_DEV_VECTOR[1]</geom:y_unit>
+              <geom:z_unit>$label.ARM_ARTICULATION_STATE.ARTICULATION_DEV_VECTOR[2]</geom:z_unit>
+            </geom:Vector_Device_Gravity>
+          </geom:Articulation_Device_Parameters>
+
+          <!-- GRAPPLE_ARTICULATION_STATE -->
+          <geom:Articulation_Device_Parameters>
+            <geom:device_id>$label.GRAPPLE_ARTICULATION_STATE.ARTICULATION_DEVICE_ID</geom:device_id>
+            <geom:device_name>$label.GRAPPLE_ARTICULATION_STATE.ARTICULATION_DEVICE_NAME[0]</geom:device_name>
+            <geom:device_mode>$label.GRAPPLE_ARTICULATION_STATE.ARTICULATION_DEVICE_MODE[0]</geom:device_mode>
+            <geom:device_phase>$label.GRAPPLE_ARTICULATION_STATE.ARTICULATION_DEVICE_PHASE[0]</geom:device_phase>
+            <geom:Device_Temperature>
+              <geom:Device_Temperature_Index>
+                <geom:index_name>$label.GRAPPLE_ARTICULATION_STATE.ARTICULATION_DEVICE_TEMP_NAME</geom:index_name>
+                <geom:index_value_temperature unit="$label.GRAPPLE_ARTICULATION_STATE.ARTICULATION_DEVICE_TEMP__UNIT">$label.GRAPPLE_ARTICULATION_STATE.ARTICULATION_DEVICE_TEMP</geom:index_value_temperature>
+              </geom:Device_Temperature_Index>
+            </geom:Device_Temperature>
+          </geom:Articulation_Device_Parameters>
+
+          <!-- Camera Model -->
+          <geom:Camera_Model_Parameters>
+            <geom:calibration_source_id>$label.GEOMETRIC_CAMERA_MODEL.CALIBRATION_SOURCE_ID</geom:calibration_source_id>
+            <geom:model_type>$label.GEOMETRIC_CAMERA_MODEL.MODEL_TYPE</geom:model_type>
+            <geom:CAHVOR_Model>
+              <geom:Vector_Center>
+                  #set ($unit = $label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_UNIT[0].toLowerCase())
+                  #if ($unit.equals("meter"))
+                  #set ($unit = "m")
+                  #end
+                <geom:x_position unit="$unit">$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_1[0]</geom:x_position>
+                <geom:y_position unit="$unit">$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_1[1]</geom:y_position>
+                <geom:z_position unit="$unit">$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_1[2]</geom:z_position>
+              </geom:Vector_Center>
+              <geom:Vector_Axis>
+                <geom:x_unit>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_2[0]</geom:x_unit>
+                <geom:y_unit>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_2[1]</geom:y_unit>
+                <geom:z_unit>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_2[2]</geom:z_unit>
+              </geom:Vector_Axis>
+              <geom:Vector_Horizontal>
+                <geom:x_pixel>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_3[0]</geom:x_pixel>
+                <geom:y_pixel>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_3[1]</geom:y_pixel>
+                <geom:z_pixel>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_3[2]</geom:z_pixel>
+              </geom:Vector_Horizontal>
+              <geom:Vector_Vertical>
+                <geom:x_pixel>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_4[0]</geom:x_pixel>
+                <geom:y_pixel>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_4[1]</geom:y_pixel>
+                <geom:z_pixel>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_4[2]</geom:z_pixel>
+              </geom:Vector_Vertical>
+              <geom:Optical_Terms>
+                <geom:c0>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_5[0]</geom:c0>
+                <geom:c1>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_5[1]</geom:c1>
+                <geom:c2>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_5[2]</geom:c2>
+              </geom:Optical_Terms>
+              <geom:Radial_Terms>
+                <geom:c0>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_6[0]</geom:c0>
+                <geom:c1>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_6[1]</geom:c1>
+                <geom:c2>$label.GEOMETRIC_CAMERA_MODEL.MODEL_COMPONENT_6[2]</geom:c2>
+              </geom:Radial_Terms>
+            </geom:CAHVOR_Model>
+
+            <geom:Coordinate_Space_Reference>
+              <geom:Local_Internal_Reference>
+                <local_identifier_reference>${label.GEOMETRIC_CAMERA_MODEL.REFERENCE_COORD_SYSTEM_NAME}_${label.GEOMETRIC_CAMERA_MODEL.REFERENCE_COORD_SYSTEM_INDEX}</local_identifier_reference>
+                <local_reference_type>to_coordinate_space_reference</local_reference_type>
+              </geom:Local_Internal_Reference>
+            </geom:Coordinate_Space_Reference>
+
+            <geom:Quaternion_Model_Transform>
+              <geom:qcos>$label.GEOMETRIC_CAMERA_MODEL.MODEL_TRANSFORM_QUATERNION[0]</geom:qcos>
+              <geom:qsin1>$label.GEOMETRIC_CAMERA_MODEL.MODEL_TRANSFORM_QUATERNION[1]</geom:qsin1>
+              <geom:qsin2>$label.GEOMETRIC_CAMERA_MODEL.MODEL_TRANSFORM_QUATERNION[2]</geom:qsin2>
+              <geom:qsin3>$label.GEOMETRIC_CAMERA_MODEL.MODEL_TRANSFORM_QUATERNION[3]</geom:qsin3>
+            </geom:Quaternion_Model_Transform>
+
+            <geom:Vector_Model_Transform>
+              <geom:x>$label.GEOMETRIC_CAMERA_MODEL.MODEL_TRANSFORM_VECTOR[0]</geom:x>
+              <geom:y>$label.GEOMETRIC_CAMERA_MODEL.MODEL_TRANSFORM_VECTOR[1]</geom:y>
+              <geom:z>$label.GEOMETRIC_CAMERA_MODEL.MODEL_TRANSFORM_VECTOR[2]</geom:z>
+            </geom:Vector_Model_Transform>
+          </geom:Camera_Model_Parameters>
+
+          <!-- LANDER_COORDINATE_SYSTEM -->
+          <geom:Coordinate_Space_Definition>
+            <geom:local_identifier>${label.LANDER_COORDINATE_SYSTEM.COORDINATE_SYSTEM_NAME}_${label.LANDER_COORDINATE_SYSTEM.COORDINATE_SYSTEM_INDEX}</geom:local_identifier> 
+            <geom:local_identifier>${label.LANDER_COORDINATE_SYSTEM.COORDINATE_SYSTEM_NAME}_${label.LANDER_COORDINATE_SYSTEM.COORDINATE_SYSTEM_INDEX}_${label.LANDER_COORDINATE_SYSTEM.SOLUTION_ID}</geom:local_identifier>
+            
+            <geom:positive_azimuth_direction>$label.ARM_COORDINATE_SYSTEM.POSITIVE_AZIMUTH_DIRECTION[0].toLowerCase()</geom:positive_azimuth_direction>
+            <geom:positive_elevation_direction>$label.ARM_COORDINATE_SYSTEM.POSITIVE_ELEVATION_DIRECTION[0].toLowerCase()</geom:positive_elevation_direction>
+
+            <geom:Coordinate_Space_Present>
+              <geom:Coordinate_Space_Indexed>
+                <geom:coordinate_space_frame_type>$label.LANDER_COORDINATE_SYSTEM.COORDINATE_SYSTEM_NAME</geom:coordinate_space_frame_type>
+                <geom:Coordinate_Space_Index>
+                  <geom:index_name>$label.LANDER_COORDINATE_SYSTEM.COORDINATE_SYSTEM_INDEX_NAME</geom:index_name>
+                  <geom:index_value_number>$label.LANDER_COORDINATE_SYSTEM.COORDINATE_SYSTEM_INDEX</geom:index_value_number>
+                </geom:Coordinate_Space_Index>
+                <geom:solution_id>$label.LANDER_COORDINATE_SYSTEM.SOLUTION_ID</geom:solution_id>
+              </geom:Coordinate_Space_Indexed>
+            </geom:Coordinate_Space_Present>
+
+            <geom:Vector_Origin_Offset>
+              <geom:x_position unit="m">$label.LANDER_COORDINATE_SYSTEM.ORIGIN_OFFSET_VECTOR[0]</geom:x_position>
+              <geom:y_position unit="m">$label.LANDER_COORDINATE_SYSTEM.ORIGIN_OFFSET_VECTOR[1]</geom:y_position>
+              <geom:z_position unit="m">$label.LANDER_COORDINATE_SYSTEM.ORIGIN_OFFSET_VECTOR[2]</geom:z_position>
+            </geom:Vector_Origin_Offset>
+
+            <geom:Quaternion_1>
+              <geom:qcos>$label.LANDER_COORDINATE_SYSTEM.ORIGIN_ROTATION_QUATERNION[0]</geom:qcos>
+              <geom:qsin1>$label.LANDER_COORDINATE_SYSTEM.ORIGIN_ROTATION_QUATERNION[1]</geom:qsin1>
+              <geom:qsin2>$label.LANDER_COORDINATE_SYSTEM.ORIGIN_ROTATION_QUATERNION[2]</geom:qsin2>
+              <geom:qsin3>$label.LANDER_COORDINATE_SYSTEM.ORIGIN_ROTATION_QUATERNION[3]</geom:qsin3>
+              <geom:rotation_direction>Forward</geom:rotation_direction>
+            </geom:Quaternion_1>
+
+            <geom:Coordinate_Space_Reference>
+              <geom:Coordinate_Space_Indexed>                  
+                <geom:coordinate_space_frame_type>$label.LANDER_COORDINATE_SYSTEM.REFERENCE_COORD_SYSTEM_NAME</geom:coordinate_space_frame_type>
+                <geom:Coordinate_Space_Index>
+                  <geom:index_name>$label.LANDER_COORDINATE_SYSTEM.REFERENCE_COORD_SYSTEM_NAME[0].replace("_FRAME","")</geom:index_name>
+                  <geom:index_value_number>$label.LANDER_COORDINATE_SYSTEM.REFERENCE_COORD_SYSTEM_INDEX</geom:index_value_number>
+                </geom:Coordinate_Space_Index>
+              </geom:Coordinate_Space_Indexed>
+            </geom:Coordinate_Space_Reference>
+          </geom:Coordinate_Space_Definition>
+
+          <!-- ARM_COORDINATE_SYSTEM -->
+          <geom:Coordinate_Space_Definition>
+            <geom:local_identifier>${label.ARM_COORDINATE_SYSTEM.COORDINATE_SYSTEM_NAME}_${label.ARM_COORDINATE_SYSTEM.COORDINATE_SYSTEM_INDEX}_${label.ARM_COORDINATE_SYSTEM.SOLUTION_ID}</geom:local_identifier>
+            <geom:local_identifier>${label.ARM_COORDINATE_SYSTEM.COORDINATE_SYSTEM_NAME}_${label.ARM_COORDINATE_SYSTEM.COORDINATE_SYSTEM_INDEX}</geom:local_identifier>
+            <geom:positive_azimuth_direction>$label.ARM_COORDINATE_SYSTEM.POSITIVE_AZIMUTH_DIRECTION[0].toLowerCase()</geom:positive_azimuth_direction>
+            <geom:positive_elevation_direction>$label.ARM_COORDINATE_SYSTEM.POSITIVE_ELEVATION_DIRECTION[0].toLowerCase()</geom:positive_elevation_direction>
+            <geom:Coordinate_Space_Present>
+              <geom:Coordinate_Space_Indexed>
+                <geom:coordinate_space_frame_type>$label.ARM_COORDINATE_SYSTEM.COORDINATE_SYSTEM_NAME</geom:coordinate_space_frame_type>
+                <geom:Coordinate_Space_Index>
+                  <geom:index_name>$label.ARM_COORDINATE_SYSTEM.COORDINATE_SYSTEM_INDEX_NAME</geom:index_name>
+                  <geom:index_value_number>$label.ARM_COORDINATE_SYSTEM.COORDINATE_SYSTEM_INDEX</geom:index_value_number>
+                </geom:Coordinate_Space_Index>
+                <geom:solution_id>$label.ARM_COORDINATE_SYSTEM.SOLUTION_ID</geom:solution_id>
+              </geom:Coordinate_Space_Indexed>
+            </geom:Coordinate_Space_Present>
+            <geom:Vector_Origin_Offset>
+              <geom:x_position unit="m">$label.ARM_COORDINATE_SYSTEM.ORIGIN_OFFSET_VECTOR[0]</geom:x_position>
+              <geom:y_position unit="m">$label.ARM_COORDINATE_SYSTEM.ORIGIN_OFFSET_VECTOR[1]</geom:y_position>
+              <geom:z_position unit="m">$label.ARM_COORDINATE_SYSTEM.ORIGIN_OFFSET_VECTOR[2]</geom:z_position>
+            </geom:Vector_Origin_Offset>
+            <geom:Quaternion_1>
+              <geom:qcos>$label.ARM_COORDINATE_SYSTEM.ORIGIN_ROTATION_QUATERNION[0]</geom:qcos>
+              <geom:qsin1>$label.ARM_COORDINATE_SYSTEM.ORIGIN_ROTATION_QUATERNION[1]</geom:qsin1>
+              <geom:qsin2>$label.ARM_COORDINATE_SYSTEM.ORIGIN_ROTATION_QUATERNION[2]</geom:qsin2>
+              <geom:qsin3>$label.ARM_COORDINATE_SYSTEM.ORIGIN_ROTATION_QUATERNION[3]</geom:qsin3>
+              <geom:rotation_direction>Forward</geom:rotation_direction>
+            </geom:Quaternion_1>
+            <geom:Coordinate_Space_Reference>
+              <geom:Local_Internal_Reference>
+                <local_identifier_reference>${label.ARM_COORDINATE_SYSTEM.REFERENCE_COORD_SYSTEM_NAME}_${label.ARM_COORDINATE_SYSTEM.REFERENCE_COORD_SYSTEM_INDEX}</local_identifier_reference>
+                <local_reference_type>to_coordinate_space_reference</local_reference_type>
+              </geom:Local_Internal_Reference>
+            </geom:Coordinate_Space_Reference>
+          </geom:Coordinate_Space_Definition>
+
+
+          <!-- LANDER_DERIVED_GEOMETRY_PARMS -->
+          <geom:Derived_Geometry>
+            <geom:instrument_azimuth unit="$label.LANDER_DERIVED_GEOMETRY_PARMS.INSTRUMENT_AZIMUTH__UNIT">$label.LANDER_DERIVED_GEOMETRY_PARMS.INSTRUMENT_AZIMUTH</geom:instrument_azimuth>
+            <geom:instrument_elevation unit="$label.LANDER_DERIVED_GEOMETRY_PARMS.INSTRUMENT_ELEVATION__UNIT">$label.LANDER_DERIVED_GEOMETRY_PARMS.INSTRUMENT_ELEVATION</geom:instrument_elevation>
+            <geom:solar_azimuth unit="$label.LANDER_DERIVED_GEOMETRY_PARMS.SOLAR_AZIMUTH__UNIT">#checkNA( $label.LANDER_DERIVED_GEOMETRY_PARMS.SOLAR_AZIMUTH )</geom:solar_azimuth>
+            <geom:solar_elevation unit="$label.LANDER_DERIVED_GEOMETRY_PARMS.SOLAR_AZIMUTH__UNIT">#checkNA( $label.LANDER_DERIVED_GEOMETRY_PARMS.SOLAR_ELEVATION )</geom:solar_elevation>
+            <geom:Coordinate_Space_Reference>
+              <geom:Local_Internal_Reference>
+                <local_identifier_reference>${label.LANDER_DERIVED_GEOMETRY_PARMS.REFERENCE_COORD_SYSTEM_NAME}_${label.LANDER_DERIVED_GEOMETRY_PARMS.REFERENCE_COORD_SYSTEM_INDEX}</local_identifier_reference>
+                <local_reference_type>to_coordinate_space_reference</local_reference_type>
+              </geom:Local_Internal_Reference>
+            </geom:Coordinate_Space_Reference>
+          </geom:Derived_Geometry>
+
+
+          <!-- SITE_DERIVED_GEOMETRY_PARMS -->
+          <geom:Derived_Geometry>
+            <geom:instrument_azimuth unit="$label.SITE_DERIVED_GEOMETRY_PARMS.INSTRUMENT_AZIMUTH__UNIT">$label.SITE_DERIVED_GEOMETRY_PARMS.INSTRUMENT_AZIMUTH</geom:instrument_azimuth>
+            <geom:instrument_elevation unit="$label.SITE_DERIVED_GEOMETRY_PARMS.INSTRUMENT_ELEVATION__UNIT">$label.SITE_DERIVED_GEOMETRY_PARMS.INSTRUMENT_ELEVATION</geom:instrument_elevation>
+            <geom:solar_azimuth unit="$label.SITE_DERIVED_GEOMETRY_PARMS.SOLAR_AZIMUTH__UNIT">#checkNA( $label.SITE_DERIVED_GEOMETRY_PARMS.SOLAR_AZIMUTH )</geom:solar_azimuth>
+            <geom:solar_elevation unit="$label.SITE_DERIVED_GEOMETRY_PARMS.SOLAR_ELEVATION__UNIT">#checkNA( $label.SITE_DERIVED_GEOMETRY_PARMS.SOLAR_ELEVATION )</geom:solar_elevation>
+            <geom:Coordinate_Space_Reference>
+              <geom:Coordinate_Space_Indexed>
+                <geom:coordinate_space_frame_type>$label.SITE_DERIVED_GEOMETRY_PARMS.REFERENCE_COORD_SYSTEM_NAME</geom:coordinate_space_frame_type>
+                <geom:Coordinate_Space_Index>
+                  <geom:index_name>SITE</geom:index_name>
+                  <geom:index_value_number>$label.SITE_DERIVED_GEOMETRY_PARMS.REFERENCE_COORD_SYSTEM_INDEX</geom:index_value_number>
+                </geom:Coordinate_Space_Index>
+              </geom:Coordinate_Space_Indexed>
+            </geom:Coordinate_Space_Reference>
+          </geom:Derived_Geometry>
+
+
+          <geom:Motion_Counter>
+            <geom:name>RMC</geom:name>
+            <geom:Motion_Counter_Index>
+              <geom:index_name>$label.IDENTIFICATION.ROVER_MOTION_COUNTER_NAME</geom:index_name>
+              <geom:index_value_number>$label.IDENTIFICATION.ROVER_MOTION_COUNTER</geom:index_value_number>
+            </geom:Motion_Counter_Index>
+          </geom:Motion_Counter>
+        </geom:Geometry_Lander>
+      </geom:Geometry>
+
+
+      <!-- IMG Discipline Area -->
+      <!-- OBSERVATION_REQUEST_PARMS -->
+      <img:Command_Parameters>
+        <img:auto_exposure_data_cut>$label.OBSERVATION_REQUEST_PARMS.AUTO_EXPOSURE_DATA_CUT</img:auto_exposure_data_cut>
+        <img:auto_exposure_percent>$label.OBSERVATION_REQUEST_PARMS.AUTO_EXPOSURE_PERCENT</img:auto_exposure_percent>
+        <img:auto_exposure_pixel_fraction>$label.OBSERVATION_REQUEST_PARMS.AUTO_EXPOSURE_PIXEL_FRACTION</img:auto_exposure_pixel_fraction>
+        <img:detector_erase_count>$label.OBSERVATION_REQUEST_PARMS.DETECTOR_ERASE_COUNT</img:detector_erase_count>
+        <img:exposure_duration_count>$label.OBSERVATION_REQUEST_PARMS.EXPOSURE_DURATION_COUNT</img:exposure_duration_count>
+        <img:exposure_type>$label.OBSERVATION_REQUEST_PARMS.EXPOSURE_TYPE</img:exposure_type>
+        <img:max_auto_exposure_iteration_count>$label.OBSERVATION_REQUEST_PARMS.MAX_AUTO_EXPOS_ITERATION_COUNT</img:max_auto_exposure_iteration_count>
+        <img:shutter_correction_mode>$label.OBSERVATION_REQUEST_PARMS.SHUTTER_CORRECTION_MODE[0].toLowerCase()</img:shutter_correction_mode>
+        <!-- v150922 - changed name to shutter_correction_mode -->
+      </img:Command_Parameters>
+
+      <img:Imaging_Instrument_Parameters>
+        <img:azimuth_fov unit="$label.INSTRUMENT_STATE_PARMS.AZIMUTH_FOV__UNIT">$label.INSTRUMENT_STATE_PARMS.AZIMUTH_FOV</img:azimuth_fov>
+        <img:elevation_fov unit="$label.INSTRUMENT_STATE_PARMS.ELEVATION_FOV__UNIT">$label.INSTRUMENT_STATE_PARMS.ELEVATION_FOV</img:elevation_fov>
+        <img:bayer_mode>$label.INSTRUMENT_STATE_PARMS.BAYER_MODE[0]</img:bayer_mode>
+        <img:camera_serial_number>$label.GEOMETRIC_CAMERA_MODEL.CAMERA_SERIAL_NUMBER</img:camera_serial_number>
+        <img:detector_to_image_rotation unit="deg">$label.INSTRUMENT_STATE_PARMS.DETECTOR_TO_IMAGE_ROTATION</img:detector_to_image_rotation>
+        <img:exposure_count>$label.INSTRUMENT_STATE_PARMS.EXPOSURE_COUNT</img:exposure_count>
+        <img:exposure_duration unit="ms">$label.INSTRUMENT_STATE_PARMS.EXPOSURE_DURATION</img:exposure_duration>
+        <img:exposure_duration_count>$label.INSTRUMENT_STATE_PARMS.EXPOSURE_DURATION_COUNT</img:exposure_duration_count>
+        <img:frame_id>$label.IDENTIFICATION.FRAME_ID[0]</img:frame_id>
+        <img:frame_type>$label.IDENTIFICATION.FRAME_TYPE[0]</img:frame_type>
+        <img:instrument_mode_id>$label.INSTRUMENT_STATE_PARMS.INSTRUMENT_MODE_ID</img:instrument_mode_id>
+        <img:offset_mode_id>$label.INSTRUMENT_STATE_PARMS.OFFSET_MODE_ID</img:offset_mode_id>
+        <img:sample_bit_method>$label.INSTRUMENT_STATE_PARMS.SAMPLE_BIT_METHOD</img:sample_bit_method>
+
+        <img:Data_Correction_Parameters>
+          <img:geometry_projection_type>$label.IDENTIFICATION.GEOMETRY_PROJECTION_TYPE[0]</img:geometry_projection_type>
+          <img:shutter_correction_mode>$label.INSTRUMENT_STATE_PARMS.SHUTTER_CORRECTION_MODE[0].toLowerCase()</img:shutter_correction_mode>
+        </img:Data_Correction_Parameters>
+
+        <img:Downsample_Parameters>
+          <img:pixel_averaging_height>$label.INSTRUMENT_STATE_PARMS.PIXEL_AVERAGING_HEIGHT</img:pixel_averaging_height>
+          <img:pixel_averaging_width>$label.INSTRUMENT_STATE_PARMS.PIXEL_AVERAGING_WIDTH</img:pixel_averaging_width>
+        </img:Downsample_Parameters>
+
+        <img:Instrument_Device_Temperature>
+          <img:Instrument_Device_Temperature_Index>
+            <img:name>$label.INSTRUMENT_STATE_PARMS.INSTRUMENT_TEMPERATURE_NAME[0]</img:name>
+            <img:temperature_calibrated unit="$label.INSTRUMENT_STATE_PARMS.INSTRUMENT_TEMPERATURE__UNIT[0]">$label.INSTRUMENT_STATE_PARMS.INSTRUMENT_TEMPERATURE[0]</img:temperature_calibrated>
+          </img:Instrument_Device_Temperature_Index>
+          <img:Instrument_Device_Temperature_Index>
+            <img:name>$label.INSTRUMENT_STATE_PARMS.INSTRUMENT_TEMPERATURE_NAME[1]</img:name>
+            <img:temperature_calibrated unit="$label.INSTRUMENT_STATE_PARMS.INSTRUMENT_TEMPERATURE__UNIT[1]">$label.INSTRUMENT_STATE_PARMS.INSTRUMENT_TEMPERATURE[1]</img:temperature_calibrated>
+          </img:Instrument_Device_Temperature_Index>
+        </img:Instrument_Device_Temperature>
+      </img:Imaging_Instrument_Parameters>
+
+      <!-- COMPRESSION -->
+      <img:Instrument_Compression_Parameters>
+        <img:instrument_compression_name>$label.COMPRESSION.INST_CMPRS_NAME</img:instrument_compression_name>
+        <img:instrument_compression_color_mode>#checkNA( $label.COMPRESSION.INST_CMPRS_COLOR_MODE[0] )</img:instrument_compression_color_mode>
+        <img:instrument_compression_quality>$label.COMPRESSION.INST_CMPRS_QUALITY</img:instrument_compression_quality>
+        <img:instrument_compression_rate>#checkNA( $label.COMPRESSION.INST_CMPRS_RATE )</img:instrument_compression_rate>
+        <img:instrument_compression_ratio>#checkNA( $label.COMPRESSION.INST_CMPRS_RATIO )</img:instrument_compression_ratio>
+      </img:Instrument_Compression_Parameters>
+
+      <img:Processing_History>
+        <img:Process>
+          <img:Process_Owner>
+            <img:product_producer_institution_name>$label.IDENTIFICATION.PRODUCER_INSTITUTION_NAME</img:product_producer_institution_name>
+          </img:Process_Owner>
+          <img:Software>
+            <img:name>$label.NSYT_CAM.TASK</img:name>
+            <img:software_user_id>$label.NSYT_CAM.USER</img:software_user_id>
+            <!--img:start_date_time>${label.NSYT_CAM.DAT_TIM}Z</img:start_date_time>-->
+            <!-- jp need to write converter for this datetime -->
+            <img:Software_Argument>
+              <img:name>SOFTWARE_NAME</img:name>
+              <img:value>$label.NSYT_CAM.SOFTWARE_NAME</img:value>
+            </img:Software_Argument>
+            <img:Software_Argument>
+              <img:name>SOFTWARE_VERSION</img:name>
+              <img:value>$label.NSYT_CAM.SOFTWARE_VERSION_ID</img:value>
+            </img:Software_Argument>
+          </img:Software>
+        </img:Process>
+      </img:Processing_History>
+
+      <img:Product_Identification>
+        <img:image_id>$label.IDENTIFICATION.IMAGE_ID</img:image_id>
+        <img:mesh_id>$label.IDENTIFICATION.MESH_ID</img:mesh_id>
+        <img:mosaic_id>$label.IDENTIFICATION.MOSAIC_ID</img:mosaic_id>
+        <img:stereo_match_id>$label.IDENTIFICATION.STEREO_MATCH_ID</img:stereo_match_id>
+        <img:image_type>$label.IDENTIFICATION.IMAGE_TYPE</img:image_type>
+        <img:Original_Source_Products>
+          <img:Source_Product>
+            <img:source_telemetry_start_time>${label.TELEMETRY.TELEMETRY_SOURCE_START_TIME}Z</img:source_telemetry_start_time>
+            <img:source_telemetry_sclk_start>$label.TELEMETRY.TELEMETRY_SOURCE_SCLK_START</img:source_telemetry_sclk_start>
+            <img:Internal_Reference>
+              <lid_reference>urn:nasa:pds:insight_cameras:data_icc_raw:$pid</lid_reference>
+              <reference_type>data_to_raw_product</reference_type>
+            </img:Internal_Reference>
+          </img:Source_Product>
+        </img:Original_Source_Products>
+      </img:Product_Identification>
+
+      <img:Subframe_Parameters>
+        <img:first_line>$label.IMAGE_DATA.FIRST_LINE</img:first_line>
+        <img:first_sample>$label.IMAGE_DATA.FIRST_LINE_SAMPLE</img:first_sample>
+        <img:lines>$label.IMAGE_DATA.LINES</img:lines>
+        <img:samples>$label.IMAGE_DATA.LINE_SAMPLES</img:samples>
+      </img:Subframe_Parameters>
+
+      <img:Telemetry_Parameters>
+        <img:download_priority>$label.TELEMETRY.DOWNLOAD_PRIORITY</img:download_priority>
+        <img:earth_received_start_date_time>${label.TELEMETRY.EARTH_RECEIVED_START_TIME}Z</img:earth_received_start_date_time>
+        <img:earth_received_stop_date_time>${label.TELEMETRY.EARTH_RECEIVED_STOP_TIME}Z</img:earth_received_stop_date_time>
+        <img:error_pixel_line>#checkNA( $label.TELEMETRY.ERROR_PIXEL_LINE[0] )</img:error_pixel_line>
+        <img:error_pixel_sample>#checkNA( $label.TELEMETRY.ERROR_PIXEL_SAMPLE[0] )</img:error_pixel_sample>
+        <img:flight_software_version_id>$label.TELEMETRY.FLIGHT_SOFTWARE_VERSION_ID</img:flight_software_version_id>
+        <img:product_completion_status>$label.TELEMETRY.PRODUCT_COMPLETION_STATUS[0]</img:product_completion_status>
+        <img:surface_gravity unit="m/s**2">$label.ARM_ARTICULATION_STATE.GRAVITY_ACCELERATION</img:surface_gravity>
+        <img:telemetry_application_id>$label.TELEMETRY.APPLICATION_PROCESS_ID</img:telemetry_application_id>
+        <img:telemetry_application_name>$label.TELEMETRY.APPLICATION_PROCESS_NAME</img:telemetry_application_name>
+        <img:telemetry_image_data_size>$label.TELEMETRY.IMAGE_DATA_SIZE</img:telemetry_image_data_size>
+        <img:telemetry_provider_id>$label.TELEMETRY.TELEMETRY_PROVIDER_ID</img:telemetry_provider_id>
+        <img:telemetry_source_name>$label.TELEMETRY.TELEMETRY_SOURCE_NAME</img:telemetry_source_name>
+        <img:telemetry_transport_protocol>$label.TELEMETRY.TELEMETRY_SOURCE_TYPE</img:telemetry_transport_protocol>
+        <img:Packet_Parameters>
+          <img:expected_packets>$label.TELEMETRY.EXPECTED_PACKETS</img:expected_packets>
+          <img:received_packets>$label.TELEMETRY.RECEIVED_PACKETS</img:received_packets>
+        </img:Packet_Parameters>
+      </img:Telemetry_Parameters>
+    </Discipline_Area>
+
+  </Observation_Area>
+  <Reference_List>
+    <Internal_Reference>
+      <lid_reference>#generateLID( "BROWSE" $pid )</lid_reference>
+      <reference_type>data_to_browse</reference_type>
+      <comment>Reference pointer to browse version of this image.</comment>
+    </Internal_Reference>
+  </Reference_List>
+  <File_Area_Observational>
+    <File>
+      <file_name>${label.IDENTIFICATION.PRODUCT_ID[0].toLowerCase()}.vic</file_name>
+      <local_identifier>DATA_FILE</local_identifier>
+      <creation_date_time>$date.get("yyyy-MM-dd'T'HH:mm:ss.sss'Z'")</creation_date_time>
+      <file_size unit="byte">$generate.file_size</file_size>
+      <md5_checksum>$generate.object_md5_checksum</md5_checksum>
+
+    </File>
+    <Header>
+      <local_identifier>VICAR_Header</local_identifier>
+      <offset unit="byte">0</offset>
+      <object_length unit="byte">$label.SYSTEM.LBLSIZE</object_length>
+      <parsing_standard_id>VICAR2</parsing_standard_id>
+      <description>VICAR Header</description>
+    </Header>
+    
+    #getArrayDefinition( $label )
+    
+  </File_Area_Observational>
+</Product_Observational>

@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module nav2
-$! VPACK Version 1.9, Thursday, October 31, 2002, 09:41:12
+$! VPACK Version 2.1, Thursday, February 18, 2016, 16:04:50
 $!
 $! Execute by entering:		$ @nav2
 $!
@@ -154,7 +154,7 @@ $ vpack nav2.com -mixed -
 	   xdgclr.fin -
 	-p nav2.pdf -
 	-i nav2.imake -
-	-t tstnav2.pdf
+	-t tstnav2.pdf tstnav2.log
 $ Exit
 $ VOKAGLEVE
 $ Return
@@ -192,7 +192,7 @@ c
       logical xvptst
       external navmain
 
-      call xvmessage(' NAV2 Version Oct 30 2002',' ')
+      call xvmessage(' NAV2 Version 2016-02-18',' ')
       call init_spice
       pi = 3.141592653589793d0
       dtr = pi/180.d0
@@ -5650,12 +5650,20 @@ HISTORY
 Original Programmer: Gary Yagi, 1 November, 1986
 Current Cognizant Programmer: Gary Yagi
 Revisions:
- WHEN       WHO WHAT
- ---------- --- ---------------------------------------------------------------
- 10 Oct 02  GMY Fix Linux compile errors (NAV2_LINUX)
-                Modify to handle Cassini and VGR image space.
-		Add Cassini and VGR image space test cases to unit test.
- 05/07/1997 SMC Port to Unix and Alpha
+ 1988-09-23 GMY * Modify for new VRDI interface, multiple versions of camera
+		  pointing in SEDR.
+		* Implement 1024x1024 display capability.
+		* Add code to support systems with only one video plane.
+		* Implement capability to process image-space frames.
+		* Change tiepoint file format to IBIS interface file.
+		* Add independent stretches for left and right images.
+		* Implement compensation for atmospheric feature motion.
+		* Add Jupiter zonal-velocity profile.
+		* Fix FRs 35652 and 37254.
+		* Numerous other modifications and minor bug fixes.
+ 1990-07-28 GMY * Galileo conversion
+ 1991-08-21 GMY * Fix FRs 66566, 61146.
+ 1997-05-07 SMC Port to Unix and Alpha
                  * Switch the image memory plane (IMP) of image and tiepoint,
                    so the image can be properly displayed on 8-bit device.
                  * Upgrade all CONVISOS calls to take camera_id parameter.
@@ -5673,19 +5681,10 @@ Revisions:
                  * Modified maplabel.f/zonal routine to use Binary Searching
                    algorithm to find the proper record.  The previous routine
                    had a problem of going into infinite loop.
- 08/21/1992 GMY * Fix FRs 66566, 61146.
- 07/28/1990 GMY * Galileo conversion
- 09/23/1988 GMY * Modify for new VRDI interface, multiple versions of camera
-		  pointing in SEDR.
-		* Implement 1024x1024 display capability.
-		* Add code to support systems with only one video plane.
-		* Implement capability to process image-space frames.
-		* Change tiepoint file format to IBIS interface file.
-		* Add independent stretches for left and right images.
-		* Implement compensation for atmospheric feature motion.
-		* Add Jupiter zonal-velocity profile.
-		* Fix FRs 35652 and 37254.
-		* Numerous other modifications and minor bug fixes.
+ 2001-10-10 GMY Fix Linux compile errors (NAV2_LINUX)
+                Modify to handle Cassini and VGR image space.
+		Add Cassini and VGR image space test cases to unit test.
+ 2016-02-18 WLB Added enable/disable-log to tstnav2.pdf
 .LEVEL1
 .VARI INP
 STRING - File names for
@@ -6147,18 +6146,16 @@ body
 let _onfail="continue"
 let $echo="yes"
 
+enable-log
+
+use xwa0
+
 LOCAL VGR_INP STRING COUNT=1
 LOCAL GLL_INP STRING COUNT=1
 LOCAL CAS_INP STRING COUNT=1
-if ($syschar(1) = "VAX_VMS")
-   let VGR_INP="WMS_TEST_WORK:[TESTDATA.MIPL.VGR]"
-   let GLL_INP="WMS_TEST_WORK:[TESTDATA.GLL]"
-   let CAS_INP="WMS_TEST_WORK:[TESTDATA.CASSINI.CAS$I$SS]"
-else
-   let VGR_INP="/project/test_work/testdata/mipl/vgr/"
-   let GLL_INP="/project/test_work/testdata/gll/"
-   let CAS_INP="/project/test_work/testdata/cassini/casIss/"
-end-if
+let VGR_INP="/project/test_work/testdata/mipl/vgr/"
+let GLL_INP="/project/test_work/testdata/gll/"
+let CAS_INP="/project/test_work/testdata/cassini/casIss/"
 
 if (TESTPROJECT="ALL" or TESTPROJECT="GLL")
    NAV2 (&"GLL_INP"60.img, &"GLL_INP"57.img) OUT=gll_test.ibis
@@ -6186,6 +6183,165 @@ if (TESTPROJECT="ALL" or TESTPROJECT="CAS")
    !gspice a.img ckname=near
 end-if
 
+disable-log
+
 end-proc
+$!-----------------------------------------------------------------------------
+$ create tstnav2.log
+ush $VRDILIB/usedisp a xwa0
+LOCAL VGR_INP STRING COUNT=1
+LOCAL GLL_INP STRING COUNT=1
+LOCAL CAS_INP STRING COUNT=1
+let VGR_INP="/project/test_work/testdata/mipl/vgr/"
+let GLL_INP="/project/test_work/testdata/gll/"
+let CAS_INP="/project/test_work/testdata/cassini/casIss/"
+if (TESTPROJECT="ALL" or TESTPROJECT="GLL")
+   NAV2 (/project/test_work/testdata/gll/60.img, /project/test_work/testdata/gll/57.img) OUT=gll_test.ibis
+Beginning VICAR task NAV2
+ NAV2 Version 2016-02-18
+msg
+CKNAME=NAIF  SPKID=N083  PROGRAM=redict  990
+            -0.0919477   0.5189606  -0.8498385
+            -0.9863231  -0.1647092   0.0061336
+            -0.1367932   0.8387793   0.5270074
+msg
+CKNAME=NAIF  SPKID=N083  PROGRAM=redict  990
+            -0.0877228   0.5188153  -0.8503737
+            -0.9863254  -0.1648054   0.0011990
+            -0.1395241   0.8388503   0.5261779
+ Do you wish to adjust for wind speed?
+'N
+ FRAME= 61056000  SCET=90343  22259466
+ FRAME= 61055700  SCET=90343  21957466
+ Time separation=    182. seconds
+exit
+ NAV2 task completed
+end-if
+if (TESTPROJECT="ALL" or TESTPROJECT="VGR")
+   FIT /project/test_work/testdata/mipl/vgr/ptp_vgr_red.img vgrred.img OFORM=BYTE
+Beginning VICAR task FIT
+
+FIT version 5 August, 2003
+
+     RAW HISTOGRAM STATISTICS...
+AVERAGE GRAY LEVEL=  2112.281 STANDARD DEVIATION=  1836.205 NUMBER OF ELEMENTS= 1000000
+
+EXCLUDED HISTOGRAM STATISTICS...
+AVERAGE GRAY LEVEL=  2112.281 STANDARD DEVIATION=  1836.205 NUMBER OF ELEMENTS= 1000000
+
+MINIMUM DN OF  -9147   SCALED TO     0
+
+MAXIMUM DN OF   6162   SCALED TO   255
+FIT task completed
+   FIT /project/test_work/testdata/mipl/vgr/ptp_vgr_blu.img vgrblu.img OFORM=BYTE
+Beginning VICAR task FIT
+
+FIT version 5 August, 2003
+
+     RAW HISTOGRAM STATISTICS...
+AVERAGE GRAY LEVEL=  2105.005 STANDARD DEVIATION=  1943.223 NUMBER OF ELEMENTS= 1000000
+
+EXCLUDED HISTOGRAM STATISTICS...
+AVERAGE GRAY LEVEL=  2105.005 STANDARD DEVIATION=  1943.223 NUMBER OF ELEMENTS= 1000000
+
+MINIMUM DN OF  -3508   SCALED TO     0
+
+MAXIMUM DN OF   5636   SCALED TO   255
+FIT task completed
+   NAV2 (vgrblu.img vgrred.img) OUT=vgr_test.ibis target=jupiter
+Beginning VICAR task NAV2
+ NAV2 Version 2016-02-18
+msg
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+CKNAME=NAIF  SPKID=N005  PROGRAM=VGRMCK  VRH059  MIPS  03/02/85
+            -0.0338463  -0.0235998  -0.9991484
+            -0.6334012   0.7738170   0.0031791
+             0.7730830   0.6329694  -0.0411390
+msg
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+CKNAME=NAIF  SPKID=N005  PROGRAM=VGRMCK  VRH059  MIPS  03/02/85
+            -0.0247017  -0.0290090  -0.9992739
+            -0.6031438   0.7975899  -0.0082446
+             0.7972499   0.6025022  -0.0371985
+ Do you wish to adjust for wind speed?
+'N
+ FRAME=  1634146  SCET=79062 215722910
+ FRAME=  1634142  SCET=79062 215409080
+ Time separation=    193. seconds
+exit
+ NAV2 task completed
+   copy /project/test_work/testdata/mipl/vgr/f1636832.raw a.img
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+   nav2 (/project/test_work/testdata/mipl/vgr/f1636832.raw,+
+a.img) ibis.img target=io  	res=/project/test_work/testdata/mipl/vgr/reseau.test
+Beginning VICAR task nav2
+ NAV2 Version 2016-02-18
+msg
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+CKNAME=NAV   SPKID=N005  PROGRAM=NAV     GMY059  NONE  01/12/01
+            -0.0003499  -0.0006059  -0.9999998
+             0.5635410   0.8260878  -0.0006977
+             0.8260881  -0.5635411   0.0000523
+msg
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+CKNAME=NAV   SPKID=N005  PROGRAM=NAV     GMY059  NONE  01/12/01
+            -0.0003499  -0.0006059  -0.9999998
+             0.5635410   0.8260878  -0.0006977
+             0.8260881  -0.5635411   0.0000523
+ Frame  =    1636832
+ Camera =          7
+ Filter =          0
+ Year   =          0
+ Day    =          0
+ Frame  =    1636832
+ Camera =          7
+ Filter =          0
+ Year   =          0
+ Day    =          0
+ FRAME=  1636832  SCET=79063 192259820
+ FRAME=  1636832  SCET=79063 192259820
+ Time separation=      0. seconds
+exit
+ NAV2 task completed
+end-if
+if (TESTPROJECT="ALL" or TESTPROJECT="CAS")
+   copy /project/test_work/testdata/cassini/casIss/n1354897340.1 a.img
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+   nav2 (/project/test_work/testdata/cassini/casIss/n1354897340.1,a.img) ibis.img
+Beginning VICAR task nav2
+ NAV2 Version 2016-02-18
+msg
+CKNAME=NAIF  SPKID=N009  PROGRAM=Y CASS  
+            -0.0020650   0.0645526  -0.9979122
+             0.9999965  -0.0015065  -0.0021668
+            -0.0016432  -0.9979132  -0.0645493
+msg
+CKNAME=NAIF  SPKID=N009  PROGRAM=Y CASS  
+            -0.0020650   0.0645526  -0.9979122
+             0.9999965  -0.0015065  -0.0021668
+            -0.0016432  -0.9979132  -0.0645493
+ Do you wish to adjust for wind speed?
+'N
+ FRAME=*********  SCET=  342 161056162
+ FRAME=*********  SCET=  342 161056162
+ Time separation=      0. seconds
+exit
+ NAV2 task completed
+end-if
+disable-log
 $ Return
 $!#############################################################################

@@ -5,6 +5,7 @@ import jpl.mipl.io.vicar.*;
 import java.util.Locale;
 
 import javax.imageio.ImageWriteParam;
+import javax.imageio.stream.ImageInputStream;
 
 /**
  * PDSImageWriteParam
@@ -27,7 +28,7 @@ public class PDSImageWriteParam extends ImageWriteParam {
 	boolean transcodeIIOmetadata = false; // turns on attempt to tramscode if true
 	String xslFileName = null; // transcoder xsl script
 	String vicarLabelString = null ; // a String containing a complete vicar label read from the input file
-	// useful for creating an emebeded vicar label
+	// useful for creating an embedded vicar label
 	VicarLabel vicarLabel = null; 
 	boolean embedVicarLabel = false; // controls if an embeded vicar label is added to the output file
 	
@@ -105,6 +106,9 @@ public class PDSImageWriteParam extends ImageWriteParam {
     String velocityTemplateFilename = "";
     // path to a set of xml files used to configure the velocity engine
     String velocityConfigPath = "";
+    
+    // used by the PDS4 generator to get file_length and calculate checksum
+    ImageInputStream imageInputStream = null;
 
     /**
      * VicarBinaryLinePrefix vicarBinaryLinePrefix = null;
@@ -580,6 +584,14 @@ public class PDSImageWriteParam extends ImageWriteParam {
 		return imageStartByte;
 	}
 	
+	public void setImageInputStream(ImageInputStream iis) {
+		imageInputStream = iis;
+	}
+	
+	public ImageInputStream getImageInputStream() {
+		return imageInputStream;
+	}
+	
 	public String toString() {
 		StringBuffer sb = new StringBuffer("PDSImageWriteParam\n");
 		
@@ -607,6 +619,7 @@ public class PDSImageWriteParam extends ImageWriteParam {
 	sb.append("detachedLabel = "+detachedLabel+"\n");
 	sb.append("dataFileIsVicarImage = "+dataFileIsVicarImage+"\n");
 	sb.append("image_start_byte = "+imageStartByte+"\n");
+	sb.append("imageInputStream = "+imageInputStream+"\n");
 
 	return sb.toString();
 	}

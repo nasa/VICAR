@@ -19,9 +19,9 @@ if (-d $V2TOP/tae) then
 endif
 
 # Create $V2UTIL/x86-macosx directory for Mac Build.
-if ($VICCPU == "x86-macosx") then
+#if ($VICCPU == "x86-macosx") then
   mkdir util/x86-macosx
-endif
+#endif
 
 #
 # Make various build scripts executable

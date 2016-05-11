@@ -44,8 +44,6 @@ endif
 
 if ($?J2_NOM_TAM_FITS != 0) then
   cp $J2_NOM_TAM_FITS/fits.jar $V2HTML/jars
-  cp $J2_NOM_TAM_FITS/fits_image.jar $V2HTML/jars
-  cp $J2_NOM_TAM_FITS/fits_util.jar $V2HTML/jars
 endif
 
 # CosNotify
@@ -66,8 +64,11 @@ endif
 # Hopefully xalanj1compat.jar is temporary until tlm.log can get cleaned up!
 
 if ($?J2_XALAN != 0) then
-  cp $J2_XALAN/bin/xalan.jar $V2HTML/jars
-  cp $J2_XALAN/bin/xalanj1compat.jar $V2HTML/jars
+  cp $J2_XALAN/xalan.jar $V2HTML/jars
+#  cp $J2_XALAN/bin/xalanj1compat.jar $V2HTML/jars
+  cp $J2_XALAN/serializer.jar $V2HTML/jars
+  cp $J2_XALAN/xercesImpl.jar $V2HTML/jars
+  cp $J2_XALAN/xml-apis.jar $V2HTML/jars
 endif
 
 # EJB, Servlet, and JSP Development Kit
@@ -311,7 +312,14 @@ if ($?J2_JOGL != 0) then
   cp $J2_JOGL/sun-solr/lib/libjogl_awt.so $V2HTML/lib/sun-solr/
   cp $J2_JOGL/sun-solr/lib/libgluegen-rt.so $V2HTML/lib/sun-solr/
 endif
-
+# JMonkeyEngine3
+if ($?J2_JMONKEYENGINE != 0) then
+  cp $J2_JMONKEYENGINE/lib/jME3-core.jar $V2HTML/jars/
+  cp $J2_JMONKEYENGINE/lib/jME3-desktop.jar  $V2HTML/jars/
+  cp $J2_JMONKEYENGINE/lib/jME3-lwjgl-natives.jar  $V2HTML/jars/
+  cp $J2_JMONKEYENGINE/lib/jME3-lwjgl.jar  $V2HTML/jars/
+  cp $J2_JMONKEYENGINE/lib/lwjgl.jar $V2HTML/jars/  
+endif
 # Apache Derby stuff
 # This jar is built for java 1.6.  
  if ($?J2_DERBY != 0) then
@@ -383,7 +391,12 @@ endif
 
 # TREEVOTEE
 if ($?J2_TREEVOTEE != 0) then
-  cp $J2_TREEVOTEE/treevotee-0.9.7p1ee.jar $V2HTML/jars
+  cp $J2_TREEVOTEE/treevotee-0.9.9p1ee.jar $V2HTML/jars
+endif
+
+# JUNAMI
+if ($?J2_JUNAMI != 0) then
+  cp $J2_JUNAMI/junami-0.7.0p1.jar $V2HTML/jars
 endif
 
 # JSON_SIMPLE
@@ -595,12 +608,60 @@ endif
 
 # PDS_GENERATE_TOOL
 if ($?J2_PDS_GENERATE_TOOL != 0) then
-  cp $J2_PDS_GENERATE_TOOL/generate-0.7.2.jar $V2HTML/jars
+  cp $J2_PDS_GENERATE_TOOL/generate-0.9.1.jar $V2HTML/jars
+endif
+
+# PDS4_TOOLS
+if ($?J2_PDS4_TOOLS != 0) then
+  cp $J2_PDS4_TOOLS/objectAccess-0.5.0.jar $V2HTML/jars
+  cp $J2_PDS4_TOOLS/opencsv-2.3.jar $V2HTML/jars
 endif
 
 # WEBSOCKET
 if ($?J2_WEBSOCKET != 0) then
   cp $J2_WEBSOCKET/javax.websocket-api-1.1.jar $V2HTML/jars
+endif
+
+# JAI_EXT
+if ($?J2_JAI_EXT != 0) then
+  cp $J2_JAI_EXT/guava-17.0.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-affine-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-algebra-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-artifact-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-bandcombine-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-bandmerge-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-bandselect-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-binarize-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-border-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-buffer-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-classifier-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-colorconvert-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-colorindexer-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-concurrent-tile-cache-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-crop-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-errordiffusion-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-format-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-imagefunction-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-iterators-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-lookup-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-mosaic-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-nullop-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-orderdither-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-piecewise-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-rescale-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-rlookup-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jts-1.12.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-scale-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-scheduler-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-square-root-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-stats-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-translate-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-utilities-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-utils-1.3.1.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-vectorbin-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-warp-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/jt-zonal-1.0.3.jar $V2HTML/jars
+  cp $J2_JAI_EXT/junit-4.8.1.jar $V2HTML/jars
 endif
 
 chmod u+w $V2HTML/jars/*

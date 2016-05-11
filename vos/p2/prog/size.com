@@ -1,7 +1,7 @@
 $!****************************************************************************
 $!
 $! Build proc for MIPL module size
-$! VPACK Version 1.9, Sunday, July 29, 2012, 13:36:52
+$! VPACK Version 1.9, Thursday, May 28, 2015, 14:39:56
 $!
 $! Execute by entering:		$ @size
 $!
@@ -176,11 +176,6 @@ C LFLAG=1 if a check for saturation is necessary (ILO,IHI)
 C
 C           SIZE  IN  OUT  (1,1,NLO,NSO)  user-parameters...
 C       or  SIZE  IN  OUT  ZOOM=2.5  user-parameters...
-
-c  29Jul2012 -lwk- the arrays of size 100000 were put into a common block,
-c		as otherwize the program crashes when the the output line
-c		length exceeds 50000 words;  if compiler changes or Solaris
-c		is no longer supported, this can probably be removed.
 C
       SUBROUTINE MAIN44
       IMPLICIT NONE
@@ -199,19 +194,24 @@ C
       INTEGER*4 LFLAG		!=1 if need to check for ILO,IHI saturation
       REAL*4 GSCALE		!Output DN scale factor
 
-      COMMON/C2/RBUF(100000),BUF(100000,2),OBUF(100000)
-      COMMON/C2/SAMP(100000),WGHT(100000)
-      INTEGER*4 BUF,SAMP
-      REAL*4 RBUF,OBUF,WGHT
-c     INTEGER*4 SAMP(100000)
-c     REAL*4 BUF(100000),RBUF(100000),OBUF(100000),WGHT(100000)
+c      COMMON/C2/RBUF(100000),BUF(100000,2),OBUF(100000)
+c      COMMON/C2/SAMP(100000),WGHT(100000)
+      INTEGER*4 SAMP(100000)
+      REAL*4 BUF(100000),RBUF(100000),OBUF(100000),WGHT(100000)
 
       INTEGER*4 I,L,N,IND,INCODE
       LOGICAL*4 INTERP
       CHARACTER*4 FMT(4)/'BYTE','HALF','FULL','REAL'/
   
-      CALL XVMESSAGE(' SIZE version 18-Jul-2012',' ')
+      CALL XVMESSAGE(' SIZE version 22 Aug 2013 (64-bit) - rjb',' ')
 
+	do i= 1,100000
+	  buf(i) = 0.0
+	  rbuf(i) = 0.0
+	  obuf(i) = 0.0
+	  wght(i) = 0.0
+          samp(i) = 0
+	enddo
 C     ....Open input picture
       CALL IPOPEN(iunit,icode,sb,eb)
 C     ....Determine zoom factor and size of input and output images
@@ -298,7 +298,7 @@ C removed return 1 and * param 2-9-2010 - RJB (call abends substituted)
       if (nbi.gt.1) then
 	if (org.eq.'BIP') then
           CALL XVMESSAGE(
-     &  ' BIP files not supported, use program TRAN to convert to BSQ',
+     &  '??E - BIP files not supported, use program TRAN to convert to BSQ',
      &    ' ')
 	  call abend
         endif
@@ -1332,9 +1332,9 @@ c	merged from sread.F (build 562) and size.com sread.f (build 804)
 	SUBROUTINE SREAD(IUNIT,LINE,SSI,NSI,NSO,IZOOM,ZOOMS,
      &		SAMP,WGHT,ib,buf,rbuf)
 	IMPLICIT NONE
-      INTEGER*4 IUNIT,LINE,SSI,NSI,NSO,IZOOM,IB
+      	INTEGER*4 IUNIT,LINE,SSI,NSI,NSO,IZOOM,IB
 	INTEGER*4 IND,SAMP(NSO)
-      REAL*4 ZOOMS,WGHT(NSO),BUF(NSI),RBUF(NSO)
+      	REAL*4 ZOOMS,WGHT(NSO),BUF(NSI),RBUF(NSO)
 
       IF (IZOOM.EQ.1) THEN
          CALL XVREAD(IUNIT,rbuf,ind,'LINE',LINE,'SAMP',SSI,
@@ -1362,15 +1362,14 @@ C Magnifies an image line via interpolation.
 C
       SUBROUTINE MAG(NSO,NSI,BUF,SAMP,WGHT,rbuf)
 	IMPLICIT NONE
-      INTEGER*4 NSO,NSI
+        INTEGER*4 NSO,NSI
 	INTEGER*4 I,I0,I2,SAMP(NSO)
-      REAL*4 BUF(NSI),RBUF(NSO),WGHT(NSO)
+        REAL*4 BUF(NSI),RBUF(NSO),WGHT(NSO)
 	REAL*4 A,D1,D2
 
       I0 = 0
       D1 = 0
       D2 = BUF(1)
-
       DO I=1,NSO
          I2 = SAMP(I)
          IF (I2.NE.I0) THEN
@@ -1934,9 +1933,9 @@ The statements:
 
 will generate 3x3 output images C and D of the form:
 
-	     	0  3  6		       2  5  8
+		    0  3  6		       2  5  8
 	 C  =	3  6  9		D  =   5  8 11
-	     	6  9 12		       8 11 14
+		    6  9 12		       8 11 14
 
 Note the use of the AREA parameter to begin the resampling at a point other
 than pixel (1,1).
@@ -2007,137 +2006,162 @@ shrinks the sample direction by 2:
 .page
 PROGRAM RESTRICTIONS:
 
-Internal buffers allow up to 100.000 samples in byte, half, full or real.
+Now internal buffers allow up to 100.000 samples in byte, half, full or real
 NO support for Double
 
 PROGRAM HISTORY:
 
 Written by: Gary Yagi, 26 January 1976
-Cognizant programmer: Lucas Kamp
+Cognizant programmer: Ray Bambery
 Revision history:
+  
+  1983-11-18 HBD - deleted stacka and restructured code made vax compatible
 
-13 Jul 2012 - LWK - Minor change to fix compilation on Solaris
-Jun 06, 2012 - R. J. Bambery - gfortran 4.6.3 changed all dimension (1) values to (*)
-             in subroutines to avoid "Fortran runtime error: Index '2' of dimension 1
-             of array 'id' above upper bound of 1"
-May 06, 2011 - R. J. Bambery - Remove warning messages from gfortran 4.4.4 compiler
-Mar 07, 2010 - R. J. Bambery - Remove residual ocode/icode debug messages for 'noin
-Feb 14, 2010 - R. J. Bambery - Fix scale parameter for case where input
-             is BYTE but output scale requires HALF, FULL, or REAL (signed BYTE 
-             to INTEGER/REAL conversion) in 'noin or for HALF to FULL
-             and HALF to REAL in 'noin
-Feb 10, 2010 - R. J. Bambery - extensive reworking of internal code to
-             remove final conflicts between real/full buffers on
-             Linux systems (g77 version 3.4.6) 
-Feb 05, 2010 - R. J. Bambery - full 64-bit compliance on MacOSX (intel/PowerPC)
-             gfortran version 4.4.2
-             reworked internals to perform in real*4 processing,
-             Massive failures for half and full word images in 'noin
-             calls due to equivalencing internal buffers to byte, half, full
-             and real. Apparently, the internal routines called via snoin.f
-             had gotten older code mixed in with new after afids build 562
-Aug 24, 2009 - smyth - fixed nsi parameters in several routines
-Apr 14, 2009 - PKim - Increased image size to 100,000 from 50000
-Jan 04  lwk  Added support for 3-D (cube) files;  removed Magellan option
-             (which will live on as pgm. SIZEMGN)
-18 Dec 03 -  DLR   INCREASED BUFFER SIZES TO ALLOW LINES UP TO 100000.
-              FIXED PDF.
-29 May 03 -  AXC  Fixed ABEND when LZOOM is specified but not SZOOM.
-             (AR-108538)
-		     Initialized a character buffer. (AR-104344) 
-22 Aug 00 -  GMY  Fix bug when ZOOM not specified and NL is same as input.
-             (AR 104590)
-24 Apr 00 -  GMY  Fix bug when ZOOM, NL, NS are specified for case where
-             NL,NS specifies output is to be same size as input.
-07 Dec 99 -  GMY  (Day of infamy)  Major reorganization of code and
-             rewritting of test script.  Fixed IOFFSET problem for
-             interpolation case.  When updating map projection labels,
-             if resolution or scale is missing, it is computed from the
-             other.
-19 Aug 99 -  EMS - fixed bug that was giving invalid values around the edges
-		     of the output image
- 9 jul 98 -  LWK - changed printout of zoom factor for integer reduction from
-		     "ZOOM -N" to "ZOOM 1/N"
-24 jun 98 -  LWK - corrected MAP_RESOLUTION update:  it should be multiplied
-		     by ZOOM, but pgm was dividing!
-21 MAY 98 -  BAM   INCREASED BUFFER SIZES TO ALLOW LINES UP TO 50000.
-              FIXED PDF.
-04 Feb 98 -  GMY  Changed SAMP from I*2 to I*4 to fix bug when NS > 32767
- 3 dec 97 -  LWK - changed ENTRY's to SUBROUTINE to avoid Alpha compiler bug
-04 Sep 97 -  LWK   corrected computation of effect of zoom on MP line/samp 
-		     items, since only (0.5,0.5) is fixed in zoom.
-06 Jul 97 -  LWK   added IOFFSET parameter
-26 Jun 95 -  SMC  FR 89394: Undo FR 89272/89275, because it caused problems.
-                        and fixed it another way
-14 Jun 95 - SMC  FR 89272: fixed ABEND when LZOOM=-2 on odd number line images
-              FR 89275: fixed image output so that LZOOM=-2 will begin
-                        processing on the first line instead of the second
-12 sep 95 - LWK - corrected the scaling of the LINE/SAMP_PROJECTION_OFFSET
-		    label items:  these are defined with respect to (1,1),
-		    not (0,0)!
-28 Apr 95 - FFM  - Fix FR 82982:
-              1. Fixed dcl delete statement in test pdf.
-              2. Corrected error in test #2 about m.dat.
-              3. Removed a test case in test #7 which needs too
-                 much disk space.
-              4. Fixed an error in xvmessage in routine GETSIZE.
-                 So it will not print out a blank line or a line 
-                 has meaningless infor on ANDES.
-                 
-25 Oct 94 - FFM   Fix FR 85697:
-              1. Add keyword DEBUG to print the informational message
-                 for routine mp_label_read.
-              2. enlarge buffer to handle output image up to 50,000 
-                 samples. If larger than 50,000 samples, SIZE will 
-                 abend with a message to inform user the cause of the
-                 abend.
-16 Nov 93 -  FFM   ported to unix. The major changes are :
-              1. modify XV,XL routines
-              2. change int, byte equivalence to INT2BYTE, BYTE2INT,
-                 add "include fortport" to all related subroutines
-              3. change logical*1 to byte (if pixel)
-              4. divide real*4 EPS/1.e-6/ into real*4, and data statement
-              5. change hex number to integer in data statement
-              6. change mvl to mvlc, add to addv
-              7. make optional arguments to required arguments for addv,
-                 mvlc, and mve
-              8. change QPRINT to XVMESSAGE
-              9. remove /LIST from include statement
-             10. add all include files to imake file
-             11. remove "implicit statement" from slookup include file
-             12. create common/c3/iunit, so iunit will pass to subroutine 
-                 sread properly, because SGI doesn't default value to 0.
-             13. add new MP interface
-             14. modify test pdf to be automated for VAX, SUNOS, & SGI.
+  1984-07-11 HBD - fix bug in shrink and shrinz
 
-09 Nov 91 -  LWK   update map labels if present
-26 Nov 89 -  GMY   Fix bug in VOLTS option (max index=2249)
-26 Nov 89 -  GMY   Added VOLTS keyword.  Program now uses size field to
-		     determine size of LOOKUP tables.
-11 Feb 89 -  GMY   Fixed image compression with no interpolation algorithm
-                to agree with documentation (start with pixel 1,1).
-22 DEC 88 -  GMY   MGN lookup table resolution increased 10x.
-              Added SMGN1 to handle ZOOM=-3 as special case.
-22 NOV 88 -  GMY   Major code modification and reorganization:
-		    ...Consolidated Magellan option to subroutines SMGN
-	        ...and MGNSIZEINIT.  LOOKUP now a separate keyword.
-		    ...Added fullword and REAL*4 capability.
-		    ...Rewrote help file.
-22 JAN 88 -  AXW   Changed keyword OFORM from 'MAGELLAN' to 'LOOKUP'.
-26 JAN 87 -  AXW   Added fullword capability and translation tables
-                  for the Magellan project.  Specified by the
-                  SIZE.PDF file keyword OFORM='MAGELLAN'.
-                  Code modifications are marked by '! AXW'.
- 1 JAN 85 -  FFM   CONVERTED SUBROUTINE INTRP,INTRPV,IOUT,SHRINK,
-                  SHRINZ FROM FORTRAN TO ASSEMBLY LANGUAGE
- 4 SEP 84 -  SP    DELETED FORMAT PARAMETER (ALWAYS USING FORMAT 
-                  FROM LABEL.)
- 4 SEP 84 -  SP    ADDED STATEMENT TO CHANGE SZOOM=-1 TO SZOOM=1.
- 4 SEP 84 -  SP    CONVERTED TO USE VICAR2 CALLS (XVREAD...)
- 4 SEP 84 -  SP    DOUBLED BUFFER SIZES TO ALLOW LINES UP TO 20000.
-11 JUL 84 -  HBD   FIX BUG IN SHRINK AND SHRINZ
-18 NOV 83 -  HBD   DELETED STACKA AND RESTRUCTURED CODE
-                  MADE VAX COMPATIBLE
+  1984-09-04 SP - doubled buffer sizes to allow lines up to 20000;
+    converted to use vicar2 calls (xvread...); added statement to change
+    szoom=-1 to szoom=1; deleted format parameter (always using format
+    from label.)
+
+  1985-01-01 FFM - converted subroutine intrp,intrpv,iout,shrink,
+    shrinz from fortran to assembly language
+
+  1987-01-26 AXW - added fullword capability and translation tables
+    for the magellan project.  specified by the size.pdf file keyword
+    oform='magellan'. code modifications are marked by '! axw'.
+
+  1988-01-22 AXW - changed keyword oform from 'magellan' to 'lookup'.
+
+  1988-11-22 GMY - major code modification and reorganization:
+    consolidated magellan option to subroutines smgn and
+    mgnsizeinit. lookup now a separate keyword. added fullword and real*4
+    capability. rewrote help file.
+
+  1988-12-22 GMY - mgn lookup table resolution increased 10x. added
+    smgn1 to handle zoom=-3 as special case.
+
+  1989-02-11 GMY - fixed image compression with no interpolation
+    algorithm to agree with documentation (start with pixel 1,1).
+
+  1989-11-26 GMY - added volts keyword.  program now uses size field
+    to determine size of lookup tables.
+
+  1989-11-26 GMY - fix bug in volts option (max index=2249)
+
+  1991-11-09 LWK - update map labels if present
+
+  1993-11-16 FFM - ported to unix. the major changes are : 1. modify
+    xv,xl routines 2. change int, byte equivalence to int2byte, byte2int,
+    add "include fortport" to all related subroutines 3. change logical*1
+    to byte (if pixel) 4. divide real*4 eps/1.e-6/ into real*4, and data
+    statement 5. change hex number to integer in data statement 6. change
+    mvl to mvlc, add to addv 7. make optional arguments to required
+    arguments for addv, mvlc, and mve 8. change qprint to xvmessage
+    9. remove /list from include statement 10. add all include files to
+    imake file 11. remove "implicit statement" from slookup include file
+    12. create common/c3/iunit, so iunit will pass to subroutine sread
+    properly, because sgi doesn't default value to 0. 13. add new mp
+    interface 14. modify test pdf to be automated for vax, sunos, & sgi.
+
+  1994-10-25 FFM - fix fr 85697: 1. add keyword debug to print the
+    informational message for routine mp_label_read. 2. enlarge buffer to
+    handle output image up to 50,000 samples. if larger than 50,000
+    samples, size will abend with a message to inform user the cause of
+    the abend.
+
+  1995-04-28 FFM - fix fr 82982: 1. fixed dcl delete statement in test
+    pdf. 2. corrected error in test #2 about m.dat. 3. removed a test case
+    in test #7 which needs too much disk space. 4. fixed an error in
+    xvmessage in routine getsize. so it will not print out a blank line or
+    a line has meaningless infor on andes.
+
+  1995-09-12 LWK - corrected the scaling of the
+    line/samp_projection_offset label items: these are defined with
+    respect to (1,1), not (0,0)!
+
+  1995-06-14 SMC - fr 89272: fixed abend when lzoom=-2 on odd number
+    line images fr 89275: fixed image output so that lzoom=-2 will begin
+    processing on the first line instead of the second
+
+  1995-06-26 SMC - fr 89394: undo fr 89272/89275, because it caused
+    problems. and fixed it another way
+
+  1997-07-06 LWK - added ioffset parameter
+
+  1997-09-04 LWK - corrected computation of effect of zoom on mp
+    line/samp items, since only (0.5,0.5) is fixed in zoom.
+
+  1997-12-03 LWK - changed entry's to subroutine to avoid alpha compiler bug
+
+  1998-02-04 GMY - changed samp from i*2 to i*4 to fix bug when ns > 32767
+
+  1998-05-21 BAM - increased buffer sizes to allow lines up to
+    50000. fixed pdf.
+
+  1998-06-24 LWK - corrected map_resolution update: it should be
+    multiplied by zoom, but pgm was dividing!
+
+  1998-07-09 LWK - changed printout of zoom factor for integer
+    reduction from "zoom -n" to "zoom 1/n"
+
+  1999-08-19 EMS - fixed bug that was giving invalid values around the
+    edges of the output image
+
+  1999-12-07 GMY - (day of infamy) major reorganization of code and
+    rewritting of test script. fixed ioffset problem for interpolation
+    case. when updating map projection labels, if resolution or scale is
+    missing, it is computed from the other.
+
+  2000-04-24 GMY - fix bug when zoom, nl, ns are specified for case
+    where nl,ns specifies output is to be same size as input.
+
+  2000-08-22 GMY - fix bug when zoom not specified and nl is same as
+    input. (ar 104590)
+
+  2003-05-29 AXC - fixed abend when lzoom is specified but not
+    szoom. (ar-108538) initialized a character buffer. (ar-104344)
+
+  2003-12-18 DLR - increased buffer sizes to allow lines up to
+    100000. fixed pdf.
+
+  2004-01 LWK - added support for 3-d (cube) files; removed magellan
+    option (which will live on as pgm. sizemgn)
+
+  2009-04-14 PKIM - increased image size to 100,000 from 50000
+
+  2009-08-24 SMYTH - fixed nsi parameters in several routines
+
+  2010-02-05 R. J. Bambery - full 64-bit compliance on macosx
+    (intel/powerpc) gfortran version 4.4.2 reworked internals to perform
+    in real*4 processing, massive failures for half and full word images
+    in 'noin calls due to equivalencing internal buffers to byte, half,
+    full and real. apparently, the internal routines called via snoin.f
+    had gotten older code mixed in with new after afids build 562
+
+  2010-02-10 R. J. Bambery - extensive reworking of internal code to
+    remove final conflicts between real/full buffers on linux systems (g77
+    version 3.4.6)
+
+  2010-02-14 R. J. Bambery - fix scale parameter for case where input
+    is byte but output scale requires half, full, or real (signed byte to
+    integer/real conversion) in 'noin or for half to full and half to real
+    in 'noin
+
+  2010-03-07 R. J. Bambery - remove residual ocode/icode debug messages for 'noin
+
+  2011-05-06 R. J. Bambery - remove warning messages from gfortran 4.4.4 compiler
+
+  2012-06-06 R. J. Bambery - gfortran 4.6.3 changed all dimension (1)
+    values to (*) in subroutines to avoid "fortran runtime error: index
+    '2' of dimension 1 of array 'id' above upper bound of 1"
+
+  2012-12-09 R. J. Bambery - fixed include in update label with .fin
+    extension to work with new vicar build system in cartlab
+
+  2013-08-22 R. J. Bambery - fixed runtime error in buf array in
+    sread.f by zeroing out all arrays in size.f
+
 .LEVEL1
 .VARI INP
 Input image.
@@ -2328,11 +2352,9 @@ $ create tstsize.pdf
 procedure
 !Test file for program SIZE
 local   afidsroot   type=string count=1
+local   aftestdata  type=string count=1
 
-  refgbl $echo
-  refgbl $syschar
-
-! Jun 25, 2012 - RJB
+! Aug 22, 2013 - RJB
 ! TEST SCRIPT FOR SIZE
 ! tests BYTE, HALF, FULL, REAL images
 !
@@ -2345,23 +2367,40 @@ local   afidsroot   type=string count=1
 !
 ! Requires external test data: 
 !   cartlab or mipl dependent pointers
+!
+!   Cartlab defines env var $AFIDS_ROOT, mipl doesn't
+!   The test data in cartlab is on /raid1/test_data 
+!   but in other facilities it might be somewhere else. 
+!   
+!   To facilitate this test you can define an
+!   environment variable $AFIDS_TESTDATA to point to
+!   that data. The cartlab system does not. In the git archive
+!   on pistol there is softlink to the test data in vdev that
+!   allows this test to pass 
+
+  refgbl $echo
+  refgbl $syschar
 
 body
-  let _onfail="goto rm"
-  let $echo="no"
+let _onfail="stop"
+let $echo="no"
 
 !check to see if mipl or cartlab for certain programs
 !cartlab defines env var $AFIDS_ROOT, mipl doesm't
 translog INP=AFIDS_ROOT TRANS=afidsroot
-
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
 if (afidsroot = "")
 !MIPL
     ush ln -s /project/test_work/testdata/mipl/vgr vt
 else
 !CARTLAB
-    ush ln -s /raid1/vicar_test_images/testdata/mipl/vgr vt
+    if (aftestdata = "")
+       ush ln -s ../test_data/vicar_test_images/testdata/mipl/vgr vt
+    else
+       ush ln -s $AFIDS_TESTDATA/vicar_test_images/testdata/mipl/vgr vt
+    end-if
 end-if
-
+let _onfail="goto rm"
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Interpolation mode
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2459,10 +2498,11 @@ list b
 size a b zoom=2
 list b nb=1 sb=3
 
-!... increased line size
-gen a 2 50000
-size a b zoom=2
-list b ss=99991 ns=10
+!... increased line size up to maximum
+gen a1 2 50000
+size a1 b1 zoom=2
+list a1 ss=49991 ns=10
+list b1 ss=99991 ns=10
 let $echo="no"
 write "!!!!!!!!!!!!!!!!!!!!!!!!!"
 write "! Non-interpolation mode"
@@ -2586,25 +2626,34 @@ size vt/tst10.dat a zoom=20 ioffset=(81,81)	!point perspective projection
 label-list a
 
 rm>
-  ush rm -f vt
-  ush rm -f a
-  ush rm -f b
-  ush rm -f c
-  ush rm -f d
-  ush rm -f e
-  ush rm -f f
-  ush rm -f g
-  ush rm -f h
-  ush rm -f x
-  ush rm -f y
-  ush rm -f w
-  ush rm -f z
-  ush rm -f xx
+   ush rm -f vt a a1 b b1 c d e f g h w x xx y z
 let $echo="no"
 end-proc
 $!-----------------------------------------------------------------------------
 $ create tstsize.log_solos
-tstsize
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
 !!!!!!!!!!!!!!!!!!!!
 ! Interpolation mode
 !!!!!!!!!!!!!!!!!!!!
@@ -2616,7 +2665,7 @@ list a
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
      Samp     1       3
    Line
       1       2   5   8
@@ -2624,7 +2673,7 @@ Beginning VICAR task list
       3       8  11  14
 size a b nl=9 ns=9
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -2633,8 +2682,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:50 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8
@@ -2648,7 +2697,7 @@ Beginning VICAR task list
       9       8   9  10  11  12  13  14  15  16
 size a c zoom=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -2659,7 +2708,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size a c lzoom=3 szoom=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -2670,7 +2719,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size b c nl=3 ns=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -2679,8 +2728,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:34 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:51 2015
      Samp     1       3
    Line
       1       2   5   8
@@ -2688,7 +2737,7 @@ Beginning VICAR task list
       3       8  11  14
 size b d zoom=-3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -2699,7 +2748,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size b d lzoom=-3 szoom=-3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -2710,7 +2759,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size b c zoom=-3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -2719,8 +2768,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:50 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8
@@ -2734,7 +2783,7 @@ Beginning VICAR task list
       9       8   9  10  11  12  13  14  15  16
 size b c zoom=-2.5
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.40000*NL,      0.40000*NS
@@ -2743,8 +2792,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:50 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8
@@ -2758,7 +2807,7 @@ Beginning VICAR task list
       9       8   9  10  11  12  13  14  15  16
 size a b (1,1,11,11) ioffset=(2,2) zoom=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=     11 X     11
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -2767,8 +2816,8 @@ list b 'zeroes
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:38 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:51 2015
      Samp     1       3       5       7       9      11
    Line
       1       0   0   0   0   0   0   0   0   0   0   0
@@ -2784,7 +2833,7 @@ Beginning VICAR task list
      11       0   0   0   0   0   0   0   0   0   0   0
 size a b zoom=3 limits=(1,14)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -2793,8 +2842,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:38 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:52 2015
      Samp     1       3       5       7       9
    Line
       1       1   1   2   3   4   5   6   7   8
@@ -2808,7 +2857,7 @@ Beginning VICAR task list
       9       8   9  10  11  12  13  14  14  14
 size a b zoom=3	area=(1,1,1,3)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    1,    3)
      OUTPUT SIZE=      3 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -2817,8 +2866,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:39 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:52 2015
      Samp     1       3       5       7       9
    Line
       1       1   2   3   4   5   6   7   8   9
@@ -2826,7 +2875,7 @@ Beginning VICAR task list
       3       1   2   3   4   5   6   7   8   9
 size b c lzoom=1 szoom=-3 area=(1,1,1,9)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    1,    9)
      OUTPUT SIZE=      1 X      3
  PICTURE SIZE SCALED BY      1*NL,     -3*NS
@@ -2835,14 +2884,14 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:40 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:52 2015
      Samp     1       3
    Line
       1       2   5   8
 size a b zoom=3	area=(1,1,3,1)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    1)
      OUTPUT SIZE=      9 X      3
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -2851,8 +2900,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:40 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:52 2015
      Samp     1       3
    Line
       1       1   1   1
@@ -2866,7 +2915,7 @@ Beginning VICAR task list
       9       9   9   9
 size b c lzoom=-3 szoom=1 area=(1,1,9,1)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    1)
      OUTPUT SIZE=      3 X      1
  PICTURE SIZE SCALED BY     -3*NL,      1*NS
@@ -2875,8 +2924,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:41 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:52 2015
      Samp     1
    Line
       1       2
@@ -2884,7 +2933,7 @@ Beginning VICAR task list
       3       8
 size a b lzoom=3 szoom=1
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      3
  PICTURE SIZE SCALED BY      3*NL,      1*NS
@@ -2893,8 +2942,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:42 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:52 2015
      Samp     1       3
    Line
       1       1   4   7
@@ -2908,7 +2957,7 @@ Beginning VICAR task list
       9       9  12  15
 size b c lzoom=-3 szoom=1
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    3)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY     -3*NL,      1*NS
@@ -2919,7 +2968,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size a b lzoom=1 szoom=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      3 X      9
  PICTURE SIZE SCALED BY      1*NL,      3*NS
@@ -2928,8 +2977,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:43 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:52 2015
      Samp     1       3       5       7       9
    Line
       1       1   2   3   4   5   6   7   8   9
@@ -2937,7 +2986,7 @@ Beginning VICAR task list
       3       7   8   9  10  11  12  13  14  15
 size b c lzoom=1 szoom=-3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      1*NL,     -3*NS
@@ -2948,7 +2997,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size b c lzoom=3 szoom=-3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    9)
      OUTPUT SIZE=      9 X      3
  PICTURE SIZE SCALED BY      3*NL,     -3*NS
@@ -2957,8 +3006,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:45 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:53 2015
      Samp     1       3
    Line
       1       1   4   7
@@ -2972,7 +3021,7 @@ Beginning VICAR task list
       9       9  12  15
 size c d lzoom=-3 szoom=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    3)
      OUTPUT SIZE=      3 X      9
  PICTURE SIZE SCALED BY     -3*NL,      3*NS
@@ -2983,7 +3032,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size a b zoom=3 'half scale=100
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -2992,8 +3041,8 @@ list b
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:46 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:53 2015
      Samp       1     2     3     4     5     6     7     8     9
    Line
       1         0   100   200   300   400   500   600   700   800
@@ -3007,7 +3056,7 @@ Beginning VICAR task list
       9       800   900  1000  1100  1200  1300  1400  1500  1600
 size b c zoom=-3 'full scale=1000
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -3016,8 +3065,8 @@ list c
 Beginning VICAR task list
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:47 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:53 2015
      Samp            1          2          3
    Line
       1         200000     500000     800000
@@ -3025,7 +3074,7 @@ Beginning VICAR task list
       3         800000    1100000    1400000
 size b d zoom=-3 'real scale=1000
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -3034,8 +3083,8 @@ list d
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:47 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:54 2015
      Samp             1           2           3
    Line
       1       2.000E+05   5.000E+05   8.000E+05
@@ -3043,7 +3092,7 @@ Beginning VICAR task list
       3       8.000E+05   1.100E+06   1.400E+06
 size d e zoom=3 'byte scale=0.00001
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -3052,8 +3101,8 @@ list e
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:48 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:54 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8
@@ -3067,7 +3116,7 @@ Beginning VICAR task list
       9       8   9  10  11  12  13  14  15  16
 size c e zoom=3 'half scale=0.001
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -3076,8 +3125,8 @@ list e
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:49 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:54 2015
      Samp       1     2     3     4     5     6     7     8     9
    Line
       1         0   100   200   300   400   500   600   700   800
@@ -3091,7 +3140,7 @@ Beginning VICAR task list
       9       800   900  1000  1100  1200  1300  1400  1500  1600
 size b e zoom=-3 'byte scale=0.01
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -3100,8 +3149,8 @@ list e
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:31 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:49 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:49 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:54 2015
      Samp     1       3
    Line
       1       2   5   8
@@ -3113,7 +3162,7 @@ GEN Version 6
 GEN task completed
 hist    d
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32768     6097   ***
@@ -3376,20 +3425,20 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1752.829
 STANDARD DEVIATION=14366.17
-NUMBER ELEMENTS=  1231200
+NUMBER ELEMENTS=  12312000
 MIN. DN=    -32768
 MAX. DN=     32762
 
 size    d e size=(1,1,337,364)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1, 3375, 3648)
      OUTPUT SIZE=    337 X    364
  PICTURE SIZE SCALED BY      0.09985*NL,      0.09978*NS
  SIZE task completed
 hist    e
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32678       48   **
@@ -3651,20 +3700,20 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1752.829
 STANDARD DEVIATION=14352.74
-NUMBER ELEMENTS=    12266
+NUMBER ELEMENTS=    122668
 MIN. DN=    -32678
 MAX. DN=     32646
 
 size    d f size=(300,200,200,200)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1, 3375, 3648)
      OUTPUT SIZE=    200 X    200
  PICTURE SIZE SCALED BY      0.05926*NL,      0.05482*NS
  SIZE task completed
 hist    f
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32602       20   ***
@@ -3926,7 +3975,7 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1752.829
 STANDARD DEVIATION=14342.64
-NUMBER ELEMENTS=     4000
+NUMBER ELEMENTS=     40000
 MIN. DN=    -32602
 MAX. DN=     32589
 
@@ -3936,7 +3985,7 @@ GEN Version 6
 GEN task completed
 size a b nb=2 zoom=2
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      6 X      6
  PICTURE SIZE SCALED BY      2*NL,      2*NS
@@ -3945,8 +3994,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:58 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:58 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:56 2015
  ***********
  Band =     1
  ***********
@@ -3960,8 +4009,8 @@ Beginning VICAR task list
       6       8  10  11  13  14  16
 
 
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:58 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:58 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:56 2015
  ***********
  Band =     2
  ***********
@@ -3975,7 +4024,7 @@ Beginning VICAR task list
       6       9  11  12  14  15  17
 size a b zoom=2
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      6 X      6
  PICTURE SIZE SCALED BY      2*NL,      2*NS
@@ -3984,8 +4033,8 @@ list b nb=1 sb=3
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:58 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:32:59 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:56 2015
  ***********
  Band =     3
  ***********
@@ -3997,30 +4046,38 @@ Beginning VICAR task list
       4       7   9  10  12  13  15
       5       9  10  12  13  15  16
       6      10  12  13  15  16  18
-gen a 2 50000
+gen a1 2 50000
 Beginning VICAR task gen
 GEN Version 6
 GEN task completed
-size a b zoom=2
+size a1 b1 zoom=2
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    2,50000)
      OUTPUT SIZE=      4 X 100000
- Warning: NSOUT > 50,000 fails on Solaris!
  PICTURE SIZE SCALED BY      2*NL,      2*NS
  SIZE task completed
-list b ss=99991 ns=10
+list a1 ss=49991 ns=10
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:32:59 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+     Samp 49991   49993   49995   49997   49999
+   Line
+      1      70  71  72  73  74  75  76  77  78  79
+      2      71  72  73  74  75  76  77  78  79  80
+list b1 ss=99991 ns=10
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:56 2015
      Samp 99991   99993   99995   99997   99999
    Line
-
-      2      20  20  20  20  20  20  20  20  21  21
-      3      57  57  58  58  59  59  59  60  60  60
-      4      94  95  96  96  97  98  98  99  99 100
+      1      75  75  76  76  77  77  78  78  79  79
+      2      75  75  76  76  77  77  78  78  79  79
+      3      76  76  77  77  78  78  79  79  80  80
+      4      76  76  77  77  78  78  79  79  80  80
 let $echo="no"
 !!!!!!!!!!!!!!!!!!!!!!!!!
 ! Non-interpolation mode
@@ -4031,7 +4088,7 @@ GEN Version 6
 GEN task completed
 size a b zoom=3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -4040,8 +4097,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:01 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:56 2015
      Samp     1       3       5       7       9
    Line
       1       2   2   2   5   5   5   8   8   8
@@ -4055,7 +4112,7 @@ Beginning VICAR task list
       9       8   8   8  11  11  11  14  14  14
 size b c zoom=-3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -4066,7 +4123,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size a c zoom=2.5 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      7 X      7
  PICTURE SIZE SCALED BY      2.50000*NL,      2.50000*NS
@@ -4075,8 +4132,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:02 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:57 2015
      Samp     1       3       5       7
    Line
       1       2   2   5   5   5   8   8
@@ -4088,7 +4145,7 @@ Beginning VICAR task list
       7       8   8  11  11  11  14  14
 size b c zoom=-2.5 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      4 X      4
  PICTURE SIZE SCALED BY      0.40000*NL,      0.40000*NS
@@ -4097,8 +4154,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:03 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:57 2015
      Samp     1       3
    Line
       1       2   2   5   8
@@ -4107,7 +4164,7 @@ Beginning VICAR task list
       4       8   8  11  14
 size a b (1,1,11,11) ioffset=(2,2) zoom=3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=     11 X     11
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -4116,8 +4173,8 @@ list b 'zeroes
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:03 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:57 2015
      Samp     1       3       5       7       9      11
    Line
       1       0   0   0   0   0   0   0   0   0   0   0
@@ -4133,7 +4190,7 @@ Beginning VICAR task list
      11       0   0   0   0   0   0   0   0   0   0   0
 size a b zoom=3 limits=(1,14) 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -4142,8 +4199,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:04 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:57 2015
      Samp     1       3       5       7       9
    Line
       1       2   2   2   5   5   5   8   8   8
@@ -4157,14 +4214,14 @@ Beginning VICAR task list
       9       8   8   8  11  11  11  14  14  14
 size a b lzoom=1 szoom=3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      3 X      9
  PICTURE SIZE SCALED BY      1*NL,      3*NS
  SIZE task completed
 size b c lzoom=3 szoom=-3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    9)
      OUTPUT SIZE=      9 X      3
  PICTURE SIZE SCALED BY      3*NL,     -3*NS
@@ -4173,8 +4230,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:05 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:57 2015
      Samp     1       3
    Line
       1       2   5   8
@@ -4188,7 +4245,7 @@ Beginning VICAR task list
       9       8  11  14
 size c d lzoom=-3 szoom=3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    3)
      OUTPUT SIZE=      3 X      9
  PICTURE SIZE SCALED BY     -3*NL,      3*NS
@@ -4199,7 +4256,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size a b zoom=3 'half scale=100 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -4208,8 +4265,8 @@ list b
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:07 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:58 2015
      Samp       1     2     3     4     5     6     7     8     9
    Line
       1       200   200   200   500   500   500   800   800   800
@@ -4223,7 +4280,7 @@ Beginning VICAR task list
       9       800   800   800  1100  1100  1100  1400  1400  1400
 size b c zoom=-3 'full scale=1000 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -4232,8 +4289,8 @@ list c
 Beginning VICAR task list
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:08 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:58 2015
      Samp            1          2          3
    Line
       1         200000     500000     800000
@@ -4241,7 +4298,7 @@ Beginning VICAR task list
       3         800000    1100000    1400000
 size b d zoom=-3 'real scale=1000 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -4250,8 +4307,8 @@ list d
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:08 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:58 2015
      Samp             1           2           3
    Line
       1       2.000E+05   5.000E+05   8.000E+05
@@ -4259,7 +4316,7 @@ Beginning VICAR task list
       3       8.000E+05   1.100E+06   1.400E+06
 size d e zoom=3 'byte scale=0.00001 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -4268,8 +4325,8 @@ list e
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:09 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:58 2015
      Samp     1       3       5       7       9
    Line
       1       2   2   2   5   5   5   8   8   8
@@ -4283,7 +4340,7 @@ Beginning VICAR task list
       9       8   8   8  11  11  11  14  14  14
 size c e zoom=3 'half scale=0.001 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -4292,8 +4349,8 @@ list e
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:09 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:58 2015
      Samp       1     2     3     4     5     6     7     8     9
    Line
       1       200   200   200   500   500   500   800   800   800
@@ -4307,7 +4364,7 @@ Beginning VICAR task list
       9       800   800   800  1100  1100  1100  1400  1400  1400
 size b e zoom=-3 'byte scale=0.01 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -4316,8 +4373,8 @@ list e
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:00 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:10 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:56 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:50:58 2015
      Samp     1       3
    Line
       1       2   5   8
@@ -4329,7 +4386,7 @@ GEN Version 6
 GEN task completed
 hist    g
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32768     6097   ***
@@ -4592,20 +4649,20 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1752.829
 STANDARD DEVIATION=14366.17
-NUMBER ELEMENTS=  1231200
+NUMBER ELEMENTS=  12312000
 MIN. DN=    -32768
 MAX. DN=     32762
 
 size    g h size=(1,1,337,364) 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1, 3375, 3648)
      OUTPUT SIZE=    337 X    364
  PICTURE SIZE SCALED BY      0.09985*NL,      0.09978*NS
  SIZE task completed
 hist    h
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32768       48   **
@@ -4868,20 +4925,20 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1683.932
 STANDARD DEVIATION=14361.92
-NUMBER ELEMENTS=    12266
+NUMBER ELEMENTS=    122668
 MIN. DN=    -32768
 MAX. DN=     32742
 
 size    g h size=(300,200,200,200) 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1, 3375, 3648)
      OUTPUT SIZE=    200 X    200
  PICTURE SIZE SCALED BY      0.05926*NL,      0.05482*NS
  SIZE task completed
 hist    h
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32768       19   ***
@@ -5144,7 +5201,7 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1621.578
 STANDARD DEVIATION=14360.94
-NUMBER ELEMENTS=     4000
+NUMBER ELEMENTS=     40000
 MIN. DN=    -32768
 MAX. DN=     32762
 
@@ -5154,7 +5211,7 @@ GEN Version 6
 GEN task completed
 size a b nb=2 zoom=2 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      6 X      6
  PICTURE SIZE SCALED BY      2*NL,      2*NS
@@ -5163,8 +5220,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:16 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:17 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:59 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:51:00 2015
  ***********
  Band =     1
  ***********
@@ -5178,8 +5235,8 @@ Beginning VICAR task list
       6       8   8  11  11  14  14
 
 
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:16 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:17 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:59 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:51:00 2015
  ***********
  Band =     2
  ***********
@@ -5193,7 +5250,7 @@ Beginning VICAR task list
       6       9   9  12  12  15  15
 size a b zoom=2 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      6 X      6
  PICTURE SIZE SCALED BY      2*NL,      2*NS
@@ -5202,8 +5259,8 @@ list b nb=1 sb=3
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:16 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:17 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:50:59 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:51:00 2015
  ***********
  Band =     3
  ***********
@@ -5221,18 +5278,17 @@ GEN Version 6
 GEN task completed
 size a b zoom=2 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    2,50000)
      OUTPUT SIZE=      4 X 100000
- Warning: NSOUT > 50,000 fails on Solaris!
  PICTURE SIZE SCALED BY      2*NL,      2*NS
  SIZE task completed
 list b ss=99991 ns=10
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:17 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:33:18 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:51:00 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 13:51:00 2015
      Samp 99991   99993   99995   99997   99999
    Line
       1      75  75  76  76  77  77  78  78  79  79
@@ -5251,7 +5307,7 @@ list x
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:18 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:51:00 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -5266,15 +5322,15 @@ Beginning VICAR task list
      10       9  10  11  12  13  14  15  16  17  18
 stretch x y func="in1+18"
 Beginning VICAR task stretch
-STRETCH version Oct 17 2002
+STRETCH version 11 Jan 2013
 *** USER SPECIFIED FUNCTION MODE ***
 Function Stretch: FUNCTION = in1+18
 list y
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:18 2012
- Task:STRETCH   User:lwk       Date_Time:Sun Jul 29 13:33:19 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:51:00 2015
+ Task:STRETCH   User:wlb       Date_Time:Thu May 28 13:51:00 2015
      Samp     1       3       5       7       9
    Line
       1      18  19  20  21  22  23  24  25  26  27
@@ -5293,8 +5349,8 @@ list z sl=1 ss=1 nl=10 ns=10
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:33:18 2012
- Task:CONCAT    User:lwk       Date_Time:Sun Jul 29 13:33:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 13:51:00 2015
+ Task:CONCAT    User:wlb       Date_Time:Thu May 28 13:51:00 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -5311,7 +5367,7 @@ let $echo="no"
  ==============================================  should FAIL here ===========
 size z w zoom=10 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,   10,   20)
      OUTPUT SIZE=    100 X    200
  PICTURE SIZE SCALED BY     10*NL,     10*NS
@@ -5320,7 +5376,7 @@ let $echo="no"
 ================================================= NO FAIL here ==============
 size w xx zoom=10
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,  100,  200)
      OUTPUT SIZE=   1000 X   2000
  PICTURE SIZE SCALED BY     10*NL,     10*NS
@@ -5404,7 +5460,7 @@ MAP005='SCALE=   7.000 KM/PXL, NORTH= ******* DEG CLOCKWISE FROM UP'
 ************************************************************
 size vt/m.dat a zoom=-2 area=(2,2,400,400)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    2,    2,  400,  400)
      OUTPUT SIZE=    200 X    200
  PICTURE SIZE SCALED BY      0.50000*NL,      0.50000*NS
@@ -5514,7 +5570,7 @@ MAP003='*** POLAR ORTHOGRAPHIC PROJECTION ***'
 MAP004='AT PROJ. CENTER L=   500.0,S=   250.0,LAT= 90.000,LONG=150.000  W'
 MAP005='SCALE=   7.000 KM/PXL, NORTH= ******* DEG CLOCKWISE FROM UP'
 ---- Task: LABSWTCH -- User: FFM059 -- Wed Jun  1 11:35:07 1994 ----
----- Task: SIZE -- User: lwk -- Sun Jul 29 13:33:22 2012 ----
+---- Task: SIZE -- User: wlb -- Thu May 28 13:51:01 2015 ----
 COMMENT='PICTURE SIZE SCALED BY      0.50000'
 MAP_PROJECTION_TYPE='POLAR_ORTHOGRAPHIC'
 COORDINATE_SYSTEM_NAME='PLANETOCENTRIC'
@@ -5534,7 +5590,7 @@ SAMPLE_PROJECTION_OFFSET=123.75
 ************************************************************
 size vt/m.dat a zoom=-1.5 area=(2,2,400,400)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    2,    2,  400,  400)
      OUTPUT SIZE=    266 X    266
  PICTURE SIZE SCALED BY      0.66667*NL,      0.66667*NS
@@ -5644,7 +5700,7 @@ MAP003='*** POLAR ORTHOGRAPHIC PROJECTION ***'
 MAP004='AT PROJ. CENTER L=   500.0,S=   250.0,LAT= 90.000,LONG=150.000  W'
 MAP005='SCALE=   7.000 KM/PXL, NORTH= ******* DEG CLOCKWISE FROM UP'
 ---- Task: LABSWTCH -- User: FFM059 -- Wed Jun  1 11:35:07 1994 ----
----- Task: SIZE -- User: lwk -- Sun Jul 29 13:33:23 2012 ----
+---- Task: SIZE -- User: wlb -- Thu May 28 13:51:01 2015 ----
 COMMENT='PICTURE SIZE SCALED BY      0.66667'
 MAP_PROJECTION_TYPE='POLAR_ORTHOGRAPHIC'
 COORDINATE_SYSTEM_NAME='PLANETOCENTRIC'
@@ -5664,7 +5720,7 @@ SAMPLE_PROJECTION_OFFSET=165.1666716039181
 ************************************************************
 size vt/tst1.dat a zoom=20 ioffset=(81,81)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,   10,   10)
      OUTPUT SIZE=    280 X    280
  PICTURE SIZE SCALED BY     20*NL,     20*NS
@@ -5743,7 +5799,7 @@ CENTER_LATITUDE=0.0
 CENTER_LONGITUDE=124.998
 LINE_PROJECTION_OFFSET=1.0
 SAMPLE_PROJECTION_OFFSET=1001.0
----- Task: SIZE -- User: lwk -- Sun Jul 29 13:33:24 2012 ----
+---- Task: SIZE -- User: wlb -- Thu May 28 13:51:01 2015 ----
 COMMENT='PICTURE SIZE SCALED BY     20'
 MAP_PROJECTION_TYPE='NORMAL_CYLINDRICAL'
 COORDINATE_SYSTEM_NAME='PLANETOGRAPHIC'
@@ -5760,7 +5816,7 @@ SAMPLE_PROJECTION_OFFSET=20109.5
 ************************************************************
 size vt/tst10.dat a zoom=20 ioffset=(81,81)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,   10,   10)
      OUTPUT SIZE=    280 X    280
  PICTURE SIZE SCALED BY     20*NL,     20*NS
@@ -5910,7 +5966,7 @@ PLANET_CENTER_SAMPLE=10.87
 SUB_SPACECRAFT_LATITUDE=-35.4729
 SUB_SPACECRAFT_LONGITUDE=344.335
 SPACECRAFT_DISTANCE=3656.65
----- Task: SIZE -- User: lwk -- Sun Jul 29 13:33:25 2012 ----
+---- Task: SIZE -- User: wlb -- Thu May 28 13:51:02 2015 ----
 COMMENT='PICTURE SIZE SCALED BY     20'
 MAP_PROJECTION_TYPE='POINT_PERSPECTIVE'
 COORDINATE_SYSTEM_NAME='PLANETOGRAPHIC'
@@ -5928,26 +5984,33 @@ SUB_SPACECRAFT_LONGITUDE=344.335
 TARGET_CENTER_DISTANCE=3656.65
  
 ************************************************************
-  ush rm -f vt
-  ush rm -f a
-  ush rm -f b
-  ush rm -f c
-  ush rm -f d
-  ush rm -f e
-  ush rm -f f
-  ush rm -f g
-  ush rm -f h
-  ush rm -f x
-  ush rm -f y
-  ush rm -f w
-  ush rm -f z
-  ush rm -f xx
+   ush rm -f vt
 let $echo="no"
-exit
-slogoff
 $!-----------------------------------------------------------------------------
 $ create tstsize.log_linux
-tstsize
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
 !!!!!!!!!!!!!!!!!!!!
 ! Interpolation mode
 !!!!!!!!!!!!!!!!!!!!
@@ -5959,7 +6022,7 @@ list a
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
      Samp     1       3
    Line
       1       2   5   8
@@ -5967,7 +6030,7 @@ Beginning VICAR task list
       3       8  11  14
 size a b nl=9 ns=9
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -5976,8 +6039,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:30 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8
@@ -5991,7 +6054,7 @@ Beginning VICAR task list
       9       8   9  10  11  12  13  14  15  16
 size a c zoom=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -6002,7 +6065,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size a c lzoom=3 szoom=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -6013,7 +6076,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size b c nl=3 ns=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -6022,8 +6085,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:30 2015
      Samp     1       3
    Line
       1       2   5   8
@@ -6031,7 +6094,7 @@ Beginning VICAR task list
       3       8  11  14
 size b d zoom=-3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -6042,7 +6105,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size b d lzoom=-3 szoom=-3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -6053,7 +6116,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size b c zoom=-3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -6062,8 +6125,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:30 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8
@@ -6077,7 +6140,7 @@ Beginning VICAR task list
       9       8   9  10  11  12  13  14  15  16
 size b c zoom=-2.5
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.40000*NL,      0.40000*NS
@@ -6086,8 +6149,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:30 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8
@@ -6101,7 +6164,7 @@ Beginning VICAR task list
       9       8   9  10  11  12  13  14  15  16
 size a b (1,1,11,11) ioffset=(2,2) zoom=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=     11 X     11
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -6110,8 +6173,8 @@ list b 'zeroes
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:30 2015
      Samp     1       3       5       7       9      11
    Line
       1       0   0   0   0   0   0   0   0   0   0   0
@@ -6127,7 +6190,7 @@ Beginning VICAR task list
      11       0   0   0   0   0   0   0   0   0   0   0
 size a b zoom=3 limits=(1,14)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -6136,8 +6199,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:30 2015
      Samp     1       3       5       7       9
    Line
       1       1   1   2   3   4   5   6   7   8
@@ -6151,7 +6214,7 @@ Beginning VICAR task list
       9       8   9  10  11  12  13  14  14  14
 size a b zoom=3	area=(1,1,1,3)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    1,    3)
      OUTPUT SIZE=      3 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -6160,8 +6223,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:30 2015
      Samp     1       3       5       7       9
    Line
       1       1   2   3   4   5   6   7   8   9
@@ -6169,7 +6232,7 @@ Beginning VICAR task list
       3       1   2   3   4   5   6   7   8   9
 size b c lzoom=1 szoom=-3 area=(1,1,1,9)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    1,    9)
      OUTPUT SIZE=      1 X      3
  PICTURE SIZE SCALED BY      1*NL,     -3*NS
@@ -6178,14 +6241,14 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:30 2015
      Samp     1       3
    Line
       1       2   5   8
 size a b zoom=3	area=(1,1,3,1)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    1)
      OUTPUT SIZE=      9 X      3
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -6194,8 +6257,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
      Samp     1       3
    Line
       1       1   1   1
@@ -6209,7 +6272,7 @@ Beginning VICAR task list
       9       9   9   9
 size b c lzoom=-3 szoom=1 area=(1,1,9,1)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    1)
      OUTPUT SIZE=      3 X      1
  PICTURE SIZE SCALED BY     -3*NL,      1*NS
@@ -6218,8 +6281,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
      Samp     1
    Line
       1       2
@@ -6227,7 +6290,7 @@ Beginning VICAR task list
       3       8
 size a b lzoom=3 szoom=1
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      3
  PICTURE SIZE SCALED BY      3*NL,      1*NS
@@ -6236,8 +6299,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
      Samp     1       3
    Line
       1       1   4   7
@@ -6251,7 +6314,7 @@ Beginning VICAR task list
       9       9  12  15
 size b c lzoom=-3 szoom=1
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    3)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY     -3*NL,      1*NS
@@ -6262,7 +6325,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size a b lzoom=1 szoom=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      3 X      9
  PICTURE SIZE SCALED BY      1*NL,      3*NS
@@ -6271,8 +6334,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
      Samp     1       3       5       7       9
    Line
       1       1   2   3   4   5   6   7   8   9
@@ -6280,7 +6343,7 @@ Beginning VICAR task list
       3       7   8   9  10  11  12  13  14  15
 size b c lzoom=1 szoom=-3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      1*NL,     -3*NS
@@ -6291,7 +6354,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size b c lzoom=3 szoom=-3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    9)
      OUTPUT SIZE=      9 X      3
  PICTURE SIZE SCALED BY      3*NL,     -3*NS
@@ -6300,8 +6363,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
      Samp     1       3
    Line
       1       1   4   7
@@ -6315,7 +6378,7 @@ Beginning VICAR task list
       9       9  12  15
 size c d lzoom=-3 szoom=3
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    3)
      OUTPUT SIZE=      3 X      9
  PICTURE SIZE SCALED BY     -3*NL,      3*NS
@@ -6326,7 +6389,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size a b zoom=3 'half scale=100
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -6335,8 +6398,8 @@ list b
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
      Samp       1     2     3     4     5     6     7     8     9
    Line
       1         0   100   200   300   400   500   600   700   800
@@ -6350,7 +6413,7 @@ Beginning VICAR task list
       9       800   900  1000  1100  1200  1300  1400  1500  1600
 size b c zoom=-3 'full scale=1000
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -6359,8 +6422,8 @@ list c
 Beginning VICAR task list
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
      Samp            1          2          3
    Line
       1         200000     500000     800000
@@ -6368,7 +6431,7 @@ Beginning VICAR task list
       3         800000    1100000    1400000
 size b d zoom=-3 'real scale=1000
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -6377,8 +6440,8 @@ list d
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:21 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
      Samp             1           2           3
    Line
       1       2.000E+05   5.000E+05   8.000E+05
@@ -6386,7 +6449,7 @@ Beginning VICAR task list
       3       8.000E+05   1.100E+06   1.400E+06
 size d e zoom=3 'byte scale=0.00001
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -6395,8 +6458,8 @@ list e
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:21 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8
@@ -6410,7 +6473,7 @@ Beginning VICAR task list
       9       8   9  10  11  12  13  14  15  16
 size c e zoom=3 'half scale=0.001
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -6419,8 +6482,8 @@ list e
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:21 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
      Samp       1     2     3     4     5     6     7     8     9
    Line
       1         0   100   200   300   400   500   600   700   800
@@ -6434,7 +6497,7 @@ Beginning VICAR task list
       9       800   900  1000  1100  1200  1300  1400  1500  1600
 size b e zoom=-3 'byte scale=0.01
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -6443,8 +6506,8 @@ list e
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:20 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:21 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:30 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
      Samp     1       3
    Line
       1       2   5   8
@@ -6456,7 +6519,7 @@ GEN Version 6
 GEN task completed
 hist    d
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32768     6097   ***
@@ -6719,20 +6782,20 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1752.829
 STANDARD DEVIATION=14366.17
-NUMBER ELEMENTS=  1231200
+NUMBER ELEMENTS=  12312000
 MIN. DN=    -32768
 MAX. DN=     32762
 
 size    d e size=(1,1,337,364)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1, 3375, 3648)
      OUTPUT SIZE=    337 X    364
  PICTURE SIZE SCALED BY      0.09985*NL,      0.09978*NS
  SIZE task completed
 hist    e
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32678       48   **
@@ -6994,20 +7057,20 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1752.829
 STANDARD DEVIATION=14352.74
-NUMBER ELEMENTS=    12266
+NUMBER ELEMENTS=    122668
 MIN. DN=    -32678
 MAX. DN=     32645
 
 size    d f size=(300,200,200,200)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1, 3375, 3648)
      OUTPUT SIZE=    200 X    200
  PICTURE SIZE SCALED BY      0.05926*NL,      0.05482*NS
  SIZE task completed
 hist    f
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32602       20   ***
@@ -7269,7 +7332,7 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1752.829
 STANDARD DEVIATION=14342.64
-NUMBER ELEMENTS=     4000
+NUMBER ELEMENTS=     40000
 MIN. DN=    -32602
 MAX. DN=     32589
 
@@ -7279,7 +7342,7 @@ GEN Version 6
 GEN task completed
 size a b nb=2 zoom=2
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      6 X      6
  PICTURE SIZE SCALED BY      2*NL,      2*NS
@@ -7288,8 +7351,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:31 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
  ***********
  Band =     1
  ***********
@@ -7303,8 +7366,8 @@ Beginning VICAR task list
       6       8  10  11  13  14  16
 
 
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:31 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:31 2015
  ***********
  Band =     2
  ***********
@@ -7318,7 +7381,7 @@ Beginning VICAR task list
       6       9  11  12  14  15  17
 size a b zoom=2
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      6 X      6
  PICTURE SIZE SCALED BY      2*NL,      2*NS
@@ -7327,8 +7390,8 @@ list b nb=1 sb=3
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:31 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
  ***********
  Band =     3
  ***********
@@ -7340,23 +7403,32 @@ Beginning VICAR task list
       4       7   9  10  12  13  15
       5       9  10  12  13  15  16
       6      10  12  13  15  16  18
-gen a 2 50000
+gen a1 2 50000
 Beginning VICAR task gen
 GEN Version 6
 GEN task completed
-size a b zoom=2
+size a1 b1 zoom=2
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    2,50000)
      OUTPUT SIZE=      4 X 100000
  PICTURE SIZE SCALED BY      2*NL,      2*NS
  SIZE task completed
-list b ss=99991 ns=10
+list a1 ss=49991 ns=10
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+     Samp 49991   49993   49995   49997   49999
+   Line
+      1      70  71  72  73  74  75  76  77  78  79
+      2      71  72  73  74  75  76  77  78  79  80
+list b1 ss=99991 ns=10
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp 99991   99993   99995   99997   99999
    Line
 
@@ -7373,7 +7445,7 @@ GEN Version 6
 GEN task completed
 size a b zoom=3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -7382,8 +7454,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp     1       3       5       7       9
    Line
       1       2   2   2   5   5   5   8   8   8
@@ -7397,7 +7469,7 @@ Beginning VICAR task list
       9       8   8   8  11  11  11  14  14  14
 size b c zoom=-3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -7408,7 +7480,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size a c zoom=2.5 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      7 X      7
  PICTURE SIZE SCALED BY      2.50000*NL,      2.50000*NS
@@ -7417,8 +7489,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp     1       3       5       7
    Line
       1       2   2   5   5   5   8   8
@@ -7430,7 +7502,7 @@ Beginning VICAR task list
       7       8   8  11  11  11  14  14
 size b c zoom=-2.5 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      4 X      4
  PICTURE SIZE SCALED BY      0.40000*NL,      0.40000*NS
@@ -7439,8 +7511,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp     1       3
    Line
       1       2   2   5   8
@@ -7449,7 +7521,7 @@ Beginning VICAR task list
       4       8   8  11  14
 size a b (1,1,11,11) ioffset=(2,2) zoom=3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=     11 X     11
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -7458,8 +7530,8 @@ list b 'zeroes
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp     1       3       5       7       9      11
    Line
       1       0   0   0   0   0   0   0   0   0   0   0
@@ -7475,7 +7547,7 @@ Beginning VICAR task list
      11       0   0   0   0   0   0   0   0   0   0   0
 size a b zoom=3 limits=(1,14) 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -7484,8 +7556,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp     1       3       5       7       9
    Line
       1       2   2   2   5   5   5   8   8   8
@@ -7499,14 +7571,14 @@ Beginning VICAR task list
       9       8   8   8  11  11  11  14  14  14
 size a b lzoom=1 szoom=3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      3 X      9
  PICTURE SIZE SCALED BY      1*NL,      3*NS
  SIZE task completed
 size b c lzoom=3 szoom=-3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    9)
      OUTPUT SIZE=      9 X      3
  PICTURE SIZE SCALED BY      3*NL,     -3*NS
@@ -7515,8 +7587,8 @@ list c
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp     1       3
    Line
       1       2   5   8
@@ -7530,7 +7602,7 @@ Beginning VICAR task list
       9       8  11  14
 size c d lzoom=-3 szoom=3 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    3)
      OUTPUT SIZE=      3 X      9
  PICTURE SIZE SCALED BY     -3*NL,      3*NS
@@ -7541,7 +7613,7 @@ DIFPIC version 06Oct11
  NUMBER OF DIFFERENT PIXELS =   0
 size a b zoom=3 'half scale=100 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -7550,8 +7622,8 @@ list b
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp       1     2     3     4     5     6     7     8     9
    Line
       1       200   200   200   500   500   500   800   800   800
@@ -7565,7 +7637,7 @@ Beginning VICAR task list
       9       800   800   800  1100  1100  1100  1400  1400  1400
 size b c zoom=-3 'full scale=1000 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -7574,8 +7646,8 @@ list c
 Beginning VICAR task list
 
    FULL     samples are interpreted as FULLWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp            1          2          3
    Line
       1         200000     500000     800000
@@ -7583,7 +7655,7 @@ Beginning VICAR task list
       3         800000    1100000    1400000
 size b d zoom=-3 'real scale=1000 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -7592,8 +7664,8 @@ list d
 Beginning VICAR task list
 
    REAL     samples are interpreted as  REAL*4  data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp             1           2           3
    Line
       1       2.000E+05   5.000E+05   8.000E+05
@@ -7601,7 +7673,7 @@ Beginning VICAR task list
       3       8.000E+05   1.100E+06   1.400E+06
 size d e zoom=3 'byte scale=0.00001 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -7610,8 +7682,8 @@ list e
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp     1       3       5       7       9
    Line
       1       2   2   2   5   5   5   8   8   8
@@ -7625,7 +7697,7 @@ Beginning VICAR task list
       9       8   8   8  11  11  11  14  14  14
 size c e zoom=3 'half scale=0.001 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      9 X      9
  PICTURE SIZE SCALED BY      3*NL,      3*NS
@@ -7634,8 +7706,8 @@ list e
 Beginning VICAR task list
 
    HALF     samples are interpreted as HALFWORD data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp       1     2     3     4     5     6     7     8     9
    Line
       1       200   200   200   500   500   500   800   800   800
@@ -7649,7 +7721,7 @@ Beginning VICAR task list
       9       800   800   800  1100  1100  1100  1400  1400  1400
 size b e zoom=-3 'byte scale=0.01 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    9,    9)
      OUTPUT SIZE=      3 X      3
  PICTURE SIZE SCALED BY      0.33333*NL,      0.33333*NS
@@ -7658,8 +7730,8 @@ list e
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:22 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:32 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:32 2015
      Samp     1       3
    Line
       1       2   5   8
@@ -7671,7 +7743,7 @@ GEN Version 6
 GEN task completed
 hist    g
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32768     6097   ***
@@ -7934,20 +8006,20 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1752.829
 STANDARD DEVIATION=14366.17
-NUMBER ELEMENTS=  1231200
+NUMBER ELEMENTS=  12312000
 MIN. DN=    -32768
 MAX. DN=     32762
 
 size    g h size=(1,1,337,364) 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1, 3375, 3648)
      OUTPUT SIZE=    337 X    364
  PICTURE SIZE SCALED BY      0.09985*NL,      0.09978*NS
  SIZE task completed
 hist    h
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32768       48   **
@@ -8210,20 +8282,20 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1683.932
 STANDARD DEVIATION=14361.92
-NUMBER ELEMENTS=    12266
+NUMBER ELEMENTS=    122668
 MIN. DN=    -32768
 MAX. DN=     32742
 
 size    g h size=(300,200,200,200) 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1, 3375, 3648)
      OUTPUT SIZE=    200 X    200
  PICTURE SIZE SCALED BY      0.05926*NL,      0.05482*NS
  SIZE task completed
 hist    h
 Beginning VICAR task hist
-*** HIST version 13 Jul 2012 ***
+*** HIST version 17 Dec 2012 ***
 
 Bin Width =      256.0
      -32768       19   ***
@@ -8486,7 +8558,7 @@ Bin Width =      256.0
 
 AVERAGE GRAY LEVEL=1621.578
 STANDARD DEVIATION=14360.94
-NUMBER ELEMENTS=     4000
+NUMBER ELEMENTS=     40000
 MIN. DN=    -32768
 MAX. DN=     32762
 
@@ -8496,7 +8568,7 @@ GEN Version 6
 GEN task completed
 size a b nb=2 zoom=2 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      6 X      6
  PICTURE SIZE SCALED BY      2*NL,      2*NS
@@ -8505,8 +8577,8 @@ list b
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:33 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:33 2015
  ***********
  Band =     1
  ***********
@@ -8520,8 +8592,8 @@ Beginning VICAR task list
       6       8   8  11  11  14  14
 
 
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:33 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:33 2015
  ***********
  Band =     2
  ***********
@@ -8535,7 +8607,7 @@ Beginning VICAR task list
       6       9   9  12  12  15  15
 size a b zoom=2 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    3,    3)
      OUTPUT SIZE=      6 X      6
  PICTURE SIZE SCALED BY      2*NL,      2*NS
@@ -8544,8 +8616,8 @@ list b nb=1 sb=3
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:33 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:33 2015
  ***********
  Band =     3
  ***********
@@ -8563,7 +8635,7 @@ GEN Version 6
 GEN task completed
 size a b zoom=2 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,    2,50000)
      OUTPUT SIZE=      4 X 100000
  PICTURE SIZE SCALED BY      2*NL,      2*NS
@@ -8572,8 +8644,8 @@ list b ss=99991 ns=10
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
- Task:SIZE      User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:33 2015
+ Task:SIZE      User:wlb       Date_Time:Thu May 28 14:39:33 2015
      Samp 99991   99993   99995   99997   99999
    Line
       1      75  75  76  76  77  77  78  78  79  79
@@ -8592,7 +8664,7 @@ list x
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:33 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -8607,15 +8679,15 @@ Beginning VICAR task list
      10       9  10  11  12  13  14  15  16  17  18
 stretch x y func="in1+18"
 Beginning VICAR task stretch
-STRETCH version Oct 17 2002
+STRETCH version 11 Jan 2013
 *** USER SPECIFIED FUNCTION MODE ***
 Function Stretch: FUNCTION = in1+18
 list y
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
- Task:STRETCH   User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:33 2015
+ Task:STRETCH   User:wlb       Date_Time:Thu May 28 14:39:33 2015
      Samp     1       3       5       7       9
    Line
       1      18  19  20  21  22  23  24  25  26  27
@@ -8634,8 +8706,8 @@ list z sl=1 ss=1 nl=10 ns=10
 Beginning VICAR task list
 
    BYTE     samples are interpreted as   BYTE   data
- Task:GEN       User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
- Task:CONCAT    User:lwk       Date_Time:Sun Jul 29 13:35:23 2012
+ Task:GEN       User:wlb       Date_Time:Thu May 28 14:39:33 2015
+ Task:CONCAT    User:wlb       Date_Time:Thu May 28 14:39:33 2015
      Samp     1       3       5       7       9
    Line
       1       0   1   2   3   4   5   6   7   8   9
@@ -8652,7 +8724,7 @@ let $echo="no"
  ==============================================  should FAIL here ===========
 size z w zoom=10 'noin
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,   10,   20)
      OUTPUT SIZE=    100 X    200
  PICTURE SIZE SCALED BY     10*NL,     10*NS
@@ -8661,7 +8733,7 @@ let $echo="no"
 ================================================= NO FAIL here ==============
 size w xx zoom=10
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,  100,  200)
      OUTPUT SIZE=   1000 X   2000
  PICTURE SIZE SCALED BY     10*NL,     10*NS
@@ -8745,7 +8817,7 @@ MAP005='SCALE=   7.000 KM/PXL, NORTH= ******* DEG CLOCKWISE FROM UP'
 ************************************************************
 size vt/m.dat a zoom=-2 area=(2,2,400,400)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    2,    2,  400,  400)
      OUTPUT SIZE=    200 X    200
  PICTURE SIZE SCALED BY      0.50000*NL,      0.50000*NS
@@ -8855,7 +8927,7 @@ MAP003='*** POLAR ORTHOGRAPHIC PROJECTION ***'
 MAP004='AT PROJ. CENTER L=   500.0,S=   250.0,LAT= 90.000,LONG=150.000  W'
 MAP005='SCALE=   7.000 KM/PXL, NORTH= ******* DEG CLOCKWISE FROM UP'
 ---- Task: LABSWTCH -- User: FFM059 -- Wed Jun  1 11:35:07 1994 ----
----- Task: SIZE -- User: lwk -- Sun Jul 29 13:35:24 2012 ----
+---- Task: SIZE -- User: wlb -- Thu May 28 14:39:33 2015 ----
 COMMENT='PICTURE SIZE SCALED BY      0.50000'
 MAP_PROJECTION_TYPE='POLAR_ORTHOGRAPHIC'
 COORDINATE_SYSTEM_NAME='PLANETOCENTRIC'
@@ -8875,7 +8947,7 @@ SAMPLE_PROJECTION_OFFSET=123.75
 ************************************************************
 size vt/m.dat a zoom=-1.5 area=(2,2,400,400)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    2,    2,  400,  400)
      OUTPUT SIZE=    266 X    266
  PICTURE SIZE SCALED BY      0.66667*NL,      0.66667*NS
@@ -8985,7 +9057,7 @@ MAP003='*** POLAR ORTHOGRAPHIC PROJECTION ***'
 MAP004='AT PROJ. CENTER L=   500.0,S=   250.0,LAT= 90.000,LONG=150.000  W'
 MAP005='SCALE=   7.000 KM/PXL, NORTH= ******* DEG CLOCKWISE FROM UP'
 ---- Task: LABSWTCH -- User: FFM059 -- Wed Jun  1 11:35:07 1994 ----
----- Task: SIZE -- User: lwk -- Sun Jul 29 13:35:24 2012 ----
+---- Task: SIZE -- User: wlb -- Thu May 28 14:39:33 2015 ----
 COMMENT='PICTURE SIZE SCALED BY      0.66667'
 MAP_PROJECTION_TYPE='POLAR_ORTHOGRAPHIC'
 COORDINATE_SYSTEM_NAME='PLANETOCENTRIC'
@@ -9005,7 +9077,7 @@ SAMPLE_PROJECTION_OFFSET=165.1666716039181
 ************************************************************
 size vt/tst1.dat a zoom=20 ioffset=(81,81)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,   10,   10)
      OUTPUT SIZE=    280 X    280
  PICTURE SIZE SCALED BY     20*NL,     20*NS
@@ -9084,7 +9156,7 @@ CENTER_LATITUDE=0.0
 CENTER_LONGITUDE=124.998
 LINE_PROJECTION_OFFSET=1.0
 SAMPLE_PROJECTION_OFFSET=1001.0
----- Task: SIZE -- User: lwk -- Sun Jul 29 13:35:24 2012 ----
+---- Task: SIZE -- User: wlb -- Thu May 28 14:39:33 2015 ----
 COMMENT='PICTURE SIZE SCALED BY     20'
 MAP_PROJECTION_TYPE='NORMAL_CYLINDRICAL'
 COORDINATE_SYSTEM_NAME='PLANETOGRAPHIC'
@@ -9101,7 +9173,7 @@ SAMPLE_PROJECTION_OFFSET=20109.5
 ************************************************************
 size vt/tst10.dat a zoom=20 ioffset=(81,81)
 Beginning VICAR task size
- SIZE version 18-Jul-2012
+ SIZE version 22 Aug 2013 (64-bit) - rjb
       INPUT AREA=(    1,    1,   10,   10)
      OUTPUT SIZE=    280 X    280
  PICTURE SIZE SCALED BY     20*NL,     20*NS
@@ -9251,7 +9323,7 @@ PLANET_CENTER_SAMPLE=10.87
 SUB_SPACECRAFT_LATITUDE=-35.4729
 SUB_SPACECRAFT_LONGITUDE=344.335
 SPACECRAFT_DISTANCE=3656.65
----- Task: SIZE -- User: lwk -- Sun Jul 29 13:35:24 2012 ----
+---- Task: SIZE -- User: wlb -- Thu May 28 14:39:33 2015 ----
 COMMENT='PICTURE SIZE SCALED BY     20'
 MAP_PROJECTION_TYPE='POINT_PERSPECTIVE'
 COORDINATE_SYSTEM_NAME='PLANETOGRAPHIC'
@@ -9269,22 +9341,7 @@ SUB_SPACECRAFT_LONGITUDE=344.335
 TARGET_CENTER_DISTANCE=3656.65
  
 ************************************************************
-  ush rm -f vt
-  ush rm -f a
-  ush rm -f b
-  ush rm -f c
-  ush rm -f d
-  ush rm -f e
-  ush rm -f f
-  ush rm -f g
-  ush rm -f h
-  ush rm -f x
-  ush rm -f y
-  ush rm -f w
-  ush rm -f z
-  ush rm -f xx
+   ush rm -f vt a a1 b b1 c d e f g h w x xx y z
 let $echo="no"
-exit
-slogoff
 $ Return
 $!#############################################################################

@@ -2,4 +2,5 @@
 # com.sun.imageio.plugins.png.PNGImageWriterSpi
  jpl.mipl.io.plugins.VicarImageWriterSpi
  jpl.mipl.io.plugins.PDSImageWriterSpi
- jpl.mipl.io.plugins.PDS4ImageWriterSpi
+# Commented out PDS4 reference for the Vicar Open Source System 3/30/16
+# jpl.mipl.io.plugins.PDS4ImageWriterSpi
