@@ -21,7 +21,7 @@ This release includes:
   - Efficient handling of large data sets
 
 
-For a full list of programs being released [click here](vos/docsource/vicar/VICAR_OS_contents_v1.0.pdf).
+For a full list of programs being released [click here](vos/docsource/vicar/VICAR_OS_contents_v2.0.pdf).
 
 For details of the release in the VICAR presentation from the 2nd Planetary Data Workshop in Flagstaff, AZ in June 2015 [click here](vos/docsource/vicar/vicar_open_source.pdf).
 
