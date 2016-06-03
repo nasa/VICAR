@@ -34,7 +34,7 @@ We have set up a [VICAR Open Source Google group](https://groups.google.com/foru
 The VICAR source code can be obtained via github.com using the links below. In addition to the VICAR source code an externals package containing 3rd party software is required. 
 
 Note that for externals you'll find a tarball that contains all the platforms, as
-well as separate ones for each platform. Externals are 3rd party packages that are required to run VICAR. See section 2 of the [Building VICAR document](vos/docsource/vicar/VICAR_build_1.0.pdf) for more information. You need only the one that
+well as separate ones for each platform. Externals are 3rd party packages that are required to run VICAR. See section 2 of the [Building VICAR document](vos/docsource/vicar/VICAR_build_2.0.pdf) for more information. You need only the one that
 applies to your machine type.
 
 #### Tarballs
@@ -48,8 +48,8 @@ applies to your machine type.
 
 ## Using VICAR
 
-* The VICAR installation guide can be found [here](vos/docsource/vicar/VICAR_build_1.0.pdf).
-* The VICAR quick-start guide can be found [here](vos/docsource/vicar/VICAR_guide_1.0.pdf).
+* The VICAR installation guide can be found [here](vos/docsource/vicar/VICAR_build_2.0.pdf).
+* The VICAR quick-start guide can be found [here](vos/docsource/vicar/VICAR_guide_2.0.pdf).
 
 
 Questions:  vicar_help@jpl.nasa.gov
