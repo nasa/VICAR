@@ -1,4 +1,5 @@
 # VICAR
+## Release 2
 We are pleased to announce the release of version 2 of the VICAR Open
 Source image processing system.  Notable changes in this release include:
 
@@ -13,7 +14,7 @@ Source image processing system.  Notable changes in this release include:
 For more information please visit:
 
 [http://www-mipl.jpl.nasa.gov/vicar_open.html](http://www-mipl.jpl.nasa.gov/vicar_open.html)
-
+## Release 1
 VICAR, which stands for Video Image Communication And Retrieval, is a general purpose image processing software system that has been developed since 1966 to digitally process multi-dimensional imaging data.
 
 We are pleased to announce that the VICAR Core is now available in Open
