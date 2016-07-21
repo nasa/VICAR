@@ -1,4 +1,19 @@
 # VICAR
+We are pleased to announce the release of version 2 of the VICAR Open
+Source image processing system.  Notable changes in this release include:
+
+* Pre-built binaries for 32- and 64-bit Linux (Red Hat 5.10), and Mac OS X
+* Three new application programs
+* 73 changes, updates, or bug fixes
+* Three new use cases (examples) in the manual
+   - Landsat mosaic
+   - SRTM mosaic
+   - Noise reduction for Voyager images
+
+For more information please visit:
+
+[http://www-mipl.jpl.nasa.gov/vicar_open.html](http://www-mipl.jpl.nasa.gov/vicar_open.html)
+
 VICAR, which stands for Video Image Communication And Retrieval, is a general purpose image processing software system that has been developed since 1966 to digitally process multi-dimensional imaging data.
 
 We are pleased to announce that the VICAR Core is now available in Open
