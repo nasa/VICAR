@@ -1,0 +1,108 @@
+
+
+
+		FICOR77 PROGRAMMER'S GUIDE
+
+This document contains information useful to the programmer responsible
+for maintaining and modifying the VICAR program FICOR77.  Read the Help
+and PDF files first.
+
+HISTORY:
+-------
+FICOR77 is a modification of the Mariner 9 program FICOR.  It was implemented
+on the IBM by Joel Mosher in time for the Voyager-Jupiter encounters.  It
+was converted to the VAX by M. Kendall and Bob Barrey at University College,
+London.  Florence Moss did the VICAR2 conversion and wrote the LCOR pixel loop
+in MACRO.  Major changes were made in Feb 1988 by Gary Yagi to clean up the
+code and add the FIXVGR scale correction.
+
+OPERATION:
+---------
+    ficor77 INP=(PIC,C1,C2,...,DC1,DC2,...) OUT=OPIC user-parameters...
+where
+    PIC	is the image to be radiometrically corrected (byte)
+    C1,...  one or more radiometric calibration files (byte or halfword)
+    DC1,...	one or more dark-current frames (byte or halfword)
+    OPIC is the radiometrically corrected image (byte,half,or real)
+
+Files PIC,CAL,DC and OPIC are referenced by logical unit numbers IUNIT,IUNITC,
+IUNITD, and OUNIT, respectively.
+
+
+DESCRIPTION OF SUBROUTINES:
+--------------------------
+FICOR77 executes these subroutines (in the order listed):
+
+IPOPEN    --Open PIC and extract camera parameters from label
+PLANETID  --Determine planet-of-encounter from user params, PICNO, SCET, or ERT.
+OPOPEN    --Open OPIC and process keywords NONEG,MAXDN,BYTE,REAL
+CPARAM    --Process camera keywords EXPO,FILTER,SCAN,CAMERA,GAIN,etc.
+FSEARCH   --Scan input file list for calibration file and dark-current
+	    frame which matches PIC (Call them CAL and DC).
+	    Call PLABEL to print CAL and DC image labels and summary of
+	    camera parameters.
+IPSCALE   --Generate look-up table LUT and scale factor DCSCALE to scale the
+	    input DNs to equivalent units as the calibration file data samples.
+OPSCALE   --Scale the luminances (LTBL) to output units (I/F or nanowatts).
+	      1) Compute adjustment for shutter speed (to/t)
+	      2) Call FTLAMBERT to get conversion factors from Ft-L to I/F
+		 or nanowatts (S1 or S2).
+	      3) Get user-specified scale (A1 or A2).
+	      4) Call FIXSCALE to get FIXVGR scale correction (S)
+	      5) Apply 1-4 to LTBL
+	    Compute difference table DTBL
+FCOSET	  --Pass LTBL, DTBL and other constants to LCOR
+FICOR     --Loops through each image line, calling LCOR to perform the
+	    radiometric correction.
+FCOEND    --Retrieve processing statistics from LCOR.
+OLABEL    --Add radiometric scale information to output image label.
+
+The subroutine CORRECT is called by FIXSCALE to access the SCF.
+The subroutine GETLABX (which gets the VICAR1 label) is called by IPOPEN
+and FSEARCH.
+
+Subroutine convention: The input arguments of a subroutine almost always
+appear first, and in UPPER CASE, followed by the updated and output
+arguments in lower case.
+
+FCOSET, FCOR, and FCOEND are entry points to the Macro subroutine FCOR.
+The old Macro equivalent to the FORTRAN code in the subroutine FCOR, was
+replaced due to not being portable.
+
+CAMERA PARAMETERS:
+-----------------
+The camera parameters for the input image and dark-current frame are
+maintained in arrays IPIC(39) and IDARK(8), as returned by ABLE77V2, where:
+
+	 IPIC(N)          VARIABLE
+	 -------	  --------
+	    1             On input, number of parameters to be returned
+	    2             FDS count (frame number)
+	    3             Exposure time (msec)
+	    4             Filter position (0-7)
+	    5             Scan rate (=5 if 5:1)
+	    6             Camera serial number
+	    7             Camera (NA=1,WA=2)
+	    8             Gain (low=0,high=1)
+	   10		  SCET year
+	   21-22	  PICNO
+	   35		  ERT year
+
+RADIOMETRIC FILE:
+----------------
+The radiometric (or calibration) file contains data in labels and data
+records containing light-transfer data (in DN) for each pixel of the
+image.  The data in the labels is as follows:
+
+	NC = number of data points on curve.
+	CNS = number of samples per data record.
+	EMAX = default relative ft-L to DN scaling factor
+	LTBL(i) = luminance of data point i at reference shutter speed in
+               relative ft-L, for i=1,NC
+
+The data points are stored in the data records as vector of the form
+(s(1),s(2),...,s(NC)) where s(i) is the pixel output at luminance LTBL(i)
+for the reference shutter speed.  The current Voyager calibration file
+uses a curve with 10 data points.  The first point is always zero (zero
+exposure level).  Each data record contains 3200 data points, or enough
+for 320 pixels of the input image.

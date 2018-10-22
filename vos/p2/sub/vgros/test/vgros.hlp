@@ -1,0 +1,34 @@
+1 VGROS
+
+  Routine to fetch the Voyager object space reseau locations for
+  a specified camera.
+
+  FORTRAN Calling Sequence:  CALL VGROS(ICAM,OLOC)
+
+      INTEGER*4 ICAM       Input Voyager camera serial number.
+      REAL*4 OLOC(2,202)   Output object space reseau locations stored
+		           as (line,sample) pairs.
+
+  C Calling Sequence:  zvgros(icam,oloc)
+
+      int icam;            Input Voyager camera serial number.
+      float oloc(202,2)    Output object space reseau locations stored
+		           as (line,sample) pairs.
+
+  The Voyager camera serial numbers are:
+	4 = VGR-1 WA		6 = VGR-2 WA
+	5 = VGR-1 NA		7 = VGR-2 NA
+ 
+  NOTE: Two-dimensional (or higher) arrays can be a major problem, since
+        Fortran treats things in column-major order, while C uses row-major
+        order.  Therefore, the C array dimensions need to be reversed.
+	
+2 History
+
+  Original Programmer: Gary Yagi, 30 September 1985
+  Current Cognizant Programmer: Gary Yagi
+  Source Language: FORTRAN
+
+  Revisions:
+  24 FEF 1988	GMY	Fix error in moving coordinates to output
+  24 AUG 1993   DDK     Ported to Unix and made callable from C.

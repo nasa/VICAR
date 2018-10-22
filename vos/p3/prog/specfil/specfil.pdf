@@ -1,0 +1,93 @@
+PROCESS HELP=*
+  PARM INP  	(STRING,40)
+  PARM OUT  	(STRING,40)
+  PARM SIZE 	INTEGER DEFAULT=--	COUNT=0:4 
+  PARM BANDS 	INTEGER DEFAULT=--	COUNT=0:2 
+  PARM SL 	INTEGER DEFAULT=1
+  PARM SS 	INTEGER DEFAULT=1
+  PARM SB 	INTEGER DEFAULT=1
+  PARM NL 	INTEGER DEFAULT=0
+  PARM NS 	INTEGER DEFAULT=0
+  PARM NB 	INTEGER DEFAULT=0
+  PARM MSS	INTEGER DEFAULT=1
+  PARM WEIGHTS	INTEGER	DEFAULT=3
+END-PROC
+.HELP
+.TITLE
+SPECFIL
+.HELP
+     This program produces a low pass box filtered image in the spectral
+dimension for data in MSS or any of the 3-D formats. If the input is a 3-D
+file with BSQ organization, on output it will be changed to BIL organization.
+.LEVEL1
+.VARIABLE INP
+Input file name
+.VARIABLE OUT
+Output file name
+.VARIABLE SIZE
+Window into input
+.VARIABLE BANDS
+Window into input
+in band dimension
+.VARIABLE SL
+Starting line
+= size(1)
+.VARIABLE SS
+Starting sample
+= size(2)
+.VARIABLE SB
+Starting band
+= bands(1)
+.VARIABLE NL
+Number of lines
+= size(3)
+.VARIABLE NS
+Number of samples
+= size(4)
+.VARIABLE NB
+Number of bands
+= bands(2)
+.VARIABLE MSS
+Number of MSS bands,
+if MSS format
+.VARIABLE WEIGHTS
+Width of filter
+.LEVEL2
+.VARIABLE INP
+Name of a single input file, either in MSS or 3-D format
+.VARIABLE OUT
+Name of a single output file. If the input is a BSQ 3-D file, the output
+will be changed to 3-D BIL organization.
+.VARIABLE SIZE
+The size parameter determines the boundaries in the input
+file from which the filter is to take place.  It is specified
+as  (SL,SS,NL,NS), where
+	SL is the starting line 
+	SS is the starting sample
+	NL is the number of lines to be copied
+	NS is the number of samples (pixels) in each line
+.VARIABLE BANDS
+The bands parameter determines the bands in the input
+file from which the filter is to take place.  It is specified
+as (SB,NB), where
+	SB is the starting band
+	NB is the number of bands to be copied
+.VARIABLE SL
+The first line of the input image to be processed.
+.VARIABLE SS
+The first sample location of the input image to be processed.
+.VARIABLE SB
+The first band of the input image to be filtered.
+.VARIABLE NL
+The total number of lines to be processed.
+.VARIABLE NS
+The number of samples of each line to be processed.
+.VARIABLE NB
+The number of bands to be processed.
+.VARIABLE MSS
+The number of MSS bands in the input and output images. If the input dataset
+is not in MSS format, this parameter is ignored.
+.VARIABLE WEIGHTS
+The number of elements to be used in computing the output value of each
+pixel. This must be an odd integer.
+.END

@@ -1,0 +1,8 @@
+#define SUBROUTINE pig_vector
+
+#define MODULE_LIST PigQuaternion.cc
+
+#define P2_SUBLIB
+
+#define USES_C_PLUS_PLUS
+

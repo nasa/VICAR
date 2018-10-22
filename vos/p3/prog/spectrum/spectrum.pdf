@@ -1,0 +1,176 @@
+process help=*
+SUBCMD-DEFAULT NORMAL
+PARM INP     TYPE=(STRING,40) 		      COUNT=(1:2)
+PARM BANDS   TYPE=INTEGER     DEFAULT=--      COUNT=(0:2) 
+PARM SB      TYPE=INTEGER     DEFAULT=1
+PARM NB      TYPE=INTEGER     DEFAULT=0
+PARM ST_CHAN TYPE=INTEGER     DEFAULT=-1
+PARM SENSOR  TYPE=KEYWORD     DEFAULT=--      COUNT=0:1 +
+           VALID=(MASTERTIR,TM,AVIRIS,TIMS,GEOSCAN,87AVIRIS,90AVIRIS)
+PARM PRINT   TYPE=KEYWORD     DEFAULT=NOPRINT VALID=(PRINT,NOPRINT)
+PARM LINE    TYPE=INTEGER     DEFAULT=0
+PARM SAMPLE  TYPE=INTEGER     DEFAULT=0
+PARM AREA    TYPE=INTEGER     DEFAULT=0       COUNT=(0:200)
+PARM XAXIS   TYPE=REAL        DEFAULT=(0,0)   COUNT=2
+PARM YAXIS   TYPE=REAL        DEFAULT=(0,0)   COUNT=2
+PARM XLABEL  TYPE=(STRING,40) DEFAULT="Channel"
+PARM YLABEL  TYPE=(STRING,40) DEFAULT="DN"
+PARM TITLE   TYPE=(STRING,40) DEFAULT=" "
+PARM SIGMA   TYPE=KEYWORD     DEFAULT=SIGMA   VALID=(SIGMA,NOSIGMA)
+PARM EXCLUDE TYPE=KEYWORD     DEFAULT=NOEXCL  VALID=(EXCLUDE,NOEXCL)
+PARM CUMUL   TYPE=KEYWORD     DEFAULT=--      VALID=CUMUL    COUNT=0:1
+PARM MODE    TYPE=KEYWORD DEFAULT=WINDOW VALID=(NOPLOT,WINDOW,PSCRIPT)
+END-SUBCMD
+SUBCMD IPARAM
+PARM PENPLOT TYPE=KEYWORD DEFAULT=-- VALID=(YES,NO,LASER) COUNT=(0:1)
+END-SUBCMD
+END-PROC
+.TITLE
+VICAR Program SPECTRUM
+.HELP
+PURPOSE:
+SPECTRUM produces a plot of DN versus channel or wavelength for a single 3-D 
+pixel, or of the mean DN for a region specified by one or more rectangular
+areas. The plot may be directed to an x-window (via IDL), or to a
+PostScript printer.
+
+WRITTEN BY:  Ron Alley,  May 1989
+COGNIZANT PROGRAMMER:  Ron Alley
+REVISION: 3 - November 8, 1994
+
+.LEVEL1
+.VARIABLE INP
+Input image file,
+Optional wavelength file
+.VARIABLE BANDS
+Starting band, # of bands
+.VARIABLE SB
+Starting band 
+.VARIABLE NB
+Number of bands
+.VARIABLE LINE
+Line number of plotted pixel
+.VARIABLE SAMPLE
+Sample number of plotted pixel
+.VARIABLE XAXIS
+Range of x-axis (bands/wavlen)
+.VARIABLE YAXIS
+Range of y-axis (DN's)
+.VARIABLE AREA
+(SL1,SS1,NL1,NS1,...,
+SLn,SSn,NLn,NSn)
+.VARIABLE SENSOR
+MASTERTIR, TM, AVIRIS, TIMS,
+GEOSCAN, 87AVIRIS, 90AVIRIS
+.VARIABLE XLABEL
+(for laser printer only)
+label for for x-axis
+.VARIABLE YLABEL
+(for laser printer only)
+label for for y-axis
+.VARIABLE ST_CHAN
+Channel number of first 
+channel to be plotted
+.VARIABLE TITLE
+Title to be placed on pen plot
+.VARIABLE CUMUL
+Plot the cumulative function
+instead of the spectrum
+.VARIABLE PRINT
+Print a table of the values?
+(PRINT or NOPRINT)
+.VARIABLE SIGMA
+Plot the 1-std deviation 
+envelope also?
+(SIGMA and NOSIGMA)
+.VARIABLE EXCLUDE
+Exclude zero valued pixels?
+(EXCLUDE or NOEXCL)
+.VARIABLE MODE
+use NOPLOT to suppress
+plotting and pauses,
+use WINDOW to plot in
+Xwindow, use PSCRIPT for a
+hardcopy plot
+.LEVEL2
+.vari INP
+The first value of INP is the name of the input image file.  A second input
+file may be used to supply the wavelengths of the input channels.  This 
+second input file should be an ASCII file (no VICAR labels) in the form of
+a table.  The wavelength values must be the first column (there need not be
+any other columns), and there must be one row per channel.
+.vari BANDS
+BANDS specifies the starting band desired, and the number of bands to be 
+processed.  If the first channel in the dataset is not Channel 1, the 
+parameter ST_CHAN should also be specified.
+.vari SB
+This parameter denotes the first channel in the dataset to be included in the 
+plotting. If the first channel in the dataset is not Channel 1, the parameter 
+ST_CHAN should also be specified.
+.vari NB
+This parameter denotes the number of bands to be included in the plot.
+.vari LINE
+This is the line number of the pixel to be plotted. If the spectrum of a region
+is wanted, the AREA parameter is used and this parameter is ignored.
+.vari SAMPLE
+This is the sample number of the pixel to be plotted. If the spectrum of a 
+region is wanted, the AREA parameter is used and this parameter is ignored.
+.vari XAXIS
+XAXIS indicates the full scale limits of the x-axis. If defaulted, the program
+chooses limits that completely span the range of the data plotted. In some
+cases, the program will adjust (widen) the user specified limits, in order to
+place the tic marks at reasonable values.
+.vari YAXIS
+YAXIS indicates the full scale limits of the y-axis. If defaulted, the program
+chooses limits that completely span the range of the data plotted. In some
+cases, the program will adjust (widen) the user specified limits, in order to
+place the tic marks at reasonable values.
+     In addition to the mean spectral values, the one standard deviation range
+is also plotted, ifthe AREA option is chosen.
+.VARIABLE XLABEL
+XLABEL is the title for the x-axis on plots printed on the laser printer. It
+is not used on any other plots. The default is "Channel".
+.VARIABLE YLABEL
+YLABEL is the title for the y-axis on plots printed on the laser printer. It
+is not used on any other plots. The default is "DN".
+.VARIABLE AREA
+If the average spectum of a region is desired, it may be specified using the
+AREA parameter.  Up to fifty rectangular areas, specified by SL,SS,NL,NS, may
+be used to form the average spectrum. The areas need not be contiguous, and if
+two area overlap, those pixels are counted twice. If the AREA parameter is used,
+the LINE and SAMPLE parameters are ignored.
+.VARIABLE SENSOR
+The channel wavelengths of certain sensors are known to this program. By 
+specifying the name of the sensor, DN values are plotted against wavelengths
+(in micrometers) rather than channel number.  If the sensor is not specified
+or not known, the channel number is used.  As of April 2,1991, AVIRIS, TIMS,
+TM, 87AVIRIS, 90AVIRIS, and GEOSCAN wavelengths are known to this program.
+.VARIABLE ST_CHAN
+This parameter indicates the channel number of the first channel to be plotted.
+It must be specified if the first channel in the input dataset is not Channel 1
+of the sensor.  If defaulted, ST_CHAN is assumed to be equal to the starting
+band (SB).
+.VARIABLE CUMUL
+Specifying this parameter produces a plot of the cumulative DN values for the
+spectrum, and not the spectrum itself.
+.VARIABLE TITLE
+This parameter allows the user to place a title or line of annotation on the
+printed plot, session log, and standard output, if such products are produced.
+It may be up to 40 characters in length.
+.VARIABLE PRINT
+Specifying this parameter causes a table of the spectral values to be printed
+to the user and in the SESSION.LOG
+.VARIABLE SIGMA
+In the default mode (SIGMA) for the spectrum of an area, the one standard 
+deviation envelope about the mean spectrum is plotted.  If NOSIGMA is 
+specified, this envelope is not plotted.  If the spectrum is for a single 
+point, rather than an area, this keyword has no relevance, and is ignored.
+.VARIABLE EXCLUDE
+This parameter is specified if the user wishes to exclude zero valued pixels
+from the compuation of the mean and stadard deviation.
+.VARIABLE MODE
+If WINDOW is specified (the default), spectrum plots the graph in an IDL
+Xwindow. If PSCRIPT is specified, no interactive plotting is done, but a
+hardcopy PostScript plot is made.  If NOPLOT is specified, printing is enabled,
+plotting is disabled, and there are no interactive pauses.
+.END

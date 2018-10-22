@@ -1,0 +1,7 @@
+#define SUBROUTINE get_tims_temp_lut
+
+#define MODULE_LIST get_tims_temp_lut.f
+
+#define P3_SUBLIB
+
+#define USES_FORTRAN

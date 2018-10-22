@@ -1,0 +1,26 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM boxflt2
+
+   To Create the build file give the command:
+
+		$ vimake boxflt2			(VMS)
+   or
+		% vimake boxflt2			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	boxflt2
+#define R2LIB
+
+#define MODULE_LIST boxflt2.f boxflt2c.c
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define USES_C
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

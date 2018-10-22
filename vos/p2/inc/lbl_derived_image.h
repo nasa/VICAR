@@ -53,6 +53,11 @@ extern "C" {
  *
  * Date		who		Description
  * -----------  --------------- ----------------------------------------------
+ * 27-Mar-2018  Steven Lu       Added EncodedDisplayGamma
+ * 02-Feb-2018  Steven Lu       Added ColorSpace, ColorComponent, and Illuminant
+ * 21-Nov-2017	Bob Deen	Added TargetInstrument
+ * 09-Nov-2017  Steven Lu       Added STEREO_BASELINE, STEREO_PRODUCT_ID,
+ *                              LINEARIZATION_PRODUCT_ID, and LINEARIZATION_MODE
  * 08-Jun-2012  Oleg Pariser    Added ErrorModel definition keywords
  * 07-Jun-2011  Oleg Pariser    Added PointingCorrectionFileName and SolutionId
                                 definition keywords
@@ -74,6 +79,7 @@ extern "C" {
 #define  LBL_PM_ITEMS                   10
 #define  LBL_EM_ITEMS                   4
 #define  LBL_INPUT_PROD_ID_ITEMS        3
+#define  LBL_LIN_MODE_ITEMS             2
 
 typedef struct
 	{
@@ -106,6 +112,15 @@ typedef struct
 	LblApiTypeItem_typ		SolarEnergyElevationUnit;
 	LblApiNameItem_typ		MaskDescFileName[2];
 	LblApiRealItem_typ		HorizonMaskElevation;
+        LblApiRealItem_typ              StereoBaseline;
+        LblApiIdItem_typ                StereoProductId;
+        LblApiNameItem_typ              LinearizationMode[LBL_LIN_MODE_ITEMS];
+        LblApiIdItem_typ                LinearizationProductId;
+	LblApiIdItem_typ		TargetInstrument;
+        LblApiNameItem_typ              ColorSpace;
+        LblApiNameItem_typ              ColorComponent;
+        LblApiNameItem_typ              Illuminant;
+        LblApiStringItem_typ            EncodedDisplayGamma;
 	} LblDerivedImage_typ;
 
 /***  Function prototypes  ***/

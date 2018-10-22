@@ -1,0 +1,53 @@
+PROCEDURE
+Refgbl $SYSCHAR
+RefGbl $echo
+BODY
+Let $echo="no"
+Local INP_PATH1 STRING
+Local INP_PATH2 STRING
+
+write "THIS IS A TEST OF PROGRAM hiccup"
+
+if ($SYSCHAR(1)="VAX_VMS")
+    let INP_PATH1="WMS_TEST_WORK:[TESTDATA.GLL]"
+    let INP_PATH2="WMS_TEST_WORK:[TESTDATA.VGR]"
+else
+    let INP_PATH1="/project/test_work/testdata/gll/"
+    let INP_PATH2="/project/test_work/testdata/vgr/"
+end-if
+let $echo="yes"
+
+write "Test on byte image (ramp)"
+gen A 128 128
+hiccup A HIS (4,4,100,100) 'PHIST 'ZEROES
+ibis-list HIS 'groups space=0
+label-list HIS 'property
+
+write "Test on Galileo halfword flight image"
+hiccup "&INP_PATH1"s0202556000.sos HIS 'PHIST SPIKES=5
+ibis-list HIS 'groups space=0
+label-list HIS 'property
+hiccup "&INP_PATH1"s0202556000.sos HIS SCALE=IOF 'PHIST
+ibis-list HIS 'groups space=0
+label-list HIS 'property
+
+write "Test on Voyager halfword flight image"
+hiccup "&INP_PATH2"f1636832.fic HIS SCALE=IOF 'PHIST
+ibis-list HIS 'groups space=0
+label-list HIS 'property
+hiccup "&INP_PATH2"f1636832.fic HIS SCALE=RADIANCE 'PHIST
+ibis-list HIS 'groups space=0
+label-list HIS 'property
+
+write "Test on Galileo halfword flight image (color triplet)"
+hiccup ("&INP_PATH1"s0202556000.sos "&INP_PATH1"s0202556100.sos +
+        "&INP_PATH1"s0202556200.sos) (HIS1 HIS2 HIS3) 'PHIST SPIKES=5
+ibis-list HIS1 'groups space=0
+ibis-list HIS2 'groups space=0
+ibis-list HIS3 'groups space=0
+label-list HIS1 'property
+label-list HIS2 'property
+label-list HIS3 'property
+
+let $echo="no"
+END-PROC

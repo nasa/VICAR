@@ -1,0 +1,11 @@
+procedure
+refgbl $echo
+local userid  type=(string,12)
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+username userid
+disp userid
+end-proc

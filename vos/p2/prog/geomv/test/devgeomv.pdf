@@ -1,0 +1,781 @@
+procedure
+refgbl $echo
+parm version string def="ibis-1"
+parm org string def="column"
+body
+!let _onfail="continue"
+let $echo="yes"
+
+
+!!!!!!!!!!!! THESE ARE DEVELOPER TESTS, COMPARING WITH LGEOM, FOR 
+!!!!!!!!!!!! INSTANCE
+
+goto curr
+
+
+!   TEST SCRIPT FOR GEOMV
+!
+!
+! Now generate BYTE input data set
+! 
+!gen mgtest 10 10 SINC=40 LINC=40
+! 
+! Verify existence of input file
+!list mgtest
+!
+!  Try some copies.
+!  Check case of grid bigger than image.
+!geomv mgtest mgtest1 NAH=1 NAV=1+ 
+!   TIEPOINT=(1.,1.,1.,1.,   1.,20.,1.,20.,+
+!            20.,1.,20.,1., 20.,20.,20.,20.)
+!difpic (mgtest1 mgtest)
+
+!  Check case of grid smaller than image.
+!geomv mgtest mgtest1 NAH=1 NAV=1+ 
+!   TIEPOINT=(1.,1.,1.,1.,   1.,2.,1.,2.,+
+!             2.,1.,2.,1.,   2.,2.,2.,2.)
+!difpic (mgtest1 mgtest)
+
+! 
+! Perform simple enlargement to 2X size
+!geomv mgtest mgenlarg NAH=1 NAV=1+ 
+!   SIZE=(1,1,20,20)+
+!   TIEPOINT=(1.,1.,1.,1.,1.,20.,1.,10.,+
+!                20.,1.,10.,1.,20.,20.,10.,10.)
+!mgeom mgtest mgenlarg2 NAH=1 NAV=1+ 
+!   SIZE=(1,1,20,20)+
+!   TIEPOINT=(1.,1.,1.,1.,1.,20.,1.,10.,+
+!                20.,1.,10.,1.,20.,20.,10.,10.)
+ 
+! Print it out
+!list mgenlarg ss=17 nl=3
+!list mgenlarg2 ss=17 nl=3
+!list mgenlarg2 nl=3
+! also diff it
+!difpic (mgenlarg mgenlarg2) 
+! 
+! Perform 45 degree rotation clockwise with 1.4 times enlargement
+!geomv mgtest mgrotat + 
+!   SIZE=(1,1,20,20)+
+!   TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+!                20.,1.,15.,5.,20.,20.,5.,15.)
+!lgeom mgtest mgrotat2 NAH=1 NAV=1+ 
+!   SIZE=(1,1,20,20)+
+!   TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+!                20.,1.,15.,5.,20.,20.,5.,15.)
+! Print it out
+!list mgrotat
+!list mgrotat2
+!f2 inp=(mgrotat,mgrotat2) out=mgrotat3 func="abs(in1-in2)"
+!list mgrotat3
+
+! also diff it
+!difpic (mgrotat mgrotat2)
+
+! Perform test of size field handling 
+!geomv mgtest mgrotat1 NAH=1 NAV=1+ 
+!   SIZE=(1,1,20,10)+
+!   TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+!                20.,1.,15.,5.,20.,20.,5.,15.)
+
+!geomv mgtest mgrotat2 NAH=1 NAV=1+ 
+!   SIZE=(1,11,20,1)+
+!   TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+!                20.,1.,15.,5.,20.,20.,5.,15.)
+
+!geomv mgtest mgrotat3 NAH=1 NAV=1+ 
+!   SIZE=(1,12,20,9)+
+!   TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+!                20.,1.,15.,5.,20.,20.,5.,15.)
+
+! Concatenate the three images.  
+!mss (mgrotat1,mgrotat2,mgrotat3) mgrotatA 
+!difpic (mgrotatA,mgrotat) 
+
+!
+! Perform the same operation, but without interpolation
+! (NOTE BY ALZ: ZNOIN WAS IN THE GEOMA CASE, NOT THE SAME AS NOIN)
+!geomv mgtest mgrotat NAH=1 NAV=1+ 
+!   SIZE=(1,1,20,20)+
+!   TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+!                20.,1.,15.,5.,20.,20.,5.,15.)+
+!   INTERP=NOIN
+!lgeom mgtest mgrotat2 NAH=1 NAV=1+ 
+!   SIZE=(1,1,20,20)+
+!   TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+!                20.,1.,15.,5.,20.,20.,5.,15.)+
+!   INTERP=NOIN
+! Print it out
+!list mgrotat
+!list mgrotat2
+!f2 inp=(mgrotat,mgrotat2) out=mgrotat3 func="abs(in1-in2)"
+!list mgrotat3
+!difpic (mgrotat,mgrotat2)
+!
+! Perform the same operation, but without interpolation
+!gen mgtest 10 10 SINC=64 LINC=64
+!list mgtest
+!geomv mgtest mgrotat NAH=1 NAV=1+ 
+!   SIZE=(1,1,20,20)+
+!   TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+!                20.,1.,15.,5.,20.,20.,5.,15.)+
+!   'ZNOIN
+!lgeom mgtest mgrotat2 NAH=1 NAV=1+ 
+!   SIZE=(1,1,20,20)+
+!   TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+!                20.,1.,15.,5.,20.,20.,5.,15.)+
+!   INTRPZ=NOIZ
+! Print it out
+!list mgrotat
+!list mgrotat2
+!f2 inp=(mgrotat,mgrotat2) out=mgrotat3 func="abs(in1-in2)"
+!list mgrotat3
+!difpic (mgrotat,mgrotat2)
+! 
+! Now generate BYTE input data set
+! 
+!gen mgtest2 1000 1000 SINC=1 LINC=1
+! 
+! Verify existence of input file
+!list mgtest2 SIZE=(1,1,15,15)
+! 
+! DO LONG THIN CASE WITH 45 DEG ROTATION.
+!datetime
+!geomv mgtest2 mgenthin NAH=1 NAV=1+ 
+!   SIZE=(1,1,2,1000)+
+!   TIEPOINT=(1.,1.,1000.,1.,1.,1000.,1.,1000.,+
+!            2.,1.,1001.,2.,2.,1000.,2.,1001.)
+!datetime
+!lgeom mgtest2 mgenthin2 NAH=1 NAV=1+ 
+!   SIZE=(1,1,2,1000)+
+!   TIEPOINT=(1.,1.,1000.,1.,1.,1000.,1.,1000.,+
+!            2.,1.,1001.,2.,2.,1000.,2.,1001.)
+!datetime
+! Print it out
+!list mgenthin 'NOEJECT nl=2 ns=2
+!list mgenthin 'NOEJECT nl=2 ns=2 ss=999
+!list mgenthin2 'NOEJECT nl=2 ns=2
+!list mgenthin2 'NOEJECT nl=2 ns=2 ss=999
+!difpic (mgenthin,mgenthin2)
+!f2 inp=(mgenthin,mgenthin2) out=mgenthin3 func="abs(in1-in2)"
+!list mgenthin3 'NOEJECT
+! 
+!gen a 1000 1000
+!  Test bilinear interpolation for FR 87169
+!geomv							+
+!inp=a					+
+!out=b					+
+!nl=900 ns=900						+
+!nav=9							+
+!nah=9							+
+!tiepoint=(						+
+!001,001,900,900,001,100,800,800,001,200,300,300,001,300,300,300,+
+!001,400,400,400,001,500,500,500,001,600,600,600,001,700,700,700,+
+!001,800,001,800,001,900,001,900,100,001,100,001,+
+!100,100,100,100,100,200,600,200,100,300,700,300,100,400,100,400,+
+!100,500,500,500,100,600,600,600,100,700,700,700,100,800,800,800,+
+!100,900,100,900,		+
+!200,001,200,001,200,100,200,100,200,200,200,200,200,300,200,300,+
+!200,400,400,400,200,500,500,500,200,600,600,600,200,700,700,700,+
+!200,800,200,800,200,900,200,900,300,001,300,001,+
+!300,100,300,100,300,200,300,200,300,300,300,300,300,400,300,400,+
+!300,500,300,500,300,600,300,600,300,700,300,700,300,800,300,800,+
+!300,900,300,900,		+
+!400,001,400,001,400,100,400,100,400,200,400,200,400,300,400,300,+
+!400,400,400,400,400,500,500,500,400,600,400,600,400,700,400,700,+
+!400,800,400,800,400,900,400,900,500,001,500,001,+
+!500,100,500,100,500,200,500,200,500,300,500,300,500,400,500,400,+
+!500,500,500,500,500,600,500,600,500,700,500,700,500,800,500,800,+
+!500,900,500,900,		+
+!600,001,600,001,600,100,600,100,600,200,600,200,600,300,600,300,+
+!600,400,600,400,600,500,600,500,600,600,600,600,600,700,600,700,+
+!600,800,600,800,600,900,600,900,700,001,700,001,+
+!700,100,700,100,700,200,700,200,700,300,700,300,700,400,700,400,+
+!70,500,700,500,700,600,700,600,700,700,700,700,700,800,700,800,+
+!700,900,700,900,		+
+!800,001,800,001,800,100,100,100,800,200,200,200,800,300,300,300,+
+!800,400,800,400,800,500,800,500,800,600,800,600,800,700,800,700,+
+!800,800,800,800,800,900,800,900,900,001,900,001,+
+!900,100,900,100,900,200,900,200,900,300,900,300,900,400,400,400,+
+!900,500,900,500,900,600,900,600,900,700,900,700,900,800,800,800,+
+!900,900,900,900)
+!list b (50,50,850,850) linc=100 sinc=100
+!geoma							+
+!inp=a					+
+!out=b2					+
+!nl=900 ns=900						+
+!nav=9							+
+!nah=9							+
+!tiepoint=(						+
+!001,001,900,900,001,100,800,800,001,200,300,300,001,300,300,300,+
+!001,400,400,400,001,500,500,500,001,600,600,600,001,700,700,700,+
+!001,800,001,800,001,900,001,900,100,001,100,001,+
+!100,100,100,100,100,200,600,200,100,300,700,300,100,400,100,400,+
+!100,500,500,500,100,600,600,600,100,700,700,700,100,800,800,800,+
+!100,900,100,900,		+
+!200,001,200,001,200,100,200,100,200,200,200,200,200,300,200,300,+
+!200,400,400,400,200,500,500,500,200,600,600,600,200,700,700,700,+
+!200,800,200,800,200,900,200,900,300,001,300,001,+
+!300,100,300,100,300,200,300,200,300,300,300,300,300,400,300,400,+
+!300,500,300,500,300,600,300,600,300,700,300,700,300,800,300,800,+
+!300,900,300,900,		+
+!400,001,400,001,400,100,400,100,400,200,400,200,400,300,400,300,+
+!400,400,400,400,400,500,500,500,400,600,400,600,400,700,400,700,+
+!400,800,400,800,400,900,400,900,500,001,500,001,+
+!500,100,500,100,500,200,500,200,500,300,500,300,500,400,500,400,+
+!500,500,500,500,500,600,500,600,500,700,500,700,500,800,500,800,+
+!500,900,500,900,		+
+!600,001,600,001,600,100,600,100,600,200,600,200,600,300,600,300,+
+!600,400,600,400,600,500,600,500,600,600,600,600,600,700,600,700,+
+!600,800,600,800,600,900,600,900,700,001,700,001,+
+!700,100,700,100,700,200,700,200,700,300,700,300,700,400,700,400,+
+!70,500,700,500,700,600,700,600,700,700,700,700,700,800,700,800,+
+!700,900,700,900,		+
+!800,001,800,001,800,100,100,100,800,200,200,200,800,300,300,300,+
+!800,400,800,400,800,500,800,500,800,600,800,600,800,700,800,700,+
+!800,800,800,800,800,900,800,900,900,001,900,001,+
+!900,100,900,100,900,200,900,200,900,300,900,300,900,400,400,400,+
+!900,500,900,500,900,600,900,600,900,700,900,700,900,800,800,800,+
+!900,900,900,900)
+!difpic (b,b2)
+!
+! Now do simple tests for half
+! Now generate HALF input data set
+! 
+!gen mgtest 10 10 SINC=40 LINC=40 'HALF
+! 
+! Verify existence of input file
+!list mgtest
+! 
+!
+!  Try some copies.
+!  Check case of grid bigger than image.
+!geomv mgtest mgtest1 NAH=1 NAV=1+ 
+!   TIEPOINT=(1.,1.,1.,1.,   1.,20.,1.,20.,+
+!            20.,1.,20.,1., 20.,20.,20.,20.)
+!difpic (mgtest1 mgtest)
+
+!  Check case of grid smaller than image.
+!geomv mgtest mgtest1 NAH=1 NAV=1+ 
+!   TIEPOINT=(1.,1.,1.,1.,   1.,2.,1.,2.,+
+!             2.,1.,2.,1.,   2.,2.,2.,2.)
+!difpic (mgtest1 mgtest)
+
+! Perform simple enlargement to 2X size
+!geomv mgtest mgenlarg NAH=1 NAV=1+ 
+!   SIZE=(1,1,20,20)   +
+!   TIEPOINT=(1.,1.,1.,1.,1.,20.,1.,10.,+
+!                20.,1.,10.,1.,20.,20.,10.,10.)
+!lgeom mgtest mgenlarg2 NAH=1 NAV=1+ 
+!   SIZE=(1,1,20,20)   +
+!   TIEPOINT=(1.,1.,1.,1.,1.,20.,1.,10.,+
+!                20.,1.,10.,1.,20.,20.,10.,10.)
+ 
+! Print it out
+!list mgenlarg
+!difpic (mgenlarg,mgenlarg2)
+! 
+! Perform 45 degree rotation clockwise with 1.4 times enlargement
+!geomv mgtest mgrotat NAH=1 NAV=1+ 
+!   SIZE=(1,1,20,20)  +
+!   TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+!                20.,1.,15.,5.,20.,20.,5.,15.)
+!
+! Print it out
+!list mgrotat
+! 
+! Now generate HALF input data set
+! 
+!gen mgtest2 1000 1000 SINC=1 LINC=1 'HALF
+! 
+! Verify existence of input file
+!list mgtest2 SIZE=(1,1,15,15)
+! 
+! DO LONG THIN CASE WITH 45 DEG ROTATION.
+!geomv mgtest2 mgenthin NAH=1 NAV=1+ 
+!   SIZE=(1,1,2,1000) +
+!   TIEPOINT=(1.,1.,1000.,1.,1.,1000.,1.,1000.,+
+!           2.,1.,1001.,2.,2.,1000.,2.,1001.)
+!lgeom mgtest2 mgenthin2 NAH=1 NAV=1+ 
+!   SIZE=(1,1,2,1000) +
+!   TIEPOINT=(1.,1.,1000.,1.,1.,1000.,1.,1000.,+
+!           2.,1.,1001.,2.,2.,1000.,2.,1001.)
+!difpic (mgenthin,mgenthin2)           
+!
+! Print it out
+!list mgenthin 'NOEJECT
+!
+!gen a 1000 1000 'half
+!  Test bilinear interpolation for FR 87169
+!geomv							+
+!inp=a					+
+!out=b					+
+!nl=900 ns=900						+
+!nav=9							+
+!nah=9							+
+!tiepoint=(						+
+!001,001,900,900,001,100,800,800,001,200,300,300,001,300,300,300,+
+!001,400,400,400,001,500,500,500,001,600,600,600,001,700,700,700,+
+!001,800,001,800,001,900,001,900,100,001,100,001,+
+!100,100,100,100,100,200,600,200,100,300,700,300,100,400,100,400,+
+!100,500,500,500,100,600,600,600,100,700,700,700,100,800,800,800,+
+!100,900,100,900,		+
+!200,001,200,001,200,100,200,100,200,200,200,200,200,300,200,300,+
+!200,400,400,400,200,500,500,500,200,600,600,600,200,700,700,700,+
+!200,800,200,800,200,900,200,900,300,001,300,001,+
+!300,100,300,100,300,200,300,200,300,300,300,300,300,400,300,400,+
+!300,500,300,500,300,600,300,600,300,700,300,700,300,800,300,800,+
+!300,900,300,900,		+
+!400,001,400,001,400,100,400,100,400,200,400,200,400,300,400,300,+
+!400,400,400,400,400,500,500,500,400,600,400,600,400,700,400,700,+
+!400,800,400,800,400,900,400,900,500,001,500,001,+
+!500,100,500,100,500,200,500,200,500,300,500,300,500,400,500,400,+
+!500,500,500,500,500,600,500,600,500,700,500,700,500,800,500,800,+
+!500,900,500,900,		+
+!600,001,600,001,600,100,600,100,600,200,600,200,600,300,600,300,+
+!600,400,600,400,600,500,600,500,600,600,600,600,600,700,600,700,+
+!600,800,600,800,600,900,600,900,700,001,700,001,+
+!700,100,700,100,700,200,700,200,700,300,700,300,700,400,700,400,+
+!700,500,700,500,700,600,700,600,700,700,700,700,700,800,700,800,+
+!700,900,700,900,		+
+!800,001,800,001,800,100,100,100,800,200,200,200,800,300,300,300,+
+!800,400,800,400,800,500,800,500,800,600,800,600,800,700,800,700,+
+!800,800,800,800,800,900,800,900,900,001,900,001,+
+!900,100,900,100,900,200,900,200,900,300,900,300,900,400,400,400,+
+!900,500,900,500,900,600,900,600,900,700,900,700,900,800,800,800,+
+!900,900,900,900)
+!list b (50,50,850,850) linc=100 sinc=100
+
+
+! long case with offsets SHOWS INACCURACY OF LGEOM
+
+!gen mgtest2 10 4000 SINC=3 LINC=7
+!datetime
+!geomv mgtest2 mgenthin NAH=1 NAV=1+ 
+!   SIZE=(1,1,10,4000)+
+!   TIEPOINT=(1.,1.,1.,1.,1.,4000.,1.,3900.,+
+!            4000.,1.,4000.,1.,4000.,4000.,4000.,3900.)
+!datetime
+!lgeom mgtest2 mgenthin2 NAH=1 NAV=1+ 
+!   SIZE=(1,1,10,4000)+
+!   TIEPOINT=(1.,1.,1.,1.,1.,4000.,1.,3900.,+
+!            4000.,1.,4000.,1.,4000.,4000.,4000.,3900.)
+!datetime
+!difpic (mgenthin,mgenthin2)
+!list mgenthin nl=1 ss=3288 ns=3    !GEOMV IS CORRECT
+!list mgenthin2 nl=1 ss=3288 ns=3   !LGEOM IS INCORRECT
+
+! big case with offsets / timing case
+
+!gen mgtest2 4000 4000 SINC=3 LINC=7
+!datetime
+!geomv mgtest2 mgenthin NAH=1 NAV=1+ 
+!   SIZE=(1,1,4000,4000)+
+!   TIEPOINT=(1.,1.,7.,7.,1.,4000.,1.,4022.,+
+!            4000.,1.,3970.,22.,4000.,4000.,4050.,4060.)
+!datetime
+!lgeom mgtest2 mgenthin2 NAH=1 NAV=1+ 
+!   SIZE=(1,1,4000,4000)+
+!   TIEPOINT=(1.,1.,7.,7.,1.,4000.,1.,4022.,+
+!            4000.,1.,3970.,22.,4000.,4000.,4050.,4060.)
+!datetime
+!difpic (mgenthin,mgenthin2)
+
+! ibis file grid input
+
+! really big case with offsets / timing case
+
+!datetime
+!gen mgtest2 8000 8000 SINC=3 LINC=7
+!datetime
+!geomv mgtest2 mgenthin NAH=1 NAV=1+
+!   SIZE=(1,1,8000,8000)+
+!   TIEPOINT=(1.,1.,7.,7.,1.,8000.,1.,8022.,+
+!            8000.,1.,7970.,22.,8000.,8000.,8050.,8060.)
+!datetime
+!lgeom mgtest2 mgenthin2 NAH=1 NAV=1+ 
+!   SIZE=(1,1,8000,8000)+
+!   TIEPOINT=(1.,1.,7.,7.,1.,8000.,1.,8022.,+
+!            8000.,1.,7970.,22.,8000.,8000.,8050.,8060.)
+!datetime
+!difpic (mgenthin,mgenthin2)
+!datetime
+
+! small grid small image testing ibis file pass to geomv
+
+!gen mgtest2 400 400 SINC=3 LINC=7
+!ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+!    nc=4 nr=444
+!mf a func=("c1=sqrt(index*17+3743)","c2=sqrt(index*7+4431)")
+!mf a func=("c1=mod(c1,0.0001)*4000000","c2=mod(c2,0.0001)*4000000")
+!mf a func=("c1=c1-mod(c1,0.1)","c2=c2-mod(c2,0.1)")
+!mf a func=("c3=c1*1.1","c4=c2*1.1")
+!!ibis-list a cols=(1,2,3,4) csize=12 'format
+!tieconv INP=a COLS=(1,2,3,4)  OUT=b +
+!      NAH=1,NAV=1,MINL=1.,MINS=1.,MAXL=400.,MAXS=400. +
+!    'GEOMV 'NOPR 
+!ibis-list b cols=(1,2,3,4) csize=12  'format
+
+!geomv INP=(mgtest2,b) OUT=mgenlarg NAH=3 NAV=3+ 
+!   SIZE=(1,1,400,400)
+
+!list mgenlarg linc=37 sinc=37
+
+! parms file use
+
+!ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+!    nc=4 nr=44
+!mf a func=("c1=sqrt(index*17+3743)","c2=sqrt(index*7+4431)")
+!mf a func=("c1=mod(c1,0.0001)*1000000","c2=mod(c2,0.0001)*1000000")
+!!mf a func=("c1=c1-mod(c1,0.1)","c2=c2-mod(c2,0.1)")
+!mf a func=("c3=c1*1.1","c4=c2*1.1")
+!ibis-list a cols=(1,2,3,4) csize=12
+! INP=a COLS=(1,2,3,4)  OUT=b +
+!      NAH=3,NAV=3,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+!    'LGEOM 'NOPR
+
+!datetime
+!geomv INP=mgtest OUT=mgenlarg PARMS=b + 
+!   SIZE=(1,1,20,20)
+!list mgenlarg ns=12 nl=20
+
+
+! ibis file grid input large grid and large image
+
+!gen mgtest2 4000 4000 SINC=3 LINC=7
+!ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+!    nc=4 nr=444
+!mf a func=("c1=sqrt(index*17+3743)","c2=sqrt(index*7+4431)")
+!mf a func=("c1=mod(c1,0.0001)*40000000","c2=mod(c2,0.0001)*40000000")
+!mf a func=("c1=c1-mod(c1,0.1)","c2=c2-mod(c2,0.1)")
+!mf a func=("c3=c1*1.1","c4=c2*1.1")
+!!ibis-list a cols=(1,2,3,4) csize=12 'format
+!tieconv INP=a COLS=(1,2,3,4)  OUT=b +
+!      NAH=30,NAV=30,MINL=1.,MINS=1.,MAXL=4000.,MAXS=4000. +
+!    'GEOMV 'NOPR 
+!ibis-list b cols=(1,2,3,4) csize=12 nr=10 'format
+
+!datetime
+!geomv INP=(mgtest2,b) OUT=mgenlarg NAH=3 NAV=3+ 
+!   SIZE=(1,1,4000,4000)
+!datetime
+
+!list mgenlarg linc=97 sinc=97
+
+! LARGE CASE COMPARISON WITH LGEOM, BE CAREFUL, LGEOM
+! REQUIRES INTEGRAL VALUES IN OUTPUT GRID, CHECK IT OUT
+
+gen mgtest2 3000 3000 SINC=3 LINC=7
+ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+    nc=4 nr=444
+mf a func=("c1=sqrt(index*17+3743)","c2=sqrt(index*7+4431)")
+mf a func=("c1=mod(c1,0.0001)*30000000","c2=mod(c2,0.0001)*30000000")
+mf a func=("c1=c1-mod(c1,0.1)","c2=c2-mod(c2,0.1)")
+mf a func=("c3=c1*1.1","c4=c2*1.1")
+ibis-list a cols=(1,2,3,4) csize=12 NR=10 'format
+tieconv INP=a COLS=(1,2,3,4)  OUT=b +
+      NAH=30,NAV=30,MINL=1.,MINS=1.,MAXL=3001.,MAXS=3001. +
+    'GEOMV 'NOPR 
+ibis-list b cols=(1,2,3,4) csize=12 nr=40 'format
+
+datetime
+geomv INP=(mgtest2,b) OUT=mgenlarg SIZE=(1,1,3000,3000)
+datetime
+
+tieconv INP=a COLS=(1,2,3,4)  OUT=b2 +
+      NAH=30,NAV=30,MINL=1.,MINS=1.,MAXL=3000.,MAXS=3000. +
+    'LGEOM 'NOPR 
+
+datetime
+lgeom INP=mgtest2 OUT=mgenlarg2 SIZE=(1,1,3000,3000) PARMS=b2
+datetime
+
+difpic (mgenlarg,mgenlarg2)
+
+! small grid small image testing ibis file pass to geomv
+
+!gen mgtest2 400 400 SINC=3 LINC=7
+!ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+!    nc=4 nr=44
+!mf a func=("c1=sqrt(index*17+3743)","c2=sqrt(index*7+4431)")
+!mf a func=("c1=mod(c1,0.0001)*4000000","c2=mod(c2,0.0001)*4000000")
+!mf a func=("c3=c1*1.1","c4=c2*1.1")
+
+!tieconv INP=a COLS=(1,2,3,4)  OUT=b +
+!      NAH=30,NAV=30,MINL=1.,MINS=1.,MAXL=421.,MAXS=421. +
+!    'GEOMV 'NOPR 
+!ibis-list b nr=40 'format
+
+!geomv INP=(mgtest2,b) OUT=mgenlarg + 
+!   SIZE=(1,1,400,400)
+
+!list mgenlarg linc=39 sinc=39
+
+! ibis file input single precision case, also test columns
+! can't use tieconv since it is always doublew precision
+
+!ibis-gen b version=&version org=&org  datacol=(1,2,3,4,5) +
+!    nc=5 nr=961
+!mf b func=("c1=int((index-1)/31)*14+1","c2=mod(index+30,31)*14+1")
+!mf b func=("c3=c1*1.1","c5=c2*1.1")
+
+!ibis-list b nr=961 'format
+
+!geomv INP=(mgtest2,b) OUT=mgenlarg2 cols=(1,2,3,5)+ 
+!   SIZE=(1,1,400,400)
+
+!list mgenlarg2 linc=39 sinc=39
+
+!difpic (mgenlarg,mgenlarg2)
+
+
+
+!   THIS CASE SHOWS GEOMV VS LGEOM ACCURACY, THE VALUE AT 18,4
+! SHOULD CLEARLY BE 37, BUT LGEOM GETS 36.  IN FACT THE FLOATING
+! VALUE CALCULATES TO 37.4, SO IT CAN'T TRUNCATE OR ROUND TO 36.
+
+! FOR THIS CASE, THE GRID IS RECTANGULAR, ALL WHOLE NUMBERS, AND
+! EVENLY SPACED
+
+! YOU CAN ALSO USE THIS CASE FOR THE VARIOUS BAD GRID ERROR CHECKS.
+
+! Now generate BYTE input data set
+ 
+!gen mgtest 10 10 SINC=40 LINC=40
+!list mgtest
+
+ 
+! Perform bent enlargement to 2X size
+!geomv mgtest mgenlarg + 
+!   SIZE=(1,1,21,21)+
+!   TIEPOINT=(1.,1.,1.,1.,     1.,11.,1.,2.,      1.,21.,1.,10.,+
+!             11.,1.,3.,1.,     11.,11.,4.,2.,      11.,21.,3.,10.,+
+!             21.,1.,10.,1.,   21.,11.,10.,2.,    21.,21.,10.,10.)
+
+!lgeom mgtest mgenlarg2 nah=2 nav=2 + 
+!   SIZE=(1,1,21,21)+
+!   TIEPOINT=(1.,1.,1.,1.,     1.,11.,1.,2.,      1.,21.,1.,10.,+
+!             11.,1.,3.,1.,     11.,11.,4.,2.,      11.,21.,3.,10.,+
+!             21.,1.,10.,1.,   21.,11.,10.,2.,    21.,21.,10.,10.)
+
+!list mgenlarg ss=1 ns=15
+
+!list mgenlarg2 ss=1 ns=15
+
+gen xxxim1 10 10 SINC=40 LINC=40
+
+! Perform 45 degree rotation clockwise with 1.4 times enlargement
+
+GEOMV xxxim1 xxxim2 sl=7 ss=1 +
+         nl=6 ns=6 interp=noin +
+         TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+                20.,1.,15.,5.,20.,20.,5.,15.)
+
+
+GEOMV xxxim1 xxxim5 sl=7 ss=1 +
+         nl=6 ns=6 interp=noin +
+         TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+                20.,1.,15.,5.,20.,20.,5.,15.)
+
+GEOMV xxxim1 xxxim3 sl=7 ss=1 +
+         nl=6 ns=6 interp=bilin +
+         TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+                20.,1.,15.,5.,20.,20.,5.,15.)
+GEOMV xxxim1 xxxim6 sl=7 ss=1 +
+         nl=6 ns=6 interp=bilin +
+         TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+                20.,1.,15.,5.,20.,20.,5.,15.)
+GEOMV xxxim1 xxxim4 sl=7 ss=1 +
+         nl=6 ns=6 +
+         TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+                20.,1.,15.,5.,20.,20.,5.,15.)
+
+GEOMV xxxim1 xxxim7 sl=7 ss=1 +
+         nl=6 ns=6 +
+         TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+                20.,1.,15.,5.,20.,20.,5.,15.)
+
+difpic (xxxim2,xxxim3)
+difpic (xxxim3,xxxim4)
+difpic (xxxim2,xxxim5)
+difpic (xxxim3,xxxim6)
+difpic (xxxim4,xxxim7)
+
+! this case tests the zero piece write, remove write in program to see in action
+
+ibis-copy xxqqgrid2 devgeomvgrid
+
+mf3 devgeomvgrid f="c7=(c7-33284.24)*450+33284.24$c8=(c8-15462.29)*450+15462.29"
+
+geomv +
+ inp=(/home/alz/astapp/tomcrete/ca-aster-quads/lcalnorm56.img, +
+ devgeomvgrid,tiny)        out=tiny2 sl=1 ss=1   +
+ nl=100 ns=100 interp=BILIN cols=(1,2,7,8) tiepoint=
+
+geomv +
+ inp=(/home/alz/astapp/tomcrete/ca-aster-quads/lcalnorm56.img, +
+ devgeomvgrid,tiny)        out=tiny3 sl=1 ss=1  vmemsize=40000000 +
+ nl=100 ns=100 interp=BILIN cols=(1,2,7,8) tiepoint=
+
+difpic (tiny2,tiny3)
+xvd tiny3
+
+!curr>
+
+! this is the first huge case
+
+!label-create xxxgeomvtmp87b xxxa nl=10451 ns=10620
+!xvd xxxa
+!goto theend
+
+!gtwarp /home/alz/astapp/tomcrete/ca-aster-quads/mos1.img +
+!   /home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb.img +
+!   ref=/home/alz/astapp/tomcrete/ca-aster-quads/ca_lamb_master +
+!   'coverinp
+
+geomv +
+ INP=(/home/alz/astapp/tomcrete/ca-aster-quads/mos1.img, +
+ xxqqgrid2, +
+ /home/alz/astapp/tomcrete/ca-aster-quads/ca_lamb_master) +
+ OUT=/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_cubspl.img +
+ size=(-130710,-196887,6000,6000)  cols=(1,2,7,8) +
+ interp=cubsplin vmemsize=800000000
+
+!size=(-150710,-206887,31355,31857)  cols=(1,2,7,8) +
+ 
+!xvd /home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb.img
+
+f2 inp=(/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_cubbil.img,+
+  /home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_cubcnv.img) +
+  out=xxxa func="abs(in1-in2+128)"
+
+hist xxxa
+
+f2 inp=(/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_cubbil.img,+
+  /home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_cubspl.img) +
+  out=xxxb func="abs(in1-in2+128)"
+
+hist xxxb
+
+
+goto theend
+
+!curr>
+
+! now cubic convolution and cubic spline
+
+gen xxxim1 20 20 SINC=40 LINC=40
+
+GEOMV xxxim1 xxxim2 sl=10 ss=4 +
+         nl=6 ns=6 interp=bilin +
+         TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+                20.,1.,15.,5.,20.,20.,5.,15.)
+
+GEOMV xxxim1 xxxim3 sl=10 ss=4 +
+         nl=6 ns=6 interp=cubsplin +
+         TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+                20.,1.,15.,5.,20.,20.,5.,15.)
+
+GEOMV xxxim1 xxxim4 sl=10 ss=4 +
+         nl=6 ns=6 interp=cubconv +
+         TIEPOINT=(1.,1.,5.,-5.,1.,20.,-5.,5.,+
+                20.,1.,15.,5.,20.,20.,5.,15.)
+
+difpic (xxxim2,xxxim3)
+difpic (xxxim2,xxxim4)
+difpic (xxxim3,xxxim4)
+list xxxim2
+list xxxim3
+xvd xxxim2
+xvd xxxim3
+
+
+! TIMIMG TEST
+
+!curr>
+
+ush date
+geomv +
+ INP=(/home/alz/astapp/tomcrete/ca-aster-quads/mosall.img, +
+ xxqqgrid2, +
+ /home/alz/astapp/tomcrete/ca-aster-quads/ca_lamb_master) +
+ OUT=/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_time.img +
+ size=(-150710,-226761,63423,62836)  cols=(1,2,7,8) +
+ interp=bilin vmemsize=700000000
+ush date
+geomv +
+ INP=(/home/alz/astapp/tomcrete/ca-aster-quads/mosall.img, +
+ xxqqgrid2, +
+ /home/alz/astapp/tomcrete/ca-aster-quads/ca_lamb_master) +
+ OUT=/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_time.img +
+ size=(-150710,-226761,63423,62836)  cols=(1,2,7,8) +
+ interp=bilin vmemsize=600000000
+ush date
+geomv +
+ INP=(/home/alz/astapp/tomcrete/ca-aster-quads/mosall.img, +
+ xxqqgrid2, +
+ /home/alz/astapp/tomcrete/ca-aster-quads/ca_lamb_master) +
+ OUT=/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_time.img +
+ size=(-150710,-226761,63423,62836)  cols=(1,2,7,8) +
+ interp=bilin vmemsize=500000000
+ush date
+geomv +
+ INP=(/home/alz/astapp/tomcrete/ca-aster-quads/mosall.img, +
+ xxqqgrid2, +
+ /home/alz/astapp/tomcrete/ca-aster-quads/ca_lamb_master) +
+ OUT=/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_time.img +
+ size=(-150710,-226761,63423,62836)  cols=(1,2,7,8) +
+ interp=bilin vmemsize=400000000
+ush date
+geomv +
+ INP=(/home/alz/astapp/tomcrete/ca-aster-quads/mosall.img, +
+ xxqqgrid2, +
+ /home/alz/astapp/tomcrete/ca-aster-quads/ca_lamb_master) +
+ OUT=/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_time.img +
+ size=(-150710,-226761,63423,62836)  cols=(1,2,7,8) +
+ interp=bilin vmemsize=300000000
+ush date
+geomv +
+ INP=(/home/alz/astapp/tomcrete/ca-aster-quads/mosall.img, +
+ xxqqgrid2, +
+ /home/alz/astapp/tomcrete/ca-aster-quads/ca_lamb_master) +
+ OUT=/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_time.img +
+ size=(-150710,-226761,63423,62836)  cols=(1,2,7,8) +
+ interp=bilin vmemsize=200000000
+ush date
+geomv +
+ INP=(/home/alz/astapp/tomcrete/ca-aster-quads/mosall.img, +
+ xxqqgrid2, +
+ /home/alz/astapp/tomcrete/ca-aster-quads/ca_lamb_master) +
+ OUT=/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_time.img +
+ size=(-150710,-226761,63423,62836)  cols=(1,2,7,8) +
+ interp=cubconv vmemsize=500000000
+ush date
+
+! comparison of data with different strip layout
+
+curr>
+
+ush date
+/home/alz/ikapp/geomv +
+ INP=(/home/alz/astapp/tomcrete/ca-aster-quads/mosall.img, +
+ /home/alz/ikapp/xxqqgrid2, +
+ /home/alz/astapp/tomcrete/ca-aster-quads/ca_lamb_master) +
+ OUT=/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_300.img +
+ size=(-150710,-226761,63423,62836)  cols=(1,2,7,8) +
+ interp=bilin vmemsize=300000000
+ush date
+/home/alz/ikapp/geomv +
+ INP=(/home/alz/astapp/tomcrete/ca-aster-quads/mosall.img, +
+ /home/alz/ikapp/xxqqgrid2, +
+ /home/alz/astapp/tomcrete/ca-aster-quads/ca_lamb_master) +
+ OUT=/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_200.img +
+ size=(-150710,-226761,63423,62836)  cols=(1,2,7,8) +
+ interp=bilin vmemsize=200000000
+ush date
+
+difpic (/home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_300.img, +
+        /home/alz/astapp/tomcrete/ca-aster-quads/mos1_lamb_200.img)
+
+theend>
+end-proc

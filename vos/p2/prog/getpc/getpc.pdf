@@ -1,0 +1,230 @@
+PROCESS help=*
+LOCAL DUM1 REAL
+LOCAL DUM2 REAL
+LOCAL DUM3 REAL
+LOCAL DUM4 REAL
+LOCAL DUM5 REAL
+
+PARM INP    STRING
+PARM PCL    NAME     DEFAULT=DUM1 
+PARM PCS    NAME     DEFAULT=DUM2
+PARM SCLAT  NAME     DEFAULT=DUM3
+PARM SCLON  NAME     DEFAULT=DUM4
+PARM SCALE  NAME     DEFAULT=DUM5
+
+PARM SPICEMODE  TYPE=KEYWORD     COUNT=0:1 VALID=(LOCAL,REMOTE) DEFAULT=--
+PARM TARGET     TYPE=(STRING,12) COUNT=0:1                      DEFAULT=--
+PARM CKNAME     TYPE=(STRING,4)  COUNT=1                        DEFAULT=DAVI
+PARM CKID       TYPE=(STRING,4)  COUNT=1                        DEFAULT=NONE
+PARM USERID     TYPE=(STRING,3)  COUNT=0:1                      DEFAULT=--
+PARM GROUPID    TYPE=(STRING,3)  COUNT=0:1                      DEFAULT=--
+PARM INSTITUTE  TYPE=(STRING,4)  COUNT=1                        DEFAULT=NONE
+PARM CDATE      TYPE=(STRING,12) COUNT=1                DEFAULT=000000000000
+PARM REQNUM     TYPE=(STRING,4)  COUNT=1                        DEFAULT=NONE
+PARM PURPOSE    TYPE=(STRING,4)  COUNT=1                        DEFAULT=NONE
+PARM PROGRAM    TYPE=(STRING,6)  COUNT=1                        DEFAULT=*NONE*
+PARM SPKID      TYPE=(STRING,4)  COUNT=1                        DEFAULT=NONE
+END-PROC
+.TITLE
+VICAR Program GETPC
+.HELP
+PURPOSE
+
+GETPC is a VICAR application program which computes the line-sample
+coordinates of the target-center from SPICE kernels and outputs it as a TAE
+variable.  In addition, it will return SCLAT, SCLON and SCALE as TAE variables
+when processing Galileo or Cassini images.
+
+For Cassini and Galileo, the image-space planet center is returned.  For
+Voyager, the object-space planet center is returned.
+
+.page
+EXECUTION
+
+     GETPC INP=InpFile PCL=PCL PCS=PCS SCLAT=SCLAT SCLON=SCLON SCALE=SCALE
+
+where InpFile is a Cassini, Galileo, or Voyager image.
+
+.page
+HISTORY:
+ WHEN       WHO WHAT
+ ---------- --- ---------------------------------------------------------------
+ 01/30/2003 GMY Upgraded to support Cassini.  Ported to Linux.
+ 12/17/1996 SMC Modified to report the correct SCLAT and SCLON.       (FR89983)
+ 10/08/1996 SMC Modified to adapt CONVEV and CONVISOS calling sequence so that
+                 Summation Mode images are supported.                 (FR89818)
+ 07/23/1996 SMC Initial release (Combined unported GLLPC and unported VGRPC)
+
+.level1
+.vari INP
+Required input image file name
+.VARI PCL
+Optional output variable
+.VARI PCS
+Optional output variable
+.VARI SCLAT
+Optional output variable for GLL
+.VARI SCLON
+Optional output variable for GLL
+.VARI SCALE
+Optional output variable for GLL
+.VARI TARGET
+Optional 12-char string
+Target name (planet,
+  satellite, or asteroid)
+.VARI SPICEMODE
+Optional keyword
+Location of SPICE kernels
+(LOCAL or REMOTE)
+.VARI CKNAME
+Optional 4-char string
+C-kernel name
+.VARI CKID
+Optional 4-char string
+C-kernel ID
+.VARI USERID
+Optional 3-char string
+User who created camera pointing
+.VARI GROUPID
+Optional 3-char string
+Group which created camera pointing
+.VARI INSTITUTE
+Optional 4-char string
+Facility which created camera pointing
+.VARI PURPOSE
+Optional 4-char string
+Purpose for camera pointing
+.VARI PROGRAM
+Optional 6-char string
+Program which created camera pointing
+.VARI SPKID
+Optional 4-char string
+SP kernel for created camera pointing
+.VARI REQNUM
+Optional 4-char string
+IPL request number for created camera pointing
+.VARI CDATE
+Optional 12-char string
+Date and time camera pointing was created
+
+.LEVEL2
+.VARI INP
+The input file of interest.  This should be a geometrically corrected image (in
+Galileo's case it can be just a raw image).
+.VARI PCL
+Planet Center Line pixel
+.VARI PCS
+Planet Center Sample pixel
+.VARI SCLAT
+SpaceCraft LATtitude
+.VARI SCLON
+SpaceCraft LONtitude
+.VARI SCALE
+The scale of the size of the given image pixel as compared to the actual size
+of the object.  In an other word, this shows how big of a ground coverage the
+pixel represents.
+.VARI TARGET
+Ex: TARGET=GANYMEDE specifies that GANYMEDE is the target in the input image.
+
+The TARGET may be a planet, satellite, or asteroid.  If defaulted, the target
+name is extracted from the VICAR label or determined by other TBD means.
+
+A complete list of valid target names is located in the ASCII file assigned
+the logical name (or environmental variable) BODY_IDS.
+
+.VARI SPICEMODE
+SPICEMODE=LOCAL specifies that SPICE data is to be retrieved from local
+SPICE kernels.  SPICEMODE=REMOTE specifies that SPICE data is to be retrieved
+via the SPICE server.  If SPICEMODE is defaulted, the logical name (or
+environmental variable) DEFAULTSPICE is used to determine whether LOCAL or
+REMOTE is used.  Note that if SPICE data is not found in LOCAL or REMOTE mode,
+the other mode is attempted.
+
+.VARI CKNAME
+CKNAME is a four character string specifying the C-kernel to be used:
+
+  CKNAME        C KERNEL
+  --------      -------------
+  DAVI          MIPS_DAVI.CK
+  NAV           MIPS_NAV.CK
+  FARE          MIPS_FARENC.CK
+  NAV2          MIPS_NAV2.CK
+  NEAR          MIPS_NEAR.CK
+  AMOS          MIPS_AMOS.CK
+  NAIF          the best NAIF kernel is used
+
+If defaulted, the kernels are searched in the above order.
+
+.VARI CKID
+CKID is an alternative way to specify the prefered C-kernel (see CKNAME
+parameter):
+
+  CKID    CKNAME        C KERNEL
+  ----    --------      -------------
+  M906    DAVI          MIPS_DAVI.CK
+  M905    NAV           MIPS_NAV.CK
+  M904    FARE          MIPS_FARENC.CK
+  M903    NAV2          MIPS_NAV2.CK
+  M902    NEAR          MIPS_NEAR.CK
+  M901    AMOS          MIPS_AMOS.CK
+  varies  NAIF          there are a large number of these files
+
+Ex:  CKID=M901 specifies the four character ID which uniquely identifies the
+     C-kernel MIPS_AMOS.CK.
+
+A complete list of the C-kernel IDs is located in the ASCII file assigned the
+logical name (or environmental variable) KERNELDB.
+
+If specified, CKID overrides the CKNAME parameter.
+
+.VARI USERID
+USERID is a three character string which identifies the user who created the
+camera pointing.
+
+Ex:  USERID=HBM identifies Helen Mortensen as the creator of the camera
+     pointing.
+
+.VARI GROUPID
+GROUPID is a three character string which identifies the group which created the
+camera pointing.
+
+Ex:  GROUPID=040 identifies group 040 as the creator of the camera pointing.
+
+.VARI INSTITUTE
+INSTITUTE is a four character string identifying the facility which created
+the camera pointing.
+
+Ex:  INSTITUTE=MIPS specifies that MIPS created the camera pointing.
+
+.VARI PURPOSE
+PURPOSE is a four character string identifying the purpose of the observation
+or the purpose of processing.  For example,
+  PURPOSE=MOSA identifies the image as part of a mosaic sequence
+  PURPOSE=COLO identifies the image as part of a color sequence
+
+.VARI PROGRAM
+PROGRAM is the first six characters of the program creating the camera pointing.
+
+Ex:  PROGRAM=FARENC specifies that FARENC created the camera pointing.
+
+.VARI SPKID
+SPKID specifies the four character ID which uniquely identifies the
+SP kernel used to create the camera pointing.  The SP-kernel IDs are located
+in the ASCII file assigned the logical name (or environmental variable)
+KERNELDB.
+
+Ex:  SPKID=N015 specifies the SP kernel GLL_LONG_2.BSP
+
+.VARI REQNUM
+REQUNUM is a four character string identifying the IPL request number for
+which the camera pointing was created.
+
+Ex:  REQNUM=3456 identifies (somewhat) request number R123456
+
+.VARI CDATE
+Date and time the camera pointing was created in the form 'YEARMMDDHHMM'.
+
+Ex:  CDATE=199602291200 specifies that the pointing was created at noon
+     on February 29, 1996.
+.end
+

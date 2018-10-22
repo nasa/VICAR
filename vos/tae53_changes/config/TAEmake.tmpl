@@ -469,7 +469,7 @@ DummyAllTarget()
 MakeMakefilesInSubdirs($(SUBDIRS))
 #endif
 #ifndef GeneratedImake
-MakeMakefileTarget(-Ddummy)
+MakeMakefileTarget(-Ddummy -s Makefile -f Imakefile)
 #endif
 
 

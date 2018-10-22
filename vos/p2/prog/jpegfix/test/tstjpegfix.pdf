@@ -1,0 +1,14 @@
+procedure
+refgbl $echo
+body
+let $echo="yes"
+!
+gen out=a.img nl=4 ns=4 linc=50 sinc=50
+size inp=a.img out=b.img zoom=50 'noin
+boxflt2 inp=b.img out=a.img nlw=3 nsw=3
+qsar inp=a.img out=b.img area=(125,125,1,5,100,75,75,5,1,200)
+jpegfix inp=b.img out=a.img
+xvd inp=a.img
+xvd inp=b.img
+!
+end-proc

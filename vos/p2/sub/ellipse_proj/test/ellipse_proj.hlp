@@ -1,0 +1,159 @@
+Documentation for subroutine package ELLIPSE_PROJ.COM:
+
+ELLIPSE_PROJ.COM contains a set of subroutines which handle the projection and
+lighting geometry for target bodies modeled as ellipsoids:
+
+  ELLIPSE_PROJ   - Given the vector from target center to surface point, compute
+                   the (line,sample) position of the surfact point in the image.
+  ELLIPSE_INV    - Given the (line,sample) coordinates of a point on an
+                   ellipsoid target surface, compute the vector from target
+                   center to surface point.
+  ELLIPSE_RADIUS - Compute the planetocentric radius for a given lat,lon
+  AZIMUTH        - Compute north azimuth, spacecraft azimuth, and solar azimuth
+                   angles.
+
+The routines are applicable to images taken by a perspective projection camera
+system (i.e. having a shutter and focal plane).  A west longitude,
+planetocentric latitude system is used.  West longitudes are measured from the
+prime meridian and increase toward the west.  The planetocentric latitude is
+the angle between the vector from target center to surface point and the
+equatorial plane.   The image line-sample coordinates are assumed to be for a
+geometrically corrected image (object space).
+
+FORTRAN calling sequences:
+
+In the following FORTRAN calling sequences, input arguments appear first and
+are in UPPER CASE, followed by output arguments in lower case.
+
+The ellipsoid model is defined by the following parameters:
+
+      REAL*8 RA			!Radius of the major equatorial axis (km)
+      REAL*8 RB			!Radius of the minor equatorial axis (km)
+      REAL*8 RC			!Radius of the polar axis (km)
+      REAL*8 LORA		!Longitude of RA
+
+The camera model is defined by the following parameters:
+
+      REAL*4 FL                 !Camera focal length in mm 
+      REAL*4 OAL,OAS            !Optical axis intercept line-sample
+      REAL*4 SCALE              !Picture scale in pixels/mm
+
+The relative positions of the spacecraft, sun, and surface point, and the
+pointing direction of the camera are defined by the following parameters:
+
+      REAL*8 OM(3,3)            !Camera to planet transformation matrix
+      REAL*8 VSC(3)             !Vector from target center to spacecraft (RS)
+      REAL*8 VSUN(3)		!Vector from target center to sun
+      REAL*8 V(3)		!Vector from target center to surface point
+
+The vectors V, VSC and VSUN must be expressed in the coordinate system of the
+target body.
+
+
+The following additional arguments are required by subroutines ELLIPSE_PROJ
+and ELLIPSE_INV:
+
+      REAL*8 RLINE,RSAMP        !Image coordinates
+      INTEGER IND		!Return status (1=success, 0=failure)
+
+      CALL ELLIPSE_PROJ(OM,VSC,FL,OAL,OAS,SCALE,RA,RB,RC,
+     &          V,rline,rsamp,ind)
+      CALL ELLIPSE_INV(OM,VSC,FL,OAL,OAS,SCALE,RA,RB,RC,
+     &          RLINE,RSAMP,v,ind)
+
+For ELLIPSE_PROJ, IND=0 if the surface point is behind the target (from the
+camera's viewpoint).
+
+For ELLIPSE_INV, IND=0 if the point is off the target.
+
+
+The function ELLIPSE_RADIUS requires the following additional variables defined:
+
+      REAL*8 LAT,LON		!Input lat,lon coordinates
+      REAL*8 RADIUS		!Output planetocentric radius (km)
+
+      CALL ELLIPSE_RADIUS(LAT,LON,RA,RB,RC,LORA,radius)
+
+The planetocentric radius is the distance from target center to the given
+surface point.
+
+
+The following additional arguments are required by subroutine AZIMUTH:
+
+      INTEGER*4 FLG	!=1 if surface pt is target center, =0 otherwise
+      REAL*8 NORAZ	!Output north azimuth (degrees)
+      REAL*8 SCAZ	!Output spacecraft azimuth (degrees)
+      REAL*8 SUNAZ	!Output solar azimuth (degrees)
+
+      CALL AZIMUTH(OM,V,VSC,VSUN,RA,RB,RC,FLG,noraz,scaz,sunaz)
+
+The azimuth angles are measured at the surface point defined by the vector V.
+To compute the solar azimuth, the solar vector is (1) projected into the
+plane tangent to the surface point, and (2) this projected vector is then
+projected into the image plane.  The solar azimuth is the angle between a
+horizontal line pointing to the right in the image and this projected vector,
+measured in a clockwise direction.  The other azimuths are defined similarly.
+
+If the surface point is the target center, the spacecraft vector projects
+to a single point and the azimuth is undefined.  For this case, the S/C
+vector is projected directly onto the image plane.
+
+
+C calling sequences:
+
+In the following C calling sequences are input arguments appear first, followed
+by the output arguments.
+
+  double ra,rb,rc;	/* camera radii */
+  double lora;		/* longitude of semi-major axis */
+  double fl;		/* Camera focal length in mm */
+  double oal,oas;    	/* Optical axis intercept line-sample */
+  double scale;          /* Picture scale in pixels/mm */
+  double om[3][3];	/* Planet-to-camera transformation */
+  double vsc[3];	/* Vector from target center to spacecraft */
+  double vsun[3];	/* Vector from target center to sun */
+  double v[3];		/* Vector from targe center to surface point */
+  double lat,lon;	/* geocentric latitude, west longitude of surface pt */
+
+
+For zellipse_proj and zellipse_inv the following output arguments are required:
+
+  double rline,rsamp;	/* line-sample image coordinates */
+  int status;		/* Return status, 1=success, 0=failure */
+
+  status = zellipse_proj(om,vsc,fl,oal,oas,scale,ra,rb,rc,v,&rline,&rsamp)
+  status = zellipse_inv(om,vsc,fl,oal,oas,scale,ra,rb,rc,rline,rsamp,v)
+
+For zellipse_proj, v is input and rline,rsamp are returned.
+For zellipse_inv, rline,rsamp are input and v is returned.
+
+
+For zellipse_radius, the following output argument is required:
+
+  double radius;	/* planetocentric radius */
+
+  zellipse_radius(lat,lon,ra,rb,rc,lora,&radius)
+
+
+For zazimuth, the following output arguments are required:
+
+  int flg;		/*=1 if surface pt is target center, =0 otherwise */
+  double noraz;		/* north azimuth */
+  double scaz;		/* scaz azimuth */
+  double sunaz;		/* solar azimuth */
+	
+  zazimuth(om,v,vsc,vsun,ra,rb,rc,flg,&noraz,&scaz,&sunaz)
+
+See FORTRAN calling sequence (above) for description of arguments.
+
+2 HISTORY
+ 
+Original Programmer: Gary Yagi, Sept 1, 1997
+Current Cognizant Programmer: Gary Yagi
+Source Language: FORTRAN
+Revision history:
+
+09 Oct 02  GMY  Fix back-of-planet test by calculating surface normal
+01 Apr 98  GMY  Pass FL, OAL, OAS, SCALE as double in C-bridge
+17 OCT 97  GMY  Correct azimuth calculation (FR 90511)
+	   Add ELLIPSE_PROJ, ELLIPSE_INV, and all C bridges

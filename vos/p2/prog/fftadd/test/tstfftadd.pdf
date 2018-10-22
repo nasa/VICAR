@@ -1,0 +1,15 @@
+procedure
+refgbl $echo
+body
+let $echo="yes"
+!
+gausnois out=a.img nl=16 ns=16 seed=123456
+gausnois out=b.img nl=16 ns=16 seed=123452
+fft22 a.img ffta.img
+fft22 b.img fftb.img
+fftadd (ffta.img,fftb.img) fftab.img
+list ffta.img nl=1 ns=8
+list fftb.img nl=1 ns=8
+list fftab.img nl=1 ns=8
+!
+end-proc

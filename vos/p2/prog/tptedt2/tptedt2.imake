@@ -1,0 +1,13 @@
+#define  PROGRAM   tptedt2
+
+#define MODULE_LIST tptedt2.f
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB 
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_FORTRAN
+#define LIB_P2SUB

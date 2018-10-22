@@ -1,0 +1,15 @@
+#define PROGRAM isislab
+#define MODULE_LIST isislab.c 
+#define MAIN_LANG_C
+#define USES_C
+#define LIB_P2SUB
+
+/* remove on delivery */
+/* #define LIB_LOCAL */
+
+/* remove on delivery */
+/* #define DEBUG */
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_FORTRAN

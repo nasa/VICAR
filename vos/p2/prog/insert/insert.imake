@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM insert
+
+   To Create the build file give the command:
+
+		$ vimake insert			(VMS)
+   or
+		% vimake insert			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	insert
+#define R2LIB
+
+#define MODULE_LIST insert.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

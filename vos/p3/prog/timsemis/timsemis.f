@@ -1,0 +1,301 @@
+	INCLUDE 'VICMAIN_FOR'
+	SUBROUTINE MAIN44
+C
+	INTEGER*2 RAD_LUT(40000,6),TEMP_LUT(32767,6)
+	INTEGER*2 BUF(638)/638*0/
+	LOGICAL XVPTST,QBBFIT,QREFCHAN
+	CHARACTER*100 LABEL
+C						Open datasets, get size field
+	CALL XVUNIT(IN,'INP',1,ISTAT,' ')
+	CALL XVOPEN(IN,ISTAT,'IO_ACT','SA','OPEN_ACT','SA',' ')
+	CALL XVSIZE(ISL,ISS,NL,NS,NLIN,NSIN)
+	CALL XVUNIT(IOUT2,'OUT',2,ISTAT,' ')
+	CALL XVOPEN(IOUT2,ISTAT,'IO_ACT','SA','OPEN_ACT','SA','OP',
+     &	     'WRITE','U_NL',NL,'U_NS',NS,'U_NB',1,'U_ORG','BSQ',' ')
+	CALL XVUNIT(IOUT,'OUT',1,ISTAT,' ')
+	IF (XVPTST('BSQ')) THEN
+	    CALL XVOPEN(IOUT,ISTAT,'IO_ACT','SA','OPEN_ACT','SA',
+     &	           'OP','WRITE','U_ORG','BSQ','U_NL',NL,'U_NS',NS,' ')
+	    DO I=1,6
+		DO J=1,NL
+		    CALL XVWRIT(IOUT,BUF,ISTAT,' ')
+		END DO
+	    END DO
+	    CALL XVCLOSE(IOUT,ISTAT,' ')
+	    CALL XVOPEN(IOUT,ISTAT,'IO_ACT','SA','OPEN_ACT','SA',
+     &	           'OP','UPDATE',' ')
+	ELSE
+	    CALL XVOPEN(IOUT,ISTAT,'IO_ACT','SA','OPEN_ACT','SA',
+     &	           'OP','WRITE','U_ORG','BIL','U_NL',NL,'U_NS',NS,' ')
+	END IF
+C						Get and process DATE parameter
+	CALL XVPARM('DATE',IDATE,NUM,IDEF,0)
+	IF (IDATE.LT.0) THEN
+C					Check to see if the date is in the label
+C
+	    CALL XLGET(IN,'HISTORY','INFO1',LABEL,ISTAT,'HIST',
+     &			'TIMSLOG','FORMAT','STRING',' ')
+	    IF (ISTAT.LT.0) CALL XLGET(IN,'HISTORY','INFO1',LABEL,ISTAT,
+     &				'HIST','VTIMSLOG','FORMAT','STRING',' ')
+	    IF (ISTAT.LT.0) CALL XLGET(IN,'HISTORY','LAB1',LABEL,ISTAT,
+     &				'HIST','VTIMSLOG','FORMAT','STRING',' ')
+C
+	    IF (LABEL(6:6).EQ.'D') THEN
+		READ (LABEL,90,err=95) MONTH,IDAY,IYEAR
+   90		FORMAT (14X,I2,1X,I2,1X,I2)
+	    ELSE
+		READ (LABEL,92,err=95) MONTH,IDAY,IYEAR
+   92		FORMAT (17X,I2,1X,I2,1X,I2)
+	    END IF
+	    IDATE = 10000*IYEAR+100*MONTH+IDAY
+   95	    CONTINUE
+	END IF
+	IF (IDATE .LT. 0) THEN
+	    CALL XVMESSAGE(' Unable to read date in VICAR label.',' ')
+	    CALL XVMESSAGE(
+     +		' Please specify the date as a parameter.',' ')
+	    CALL ABEND
+	END IF
+C							Get the other parameters
+	QBBFIT = XVPTST('BBFIT')
+	QREFCHAN = XVPTST('REFCHAN')
+	CALL XVPARM('E',E,NUM,IDEF,0)
+	CALL XVPARM('REFCHAN',IREF,NUM,IDEF,0)
+C							       Get lookup tables
+	CALL GET_TIMS_RAD_LUT(IDATE,0.0,RAD_LUT)
+	CALL GET_TIMS_TEMP_LUT(IDATE,0.0,TEMP_LUT)
+C					    Remove obsolete VICAR history labels
+	CALL XLDEL(IOUT,'HISTORY','LBL1',ISTAT,'HIST','TIMSCAL',' ')
+	CALL XLDEL(IOUT,'HISTORY','LBL2',ISTAT,'HIST','TIMSCAL',' ')
+	CALL XLDEL(IOUT,'HISTORY','LBL1',ISTAT,'HIST','TIMSCAL2',' ')
+	CALL XLDEL(IOUT,'HISTORY','LBL2',ISTAT,'HIST','TIMSCAL2',' ')
+	CALL XLDEL(IOUT2,'HISTORY','LBL1',ISTAT,'HIST','TIMSCAL',' ')
+	CALL XLDEL(IOUT2,'HISTORY','LBL2',ISTAT,'HIST','TIMSCAL',' ')
+	CALL XLDEL(IOUT2,'HISTORY','LBL1',ISTAT,'HIST','TIMSCAL2',' ')
+	CALL XLDEL(IOUT2,'HISTORY','LBL2',ISTAT,'HIST','TIMSCAL2',' ')
+C						    Add new VICAR history labels
+	CALL XLADD(IOUT,'HISTORY','LBL1','Emissivity Image',
+     &			ISTAT,'FORMAT','STRING',' ')
+	CALL XLADD(IOUT,'HISTORY','LBL2','DN = 10,000*Emissivity',
+     &			ISTAT,'FORMAT','STRING',' ')
+	CALL XLADD(IOUT2,'HISTORY','LBL1','Ground Temperature Image',
+     &			ISTAT,'FORMAT','STRING',' ')
+	CALL XLADD(IOUT2,'HISTORY','LBL2',
+     &	      'DN = 100*Degrees Celsius',ISTAT,'FORMAT','STRING',' ')
+C
+C									refchan
+	IF (QREFCHAN) THEN
+     	    WRITE (LABEL,100) E,IREF
+  100	    FORMAT(F5.3,' emittance fit to reference channel',I2)
+   	    CALL XLADD(IOUT,'HISTORY','METHOD',LABEL,ISTAT,
+     &		       'FORMAT','STRING',' ')
+  	    CALL XLADD(IOUT2,'HISTORY','METHOD',LABEL,ISTAT,
+     &			'FORMAT','STRING',' ')
+	    CALL EMISCAL(IN,IOUT,IOUT2,ISL,ISS,NL,NS,IREF,E,RAD_LUT,
+     &			 TEMP_LUT)
+C									bbfit
+	ELSE IF (QBBFIT) THEN
+	    WRITE (LABEL,200) E
+  200	    FORMAT(F5.3,' Emittance graybody fit')
+	    CALL XLADD(IOUT,'HISTORY','METHOD',LABEL,ISTAT,
+     &			'FORMAT','STRING',' ')
+	    CALL XLADD(IOUT2,'HISTORY','METHOD',LABEL,ISTAT,
+     &			'FORMAT','STRING',' ')
+	    CALL EMISCAL2(IN,IOUT,IOUT2,ISL,ISS,NL,NS,E,RAD_LUT,
+     &			  TEMP_LUT)
+C									2-Chan
+	ELSE
+	    CALL XLADD(IOUT,'HISTORY','METHOD','Two channel fit',
+     &			ISTAT,'FORMAT','STRING',' ')
+	    CALL XLADD(IOUT2,'HISTORY','METHOD','Two channel fit',
+     &			ISTAT,'FORMAT','STRING',' ')
+	    CALL EMISCAL3(IN,IOUT,IOUT2,ISL,ISS,NL,NS,E,RAD_LUT,
+     &			  TEMP_LUT)
+	END IF
+C								Close datasets
+	CALL XVCLOSE(IN,ISTAT,' ')
+	CALL XVCLOSE(IOUT,ISTAT,' ')
+	CALL XVCLOSE(IOUT2,ISTAT,' ')
+	RETURN
+	END
+C***********************************************************************
+	SUBROUTINE EMISCAL(IN,IOUT,IOUT2,ISL,ISS,NL,NS,IREF,E,RAD_LUT,
+     +			   TEMP_LUT)
+C
+	REAL BBRAD(5000,6)
+	INTEGER*2 RAD_LUT(40000,6),TEMP_LUT(32767,6)
+	INTEGER*2 OUTBUF(5000),INBUF(5000)
+C
+	ILINE = ISL
+	DO I=1,NL
+	    CALL XVREAD(IN,INBUF,ISTAT,'LINE',ILINE,'BAND',IREF,' ')
+	    ISAMP = ISS
+	    DO J=1,NS
+		IRAD = NINT(INBUF(ISAMP)/E)
+		IRAD = MIN(32767,MAX(1,IRAD))
+		ITEMP = TEMP_LUT(IRAD,IREF)
+		OUTBUF(J) = ITEMP
+		DO ICHAN=1,6
+		    BBRAD(J,ICHAN) = RAD_LUT(ITEMP+27315,ICHAN)
+C                                               BBRAD(J,ICHAN) is the blackbody
+C                                               radiance of channel ICHAN at
+C                                               temperature ITEMP.
+		END DO
+		ISAMP = ISAMP+1
+	    END DO
+	    CALL XVWRIT(IOUT2,OUTBUF,ISTAT,' ')
+	    DO ICHAN=1,6
+		CALL XVREAD(IN,INBUF,ISTAT,'LINE',ILINE,
+     +			    'BAND',ICHAN,' ')
+		ISAMP = ISS
+		DO J=1,NS
+		    OUTBUF(J) = 10000.0*INBUF(ISAMP)/BBRAD(J,ICHAN) + .5
+		    ISAMP = ISAMP+1
+		END DO
+		CALL XVWRIT(IOUT,OUTBUF,ISTAT,'LINE',I,'BAND',ICHAN,' ')
+	    END DO
+	    ILINE = ILINE+1
+	END DO
+	RETURN
+	END
+C***********************************************************************
+	SUBROUTINE EMISCAL2(IN,IOUT,IOUT2,ISL,ISS,NL,NS,E,RAD_LUT,
+     +			    TEMP_LUT)
+C
+	INTEGER*2 RAD_LUT(40000,6),TEMP_LUT(32767,6)
+	INTEGER*2 OUTBUF(5000,6),INBUF(5000,6),TBUF(5000)
+C
+	IEL = ISL + NL - 1
+	DO ILINE=ISL,IEL
+	    DO ICHAN=1,6
+		CALL XVREAD(IN,INBUF(1,ICHAN),ISTAT,'LINE',ILINE,
+     +			    'SAMP',ISS,'NSAMPS',NS,'BAND',ICHAN,' ')
+	    END DO
+	    DO ISAMP=1,NS
+C						Find the max temperature that is
+C						consistent with the given max e
+		ITEMP = -32768
+		DO ICHAN=1,6
+		    IRAD = NINT(INBUF(ISAMP,ICHAN)/E)
+		    IRAD = MIN(32767,MAX(1,IRAD))
+		    ITEMP = MAX(ITEMP,TEMP_LUT(IRAD,ICHAN))
+		END DO
+		TBUF(ISAMP) = ITEMP
+		DO ICHAN=1,6
+		    OUTBUF(ISAMP,ICHAN) = NINT(10000.0 * FLOAT(
+     +				INBUF(ISAMP,ICHAN)) / FLOAT(
+     +				RAD_LUT(ITEMP+27315,ICHAN)))
+		END DO
+	    END DO
+	    CALL XVWRIT(IOUT2,TBUF,ISTAT,' ')
+	    DO ICHAN=1,6
+		CALL XVWRIT(IOUT,OUTBUF(1,ICHAN),ISTAT,
+     +			    'LINE',ILINE-ISL+1,'BAND',ICHAN,' ')
+	    END DO
+	END DO
+	RETURN
+	END
+C***********************************************************************
+	SUBROUTINE EMISCAL3(IN,IOUT,IOUT2,ISL,ISS,NL,NS,E,RAD_LUT,
+     +			    TEMP_LUT)
+C
+	REAL EMIS(6)
+	INTEGER*2 RAD_LUT(40000,6),TEMP_LUT(32767,6)
+	INTEGER*2 OUTBUF(5000,6),INBUF(5000,6),TBUF(5000),IRAD(6)
+C
+	IEL = ISL + NL - 1
+	DO ILINE=ISL,IEL
+	    DO ICHAN=1,6
+		CALL XVREAD(IN,INBUF(1,ICHAN),ISTAT,'LINE',ILINE,
+     +			    'SAMP',ISS,'NSAMPS',NS,'BAND',ICHAN,' ')
+	    END DO
+	    DO ISAMP=1,NS
+		ITEMP = -32768
+		DO ICHAN=1,6
+		    IRAD(ICHAN) = NINT(INBUF(ISAMP,ICHAN)/E)
+		    IRAD(ICHAN) = MIN(32767,MAX(1,IRAD(ICHAN)))
+		    ITEMP = MAX(ITEMP,TEMP_LUT(IRAD(ICHAN),ICHAN))
+		END DO
+		ITEMP = MIN(ITEMP+27315,40000)
+C						calculate bbfit emittances
+		DO ICHAN=1,6
+		    BB = RAD_LUT(ITEMP,ICHAN)
+		    IF (BB .NE. 0.0) THEN
+			EMIS(ICHAN) = IRAD(ICHAN)/BB
+		    ELSE
+			EMIS(ICHAN) = -10.0*ICHAN
+		    END IF
+		END DO
+C				find the 2 emittances in closest agreement
+		DELTA = 10000000.0
+		DO I=2,6
+		    DO J=1,I-1
+			ETEST = ABS(EMIS(I)-EMIS(J))
+			IF (ETEST .LT. DELTA) THEN
+			    DELTA = ETEST
+			    II = I
+			    JJ = J
+			END IF
+		    END DO
+		END DO
+C							     compute temperature
+		RATIO = FLOAT(IRAD(JJ)) / FLOAT(IRAD(II))
+		ITEMP = NEWTEMP(RATIO,JJ,II,ITEMP,RAD_LUT)
+		TBUF(ISAMP) = ITEMP - 27315
+C
+C				compute emittances based upon output temperature
+		DO ICHAN=1,6
+		    OUTBUF(ISAMP,ICHAN)=NINT(10000.0*FLOAT(IRAD(ICHAN))/
+     +					    FLOAT(RAD_LUT(ITEMP,ICHAN)))
+		END DO
+	    END DO
+C							       write out results
+	    CALL XVWRIT(IOUT2,TBUF,ISTAT,' ')
+	    DO ICHAN=1,6
+		CALL XVWRIT(IOUT,OUTBUF(1,ICHAN),ISTAT,
+     +			    'LINE',ILINE-ISL+1,'BAND',ICHAN,' ')
+	    END DO
+	END DO
+	RETURN
+	END
+C****************************************************************************
+	FUNCTION NEWTEMP(RATIO,ICHAN,JCHAN,ITEMP,RAD_LUT)
+C
+C	Use the bisection method to solve for temperature, given the ratio of
+C	the radiances (RATIO) at two given wavelengths (WVL1 and WVL2). 
+C	TEMPIN is a first trial value for the solution.
+C
+	INTEGER*2 RAD_LUT(40000,6)
+C
+	LOWTEMP = ITEMP - 4096
+	IHITEMP = ITEMP + 4096
+	VLOW = RATIO - (FLOAT(RAD_LUT(LOWTEMP-1,ICHAN) +
+     +		RAD_LUT(LOWTEMP,ICHAN) + RAD_LUT(LOWTEMP+1,ICHAN)) /
+     +		FLOAT(RAD_LUT(LOWTEMP-1,JCHAN) +
+     +	 	RAD_LUT(LOWTEMP,JCHAN) + RAD_LUT(LOWTEMP+1,JCHAN)))
+	DO I=1,13
+	    MTEMP = (LOWTEMP + IHITEMP) / 2
+	    VSOLVE = RATIO - (FLOAT(RAD_LUT(MTEMP-1,ICHAN) +
+     +		RAD_LUT(MTEMP,ICHAN) + RAD_LUT(MTEMP+1,ICHAN)) /
+     +		FLOAT(RAD_LUT(MTEMP-1,JCHAN) +
+     +		RAD_LUT(MTEMP,JCHAN) + RAD_LUT(MTEMP+1,JCHAN)))
+	    IF (VSOLVE*VLOW .GT. 0.0) THEN
+		LOWTEMP = MTEMP
+		VLOW = VSOLVE
+	    ELSE
+		IHITEMP = MTEMP
+	    END IF
+	END DO
+C
+	VHI = RATIO - (FLOAT(RAD_LUT(IHITEMP-1,ICHAN) +
+     +		RAD_LUT(IHITEMP,ICHAN) + RAD_LUT(IHITEMP+1,ICHAN)) /
+     +		FLOAT(RAD_LUT(IHITEMP-1,JCHAN) +
+     +		RAD_LUT(IHITEMP,JCHAN) + RAD_LUT(IHITEMP+1,JCHAN)))
+	IF (ABS(VLOW) .LE. ABS(VHI)) THEN
+	    NEWTEMP = LOWTEMP
+	ELSE
+	    NEWTEMP = IHITEMP
+	END IF
+C
+	RETURN
+	END

@@ -1,0 +1,23 @@
+/* 
+
+IMAKE file for Test of VICAR subroutine GPDS_REPLACE_COLUMN_VALUE 		
+
+*/
+
+#define PROGRAM tgpdsrcvalue
+
+#define MODULE_LIST tgpdsrcvalue.c
+
+#define MAIN_LANG_C
+#define TEST
+
+#define USES_C
+
+#if UNIX_OS
+#define C_OPTIONS -D SUN_UNIX -D PDS_TOOLBOX
+#endif
+
+#define   LIB_RTL
+#define   LIB_TAE
+#define   LIB_P2SUB
+#define   LIB_PDS_LABEL

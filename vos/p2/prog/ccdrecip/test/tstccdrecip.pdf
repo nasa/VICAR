@@ -1,0 +1,568 @@
+procedure
+parm    mode    type=keyword count=(0:1) valid=(batch,nobatch,inter) default=inter
+local   afidsroot   type=string count=1
+! Feb 18, 2013 - RJB
+! TEST SCRIPT FOR TSTCCDNOISE
+! tests HALF images
+!
+! Vicar Programs:
+!       f2 copy label-rep createfile addtofile
+!       reset ltgen momgen2 typeit gausnois
+!
+! External programs
+!       gnuplot 4.6.x 
+!       gimp for eps file
+!
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no xvd display
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!           
+!   In batch mode it produces files testx.eps by calling gnuplot
+!       to create the encapsulated postscript file which can be
+!       later viewed with ghostscript or gimp
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
+!            
+! Requires external test data: 
+!   cartlab or mipl dependent pointers
+
+refgbl $autousage
+refgbl $echo
+refgbl $syschar
+body
+let $autousage="none"
+let _onfail="goto rm"
+let $echo="yes"
+
+!check to see if mipl or cartlab for certain programs
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+
+if (afidsroot = "")
+!MIPL        
+    ush ln -s /project/test_work/testdata/cassini/iss cas 
+else         
+!CARTLAB     
+    ush ln -s /raid1/vicar_test_images/testdata/cassini/iss cas
+end-if       
+            
+  defcmd-replace typeit "ush cat"
+            
+
+!=================================================================
+!First, check the results from simulated data to verify algoritm.
+!Second, see that the sample- and line-dependent modes get the
+!same answer.
+!=================================================================
+ 
+!CASSINI TEST:
+ 
+!---------------------------
+! Make TEST.LTF a test reciprocity file which has exposure levels of
+! 0,10,20,40 and each input frame was 10, 910, 960, 985 dn, with
+! radiances of 0,100,50,25 respectively.
+!
+! A sequence with a shutter-offset of zero would have DNs of exactly
+! Radiance*EXP + DC or (10, 1010, 1010, 1010) assuming a sensitivity of 1.0.
+! The use of uniform images of (10, 910, 960, 985) DN should give a
+! shutter-offset of 1.0.
+!---------------------------
+ 
+!Set dns to 10 and replicate - exposure = 0.0
+f2 inp=cas/sum2.1 out=l1.a func=10
+copy l1.a l1.b
+copy l1.a l1.c
+ 
+!Set dns to 910 and replicate - set exposure to 10, radiance to 100
+f2 inp=cas/sum2.1 out=l2.a func=910
+label-rep l2.a 'prop property="CASSINI-ISS" item="EXPOSURE_DURATION=10. +
+            RADIANCE=100."
+copy l2.a l2.b
+copy l2.a l2.c
+ 
+!Set dns to 960 and replicate - set exposure to 20, radiance to 50
+f2 inp=cas/sum2.1 out=l3.a func=960
+label-rep l3.a 'prop property="CASSINI-ISS" item="EXPOSURE_DURATION=20. +
+            RADIANCE=50."
+copy l3.a l3.b
+copy l3.a l3.c
+ 
+!Set dns to 985 and replicate - set exposure to 40, radiance to 25
+f2 inp=cas/sum2.1 out=l4.a func=985
+label-rep l4.a 'prop property="CASSINI-ISS" item="EXPOSURE_DURATION=40. +
+            RADIANCE=25."
+copy l4.a l4.b
+copy l4.a l4.c
+ 
+!Create list of the files created
+createfile l.list
+addtofile l.list "NEXT FILE=0001"
+addtofile l.list "l1.a"
+addtofile l.list "l1.b"
+addtofile l.list "l1.c"
+addtofile l.list "l2.a"
+addtofile l.list "l2.b"
+addtofile l.list "l2.c"
+addtofile l.list "l3.a"
+addtofile l.list "l3.b"
+addtofile l.list "l3.c"
+addtofile l.list "l4.a"
+addtofile l.list "l4.b"
+addtofile l.list "l4.c"
+reset l.list
+typeit l.list 
+ 
+!Initialize Light Transfer File
+ltgen l1.a out=test.ltf list=l.list 'grid
+ 
+!Fill Light Transfer File with stats
+momgen2 list=l.list ltfrcp=test.ltf
+
+! TEST 1  - Raw Cassini data
+ccdrecip test.ltf 'SAMP  light=(0,100,50,25) 'RADIANCE +
+ arraysiz=512  offset=so.file  areatbl=area.tbl +
+ offtbl=off.tbl  avofftbl=meanoff.tbl +
+ plot=test1
+
+typeit area.tbl
+typeit off.tbl
+typeit meanoff.tbl
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test1.gpi
+end-if
+
+
+!---------------------------
+! Repeat with noise-added input data
+!---------------------------
+!Set dns to 10 and replicate - exposure = 0.0
+ 
+gausnois a.dat mean=0 sigma=3 format=half seed=13 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m1.a func=10+in2
+gausnois a.dat mean=0 sigma=3 format=half seed=17 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m1.b func=10+in2
+gausnois a.dat mean=0 sigma=3 format=half seed=19 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m1.c func=10+in2
+ 
+!Set dns to 910 and replicate - set exposure to 10, radiance to 100
+gausnois a.dat mean=0 sigma=30 format=half seed=13 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m2.a func=910+in2
+label-rep m2.a 'prop property="CASSINI-ISS" +
+    item="EXPOSURE_DURATION=10. RADIANCE=100."
+gausnois a.dat mean=0 sigma=30 format=half seed=17 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m2.b func=910+in2
+label-rep m2.b 'prop property="CASSINI-ISS" +
+    item="EXPOSURE_DURATION=10. RADIANCE=100."
+gausnois a.dat mean=0 sigma=30 format=half seed=19 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m2.c func=910+in2
+label-rep m2.c 'prop property="CASSINI-ISS" +
+    item="EXPOSURE_DURATION=10. RADIANCE=100."
+ 
+!Set dns to 960 and replicate - set exposure to 20, radiance to 50
+gausnois a.dat mean=0 sigma=30 format=half seed=13 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m3.a func=960+in2
+label-rep m3.a 'prop property="CASSINI-ISS" +
+    item="EXPOSURE_DURATION=20. RADIANCE=50."
+gausnois a.dat mean=0 sigma=30 format=half seed=17 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m3.b func=960+in2
+label-rep m3.b 'prop property="CASSINI-ISS" +
+    item="EXPOSURE_DURATION=20. RADIANCE=50."
+gausnois a.dat mean=0 sigma=30 format=half seed=19 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m3.c func=960+in2
+label-rep m3.c 'prop property="CASSINI-ISS" +
+    item="EXPOSURE_DURATION=20. RADIANCE=50."
+ 
+!Set dns to 985 and replicate - set exposure to 40, radiance to 25
+gausnois a.dat mean=0 sigma=30 format=half seed=13 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m4.a func=985+in2
+label-rep m4.a 'prop property="CASSINI-ISS" +
+    item="EXPOSURE_DURATION=40. RADIANCE=25."
+gausnois a.dat mean=0 sigma=30 format=half seed=17 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m4.b func=985+in2
+label-rep m4.b 'prop property="CASSINI-ISS" +
+    item="EXPOSURE_DURATION=40. RADIANCE=25."
+gausnois a.dat mean=0 sigma=30 format=half seed=19 nl=512 ns=512
+f2 (cas/sum2.1, a.dat) m4.c func=985+in2
+label-rep m4.c 'prop property="CASSINI-ISS" +
+    item="EXPOSURE_DURATION=40. RADIANCE=25."
+ 
+!Create list of the files created
+createfile m.list
+addtofile m.list "NEXT FILE=0001"
+addtofile m.list "m1.a"
+addtofile m.list "m1.b"
+addtofile m.list "m1.c"
+addtofile m.list "m2.a"
+addtofile m.list "m2.b"
+addtofile m.list "m2.c"
+addtofile m.list "m3.a"
+addtofile m.list "m3.b"
+addtofile m.list "m3.c"
+addtofile m.list "m4.a"
+addtofile m.list "m4.b"
+addtofile m.list "m4.c"
+reset m.list 
+typeit m.list
+ 
+!Initialize Light Transfer File
+ltgen m1.a out=testm.ltf list=m.list 'GRID
+ 
+!Fill Light Transfer File with stats
+momgen2 list=m.list ltfrcp=testm.ltf
+
+! TEST 2 - Cassini with added noise
+! 
+ccdrecip testm.ltf 'SAMP  light=(0,100,50,25) 'RADIANCE +
+ arraysiz=512  offset=so.file  areatbl=aream.tbl +
+ offtbl=offm.tbl  avofftbl=meanoffm.tbl +
+  plot=test2
+
+typeit aream.tbl
+typeit offm.tbl
+typeit meanoffm.tbl
+! Note xrt graph created a dynamic range for plot
+! so small differences didn't show on plotting
+! appeared to be a straight line at 1.0
+! gnuplot shows the small differences in its plot
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test2.gpi
+end-if
+!goto rm 
+! Left the following code in for historical reasons
+
+!---------------------------
+! Deriving the sample-dependent shutter-offset
+!---------------------------
+!Introduce a shutter offset in the sample direction by creating a
+! ramp in DN in the sample direction.  At each exposure level, use
+! a different amount of ramping across the 512 samples.  A ramp of101 DN
+! for exp=100, 51 for exp=50 and 26 for exp=26 will be used to generate
+! a shutter-offset which goes from 1.0 at sample 1 to 2.0 at sample 512.
+! (i.e., an average offset of 1.5)
+!---------------------------
+ 
+gen x.dat nl=512 ns=256 ival=0 linc=0 sinc=1
+ 
+copy x.dat a.dat (1,1,512,101)
+size a.dat xa.dat (1,1,512,512)
+f2 (l2.a, xa.dat) l6.a func=in1-in2
+maxmin l6.a (1,1,1,512)
+copy l6.a l6.b
+copy l6.a l6.c
+ 
+copy x.dat a.dat (1,1,512,51)
+size a.dat xa.dat (1,1,512,512)
+f2 (l3.a, xa.dat) l7.a func=in1-in2
+maxmin l7.a (1,1,1,512)
+copy l7.a l7.b
+copy l7.a l7.c
+ 
+copy x.dat a.dat (1,1,512,26)
+size a.dat xa.dat (1,1,512,512)
+f2 (l4.a, xa.dat) l8.a func=in1-in2
+maxmin l8.a (1,1,1,512)
+copy l8.a l8.b
+copy l8.a l8.c
+ 
+!Create list of the files created
+createfile n.list
+addtofile n.list "NEXT FILE=0001"
+addtofile n.list "l1.a"
+addtofile n.list "l1.b"
+addtofile n.list "l1.c"
+addtofile n.list "l6.a"
+addtofile n.list "l6.b"
+addtofile n.list "l6.c"
+addtofile n.list "l7.a"
+addtofile n.list "l7.b"
+addtofile n.list "l7.c"
+addtofile n.list "l8.a"
+addtofile n.list "l8.b"
+addtofile n.list "l8.c"
+reset n.list
+typeit n.list
+ 
+!Initialize Light Transfer File
+ltgen l1.a out=test.ltf list=n.list 'GRID
+ 
+!Fill Light Transfer File with stats
+momgen2 list=n.list ltfrcp=test.ltf
+
+! TEST 3  - Genned CCD data
+ccdrecip test.ltf 'SAMP  light=(0,100,50,25) 'RADIANCE +
+ arraysiz=512  offset=so.file  areatbl=area.tbl +
+ offtbl=off.tbl  avofftbl=meanoff.tbl reject=0 +
+ plot=test3
+
+typeit area.tbl
+typeit off.tbl
+typeit meanoff.tbl
+
+!
+!  TEST 4 - Repeat Test 3, but eps
+ccdrecip test.ltf 'SAMP  light=(0,100,50,25) 'RADIANCE +
+ arraysiz=512  offset=so.file  areatbl=area.tbl +
+ offtbl=off.tbl  avofftbl=meanoff.tbl reject=0 +
+ plot=test4 plotfmt=eps
+
+ush gnuplot test4.eps.gpi
+goto rm 
+if ($syschar(1) = "UNIX")
+   ush rm l1.*
+   ush rm l2.*
+   ush rm l3.*
+   ush rm l4.*
+   ush rm l.list
+   ush rm m.list
+   ush rm n.list
+   ush rm l6.*
+   ush rm l7.*
+   ush rm l8.*
+else
+   dcl del l1.*;*
+   dcl del l2.*;*
+   dcl del l3.*;*
+   dcl del l4.*;*
+   dcl del l.list;*
+   dcl del l6.*;*
+   dcl del l7.*;*
+   dcl del l8.*;* 
+end-if
+ 
+!=================================================================
+ 
+!make galileo style (line-dependent shutter-offset) RCP file
+ltgen &"dir"rcp_5.byte rcp.tst 'GRID ni=3 +
+   exp=(0,4,6,8,12,17,25,33,50,67,100)
+ 
+momgen +
+  (&"dir"rcp_1.byte,&"dir"rcp_2.byte,&"dir"rcp_3.byte) +
+  rcp.tst exp=0
+momgen +
+  (&"dir"rcp_4.byte,&"dir"rcp_5.byte,&"dir"rcp_6.byte) +
+  rcp.tst exp=4
+momgen +
+  (&"dir"rcp_7.byte,&"dir"rcp_8.byte,&"dir"rcp_9.byte) +
+  rcp.tst exp=6
+momgen +
+  (&"dir"rcp_10.byte,&"dir"rcp_11.byte,&"dir"rcp_12.byte) +
+  rcp.tst exp=8
+momgen +
+  (&"dir"rcp_13.byte,&"dir"rcp_14.byte,&"dir"rcp_15.byte) +
+  rcp.tst exp=12
+momgen +
+  (&"dir"rcp_16.byte,&"dir"rcp_17.byte,&"dir"rcp_18.byte) +
+  rcp.tst exp=17
+momgen +
+  (&"dir"rcp_19.byte,&"dir"rcp_20.byte,&"dir"rcp_21.byte) +
+  rcp.tst exp=25
+momgen +
+  (&"dir"rcp_22.byte,&"dir"rcp_23.byte,&"dir"rcp_24.byte) +
+  rcp.tst exp=33
+momgen +
+  (&"dir"rcp_25.byte,&"dir"rcp_26.byte,&"dir"rcp_27.byte) +
+  rcp.tst exp=50
+momgen +
+  (&"dir"rcp_28.byte,&"dir"rcp_29.byte,&"dir"rcp_30.byte) +
+  rcp.tst exp=67
+momgen +
+  (&"dir"rcp_31.byte,&"dir"rcp_32.byte,&"dir"rcp_33.byte) +
+  rcp.tst exp=100
+ 
+ 
+!make cassini style (sample-dependent shutter-offset) RCP file
+!make sure the flotted pixels wind up in the proper place
+!for the new grid to use them
+ 
+ 
+flot &"dir"rcp_1.byte ax.dat 'coun
+fastmos ax.dat a.dat off1=(-5,1)
+flot &"dir"rcp_2.byte ax.dat 'coun
+fastmos ax.dat b.dat off1=(-5,1)
+flot &"dir"rcp_3.byte ax.dat 'coun
+fastmos ax.dat c.dat off1=(-5,1)
+ 
+ltgen b.dat rcps.tst 'GRID ni=3 exp=(0,4,6,8,12,17,25,33,50,67,100)
+ 
+momgen (a.dat,b.dat,c.dat) rcps.tst exp=0
+flot &"dir"rcp_4.byte ax.dat 'coun
+fastmos ax.dat a.dat off1=(-5,1)
+flot &"dir"rcp_5.byte ax.dat 'coun
+fastmos ax.dat b.dat off1=(-5,1)
+flot &"dir"rcp_6.byte ax.dat 'coun
+fastmos ax.dat c.dat off1=(-5,1)
+momgen (a.dat,b.dat,c.dat) rcps.tst exp=4
+flot &"dir"rcp_7.byte ax.dat 'coun
+fastmos ax.dat a.dat off1=(-5,1)
+flot &"dir"rcp_8.byte ax.dat 'coun
+fastmos ax.dat b.dat off1=(-5,1)
+flot &"dir"rcp_9.byte ax.dat 'coun
+fastmos ax.dat c.dat off1=(-5,1)
+momgen (a.dat,b.dat,c.dat) rcps.tst exp=6
+flot &"dir"rcp_10.byte ax.dat 'coun
+fastmos ax.dat a.dat off1=(-5,1)
+flot &"dir"rcp_11.byte ax.dat 'coun
+fastmos ax.dat b.dat off1=(-5,1)
+flot &"dir"rcp_12.byte ax.dat 'coun
+fastmos ax.dat c.dat off1=(-5,1)
+momgen (a.dat,b.dat,c.dat) rcps.tst exp=8
+flot &"dir"rcp_13.byte ax.dat 'coun
+fastmos ax.dat a.dat off1=(-5,1)
+flot &"dir"rcp_14.byte ax.dat 'coun
+fastmos ax.dat b.dat off1=(-5,1)
+flot &"dir"rcp_15.byte ax.dat 'coun
+fastmos ax.dat c.dat off1=(-5,1)
+momgen (a.dat,b.dat,c.dat) rcps.tst exp=12
+flot &"dir"rcp_16.byte ax.dat 'coun
+fastmos ax.dat a.dat off1=(-5,1)
+flot &"dir"rcp_17.byte ax.dat 'coun
+fastmos ax.dat b.dat off1=(-5,1)
+flot &"dir"rcp_18.byte ax.dat 'coun
+fastmos ax.dat c.dat off1=(-5,1)
+momgen (a.dat,b.dat,c.dat) rcps.tst exp=17
+flot &"dir"rcp_19.byte ax.dat 'coun
+fastmos ax.dat a.dat off1=(-5,1)
+flot &"dir"rcp_20.byte ax.dat 'coun
+fastmos ax.dat b.dat off1=(-5,1)
+flot &"dir"rcp_21.byte ax.dat 'coun
+fastmos ax.dat c.dat off1=(-5,1)
+momgen (a.dat,b.dat,c.dat) rcps.tst exp=25
+flot &"dir"rcp_22.byte ax.dat 'coun
+fastmos ax.dat a.dat off1=(-5,1)
+flot &"dir"rcp_23.byte ax.dat 'coun
+fastmos ax.dat b.dat off1=(-5,1)
+flot &"dir"rcp_24.byte ax.dat 'coun
+fastmos ax.dat c.dat off1=(-5,1)
+momgen (a.dat,b.dat,c.dat) rcps.tst exp=33
+flot &"dir"rcp_25.byte ax.dat 'coun
+fastmos ax.dat a.dat off1=(-5,1)
+flot &"dir"rcp_26.byte ax.dat 'coun
+fastmos ax.dat b.dat off1=(-5,1)
+flot &"dir"rcp_27.byte ax.dat 'coun
+fastmos ax.dat c.dat off1=(-5,1)
+momgen (a.dat,b.dat,c.dat) rcps.tst exp=50
+flot &"dir"rcp_28.byte ax.dat 'coun
+fastmos ax.dat a.dat OFF1=(-5,1)
+flot &"dir"rcp_29.byte ax.dat 'coun
+fastmos ax.dat b.dat off1=(-5,1)
+flot &"dir"rcp_30.byte ax.dat 'coun
+fastmos ax.dat c.dat off1=(-5,1)
+momgen (a.dat,b.dat,c.dat) rcps.tst exp=67
+flot &"dir"rcp_31.byte ax.dat 'coun
+fastmos ax.dat a.dat off1=(-5,1)
+flot &"dir"rcp_32.byte ax.dat 'coun
+fastmos ax.dat b.dat off1=(-5,1)
+flot &"dir"rcp_33.byte ax.dat 'coun
+fastmos ax.dat c.dat off1=(-5,1)
+momgen (a.dat,b.dat,c.dat) rcps.tst exp=100
+
+!TEST 4 -RUN CCDRECIP IN LINE- AND SAMPLE-DEPENDENT CASES AND COMPARE
+ 
+ 
+!THE OUTPUT OF THE LINE-DEPENDENT RUNS AND THE SAMPLE-DEPENDENT RUNS
+!MAY BE DIRECTLY COMPARED EXCEPT FOR THE AREA NUMBERS.  BECAUSE THE
+!INPUT DATA HAS BEEN FLOTTED FOR THE SAMPLE-DEPENDENT CASE, THE PIXELS
+!THAT WERE IN AREA X ARE NOW IN AREA Y.  SO THE RESULTS FOR AREAS X AND Y
+!CAN BE COMPARED.
+ 
+!            LINE CASE                   SAMP CASE
+!      X = grid_row,grid_col  -->    11-grid_col,grid_row = Y
+! e.g.
+!      AREA 19 = (2,9)        -->    (2,2) = AREA 12
+ 
+!MAKE THE LIGHT FILE FOR INPUT LATER
+createfile lt.dat 
+addtofile lt.dat "0.0"
+addtofile lt.dat "74.5"
+addtofile lt.dat "50.5"
+addtofile lt.dat "38.7"
+addtofile lt.dat "26.0"
+addtofile lt.dat "20.0"
+addtofile lt.dat "12.8"
+addtofile lt.dat "9.9"
+addtofile lt.dat "6.8"
+addtofile lt.dat "5.2"
+addtofile lt.dat "3.6"
+
+typeit lt.dat
+ 
+!RUN IN LINE-DEPENDENT MODE
+! ---- rcp.tst is Recprocity file from ltgen/momgen containing
+! ---- a line-dependent shutter-offset
+ccdrecip rcp.tst rej=0 array=800 ltfile=lt.dat 'radiance +
+ areatbl=al.tbl offtbl=ol.tbl avofftbl=vl.tbl
+ccdrecip rcp.tst rej=1 array=800 ltfile=lt.dat 'radiance +
+ areatbl=al1.tbl offtbl=ol1.tbl avofftbl=vl1.tbl
+ccdrecip rcp.tst REJ=2 array=800 ltfile=lt.dat 'radiance +
+ areatbl=al2.tbl offtbl=ol2.tbl avofftbl=vl2.tbl
+ccdrecip rcp.tst REJ=3 areatbl=al3.tbl offtbl=ol3.tbl avofftbl=vl3.tbl +
+ light=(0,74.5,50.5,38.7,26,20,12.8,9.9,6.8,5.2,3.6) 'radiance
+ 
+!RUN IN SAMPLE-DEPENDENT MODE
+! ---- rcps.tst is Recprocity file from ltgen/momgen containing
+! ---- a sample-dependent shutter-offset.  It used flotted versions of the
+! ---- inputs used in rcp.tst
+ccdrecip rcps.tst 'samp ltfile=lt.dat 'radiance +
+   rej=0 array=800 areatbl=as.tbl offtbl=os.tbl avofftbl=vs.tbl
+ccdrecip rcps.tst  'samp ltfile=lt.dat 'radiance +
+   rej=1 array=800 areatbl=as1.tbl offtbl=os1.tbl avofftbl=vs1.tbl
+ccdrecip rcps.tst  'samp ltfile=lt.dat 'radiance +
+   rej=2 array=800 areatbl=as2.tbl offtbl=os2.tbl avofftbl=vs2.tbl
+ccdrecip rcps.tst  'samp +
+   rej=3 areatbl=as3.tbl offtbl=os3.tbl avofftbl=vs3.tbl +
+   light=(0,74.5,50.5,38.7,26,20,12.8,9.9,6.8,5.2,3.6) 'radiance
+ 
+!COMPARE SOME TABLES BETWEEN THE MODES
+if ($syschar(1) = "UNIX")
+   ush diff al.tbl as.tbl
+   ush diff vl.tbl vs.tbl
+else
+   dcl diff/para al.tbl,as.tbl
+   dcl diff/para vl.tbl,vs.tbl
+end-if
+ 
+!TRY MARK OUTPUT AND PLOTS FOR BOTH MODES
+! TEST 4A - line depedent mode
+ccdrecip rcp.tst  out=ml.dat offset=sol.dat 'line rej=3 +
+  ltfile=lt.dat array=1024 'radiance plot=line +
+! TEST 4B - sample dependent mode
+ccdrecip rcps.tst  out=ms.dat offset=sos.dat 'samp  REJ=3 +
+  ltfile=lt.dat array=1024 'radiance plot=sample
+ 
+!The plot files will have differences in the titles
+!The mark files will have differences because the areas are flotted
+!with respect to each other
+ 
+!The output image files should be identical except for maybe
+!roundoff error
+difpic (sol.dat, sos.dat) sd
+
+! TEST 5 - eps format
+!
+ccdrecip rcps.tst  out=ms.dat offset=sos.dat 'samp  REJ=3 +
+  ltfile=lt.dat array=1024 'radiance plot=sample2 plotfmt=eps
+
+let $echo="no"
+rm>
+  ush rm -f l.list
+  ush rm -f m.list
+  ush rm -f n.list
+  ush rm -f cas
+  ush rm -f test?.eps
+  ush rm -f test*.gpi
+  ush rm -f test*.asc
+  ush rm -f list?.dat
+  ush rm -f ?.dat
+  ush rm -f xa.dat
+  ush rm -f l?.?
+  ush rm -f m?.?
+  ush rm -f so.file
+  ush rm -f *off*.tbl
+  ush rm -f area*.tbl
+  ush rm -f test*.ltf
+end-proc
+

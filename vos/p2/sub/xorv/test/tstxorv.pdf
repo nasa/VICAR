@@ -1,0 +1,10 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!this is a test of module XORV
+!An 'exclusive or' will be done on the listed constants A & B.
+!Various data type combinations will be tested.
+txorv
+end-proc

@@ -1,0 +1,62 @@
+1 FOMCAV
+
+  Calculates the planet to camera transformation matrix.
+
+  Calling Sequence:  FOMCAV(IND,NPOINT,A,B,OM,RS,CL,CS)
+
+  Arguments:
+
+	IND (output)	Return indicator
+	NPOINT (input)	Number of points
+	A (input)	Reticle descriptive array
+	B (input)	Planet and spacecraft descriptive array
+	OM (output)	Planet to camera transformation matrix
+	RS (output)	Planet to cmmera position vector in planet system
+	CL (input)	Line of camera axis
+	CS (input)	Sample of camera axis
+
+2 History
+
+  Original Programmer: JJL
+  Current Cognizant Programmer:   Helen De Rueda
+  Source Language: Fortran
+
+  Ported for UNIX Conversion:  W.P. Lee,  Jan-15-1993
+
+
+2 Operation
+
+       This routine is a modification of the routine CORCAL as it
+     was in SUPERMAP.   Given a control net of three or more
+     points  on a planetary image, the routine will calculate the
+     planet to camera transformation matrix.
+       This version allows more than three points to be used in the
+     transformation calculation.  If more than 3 image points are
+     specified, then a Linear Least Squares solution to the
+     problem is obtained.  Redundancy in control point specification
+     improves the transformation matrix soln.
+
+2 Arguments
+
+     IND (output)   RETURN INDICATOR
+	              0 = NORMAL RETURN
+	              1 = INITIALIZATION FAILURE
+     NPOINT (input) NUMBER OF POINTS
+     A (input)      RETICLE DESCRIPTIVE ARRAY
+		      A(1,J) = LINE VALUE OF JTH RETICLE POINT
+	              A(2,J) = SAMP VALUE OF JTH RETICLE POINT
+	              A(3,J) = SLANT RANGE TO JTH RETICLE POINT
+	              A(4,J) = LATITUDE OF JTH RETICLE POINT
+	              A(5,J) = LONGITUDE OF JTH RETICLE POINT
+                         , J=1,2,...,NPOINT-1,NPOINT
+     B (input)      PLANET AND SPACECRAFT DESCRIPTIVE ARRAY
+	              B(1) = CAMERA FOCAL LENGTH (IN PIXELS)
+	              B(2) = POLAR FLATTENING (RADIUS AT EQ-RAD.AT POLE)
+	              B(3) = DISTANCE PLANET (CENTER ) TO SPACECRAFT
+	              B(4) = LATITUDE OF SUBSPACECRAFT POINT
+	              B(5) = LONGITUDE OF SUBSPACECRAFT POINT
+	              B(6) = EQUATORIAL RADIUS
+     OM (output)    R*8 PLANET TO CAMERA TRANSFORMATION MATRIX
+     RS (output)    PLANET TO CAMERA POSITION VECTOR IN PLANET SYSTEM
+     CL (input)     LINE OF CAMERA AXIS
+     CS (input)     SAMPLE OF CAMERA AXIS

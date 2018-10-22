@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM ibislsq
+
+   To Create the build file give the command:
+
+		$ vimake ibislsq			(VMS)
+   or
+		% vimake ibislsq			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	ibislsq
+#define R2LIB
+
+#define MODULE_LIST ibislsq.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_MATH77
+/************************* End of Imake file ***************************/

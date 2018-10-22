@@ -1,0 +1,21 @@
+#define SUBROUTINE xvicimage
+
+#define MODULE_LIST XvicRegion.c XvicBasicImage.c XvicImage.c XvicCopyRaw.c \
+   XvicImageOverlay.c XvicStringCursor.c
+
+#define INCLUDE_LIST XvicCopyRawCall_zoom.h XvicCopyRawFn_zoom.h \
+   XvicCopyRawFn_1band.h XvicCopyRawFn_3band.h \
+   XvicCopyRaw_bw.h XvicCopyRaw_color.h XvicCopyRaw_name.h
+
+#define USES_ANSI_C
+
+#define GUI_SUBLIB
+
+#define LIB_MOTIF
+#define LIB_XMU
+
+#if VAX_ARCH
+#define C_OPTIONS /define=NO_XMU
+#undef LIB_XMU
+#endif
+

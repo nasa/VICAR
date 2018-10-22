@@ -1,0 +1,33 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+!!!!!!!!!
+Write " "
+Write " The Test Data are handeled for both VMS and UNIX in this PDF."
+Write " At present (May 1994), in order to run this program, the"
+Write " following data files MUST be copied to the LOCAL directory"
+Write " where the program resides:"
+Write " "
+Write "                        OLD       NEW  (VMS or UNIX execution)"
+Write " mipldisk:[mipl.vgr]colors.dat => colors.dat"
+Write " mipldisk:[mipl.vgr]uranus.ora => uranus.ora"
+Write " mipldisk:[mipl.vgr]uranus.gre => uranus.gre"
+Write " mipldisk:[mipl.vgr]uranus.blu => uranus.blu"
+Write " v2$scratch:out.red            => out.red"
+Write " v2$scratch:out.gre            => out.gre"
+Write " v2$scratch:out.blu            => out.blu"
+Write " "
+Write " "
+let $echo="yes"
+!!
+!!
+giaconda inp=(uranus.ora,uranus.gre,uranus.blu), +
+         out=(out.red,out.gre,out.blu), +
+         scfname=(colors.dat), +
+         colors=(red,blue,gray)
+!!
+!!
+end-proc

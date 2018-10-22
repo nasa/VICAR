@@ -1,0 +1,102 @@
+process help=*
+PARM OUT	STRING
+PARM NROW	INTEGER 
+PARM NCOL	INTEGER
+PARM INCR	INTEGER   
+PARM CONSTANT	REAL    
+PARM CL		REAL
+PARM CS		REAL
+END-PROC
+.TITLE
+VICAR Program RADDIST
+.HELP
+
+RADDIST is a VICAR applications program which produces a MARK-format
+coordinate set similar to GRIDGEN output.  However, RADDIST output is a
+rectilinear set which has been transformed by a radial distortion.
+
+EXECUTION
+
+	raddist out parms
+
+OPERATION
+
+A geometric radial distortion is applied to set of points in a regular
+grid.  The geometry of the undistorted grid is defined by the NROW, NCOL,
+and INCR parameters.  The coordinates of the output points are written
+in MARK format (see VICAR program MARK).  This is just a Real*4 file
+of Line, Sample pairs on one record.
+
+The distortion is applied using the equation:
+
+	Rnew = Rold + A*Rold**3
+
+where Rnew is the new radius from center to point,
+      Rold is the old radius from center to point,
+      A is the input constant.
+
+The center is specified by parameters CL and CS.
+	
+
+RESTRICTIONS
+
+1.  No more than 900 coordinates.
+
+EXAMPLE
+
+   raddist out=R ncol=20 nrow=20 inc=20 constant=1.0E-06 cl=512 cs=512
+
+
+WRITTEN BY:             Charlie Avis
+
+COGNIZANT PROGRAMMER:   Charlie Avis
+
+REVISIONS:
+     4-94 ...CCA... INITIAL RELEASE
+     1-97 ...CCA... ADDED CL CS PARAMETERS FOR CENTER OF DISTORTION
+     6-97 ...RRD... MADE PORTABLE FOR UNIX
+
+.LEVEL1
+.VARIABLE OUT
+Output file name
+.VARIABLE NROW
+Number of rows in 
+the coordinate grid
+.VARIABLE NCOL
+Number of columns in 
+the coordinate grid
+.VARIABLE INCR
+Line and Sample increment
+between rows and columns
+.VARIABLE CONSTANT
+The distortion constant
+.VARIABLE CL
+Line of center of 
+distortion function.
+.VARIABLE CS
+Sample of center of 
+distortion function.
+.LEVEL2
+.VARIABLE OUT
+STRING
+Output filename
+.VARIABLE NROW
+INTEGER
+Number of rows in the coordinate grid.
+.VARIABLE NCOL
+INTEGER
+Number of columns in the coordinate grid.
+.VARIABLE INCR
+INTEGER
+Line and Sample increment between rows and columns.
+.VARIABLE CONSTANT
+REAL
+The distortion constant A in the equation:
+	Rnew = Rold + A*Rold**3
+.VARIABLE CL
+INTEGER
+CENTER LINE NUMBER
+.VARIALBE CS
+INTEGER 
+CENTER SAMPLE NUMBER
+.END

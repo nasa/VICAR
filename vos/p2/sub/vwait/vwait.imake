@@ -1,0 +1,18 @@
+/* Imake file for VICAR subroutine VWAIT */
+
+#define SUBROUTINE vwait
+
+#if VMS_OS
+#define MODULE_LIST vwait.mar zvwait.c
+#define CLEAN_OTHER_LIST vwait.c 
+#else
+#define MODULE_LIST vwait.c 
+#define CLEAN_OTHER_LIST vwait.mar zvwait.c 
+#endif
+
+#define P2_SUBLIB
+
+#define USES_C
+#if VMS_OS
+#define USES_MACRO
+#endif

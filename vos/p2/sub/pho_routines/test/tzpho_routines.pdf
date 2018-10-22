@@ -1,0 +1,327 @@
+process execute=tzpho_routines help=*
+
+
+
+    parm PHO_FUNC	string 	count=0:1 	+
+			valid=(	LAMBERT,	+
+				MINNAERT,	+
+				IRVINE,		+
+				VEVERKA,	+
+				BURATTI1,	+
+				BURATTI2,	+
+				BURATTI3,	+
+				MOSHER,		+
+				LUMME_BOWEL_HG1,+
+				HAPKE_81_LE2,	+
+				HAPKE_81_COOK,	+
+				HAPKE_86_HG1,	+
+				HAPKE_86_HG2,	+
+				HAPKE_86_LE2,	+
+				HAPKE_HG1_DOM,	+
+				REGNER_HAPKE_HG1,+
+				ATMO_CORR_REGNER) +
+			default=MINNAERT
+
+    parm ALBEDO 	real count=0:1 +
+			valid=(0:1)	default=1.0
+    parm EXPONENT 	real count=0:1 +
+			valid=(0:1)	default=0.5
+    parm A_VEVERKA 	real count=0:1 +
+					default=--
+    parm B_VEVERKA 	real count=0:1 +
+					default=--
+    parm C_VEVERKA 	real count=0:1 +
+					default=--
+    parm D_VEVERKA 	real count=0:1 +
+					default=-- 
+    parm MO_EXP1 	real count=0:1 +
+					default=--
+    parm MO_EXP2 	real count=0:1 +
+					default=--
+    parm E_BURATTI 	real count=0:1 +
+					default=--
+    parm DEN_SOIL 	real count=0:1 +
+					default=--
+    parm W_SOIL 	real count=0:1 +
+			valid=(0:1)	default=--
+    parm HG1_SOIL 	real count=0:1 +
+					default=--
+    parm HG2_SOIL 	real count=0:1 +
+					default=--
+    parm HG_ASY_SOIL 	real count=0:1 +
+					default=--
+    parm LE1_SOIL 	real count=0:1 +
+					default=--
+    parm LE2_SOIL 	real count=0:1 +
+					default=--
+    parm H_SHOE 	real count=0:1 +
+					default=--
+    parm B_SHOE 	real count=0:1 +
+					default=--
+    parm H_CBOE 	real count=0:1 +
+					default=--
+    parm B_CBOE 	real count=0:1 +
+					default=--
+    parm THETA 		real count=0:1 +
+					default=--
+    parm COOK 		real count=0:1 +
+					default=--
+    parm TAU_ATM 	real count=0:1 +
+					default=--
+    parm W_ATM 		real count=0:1 +
+			valid=(0:1)	default=--
+    parm HG1_ATM 	real count=0:1 +
+					default=--
+    parm IRV_EXP1 	real count=0:1 +
+					default=--
+    parm IRV_EXP2 	real count=0:1 +
+					default=--
+    parm INC_ANG	real count=0:1 +
+					default=--
+    parm EM_ANG 	real count=0:1 +
+					default=--
+    parm PHAS_ANG 	real count=0:1 +
+					default=--
+
+end-proc
+ 
+.Title
+ TZPHO_ROUTINES - test general photometric subroutine package
+
+.HELP
+ C test program for the general photometric subroutine package
+
+.LEVEL1
+
+.VARI PHO_FUNC
+photometric function
+
+.VARI ALBEDO
+albedo
+
+.VARI EXPONENT
+Minnaert's konstant
+
+.VARI A_VEVERKA 
+Veverka parameter
+
+.VARI B_VEVERKA
+Veverka parameter
+
+.VARI C_VEVERKA
+Veverka parameter
+
+.VARI D_VEVERKA
+Veverka parameter
+
+.VARI MO_EXP2
+Mosher's exponent
+
+.VARI MO_EXP1
+Mosher's exponent
+
+.VARI E_BURATTI
+Buratti's parameter
+
+.VARI DEN_SOIL
+Hapke parameter
+
+.VARI W_SOIL
+Hapke parameter
+
+.VARI HG1_SOIL
+Hapke Parameter
+
+.VARI HG2_SOIL
+Hapke parameter
+
+.VARI HG_ASY_SOIL
+Hapke parameter
+
+.VARI LE1_SOIL
+Hapke parameter
+
+.VARI LE2_SOIL
+Hapke parameter
+
+.VARI H_SHOE
+Hapke parameter
+
+.VARI B_SHOE
+Hapke parameter
+
+.VARI H_CBOE
+Hapke-Dominique parameter
+
+.VARI B_CBOE
+Hapke-Dominique parameter
+
+.VARI THETA
+Hapke parameter
+
+.VARI COOK
+Hapke-Cook parameter
+
+.VARI TAU_ATM
+Regner parameter
+
+.VARI W_ATM
+Regner parameter
+
+.VARI HG1_ATM
+Regner parameter
+
+.VARI IRV_EXP1
+Irvine parameter
+
+.VARI IRV_EXP2
+Irvine parameter
+
+.VARI INC_ANG
+incidence angle
+
+.VARI EM_ANG
+emission angle
+
+.VARI PHAS_ANG
+phase angle
+
+.LEVEL2
+
+.VARI PHO_FUNC
+Name of the photometric function
+
+.VARI ALBEDO
+Albedo -  valid for the Lambert and Minnaert photometric functions.
+
+.VARI EXPONENT
+Exponent - the geometrical constant k of the Minnaert photometric function.
+
+.VARI A_VEVERKA 
+Parameter of the Veverka, Squyres-Veverka and Mosher photometric functions.
+
+.VARI B_VEVERKA
+Parameter of the Veverka, Mosher, Squyres-Veverka and Buratti 
+photometric functions.
+
+.VARI C_VEVERKA
+Parameter of the Veverka, Mosher, Squyres-Veverka and Buratti 
+photometric functions.
+
+.VARI D_VEVERKA
+Parameter of the Veverka, Mosher, Squyres-Veverka and Buratti 
+photometric functions.
+
+.VARI E_BURATTI
+Buratti's parameter for modification of the Veverka photometric function.
+
+.VARI MO_EXP1
+Modification of the coefficient k in the Minnaert part 
+of Mosher's photometric function (goes along with MO_EXP2).
+
+.VARI MO_EXP2
+Modification of the coefficient k in the Minnaert part 
+of Mosher's photometric function (goes along with MO_EXP1).
+
+.VARI DEN_SOIL
+Specific volume density of the soil.
+
+.VARI W_SOIL
+Single-scattering albedo of the soil particles. It characterizes the 
+efficiency of an average particle to scatter and absorb light. 
+One of the classical Hapke parameter.
+
+.VARI HG1_SOIL
+Parameter of the first term of the Henyey-Greenstein soil particle 
+phase function.
+
+.VARI HG2_SOIL
+Parameter of the second term of the Henyey-Greenstein soil particle 
+phase function.
+
+.VARI HG_ASY_SOIL
+Asymmetry parameter (weight of the two terms 
+in the Henyey-Greenstein soil phase function).
+
+.VARI LE1_SOIL
+Parameter of the first term of the Legendre-Polynomial soil particle 
+phase function.
+
+.VARI LE2_SOIL
+Parameter of the second term of the Legendre-Polynomial soil particle 
+phase function.
+
+.VARI H_SHOE
+One of the classical Hapke parameter.
+Parameter which characterizes the soil structure in the terms of porosity, 
+particle-size distribution, and rate of compaction with depth (angular width 
+of opposition surge due to shadowing). 
+
+.VARI B_SHOE
+One of the classical Hapke parameter. 
+Opposition magnitude coefficient. The total amplitude of the opposition surge 
+due to shadowing. It is the ratio of the light scattered from near the 
+illuminated surface of the particle to the total amount of light scattered at 
+zero phase : 
+B_SHOE=S(0)/(W_SOIL*p(0))
+with p(0) - soil phase function
+S(0) - opposition surge amplitude term which characterizes the contribution of 
+light scattered from near the front surface of individual particles at zero 
+phase.
+.page
+For a true, shadow-hiding opposition effect, 0<=B_SHOE<=1.
+However, there are several other phenomena that may also cause a surge in 
+brightness at small phase angles. These including the following:
+1) The coherent backscatter or weak photon localisation due to multiply 
+   scattered light.
+2) An single-particle opposition effect caused by complex porous agglomerates 
+   ( soil phase function )
+3) Glory caused by sperical particles ( soil phase function )
+4) Internal reflections of transparent particles ( soil phase function )
+   These various phenomena may be large enough to increase the opposition surge 
+   by more than a factor of 2. This possibility may be taken into account by 
+   allowing B_SHOE to be greater than 1.
+ 
+.VARI H_CBOE
+Parameter of the coherent backscattering ( angular width of the opposition 
+surge due to multiply scattered light).
+H_CBOE=lambda/(2*pi*L)
+lambda - wavelength
+L - the free path of the phonon in the medium
+
+.VARI B_CBOE
+Opposition magnitude coefficient of the coherent backscattering 
+(height of opposition surge due to multiply scattered light). 
+
+.VARI THETA
+Average topographic slope angle of surface roughness at subresolution scale.
+One of the classical Hapke parameter. 
+
+.VARI COOK
+ Parameter of the Cook's modification of the old Hapke function.
+
+.VARI TAU_ATM
+Optical depth of the atmosphere.
+
+.VARI W_ATM
+Single scattering albedo of the atmospheric aerosols.
+
+.VARI HG1_ATM
+Parameter of the first term of the Henyey-Greenstein atmospheric phase function.
+
+.VARI IRV_EXP1
+Parameter of the Irvine photometric function.
+
+.VARI IRV_EXP2
+Parameter of the Irvine photometric function.
+
+.VARI INC_ANG
+Incidence angle in degree.
+
+.VARI EM_ANG
+Emission angle in degree.
+
+.VARI PHAS_ANG
+Phase angle in degree.
+
+.END

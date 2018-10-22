@@ -1,0 +1,12 @@
+/* Imake file for VICAR subroutine pu75 */
+
+#define SUBROUTINE pu75
+
+#define MODULE_LIST pu75.f zpu75.c 
+
+#define P2_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+

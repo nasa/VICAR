@@ -1,0 +1,42 @@
+1 VGRCAM
+
+       VGRCAM will return Voyager camera constants in a four-word buffer.
+
+2  CALLING SEQUENCE
+
+	FORTRAN calling sequence:
+	
+	       CALL VGRCAM(SN,BUF)
+
+	C calling sequence:
+
+		vgrcam(sn,buf)
+
+2  ARGUMENTS
+
+       Sn      is the Voyager caamera serial number, I*4.
+
+       Buf     is the returned four-word buffer,     R*4
+               
+               BUF(1) = Focal Length in mm.
+               BUF(2) = Optical Axis Line (Object Space)
+               BUF(3) = Optical Axis Sample (Object Space)
+               BUF(4) = Camera Scale (pixels/mm)
+
+2  HISTORY
+
+      Original Programmer: Gary Yagi
+      Current Cognizant Programmer: Charlie Avis
+      Source Language: Fortran
+      Latest Revision: New, 15 December 1982
+      Ported to UNIX: T. L. Truong, 12 July 1993
+
+2 OPERATION
+
+       REAL*4 MAP(40) [the standard 40-word geometry buffer defined in
+       subroutine MAP]
+       CALL VGRCAM(SN,MAP(27))
+
+       SUBROUTINES CALLED:  MVE
+
+

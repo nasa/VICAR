@@ -27,6 +27,12 @@
 
 #define InstallCmd install
 
+#ifdef UseInstalled
+#define ImakeOpts -DV2_FORCE_32def -T$(IMAKETMPL) -I$(TAECONFIGDIR) -DUseInstalled
+#else
+#define ImakeOpts -DV2_FORCE_32def -T$(IMAKETMPL) -I$(TAECONFIGDIR)
+#endif
+
 /* Special Fortran binding target, needed in taelib.  Overrides the one */
 /* in TAErules.def.  The only change is to add -traditional to the gcc  */
 /* line.  Nice of them to NOT put that particular thing in a macro! :-( */

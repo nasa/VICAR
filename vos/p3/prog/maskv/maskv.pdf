@@ -1,0 +1,181 @@
+process help=*
+ PARM INP         TYPE=(STRING,40)
+ PARM OUT         TYPE=(STRING,40)
+ PARM SIZE        TYPE=INTEGER         COUNT=4          DEFAULT=(1,1,0,0)
+ PARM SL          TYPE=INTEGER         COUNT=1          DEFAULT=1
+ PARM SS          TYPE=INTEGER         COUNT=1          DEFAULT=1
+ PARM NL          TYPE=INTEGER         COUNT=1          DEFAULT=0
+ PARM NS          TYPE=INTEGER         COUNT=1          DEFAULT=0
+ PARM COMP        TYPE=KEYWORD COUNT=0:1 VALID=COMP DEFAULT=--
+ PARM STRETCH     TYPE=INTEGER         COUNT=2          DEFAULT=(0,255)
+ PARM EXPAND      TYPE=INTEGER         DEFAULT=1
+ PARM TASK        TYPE=KEYWORD VALID=(TASK,NOTASK)      DEFAULT="TASK" 
+ PARM USER        TYPE=KEYWORD VALID=(USER,NOUSER)      DEFAULT="NOUSER" 
+ PARM HISTORY     TYPE=KEYWORD VALID=(HISTORY,NOHISTOR,TIMS) DEFAULT="HISTORY"  
+ PARM ID          TYPE=KEYWORD VALID=(ID,NOID) 		DEFAULT=ID
+ PARM LOGO	  TYPE=KEYWORD VALID=(LOGO,NOLOGO)	DEFAULT=NOLOGO
+ PARM LLOGO       TYPE=INTEGER         VALID=(0:5)      DEFAULT=0
+ PARM RLOGO       TYPE=INTEGER         VALID=(0:5)      DEFAULT=0
+ PARM SYSTEM	  TYPE=KEYWORD VALID=(SYSTEM,NOSYSTEM)  DEFAULT=SYSTEM
+ END-PROC
+.TITLE
+ MASKV  --  Format images for hardcopy display
+.HELP
+ MASKV formats images for hardcopy display. This includes the 
+ numbering of lines and samples, a grey wedge along the right side,
+ and, optionally, Vicar labels, logos, and a job id.
+
+.PAGE
+ RESTRICTIONS:
+
+ MASKV only displays up to 70 characters per label line.
+ Any label that exceeds 70 characters will be truncated to 70 characters
+ on the hard copy.
+
+.page
+ ORIGINAL PROGRAMMER:  John H. Reimer,  10 MAY 1982
+ 
+ CONVERTED TO VAX BY:  F. F. Moss,  20 JAN 1984
+ 
+ CURRENT COGNIZANT PROGRAMMER: Ron Alley
+.LEVEL1
+.VARIABLE INP
+ input data set
+.VARIABLE OUT
+ output data set
+.VARIABLE SIZE
+ image size
+
+
+
+
+
+
+.VARIABLE SL
+ starting line
+.VARIABLE SS
+ starting sample
+.VARIABLE NL
+ number of lines
+.VARIABLE NS
+ number of samples
+.VARIABLE COMP
+ complement the input image
+ VALID: COMP
+.VARIABLE STRETCH
+ apply a linear stretch
+ to the input image
+.VARIABLE EXPAND
+ enlarge the characters in
+ the output by this factor
+.VARIABLE ID
+ ID's displayed
+ VALID: ID, NOID
+.VARIABLE LOGO
+ LOGO's displayed
+ VALID: LOGO, NOLOGO
+.VARIABLE LLOGO
+ left logo number (1-5)
+.VARIABLE RLOGO
+ right logo number (1-5)
+.VARIABLE TASK
+ display task names from the
+ VICAR labels
+ VALID: TASK, NOTASK
+.VARIABLE USER
+ display user name and date-
+ time from the VICAR label
+ VALID: USER, NOUSER
+.VARIABLE HISTORY
+ display VICAR history 
+ labels
+ VALID: 
+ HISTORY, NOHISTOR, TIMS
+.VARIABLE SYSTEM
+ display VICAR system labels
+ VALID: SYSTEM, NOSYSTEM
+.LEVEL2
+.VARIABLE INP
+ The image to be masked for hardcopy output.
+.VARIABLE OUT
+ The output file, containing the masked image.
+.VARIABLE SIZE
+ (starting line,starting sample,number of lines,number of samples)
+.VARIABLE SL
+ starting line of the input image to be masked.
+.VARIABLE SS
+ starting sample of the input image to be masked.
+.VARIABLE NL
+ number of lines of the image to be included in the mask. If NL=0, all
+ lines are used.
+.VARIABLE NS
+ number of samples of the image to be included in the mask. If NS=0,
+ all samples are used.
+
+.VARIABLE COMP
+ COMP specifies that the input image is to be complemented before
+ masking. (Default is not to complement)
+
+.VARIABLE STRETCH
+ STRETCH=(N1,N2) specifies that a linear stretch will be applied to
+ the input image before masking.
+ Defaults are:
+   for byte:  N1=0, N2=255
+   for halfword:   N1=0, N2=32767.
+
+.VARIABLE EXPAND
+ EXPAND=N specifies that all characters in the output will be 7*N
+ lines by 6*N samples
+
+ .VARIABLE ID
+ This parameter controls the display of the account name and picture id.
+ NOID specifies that id labels will not be displayed in the
+ output. (Default is to display them)
+ 
+.VARIABLE LOGO
+ LOGO specifies that the JPL Logo will be displayed to both sides
+ of the IPL id labels. (Default is not to display the logo)
+
+.VARIABLE LLOGO
+ LLOGO specifies a left logo. Values for LLOGO and corresponding
+ logos are:
+                  1 = JPL logo
+                  2 = Mickey Mouse logo
+                  3 = Goddard logo
+                  4 = NASA logo
+                  5 = ASTER logo
+ Default is that no logos are displayed
+
+.VARIABLE RLOGO
+ RLOGO specifies a left logo. Values for RLOGO and corresponding
+ logos are:
+                  1 = JPL logo
+                  2 = Mickey Mouse logo
+                  3 = Goddard logo
+                  4 = NASA logo
+                  5 = ASTER logo
+ RLOGO is similar to keyword LLOGO except that this keyword
+ specifies a right logo. Default is that no logos are displayed.
+
+.VARIABLE TASK
+ If TASK is specified, MASKV searches for all occurrences of
+ keyword 'TASK' in the VICAR history labels and then displays
+ the values of 'TASK'.
+
+
+.VARIABLE USER
+ If USER is specified, MASKV searches for all occurrences of
+ keywords 'DATETIME' and 'USER' in the VICAR history labels
+ and then displays all of their respective values.
+ 
+.VARIABLE HISTORY 
+ If HISTORY is specified, then all VICAR history labels will be
+ printed in the order in which they are found, excepting those
+ with keywords 'TASK', 'USER', and 'DATETIME'. 
+
+.VARIABLE SYSTEM
+ If NOSYSTEM is specified the VICAR system label, containing the
+ number of lines, number of samples, and data format, is not
+ displayed with the masked imaged. The default is to display the
+ system label.
+.END

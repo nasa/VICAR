@@ -1,0 +1,153 @@
+process help=*
+PARM INP TYPE=STRING
+PARM OUT TYPE=STRING
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL TYPE=INTEGER DEFAULT=1
+PARM SS TYPE=INTEGER DEFAULT=1
+PARM NL TYPE=INTEGER DEFAULT=0
+PARM NS TYPE=INTEGER DEFAULT=0
+PARM NLW TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM FLIP TYPE=KEYWORD VALID=(FLIP) COUNT=0:1 DEFAULT=--
+PARM LINE TYPE=INTEGER DEFAULT=0
+PARM DC TYPE=INTEGER DEFAULT=0
+END-PROC
+.TITLE
+Vicar Program "fftflip"
+.HELP
+PURPOSE:
+"fftflip" accepts one FFT or a matrix of FFT outputs from programs "fft2",
+or "fft22", and rearranges the internal structure of each FFT
+such that DC is moved from the upper-left corner to center.  An optional
+transposition can also be made along the diagonal (upper-left to lower-right).
+"fftflip" differs from "fftpic" in that no automatic scaling of the FFT is
+performed, and no beginning and trailing samples are added.
+
+EXECUTION:
+
+	fftflip INP OUT SIZE PARAMS
+
+where:  INP  is the input FFT or matrix of FFTs.
+	OUT  is the output file.
+        SIZE specifies a subarea of the input file to process.
+	PARAMS includes other parameters descibed below and in Tutor mode.
+.page
+OPERATION:
+"fftflip" performs the operation shown in the following diagrams.
+The letters A,B,C,D refer to fft quadrants.
++-------+-------+     +-------+-------+     +-------+-------+
+|DC     |       |     |       |       |     |       |       |
+|       |       |     |       |       |     |       |       |
+|   A   |   B   |     |   D   |   C   |     |   D'  |   B'  |
+|       |       |     |       |       |     |       |       |
++-------+-------+ --> +-------+-------+ --> +-------+-------+
+|       |       |     |       |DC     |     |       |DC     |
+|       |       |     |       |       |     |       |       |
+|   C   |   D   |     |   B   |   A   |     |   C'  |   A'  |
+|       |       |     |       |       |     |       |       |
++-------+-------+     +-------+-------+     +-------+-------+
+  INPUT FFT           DEFAULT OPERATION      WITH FLIP OPTION
+                                            (' MEANS TRANSPOSE)
+
+When the input is a matrix of FFTs, then the above operation is
+performed on each FFT separately.
+
+Obviously, there is nothing that compells the input to this program 
+to be an FFT:  it will work on any arbitrary image;  however, the
+operation described is most meaningful for an FFT, so that term is
+used here.
+
+
+LIMITATIONS
+    (Removed Warning about slowness on VAX)
+
+    Does not work with "COMP" images
+
+.PAGE
+EXAMPLES
+
+	fftflip INP=A OUT=B NLW=32 LINE=0 'FLIP
+
+	In this example, the FFT in file A will be rearranged and then the
+	program will perform a transposition along the upper-left to lower-
+	right diagonal.  The result will be written to file B.  NLW gives
+	the FFT dimension in pixels; the default is 32.  LINE specifies the
+	number of lines above and below DC which are to be averaged
+	together as a form of pseudo apodizing; no averaging is desired in
+	this case.  (If averaging were to be done, the DC parameter could
+	also have been specified, which indicates the number of lines
+	surrounding DC that are to be excluded from the averaging; the
+	default is DC=1, that is, only the DC line is excluded.)
+
+.page
+	insert INP=IN OUT=A (1,1,32,32)		(where 'IN' is image data)
+	fft22 INP=A OUT=B POW=5 IFMT=BYTE OFMT=COMP
+	cform INP=B OUT=A IN=COMP OUT=HALF SO=(9.76525,0.)
+	fftflip INP=A OUT=B NLW=32 LINE=0 'FLIP
+	f2 INP=B OUT=A 'HALF 'OUTH +
+	    FUNC="(32767./ALOG(32767.))*ALOG10(IN1)"
+	linear INP=A OUT=B 'HALF 'OUTB STRE=(6000,14000) LIMI=(0,255)
+	list B
+
+	This example shows fftflip as used in a typical command sequence
+
+.page
+WRITTEN BY:  J.J. Lorre,  23 January 1984
+
+CONVERTED TO VAX BY:  A.S.Mazer, 11 May 1984
+
+
+CURRENT COGNIZANT PROGRAMMER:  R. J. Bambery
+
+    1984-05-11 A.S.Mazer - Converted to VAX 
+    1985-08-01 L. W. Kamp - CONVERTED TO VICAR2, FIXED BUGS
+    1994-09-05 A. Scop (CRI) - Made portable for UNIX 
+    2012-12-19 R. J. Bambery - LINUX 64-bit changes, Internal format
+                               is real, removed BYE,HALF limitation
+    2016-06-08 W. L. Bunch - Migrated to MIPL
+
+.LEVEL1
+.VARIABLE INP
+STRING - Input fft(s)
+.VARIABLE OUT
+STRING - Output fft(s)
+.VARIABLE SIZE
+INTEGER - Standard size field
+.VARIABLE SL
+INTEGER - Starting line
+.VARIABLE SS
+INTEGER - Starting sample
+.VARIABLE NL
+INTEGER - Number of lines
+.VARIABLE NS
+INTEGER - Number of samples
+.VARIABLE NLW
+INTEGER - fft dimension in pixels
+.VARIABLE FLIP
+KEYWORD - Causes transposition along NW-SE diagonal
+.VARIABLE LINE
+INTEGER - Number of lines above and below DC to be averaged
+.VARIABLE DC
+INTEGER - Number of lines around DC to be excluded from averaging
+.LEVEL2
+.VARIABLE INP
+Input fft(s) produced by fft2, fft22, or Rfft2 in halfword or byte format.
+.VARIABLE OUT
+Rearranged output fft(s).
+.VARIABLE NLW
+Dimension of fft in pixels; each fft must be square.
+
+Default is NLW is the smaller of NL and NS.
+.VARIABLE FLIP
+'FLIP causes the program, after rearranging each fft, to perform a 
+transposition along the upper-left to lower-right diagonal.
+.VARIABLE LINE
+LINE specifies the number of lines above and below DC that are to be averaged
+together as a form of pseudo apodizing.  
+
+The default is 0, i.e. no averaging is performed.
+.VARIABLE DC
+DC specifies the number of lines surrounding DC that are to be excluded from
+the 'LINEs' averaging.  This is ignored if LINE=0.
+
+The default is 1, that is, only the DC line is excluded.
+.END

@@ -1,0 +1,161 @@
+PROCESS HELP=*
+PARM INP STRING
+PARM OUT STRING
+PARM SIZE INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL INTEGER DEFAULT=1
+PARM SS INTEGER DEFAULT=1
+PARM NL INTEGER DEFAULT=0
+PARM NS INTEGER DEFAULT=0
+PARM ZOOM INTEGER COUNT=1:2
+PARM B REAL DEFAULT=.333333333
+PARM C REAL DEFAULT=.333333333
+END-PROC
+.TITLE
+Vicar Program BICUBIC -- Enlarges images by integer zoom factors using cubic
+			convolutional reconstruction filters.
+.HELP
+BICUBIC is a Vicar program that enlarges images by integer zoom factors using
+convolutional reconstruction techniques.  A piecewise cubic convolutional 
+filter is used.
+
+USAGE:
+	BICUBIC input output [size] ZOOM=zoom [parms]
+
+OPERATION:
+
+BICUBIC determines the output image size from the specified zoom factor(s) and
+the input image size or sub-area (i.e. NLO = NL*ZOOM(1) and NS = NSO*ZOOM(2)).
+The output image is then written line by line, pixel by pixel.  The value of an
+output pixel is determined by convolving the input image with a piecewise cubic
+interpolation function.  For details on convolutional interpolation, the user
+is referred to [HOU78], [KEY81], [MIT88] and [PAR83].
+
+In order to perform the interpolation near the image (or sub-area) edges, the
+pixels need to be extrapolated in all directions.  This is done using a simple
+linear extrapolation of the two edge pixels in any column or row.
+.page
+The piecewise cubic interpolation filters are described in [MIT88].  The 
+piecewise cubic function is:
+
+	           / (12 - 9*B - 6*C)*|x|**3 +		for |x| < 1
+		  /	(-18 + 12*B + 6*C)*|x|**2 +
+		 /	(6 - 2*B)
+	 	/
+	f(x) = <     (-B - 6*C)*|x|**3 + 		for 1 <= |x| < 2
+	 	\	(6*B + 30*C)*|x|**2 +
+	 	 \	(-12*C - 48*C)*|x| + (8*B + 24*C)
+		  \
+		   \ 0					otherwise
+
+where B and C are parameters that control the shape of the cubic curves
+and thus the appearance of the output image (see CONTROLLING THE CUBIC 
+FUNCTION below).
+.page 
+CONTROLLING THE CUBIC FUNCTION:
+
+The piecewise cubic interpolation function can be controlled by two parameters
+(B and C) as shown in the above formulas.  The effects of changing these
+parameters is generalized in the graph of B and C on the following page.  This
+graph is the result of a subjective test in which nine expert observers were
+shown images reconstructed with random values of B and C [MIT88].  The
+observers were asked to classify the appearence of the images into one of
+these categories: blurring, ringing, anisotropy, and satisfactory.  The graph
+shows the results of the test over the range of 0.0 to 1.0.  Of course B and C
+may be outside this range, the effects will be more noticeable.
+.page
+		1.0 +-------------+---------------+
+		    |             |               |
+		    |             |               |
+	     B	0.8 +           _~ \      II      |	Regions:
+	      	    |     I    /    \             |	-------
+	     P	    |         <      ~-_         _+
+	     a	0.6 +          >        \     _-~ |	I   - Blurring
+	     r	    |      __-~         |~-_-~    |	II  - Anisotropy
+	     a	    +__--~~            /          |	III - Ringing
+	     m	0.4 + \               |           |	IV  - Anisotropy
+	     e	    |  \       V     /            |	V   - Satisfactory
+	     t	    |   \           /      III    |
+	     e	0.2 +    ~\         |             |
+	     r	    |  IV  \        \             |
+		    |       ~~~\     |            |
+		0.0 +-----+-----+----++-----+-----+		
+		   0.0   0.2   0.4   0.6   0.8   1.0
+			      C Parameter 
+.page
+
+The default values for (B, C) are (1/3, 1/3) which is recommended by [MIT88].
+Other interesting values are:
+
+	(1, 0)	 - Equivalent to the Cubic B-Spline,
+	(0, 0.5) - Equivalent to the Catmull-Rom Spline,
+	(0, C)	 - The family of Cardinal Cubic Splines,
+	(B, 0)   - Duff's tensioned B-Splines [DUF86].
+
+.page
+EXAMPLES:
+
+	BICUBIC TEST.IMG TEST2.IMG ZOOM=3
+
+	BICUBIC TEST.IMG TEST3.IMG ZOOM=(5,4)
+
+	BICUBIC TEST.IMG TEST4.IMG ZOOM=7 B=1 C=0
+
+.page
+REFERENCES:
+
+[DUF86]	Duff, Tom, "Splines in Animation and Modeling", State of the Art in
+	Image Synthesis, SIGGRAPH 86 Course Notes.
+
+[HOU78]	Hou, Hsieh S. and Andrews, Harry C., "Cubic Splines for Image
+	Interpolation and Digital Filtering", IEEE Trans. Acoustics, Speech,
+	and Signal Processing, Vol. ASSP-26, No. 6, December 1978, pp.
+	508-517.
+
+[KEY81]	Keys, Robert G., "Cubic Convolution Interpolation for Digital Image
+	Processing", IEEE Trans. Acoustics, Speech, and Signal Processing,
+	Vol. ASSP-29, No. 6, December 1981, pp. 1153-1160.
+
+[MIT88]	Mitchell, Don P. and Netravali, Arun N., "Reconstruction Filters in
+	Computer Graphics", Computer Graphics, Vol. 22, No. 4, August 1988,
+	pp. 221-228.
+
+[PAR83]	Park, Stephen K. and Schowengerdt, Robert A., "Image Reconstruction by
+	Parametric Cubic Convolution", Computer Vision, Graphics and Image
+	Processing", Vol. 23, No. 3, September 1983, pp. 258-272.
+.page
+HISTORY:
+
+Written by:		R. Mortensen
+Cognizant Programmer:	R. Mortensen
+
+Revisions:
+	Initial Version		7-Oct-88
+.LEVEL1
+.VARIABLE INP
+Input Vicar image file.
+.VARIABLE OUT
+Output Vicar image file.
+.VARIABLE SIZE
+Sub-area of input image to
+be zoomed. (SL,SS,NL,NS).
+.VARIABLE SL
+Starting line of sub-area.
+.VARIABLE SS
+Starting sample of sub-area.
+.VARIABLE NL
+Number of lines in sub-area.
+.VARIABLE NS
+Number of samples in sub-area.
+.VARIABLE ZOOM
+Integer ZOOM factor(s).
+(LZOOM,SZOOM) -- if SZOOM
+is omitted, LZOOM is used.
+.VARIABLE B
+Parameter to control CUBIC
+spline function. 
+(See HELP *)
+.VARIABLE C
+Parameter to control CUBIC
+spline function.
+(See HELP *)
+.END

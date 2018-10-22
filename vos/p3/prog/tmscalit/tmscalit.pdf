@@ -1,0 +1,46 @@
+PROCESS HELP=*
+PARM INP TYPE=(STRING,40)
+PARM OUT TYPE=(STRING,40)
+PARM SAT TYPE=INTEGER DEFAULT=32767
+PARM CALMODE TYPE=KEYWORD VALID=(IRAD,ITEM) DEFAULT=IRAD
+PARM FILTER TYPE=INTEGER DEFAULT=75
+END-PROC
+.HELP
+      TMSCALIT is a VICAR program designed to perform the decalibration of
+TMS data that has originated from the Italian instrument and system.
+The output is a single file of all 12 channels, in BSQ format. Pixels are
+stored as 16 bit integer (halfword).  For Channels 1-10, each DN corresponds 
+to 10 milliWatts per square meter per steradian per micrometer.  For the
+thermal channels, each DN corresponds to 1 milliWatt per square meter per 
+steradian per micrometer (in IRAD mode) or 0.01 degrees Celsius (in ITEM mode).
+.LEVEL1
+.VARIABLE INP
+Input dataset
+.VARIABLE OUT
+Output dataset
+.VARIABLE SAT
+DN assigned to saturated pixels
+.VARIABLE CALMODE
+Calibration mode for 
+thermal bands
+  = IRAD for radiance
+  = ITEM for temperature
+.VARIABLE FILTER
+Filter width for thermal
+calibration smoothing,
+in scan lines
+.LEVEL2
+.VARIABLE INP
+Input dataset
+.VARIABLE OUT
+Output dataset
+.VARIABLE SAT
+If the input pixel value is 255 (i.e., is saturated), the output pixel will be
+set to this value.
+.VARIABLE CALMODE
+This keyword selects the type of decalibration to be performed on the thermal
+channels.  There are two options.
+        IRAD - Instrument perceived RADiance
+        ITEM - Instrument perceived TEMperature
+.VARIABLE FILTER
+.END

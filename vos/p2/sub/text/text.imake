@@ -1,0 +1,14 @@
+/*  Imake file for VICAR subroutine TEXT  */
+
+#define SUBROUTINE text
+
+#define MODULE_LIST text.c
+#define INCLUDE_LIST text.h
+
+#define FTN_STRING
+
+#define USES_ANSI_C
+
+#define P2_SUBLIB
+
+#define LIB_P2SUB

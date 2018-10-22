@@ -1,0 +1,18 @@
+/* Imake file for MIPS subroutines MPGETPAR */
+
+#define SUBROUTINE  	mpgetpar
+
+#define MODULE_LIST  	mpgetpar.c 
+
+#define USES_ANSI_C
+#define FTN_STRING
+
+#define P2_SUBLIB	
+
+/*********
+
+LOCAL LIBRARY for development
+
+*********/
+#define DEBUG
+#define LIB_LOCAL

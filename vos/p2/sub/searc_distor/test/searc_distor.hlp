@@ -1,0 +1,37 @@
+1 SEARC_DISTOR
+
+ This routine searches the entire label of a VICAR image in order to
+ determine whether it is "Object space" (perspective projection) or
+ "Image space" (contains camera-specific distortion).  Both cases
+ imply that no map labels are present, so it should be called only
+ after verifying that the image does not contain map labels (using
+ MP_LABEL_READ or SEARCV2).  Note that SEARCV2 (on the unported
+ system) performs the same function, but the current version does
+ not work for certain kinds of (very old) VICAR labels.
+
+2 Calling Sequence
+
+ CALL SEARC_DISTOR( UNIT, IND)
+
+ UNIT (input, integer) = unit number assigned by XVUNIT
+
+ IND (output, integer) = indicator flag:
+      IND=0 means Image space
+      IND=1 means Object space
+      IND=-1: label exceeds buffer size
+      IND=-2: error reading label
+ 
+2 History
+
+  Original Programmer: L.W.Kamp,  25 JULY 1994
+  Current Cognizant Programmer: L.W.Kamp
+  Source Language: FORTRAN
+  Revisions:
+   01 Mar 03  GMY  Replace TEMP by WORK in call to XLGETLABEL (unix error)
+
+2 Operation
+
+ Currently, the criteria for determining that an unlabelled image
+ is Obect space are that it has been processed by a GEOM task or by
+ FARENC.  Thus, all that SEARC_DISTOR does is to search the entire
+ label buffer for these strings.  

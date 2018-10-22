@@ -1,0 +1,261 @@
+process help=*
+!  Input and output file names
+!
+PARM INP     TYPE=STRING   COUNT=1
+PARM OUT     TYPE=STRING   COUNT=(2:4)
+!
+!  Input parameters
+!
+PARM SIZE    TYPE=INTEGER  COUNT=4       DEFAULT=(1,1,0,0)
+!
+PARM FORMAT  TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=REAL   VALID=(BYTE,REAL)
+!
+PARM NORTH   TYPE=REAL     COUNT=1       DEFAULT=0.0
+PARM ADIP    TYPE=REAL     COUNT=1       DEFAULT=2.8333
+PARM BDIP    TYPE=REAL     COUNT=1       DEFAULT=0.0
+PARM AAZ     TYPE=REAL     COUNT=1       DEFAULT=0.7111
+PARM BAZ     TYPE=REAL     COUNT=1       DEFAULT=0.0
+PARM LSCALE  TYPE=REAL     COUNT=1       DEFAULT=0.01
+PARM SSCALE  TYPE=REAL     COUNT=1       DEFAULT=0.01
+PARM AALT    TYPE=REAL     COUNT=1       DEFAULT=1.0
+PARM CENTER  TYPE=KEYWORD  COUNT=(0:1) VALID=(CENTER) DEFAULT=--
+PARM MODE    TYPE=KEYWORD VALID=(VERBOSE,QUIET) DEFAULT=QUIET
+PARM METHOD  TYPE=KEYWORD VALID=(STANDARD,ARCINFO,ERDAS) DEFAULT=STANDARD
+END-PROC
+.TITLE
+VICAR2 Program PIXGRAD
+.HELP
+PURPOSE
+-------
+
+PIXGRAD calculates the magnitude (slope) and direction (azimuth)
+of the gradient at each pixel within an image.  The image of slope
+values is saved in the first output dataset, and the azimuth image
+is sent to the second output.
+
+The gradients are computed by examining the four adjacent pixels
+(left, right, above, below) to the point being evaluated.  From these
+pairs of points, a line-direction and a sample-direction gradient is
+computed. The composite slope and azimuth are computed by a
+trigonometric summation of these two gradients.
+
+Prior to rescaling, the slope is computed as degrees from horizontal,
+while the azimuth is degrees East of North.  The default rescaling
+maps the slope values to 0 DN for horizontal and 255 DN for vertical.
+The default azimuth rescaling places North at 0 DN, East at 64 DN,
+South at 128 DN, and West at 192 DN.
+
+Additionally, the user may output the x and y derivatives which
+are part of the dip and amimuth computations. By indicating two
+additional output data sets, the program will automatically 
+output these values.  Scale parameters are available so that the
+floating point numbers computed for the x and y derivatives fit
+nicely into the halfword output value. 
+
+A subset version of the program is available by indicating the
+CENTER keyword.  The program will output the center pixel of a 
+moving 9 square box.  In essence, the program will choose pixel
+2,5,8,...from rows 2,5,8,...etc.
+
+
+.PAGE
+EXECUTION
+---------
+Execution is initiated by:
+
+pixgrad INP (OUT1,OUT2) PARAMETERS
+              or
+pixgrad INP (OUT1,OUT2,OUT3,OUT4) PARAMETERS ( for x and y derivatives )
+
+
+.PAGE
+HISTORY
+------- 
+Made Portable for UNIX                RNR(CRI)  05-SEP-94
+ 
+Added ERDAS,ARCINFO gradient options  NDR       06-SEP-96
+ 
+Added CENTER, x and y derivative      BAM       02-06-97
+options; added REA additions.
+ 
+Corrected PIXGRAD.PDF AR9873          TXH       04-10-1998
+ 
+
+
+.LEVEL1
+.VARIABLE INP
+Input filename.
+.VARIABLE OUT
+Output filenames.
+
+There must be at least 
+2 output data sets -
+one for dip and 
+the other for
+azimuth.
+
+If two additional data
+sets are indicated -
+the x and y partial
+derivatives are output.
+.VARIABLE SIZE
+Vicar size field.
+.VARIABLE FORMAT
+FORMAT for output 
+s and y derivatives
+.VARIABLE NORTH
+Direction of North
+in degrees clock-
+wise from up.
+.VARIABLE ADIP
+Scale factor for
+slope.
+.VARIABLE BDIP
+Offset factor for
+slope.
+.VARIABLE AAZ
+Scale factor for
+azimuth.
+.VARIABLE BAZ
+Offset factor for
+azimuth.
+.VARIABLE LSCALE
+Line scale in 
+miles per line.
+.VARIABLE SSCALE
+Sample scale in
+miles per sample.
+.VARIABLE AALT
+Altitude scale in
+feet per dn of 
+input.
+.VARIABLE CENTER
+If present,  
+subsampled output 
+data sets will be
+generated.
+.VARIABLE MODE
+VERBOSE or QUIET?
+.VARIABLE METHOD
+STANDARD,ARCINFO,ERDAS?
+
+.LEVEL2
+.VARIABLE INP
+             Input filename - may be byte or halfword.
+.VARIABLE OUT
+Filenames of the output datasets. The first dataset will contain the
+gradient magnitude (aka dip, or slope) image.  The second dataset will
+contain the gradient azimuth (aka slope azimuth, or slope direction) image.
+
+Optionally, x and y derivative data sets may be output.
+.VARIABLE SIZE
+             Vicar size field.
+             -----------------
+             
+             Starting line          default - input image
+             Starting sample
+             Number of lines
+             Number of samples
+.VARIABLE FORMAT
+This is the format of the output derivatives data sets.
+.VARIABLE NORTH
+             Direction of North in degrees clockwise from 
+                           top of image.
+
+             Default = 0.0
+.VARIABLE ADIP
+             Scale factor for slope.
+
+             DN(DIP) = ADIP * (DIP+BDIP)
+             where
+             adip - scale factor
+             dip  - computed dip in degrees
+             bdip - offset factor ( see BDIP )
+
+             Default adip = 255./90.
+                     bdip = 0.0                    
+.VARIABLE BDIP
+             Offset factor for slope.
+             DN(DIP) = ADIP * (DIP+BDIP)
+             where
+             adip - scale factor ( see ADIP )
+             dip  - computed dip in degrees
+             bdip - offset factor 
+
+             Default ADIP = 255./90.
+                     BDIP = 0.0
+.VARIABLE AAZ
+             Scale factor for azimuth.
+ 
+             DN(AZIM) = AAZ * (AZIMUTH+BAZ)
+             where
+             aaz      - scale factor 
+             azimuth  - computed azimuth in degrees from North
+             baz      - offset factor ( see BAZ )
+
+             Default AAZ = 256./360.
+                     BAZ = 0.0
+.VARIABLE BAZ
+             Offset factor for azimuth.
+
+             DN(AZIM) = AAZ * (AZIMUTH+BAZ)
+             where
+             aaz      - scale factor ( see AAZ )
+             azimuth  - computed azimuth in degrees from North
+             baz      - offset factor 
+
+             Default AAZ = 256./360.
+                     BAZ = 0.0
+.VARIABLE METHOD
+
+            Method for computing delta-x and delta-y
+
+    PIXGRAD calculates the magnitude of the gradient of an image from
+    estimated partials delta_x and delta_y. By default PIXGRAD computes 
+    the delta_x and delta_y by the following algorithm using a
+    3 x 3 pixel window around point e:
+
+          a   b  c             METHOD #1 (default):
+          d   e  f         delta_x(e) =  (d - f)/ 2
+          g   h  j         delta_y(e) =  (b - h)/ 2 
+
+.page
+    The new parameter METHOD allows for more precise computations
+    using the following:
+
+    Note: North and West facing gradients are positive.
+
+      First-order ERDAS method:
+
+           delta_x = [(c + f + j) - (a + d + g)] / 6 
+           delta_y = [(g + h + j) - (a + b + c)] / 6 
+
+      Second-order ARCINFO method:
+
+           delta_x = [(c + 2*f + j) - (a + 2*d + g)] / 8 * x_scale
+           delta_y = [(g + 2*h + j) - (a + 2*b + c)] / 8 * x_scale
+.page
+     From the deltas the "dip" angle of the normal vector, and its
+     azimuthal orientation with respect to north  is computed by:
+
+          z = sqrt ( (delta_x**2) + (delta_y**2) )
+
+          dip angle =  ATAN(SQRT(z))
+          azimuth   =  ATAN2(-delta_x, delta_4) MOD 2*PI
+.VARIABLE LSCALE
+             Line scale in miles per line.
+
+             Default = 0.01
+.VARIABLE SSCALE
+             Sample scale in miles per sample.
+             Default = 0.01
+.VARIABLE AALT
+             Altitude scale in feet per dn of input.
+
+             Default = 1.0 feet/dn
+.VARIABLE CENTER
+	If present,  subsampled output data sets will be generated.
+.VARIABLE MODE
+	     VERBOSE or QUIET?
+.VARIABLE METHOD
+	     STANDARD,ARCINFO,ERDAS?

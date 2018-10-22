@@ -1,0 +1,88 @@
+process help=*
+  PARM ASCII      TYPE=(STRING,40)
+  PARM OUT        TYPE=(STRING,40)
+  PARM NCOL       INTEGER
+  PARM SLINE      INTEGER DEFAULT=1
+  PARM NLINES     INTEGER COUNT=0:1 DEFAULT=--
+  PARM DATA       TYPE=KEYWORD VALID=(BYTE,HALF,FULL,REAL) DEFAULT=REAL
+  PARM FORMAT     TYPE=(STRING,80) DEFAULT=""
+  PARM COLUMNS    INTEGER COUNT=0:150 DEFAULT=--
+END-PROC
+.help
+      FROMASCII is a VICAR program to convert part or all of a tabular (ASCII)
+file into a VICAR image.  The user may provide a FORTRAN format specifier, or
+the data may be read as free format.  In either case, lines that do not fit
+the form (such as headers, page counts, and trailers) are ignored.  The user 
+may select and interchange up to 150 columns for output.
+.level1
+.vari ASCII
+Input ASCII file name
+.vari OUT
+Output VICAR file name
+.vari NCOL
+Number of columns in input
+.vari SLINE
+First Line to be converted
+.vari NLINES
+Number of lines to be output
+.vari COLUMNS
+Columns (sample positions)
+to be output.
+DEFAULT: Output all columns
+.VARI FORMAT
+Input print format
+.VARI DATA
+Output data type
+Valid: BYTE, HALF, FULL, REAL
+.level2
+.vari ASCII
+Name of the tabular ASCII input file.
+.vari out
+Name of the VICAR output file.
+.vari ncol
+NCOL is used to indicate the number of columns in the input file.  If the user
+provides a format for reading the input, this is the number of columns actually
+read by the input format.  Any columns skipped, by use of the X format 
+descriptor, are not counted.
+.vari SLINE
+SLINE indicates the first line to be converted into the output VICAR
+file. For example, if SLINE=10, then the first 9 lines are discarded. 
+The count of this parameter is of all lines; both valid data lines and
+invalid lines (such as titles or lines of headings) are included in the
+count.  The default is to start with the first line.
+.vari NUM_LINES
+NLINES indicates the desired number of lines to be output. Once this
+number of lines has been written to output, no further reading of the 
+input, or conversion to output is performed.  If the end of the output 
+file is reached before NUM_LINES are converted, the program reports
+and stores in the VICAR label the actual number of lines in the output
+file.  The default is to read and convert all lines, until the end-of-file
+is reached.
+.vari columns
+COLUMNS is a parameter that allows the user to select and order the columns to
+be used as input.  For example, COLUMNS=(3,7,2,4) will cause the output to be
+four samples wide, with the first sample coming from Column 3, the second from
+Column 7, the third from Column 2, and the fourth from Column 4.  If COLUMNS is
+defaulted, all columns are selected and output in their original order.
+.vari format
+The user may override the default print format by supplying a valid FORTRAN
+FORMAT statement as the value of this parameter.  For example,
+FORMAT="(14X,F5.1,6X,F5.1)" would, in the following example,  read the "Temp"
+and "Wet Bulb" columns only.  The two header lines, since they do not fit the
+given format, are discarded.  All other columns are ignored.
+
+                  Weatherstation:  Tonopah, Nevada
+      Time     Temp     Wet Bulb   Wind   Dir   Pressure
+      8:00     57.5       33.2      9     NE     30.02
+      9:00     59.8       33.7      5     NNE    30.02
+     10:00     62.9       33.9      5     NE     30.01
+     11:00     66.1       34.3      1     NE     29.99
+
+Note that parentheses enclosing the full format expression are required, with
+quotes enclosing the parentheses, and that the specifiers must be in agreement
+with the DATA parameter.  If FORMAT is defaulted, the program assumes that
+there are NCOL columns, separated by blanks, tabs, or commas.
+.vari data
+DATA is used to specify the data type of the output VICAR image.  BYTE, HALF,
+FULL, and REAL are valid, with REAL being the default.
+.end

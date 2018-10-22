@@ -1,0 +1,161 @@
+process help=*
+parm INP	TYPE=STRING
+parm OUT	TYPE=STRING   DEFAULT=a
+parm LON_CL     TYPE=REAL     DEFAULT=--  COUNT=0:1
+parm LON_CR     TYPE=REAL     DEFAULT=--  COUNT=0:1
+parm LAT_UC     TYPE=REAL     DEFAULT=--  COUNT=0:1
+parm LAT_LC     TYPE=REAL     DEFAULT=--  COUNT=0:1
+parm PROJ_LON	TYPE=REAL     DEFAULT=--  COUNT=0:1
+parm SIZE       TYPE=INTEGER  DEFAULT=--  COUNT=0:4
+parm SL  	TYPE=INTEGER  DEFAULT=--  COUNT=0:1
+parm SS  	TYPE=INTEGER  DEFAULT=--  COUNT=0:1
+parm NL  	TYPE=INTEGER  DEFAULT=--  COUNT=0:1
+parm NS 	TYPE=INTEGER  DEFAULT=--  COUNT=0:1
+parm PROJSAMP	TYPE=INTEGER  DEFAULT=--  COUNT=0:1
+PARM DBUG       TYPE=KEYWORD  COUNT=0:1   DEFAULT=--    VALID=(DBUG,NODBUG)
+end-proc
+
+.title
+SINPROJ
+.help
+PURPOSE:
+SINPROJ reprojects a vicar image file of a sinusoidal projection of a given
+projection longitude into an image file with a different projection longitude,
+it also can produce an output file with the same projection longitude but of a
+different size, i.e. sinproj will not change the pixel size of the image but
+will change the width of the image by only reprojecting a fraction of the 
+original image.
+SINPROJ expects the projection longitude (PROJ_LON),  the starting (LON_CL) and
+ending (LON_CR) longitudes, and the starting (LAT_UC) and ending (LAT_LC)
+latitudes  for the output file to be specified, although all these values can
+be defaulted or specified by line and sample instead, with SINPROJ converting
+them from one to another internally. The input image file should also have
+these keys in its vicar label because they are needed to recalculate the new
+projection and are are used as the default values if none are specified in the
+parameters.
+.page
+When SINPROJ is run with LON_CL and LON_CR specifying the size of the output
+image and PROJ_LON not specified the projection longitude will default to the
+longitude midway between LON_CL and LON_CR; similarly if only SS and NS are
+specified PROJSAMP will be set to SS + NS/2. SINPROJ cannot reproject an image
+into an oblique sinusoidal projection. If LAT_UC and LAT_LC are specified to be
+smaller in the output image than they are in original image, the output image
+will simply cut off at those latitudes. The equator is always taken to be the
+latitude from which the projection is calculated.
+.page
+examples
+if the input image file has in its label:
+                            PROJ_LON = 180.0
+                            LON_CL = 0.0  LON_CR = 360.0
+                            LAT_UC = 90.0 LAT_LC = -90.0
+
+SINPROJ inp out PROJ_LON=0
+   output image is very lopsided with all of the image to the right
+   of the projection longitude (you probably don't want this) and
+   contains all of the input image
+SINPROJ inp out PROJ_LON=0 LON_CL=180 LON_CR = 179
+   output image is centered around the projection longitude      
+SINPROJ inp out  LON_CL=180 LON_CR = 220
+   output image is centered on a projection longitude of 200
+   and is only 1/9th as wide as the input image
+SINPROJ inp out  SS = 360 NS = 80
+   this will do the same as the previous example if there are
+   two samples per degree
+.page
+HISTORY
+
+Original Author: ??? 
+Cognizant Programmer: m. jentoft-nilsen
+
+history:
+    Mar 6, 1992:  MJ-N - mcr 1290 allow projections with lon_cl
+                  or lon_cr outside of original longitude range of an
+                  image
+    22 Feb 1990 - FR 52797 mj-n
+    02 Jan 1995   Made portable for UNIX ... J. Turner (CRI) 
+
+
+.level1
+.variable INP
+input image file
+.variable OUT
+output image file
+.variable LON_CL
+output left longitude
+.variable LON_CR
+output right longitude
+.variable LAT_UC
+output upper latitude
+.variable LAT_LC
+output lower latitude
+.variable PROJ_LON
+output projection longitude
+.variable SIZE
+standard vicar size field
+.variable SL
+starting line
+.variable SS
+starting sample
+.variable NL
+number of lines
+.variable NS
+number of samples
+.variable PROJSAMP
+sample number of the 
+output projection longitude
+in input file sample
+numbering
+.level2
+.variable INP
+input image file, it needs to contain the label items: proj_lon, lon_cl,
+lon_cr, lat_uc, and lat_lc for sinproj to work
+.variable OUT
+output image file
+.variable LON_CL
+the longitude of the leftmost pixel at the equator for the output
+file. if not specified and if the size field is not specified the
+default is the input file's value. should be between 0.0 and 360.0
+.variable LON_CR
+the longitude of the rightmost pixel at the equator for the output
+file if not specified and if the size field is not specified the
+default is the input file's value. LON_CR is expected to be greater
+than LON_CL but less than 360.0, if it isn't then SINPROJ interprets
+it as a wraparound, e.g. specify a reprojection from 320.0 to 20.0
+with a projection longitude of 350.0 as
+  LON_CL = 320.0 LON_CR = 20.0 PROJ_LON = 350.
+.variable LAT_UC
+the latitude of the northernmost pixel at the projection longitude
+for the output file. should be between 90.0 and -90.0
+.variable LAT_LC
+the latitude of the southernmost pixel at the projection longitude
+for the output file. should be between 90.0 and -90.0 and should be 
+less than LAT_UC
+.variable PROJ_LON
+the projection longitude of the sinusoidal projection for the output
+file, it usually passes through the center of the image frame. PROJ_LON
+defaults to the longitude halfway between LON_CL and LON_CR. If samples
+are specified instead of longitudes PROJ_LON is calculated from PROJSAMP
+.variable SL
+starting line for the output file, corresponds to LAT_UC. 
+.variable SS
+starting sample for the output file, corresponds to LON_CL
+.variable NL
+number of lines for the output file
+.variable NS
+number of samples for the output file
+.variable PROJSAMP
+sample number of the output projection longitude for the output file 
+it needs to be specified in terms of the input file sample numbering.
+ie if the input image is 2000 samples wide and the output image is going
+to be 500 samples wide and centered on the input image :
+
+   SINPROJ inp=tst.in out=tst.out ss=750 ns=500  
+   SINPROJ inp=tst.in out=tst.out ss=750 ns=500  projsamp=1000
+
+will both give the same result
+
+   SINPROJ inp=tst.in out=tst.out ss=750 ns=500  projsamp=250
+
+will not work
+If not specified it is calculated from PROJ_LON
+.end

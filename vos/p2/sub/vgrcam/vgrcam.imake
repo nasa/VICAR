@@ -1,0 +1,12 @@
+/* Imake file for VICAR subroutine VGRCAM */
+
+#define SUBROUTINE vgrcam
+
+#define MODULE_LIST vgrcam.f zvgrcam.c
+
+#define P2_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+
+

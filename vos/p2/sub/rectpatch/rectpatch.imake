@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine rectpatch */
+
+#define SUBROUTINE rectpatch
+
+#define MODULE_LIST rectpatch.f
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

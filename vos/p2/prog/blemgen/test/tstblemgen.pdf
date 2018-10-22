@@ -1,0 +1,322 @@
+procedure
+refgbl $echo
+refgbl $becho
+refgbl $autousage
+refgbl $syschar
+body
+let $autousage="none"
+let _onfail="continue"
+!!!!!!!!!
+  local g1                type=string
+  local g2                type=string
+  local g3                type=string
+  local g4                type=string
+  local g5                type=string
+  local g6                type=string
+  local g7                type=string
+  local g8                type=string
+  local g9                type=string
+  local g10               type=string
+  local goff              type=string
+  local s1                type=string
+  local s2                type=string
+  local s7                type=string
+  local s8                type=string
+  local s14               type=string
+  local s15               type=string
+  local s24               type=string
+  local s25               type=string
+  local s36               type=string
+  local s37               type=string
+  local sol               type=string
+
+  let $echo="no"
+  if ($syschar(1) = "VAX_VMS")
+    let g1   = "wms_test_work:[testdata.mipl.gll]galt1.dat"
+    let g2   = "wms_test_work:[testdata.mipl.gll]galt2.dat"
+    let g3   = "wms_test_work:[testdata.mipl.gll]galt3.dat"
+    let g4   = "wms_test_work:[testdata.mipl.gll]galt4.dat"
+    let g5   = "wms_test_work:[testdata.mipl.gll]galt5.dat"
+    let g6   = "wms_test_work:[testdata.mipl.gll]galt6.dat"
+    let g7   = "wms_test_work:[testdata.mipl.gll]galt7.dat"
+    let g8   = "wms_test_work:[testdata.mipl.gll]galt8.dat"
+    let g9   = "wms_test_work:[testdata.mipl.gll]galt9.dat"
+    let g10  = "wms_test_work:[testdata.mipl.gll]galt10.dat"
+    let goff = "wms_test_work:[testdata.mipl.gll]goffsets.img"
+  else ! Unix
+    let g1   = "/project/test_work/testdata/mipl/gll/galt1.dat"
+    let g2   = "/project/test_work/testdata/mipl/gll/galt2.dat"
+    let g3   = "/project/test_work/testdata/mipl/gll/galt3.dat"
+    let g4   = "/project/test_work/testdata/mipl/gll/galt4.dat"
+    let g5   = "/project/test_work/testdata/mipl/gll/galt5.dat"
+    let g6   = "/project/test_work/testdata/mipl/gll/galt6.dat"
+    let g7   = "/project/test_work/testdata/mipl/gll/galt7.dat"
+    let g8   = "/project/test_work/testdata/mipl/gll/galt8.dat"
+    let g9   = "/project/test_work/testdata/mipl/gll/galt9.dat"
+    let g10  = "/project/test_work/testdata/mipl/gll/galt10.dat"
+    let goff = "/project/test_work/testdata/mipl/gll/goffsets.img"
+  end-if
+
+!!!!!!!!!
+let $echo="yes"
+!                     GENERATE CALIBRATION FILES
+galgen INP=(&g1,&g2,&g3,&g4 +
+            &g5,&g6,&g7,&g8 +
+            &g9,&g10)+
+ out=(cal.100, sat.100, fit.100, rms.100, dc.100)+
+ offsets=&goff +
+ gain=100 light=3.54 shutter=(0,7,8,9,10,11,12,13,14,15)+
+ 'lfwpt error=(0,7) skip=4 numb=(3,3,3,3,3,3,3,3,3,3)
+!
+!                     DETECT AND CLASSIFY BLEMISHES
+blemgen (cal.100,sat.100,fit.100,rms.100,dc.100) blem.100. +
+  minslope=.52 maxslope=72.8 mindc=-113.0 maxdc=17.08 +
+  minsat=15 maxerr=3 maxrms=1 'luminanc
+
+
+  if ($syschar(1) = "VAX_VMS")
+    let s1   = "wms_test_work:[testdata.cassini.iss]sum2.1"
+    let s2   = "wms_test_work:[testdata.cassini.iss]sum2.2"
+    let s7   = "wms_test_work:[testdata.cassini.iss]sum2.7"
+    let s8   = "wms_test_work:[testdata.cassini.iss]sum2.8"
+    let s14  = "wms_test_work:[testdata.cassini.iss]sum2.14"
+    let s15  = "wms_test_work:[testdata.cassini.iss]sum2.15"
+    let s24  = "wms_test_work:[testdata.cassini.iss]sum2.24"
+    let s25  = "wms_test_work:[testdata.cassini.iss]sum2.25"
+    let s36  = "wms_test_work:[testdata.cassini.iss]sum2.36"
+    let s37  = "wms_test_work:[testdata.cassini.iss]sum2.37"
+    let sol  = "wms_test_work:[testdata.cassini.iss]sol.dat"
+  else ! Unix
+    let s1   = "/project/test_work/testdata/cassini/iss/sum2.1"
+    let s2   = "/project/test_work/testdata/cassini/iss/sum2.2"
+    let s7   = "/project/test_work/testdata/cassini/iss/sum2.7"
+    let s8   = "/project/test_work/testdata/cassini/iss/sum2.8"
+    let s14  = "/project/test_work/testdata/cassini/iss/sum2.14"
+    let s15  = "/project/test_work/testdata/cassini/iss/sum2.15"
+    let s24  = "/project/test_work/testdata/cassini/iss/sum2.24"
+    let s25  = "/project/test_work/testdata/cassini/iss/sum2.25"
+    let s36  = "/project/test_work/testdata/cassini/iss/sum2.36"
+    let s37  = "/project/test_work/testdata/cassini/iss/sum2.37"
+    let sol  = "/project/test_work/testdata/cassini/iss/sol.dat"
+  end-if
+!-----------------------------------------------------------
+!CASSINI DATA
+picsum (&s1 &s2 ) cgdc
+!picsum (&s7 &s8 ) cg1
+! (jul2010 / lwk) s8 is missing, so try just using s7 twice:
+picsum (&s7 &s7 ) cg1
+picsum (&s14 &s15 ) cg2
+picsum (&s24 &s25 ) cg3
+picsum (&s36 &s37 ) cg4
+galgen (cg1,cg2,cg3,cg4) out=(cal,sat,err,rms,dc) dc=cgdc +
+        offset=&sol light=5.1
+
+let $echo="no"
+let $becho="no"
+write "Find none this time"
+let $echo="yes"
+let $becho="yes"
+blemgen (cal,sat,err,rms,dc) blem +
+  minslope=0 maxslope=50 mindc=-100 maxdc=500 +
+  minsat=0 maxerr=1000 maxrms=1000 'lumin
+
+let $echo="no"
+let $becho="no"
+write "Find some based on slope"
+let $echo="yes"
+let $becho="yes"
+blemgen (cal,sat,err,rms,dc) blem +
+  minslope=5 maxslope=20 mindc=-100 maxdc=500 +
+  minsat=0 maxerr=1000 maxrms=1000 'lumin
+
+let $echo="no"
+let $becho="no"
+write "Based on DC"
+let $echo="yes"
+let $becho="yes"
+blemgen (cal,sat,err,rms,dc) blem +
+  minslope=0 maxslope=50 mindc=-10 maxdc=30. +
+  minsat=0 maxerr=1000 maxrms=1000 'lumin
+
+let $echo="no"
+let $becho="no"
+write "Based on ERR"
+let $echo="yes"
+let $becho="yes"
+blemgen (cal,sat,err,rms,dc) blem +
+  minslope=0 maxslope=50 mindc=-100 maxdc=500 +
+  minsat=0 maxerr=30 maxrms=1000 'lumin
+
+let $echo="no"
+let $becho="no"
+write "Based on RMS"
+let $echo="yes"
+let $becho="yes"
+blemgen (cal,sat,err,rms,dc) blem +
+  minslope=0 maxslope=50 mindc=-100 maxdc=500 +
+  minsat=0 maxerr=1000 maxrms=30 'lumin
+
+
+let $echo="no"
+let $becho="no"
+write "Does it find Low Full Well pixels ok?"
+write "Make 512 oddballs in the SAT file."
+let $echo="yes"
+let $becho="yes"
+f2 sat sat2 func="(LINE.EQ.SAMP)*(LINE/10-32766.5) + IN1"
+list sat2 (5,5,12,12)
+
+
+let $echo="no"
+let $becho="no"
+write "Based on SAT" 
+let $echo="yes"
+let $becho="yes"
+blemgen (cal,sat2,err,rms,dc) blem +
+  minslope=0 maxslope=50 mindc=-100 maxdc=500 +
+  minsat=25 maxerr=1000 maxrms=1000 'lumin
+
+let $echo="no"
+let $becho="no"
+write "Zero out all elements of blemish file but the CLASS" 
+write "convert to byte and histogram to see kinds of classes"
+let $echo="yes"
+let $becho="yes"
+
+f2 blem b 'byte func="(MOD(SAMP,4).EQ.3)*IN1"
+hist b
+
+let $echo="no"
+let $becho="no"
+write "Find just the LFWP"
+let $echo="yes"
+let $becho="yes"
+blemgen (cal,sat2,err,rms,dc) blem +
+  minslope=0 maxslope=50 mindc=-100 maxdc=500 +
+  minsat=0 maxerr=1000 maxrms=1000 'lumin
+
+let $echo="no"
+let $becho="no"
+write "Use all above criteria and output codes in blem file"
+write "then do histogram of the codes to check the count of each"
+let $echo="yes"
+let $becho="yes"
+blemgen (cal,sat2,err,rms,dc) blem +
+  minslope=5 maxslope=20 mindc=-10 maxdc=30 +
+  minsat=25 maxerr=30 maxrms=30 'bc  'lumin
+
+!zero out all but the words with the codes in them (3rd of 4 for each blem)
+f2 blem bx func="(MOD(SAMP,4).EQ.3)*IN1" 'byte
+hist bx
+
+let $echo="no"
+let $becho="no"
+write "In above histogram:  level 0 - ignore"
+write "                     level 1 - bad slopes"
+write "                     level 2 - bad dc"
+write "                     level 4 - bad SAT"
+write "                     level 5 - bad ERR"
+write "                     level 6 - bad RMS"
+write "                     level 7 - Low Full Well"
+write "Note:  some pixels may have satisfied more than on criteria, but"
+write "       are finally bookkept in only one place"
+write " "
+write "Does it handle Low Full Well pixels in the halfword range?"
+write "Make 512 oddballs in the SAT file ranging from 4 to 2048"
+write "MINSAT=1028 will make 256 of them LFW pixels."
+let $echo="yes"
+let $becho="yes"
+
+f2 sat sat2 func="(LINE.EQ.SAMP)*(LINE*4-32767) + IN1"
+list sat2 (1,1,5,5)
+
+blemgen (cal,sat2,err,rms,dc) blem +
+  minslope=0 maxslope=50 mindc=-100 maxdc=500 +
+  minsat=1028 maxerr=1000 maxrms=1000 'lumin
+
+let $echo="no"
+let $becho="no"
+write "Check blemish classifying.  Generating blemishes with known"
+write "locations and therefore known classes.  After BLEMGEN, the"
+write "classes are printed in order of blemish number."
+let $echo="yes"
+let $becho="yes"
+
+copy  cal c (101,101,11,7)
+copy  sat s (101,101,11,7)
+copy  err e (101,101,11,7)
+copy  rms r (101,101,11,7)
+copy  dc  d (101,101,11,7)
+genthis g nl=11 ns=7 +           !make 20 blems various classes
+dn=(1,1,1,1,1,1,1,+
+    1,9,1,9,1,1,1,+
+    1,1,1,9,1,1,1,+
+    1,1,9,9,9,9,1,+
+    1,1,9,1,9,1,1,+
+    1,1,9,9,9,9,1,+
+    1,1,9,1,1,1,1,+
+    1,1,9,1,9,1,1,+
+    1,1,1,9,1,1,1,+
+    1,9,9,1,9,1,1,+
+    1,1,1,1,1,1,1)
+
+let $echo="no"
+let $becho="no"
+write "List out where the blemishes will be for class checking"
+write "The 9's will become blemishes, the 1's won't"
+let $echo="yes"
+let $becho="yes"
+
+list g 'dump
+
+let $echo="no"
+let $becho="no"
+write "The classes for these blemish locations should be:"
+write "      15     13"
+write "              8"
+write "          1  25  4  3"
+write "          8      8"
+write "          5   2  5  6"
+write "          9"
+write "         12     11"
+write "             10"
+write "       7  3     14"
+write " "
+write "or when put in order of blemish number:"
+write " 15,13,8,1,25,4,3,8,8,5,2,5,6,9,12,11,10,7,3,14"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+f2 (c,g) cal2 func=in1*in2
+
+blemgen (cal2,s,e,r,d) blem.tmp +
+  minslope=0 maxslope=50 mindc=-100 maxdc=500 +
+  minsat=0 maxerr=1000 maxrms=1000 'lumin
+
+let $echo="no"
+let $becho="no"
+write "weed out all but class from blem file and list"
+let $echo="yes"
+let $becho="yes"
+
+size blem.tmp t zoom=-2 'noin
+local nsx integer
+form t ns=nsx
+let nsx=nsx-1
+copy t u (1,2,1,&nsx)
+size u v zoom=-2 'noin
+list v 'dump
+
+let $echo="no"
+let $becho="no"
+write "Check out 'RADIANCE"
+let $echo="yes"
+let $becho="yes"
+
+blemgen (cal,sat,err,rms,dc) blem +
+  minslope=0 maxslope=50 mindc=-100 maxdc=500 +
+  minsat=0 maxerr=1000 maxrms=1000 
+
+end-proc
+

@@ -1,0 +1,164 @@
+PROCESS help=*
+PARM INP    TYPE=STRING
+PARM PLOTNAME  TYPE=STRING COUNT=(0:1) DEFAULT='none'
+PARM SIZE   TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL     TYPE=INTEGER DEFAULT=1
+PARM NL     TYPE=INTEGER DEFAULT=0
+PARM BANDS  TYPE=INTEGER COUNT=2 VALID=(1:4) DEFAULT=(1,2)
+PARM SIGMA  TYPE=REAL    DEFAULT=1.0
+PARM XSCALE TYPE=INTEGER COUNT=2 DEFAULT=(0,255)
+PARM YSCALE TYPE=INTEGER COUNT=2 DEFAULT=(0,255)
+!PARM NODISP TYPE=KEYWORD COUNT=(0,1) VALID=NODISP DEFAULT=--
+END-PROC
+.TITLE
+STATPLT
+.HELP
+PURPOSE: 
+
+STATPLT generates a plot of the contents of a classification statistics
+dataset. The plot consists of the centroids and Bayesian confidence regions
+for each class, for any two input bands. If the display of the plot is not 
+suppressed The plot is automatically displayed, and if requested, is saved
+in an output PostScript file.
+
+EXECUTION:
+STATPLT SDS BANDS=(1,5) SIGMA=2.5   
+                                    The resultant plot will have DN of
+                                    Band 1 as the x-axis and the DN of
+                                    Band 5 as the y-axis. Ellipses
+                                    representing the 2.5 standard
+                                    deviation confidence boundaries will
+                                    be drawn around each centroid. The plot
+                                    will be automatically displayed and
+                                    optionally saved in the output PostScript
+                                    file, 'statplt.psf'.
+
+STATPLT SDS XSCALE=(0,100) PLOTNAME=(statplt1.psf)
+
+                                    This plot will have the x-axis 
+                                    rescaled such that the range 0 to 100 DN
+                                    spans the entire length of the x-axis.
+                                    Any class whose Band 1 mean (the band
+                                    being plotted on the x-axis) is outside
+                                    the 0 to 100 DN range, will not be
+                                    plotted.  The plot will be automatically
+                                    displayed and optionally saved in the 
+                                    output PostScript file, 'statplt.psf'.
+
+STATPLT SDS XSCALE=(0,100) YSCALE=(0,100) PLOTNAME=(statplt.psf)
+
+                                    In addition to scaling both axes for
+                                    the range 0 to 100, the plot is not
+                                    displayed, but is automatically saved in
+                                    the output PostScript file.
+
+OPERATION:
+     For each class in a classification statistics dataset (or for those
+specified by the size field) STATPLT:
+
+           1.  Marks the position of the centroid of the class.
+           2.  Labels the centroid with its corresponding class number.
+           3.  Draws the ellipse that bounds the range of the class.
+               The number of standard deviations within this boundary
+               is specified by the SIGMA parameter.
+
+If the centroid of a class lies outside the range of either the x or y axis,
+that class will be ignored.
+
+If the plot display is not suppressed by the use of the keyword 'NODISP, the 
+plot is displayed at the user terminal via calls to XRTPS. XRTPS also
+displays three menu selections and then waits for the user to select one of
+three options before continuing. The three options are; 1) exit, 2)
+page, and 3) save. Selecting 'exit' results in immediate termination of
+STATPLT.  Selecting 'page' results in immediate termination of STATPLT, as
+STATPLT creates only one plot each time that it is run. Selecting 'save' 
+results in the displayed image being saved in the output PostScript file, 
+followed by the termination of STATPLT.
+
+WRITTEN BY:  Ron Alley, 24 October 1978
+COGNIZANT PROGRAMMER:  S. Pohorsky
+REVISION: 5 April 1984 (Conversion to VAX)
+          Made portable for UNIX and for XRT/graph. J. Turner (CRI) May 1995
+
+        26 Jun 2011 - Ray Bambery - Clean up code to prevent warning messages
+                            with gfortran 4.4.4 compiler under Linux. Changed
+                            plot routine calls from XRT commercial graphics
+                            package to gnuplot. Added class names and centroid
+                            positions to graphics.
+        03 Jul 2012 - Ray Bambery -  Renamed STATPLT2 for delivery to MIPL
+                        power still uses XRT/Graph package, removed debug
+                        statements, Removed <tab> in front of continuation
+                        lines to make backward compatible with
+                        32-bit Linux gfortran 4.2.1, otherwise
+                         compatible 64-bit Linux gfortran 4.6.3</tab>
+        24 Aug 2012 -lwk- renamed back to STATPLT since it has exactly the
+                        same functionality and interface as the old one.
+
+.LEVEL1
+.VARIABLE INP
+STRING - Input image file; must
+be a classification statsitics 
+dataset.
+.VARIABLE PLOTNAME
+STRING - Output PostScript file
+name. STATPLT names output file 
+as 'postscript.ps' if not specified
+on VICAR command line.
+NONE,YES, or filename, Default="NONE"
+.VARIABLE SIZE
+INTEGER - Standard VICAR size 
+field
+.VARIABLE SL
+INTEGER - Starting line (class)
+.VARIABLE NL
+INTEGER - Number of lines 
+(classes)
+.VARIABLE BANDS
+INTEGER - The bands used for the
+x and y axes, respectively.
+.VARIABLE SIGMA
+REAL - The number of standard
+deviations about each class.
+.VARIABLE XSCALE
+INTEGER - The limits in DN 
+values for the x-axis.
+.VARIABLE YSCALE
+INTEGER - The limits in DN 
+values for the y-axis.
+.VARIABLE 'NODISP
+KEYWORD - Specify 'NODISP to
+suppress the display of the 
+plot on the display. Plot will
+be saved in PostScript file.
+.LEVEL2
+.VARIABLE INP
+The input dataset must be in the classification statistics dataset format.
+This is the format output by STATS and USTATS. Alternatively, stats may be
+gathered in an IBIS interface file and converted to a statistics dataset via
+the program SDSIBIS.
+.VARIABLE BANDS
+The plot produced by STATPLT is two dimensional. Therefore, only two bands
+are plotted. The first value of BANDS is used for the x-axis, and the second
+value is used for the y-axis. The default is BANDS=(1,2).
+.VARIABLE SIGMA
+Assuming Normal distributions (STATS, USTATS, and FASTCLAS all make this
+assumption), confidence boundaries in two dimensions take the shape of
+ellipses. The SIGMA variable allows the user to choose a level of
+confidence, in terms of standard deviations from the mean. The default is
+SIGMA=1, a one standard deviation region about the mean.
+.VARIABLE XSCALE
+The values given by XSCALE define the end-points of the axis. 
+The default is XSCALE=(0,255).
+.VARIABLE YSCALE
+The values given by YSCALE define the end-points of the axis. 
+The default is YSCALE=(0,255).
+.VARIABLE NODISP
+The keyword NODISP is used to suppress the automatic display of the output
+plot image. When NODISP is specified, the automatic display of the plot
+image is suppressed, but is automatically saved in the output PostScript
+file. The output PostScript file may be printed using the command 'qpr'.
+.VARIABLE PLOTNAME
+STATPLT provides the user with the capability of specifying the name of the
+output PostScript file.  If a name is not specified, STATPLT identifies the
+output file as 'statplt.psf'. 
+.END

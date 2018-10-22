@@ -1,0 +1,24 @@
+/*****************************************************************************/
+/*****************************************************************************/
+/** Rajesh R. Patel                                                         **/
+/**                                                                         **/
+/*****************************************************************************/
+/*****************************************************************************/
+
+#define SUBROUTINE balm
+
+#define MODULE_LIST balm.cc
+
+
+#define USES_C_PLUS_PLUS
+#define CCC_TEMPLATES
+
+#define USES_ANSI_C
+
+#define P2_SUBLIB
+
+#define LIB_RTL
+#define LIB_TAE
+/* #define LIB_P2SUB for local build*/
+
+#define LIB_PDS

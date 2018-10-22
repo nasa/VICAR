@@ -1,0 +1,33 @@
+procedure
+refgbl $echo
+refgbl $autousage
+
+local tline int
+local tsamp int
+body
+let $autousage="none"
+let $echo="yes"
+
+enable-log
+
+! TEST CASE FOR mooresc
+
+gen xxxim1 nl=10 ns=10 sinc=0
+gen xxxim2 nl=10 ns=10 linc=0
+f2 inp=(xxxim1,xxxim2) out=xxxim3 +
+ func="2*((abs(in1-5)+abs(in2-5))<2)+3*((abs(in1-3)+abs(in2-6))<2)"
+list xxxim3 'zer
+
+mooresc xxxim3 xxxim4 dmax=2 pixval=(2,3) numpix=2
+
+list xxxim4 'zer
+
+mooresc xxxim3 (xxxim4,xxxim5) dmax=2 pixval=(2,3) numpix=2
+
+list xxxim4 'zer
+list xxxim5 'zer
+
+disable-log
+
+theend>
+END-PROC

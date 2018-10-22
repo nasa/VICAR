@@ -1,0 +1,299 @@
+procedure
+!Test file for program SIZE
+local   afidsroot   type=string count=1
+local   aftestdata  type=string count=1
+
+! TEST SCRIPT FOR SIZE
+! tests BYTE, HALF, FULL, REAL, DOUB images
+!
+! Vicar Programs:
+!       gen list difpic hist label-list 
+!       stretch concat
+! 
+! parameters:
+!   <none>
+!
+! Requires external test data: 
+!   cartlab or mipl dependent pointers
+!
+!   Cartlab defines env var $AFIDS_ROOT, mipl doesn't
+!   The test data in cartlab is on /raid1/test_data 
+!   but in other facilities it might be somewhere else. 
+!   
+!   To facilitate this test you can define an
+!   environment variable $AFIDS_TESTDATA to point to
+!   that data. The cartlab system does not. In the git archive
+!   on pistol there is softlink to the test data in vdev that
+!   allows this test to pass 
+
+  refgbl $echo
+  refgbl $syschar
+
+body
+let _onfail="stop"
+let $echo="no"
+
+enable-log
+
+!check to see if mipl or cartlab for certain programs
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
+if (afidsroot = "")
+!MIPL
+    ush ln -s /project/test_work/testdata/mipl/vgr vt
+else
+!CARTLAB
+    if (aftestdata = "")
+       ush ln -s ../test_data/vicar_test_images/testdata/mipl/vgr vt
+    else
+       ush ln -s $AFIDS_TESTDATA/vicar_test_images/testdata/mipl/vgr vt
+    end-if
+end-if
+let _onfail="goto rm"
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Interpolation mode
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+write "!!!!!!!!!!!!!!!!!!!!"
+write "! Interpolation mode"
+write "!!!!!!!!!!!!!!!!!!!!"
+let $echo="yes"
+!....First, test all options on a byte image
+gen a 3 3 ival=2 sinc=3 linc=3
+list a 'nousrtim
+
+!....3x3 magnification, three different ways
+size a b nl=9 ns=9	!Use size field to specify magnification
+list b 'nousrtim
+
+size a c zoom=3		!Use ZOOM parameter to specify magnification
+difpic (b,c)		!Results should be identical
+size a c lzoom=3 szoom=3
+difpic (b,c)		!Results should be identical
+
+!....3x3 image compression, three different ways
+size b c nl=3 ns=3		!Zoom factor specified by size field
+list c 'nousrtim
+size b d zoom=-3		!Zoom factor specified by ZOOM parameter
+difpic (c,d)
+size b d lzoom=-3 szoom=-3	!Zoom factor specified by LZOOM,SZOOM
+difpic (c,d)
+
+size b c zoom=-3	!Integral compression
+list b 'nousrtim
+size b c zoom=-2.5	!Non-integral compression
+list b 'nousrtim
+
+size a b (1,1,11,11) ioffset=(2,2) zoom=3	!IOFFSET parameter
+list b 'zeroes 'nousrtim
+
+size a b zoom=3 limits=(1,14)			!LIMITS parameter
+list b 'nousrtim
+
+!...Special cases
+size a b zoom=3	area=(1,1,1,3)		!nli=1
+list b 'nousrtim
+size b c lzoom=1 szoom=-3 area=(1,1,1,9)
+list c 'nousrtim
+
+size a b zoom=3	area=(1,1,3,1)		!nsi=1
+list b 'nousrtim
+size b c lzoom=-3 szoom=1 area=(1,1,9,1)
+list c 'nousrtim
+
+size a b lzoom=3 szoom=1		!SZOOM=1
+list b 'nousrtim
+size b c lzoom=-3 szoom=1
+difpic (a,c)
+
+size a b lzoom=1 szoom=3		!LZOOM=1
+list b 'nousrtim
+size b c lzoom=1 szoom=-3
+difpic (a,c)
+
+!...Mixed magnifications/compressions
+size b c lzoom=3 szoom=-3		!vertical mag, horizontal compression
+list c 'nousrtim
+size c d lzoom=-3 szoom=3		!horizontal mag, vertical compression
+difpic (b,d)				!no differences
+
+!...Mixed data modes, outputs greater than inputs
+size a b zoom=3 'half scale=100 	!byte to halfword
+list b 'nousrtim
+size b c zoom=-3 'full scale=1000	!half to full
+list c 'nousrtim
+size b d zoom=-3 'real scale=1000	!half to real
+list d 'nousrtim
+size b dd zoom=-3 'doub scale=1000	!half to doub
+list dd 'nousrtim
+
+!...Mixed data modes, outputs smaller than inputs
+size dd e zoom=3 'byte scale=0.00001	!doub to byte
+list e 'nousrtim
+size d e zoom=3 'byte scale=0.00001	!real to byte
+list e 'nousrtim
+size c e zoom=3 'half scale=0.001	!full to half
+list e 'nousrtim
+size b e zoom=-3 'byte scale=0.01	!half to byte
+list e 'nousrtim
+
+!...Half word extract smaller image - Interpolation
+gen     out=d nl=3375 ns=3648 ival=-32768 linc=10 sinc=10 'half
+hist    d
+size    d e size=(1,1,337,364)
+hist    e
+
+size    d f size=(300,200,200,200)
+hist    f
+
+!...3D file
+gen a 3 3 3 ival=2 sinc=3 linc=3
+size a b nb=2 zoom=2
+list b 'nousrtim
+size a b zoom=2
+list b nb=1 sb=3 'nousrtim
+
+!... increased line size up to maximum
+gen a1 2 50000
+size a1 b1 zoom=2
+list a1 ss=49991 ns=10 'nousrtim
+list b1 ss=99991 ns=10 'nousrtim
+let $echo="no"
+write "!!!!!!!!!!!!!!!!!!!!!!!!!"
+write "! Non-interpolation mode"
+write "!!!!!!!!!!!!!!!!!!!!!!!!!"
+let $echo="yes"
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Non-interpolation mode
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+gen a 3 3 ival=2 sinc=3 linc=3
+
+!....First, test all options on a byte image
+size a b zoom=3 'noin		!Zoom up
+list b 'nousrtim
+size b c zoom=-3 'noin		!Zoom down
+difpic (a,c)
+
+size a c zoom=2.5 'noin		!Non-integral magnification
+list c 'nousrtim
+size b c zoom=-2.5 'noin	!Non-integral compression
+list c 'nousrtim
+
+size a b (1,1,11,11) ioffset=(2,2) zoom=3 'noin	!IOFFSET parameter
+list b 'zeroes 'nousrtim
+
+size a b zoom=3 limits=(1,14) 'noin		!LIMITS parameter
+list b 'nousrtim
+
+!...Mixed magnifications/compressions
+size a b lzoom=1 szoom=3 'noin
+size b c lzoom=3 szoom=-3 'noin		!vertical mag, horizontal compression
+list c 'nousrtim
+size c d lzoom=-3 szoom=3 'noin		!horizontal mag, vertical compression
+difpic (b,d)				!no differences
+
+!...Mixed data modes, outputs greater than inputs
+size a b zoom=3 'half scale=100 'noin 		!byte to halfword
+list b 'nousrtim
+size b c zoom=-3 'full scale=1000 'noin		!half to full
+list c 'nousrtim
+size b d zoom=-3 'real scale=1000 'noin		!half to real
+list d 'nousrtim
+size b dd zoom=-3 'doub scale=1000 'noin	!half to doub
+list dd 'nousrtim
+
+!...Mixed data modes, outputs smaller than inputs
+size dd e zoom=3 'byte scale=0.00001 'noin	!doub to byte
+list e 'nousrtim
+size d e zoom=3 'byte scale=0.00001 'noin	!real to byte
+list e 'nousrtim
+size c e zoom=3 'half scale=0.001 'noin		!full to half
+list e 'nousrtim
+size b e zoom=-3 'byte scale=0.01 'noin		!half to byte
+list e 'nousrtim
+
+!...Half word extract smaller image - No interpolation
+gen     out=g nl=3375 ns=3648 ival=-32768 linc=10 sinc=10 'half
+hist    g
+size    g h size=(1,1,337,364) 'noin
+hist    h
+
+size    g h size=(300,200,200,200) 'noin
+hist    h
+
+!...3D file
+gen a 3 3 3 ival=2 sinc=3 linc=3
+size a b nb=2 zoom=2 'noin
+list b 'nousrtim
+size a b zoom=2 'noin
+list b nb=1 sb=3 'nousrtim
+
+!... increased line size
+gen a 2 50000
+size a b zoom=2 'noin
+list b ss=99991 ns=10 'nousrtim
+let $echo="no"
+write "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+write "****Test for fail on size 'noin ****"
+write "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+let $echo="yes"
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!            ****Test for fail on size 'noin ****                  !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+gen x 10 10                     !Create a 10x10 byte image
+list x 'nousrtim
+stretch x y func="in1+18"       !Create image with bimodal histogram
+list y 'nousrtim
+concat (x,y) z ns=20 'nost
+list z sl=1 ss=1 nl=10 ns=10 'nousrtim
+let $echo="no"
+let _onfail="continue"
+write " ==============================================  should FAIL here ==========="
+let $echo="yes"
+size z w zoom=10 'noin
+let $echo="no"
+let _onfail="goto rm"
+write "================================================= NO FAIL here =============="
+let $echo="yes"
+size w xx zoom=10
+list w sl=1 ss=1 nl=10 ns=10 'nousrtim
+list xx sl=1 ss=1 nl=10 ns=10 'nousrtim
+
+let $echo="no"
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Test updating of map projection labels
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+write "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+write "! Test updating of map projection labels"
+write "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+let $echo="yes"
+
+!....Test on old map projection labels
+label-list vt/m.dat  'nousrtim
+size vt/m.dat a zoom=-2 area=(2,2,400,400)
+label-list a 'nousrtim
+
+!...Repeat map label test with non-integral zoom:
+size vt/m.dat a zoom=-1.5 area=(2,2,400,400)
+label-list a 'nousrtim
+
+!...Test on new map projection labels
+size vt/tst1.dat a zoom=20 ioffset=(81,81)	!normal cylindrical projection
+label-list a 'nousrtim
+
+size vt/tst10.dat a zoom=20 ioffset=(81,81)	!point perspective projection
+label-list a 'nousrtim
+
+rm>
+   ush rm -f vt a a1 b b1 c d dd e f g h w x xx y z
+
+theend>
+
+  ush rm -f vt	
+
+let $echo="no"
+
+disable-log
+
+end-proc

@@ -1,0 +1,46 @@
+C                                                                       
+C     MODTRAN INCLUDE PARAMETERS FILE.                                  
+C                                                                       
+C     LAYER PARAMETERS:                                                 
+C       LAYDIM   MAXIMUM NUMBER OF LAYER BOUNDARY.                      
+C       LAYTWO   TWICE LAYDIM.                                          
+C       LATTHR   THREE TIMES LAYDIM.                                    
+      INTEGER LAYDIM,LAYTWO,LAYTHR                                      
+      PARAMETER(LAYDIM=61,LAYTWO=2*LAYDIM,LAYTHR=3*LAYDIM)              
+C                                                                       
+C     MAXIMUM SPECIES NUMBER PARAMETERS:                                
+C       MMOL     MAXIMUM NUMBER OF MODTRAN MOLECULAR BAND MODEL         
+C                PARAMETER SPECIES.                                     
+C       MMOLX    MAXIMUM NUMBER OF TEMPERATURE-DEPENDENT                
+C                CROSS-SECTION SPECIES.                                 
+C       MMOLT    MMOL PLUS MMOLX.                                       
+C       MMOLT2   TWICE MMOLT.                                           
+      INTEGER MMOL,MMOLX,MMOLT,MMOLT2                                   
+      PARAMETER(MMOL=12,MMOLX=18,MMOLT=MMOL+MMOLX,MMOLT2=2*MMOLT)       
+C                                                                       
+C     PARAMETERS FOR THE BAND MODEL EXTERNAL FILES:                     
+C       NSPC     ACTUAL NUMBER OF MODTRAN MOLECULAR BAND MODEL          
+C                PARAMETER SPECIES (MOLBMP96.ASC FILE).                 
+C       NSPCX    ACTUAL NUMBER OF TEMPERATURE-DEPENDENT                 
+C                CROSS-SECTION SPECIES (CFCBMP96.ASC FILE).             
+C       NSPECT   NSPC PLUS NSPCX.                                       
+C       MXTEMP   MAXIMUM NUMBER OF BAND MODEL PARAMETER TEMPERATURES.   
+      INTEGER NSPC,NSPECX,NSPECT,MXTEMP                                 
+      PARAMETER(NSPC=12,NSPECX=13,NSPECT=NSPC+NSPECX,MXTEMP=6)          
+C                                                                       
+C     CLOUD/RAIN/AEROSOL PARAMETERS:                                    
+C       NZCLD    NUMBER OF CLOUD/RAIN LAYER BOUNDARIES.                 
+C       KMAX     NUMBER OF MODTRAN SPECIES (EXTINCTION SOURCES).        
+C       NAER     NUMBER OF AEROSOL/CLOUD PROFILES.                      
+C       NWAVLN   NUMBER OF WAVELENGTHS IN BUILT-IN SPECTRAL DATA.       
+C       MXWVLN   MAXIMUM NUMBER OF USER-DEFINED SPECTRAL DATA POINTS.   
+      INTEGER NZCLD,KMAX,NAER,NWAVLN,MXWVLN                             
+      PARAMETER(NZCLD=16,KMAX=67,NAER=7,NWAVLN=47,MXWVLN=101)           
+C                                                                       
+C     CORRELATED-K APPROACH PARAMETERS:                                 
+C       NKSUB    NUMBER OF K-DISTRIBUTION SPECTRAL BIN SUB-INTERVALS.   
+C       NGAMD    NUMBER OF DOPPLER HALF-WIDTH BOUNDARY VALUES.          
+C       NGAML    NUMBER OF LORENTZ HALF-WIDTH BOUNDARY VALUES.          
+C       NUML     NUMBER OF EFFECTIVE NUMBER OF LINES BOUNDARY VALUES.   
+      INTEGER NKSUB,NGAMD,NGAML,NUML                                    
+      PARAMETER(NKSUB=33,NGAMD=23,NGAML=36,NUML=14)                    

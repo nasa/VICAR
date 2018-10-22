@@ -1,0 +1,84 @@
+process help=*
+SUBCMD-DEFAULT NORMAL
+PARM INP      TYPE=(STRING,40)
+PARM START    TYPE=INTEGER COUNT=2
+PARM END      TYPE=INTEGER COUNT=2
+PARM BAND     TYPE=INTEGER DEFAULT=1
+PARM YAXIS    TYPE=REAL COUNT=2 DEFAULT=(0,0)
+PARM TITLE    TYPE=(STRING,80) DEFAULT=" "
+PARM XLABEL   TYPE=(STRING,40) DEFAULT="Relative Pixel Position"
+PARM YLABEL   TYPE=(STRING,40) DEFAULT="DN Value"
+PARM PRINT    TYPE=KEYWORD VALID=(PRINT,NOPRINT) DEFAULT=NOPRINT
+END-SUBCMD
+SUBCMD IPARAM
+PARM PENPLOT   TYPE=KEYWORD DEFAULT=-- VALID=(YES,NO) COUNT=(0:1)
+END-SUBCMD
+END-PROC
+.TITLE
+TRANSECT
+.HELP
+PURPOSE:
+     TRANSECT is a program for plotting the values along a line within an
+image. The user specifies the line and sample coordinates for the end points
+of the line, and the DN's are plotted as a function of distance (in pixels)
+from the starting point. The user may also designate the band (if multichannel
+data), the limits of the y axis, and a title to be placed on the printed plot,
+if generated.
+     TRANSECT does no interpolation to arrive at the values it plots. If
+the transect is mostly horizontal in the image, a value is taken at each
+sample, using the nearest line. For the more vertical transects, a value is
+taken at each line, using the nearest sample.
+.LEVEL1
+.VARIABLE INP
+Input file name
+.VARIABLE START
+Line and sample of 
+the starting  point
+.VARIABLE END
+Line and sample of 
+the end point
+.VARIABLE BAND
+Band number (if multichannel)
+.VARIABLE YAXIS
+Range of y-axis
+.VARIABLE TITLE
+Title placed on hardcopy plot
+.VARIABLE XLABEL
+X-axis label (paper plot only)
+.VARIABLE YLABEL
+Y-axis label (paper plot only)
+.VARIABLE PRINT
+Print pixel values?
+(PRINT or NOPRINT)
+.LEVEL2
+.VARIABLE INP
+Input file name. The file may be BYTE, HALF, FULL, or REAL; if multichannel,
+it may be BIL or BSQ.  BIP is not presently implemented.
+.VARIABLE START
+This is the line and sample of the starting point of the transect (or DN 
+profile). The value at this location is plotted at zero on the x-axis.
+.VARIABLE END
+This is the line and sample of the end point of the transect. The value at
+this location is plotted as the rightmost value along the x-axis.
+.VARIABLE BAND
+If the input dataset is multichannel, BAND designates which band is to be
+plotted. The default is Band 1.  
+.VARIABLE YAXIS
+YAXIS indicates the full scale limits of the y-axis. If defaulted, the program
+chooses limits that completely span the range of the data plotted. 
+.VARIABLE TITLE
+The user may place a line of annotation up to 80 characters in length on the 
+printed plots. This annotation does not appear on the screen, and, if a printed
+plot is not requested, the value of TITLE is not used.
+.VARIABLE XLABEL
+When printing on the laser printer, the user may place a label on the X-axis.
+The label may be up to 40 characters in length, and does not appear on the 
+other plot media. The default is "Relative Pixel Position".
+.VARIABLE YLABEL
+When printing on the laser printer, the user may place a label on the Y-axis.
+The label may be up to 40 characters in length, and does not appear on the 
+other plot media. The default is "DN Value".
+.VARIABLE PRINT
+If the keyword PRINT is given, the pixel locations and values are printed to
+the terminal and session log.  Otherwise, only a plot is made.
+.END

@@ -1,0 +1,30 @@
+1 SUMMARY
+
+  Routine to print out an Image File summary.
+
+  Calling Sequence:  CALL SUMMARY(EDR,LDR)
+
+  Arguments:  All arguments are inputs:
+
+	INTEGER*2 EDR(128)	EDR header record.
+	INTEGER*2 LDR(512)	EDR record for line 1.
+
+	The EDR header and line records are input from the binary label
+	portion of the Image File.  See program EDRVAL for an example.
+
+2 History
+
+  Original Programmer: Gary Yagi, December 4, 1984
+  Made Portable for Unix: C Randy Schenk (CRI) March 6, 1995
+  Current Cognizant Programmer: Gary Yag
+  Source Language: C
+  Revisions:
+    25 Aug 00  GMY  Add reference to gcfdata.h and vgrsubcom.h (AR-104738)
+
+2 Operation
+
+  The summary information is extracted from the EDR header and printed
+  out.  The first line record is needed to get the FDS count since the
+  count in the EDR header does not necessarilly correspond to the start
+  of the frame.
+

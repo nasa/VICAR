@@ -1,0 +1,61 @@
+procedure
+refgbl $echo
+body
+
+local wh_1 string init="/project/test_work/testdata/mer/1N491020376ILFCNY9P0706L0M1.IMG"
+local wh_2 string init="/project/test_work/testdata/mer/1N491020519ILFCNY9P0706L0M1.IMG"
+local ph_1 string init="/project/test_work/testdata/mer/1N491020834ILFCNY9P0706L0M1.IMG"
+local nh_1 string init="/project/test_work/testdata/mer/1N491020993ILFCNY9P0706L0M1.IMG"
+local nh_2 string init="/project/test_work/testdata/mer/1N491021154ILFCNY9P0706L0M1.IMG"
+local nh_3 string init="/project/test_work/testdata/mer/1P491287702ILFCNY9P2584L2M1.IMG"
+local nh_1_csv string init="1N491020993ILFCNY9P0706L0M1.CSV"
+local nh_1_gm string init="1N491020993ILFCNY9P0706L0M1.GM"
+local nh_1_gd string init="1N491020993ILFCNY9P0706L0M1.GD"
+local nh_1_ql string init="1N491020993ILFCNY9P0706L0M1.QL"
+local nh_2_csv string init="1N491021154ILFCNY9P0706L0M1.CSV"
+local nh_2_gm string init="1N491021154ILFCNY9P0706L0M1.GM"
+local nh_2_gd string init="1N491021154ILFCNY9P0706L0M1.GD"
+local nh_2_ql string init="1N491021154ILFCNY9P0706L0M1.QL"
+local nh_3_csv string init="1P491287702ILFCNY9P2584L2M1.CSV"
+local nh_3_gm string init="1P491287702ILFCNY9P2584L2M1.GM"
+local nh_3_gd string init="1P491287702ILFCNY9P2584L2M1.GD"
+local nh_3_ql string init="1P491287702ILFCNY9P2584L2M1.QL"
+local wh_1_csv string init="1N491020376ILFCNY9P0706L0M1.CSV"
+local wh_1_ql string init="1N491020376ILFCNY9P0706L0M1.QL"
+local wh_1_smh string init="1N491020376ILFCNY9P0706L0M1.SMOOTH"
+local wh_2_csv string init="1N491020519ILFCNY9P0706L0M1.CSV"
+local wh_2_ql string init="1N491020519ILFCNY9P0706L0M1.QL"
+local wh_2_smh string init="1N491020519ILFCNY9P0706L0M1.SMOOTH"
+local ph_1_csv string init="1N491020834ILFCNY9P0706L0M1.CSV"
+local ph_1_ql string init="1N491020834ILFCNY9P0706L0M1.QL"
+
+let _onfail="continue"
+let $echo="yes"
+!
+
+! INP, OUT, GM_IMG, GD_IMG, and QL_IMG test case
+! This test case verifies the parameters listed above work appropriately.
+horizon inp=&nh_1 out=&nh_1_csv gm_img=&nh_1_gm gd_img=&nh_1_gd ql_img=&nh_1_ql 
+horizon inp=&nh_2 out=&nh_2_csv gm_img=&nh_2_gm gd_img=&nh_2_gd ql_img=&nh_2_ql
+
+! FILTER_TYPE, FILTER_SIZE, and SMOOTH_IMG test case
+! This test case verifies that the salt-and-pepper noise can be significantly
+! reduced using the FILTER_TYPE and FILTER_SIZE.
+horizon inp=&wh_1 out=&wh_1_csv smooth_img=&wh_1_smh filter_size=3 filter_type=min
+horizon inp=&wh_1 out=$wh_1_csv smooth_img=&wh_1_smh filter_size=5 filter_type=median
+horizon inp=&wh_1 out=&wh_1_csv smooth_img=&wh_1_smh filter_size=7 filter_type=max
+horizon inp=&wh_2 out=&wh_2_csv smooth_img=&wh_2_smh filter_size=3 filter_type=min
+horizon inp=&wh_2 out=&wh_2_csv smooth_img=&wh_2_smh filter_size=5 filter_type=median
+horizon inp=&wh_2 out=&wh_2_csv smooth_img=&wh_2_smh filter_size=7 filter_type=max
+
+! SH_THRESH_MIN, SH_THRESH_MAX, SH_SIF, and BP_FACTOR test case
+horizon inp=&ph_1 out=&ph_1_csv ql_img=&ph_1_ql filter_size=3 wh_iter_max=0 sh_thresh_min=400 sh_thresh_max=500 sh_sif=10 bp_factor=2
+horizon inp=&wh_1 out=&wh_1_csv ql_img=&wh_1_ql filter_size=9 wh_iter_max=0 sh_thresh_min=10 sh_thresh_max=100 sh_sif=10
+horizon inp=&wh_2 out=&wh_2_csv ql_img=&wh_2_ql filter_size=7 wh_iter_max=0 sh_thresh_min=90 sh_thresh_max=130 sh_sif=5
+
+! No horizon test case
+horizon inp=&nh_1 out=&nh_1_csv ql_img=&nh_1_ql gm_img=&nh_1_gm gd_img=&nh_1_gd
+horizon inp=&nh_2 out=&nh_2_csv ql_img=&nh_2_ql gm_img=&nh_2_gm gd_img=&nh_2_gd
+horizon inp=&nh_3 out=&nh_3_csv ql_img=&nh_3_ql gm_img=&nh_3_gm gd_img=&nh_3_gd
+
+End-proc

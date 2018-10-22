@@ -1,0 +1,9 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+WRITE "THIS IS A TEST OF MODULE REALCON"
+WRITE "should generate 20 values, each with 1 trailing X."
+trealcon
+end-proc

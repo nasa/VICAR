@@ -1,0 +1,32 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let $echo="yes"
+
+ush rm -f data
+ush ln -s /project/test_work/testdata/carto/lsat7 data
+
+enable-log
+
+! Landsat 7 imagery of Saticoy acquired 2000-07-27
+sampler inp=(data/band1.vic,data/band2.vic,data/band3.vic,data/band4.vic,data/band5.vic) out=subsamples.ibis ngridx=200 ngridy=200 seed=30
+
+ibisstat subsamples.ibis 'sum cols=(1,2,3,4,5,6,7)
+
+ibisstat subsamples.ibis 'histo cols=(1,2,3,4,5,6,7)
+
+disable-log
+
+end-proc
+
+
+
+
+
+
+
+
+
+

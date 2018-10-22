@@ -1,0 +1,70 @@
+1  LOGO
+
+ PURPOSE: LOGO generates logo displays for use in masking programs.
+
+ Fortran calling sequence:  CALL LOGO(IDN,LINE,ILOGO,BGR,BUF)
+ C Calling Sequence:        zlogo(idn,line,ilogo,bgr,buf);
+ 
+  ( idn, line, ilogo, and bgr are passed by value for zlogo.)
+
+
+ ARGUMENTS:  IDN, LINE, ILOGO, and BGR are input integers.
+             BUF is an output buffer of type BYTE.
+
+     IDN     THE DN VALUE FOR THE LOGO
+
+     LINE    THE RELATIVE LINE NUMBER (I.E., 1 - 64)
+
+     ILOGO   SPECIFIES THE LOGO TO BE USED
+             1 = JPL
+             2 = MICKEY MOUSE
+             3 = GODDARD
+             4 = NASA (worm logo)
+
+     BGR     RESERVED FOR POSSIBLE FUTURE COLOR LOGOS
+             IT SHOULD BE SET AT ZERO AT THE PRESENT TIME
+             FUTURE VALUES ARE:
+             0 = BLACK AND WHITE
+             1 = BLUE
+             2 = GREEN
+             3 = RED
+
+     BUF     BUFFER IN WHICH LOGO IS RETURNED (BYTE).
+             IT MUST BE AT LEAST 64 BYTES IN LENGTH.
+
+2  HISTORY
+
+  Original Programmer: A. Gillespie
+  Ported to UNIX:       Steve Pohorsky
+  Source Language: C
+  Current Cog Progr:    Steve Pohorsky
+
+ REVISION HISTORY:                                          
+   6-16-93  ..SP....  Made portable for UNIX.  Converted to C because
+                      bit maps should be in hex, which ANSI Fortran
+                      does not support.
+
+2  OPERATION
+
+     ALL LOGOS ARE STORED IN LOGO IN PACKED FORMAT, EACH BIT REPRESENTING A 
+     BYTE (PIXEL).  FOR EACH CALL TO THE SUBROUTINE, THE SPECIFIED LINE OF THE 
+     SPECIFIED LOGO IS UNPACKED FROM 8 BYTES TO THE OUTPUT SIZE OF 64 BYTES.
+     ON BITS CAUSE THE CORRESPONDING BYTE IN BUF TO BE SET TO THE VALUE SPEC-
+     FIED BY THE DN ARGUMENT WHILE OFF BITS CAUSE NO CHANGE TO THE CORRES-
+     PONDING BYTE IN BUF.
+
+2  EXAMPLE
+
+      INTEGER OUNIT
+      BYTE  BUF(64)
+      CALL XVUNIT(OUNIT,'OUT',1,STAT, ' ')
+      CALL XVOPEN(OUNIT,STAT,'OP','WRITE','O_FORMAT','BYTE',
+     &            'U_NL',NLO,'U_NS',NSO, ' ')
+      DO I=1,64
+         CALL ITLA(0,BUF,64)
+         CALL LOGO(255,I,1,0,BUF)   ! JPL LOGO AT 255 DN.
+         CALL XVWRIT(OUNIT,BUF,STAT,'NSAMPS',64, ' ')
+      END DO
+      CALL XVCLOSE(OUNIT,STAT, ' ')
+
+

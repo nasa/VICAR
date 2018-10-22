@@ -1,0 +1,26 @@
+process help=*
+end-proc
+
+.TITLE
+Vicar2 Routine TGLLCGOR
+.HELP
+PURPOSE:
+
+	Verify operation of GLLGCOR routine.
+
+EXECUTION:
+
+	TGLLGCOR   ...  There are no parameters
+
+OPERATION:
+
+	TGLLGCOR runs though a loop of the more common line/sample
+combinations converting from image space to object space and back.
+the original vlaue is then compared to the processed value.  If the
+two differ by an amount greater than an internally defined tolerance,
+the line & sample pairs are displayed.
+
+PROGRAM HISTORY:
+ Original Programmer: Allan Runkle
+ Cognizant programmer:  Allan Runkle
+.end

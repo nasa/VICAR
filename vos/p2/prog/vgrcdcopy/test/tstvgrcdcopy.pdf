@@ -1,0 +1,20 @@
+procedure help=*
+refgbl $syschar
+refgbl $echo
+
+body
+let _ONFAIL="continue"
+let $echo="yes"
+
+! the input file c2684533.imq was downloaded from the PDS website
+
+vgrcdcopy /project/test_work/testdata/vgr/c2684533.imq c2684533.vic
+
+label-l c2684533.vic
+
+! check contents, including binary header and prefix:
+label-remove c2684533.vic c2684533.nolab 'bin
+label-create c2684533.nolab c2684533.bin nl=802 ns=1024
+list c2684533.bin lin=60 sinc=60
+
+end-proc  

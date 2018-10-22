@@ -1,0 +1,206 @@
+procedure
+parm    mode    type=string count=(0:1) valid=(batch,nobatch,inter) default=batch
+local   afidsroot   type=string count=1
+local   aftestdata  type=string count=1
+local DIR    TYPE=STRING 
+local INPIC   TYPE=STRING
+
+! Aug 23, 2013 - RJB
+! TEST SCRIPT FOR POWER
+! tests BYTE, HALF images
+!
+! Vicar Programs:
+!       translog f2 typetext label-list 
+! 
+! External programs
+!       gnuplot 4.6 or greater
+! 
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no display but creates .eps files
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!
+!   In batch mode it produces files testx.eps by calling gnuplot
+!       to create the encapsulated postscript file which can be
+!       later viewed with ghostscript or gimp
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
+!
+! Requires external test data: 
+!   cartlab or mipl dependent pointers
+!
+!
+!   Cartlab defines env var $AFIDS_ROOT, mipl doesn't
+!   The test data in cartlab is on /raid1/test_data 
+!   but in other facilities it might be somewhere else. 
+!   
+!   To facilitate this test you can define an
+!   environment variable $AFIDS_TESTDATA to point to
+!   that data. The cartlab system does not. In the git archive
+!   on pistol there is softlink to the test data in vdev that
+!   allows this test to pass 
+
+! 
+!  the *.gpi data produced by power are gnuplot scripts
+refgbl $echo
+refgbl $syschar
+
+
+body
+!
+let _onfail="stop"
+let $echo="yes"
+
+!check to see if mipl or cartlab for certain programs
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
+if (afidsroot = "")
+!MIPL
+    ush ln -s /project/test_work/testdata/cassini/iss cs
+else
+!CARTLAB
+    if (aftestdata = "")
+        ush ln -s /raid1/vicar_test_images/testdata/cassini/iss cs
+    else
+        ush ln -s $AFIDS_TESTDATA/vicar_test_images/testdata/cassini/iss cs
+    end-if
+end-if
+
+
+! THIS IS A TEST SCRIPT FOR THE PROGRAM - POWER
+let _onfail="goto rm"
+let $echo="no"
+write "TESTS USING AN IMAGE CONTAINING A ONE CYCLE SINE WAVE OVER 256 SAMPLES"
+write "THE MEAN IS 100 DN AND THE AMPLITUDE (PEAK-TO-PEAK) IN DN IS 200."
+write "So the first element of the table should be the mean:  100 and the" 
+write "max value should be about 200 at a frequency of 1/256 = .0039"
+let $echo="yes"
+! TEST 1
+f2 out=A.h size=(1,1,50,256) 'half func="100*(1+sin(3.1415926*samp/128.))"
+power A.h plotfmt=eps plotout=sin1  scale=30 fmax=.1  +
+    title="TEST 1 - RMS POWER SPECTRUM FOR FILE sin1" 
+typetext sin1.asc
+    ush gnuplot sin1.eps.gpi
+if (mode = "nobatch" or mode = "inter") 
+    ush gnuplot sin1.gpi
+end-if
+
+! TEST 2
+f2 out=A.b1 size=(1,1,50,256) 'byte func="100*(1+sin(3.1415926*samp/128.))"
+power A.b1  plotout=sin2 scale=30 fmax=.1  +
+    TITLE="TEST 2 - RMS POWER SPECTRUM FOR BYTE FILE sin2"
+typetext sin2.asc
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot sin2.gpi
+end-if
+
+let $echo="no"
+write "TRY A SINE WAVE OVER 256 LINES"
+let $echo="yes"
+! TEST 3
+f2 out=A.b2 size=(1,1,256,50) 'byte func="100*(1+sin(3.1415926*line/128.))"
+power A.b2 plotout=sin3 scale=20 fmax=.1 +
+    title="TEST 3 - RMS POWER SPECTRUM FOR BYTE FILE sin3"
+typetext sin3.asc
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot sin3.gpi
+end-if
+
+
+let $echo="no"
+write "HALFWORD DATA TESTS on Cassini data"
+let $echo="yes"
+! TEST 4
+power cs/sum2.38 (11,11,50,140) plotout=case1  +
+    title="TEST 4 - RMS POWER SPECTRUM FOR HALF FILE sum2.38"
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot case1.gpi
+end-if
+
+! TEST 5 - change x axis to FREQ 
+power cs/sum2.38 (1,1,100,500) plotout=case2 EXPONENT=9 TITLEX="FREQ"  +
+    title="TEST 5 - RMS POWER SPECTRUM FOR HALF FILE sum2.38"
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot case2.gpi
+end-if
+! TEST 6 - change title to FLORANCE (for Florance Moss)   - expand x-axis to 2.0
+! although max plotted is 0.5
+! xrtgraph only allowed title to be 52 chars
+power cs/sum2.38 (1,1,150,64)  EXPONENT=6 FMAX=2.0 +
+    TITLE="TEST 6 - FLORANCE CASE3 RMS POWER SPECTRUM FOR HAF FILE sum2.38" 
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot power.gpi
+end-if
+
+! TEST 7 - Title is FLORANCE - DNSCALE = 20.0 times 1.0 inches
+f2 cs/sum2.38 T FUNC="IN1*20."
+power T (1,1,150,64)  EXPONENT=6 FMAX=2.0  DNSCALE=20. +
+          plotout=case4 TITLE="TEST 7 - FLORANCE CASE4"
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot case4.gpi
+end-if
+! TEST 8
+power cs/sum2.38 (1,1,120,50) EXPONENT=6 TITLE="TEST 8 - PLOT ONLY - CASE5" plotout=case5
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot case5.gpi
+end-if
+! TEST 9
+ush rm power.gpi
+power cs/sum2.38 (1,1,120,50)  plotout=case6  +
+    title="TEST 9 - CASE6 RMS POWER SPECTRUM FOR FILE sum2.38"
+typetext case6.asc
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot case6.gpi
+end-if
+
+!ush gnuplot power.gpi
+
+let $echo="no"
+write "BYTE DATA TESTS"
+let $echo="yes"
+
+!LET INPIC = "&DIR"//"grid.byte"      
+! TEST 10
+label-li cs/grid.byte
+!ush rm power.gpi
+power cs/grid.byte (1,1,50,50) EXPONENT=6  TITLE="TEST 10 - BYTE TEST FOR FILE grid.byte" +
+     plotout=grid0
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot grid0.gpi
+end-if
+
+! TEST 11
+power cs/grid.byte (1,1,50,50) EXPO=6 PLOTOUT=grid1  +
+    title="TEST 11 - RMS POWER SPECTRUN FOR FILE grid.byte"
+typetext grid1.asc
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot grid1.gpi
+end-if
+
+! TEST 12 - should get "??W - Number of samples truncated" 
+power cs/grid.byte (1,1,60,60) EXPO=6 PLOTOUT=grid2  +
+    title="TEST 12 - RMS POWER SPECTRUN FOR FILE grid.byte"
+typetext grid2.asc
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot grid2.gpi
+end-if
+
+rm>
+ush rm cs
+let $echo="no"
+
+end-proc

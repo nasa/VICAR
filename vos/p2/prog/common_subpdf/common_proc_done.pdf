@@ -1,0 +1,113 @@
+procedure option=selftutor help=*
+
+  refgbl $menus
+
+  parm MAIN_PROC_NAME string
+
+!-----------------------------------------------------------------------------
+! COMMON_PROC_DONE.PDF
+!
+! This PDF-file was developed in order to provide various sub-PDF's which can
+! be used by Menu-driven PDF's (i.e. so-called MDF's).
+! This sub-PDF is the entry point which is selected to execute the program
+! with the keyword readparam="read" ('&"MAIN_PROC_NAME" 'read', see below). 
+!-----------------------------------------------------------------------------
+
+
+
+body
+
+	if (_tutor=1)
+	
+		restore-parm common_proc_name.par
+
+		!**********************************************************
+		! Execution of &"MAIN_PROC_NAME".PDF (and, therefore, of  
+		! the main program). The keyword parameter "readparam" is set 
+		! to 'READ'
+		!**********************************************************
+
+		let _ONFAIL="continue"
+
+		&MAIN_PROC_NAME 'read
+
+		!**********************************************************
+		! The stack of menus (i.e. $MENUS) is set back to the Null
+		! value after the pho_demo main program has been executed.
+		!**********************************************************
+
+		let $MENUS=--
+
+		!**********************************************************
+		! There are three interactive operation modes in TAE:
+		! 1) Menu Mode	(driven by the MDF)
+		! 2) TCL Mode	(command line)
+		! 3) Tutor Mode	(driven by a PDF)
+		! To switch between the different modes, see the following
+		! table:
+		!
+		! From		To		Transition
+		!
+		! Menu Mode	Tutor Mode	procedure selection	   (1)
+		!     "		TCL		"COMMAND"		   (2)
+		! Tutor Mode	Menu Mode	"EXIT" or proc completion  (3)
+		!     "		TCL		"EXIT" or proc completion  (4)
+		!				(Note that tutor mode, in  
+		!				order to distinguish bet-
+		!				ween (3) and (4), remem-
+		!				bers whether the user is a
+		!				Menu user or a TCL user.
+		! TCL Mode	Menu Mode	"MENU"
+		!    "		Tutor Mode	"TUTOR"
+		!
+		! The command COMMAND (see below) exits the Menu Mode and 
+		! enters the Command Mode of TAE after the main program
+		! part of our demo has been run. When &MAIN_PROC_NAME has
+		! been run without any problems, "command" is the last
+		! command executed by this procedure.
+		!**********************************************************
+
+		command
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs. "
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+!# annot function="VICAR Utilities"
+!# annot keywords=("sub-pdf","menu-driven")
+
+end-proc
+
+.Title
+Various sub-PDFs which can be used by menu-driven PDFs
+
+.help
+This PDF-file was developed in order to provide various sub-PDF's which can
+be used by Menu-driven PDF's (i.e. so-called MDF's).
+This sub-PDF is the entry point which is selected to execute the program.
+There are no parameters to specify. 
+
+OPERATION:
+
+'common_proc_done' calls the main-PDF with the option 
+"readparam=read" which is needed to make sure that main_PDF reads (restores) 
+all parameter files which have been created and saved by 
+the previous calls to the separate PDF's. Finally, the main-PDF calls 
+the main application pogram .
+
+.page
+
+Programmer:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+.end

@@ -1,0 +1,8 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+WRITE "THIS IS A TEST OF MODULE DIVV"
+tdivv
+end-proc

@@ -1,0 +1,93 @@
+process help=*
+
+parm NL    type=integer count=1 default=512
+parm NS    type=integer count=1 default=512
+parm OUT   count = 1
+parm FILT  type=(string,7) default=CLEAR valid=(CLR,CLEAR,RED,VLT,VIOLET,IR-8890,889,GREEN,GRN,IR-9680,968,IR-7270,727,IR-7560,756)
+
+parm PSF   type = real count = 0:258 default = --
+end-proc
+!special comments:
+!# annot function = (mathematical/fourier,projects/galileo/corrections)
+!# annot project = galileo
+!# annot keyboard = ("scattered light correction",fourier,"point spread function",fft)
+
+.title
+VICAR2 program GLLPSF
+
+.help
+PURPOSE
+GLLPSF generates a two dimensional point spread function in fft format
+suitable to be converted into a two dimensional optical transfer function
+by vicar program fft22. The output of fft22 can be input to vicar program
+wiener as the second input file.
+
+EXECUTION
+    gllpsf out=a.img nl=1024 ns=1024
+
+OUTPUT FILES:
+The output is a real image nl by ns in fft suitable format, ie: with the
+origin of the psf at the upper left.
+
+EXAMPLE
+  gllpsf out=psf nl=512 ns=512 psf=(1.,0.,0.,10.)
+  fft22  inp=psf out=otf 
+  fft22  inp=pix out=fftpix nl=512 ns=512
+  wiener inp=(fftpix,otf) out=fixfftpix sn=45.
+  fft22 inp=fixfftpix out=newpix mode=inverse format=half
+ 
+WRITTEN BY: 		J Lorre 1/20/92
+
+
+!
+
+.level1
+
+.vari NL
+output number
+of lines
+
+.vari NS
+output number
+of samples
+
+.vari OUT
+output image files
+
+.vari FILT
+image filter
+RED,GRN,VLT,CLR,889
+  968,727,756
+
+.vari PSF
+point spread
+function profile
+
+.level2
+.vari NL
+output number of lines.
+defaults to 512
+
+.vari NS
+output number of samples
+defaults to 512
+
+.vari OUT
+output image file in real format of dimensions nl and ns.
+
+.vari FILT
+GLLPSF includes point spread function values specific to Galileo
+filters.  If filt = GRN, the values specific to the green filter
+will be created, etc.  If the user enters values in PSF parameter,
+this FILT parameter is ignored.
+
+.vari PSF
+point spread function profile as pairs of values beginning at the center of
+the psf and extending to the tail of the psf.  The first value of each
+pair is the psf amplitude. The last (second) value of each pair is the
+distance from the origin in pixels. Make sure that the last pair has a
+distance large enough to encompass the image.
+Example:  psf=(1.,0.,.8,1.,.3,2.,0.1,10,0.,60.)
+Default is to use the built in GLL psf profile.
+.end
+

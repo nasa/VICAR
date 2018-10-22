@@ -1,0 +1,99 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+
+!***************************************************************************
+!
+!	GMASK TEST PDF FOR UNIX OPERATING SYSTEM MACHINES
+!
+!	Author: J. McNeill
+!	Date: 	August 1993
+!
+!***************************************************************************
+!
+! Note : this is the test PDF for unix, please do the following :
+!
+! 1. Copy the file input.str from /home/ffm/gmask.
+!
+! 2. Output the files to your own test directory (XX MB of space required).
+!
+!***************************************************************************
+
+gen out=input4.hlf ns=512 nl=512 format="half" linc=0 + 
+	sinc=128 ival=-32768
+gen out=input.byt ns=100 nl=100 linc=0 sinc=1
+
+! Test color C mask program
+TESTRGB in=(    /usr/local/images/mandrill.red, +
+		/usr/local/images/mandrill.grn, + 
+		/usr/local/images/mandrill.blu, +
+		/usr/local/images/b52.img, +
+		input4.hlf, +
+		/usr/local/images/io.red, +
+	        /usr/local/images/io.grn, +
+		/usr/local/images/io.blu, +
+		/usr/local/images/jpllogo.img 	) +
+	out=GMASKRGBC_U.DAT
+
+! Test color fortran mask program
+TESTRGBF in=(   /usr/local/images/mandrill.red, +
+		/usr/local/images/mandrill.grn, + 
+		/usr/local/images/mandrill.blu, +
+		/usr/local/images/b52.img, +
+		input4.hlf, +
+		/usr/local/images/io.red, +
+	        /usr/local/images/io.grn, +
+		/usr/local/images/io.blu, +
+		/usr/local/images/jpllogo.img 	) +
+	out=GMASKRGBF_U.DAT
+
+! Test BW C mask program
+TESTBW in=(     /usr/local/images/mandrill.red, +
+		/usr/local/images/b52.img, +
+		input4.hlf, +
+		/usr/local/images/io.red, +
+		/usr/local/images/jpllogo.img 	) +
+	out=GMASKBWC_U.DAT
+
+! Test BW fortran mask program
+TESTBWF in=(    /usr/local/images/mandrill.red, +
+		/usr/local/images/b52.img, +
+		input4.hlf, +
+		/usr/local/images/io.red, +
+		/usr/local/images/jpllogo.img 	) +
+	out=GMASKBWF_U.DAT
+
+write "*******************************************************************"
+write " TEST OF XAOUTSIZE and INVERSE STRETCHES OF XASTORE- XAZOOMIMAGE  "
+write "*******************************************************************"
+write " "
+write "TESTAUX, TESTAUXF and TESTDIF should all have identical outputs."
+write "TESTDIF uses stretched inputs produced by STRETCH.COM, while "
+write "TESTAUX and TESTAUXF use GMASK stretch routines.  XAOUTSIZE is also"
+write "tested.  All outputs should be of dimensions 512x512, with a 200x200"
+write "window of images."
+TESTAUX  input.byt GMASKAUX_U.DAT 
+
+TESTAUXF input.byt GMASKAUXF_U.DAT 
+
+!
+!	STRETCH currently is not working on UNIX system (FR 81818)
+!	copy input.str from /home/ffm/gmask.
+!
+!STRETCH inp=input.byt out=input.str linear=(50,10)
+!
+
+TESTDIF input.str GMASKDIF_U.DAT
+
+write " "
+write "THERE SHOULD BE NO DIFFERENCE BETWEEN GMASKAUX_U.DAT, GMASKAUXF_U.DAT"
+write "and GMASKDIF_U.DAT"
+difpic (GMASKAUX_U.DAT,GMASKAUXF_U.DAT) DIFF.DAT
+difpic (GMASKAUX_U.DAT,GMASKDIF_U.DAT) DIFF.DAT
+
+TESTRAY (GMASKRAY1_U.DAT,GMASKRAY2_U.DAT)
+
+end-proc
+

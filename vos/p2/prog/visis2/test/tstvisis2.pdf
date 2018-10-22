@@ -1,0 +1,61 @@
+procedure
+refgbl $echo
+refgbl $syschar
+body
+let _onfail="continue"
+let $echo="yes"     
+
+enable-log
+
+write "This is the test file for Program VISIS2"
+
+ush cp /project/test_work/testdata/gll/g7jnfeap4101a.3 edr_file
+ush cp /project/test_work/testdata/gll/g7jnfeap4101a.aacs aacs_file
+ush cp /project/test_work/testdata/gll/nims98a_gs4_ref_g1_01.tab CAL_FILE
+ush cp /project/spice/ops/sun-solr/s980326b.bsp spk_file
+ush cp /project/test_work/testdata/gll/nims_ikernel_mab.dat ik_file
+ush cp /project/test_work/testdata/gll/nims_solar.dat sol_file
+ush cp /project/test_work/testdata/gll/boom_obscuration.nim dbm_file
+
+NIMSCMM2 edr=edr_file +
+        cube=G7JNFEAP4101A.CUB 'NOCAL +
+	aacsfil=aacs_file +
+	calfil=CAL_FILE +
+	spkernel=spk_file +
+	ikernel=ik_file solfile=sol_file +
+	dbmfile=dbm_file +
+        prodnote="testbed EDR with simulated pointing"  +
+        obsnote="testbed EDR with simulated pointing"  +
+        target=GANYMEDE phase=GANYMEDE_7_ENCOUNTER +
+        proj=pov slew_tol=-1. +
+	outsiz=(9,5)
+
+!  LIST ONE BAND FOR CHECK ON INVERSE MODE, BELOW:
+list G7JNFEAP4101A.CUB nb=1
+
+hist2d G7JNFEAP4101A.CUB tst1.h2d out_nl=256 out_ns=408 'DN
+
+VISIS2 (tst1.h2d G7JNFEAP4101A.CUB G7JNFEAP4101A.COC) G7JNFEAP4101A.QUB
+
+isislab G7JNFEAP4101A.QUB
+
+!  TEST INVERSE MODE:  OUTPUT (TST1.CUB) MUST BE SAME AS INPUT ABOVE
+
+VISIS2 G7JNFEAP4101A.QUB (tst1.h2d G7JNFEAP4101A.CUB G7JNFEAP4101A.COC) 
+
+! COMPARE THIS WITH ABOVE LIST:
+list G7JNFEAP4101A.CUB nb=1
+
+! clean up:
+ush rm edr_file
+ush rm aacs_file
+ush chmod 777 spk_file
+ush rm spk_file
+ush rm ik_file
+ush rm dbm_file
+ush rm sol_file
+ush rm CAL_FILE
+
+disable-log
+
+end-proc

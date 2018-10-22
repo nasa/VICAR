@@ -1,0 +1,28 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM clustest
+
+   To Create the build file give the command:
+
+		$ vimake clustest			(VMS)
+   or
+		% vimake clustest			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	clustest
+#define R2LIB
+
+#define MODULE_LIST clustest.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/****    #define LIB_LOCAL  ******/
+/************************* End of Imake file ***************************/

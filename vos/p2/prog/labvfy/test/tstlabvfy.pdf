@@ -1,0 +1,38 @@
+procedure
+refgbl $autousage
+body
+    local flag integer
+
+    let $autousage="none"
+
+    gen a nl=10 ns=10
+    f2 a b fun="in1+1"
+
+    write "All of the responses below should begin with"
+    write "Correct; If any begin with Error: there is a problem"
+
+    labvfy  a  TASK="F2" KEYWORD="FUNCTION"  LABEL="in1+1" RESULT=FLAG
+    write "FLAG=&FLAG"
+    if (FLAG = 1)
+	write "Error: should not detect FUNCTION=in1+1"
+    else
+	write "Correct: Image A does not contain in1+1 as FUNCTION"
+    end-if
+
+    labvfy  b  TASK="F2" KEYWORD="FUNCTION"  LABEL="in1+1" RESULT=FLAG
+    write "FLAG=&FLAG"
+    if (FLAG = 1)
+	write "Correct: Image B uses in1+1 as FUNCTION"
+    else
+	write "Error: did not detect FUNCTION=in1+1"
+    end-if
+
+    labvfy  b  TASK="GEN" KEYWORD="FUNCTION"  LABEL="in1+1" RESULT=FLAG
+    write "FLAG=&FLAG"
+    if (FLAG = 1)
+	write "Error: should not detect FUNCTION=in1+1 in GEN"
+    else
+	write "Correct: Image B does not use in1+1 as FUNCTION in GEN"
+    end-if
+
+end-proc

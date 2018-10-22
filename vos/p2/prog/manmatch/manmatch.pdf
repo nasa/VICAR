@@ -1,0 +1,708 @@
+PROCESS HELP=*
+SUBCMD-DEFAULT DUMMY 
+ PARM INP      TYPE=STRING  COUNT=(2:4)
+ PARM OUT      TYPE=STRING  COUNT=1
+ PARM PROJECT  TYPE=(STRING,5) COUNT=(0:1) DEFAULT=-- +
+    VALID=("VGR-1","VGR-2","MAR10","MAR-9","VIKOR","GLL  ","CASSI")
+ PARM CORR     TYPE=INTEGER VALID=(16,32,64,128,256) COUNT=2 DEFAULT=(64,64)
+ PARM PFILTER  TYPE=REAL    DEFAULT=0
+ PARM PHASE    TYPE=REAL    DEFAULT=0
+ PARM OFFMAX   TYPE=REAL    DEFAULT=0.8
+ PARM FUNC     TYPE=(STRING,3) DEFAULT=""
+ PARM REDOCORR TYPE=KEYWORD VALID=(REDO,NOREDO) DEFAULT=REDO
+ PARM SUBPIX   TYPE=KEYWORD VALID=(SUBPIX,NOSUBPIX) DEFAULT=NOSUBPIX
+ PARM PRINT    TYPE=KEYWORD VALID=(PRINT,NOPRINT) DEFAULT=PRINT
+ PARM DIR      TYPE=(STRING,80) COUNT=1 DEFAULT=" "
+ PARM OBJECT   TYPE=KEYWORD VALID=(IMAGE,OBJECT) DEFAULT=IMAGE
+ PARM SEDR     TYPE=KEYWORD VALID=(SEDR,NOSEDR) DEF=SEDR
+ PARM FILENAME TYPE=(STRING,80) COUNT=(0:1) DEFAULT="NOFILE"
+ PARM FONTHT   TYPE=INTEGER COUNT=(0:1) DEFAULT=10
+ PARM FONTSC   TYPE=REAL COUNT=(0:1) DEFAULT=1.0
+END-SUBCMD
+SUBCMD CURSOR
+ PARM CORR TYPE=INTEGER COUNT=(0,2) VALID=(16,32,64,128,256) DEFAULT=--
+ PARM DELETE TYPE=INTEGER COUNT=(0:1) VALID=(1:500) DEFAULT=--
+ PARM EXIT TYPE=KEYWORD COUNT=(0:1) VALID=EXIT DEFAULT=--
+ PARM REDRAW TYPE=KEYWORD COUNT=(0:1) VALID=REDRAW DEFAULT=--
+ PARM HELP TYPE=KEYWORD COUNT=(0:1) VALID=(HELP) DEFAULT=--
+ PARM NEXT TYPE=KEYWORD COUNT=(0:1) VALID=(NEXT) DEFAULT=--
+ PARM LAST TYPE=KEYWORD COUNT=(0:1) VALID=(LAST) DEFAULT=--
+ PARM PERCENT TYPE=REAL COUNT=(0:1) VALID=(0.:49.) DEFAULT=--
+ PARM SEDR TYPE=KEYWORD COUNT=(0:1) VALID=(SEDR) DEFAULT=--
+ PARM NOSEDR TYPE=KEYWORD COUNT=(0:1) VALID=(NOSEDR) DEFAULT=--
+ PARM PAIR TYPE=INTEGER COUNT=(0:1) VALID=(1:200) DEFAULT=--
+ PARM NOCORR TYPE=KEYWORD COUNT=(0:1) VALID=(NOCORR) DEFAULT=--
+END-SUBCMD
+END-PROC
+
+.TITLE
+VICAR/IBIS Program MANMATCH
+
+.HELP
+PURPOSE
+
+MANMATCH or Manual Match, is a program which produces an IBIS format file
+containing tiepoint information for the purpose of producing mosaics.  The 
+program displays the a paired images with overlapping parts allowing the user 
+to manually match the tiepoints (or similar pixels).
+
+A more global view of the entire mosaicking process was documented in some
+procedures in r3lib called MANUAL2.COM for Voyager, and MANUAL3.COM for Galileo. 
+As of Aug.2005, these are no longer on the system.  However, extracts from them
+have been included in this Help file.
+
+.page
+EXECUTION
+
+To run without a SEDR:
+   MANMATCH  inp=(sedr.int,over.int)  out=match.int 'nosedr
+
+To run with a sedr on image space images:
+   MANMATCH  inp=(sedr.int,over.int,geoma.cor)  out=match.int 
+  (note that Galileo does not have a geoma correction file,
+   you must instead specify project=gll).
+
+or to continue from a partially complete tiepoint set:
+   MANMATCH  inp=(sedr.int,over.int,match.int,geoma.cor) +  
+             out=newmatch.int
+
+EXAMPLE: manmatch inp=(jupsedr.int,jupover.int) out=jupmatch.int +
+         dir=ud4:[jjl059.mosaic]
+         Note: the images are in the directory ud4:[jjl059.mosaic]
+
+.PAGE
+The following procedure is a copy of MANUAL4.COM which shows how to
+build a mosaic using manmatch. Refer directly to manual3 or manual4
+rather than to this procedure because they may change.
+
+procedure help=*
+ REFGBL $ECHO
+BODY
+WRITE "This is a guide for masaicking GALILEO images "
+WRITE "using OMCOR2 rather than OMCOR."
+WRITE "To mosaic Voyager images refer to MANUAL2.COM."
+WRITE "MANUAL4 MOSAICKING PROCEDURE (Things to do first)"
+WRITE "(1)You must create a file with the editor containing"
+WRITE "the full names of all the frames to be contained in"
+WRITE "the mosaic, one filename per record."
+WRITE "Ground control frame(s) must be at the END."
+WRITE "Here we call this file LISTOFFILES."
+WRITE "(2)YOU MUST ALLOCATE THE DISPLAY WITH  use  BEFORE STARTING"
+WRITE "(3)To use this proc you must edit the following:"
+WRITE "   -> The values assigned in the following LET commands."
+WRITE "All plots will go to the printronix printer."
+
+local (numpix,nlpix,nspix,camera,idfts) integer
+local (latcen,loncen) real
+local (planet,project) string
+local return string initial=""
+
+WRITE "nlpix=the number of lines in each picture."
+WRITE "nspix=the number of samples in each picture."
+WRITE "numpix=the number of pictures in the mosaic."
+WRITE "planet=the target body."
+let nlpix=800
+let nspix=800
+let numpix=2
+let planet="venus"
+let project="GLL"
+
+plotting 'print
+
+WRITE " "
+WRITE "Create the ibis sedr file"
+WRITE "Place the ground control image LAST"
+WRITE "Replace the fds counts by those you are to use."
+WRITE "List them in the order of priority, highest first."
+ibisnav out=gasedr.int sedr=(fare,fare) +
+         planet=&planet project=&project +
+         filename=listoffiles.
+WRITE " "
+WRITE "Make first footprint plot to get center of projection"
+WRITE "From the map select an approximate center of projection"
+WRITE "and enter it in the next two prompts."
+mosplot inp=gasedr.int nl=&nlpix ns=&nspix project=&project
+dcl print/nofeed printronx.plt
+
+WRITE " "
+WRITE "Provide the latitude at the center of projection:"
+getpar latcen
+WRITE "Provide the longitude at the center of projection:"
+getpar loncen
+
+WRITE " "
+WRITE "Make stereographic plot and create overlap file"
+mosplot inp=gasedr.int out=gaover.int 'plot project=&project +
+         nl=&nlpix ns=&nspix latlon=(&latcen,&loncen)
+dcl print/nofeed printronx.plt
+
+WRITE " "
+WRITE "Delete unnecessary cross terms from the overlap file."
+WRITE "Consult the footprint plot. In general each picture"
+WRITE "should see the ones to left,right,top,& bottom but"
+WRITE "needn't see more than those."
+WRITE "You will be placed into program EDIBIS."
+WRITE "To continue hit RETURN"
+getpar return
+edibis inp=gaover.int
+
+WRITE " "
+WRITE "Collect tiepoints MANUALLY using program MANMATCH."
+WRITE "This is a time consuming interactive step. Try to read"
+WRITE "the help file for MANMATCH before proceeding"
+WRITE "To continue hit RETURN"
+getpar return
+manmatch inp=(gasedr.int,gaover.int) out=gamatch.int +
+         filename=listoffiles. project=&project 'sedr 
+
+WRITE "Plot tiepoints using old sedr."
+WRITE "This is to see what residuals look like before"
+WRITE "correction of the sedr."
+mosplot inp=(gasedr.int,gamatch.int) project=&project +
+         nl=&nlpix ns=&nspix exag=10. latlon=(&latcen,&loncen)
+dcl print/nofeed printronx.plt
+
+WRITE "Iteratively correct the ibis sedr file."
+omcor2 inp=(gasedr.int,gamatch.int) project=GLL
+omcor2 inp=(gasedr.int,gamatch.int) project=GLL
+
+WRITE "Plot the tiepoints using the corrected sedr."
+mosplot inp=(gasedr.int,gamatch.int) 'new +
+         project=&project +
+         nl=&nlpix ns=&nspix exag=100. latlon=(&latcen,&loncen)
+dcl print/nofeed printronx.plt
+
+WRITE "Correct the archival sedr from the ibis sedr."
+ibisupdate inp=gasedr.int 'update planet=&planet +
+         project=&project +
+
+dcl del printronx.plt;*
+end-proc
+
+
+.PAGE
+USAGE:
+MANMATCH is an interactive program which has in the SEDR.INT file
+the FDS or SCET times of all of the frames to inspect along
+with all the navigation for these images.. 
+You must create this file using the program IBISNAV
+At the moment you must remember to use the single quote ' before all
+single keywords. Thus 'HELP and 'EXIT is correct and HELP is incorrect.
+
+Manmatch can obtain the names (and thus the locations) of all the
+input files in one of two ways:
+
+1. By the user specifying the parameter FILENAME which points to
+   a file created by a text editor and which contains the full
+   file names of each input picture in the order of priority, one
+   name per record. This is the same file used in IBISNAV.
+   So, if the first 2 pictures are called scx1:[jjl059]1234567.img
+   and mipldisk:[mipl.gll]venus.img the first two records of
+   FILENAME would contain:
+
+   scx1:[jjl059]1234567.img
+   mipldisk:[mipl.gll]venus.img
+
+   This is the preferred usage.
+
+2. By building each file name by appending to the DIR keyword
+   the integer contained in column 1 of the SEDR.INT file followed
+   by .IMG. You must in this mode name the input pictures
+   accordingly. 
+   For Voyager, column 1 is the FDS times thus the frames must be
+   named the same as their FDS times; ie: 7654321.img is the file
+   name of the image with fds time 7654321. 
+   For Galileo the FDS times are just 1,2,3,4.. so the file names are
+   1.img   2.img etc.
+   So, if DIR=scx1:[jjl059] and SEDR.INT has fds time 1234567 in column
+   one then the built-up name would be:  scx1:[jjl059]1234567.img
+
+   This method is relatively obsolete.
+
+The second input file 
+contains the overlap frame pairs to present to the user.
+This file is created by program MOSPLOT.
+
+First input= SEDR.INT produced by program IBISNAV
+Second input= OVER.INT produced by program MOSPLOT
+
+When project is of Galileo, the camera s/n used to distinguish the mode of the
+SSI camera is obtained from the first entry of the SEDR.INT file.  Thus, it is 
+expected that the image files being processes are all taken by the same camera.
+
+The program will attempt to present the user with each frame
+overlap pair, one pair at a time. The user has control from 
+the keyboard and from the trackball using 3 buttons. 
+The object of the game is for the user to cursor two tiepoints
+connecting each frame pair for all the frame pairs presented.
+You can collect from none to 1000 points but two is sufficient.
+There can be up to 200 frames and 1000 points total.
+
+There are two modes:
+
+MODE1 is the parameter processor. When in this mode you will 
+have a prompt of the form: MANMATCH> . The program is waiting
+for keyword entry. A carriage return or most keywords will
+put you into MODE2. To get into MODE1 you can:
+1. Depress the leftmost trackball button before depressing
+   any of the others.  -or-
+2  Move the cursor into the box labelled: PARAMETER PROCESSOR.
+
+MODE2 is the tiepoint acquisition mode. To get into this mode depress the 
+carriage return. When in MODE2 the cursor is active. You can move a rectangular
+box the size of the correlation area over the image, called the correlation 
+box. At first the box will remain in the left image area. After you have placed
+the cursor over a likely region in the left image you can move to the right 
+image by depressing the right most track ball button. Toggling the middle or 
+right button switches attention between left & right image areas.  To enter a 
+tiepoint THEN depress the left button. If you depress the left button BEFORE 
+the middle or right button you are returned to the parameter processor. You can
+advance one frame pair or revisit one frame pair by moving the cursor to within
+the boxes indicating: NEXT or LAST PAIR.
+
+When the last pair has been reached you will return to
+the parameter processor. To exit type: 'EXIT.
+Interactive parameters are listed with: 'HELP.
+
+The program performs correlations to assist in precision. The
+default size is: 64 by 64.
+
+.page
+SEDR PARAMETER
+
+If the SEDR=SEDR is specified, then the program will read in the SEDR 
+information from the first file to help the user visually locate the
+overlapping coordinates of the paired image when in tiepoint acquisition mode.
+This assistance is done by synchronizing the movement of two tiepoint boxes
+on the left and right side of the image.  
+
+Occasionally the SEDR is bad and the synchronization would result in nothing 
+but annoyance.  In such case, the user may initiate the program with 
+SEDR=NOSEDR to disable the SEDR control for the whole interactive session.
+Another way is to temporarily disable SEDR control with the 'NOSEDR in the
+parameter processor mode.
+
+.PAGE
+FILE STRUCTURE:
+  The tiepoints file is an IBIS format tabular file. It consists
+of 512 byte records where each column of data is written as
+sequential records until exhausted. The next column begins at the
+start of the next record etc. Record #1 contains the number of points
+per column. All data is real*4 binary.
+
+.page
+Revision History:
+
+Who When       What
+--- ---------- ----------------------------------------------------------------
+SMC 09/27/1996 Updated CONVEV call to reflect (FR89818)
+SMC 09/27/1996 Make 'SEDR command reload the SEDR information.  (FR89849)
+SMC 08/05/1996 FR 89352
+               Disable 'SEDR in parameter processor initiated with 'NOSEDR
+               Took out DEVICE parameter
+SMC 10/22/1996 * Updated VALID input list for 2 parameter CORRs to match
+               * Took out parameters D1, D2, U1, and U2              (FR89888)
+SMC 10/22/1996 Make SEDR information be reloaded when 'SEDR command  (FR89849)
+SMC 10/22/1996 Updated CONVEV calling sequence so that Summation Mode is
+                 supported.                           (FR89818)
+SMC 10/22/1996 Use MVCL to write 'GLL  ' to CONV instead of MVE    (FR89353)
+LWK 05aug2005  Fixed some errors in the Help text.  Closed ARs 9037 and 9038
+               because they were not reproducible and predated above changes
+               by SMC.
+
+.LEVEL1
+.VARIABLE INP
+Batch parameter !
+All inputs are IBIS tabular files.
+
+First input= SEDR.INT produced
+ by program IBISNAV
+Second input= OVER.INT produced
+ by program MOSPLOT
+Third or fourth input=
+An old tiepoints file 
+Third or fourth input=
+A GEOMA distortion file.
+
+.VARIABLE OUT
+Batch parameter !
+The output IBIS tabular file.
+nine columns output:
+col1=first frame number of a pair
+col2=second frame number of a pair
+col3=first frame tiepoint line
+col4=first frame tiepoint sample
+col5=second frame tiepoint line
+col6=second frame tiepoint sample
+col7=first tiepoint DN value
+col8=second tiepoint DN value
+col9=correlation value (1.0)
+
+.VARIABLE HELP
+List the interactive parameters 
+available in a session.
+
+.VARIABLE PROJECT
+Batch parameter !
+Specifies  the 
+project. 
+
+.VARIABLE SEDR
+Batch parameter !
+Causes navigation assisted
+tiepoint acquisition.
+Requires IBISNAV
+sedr ibis file.
+
+.VARIABLE OBJECT
+Batch parameter !
+Causes images to be 
+considered geometrically
+corrected.
+
+.VARIABLE PFILTER
+Batch parameter !
+The power of the FFT high pass
+power law filter. Default 
+is no power filter.
+default is: pfilter=0.0 real
+
+.VARIABLE PHASE
+Batch parameter !
+Degree of phase correlation:
+0 for normal correlation. ( Default ).
+1 for phase correlation
+
+.VARIABLE OFFMAX
+Batch parameter !
+How far off center, correlation
+peak is allowed (0 to 1). 
+If the peak is more than
+OFFMAX*window/2 pixels from 
+the center it is rejected.
+Default is 0.8
+
+.VARIABLE FUNC
+Batch parameter !
+Pixel function before 
+correlation is performed..
+The options are: LOG or EXP.
+DEfault is no funtion performed.
+
+.VARIABLE REDO
+Batch parameter !
+Keyword for redo mode. 
+Valid responses are:
+REDO or NOREDO. 
+The default is REDO.
+Redo specifies that if 
+the first correlation for
+an area has an offset of 
+less than the OFFMAX limit
+but greater than zero 
+the correlation is rerun
+beginning at the new location.
+
+.VARIABLE PRINT
+Batch parameter !
+'NOPRINT to turn off 
+terminal output
+
+.VARIABLE DIR
+Batch parameter.
+Specifies the directory 
+name where all the 
+input files for the
+mosaic reside.
+
+.VARIABLE FILENAME
+Batch parameter.
+Specifies a file name 
+which contains the 
+names of all the
+images to be included 
+in the mosaic.
+
+.VARIABLE FONTHT
+Batch parameter.
+Specifies Font height
+of text displayed in 
+image window. 
+
+.VARIABLE FONTSC
+Batch parameter.
+Specifies Font scale
+of text displayed in 
+image window. This
+is the horizonal
+scaling factor (width/height)
+to be used when drawing text.
+ 
+.VARIABLE EXIT
+Interactive parameter !
+To exit from the program 
+in interactive mode.
+
+.VARIABLE CORR
+Interactive & batch parameter !
+The number of lines and samples
+in the correlation window. 
+Defaults to 
+64 lines and 64 samples.
+Valid values are: 16 32 64 128 256.
+Default is: corr=(64,64)
+
+.VARIABLE DELETE
+Interactive parameter !
+To delete tiepoint #n specify:
+delete=n
+
+.VARIABLE REDRAW
+Interactive parameter !
+To redraw all the acquired 
+tiepoints.
+
+.VARIABLE NEXT
+Interactive parameter
+To select the next frame pair.
+
+.VARIABLE LAST
+Interactive parameter
+To select the last frame pair.
+
+.VARIABLE PERCENT
+Interactive parameter
+Specifies the percentage of the
+histogram to saturate at each
+end for autostretching of the
+displayed images.
+Default=2.0
+
+.VARIABLE PAIR
+Interactive parameter !
+Forces the image pair 
+specified to
+be displayed and to become
+ the current
+pair.
+
+.VARIABLE NOSEDR
+Interactive parameter !
+nosedr causes the 
+SEDR navigation to
+be turned off 
+during interactive
+session. 
+
+.VARIABLE SEDR
+Interactive parameter !
+sedr causes the SEDR 
+navigation to
+be turned back on 
+during interactive
+session. See 'NOSEDR.
+
+.VARIABLE NOCORR
+Interactive parameter
+Turns off correlation.
+To reactivate use CORR.
+
+.LEVEL2
+.VARIABLE INP
+Batch parameter !
+All inputs are IBIS tabular files.
+
+First input= SEDR.INT produced by program IBISNAV
+  The first column contains the FDS times of the frames to mosaic.
+  It is assumed that the file names of the pictures to mosaic are
+  named by their FDS times with a .IMG trailer.
+  For example: 564329.img
+
+Second input= OVER.INT produced by program MOSPLOT.
+  Columns 1 and 2 contain the frame overlap numbers.
+  Frame pairs are selected from the overlap numbers only.
+
+An old tiepoints file can be entered as a third or fourth input if you
+wish to continue where you left off the last time. (optional)
+
+A geom correction file can be entered as the third or fourth input
+if the images are in image space (not geometrically corrected).
+
+.VARIABLE OUT
+Batch parameter !
+The output IBIS tabular file.
+nine columns output:
+col1=first frame number of a pair
+col2=second frame number of a pair
+col3=first frame tiepoint line
+col4=first frame tiepoint sample
+col5=second frame tiepoint line
+col6=second frame tiepoint sample
+col7=first tiepoint DN value
+col8=second tiepoint DN value
+col9=correlation value (1.0)
+
+(The file actually contains 12 columns, but the last three are
+always zero.)
+
+The contents of this file can be listed with program IBIS-LIST.
+
+.VARIABLE HELP
+List the interactive parameters available in a session.
+
+.VARIABLE PROJECT
+Batch parameter !
+Specifies the project . This is required if
+the images are un-geometrically corrected
+and the project is GLL.
+
+.VARIABLE SEDR
+Batch parameter !
+Causes navigation assisted tiepoint acquisition.
+Requires VGRIBIS sedr ibis file rather than the
+file generated by automosaicking procedure.
+If the images are NOT geometrically corrected
+then you MUST include a GEOMA correction file
+as the third or fourth input.
+
+.VARIABLE OBJECT
+Batch parameter !
+Causes images to be considered geometrically corrected.
+The geoma file will be ignored if present.
+
+.VARIABLE PFILTER
+Batch parameter !
+The power of the FFT high pass
+power law filter. Default is no power filter.
+default is: pfilter=0.0 real
+
+.VARIABLE PHASE
+Batch parameter !
+Degree of phase correlation:
+0 for normal correlation. ( Default ).
+1 for phase correlation
+
+.VARIABLE OFFMAX
+Batch parameter !
+How far off center, correlation
+peak is allowed (0 to 1). If the peak is more than
+OFFMAX*window/2 pixels from the center it is rejected.
+Default is 0.8
+
+.VARIABLE FUNC
+Batch parameter !
+Pixel function before correlation is performed..
+The options are: LOG or EXP.
+DEfault is no funtion performed.
+
+.VARIABLE REDO
+Batch parameter !
+Keyword for redo mode. Valid responses are:
+REDO or NOREDO. The default is REDO.
+Redo specifies that if the first correlation for
+an area has an offset of less than the OFFMAX limit
+but greater than zero the correlation is rerun
+beginning at the new location.
+
+.VARIABLE PRINT
+Batch parameter !
+'NOPRINT to turn off terminal output
+
+.VARIABLE DIR
+Batch parameter.
+Optional parameter required only if the FILENAME parameter
+is NOT specified. 
+Specifies the directory name where all the input files for the
+mosaic reside.
+
+.VARIABLE FILENAME
+Batch parameter.
+Optional parameter required only if the DIR keyword is not
+specified.
+Specifies a file name which contains the names of all the
+images to be included in the mosaic, one name per record.
+This file is created by the user with a text editor.
+For example, if the first 2 pictures are called 
+scx1:[jjl059]1234567.img and mipldisk:[mipl.gll]venus.img 
+the first two records of FILENAME would contain:
+
+scx1:[jjl059]1234567.img
+mipldisk:[mipl.gll]venus.img 
+
+.VARIABLE FONTHT
+Batch parameter. Specifies Font height in 
+pixels of text displayed in (VRDI) image window. 
+
+.VARIABLE FONTSC
+Batch parameter. Specifies Font scale
+of text displayed in (VRDI) image window. This
+is the horizonal scaling factor (width/height)
+to be used when drawing text.
+ 
+.VARIABLE EXIT
+Interactive parameter !
+To exit from the program in interactive mode.
+
+.VARIABLE CORR
+Interactive & batch parameter !
+The number of lines and samples
+in the correlation window. Defaults to 
+64 lines and 64 samples.
+Valid values are: 16 32 64 128 256.
+Default is: corr=(64,64)
+
+.VARIABLE PAIR
+Interactive parameter !
+Forces the image pair specified to
+be displayed and to become the current
+pair. Do not use routinely - keep
+the images in order if possible.
+More for diagnostic use.
+
+.VARIABLE NOSEDR
+Interactive parameter !
+nosedr causes the SEDR navigation to
+be turned off during interactive
+session. Useful when some of the SEDR
+is bogus. Can turn back on with 'SEDR.
+
+.VARIABLE SEDR
+Interactive parameter !
+sedr causes the SEDR navigation to
+be turned back on during interactive
+session. See 'NOSEDR.
+WARNING: To reactivate the sedr the
+program must have been given a sedr
+ibis file to begin with.
+
+.VARIABLE DELETE
+Interactive parameter !
+To delete tiepoint #n specify:
+delete=n
+
+.VARIABLE REDRAW
+Interactive parameter !
+To redraw all the acquired tiepoints.
+
+.VARIABLE NEXT
+Interactive parameter
+To select the next frame pair.
+
+.VARIABLE LAST
+Interactive parameter
+To select the last frame pair.
+
+.VARIABLE PERCENT
+Interactive parameter
+Specifies the percentage of the
+histogram to saturate at each
+end for autostretching of the
+displayed images.
+Default=2.0
+
+.VARIABLE NOCORR
+Interactive parameter
+Turns off correlation. In this mode the position of the cursor is
+accepted verbatim. To reactivate use CORR.
+
+.END

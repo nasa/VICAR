@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine iter */
+
+#define SUBROUTINE iter
+
+#define MODULE_LIST iter.f
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

@@ -17,23 +17,18 @@ import javax.media.jai.DataBufferFloat;
 import javax.media.jai.ComponentSampleModelJAI;
 
 import java.awt.image.*;
-
-import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 
 import jpl.mipl.io.vicar.*;
-
 import jpl.mipl.io.codec.*;
-
 import jpl.mipl.io.streams.*;
 
 import java.awt.color.ColorSpace;
-import javax.media.jai.PlanarImage;
+
+import javax.media.jai.*;
 
 /**
  * This class is used to allow a RenderedImage to be returned by ImageReader.getAsRenderedImage().
@@ -53,6 +48,9 @@ public class VicarRenderedImage extends  SimpleRenderedImage {
 	boolean debug = false;
 	// boolean debug = true;
 	
+	// For tile caching
+	TileCache _cache;
+
 	// for fast copies a tileWidth should be the record length
 	// for an image display it should be a square
 	int defaultTileWidth = 256;
@@ -102,6 +100,14 @@ public class VicarRenderedImage extends  SimpleRenderedImage {
 
     private void initVicarRenderedImage(VicarInputFile vicarInputFile, ImageReadParam param) throws Exception {
     	
+	_cache = JAI.getDefaultInstance().getTileCache();
+	if (debug) {
+		System.out.println("CACHE VERSION OF VicarRenderedImage");	
+		System.out.println("CACHE memory = "+_cache.getMemoryCapacity());
+	}
+    // JAI.getDefaultInstance().setTileCache(_cache);
+	
+
         vif = vicarInputFile; 
         imageReadParam = param;
         boolean useCR = true;
@@ -609,7 +615,27 @@ public class VicarRenderedImage extends  SimpleRenderedImage {
     public synchronized Raster getTile(int tileX, int tileY) {
 		if (debug) System.out.println("VicarRenderedImage.getTile "+tileX +" "+tileY+" "+this.width+" x "+this.height);
 		// if (debug && tileX == 0 && tileY == 0) new Throwable().printStackTrace();
-        return computeTile(tileX, tileY);
+
+
+//!!!! System.out.println("in getTile: "+tileX+","+tileY);	//!!!!
+	Raster tile;
+	if (_cache != null) {
+	    tile = _cache.getTile(this, tileX, tileY);
+	    if (tile != null) {
+	    	if (debug) System.out.println("VicarRenderedImage Cache hit: "+tileX+","+tileY);	//!!!!
+		return tile;
+	    } else {
+	    	if (debug) System.out.println("VicarRenderedImage Cache MISS: "+tileX+","+tileY);
+	    }
+	}
+    tile = computeTile(tileX, tileY);
+
+	if (_cache != null) {
+	    _cache.add(this, tileX, tileY, tile);
+	    if (debug) System.out.println("VicarRenderedImage Cache add: "+tileX+","+tileY);	//!!!!
+	}
+
+	return tile;
     }
     
     

@@ -1,0 +1,13 @@
+#define PROGRAM tkqkkor
+#define MODULE_LIST tkqkkor.c 
+
+#define MAIN_LANG_C
+#define USES_ANSI_C
+
+#define TEST
+
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+
+/* #define LIB_LOCAL */

@@ -1,0 +1,74 @@
+1 MULV
+
+PURPOSE: Multiplies the elements of two arrays
+
+ Fortran calling sequence:  CALL MULV(DCODE, N, A, B, INCA, INCB)
+ C Calling Sequence:        zmulv(dcode, n, a, b, inca, incb);
+ 
+  INCA and INCB are REQUIRED arguments. (dcode, n, inca, and incb are
+  passed by value for zmulv.)
+
+  Arguments:
+
+    DCODE  (input, integer)           data format code
+    N      (input, integer)           number of elements
+    A      (input, DCODE data type)   first input array
+    B      (in/out, DCODE data type)  second input,output array
+             On output B(i) = B(i)*A(i)   [i=1,..,N] for case of INCA=1=INCB.
+    INCA   (input, integer)           A array index increment
+    INCB   (input, integer)           B array index increment
+
+ 
+         TABLE OF AVAILABLE DATA TYPES FOR A AND B 
+       ====================================================
+       DCODE   A     B                DCODE   A     B 
+       ====================================================
+        1     byte  byte               6     half  full
+        2     half  half               7     real  real
+        3     byte  half               8     doub  double
+        4     full  full               9     real  double
+        5     byte  full
+       ====================================================         
+       Negative values  of DCODE (-1 TO -9) reverse data types
+       for A and B
+
+2 NOTES
+
+ HISTORY
+
+  Original Programmer: G.M. Yagi  02/04/75
+  Converted to Vax by:  L.W. Kamp  12/15/82
+  Current Cog Progr:    Steve Pohorsky
+  Ported to UNIX:       Steve Pohorsky 3-30-93
+
+ REVISION HISTORY:                                          
+   3-30-93  ..SP....  Made portable for UNIX - Adapted from addv.
+                      Added zmulv for calls from C.  Changed name from
+                      mul to mulv (added v for most of the vector routines).
+                      ELIMINATED OPTIONAL PARAMETERS FOR PORTABILITY.
+
+DESCRIPTION
+
+  This routine divides the elements of two given arrays A and B.  On output  
+  B(j) = B(j)*A(i). The two arrays may be any of the data types listed in the
+  table for DCODE, which controls the assumed combination of data types.
+
+
+  The calling sequence:
+
+       CALL MULV(DCODE, N, A, B, INCA, INCB)
+
+  Is equivalent to the following code:
+
+
+       I = 1
+       J = 1
+       DO K=1,N
+          B(J) = B(J)*A(I)
+          I    = I + INCA
+          J    = J + INCB
+       ENDDO
+
+  Where all arguments are INTEGER*4 except for the arrays whose
+  data types are controlled by the data code DCODE.
+

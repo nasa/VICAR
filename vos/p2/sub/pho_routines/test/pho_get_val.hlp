@@ -1,0 +1,131 @@
+================================================================================
+VICAR SUBROUTINE			phoGetVal
+================================================================================
+
+Purpose:		This routine retrieves a value from the PHO 
+			(photometric data object)  for a given parameter 
+			keyword.
+
+================================================================================
+
+Function:		determines the current photometric function;
+			verifies that the parameter keyword is a valid one; 
+			retrieves the value from the PHO
+
+================================================================================
+
+Requirements and Dependencies:
+
+Libraries and subroutines
+required to run routine:	
+
+Necessary include files
+for calling routine 
+or program:			pho.h (for C routines )
+				pho.fin (for FORTRAN routines )
+
+Other requirements: 		need to run routines phoInit, 
+				phoSetFunc, phoSetVal first
+
+Main programs from which
+subroutine will be called:	general application software and 
+				higher-level subroutines; 
+				phoParFilWrt, phoFunc, hwphoco; 
+				PHOTEST, PHOTFIT2, 
+				HWGEOM*, HWORTH*, HWPHOCOE, ....
+
+================================================================================
+
+Interfaces: Input / Output Parameters:
+
+Calling Sequence:		
+
+	calling from C:		include "pho.h"
+				PHO PHO_DATA;
+				char keyword[phoMAX_KEYWD_LENGTH+1];
+				double value;
+				int status;
+				...
+				status =phoGetVal( PHO_DATA, keyword, &value); 
+
+	calling from FORTRAN:	INCLUDE 'pho'
+				CHARACTER*(PHO_MAX_KEYWD_LENGTH) keyword
+				INTEGER PHO_DATA, status
+				DOUBLE PRECISION value
+				...
+				call pho_get_val( PHO_DATA, keyword, 
+			*	value, status)
+
+Necessary include files
+from calling routine 
+or program:			pho.h ( for C routines)
+				pho.fin ( for FORTRAN routines )
+
+
+
+
+Parameters:
+	
+	Name		Type		In/Out	Description
+
+	
+	PHO_DATA	PHO_STRUCT	Input	Address of photometric data 
+						data object
+
+	keyword		char		Output	the photometric parameter 
+		[phoMAX_KEYWD_LENGTH+1]		keyword
+
+	value		double	 	Output	value for the keyword
+
+	status	int			Output	Error status:
+						phoSUCCESS - success
+							phoFUNC_NOT_SET 
+							   - failed :
+								photometric 
+								function has 
+								not been set in 
+								the pho_object
+							phoINVALID_KEYWD 
+							   - failed :
+								invalid 
+								parameter 
+								keyword has 
+								been passed
+							phoKEYWD_NOT_SET 
+							   - failed :
+								the parameter 
+								value has not 
+								been set in 
+								the pho_object
+
+================================================================================
+Background and References:
+================================================================================
+
+Other Information:
+
+	Software Platforms:		VICAR (VMS/UNIX)
+
+	Software Platforms:		No particular hardware required;
+					tested on ....
+
+	rogramming Language:		ANSI-C, 
+					ANSI-FORTRAN bridge
+
+	Specification by:		Friedel Oschuetz, DLR
+
+	Initial Version :		Lucas Kamp, JPL
+
+	Cognizant Programmer:		Friedel Oschuetz
+
+	Date of Specification:		Jan. '94
+
+	Time Estimated for 
+	Routine Development: 		1/2 day
+
+	Estimate of Delivery Date:
+
+	History:			L. Kamp, Jan. '94 : Original
+
+================================================================================
+

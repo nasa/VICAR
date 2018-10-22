@@ -1,0 +1,59 @@
+1 SUMV
+ 
+    PURPOSE
+ 
+         Subroutine to sum elements in array A and return sum in B.
+	 B = SUM A(i) for i = 1 to 1 + INCA*(N-1). 
+         A and B can be of different data types as indicated.
+ 
+ Fortran calling sequence:  CALL SUMV(DCODE, N, A, B, INCA)
+ C Calling Sequence:        zsumv( dcode, n, a, b, inca );
+ 
+  INCA is a REQUIRED argument. (dcode, n, and inca are
+  passed by value for zsumv.)
+   	 
+
+    Arguments:
+
+    DCODE  (input, integer)           data format code
+    N      (input, integer)           number of elements
+    A      (input, DCODE data type)   input array
+    B      (out,   DCODE data type)   sum of elements from input array.
+    INCA   (input, integer)           A increment
+ 
+2  ARGUMENTS
+ 
+ 	DCODE      Data types
+ 
+                          ..INPUT..         ..OUTPUT..
+ 
+                    =1,   A is byte         B is byte
+                    =2,   A is halfword     B is halfword
+                    =3,   A is byte         B is halfword
+                    =4,   A is fullword     B is fullword
+                    =5,   A is byte         B is fullword
+                    =6,   A is halfword     B is fullword
+                    =7,   A is REAL*4       B is REAL*4
+                    =8,   A is REAL*8       B is REAL*8
+                    =9,   A is REAL*4       B is REAL*8
+                    negative values -1 to -9 reverse of above
+ 
+         N          Number of elements to sum.
+ 
+         A          Source vector
+ 
+         B          Sum of elements from A.
+  
+         INCA       Source vector address increment.
+ 
+2  HISTORY
+ 
+         Original Programmer: Gary Yagi, 4 Feb 1975
+         Current Cognizant Programmer: Steve Pohorsky
+         Source Language: C
+
+ REVISION HISTORY:                                          
+   11-92    ..SP....  Made portable for UNIX - Adapted from ADDV.
+                      Added zsumv for calls from C.  Changed name from
+                      sum to sumv (added v for most of the vector routines).
+                      ELIMINATED OPTIONAL PARAMETERS FOR PORTABILITY.

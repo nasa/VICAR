@@ -1,0 +1,46 @@
+procedure 
+refgbl $autousage
+body
+let $autousage="none"
+!------------------------------------------------------------------------------
+!generate test images
+!------------------------------------------------------------------------------
+gen out=source.img nl=10 ns=10 nb=1 format=byte
+label-add inp=source.img task=GEN +
+    items = "PLANET='jupiter', SLAT=40., SLON=50."
+label-add inp=source.img out=source.img +
+    items = "PLANET='saturn', SLAT=10., SLON=20., FARENC='farenc'"
+label-add inp=source.img out=source.img +
+    items = "PLANET='neptune', FUNC='in1*0', SLAT=45., SLON=70., FORMAT='byte'"
+
+label-l source.img
+copy source.img prod5.img
+copy source.img prod6.img
+
+!------------------------------------------------------------------------------
+! test the program
+!------------------------------------------------------------------------------
+cleanlabel inp=source.img out=prod1.img keywords=-- mode=keeplast
+label-l prod1.img
+
+cleanlabel inp=source.img out=prod2.img keywords=-- mode=keepfrst
+label-l prod2.img
+
+cleanlabel inp=source.img out=prod3.img keywords=(PLANET,SLON) mode=keeplast
+label-l prod3.img
+
+cleanlabel inp=source.img out=prod4.img keywords=(PLANET,SLON) mode=keepfrst
+label-l prod4.img
+
+cleanlabel inp=prod5.img out=-- keywords=-- mode=keeplast
+label-l prod5.img
+
+cleanlabel inp=prod6.img out=-- keywords=(PLANET,SLON) mode=keepfrst
+label-l prod6.img
+
+!------------------------------------------------------------------------------
+! test the keyword error logic
+!------------------------------------------------------------------------------
+cleanlabel inp=prod6.img out=-- keywords=(FRED, GEORGE) mode=keepfrst
+label-list prod6.img
+end-proc

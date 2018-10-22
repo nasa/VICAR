@@ -1,0 +1,12 @@
+/* Imake file for VICAR subroutine fpse */
+
+#define SUBROUTINE fpse
+
+#define MODULE_LIST fpse.f zfpse.c
+
+#define P2_SUBLIB
+
+#define USES_ANSI_C
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+

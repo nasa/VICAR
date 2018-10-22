@@ -1,0 +1,16 @@
+/* Imake file for VICAR program ttimeout */
+
+#define PROGRAM  ttimeout 
+
+#define MODULE_LIST ttimeout.c
+
+#define MAIN_LANG_C
+#define TEST
+
+#define USES_ANSI_C
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+
+#define LIB_LOCAL
+

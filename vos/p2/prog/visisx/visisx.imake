@@ -1,0 +1,10 @@
+#define PROGRAM visisx
+#define MODULE_LIST visisx.c 
+#define MAIN_LANG_C
+#define USES_C
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_FORTRAN
+/* remove on delivery */
+/* #define DEBUG */

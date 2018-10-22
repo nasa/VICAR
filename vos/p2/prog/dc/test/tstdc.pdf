@@ -1,0 +1,45 @@
+procedure
+refgbl $autousage
+refgbl $echo
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+gen a 10 10
+gen b 10 10 sinc=2 linc=2
+gen c 10 10 sinc=100 linc=100
+write "FIND DARK CURRENT AND SLOPE PICTURE"
+dc (a,b,c) (d,e) 'nega expo=(2.5,3.0,6.0) MAXDN=255
+write "list calculated dark current image"
+list d
+write "list calculated slope image"
+list e
+write "FIND DARK CURRENT, SLOPE, PREDICTED Y AND DEVIATED POINT PICTURES"
+dc (b,a) (c,d,e,f) expo=(2.5,3.0) x=2 scal=2 cons=2
+write "list calculated dark current image"
+list c
+write "list calculated slope image, output should be zeroes"
+list d 'zero
+write "list calculated predicted-y image, output should be zeroes"
+list e 'zero
+write "list calculated deviated-point image"
+list f
+write "DO SAME AS ABOVE, BUT WITH HALFWORD"
+gen aa 10 10 'half
+gen bb 10 10 'half sinc=2 linc=2
+gen cc 10 10 'half sinc=100 linc=100
+dc (aa,bb,cc) (dd,ee) 'nega expo=(2.5,3.0,6.0) MAXDN=32767
+write "list calculated dark current image"
+list dd
+write "list calculated slope image"
+list ee
+dc (bb,aa) (cc,dd,ee,ff) expo=(2.5,3.0) x=2 scal=2 cons=2 
+write "list calculated dark current image"
+list cc
+write "list calculated slope image; output should be zeroes"
+list dd 'zero
+write "list calculated predicted-y image; output should be zeroes"
+list ee 'zero
+write "list calculated deviated-point image"
+list ff
+end-proc

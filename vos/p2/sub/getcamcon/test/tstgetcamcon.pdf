@@ -1,0 +1,69 @@
+!****************************************************************************
+! TSTGETCAMCON.PDF, unit test procedure for subroutine GETCAMCON.F
+!
+! This PDF is written for both VMS and Unix
+! The testings of projects WFPC1, WFPC2, VIS, MVM73 and MARINER 9 have been
+!   removed due to the unavailability of these images.  Please add these test 
+!   cases if images are available
+!
+! NOTE: Since this routine heavily depends on GETPROJ, the test PDF files are 
+!       almost identical
+!****************************************************************************
+procedure help=*
+  RefGbl $Echo
+  RefGbl $SysChar
+body
+  local GllFlightFull     type=string
+  local GllFlightSum      type=string
+  local GllCalibFull      type=string
+  local GllCalibSum       type=string
+  local GllSum            type=string
+  local VGR1              type=string
+  local VGR2              type=string
+  local CssCalib          type=string
+  local CssFlight         type=string
+  local CssS2             type=string
+  local CssS4             type=string
+
+
+  let $echo="no"
+  if ($syschar(1) = "VAX_VMS")
+    let GLLFlightFull = "wms_test_work:[testdata.mipl.gll]venus.img"
+    let GLLFlightSum  = "wms_test_work:[testdata.mipl.gll]4600.byt"
+    let GllCalibFull  = "wms_test_work:[testdata.mipl.gll]445.rad"
+    let GLLCalibSum   = "wms_test_work:[testdata.mipl.gll]gllsumdrkcrnt.tst"
+    let VGR1          = "wms_test_work:[testdata.mipl.vgr]f1636832.fic"
+    let VGR2          = "wms_test_work:[testdata.mipl.vgr]uvh.img"
+    let CssCalib      = "wms_test_work:[testdata.cassini.iss]labtest.img"
+    let CssFlight    = "wms_test_work:[testdata.cassini.cas$i$ss]n1356781097.2"
+    let CssS2= "wms_test_work:[testdata.cassini.cas$i$ss]n1308947518.182-142523"
+    let CssS4= "wms_test_work:[testdata.cassini.cas$i$ss]n1294639770.011-091050"
+  else ! Unix
+    let GLLFlightFull = "/project/test_work/testdata/mipl/gll/venus.img"
+    let GLLFlightSum  = "/project/test_work/testdata/mipl/gll/4600.byt"
+    let GllCalibFull  = "/project/test_work/testdata/mipl/gll/445.rad"
+    let GLLCalibSum   = "/project/test_work/testdata/mipl/gll/gllsumdrkcrnt.tst"
+    let VGR1          = "/project/test_work/testdata/mipl/vgr/f1636832.fic"
+    let VGR2          = "/project/test_work/testdata/mipl/vgr/uvh.img"
+    let CssCalib    = "/project/test_work/testdata/cassini/iss/labtest.img"
+    let CssFlight   = "/project/test_work/testdata/cassini/casIss/n1356781097.2"
+    let CssS2    = +
+        "/project/test_work/testdata/cassini/casIss/n1308947518.182-142523"
+    let CssS4    = +
+        "/project/test_work/testdata/cassini/casIss/n1294639770.011-091050" 
+  end-if
+
+  let $echo="yes"
+ TGETCAMCON INP=@GllFlightFull
+ TGETCAMCON INP=@GllFlightSum
+ TGETCAMCON INP=@GllCalibFull
+ TGETCAMCON INP=@GllCalibSum
+ TGETCAMCON INP=@VGR1
+ TGETCAMCON INP=@VGR2
+ TGETCAMCON INP=@CssCalib
+ TGETCAMCON INP=@CssFlight
+ TGETCAMCON INP=@CssS2
+ TGETCAMCON INP=@CssS4
+  let $echo="no"
+
+end-proc

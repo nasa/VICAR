@@ -1,0 +1,314 @@
+process help=*
+PARM INP TYPE=(STRING,132) COUNT=1
+PARM OUT TYPE=(STRING,132) COUNT=1
+PARM SIZE TYPE=INTEGER COUNT=(0,4) DEFAULT=--
+PARM SL TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM SS TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM NL TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM NS TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM MODE TYPE=KEYWORD VALID=(FORWARD,INVERSE) COUNT=0:1 DEFAULT=--
+PARM SCRATCH TYPE=(STRING,32) COUNT=0:1 DEFAULT=" "
+PARM FORMAT KEYWORD VALID=(BYTE,HALF,FULL,REAL,COMP) DEFAULT=BYTE
+PARM BUFPOW INTEGER DEFAULT=18
+END-PROC
+.TITLE
+VICAR2 Program "fft22"  --  performs 2-dimensional fourier transforms
+.HELP
+ "fft22" performs direct and inverse two dimensional fast fourier 
+ transforms.  The program performs the same function, without the 
+ array processor, as FFT2AP (which uses the array processor);  but
+ "fft22" is more flexible in that the  image dimensions need not be
+ powers of 2 (see RESTRICTIONS).  (Program FT2, with program FTPACK,
+ does the same thing as FFT2AP with some restrictions and may be
+ faster for large images.  See help for programs FFT2AP and FT2.) 
+.page
+EXECUTION
+
+"fft22" can be invoked by entering the command:
+
+	fft22 IN OUT [SIZE] PARAMS
+where 
+
+IN	is an input picture (forward mode) or an FFT (transform mode)
+
+OUT	is an FFT (forward mode) or an output picture 
+
+SIZE    specifies the area of the input dataset to use
+
+PARAMS  includes parameters allowing:
+
+	- mode selection ('FORWARD, 'INVERSE)
+
+	- image format selection ('BYTE, 'HALF, 'FULL, 'REAL, 'COMP);
+	  this applies only to the input in forward mode or to the output
+	  in inverse mode.
+
+	- scratch file specification. (This is generally defaulted and
+          not always needed.)
+
+        - memory buffer size specification (not generally specified by
+          the user).
+
+	See Tutor for full description.
+.page 
+OPERATION
+ The program performs the following operation:
+
+               M-1  N-1                   k*m   l*n
+ O(k,l) =  K * SUM( SUM( I(m,n) exp( P * [--- + --- ]) )),
+               m=0  n=0                    M     N
+
+   for k = 0,1,...,M-1  and  l = 0,1,...,N-1,
+
+ where:  I(m,n) is line m+1, sample n+1, of the input file,
+         O(k,l) is line l+1, sample k+1, of the output file,
+         K = 1 for a forward transform, and
+             1/(M*N) for an inverse transform,
+         P = 2*PI*i for a forward transform, and
+             -2*PI*i for an inverse transform.
+             [PI = 3.1416...,  i = SQRT(-1)]
+
+ "fft22" uses subroutine DFFT to compute the one-dimensionsal fourier
+ transform.  This is done twice, with a transposition step in between.
+ For further computational details, see Help (in DCL) for that routine. 
+ It uses an algorithm by Richard C. Singleton of Stanford Research
+ Institute.
+ 
+ As the above equation implies, the output of the program is stored
+ in transposed format, in the matrix sense, compared to the input
+ data.  This practice is responsible for faster program execution,
+ because it allows one transposition to suffice (after the first
+ 1-D FFT), and does not bother with the second which would bring
+ the output back into standard format.  When a forward and inverse
+ transform are performed in sequence, the two transpositions cancel
+ out and the original format is recovered.  However, the user must
+ be aware of the transposition when working with the transformed data. 
+ For example, when filtering by multiplication with a transfer
+ function, the user must first transpose the transfer function (unless
+ it is transpose-invariant).
+
+ The transposition step requires a buffer of size 2*N*N real*4 words,
+ where N is the larger of NL and NS.  The default buffer size is 65536
+ real*4 words, so the maximum image dimension that can be accomodated
+ is 128. (32768 = 2*128*128); for a larger NL or NS, the transposition
+ cannot be performed in memory.  In this case, the operation is performed
+ in several passes, with intermediate results being saved on disk.
+
+ If disk storage of intermediate results is required, then the output
+ file is used if it is of sufficient size, which is the case if the
+ output format is complex (always true for forward mode) and NL is equal
+ to NS; otherwise, a scratch file is used.  This file has a default value
+ on a standard system scratch directory, but may be redefined using the
+ SCRATCH parameter.
+.page
+RESTRICTIONS:
+
+1. For an inverse transform, the input format must be complex.
+
+2. Either dimension of the FFT (i.e., the number of lines or samples of
+  the output in forward mode) may be any number, subject to the following
+  constraints:
+
+  a. It may not contain a prime factor greater than 23.
+
+  b. The number of prime factors may not exceed 208.
+
+  c. The square-free portion may not exceed 210.  (A factor P of a number
+    N is square-free if it cannot be paired with another identical factor
+    of N; i.e., each prime occurring an odd number of times in N is a
+    square-free factor of N.  The square-free portion of N is the product
+    of its square-free factors.)
+
+  E.g., 221 (=13*17) fails because the square-free part exceeds 210, and
+  202 (=2*101) fails because a prime factor exceeds 23, but 210 (=2*3*5*7)
+  and 216 (= 2**3 * 3**3) are acceptable.  These restrictions are due to
+  subroutine DFFT and may be modified by changing array dimensions and
+  recompiling that subroutine.
+
+  The program checks if the dimensions of the input image meet these criteria
+  and abends if they do not.  You can check these criteria for a given 
+  number N by running this program on a test image with one line and N
+  samples and seeing if the program abends.
+
+3. The RMS file header does not support a record length exceeding 32767,
+  hence a complex (8-byte per sample) image may not have NS equal to or
+  above 4096.  Since "fft22" requires a square intermediate or output file 
+  with a complex data format whose dimension is the power 
+  of 2 greater than or equal to the maximum of NL
+  and NS, this implies that the largest value of NL or NS allowed is 2048.
+  Thus, for the input file, neither NL nor NS may be greater than 2048.
+  (Program FT2 can handle input images up to 4096 square because it uses
+  a packed format.)
+.page
+TIMING
+
+ The following CPU times were measured for "fft22" on a lightly loaded
+ VAX-11/780:  (in seconds)
+
+            image size:      256x256     512x512    1024x1024
+
+       Forward transform:       26         104         422
+
+       Inverse transform:       28         114         451
+
+ Processing time for a 1-dimensional FFT on N samples scales roughly as
+ N * log(N).  However, the code of subroutine DFFT strongly favours values
+ of N that contain few and low prime factors: powers of 2 are particularly
+ efficient.
+.PAGE
+
+ORIGINAL PROGRAMMERS:  T. C. Rindfleisch and J. B. Seidman,  30 Oct. 1978
+
+CONVERTED TO VAX BY:  J. H. Reimer and L. W. Kamp,  10 Feb. 1985
+
+CURRENT COGNIZANT PROGRAMMER:  L. W. Kamp
+
+HISTORY:
+
+   1jul94 -- Made portable for UNIX  A. Scop (CRI)
+  30aug90 -- changed COMPLEX to COMP in F.T. labels.
+
+.page
+ Programming note:  the original matrix transposition algorithm was keyed
+ to dimensions that were powers of 2.  When this requirement was relaxed
+ by use of subroutine DFFT, the transposition algorithm was not changed.
+ (The matrix is treated as if it were part of a larger square matrix whose
+ dimension is a power of 2.)  Hence the buffer and scratch file requirements
+ can be quite wasteful, e.g., a 2*130 image requires the same scratch file
+ and buffer that a 256*256 image would, i.e. 0.5 MB.  If anyone would care
+ to rewrite the program to eliminate this feature, they are invited to do so.
+.LEVEL1
+.VAR MODE
+Keyword: Transform mode.
+Valid: FORWARD, INVERSE.
+.VARI FORMAT
+Ouput image data format.
+Valid: BYTE, HALF, FULL,
+REAL, COMP
+.VAR INP
+Input dataset.
+.VAR OUT
+Output dataset.
+.VAR SIZE
+VICAR size field.
+.var sl
+Starting line
+.var ss
+Starting sample
+.var nl
+Number of lines
+.var ns
+Number of samples
+.var SCRATCH
+Intermediate dataset.
+(Temporary, not always
+needed.)
+.VARI BUFPOW
+2**BUFPOW = Memory buffer
+size
+.LEVEL2
+.VARI MODE
+This parameter specifies the type of transform that is to be performed:
+
+FORWARD specifies that a forward transform is desired, from image space
+to transform space.  This is the default if the input format is not 
+complex.
+
+INVERSE specifies that an inverse transform is desired, from transform
+space to image space.  This is the default if the input format is complex.
+
+Note that it is permissible to specify FORWARD with complex input, but
+not to specify INVERSE with non-complex input:  the FFT must always be
+in complex format.
+.VARI FORMAT
+Keyword parameter, valid: BYTE, HALF, FULL, REAL, or COMP.
+
+This parameter specifies the format of the data in the output image file
+in the case of an inverse transform.  It is ignored in forward transform
+mode, because Vicar2 discourages overriding the input label.
+
+Default = BYTE.
+
+Note that the format of the FFT may never be specified, as it is always
+COMP (complex).
+.VARI INP
+INP specifies the input picture for a forward transform, or the 
+transform dataset for an inverse transform.
+.VARI OUT
+OUT specifies the output transform dataset for a forward transform, 
+or the output image for an inverse transform.
+
+The output FFT of an image with NL lines and NS samples will be
+of COMPLEX format, with NS lines and NL samples.  I.e., it is 
+transposed with respect to the input.  This is done to speed up 
+processing.
+.VARI SIZE
+SIZE is a standard VICAR size field:
+
+ (starting line, starting sample, number of lines, number of samples)
+
+This specifies the subimage of the input image to be processed.
+.vari ss
+Starting sample.  See Help SIZE.
+.vari sl
+Starting line.  See Help SIZE.
+.vari ns
+Number of samples.  See Help SIZE.
+.vari nl
+Number of lines.  See Help SIZE.
+.vari scratch
+This specifies a disk file that is used by the program to store
+data during intermediate steps of the processing.  It is only
+required when both of the following conditions are met:
+ 
+   (a) the image buffer required by the program is larger than
+      the buffer size specified by the BUFPOW parameter. The image
+      buffer size required is N*N complex numbers, where N is the
+      smallest power of 2 that equals or exceeds both NL and NS,
+      i.e., 8*N*N bytes; and,
+
+   (b) the output file is not large enough to be used for scratch
+      storage.  This will be true if its format is not complex, and
+      also if the number of lines of the output is less than the
+      number of samples.
+
+The default BUFPOW (18) is sufficient to contain a 128*128 image.
+However, note that a 64*256 image, say, requires a scratch file,
+since it is the larger of NL and NS that determines the buffer size.
+
+The scratch file will be deleted at the end of the execution of "fft22"
+by the program.
+
+The default for this parameter is a file in the standard MIPL scratch
+directory.  The user may specify a different location for any reason
+(e.g., if that disk is full, or not available).  If this parameter is
+specified for a case in which it is not required, it is ignored.
+.vari BUFPOW
+This determines the size of the buffer that the program uses to 
+transpose the FFT.  Since this buffer size (in bytes) is always a power
+of 2, this parameter specifies the power of 2 which equals the buffer
+size:  BUF_SIZE = 2 ** BUFPOW.
+
+Since the FFT will be transposed, this buffer must be able to hold
+at least two lines of N complex numbers, where N is the larger of NS
+and NL, hence:
+                BUF_SIZE >= 2 * 8 * N,
+ or:
+                               2
+                BUFPOW >= 4 + log(N).
+The above conditions must be met for the program to run at all.
+
+Furthermore, the entire operation can be done in memory if
+BUF_SIZE >= 8*N*N, or BUFPOW >= 3+logN.  This will speed processing,
+assuming that the memory is available and that paging is not a
+problem.
+.page
+The user will not in general need to specify this parameter, but it
+is provided for the following contingencies:
+
+ (a) to allow improved performance, since increasing the buffer size
+    will cut down on the amount of I/O done in the program, but can
+    increase paging if a large working set is not available;
+ 
+ (b) to obviate the need for a scratch file (see parameter SCRATCH);
+.END

@@ -1,0 +1,286 @@
+tstptp
+==================================================================
+========================== VGR Test ==============================
+==================================================================
+ptp INP=/project/test_work/testdata/mipl/vgr/ptp_vgr_red.img OU+
+T=vgr_red.img TARGET=JUPITER      REF=/project/test_work/testdata/mipl/vgr/ptp_vgr_blu.img
+Beginning VICAR task ptp
+ PTP Version 29-Dec-2011
+Input image spacecraft is VGR-1
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+CKNAME=NAIF  SPKID=N005  PROGRAM=VGRMCK  VRH059  MIPS  03/02/85
+Reference image spacecraft is VGR-1
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+CKNAME=NAIF  SPKID=N005  PROGRAM=VGRMCK  VRH059  MIPS  03/02/85
+ OS target center=(    707.78,    542.33)
+ OS target center for ref image=(    601.77,    709.68)
+ ***PTP task completed
+ptp INP=/project/test_work/testdata/mipl/vgr/ptp_vgr_red.img OU+
+T=vgr_grn.img TARGET=JUPITER      RSCET=(1979,62,21,57,22,910) rcam=6
+Beginning VICAR task ptp
+ PTP Version 29-Dec-2011
+Input image spacecraft is VGR-1
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+CKNAME=NAIF  SPKID=N005  PROGRAM=VGRMCK  VRH059  MIPS  03/02/85
+No reference image provided
+CKNAME=NAIF  SPKID=N005  PROGRAM=VGRMCK  VRH059  MIPS  03/02/85
+ OS target center=(    707.78,    542.33)
+ OS target center for ref image=(    601.77,    709.68)
+ ***PTP task completed
+difpic (vgr_red.img vgr_grn.img)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+ptp INP=/project/test_work/testdata/mipl/vgr/ptp_vgr_grn.img OU+
+T=vgr_grn.img TARGET=JUPITER      REF=/project/test_work/testdata/mipl/vgr/ptp_vgr_blu.img
+Beginning VICAR task ptp
+ PTP Version 29-Dec-2011
+Input image spacecraft is VGR-1
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+CKNAME=NAIF  SPKID=N005  PROGRAM=VGRMCK  VRH059  MIPS  03/02/85
+Reference image spacecraft is VGR-1
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+CKNAME=NAIF  SPKID=N005  PROGRAM=VGRMCK  VRH059  MIPS  03/02/85
+ OS target center=(    598.31,    637.46)
+ OS target center for ref image=(    601.77,    709.68)
+ ***PTP task completed
+list vgr_red.img (365,278,20,10)
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:TASK      User:jry       Date_Time:Fri Jun  7 12:19:47 1996
+ Task:PTP       User:lwk       Date_Time:Thu Dec 29 15:20:48 2011
+     Samp     278   279   280   281   282   283   284   285   286   287
+   Line
+
+    369         0     0     0     0     0     0     0     0     0   622
+    370         0     0     0     0     0     0     0     0     0   812
+    371         0     0     0     0     0     0     0     0   684   929
+    372         0     0     0     0     0     0     0     0   872  1009
+    373         0     0     0     0     0     0     0   739   993  1063
+    374         0     0     0     0     0     0   585   893  1073  1108
+    375         0     0     0     0     0     0   802  1028  1120  1151
+    376         0     0     0     0     0   667   954  1080  1159  1199
+    377         0     0     0     0     0   843  1023  1112  1191  1242
+    378         0     0     0     0   723   969  1082  1154  1219  1253
+    379         0     0     0     0   884  1044  1134  1184  1217  1262
+    380         0     0     0   772   984  1093  1167  1196  1229  1290
+    381         0     0     0   927  1056  1131  1183  1212  1275  1329
+    382         0     0   839  1039  1116  1167  1205  1243  1299  1352
+    383         0   639   965  1097  1159  1193  1218  1276  1319  1368
+    384         0   844  1053  1144  1190  1217  1247  1303  1356  1406
+list vgr_grn.img (365,278,20,10)
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:TASK      User:jry       Date_Time:Fri Jun  7 12:21:31 1996
+ Task:PTP       User:lwk       Date_Time:Thu Dec 29 15:20:54 2011
+     Samp     278   279   280   281   282   283   284   285   286   287
+   Line
+
+    369         0     0     0     0     0     0     0     0     0  1685
+    370         0     0     0     0     0     0     0     0     0  1719
+    371         0     0     0     0     0     0     0     0  1654  1715
+    372         0     0     0     0     0     0     0     0  1697  1795
+    373         0     0     0     0     0     0     0  1671  1752  1824
+    374         0     0     0     0     0     0  1701  1816  1844  1859
+    375         0     0     0     0     0     0  1795  1882  1883  1900
+    376         0     0     0     0     0  1727  1783  1847  1903  1974
+    377         0     0     0     0     0  1779  1812  1853  1924  2008
+    378         0     0     0     0  1728  1779  1823  1879  1969  2074
+    379         0     0     0     0  1779  1816  1856  1922  2009  2092
+    380         0     0     0  1730  1781  1834  1888  1955  2025  2089
+    381         0     0     0  1748  1806  1864  1924  1984  2046  2112
+    382         0     0  1735  1770  1841  1918  1979  2021  2087  2147
+    383         0  1718  1759  1822  1893  1968  2035  2094  2136  2168
+    384         0  1733  1801  1880  1931  1970  2025  2117  2164  2190
+copy /project/test_work/testdata/mipl/vgr/ptp_vgr_blu.img vgr_blu.img
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+Let $Echo="No"
+==================================================================
+======================= Galileo test =============================
+==================================================================
+ptp INP=/project/test_work/testdata/mipl/gll+
+/ptp_gll_red.img OUT=red.img  	REF=/project/test_work/testdata/mipl/gll/ptp_gll_grn.img
+Beginning VICAR task ptp
+ PTP Version 29-Dec-2011
+Input image spacecraft is GLL
+CKNAME=NAV   SPKID=N083  PROGRAM=  1919  
+Reference image spacecraft is GLL
+CKNAME=NAV   SPKID=N083  PROGRAM=  1919  
+ OS target center=(    382.56,    475.63)
+ OS target center for ref image=(    384.22,    518.68)
+ ***PTP task completed
+ptp INP=/project/test_work/testdata/mipl/gll+
+/ptp_gll_red.img OUT=grn.img  	RSCET=(1992,346,6,9,57,358) RCAM=1 TARGET=EARTH
+Beginning VICAR task ptp
+ PTP Version 29-Dec-2011
+Input image spacecraft is GLL
+CKNAME=NAV   SPKID=N083  PROGRAM=  1919  
+No reference image provided
+CKNAME=NAV   SPKID=N083  PROGRAM=  1919  
+ OS target center=(    382.56,    475.63)
+ OS target center for ref image=(    384.22,    518.68)
+ ***PTP task completed
+difpic (red.img,grn.img)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENCES =   0
+ptp INP=/project/test_work/testdata/mipl/gll+
+/ptp_gll_blu.img OUT=blu.img      REF=/project/test_work/testdata/mipl/gll/ptp_gll_grn.img 'REMOTE
+Beginning VICAR task ptp
+ PTP Version 29-Dec-2011
+Input image spacecraft is GLL
+CKNAME=NAV   SPKID=N083  PROGRAM=  1919  
+Reference image spacecraft is GLL
+CKNAME=NAV   SPKID=N083  PROGRAM=  1919  
+ OS target center=(    381.74,    501.73)
+ OS target center for ref image=(    384.22,    518.68)
+ ***PTP task completed
+list red.img (203,265,20,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:CATLABEL  User:HBM320    Date_Time:Tue Aug  3 16:13:51 1993
+ Task:PTP       User:lwk       Date_Time:Thu Dec 29 15:20:57 2011
+     Samp   265     267     269     271     273
+   Line
+    203       0   0   0   0   0   0  12  13  14  18
+    204       0   0   0   0   0  12  14  14  19  22
+    205       0   0   0   0  11  13  14  16  21  37
+    206       0   0   0  11  12  14  15  19  26  66
+    207       0   0   0  12  13  14  19  23  50 105
+    208       0   0  10  11  14  18  18  34  81 136
+    209       0  13  13  14  16  19  26  60 115 159
+    210       0  12  13  13  18  21  44  96 146 183
+    211      12  13  16  18  18  32  80 128 171 192
+    212      12  16  13  18  25  60 116 160 184 208
+    213      14  17  17  20  42 100 150 181 202 233
+    214      13  17  20  33  78 141 171 192 220 246
+    215      16  19  25  58 123 170 191 213 238 252
+    216      16  23  42  99 157 190 209 235 251 255
+    217      19  30  74 143 183 202 226 249 255 255
+    218      25  55 121 176 196 212 242 253 255 255
+    219      38  90 158 193 203 222 241 252 255 255
+    220      68 135 178 195 214 235 251 255 255 255
+    221     109 165 186 201 232 251 255 255 255 255
+    222     153 188 204 221 243 253 255 255 255 255
+list grn.img (203,265,20,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:CATLABEL  User:HBM320    Date_Time:Tue Aug  3 16:13:51 1993
+ Task:PTP       User:lwk       Date_Time:Thu Dec 29 15:21:01 2011
+     Samp   265     267     269     271     273
+   Line
+    203       0   0   0   0   0   0  12  13  14  18
+    204       0   0   0   0   0  12  14  14  19  22
+    205       0   0   0   0  11  13  14  16  21  37
+    206       0   0   0  11  12  14  15  19  26  66
+    207       0   0   0  12  13  14  19  23  50 105
+    208       0   0  10  11  14  18  18  34  81 136
+    209       0  13  13  14  16  19  26  60 115 159
+    210       0  12  13  13  18  21  44  96 146 183
+    211      12  13  16  18  18  32  80 128 171 192
+    212      12  16  13  18  25  60 116 160 184 208
+    213      14  17  17  20  42 100 150 181 202 233
+    214      13  17  20  33  78 141 171 192 220 246
+    215      16  19  25  58 123 170 191 213 238 252
+    216      16  23  42  99 157 190 209 235 251 255
+    217      19  30  74 143 183 202 226 249 255 255
+    218      25  55 121 176 196 212 242 253 255 255
+    219      38  90 158 193 203 222 241 252 255 255
+    220      68 135 178 195 214 235 251 255 255 255
+    221     109 165 186 201 232 251 255 255 255 255
+    222     153 188 204 221 243 253 255 255 255 255
+copy /project/test_work/testdata/mipl/gll/ptp_gll_grn.img grn.img
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+WRITE "----------------------------------------------------------------------"
+----------------------------------------------------------------------
+WRITE "TEST 2: Input is summation and reference is full frame."
+TEST 2: Input is summation and reference is full frame.
+WRITE ""
+
+ptp INP=/project/test_work/testdata/gll/s0401863200.1 OUT=sf.img REF=/project/test_work/testdata/gll/s0401863178.1 'INCLUDE
+Beginning VICAR task ptp
+ PTP Version 29-Dec-2011
+Input image spacecraft is GLL
+CKNAME=NAV   SPKID=N126  PROGRAM=NAV     TFT
+Reference image spacecraft is GLL
+CKNAME=NAV   SPKID=N126  PROGRAM=NAV     TFT
+ OS target center=(    194.93,    231.37)
+ OS target center for ref image=(    382.99,    462.28)
+ ***PTP task completed
+list sf.img (267,185,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:TASK      User:RTO040    Date_Time:Tue Jul 15 09:56:18 1997
+ Task:PTP       User:lwk       Date_Time:Thu Dec 29 15:21:08 2011
+     Samp   185     187     189     191     193
+   Line
+    267      10  11  11  21  40  87 167 208 208 206
+    268       8  10  12  31  68 119 183 215 212 207
+    269       6   8  13  42  98 151 198 220 214 208
+    270       7  11  21  59 130 180 207 218 213 207
+    271       8  15  31  78 162 209 215 216 211 206
+    272       9  23  51 103 183 223 218 214 208 205
+    273      10  32  73 130 203 234 221 211 206 203
+    274      14  45 105 163 217 237 220 210 206 203
+    275      18  59 140 198 230 238 219 208 206 203
+    276      31  79 164 215 230 230 216 207 205 203
+let $echo="no"
+==================================================================
+========================= Cassini Test ===========================
+==================================================================
+ptp INP=/project/test_work/testdata/cassini/casIss/n135489734+
+0.1 OUT=cas_red.img TARGET=JUPITER      REF=/project/test_work/testdata/mipl/vgr/ptp_vgr_blu.img
+Beginning VICAR task ptp
+ PTP Version 29-Dec-2011
+Input image spacecraft is CASSI
+CKNAME=NAV   SPKID=N009  PROGRAM=NAV     GMY059  NONE  02/08/03
+Reference image spacecraft is VGR-1
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+CKNAME=NAIF  SPKID=N005  PROGRAM=VGRMCK  VRH059  MIPS  03/02/85
+ OS target center=(    138.69,    840.44)
+ OS target center for ref image=(    601.77,    709.68)
+ ***PTP task completed
+list cas_red.img (190,468,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:TASK      User:casrt     Date_Time:Fri Dec  8 10:00:23 2000
+ Task:PTP       User:lwk       Date_Time:Thu Dec 29 15:21:12 2011
+     Samp   468     470     472     474     476
+   Line
+    190       0   0   0   0   0   0   0  26  26  27
+    191       0   0   0   0   0  25  26  26  26  26
+    192       0   0   0  25  26  26  26  25  26  27
+    193       0  27  27  27  26  26  27  28  28  27
+    194      27  27  27  26  27  28  28  28  28  29
+    195      27  27  26  27  28  28  29  30  31  30
+    196      26  27  27  28  27  30  31  31  31  32
+    197      28  27  28  29  29  31  31  32  33  33
+    198      28  29  30  30  30  32  33  33  34  34
+    199      29  30  31  31  32  33  33  34  36  35
+End-Proc
+exit
+slogoff
+if ($RUNTYPE = "INTERACTIVE")
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+else
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+end-if
+ulogoff
+END-PROC
+END-PROC

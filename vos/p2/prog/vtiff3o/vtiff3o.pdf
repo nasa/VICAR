@@ -1,0 +1,469 @@
+process help=*
+SUBCMD TOVIC	! convert from TIFF to vicar
+    PARM INP	TYPE=STRING COUNT=1
+    PARM OUT	TYPE=STRING COUNT=0:4 default=--
+    PARM AUXIL  TYPE=STRING COUNT=0:2 DEFAULT=--
+    PARM INFO   TYPE=KEYWORD VALID=(DUMP,NODUMP) DEFAULT=NODUMP
+    PARM FORMAT TYPE=KEYWORD VALID=(BYTE,HALF,FULL,REAL,DOUB,COMP,SAME)  +
+    		DEFAULT=SAME
+!	PARM SIZE	TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+!	PARM SL		TYPE=INTEGER COUNT=1 DEFAULT=1
+!	PARM SS		TYPE=INTEGER COUNT=1 DEFAULT=1
+	PARM NL		TYPE=INTEGER COUNT=1 DEFAULT=0
+	PARM NS		TYPE=INTEGER COUNT=1 DEFAULT=0
+	PARM METADATA	TYPE=STRING DEFAULT=" "
+    PARM STATUS		TYPE=KEYWORD VALID=(PRINT,NOPRINT) DEFAULT=PRINT
+END-SUBCMD
+
+SUBCMD-DEFAULT FROMVIC	! convert from vicar to TIFF
+    PARM INP 		TYPE=STRING COUNT=1:3
+    PARM OUT 		TYPE=STRING COUNT=1
+    PARM AUXIL 		TYPE=STRING COUNT=0:2 DEFAULT=--
+    PARM TLINES		TYPE=INTEGER DEFAULT=128
+    PARM TSAMPS		TYPE=INTEGER DEFAULT=128
+    PARM COMPRESS	TYPE=KEYWORD VALID=(LZW,PACKBITS,JPL,ZIP,JPG,NOCOMP)+
+      DEFAULT=NOCOMP
+    PARM ZIPCOMP        TYPE=INTEGER DEFAULT=1 VALID=(1,2,3,4,5,6,7,8,9)
+    PARM COLORBITS  TYPE=KEYWORD VALID=(BIT8,BIT24) DEFAULT=BIT24
+    PARM TIFFMODE	TYPE=KEYWORD VALID=(TILED,STRIPS) DEFAULT=STRIPS
+    PARM INTRLEAV	TYPE=KEYWORD VALID=(CHUNKY,PLANAR) DEFAULT=CHUNKY
+    PARM LAT		TYPE=REAL valid=(0:90) COUNT=0:3 DEFAULT=--
+    PARM HEMILAT	TYPE=KEYW VALID=(NORTH,SOUTH) DEF=NORTH
+    PARM LONG		TYPE=REAL valid=(0:180) COUNT=0:3 DEFAULT=--
+    PARM HEMILONG	TYPE=KEYW VALID=(EAST,WEST) DEF=EAST
+    PARM HDEGPIX	TYPE=REAL COUNT=0:3 DEFAULT=(0,0,1.0)
+    PARM VDEGPIX	TYPE=REAL COUNT=0:3 DEFAULT=(0,0,1.0)
+    PARM XPIXPOS	TYPE=REAL COUNT=1 DEFAULT=0.0
+    PARM YPIXPOS	TYPE=REAL COUNT=1 DEFAULT=0.0
+    PARM RESUNIT	TYPE=KEYWORD VALID=(INCH,CENTIMETER) DEF=INCH
+    PARM XRES      	TYPE=REAL COUNT=1 DEF=72.0
+    PARM YRES		TYPE=REAL COUNT=1 DEF=72.0
+	PARM NULLMASK	TYPE=STRING DEFAULT=" "
+	PARM METADATA	TYPE=STRING DEFAULT=" "
+	PARM GCS		TYPE=KEYWORD VALID=(WGS84,WGS72,NAD83,NAD27) DEFAULT=WGS84
+    PARM JPLCOMP	TYPE=KEYWORD VALID=(ZIPJPL,NGT) DEFAULT=ZIPJPL
+    PARM MASKCOL	TYPE=INTEGER COUNT=1 valid=(1:1024) DEFAULT=1
+    PARM STATUS		TYPE=KEYWORD VALID=(PRINT,NOPRINT) DEFAULT=PRINT
+	
+	! Added to enable Albers GeoTIFF
+	PARM PROJ		TYPE=KEYWORD VALID=(LATLONG,ALBERS,LAMBCC) DEFAULT=LATLONG
+	PARM PIXSIZE    TYPE=REAL COUNT=2 DEFAULT=(1.0,1.0)
+	PARM STDPARAL	TYPE=REAL COUNT=2 DEFAULT=(0,0)
+	PARM PIX_ORIG   TYPE=REAL COUNT=2 DEFAULT=(0.0,0.0)
+	PARM FAL_ORIG   TYPE=REAL COUNT=2 DEFAULT=(0.0,0.0)
+	PARM FO_LAT	TYPE=REAL valid=(-90:90) COUNT=1 DEFAULT=0
+	PARM NO_LONG	TYPE=REAL valid=(-180:180) COUNT=1 DEFAULT=0
+	PARM CARTTAG	TYPE=KEYWORD valid=(OLD,NONE) default=OLD
+
+END-SUBCMD
+
+end-proc
+.TITLE
+VICAR2 Program VTIFF
+.HELP
+   VTIFF is a Vicar2 program, which can be used to convert
+   between VICAR labeled images and TIFF format files, using
+   either scanline (strip) organization, or the newer Revision
+   6.0 TIFF tiled-image format. Currently grayscale, image-
+   lookup table pairs and RGB tripletes are supported. In addition,
+   multiple auxiliary images may be placed in the same file,
+   such as "thumbnail" preview images. GeoTIFF 1.0 georeferencing
+   parameters may also be inserted for Geographic and Albers.
+
+   Need to add:
+     sinusoidal
+     utm
+     lambert
+     polar stereographic
+
+     plus other datums
+
+   "TIFF" is a trademark of Aldus Corporation, and is a public
+   standard for platform-independent raster-image storage and
+   transmission. It is an acronym for Tagged Image File Format.
+
+.PAGE
+CALLING SEQUENCE:
+
+	vtiff-tovic   image.tiff  image 	  AUXIL=(files...)
+	vtiff-tovic   image.tiff  (image, lookup) AUXIL=(files...)
+	vtiff-tovic   image.tiff  (red, grn, blu) AUXIL=(files...)
+
+	vtiff-fromvic  image  		image.tif  [options..]
+	vtiff-fromvic  (image, lookup)  image.tif  [options..]
+	vtiff-fromvic  (red, grn, blu)  image.tif  [options..]
+
+   where image.tiff is TIFF format, and lookup is a
+   color lookup table in IDX format (1024 sample, 1 line
+   byte image, with values r1,g1,b1,0,r2,g2,b2,0,...).
+
+
+.PAGE
+OPERATION
+
+  In the "tovicar" mode, the program unpacks the image and
+  lookup table, if desired. It will also unpack any additional
+  files and save them as specified by the AUX parameter.
+
+  In the "fromvicar" mode, you have the option of saving the
+  files in strip-mode (horizontal scanlines contiguous), which
+  makes them TIFF 5.0 compliant; or using the TIFF 6.0 tiling
+  option, which breaks the image up into rectangular tiles, and
+  saves those in a contiguous manner.
+
+  You may save multiple additional images in the same file using
+  the "AUX" parameter. If the file uses a lookup table, you may
+  include this in the second INP parameter. It currently must be
+  an IDX-format lookup table (1 line x 1024 sample byte image:
+  r1,g1,b1,0,r2..). NOTE: Tiling is a new feature, which many
+  TIFF programs cant yet handle. If so, use the default strip-mode. 
+.PAGE
+OPERATION
+
+  You may also chose a TIFF data compression option. The
+  currently supported keywords in VTIFF are 'LZW = lempel-ziv-welch
+  compression, 'PACKBITS = Macintosh-style packbits (run-length
+  encoding) compression, or 'NOCOMP = no compression. NOTE: The
+  TIFF 6.0 standard now discourages the use of LZW, as Unisys Corp.
+  claims to have a patent on the algorithm, and so may not
+  support LZW in the future. If this is a concern, you can try
+  the 'ZIP Deflation compression, which does not have any
+  limitations.
+.page
+OPERATION
+
+  The 'JPL compression by default implies the 'ZIPJPL codec, which
+  uses a modified ZIP/Deflate compression scheme, allowing for NULL's.
+  An optional NULLMASK parameter allows the specification of tiles
+  which are all zero, permitting faster,better,cheaper compression
+  on those tiles. The NULLMASK file should be an IBIS tabular file 
+  containing 0's on those row number corresponding
+  to NULL tiles. Use the MASKCOL parameter to specify which column
+  contains the NULL information.
+
+  In this version a ('JPL 'NGT) compression is also enabled, 
+  supporting National Geographic Television/JPL compression support.
+  this mechanism operates in a similar mode to the 'ZIPJPL scheme,
+  but is patented and not for general use.
+.PAGE
+OPERATION
+
+  For RGB triplets, whether tiled or in strips, you may choose
+  to organize the data using 'CHUNKY or 'PLANAR interleaving.
+  The 'CHUNKY format is analogous to the VICAR BIP (Band-interleaved
+  by pixel) organization, and is the default. The 'PLANAR is
+  similar to BSQ (Band-sequential) format, and while this permits
+  faster conversion and extraction, it is an extension to TIFF
+  that is not supported by as many TIFF-compatible programs.
+.PAGE
+OPERATION
+
+  The latitude-longitude parmeters are extensions to TIFF to
+  permit specification of scanned map georeference data. These
+  extensions are GeoTIFF 1.0-compliant, and will not interfere with
+  any standard TIFF-reading program, which will ignore the 
+  extended data fields. For more information on the cartographic
+  TIFF extensions, see the GeoTIFF web page, and "HELP PROJ".
+
+  In general, for the most easily exportable TIFF file, use as few
+  of the parameters as possible. 
+
+.PAGE
+
+REVISION HISTORY
+
+   Written by:            N. D. Ritter  September 1991
+   Cognizant Programmer:  W Bunch
+
+   2003-09-05 WLB Added GeoTIFF support.
+   2004-07-12 WLB Added legacy cart tag support.
+   2004-10-19 WLB Added support for fourth input TIFF band.
+   2004-12-01 WLB Added support for non GeoTIFF metata (to/from TIFF image description tag).
+   2005-05-11 WLB Added support for new tags.
+   2005-06-01 WLB Bug fix.
+   2006-11-21 WLB strcpy/cat and ms_dnum bugs fixed.
+   2008-01-03 WLB Switched to USES_ANSI_C AND LIB_CARTO; misc cleanup.
+   2016-01-08 WLB Migrated to MIPL; replaced printf with zifmessage.
+   2017-02-28 WLB Added support for single-file, multi-band conversion.
+   2017-06-02 WLB Removed unnecessary warning messages.
+   2017-08-15 WLB Removed DEBUG from imake.
+
+REFERENCES
+
+   "TIFF" Revision 6.0, Final - Jun 3, 1992,
+      Aldus Developers Desk, available via anonymous ftp
+      through sgi.com.
+.PAGE
+AKNOWLEDGMENT
+
+   This program is a VICAR front-end to a public-domain
+   subroutine library of TIFF file format routines, written
+   by Sam Leffler, and extended for JPL use by Niles Ritter.
+   The source code carries the following copyright notice:
+
+   <quote>
+   Copyright (c) 1988, 1989, 1990, 1991, 1992 Sam Leffler
+   Copyright (c) 1991, 1992 Silicon Graphics, Inc.
+ 
+   Permission to use, copy, modify, distribute, and sell this software and 
+   its documentation for any purpose is hereby granted without fee, provided
+   that (i) the above copyright notices and this permission notice appear in
+   all copies of the software and related documentation, and (ii) the names of
+   Sam Leffler and Silicon Graphics may not be used in any advertising or
+   publicity relating to the software without the specific, prior written
+   permission of Sam Leffler and Silicon Graphics.
+.PAGE
+AKNOWLEDGMENT
+   
+   THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
+   EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
+   WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
+   
+   IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
+   ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
+   OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+   WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
+   LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
+   OF THIS SOFTWARE.
+
+   <unquote>.
+
+.LEVEL1
+
+
+.SUBCMD TOVIC
+Convert TIFF format file
+to VICAR.
+.VAR INP -TOVIC
+Input TIFF file
+.VAR OUT -TOVIC
+Output VICAR file.
+.VAR AUXIL -TOVIC
+Auxiliary files to pull
+out of TIFF file.
+.VAR INFO -TOVIC
+Dump information only.
+.VAR SIZE -TOVIC
+.VAR SL -TOVIC
+.VAR SS -TOVIC
+.VAR NL -TOVIC
+.VAR NS -TOVIC
+.VAR METADATA -TOVIC
+Dump GeoTIFF to file
+.VAR STATUS -TOVIC
+Print Progress Bar?
+
+.SUBCMD FROMVIC
+Covert from VICAR image
+to TIFF format file.
+.VAR INP -FROMVIC
+Input VICAR file
+.VAR OUT -FROMVIC
+Output TIFF file
+.VAR AUXIL -FROMVIC
+Auxiliary files to stuff
+into output TIFF file.
+.VAR TLINES -FROMVIC
+Number of lines in tile
+.VAR TSAMPS -FROMVIC
+Number of samps in tile
+.VAR COMPRESS -FROMVIC
+Compression type
+.VAR COLORBITS  -FROMVIC 
+Convert RGB to 8-bit?
+.VAR TIFFMODE -FROMVIC
+Use Strips or Tiles ?
+.VAR INTRLEAV -FROMVIC
+Chunky Interleave:rgbrgb...?
+.VAR LUT -FROMVIC
+Type of Color Lookup 
+Table to use.
+.VAR LAT -FROMVIC
+Ref. Latitude in (D,Min,Sec).
+.VAR HEMILAT -FROMVIC
+North or South Latitude ?
+.VAR LONG -FROMVIC
+Ref. Longitude in (D,Min,Sec).
+.VAR HEMILONG -FROMVIC
+East or West Longitude ?
+.VAR HDEGPIX -FROMVIC
+Horiz. (D,Min,Sec) per pixel.
+.VAR VDEGPIX -FROMVIC
+Vert. (D,Min,Sec) per pixel.
+.VAR XPIXPOS -FROMVIC
+X-Position of Coord. axis.
+.VAR YPIXPOS -FROMVIC
+Y-Position of Coord. axis.
+.VAR RESUNIT -FROMVIC
+Units used in X/YRES
+.VAR XRES -FROMVIC
+#pixels per (RESUNIT) horiz.
+.VAR YRES -FROMVIC
+#pixels per (RESUNIT) vert.
+.VAR GCS -FROMVIC
+Geog. Coord. System Used
+.VAR NULLMASK -FROMVIC
+IBIS table flagging NULL tiles
+(0 = NULL, 1 = valid data)
+.VAR MASKCOL -FROMVIC
+Column containing NULL flag
+.VAR STATUS -FROMVIC
+Print Progress Bar?
+.VAR PROJ -FROMVIC
+Lat-Long, Albers...?
+.VAR PIXSIZE -FROMVIC
+horiz,vert Pixel Size (m)
+.VAR STDPARAL -FROMVIC
+Standard Parallels (degrees)
+.VAR NAT_ORIG -FROMVIC
+Natural Origin (E,N)
+.VAR FAL_ORIG -FROMVIC
+False Origin (E,N)
+.VAR FO_LAT -FROMVIC
+False Origin Latitude
+.VAR NO_LONG -FROMVIC
+Natural Origin Longitude
+(aka Central Meridian)
+.VAR CARTTAG -FROMVIC
+Include Old Carto tags?
+
+.level2
+
+.SUBCMD TOVIC
+Convert TIFF format file
+to VICAR.
+.VAR INP -TOVIC
+Input TIFF file
+.VAR OUT -TOVIC
+Output VICAR file.
+.VAR AUXIL -TOVIC
+Auxilary files to pull
+out of TIFF file.
+.VAR INFO -TOVIC
+Dump information only.
+.VAR FORMAT -TOVIC
+Output format.
+.VAR NL -TOVIC
+Number of Lines
+.VAR NS -TOVIC
+Number of Samples
+.VAR METADATA -TOVIC
+Dump GeoTIFF to file
+
+.SUBCMD FROMVIC
+Covert from VICAR image
+to TIFF format file.
+.VAR INP -FROMVIC
+Input VICAR file
+.VAR OUT -FROMVIC
+Output TIFF file
+.VAR AUXIL -FROMVIC
+Auxilary files to stuff
+into output TIFF file.
+.VAR TLINES -FROMVIC
+Number of lines in tile.
+.VAR TSAMPS -FROMVIC
+Number of samps in tile.
+.VAR COMPRESS -FROMVIC
+Use Compression ?
+.VAR COLORBITS  -FROMVIC 
+When an (r,g,b) triplet is input, tells VTIFF whether the
+output TIFF file should be 8-bit ('BIT8) or 24-bit (BIT24) color .
+.VAR TIFFMODE -FROMVIC
+Use Strips or Tiles ?
+.VAR INTRLEAV -FROMVIC
+Chunky Interleave:rgbrgb...?
+.VAR LUT -FROMVIC
+Type of Color Lookup 
+Table to use.
+
+.VAR LAT -FROMVIC
+Ref. Latitude in DMS.
+.VAR LONG -FROMVIC
+Ref. Longitude in DMS.
+.VAR HEMILAT -FROMVIC
+North or South latitude?
+.VAR HEMILONG -FROMVIC
+East or West longitude?
+.VAR HDEGPIX -FROMVIC
+Horiz. (D,Min,Sec) per pixel.
+.VAR VDEGPIX -FROMVIC
+Vert. (D,Min,Sec) per pixel.
+.VAR XPIXPOS -FROMVIC
+X-Position of Coord. axis.
+.VAR YPIXPOS -FROMVIC
+Y-Position of Coord. axis.
+.VAR RESUNIT -FROMVIC
+Units used in X/YRES to expression resolution
+of displayed map/image.
+.VAR XRES -FROMVIC
+#pixels per (RESUNIT) horizontal.
+.VAR YRES -FROMVIC
+#pixels per (RESUNIT) vertical.
+.VAR NULLMASK -FROMVIC
+IBIS table flagging NULL tiles
+(0 = NULL, 1 = valid data)
+.VAR MASKCOL -FROMVIC
+Column containing NULL flag
+.VAR PROJ -FROMVIC
+Allows choice of Geographic (Lat-long) coordinate system, or
+a projected coordinate system such as Albers Equal Area.
+
+For Albers Equal Area the following georeferencing approach
+should be used:
+
+First, define the cartographic projected coordinate system. Use
+the NO_LONG parameter to define the central meridian (in decimal
+degrees), and the STDPARAL parameter to define the two standard
+parallels. There is no natural origin latitude, so instead we
+choose a latitude for a false origin (given by FO_LAT), and assign it an
+arbitrary Easting,Northing ( given by FAL_ORIG).
+
+The most common choice for the False origin is a parallel which hits
+the top or bottom of the image tangentially (at the center of image),
+for which the latitude is known.
+
+Next, the raster XY pixel-space should be tied to this easting,northing
+coordinate system. The recommended way to do this is to set the
+pixel origin (PIX_ORIG) easting,northing equal to the coordinate
+system false origin (PIX_ORIG = FAL_ORIG), and then specify the
+pixel (X,Y) location of of this origin in the image. Also, use the
+PIXSIZE parameter to specify the horizontal and vertical size of
+the pixels in meters. In the XY coordinate system the location of
+the upper-left corner of the upper-left pixel is (0,0), and the
+bottom-right corner of the bottom-right pixel is (NS+1, NL+1).
+
+
+.VAR PIXSIZE -FROMVIC
+horiz,vert Pixel Size (m)
+
+  *** See "HELP PROJ" *** 
+  
+.VAR STDPARAL -FROMVIC
+Standard Parallels (degrees)
+
+  *** See "HELP PROJ" *** 
+  
+.VAR NAT_ORIG -FROMVIC
+Natural Origin (E,N)
+
+  *** See "HELP PROJ" *** 
+  
+.VAR FAL_ORIG -FROMVIC
+False Origin (E,N)
+
+  *** See "HELP PROJ" *** 
+  
+.VAR FO_LAT -FROMVIC
+False Origin Latitude
+
+  *** See "HELP PROJ" *** 
+  
+.VAR NO_LONG -FROMVIC
+Natural Origin Longitude
+(aka Central Meridian)
+
+  *** See "HELP PROJ" *** 
+  
+
+.END

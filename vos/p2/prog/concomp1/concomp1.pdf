@@ -1,0 +1,224 @@
+process help=*
+!  FILE NAMES      
+!
+PARM INP     TYPE=STRING   COUNT=1
+PARM OUT     TYPE=STRING   COUNT=(1:2)
+!
+PARM SIZE    TYPE=INTEGER  COUNT=4       DEFAULT=(1,1,0,0)
+PARM SL      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM SS      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM NL      TYPE=INTEGER  COUNT=1       DEFAULT=0
+PARM NS      TYPE=INTEGER  COUNT=1       DEFAULT=0
+!
+PARM THRESH  TYPE=INTEGER  COUNT=1       DEFAULT=1          VALID=(0:8)
+PARM REPLACE TYPE=INTEGER  COUNT=1       DEFAULT=255        VALID=(0:255)
+PARM MODE    TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=--         VALID=MODE
+PARM RANGE   TYPE=INTEGER  COUNT=2       DEFAULT=(0,255)    VALID=(0:255) 
+!
+END-PROC
+.TITLE
+concomp1
+.HELP
+ PURPOSE:
+
+concomp1 is a VICAR applications program used to remove high frequency
+information (noise) components from digital images.  It is usually used as a
+post-processing procedure to remove visually distracting detail from classified
+or stratified images such as images produced by VICAR programs FASTCLAS or
+USTATS.  Such images usually are composed of a number of regions, where each
+pixel in a region has the same DN except possibly for some isolated noise
+pixels. CONCOMP1 changes the DNs of these isolated noise pixels to match the DN
+of the surrounding pixels and writes the resulting image to an output file. 
+A mask of changed pixels can be generated on request. 
+.PAGE
+ EXECUTION:
+
+In order to determine which DNs to change, concomp1 applies a test to each
+pixel in the input image.  The test involves looking at a 3 by 3 (pixel)
+window centered around the pixel being tested.  The number of other pixels
+in the window with the same DN as the pixel being tested is found.  If this
+number is less than the threshold value specified by the THRESH parameter,
+then the DN for the pixel being tested is changed.  The new value of the DN
+is determined by the MODE or REPLACE parameters specified by the user.  If
+REPLACE is specified, the new value is just the value specified for the REPLACE
+parameter.  If MODE is specified, the new value is generally the mode of the DN
+distribution within the window.  More precisely, if MODE is specified, the
+new DN is the most frequent DN in the window that lies in the range of DNs
+specified for the RANGE parameter.  In case of a tie in determining the 
+most frequent DN, the lowest of the DNs in the tie is used.  If no DN in
+the specified range occurs in the window, the DN of the pixel tested is not
+changed.  The range is commonly set according to the range of DNs for the
+regions of the image.  When a DN is changed, the change is not included in 
+the subsequent windows. 
+
+A mask file is specified by entering a second output file name for the OUT
+parameter.  The mask file is the same size as the (first) output file.  A
+pixel in the mask file has a DN of 0 if the DN for the corresponding pixel
+in the output file was changed.  All other pixels in the mask file have a
+DN of 255.   It is possible that the DN of a pixel in the image be change to
+itself, particularly if the value of the THRESH parameter is greater than 3.
+In this case, the corresponding pixel in the mask file will be 0.
+
+
+.PAGE
+TAE COMMAND LINE FORMAT
+      The following command line formats show the major allowable forms:
+      concomp1 INP=a OUT=b SIZE=(sl,ss,nl,ns) optional parameters
+      concomp1 INP=a OUT=b  SL=sl SS=ss NL=nl NS=ns optional parameters
+      concomp1 a b (sl,ss,nl,ns) optional parameters
+      concomp1 a b optional parameters
+
+      concomp1 INP=a OUT=(b,m) SIZE=(sl,ss,nl,ns) optional parameters
+      concomp1 INP=a OUT=(b,m)  SL=sl SS=ss NL=nl NS=ns optional parameters
+      concomp1 a (b,m) (sl,ss,nl,ns) optional parameters
+      concomp1 a (b,m) optional parameters
+
+       Here 'a' represents the input image file name, 
+       'b' represents the output image file name,
+       and 'm' represents the mask file name.
+.PAGE
+EXAMPLE
+
+      concomp1 INP=A OUT=B THRESH=1 'MODE
+
+      In this example the center pixel of the window will be changed unless it
+      is connected to at least 1 other pixel with the same value.  The new
+      value is found by taking the mode of the distribution of values in the
+      window.
+
+
+RESTRICTIONS
+1. The input, output, and mask images must be byte data.
+.PAGE
+ OPERATION:
+
+The operation of concomp1 is similar to the operation of a box-filtering
+routine as it uses a moving window.  However, the pixel replacements are
+based on a different decision rule.  concomp1 searches for and removes 
+isolated pixels  and/or groups of pixels.  A 3 by 3 moving window is used
+to find isolated pixels by comparing the central pixel of the window with
+its adjacent pixels.  The number of other pixels in the window with the
+same value is the 'connectivity factor'.  If the connectivity factor is
+less than the THRESH parameter, the central pixel is replaced either by a 
+user specified value or by the mode of the distribution within the window.
+
+The window for pixels along the edges of the image is defined by conceptually
+reflecting the image data about the edges.  Thus, the second line of the image
+is conceptually duplicated above the first line, and the second pixel of each
+line is conceptually duplicated to the left of the first pixel in a line.  The
+next to last line of the image and the next to the last pixel in each line are
+handled analogously.  This method compensates for the fact that edge pixels
+have fewer real neighbors. 
+
+The following window operations will demonstrate the operation of concomp1
+on various windows.
+
+Example 1:  specifying THRESH=1 and 'MODE
+
+                    5   5   5                   5   5   5 
+
+            INPUT:  3   2   5          OUTPUT:  3   5   5
+
+                    4   3   3                   4   3   3
+
+Example 2:  specifying THRESH=4
+
+                    5   5   5
+
+            INPUT:  3   2   2          OUTPUT:  no change
+
+                    2   2   2 
+
+Example 3:  specifying THRESH=6, 'MODE, and RANGE=(1,5)
+
+                    0   0   0                   0   0   0
+
+            INPUT:  0   0   0          OUTPUT:  0   2   0
+
+                    2   2   1                   2   2   1
+
+
+ WRITTEN BY:             Steve Pohorsky              14 Dec 1983
+
+ COGNIZANT PROGRAMMER:   S. Z. Friedman              19 Dec 1980
+
+ REVISIONS:
+  1994-10-03 CRI - Made portable for UNIX
+  2016-07-15 R. J. Bambery - Removed 2 GB maximum image size.
+             by changing stacka call with stacka_big call
+              Centos-7.2 & gcc-4.8.5
+  2017-05-31 W. L. Bunch - Restored stacka
+
+.LEVEL1
+.VARIABLE INP
+Input file name
+.VARIABLE OUT
+Output file name optionally
+followed by mask file name
+.VARIABLE SIZE
+Standard Vicar size field:
+  (SL,SS,NL,NS)
+You can enter SL,SS,NL,
+and NS together as SIZE, OR
+enter the SL,SS,NL, and NS
+parameters separately.
+By default, the entire input
+image is used if these
+parameters are not entered.
+.VARIABLE SL
+Starting line number
+.VARIABLE SS
+Starting sample number
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples
+.VARIABLE THRESH
+Threshold of connectivity factor
+for pixel replacement.
+.VARIABLE REPLACE
+New DN value for pixels that
+are replaced.
+.VARIABLE MODE
+Enter to use the mode of
+DNs in the window as the new DN
+value for pixels that are 
+replaced.
+.VARIABLE RANGE
+Range of DNs to consider in 
+finding the mode.
+.LEVEL2
+.VARIABLE THRESH
+In order to determine which DNs to change, concomp1 applies a test to each
+pixel in the input image.  The test involves looking at a 3 by 3 (pixel) window
+centered around the pixel being tested. The number of OTHER pixels in the
+window with the same value is the 'connectivity factor'.  If the connectivity
+factor is less than the THRESH parameter, the central pixel is replaced either
+by a user specified value or by the mode of the distribution within the window.
+The default value for THRESH is 1.  Valid values for THRESH are integers from
+0 to 8, inclusive.
+.VARIABLE REPLACE
+Specify either REPLACE or MODE as the method for determining the new DN value 
+for pixels that are to be replaced.  If REPLACE is specified, the new value 
+is just the value specified for the REPLACE parameter.  The default value
+for REPLACE is 255.  This default is used if neither REPLACE or MODE is
+specified.
+.VARIABLE MODE
+Specify either REPLACE or MODE as the method for determining the new DN value
+for pixels that are to be replaced.  If MODE is specified, the new value is
+generally the mode of the DN distribution within the window.  More precisely,
+if MODE is specified, the new DN is the most frequent DN in the window that
+lies in the range of DNs specified for the RANGE parameter.  In case of a tie
+in determining the most frequent DN, the lowest of the DNs in the tie is used. 
+If no DN in the specified range occurs in the window, the DN of the pixel
+tested is not changed.  REPLACE is the default.
+.VARIABLE RANGE
+The RANGE parameter is used only when MODE is selected. This parameter is
+entered in the form RANGE=(LO,HI) where LO and HI are selected by the user. 
+This defines a range from a DN of LO to a DN of HI, inclusive.  When a pixel is
+changed, the new DN is the most frequent DN in the window that lies in the
+range of DNs specified for the RANGE parameter. The range is commonly set
+according to the range of DNs for the regions of the image.  The range should
+be made as small as the input image allows in order to reduce execution time. 
+RANGE=(0,255) is the default. 
+.END

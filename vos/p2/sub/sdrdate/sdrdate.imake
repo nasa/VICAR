@@ -1,0 +1,20 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY sdrdate
+
+   To Create the build file give the command:
+
+	$ vimake sdrdate                 (VMS)
+   or
+	% vimake sdrdate                 (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE sdrdate
+
+#define MODULE_LIST sdrdate.c 
+
+#define P2_SUBLIB
+
+#define USES_C

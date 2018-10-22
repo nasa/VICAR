@@ -332,8 +332,11 @@ public class JadeFileChooser extends JFrame implements PropertyChangeListener {
 		} else if (
 			   e.getActionCommand().equals(
 					      JFileChooser.CANCEL_SELECTION)) {
-		    //hide fileLoader
-		    _jadeFileChooser.setVisible(false);
+            //Find the JadeFileChooser parent object of
+            JadeFileChooser ancestor = (JadeFileChooser)SwingUtilities.getAncestorOfClass(JadeFileChooser.class,(JFileChooser)e.getSource());
+            //Hide fileloader
+            if (ancestor != null)
+                ancestor.setVisible(false);
 		}
 	    }
 	});

@@ -1,0 +1,127 @@
+PROCESS HELP=*
+PARM INP    TYPE=STRING
+PARM OUT    TYPE=STRING
+PARM SIGMA  TYPE=REAL       DEFAULT=-- COUNT=0:1
+PARM GAIN   TYPE=REAL       DEFAULT=-- COUNT=0:1
+PARM RATE   TYPE=INTEGER    DEFAULT=-- COUNT=0:1
+PARM BITS   TYPE=INTEGER    DEFAULT=8 COUNT=0:1
+PARM SEED   TYPE=INTEGER    DEFAULT=-- COUNT=0:1
+END-PROC
+
+.TITLE
+Create noise in images via a noise model.
+
+.HELP
+PURPOSE:
+
+Addnoise creates three types of noise:
+1. Additive gaussian noise.
+2. Shot noise (multiplicative ccd type noise).
+3. Bit error noise.
+
+EXECUTION:
+
+addnoise inp=a out=b sigma=10.            Additive gaussian noise 
+addnoise inp=a out=b gain=30.             ccd shot noise
+addnoise inp=a out=b rate=100 bits=8      bit error noise
+
+The SEED parameter is provided so the same random patterns can be generated.
+If it is defaulted the seed for the random number generator comes from the
+system time.
+
+Note, more than one noise can be simulated at one time. If you specify "sigma"
+and "gain" and "rate" for example, you'll get all three. The ordering of
+these is:
+first  shot noise
+second additive noise
+third  bit noise
+
+METHOD:
+
+Additive noise:
+dn_out= dn_in + sigma
+
+Shot noise:
+dn_out = sqrt(1/gain) * sqrt(dn_in) * x + dn_in
+where x is a random gaussian distribution with a mean deviation of 1.0
+
+Bit error noise:
+A pixel rate is computed from the bit rate.
+A random number selects the pixels to hit.
+Another random number selects the bit to flip.
+
+LIMITATIONS:
+
+    1. The maximum ns of image is 32768
+
+HISTORY:
+
+Original Programmer :	Jean Lorre  11-1-1998
+
+2012-06-18 - Ray Bambery - gfortran 4.6.3 revealed that
+             rangen parameters are (long,float) so
+             created integer*8 dseed replacement for
+             integer*4 seed. get_seconds parameter 
+             is also integer*8, converted all internal
+             write (*,*) to xvmessage
+2013-08-26 - Ray Bambery - called new get_seconds_big and rangen_big
+             to fix the long int (integer*8) problem
+2016-05-26 - Walt Bunch - reverted _big calls to original calls now
+             that we've all moved on to gcc 4.x.
+
+.LEVEL1
+.VARIABLE IN
+Input image 
+.VARIABLE OUT
+Output image
+.VARIABLE SIGMA
+The standard deviation
+of the distribution
+for additive noise.
+.VARIABLE GAIN
+Ccd gain constant
+in electrons/dn.
+.VARIABLE RATE
+Bit error rate.
+.VARIABLE BITS
+Bits per pixel.
+.VARIABLE SEED
+The starting seed for the
+random number generator
+
+.LEVEL2
+.VARIABLE IN
+Input image
+ 
+.VARIABLE OUT
+Output image
+
+.VARIABLE SIGMA
+Triggers additive noise to be created.
+The standard deviation of the distribution for additive noise.
+
+.VARIABLE GAIN
+Triggers shot noise to be created.
+Ccd gain constant in electrons/dn.
+Typical values for galileo were gain=30 in gain state 4 and gain=170 in
+gain state 2.
+
+.VARIABLE RATE
+Triggers bit error noise to be created.
+For example a bit error rate of 100 means one bit in 100 is hit on the average.
+
+Note, the algorithm does not permit a pixel to be hit more than once.
+Note, see the BITS keyword.
+
+.VARIABLE BITS
+Bits per pixel. Defaults to 8. Only used in the bit error "RATE" mode.
+This is the lower number of bits which can be changed per word. 
+
+Note: bits does not default to the format type. If you have HALF data but
+only 12 bits/pixel in a 16 bit field you must set bits=12 not to 16.
+Avoid changing the sign bit by setting bits to one less than the word length.
+
+.VARIABLE SEED
+The starting seed for the random number generator. Defaults to time of day.
+
+.END

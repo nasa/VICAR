@@ -1,0 +1,22 @@
+/* IMAKE file for Test of VICAR subroutine  gmask   */
+
+#define PROGRAM testrgbf
+
+#define MODULE_LIST testrgbf.f  
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define   LIB_RTL
+#define   LIB_TAE
+#define   LIB_P2SUB
+#define   LIB_PDS_LABEL
+/*
+Disable during delivery.
+
+#define   LIB_LOCAL       
+
+*/

@@ -1,0 +1,16 @@
+#define PROGRAM maptran
+
+#define MODULE_LIST maptran.f 
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB
+
+#define USES_FORTRAN
+
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_MATH77
+
+/*#define DEBUG		/* comment out on delivery */
+/*#define LIB_LOCAL 	/* comment out on delivery */

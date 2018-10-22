@@ -1,6 +1,6 @@
 /**
- * Structure holding the header for the Magellan F-BIDR.  Includes code to
- * read the contents from the actual F-BIDR.
+ * Structure holding the header for a single Magellan F-BIDR record.  Includes
+ * code to read the contents from the actual F-BIDR.
  *
  * @author Bob Deen, JPL
  */
@@ -10,11 +10,15 @@ package jpl.mipl.io.vicar;
 import java.io.*;
 import org.w3c.dom.*;
 
+import javax.imageio.stream.*;
+import jpl.mipl.io.vicar.*;
+
 public class MgnFbidrHeader {
 
     // Primary Header fields
     protected String _header;
-    protected String _logicalRecordSize;
+    protected String _logicalRecordSizeStr;
+    protected int _logicalRecordSize;
 
     // Secondary Header fields
     protected int _secondaryLabelType;
@@ -34,13 +38,17 @@ public class MgnFbidrHeader {
     protected int _referencePointOffsetPixels;
     protected int _burstCounter;
     protected String _navUniqueID;
+    
+    
+    
+    protected long _posInFile;
 
     // Accessors.  We have no "set" functions because this is read-only
 
     /** Primary header field */
     public String getHeader() { return _header; }
     /** Primary header field */
-    public String getLogicalRecordSize() { return _logicalRecordSize; }
+    public String getLogicalRecordSizeStr() { return _logicalRecordSizeStr; }
 
     /** Secondary header field */
     public int getSecondaryLabelType() { return _secondaryLabelType; }
@@ -73,12 +81,22 @@ public class MgnFbidrHeader {
     public int getBurstCounter() { return _burstCounter; }
     /** Data annotation label */
     public String getNavUniqueID() { return _navUniqueID; }
+    /** Size of the data exclusive of this header */
+    public int getDataSize() { return _imageLineCount * _imageLineLength; }
 
+    /** Position of this record header in the file */
+    public long getHeaderPosInFile() { return _posInFile; }
+    /** Position of the data for this record in the file */
+    public long getDataPosInFile() { return _posInFile + 92; }
+    
 /***********************************************************************
- * Constructor.  Reads the info from the file, as well.
+ * Constructor.  Reads the info from the file, as well.  The given position
+ * is the position in the file at the start of the record, so we can seek to
+ * there later.
  */
-    public MgnFbidrHeader(DataInput di) throws IOException
+    public MgnFbidrHeader(DataInput di, long pos) throws IOException
     {
+        _posInFile = pos;
 	readHeader(di);
     }
 
@@ -101,6 +119,8 @@ public class MgnFbidrHeader {
 	byte hdr[] = new byte[12];
 	for (int i=0; i < 12; i++) {
 	    hdr[i] = di.readByte();
+	    if (hdr[i] == '^')              // ^ indicates EOF
+                throw new EOFException("Caret reached");
 	}
 	_header = new String(hdr);
 
@@ -108,8 +128,9 @@ public class MgnFbidrHeader {
 	for (int i=0; i < 8; i++) {
 	    sz[i] = di.readByte();
 	}
-	_logicalRecordSize = new String(sz);
-
+	_logicalRecordSizeStr = new String(sz);
+        _logicalRecordSize = Integer.parseInt(_logicalRecordSizeStr);
+	
 	// Secondary Header fields
 
 	_secondaryLabelType = di.readUnsignedShort();
@@ -145,7 +166,7 @@ public class MgnFbidrHeader {
     {
 	s.println("Primary Header:");
 	s.println("  Header: " + _header);
-	s.println("  Logical Record Size: " + _logicalRecordSize);
+	s.println("  Logical Record Size: " + _logicalRecordSizeStr);
 
 	s.println("Secondary Header:");
 	s.println("  Secondary Label Type: " + _secondaryLabelType);
@@ -189,12 +210,12 @@ public class MgnFbidrHeader {
  * </pre>
  */
 
-    public void buildDom(Document doc)
+    public Element buildDom(Document doc)
     {
 	Element item;
 
 	Element root = (Element)doc.createElement("mgn_fbidr_header");
-	doc.appendChild(root);
+	//doc.appendChild(root);
 
 	Element primary = doc.createElement("primary_header");
 	root.appendChild(primary);
@@ -206,7 +227,7 @@ public class MgnFbidrHeader {
 
 	item = doc.createElement("item");
 	item.setAttribute("key", "logicalRecordSize");
-	item.appendChild(doc.createTextNode(_logicalRecordSize));
+	item.appendChild(doc.createTextNode(_logicalRecordSizeStr));
 	primary.appendChild(item);
 
 	Element secondary = doc.createElement("secondary_header");
@@ -289,6 +310,8 @@ public class MgnFbidrHeader {
 	item.setAttribute("key", "navUniqueID");
 	item.appendChild(doc.createTextNode(_navUniqueID));
 	annot.appendChild(item);
+	
+	return root;
     }
 
 }

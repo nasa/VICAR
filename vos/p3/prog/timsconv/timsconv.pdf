@@ -1,0 +1,131 @@
+Process help=*
+parm  INP	(string,80)
+parm  OUT	(string,80)
+parm  SIZE	integer	default=(1,1,0,0)	count=4
+parm  SL	integer	default=1
+parm  SS	integer	default=1
+parm  NL	integer	default=0
+parm  NS	integer	default=0
+parm  MODE	keyword	valid=(TEMP,RAD) default=TEMP
+parm  EMIT	real	default=(0.93,0.93,0.93,0.93,0.93,0.93)	count=6
+parm  FORMAT	keyword valid=(byte,half,full,real) count=0:1 default=--
+parm  TEMPFAC   real    default=0.01
+parm  RADFAC    real    default=1.0
+parm  DATE	integer default=-1
+End-proc
+
+.TITLE
+TAE PROCESS TIMSCONV
+.HELP
+PURPOSE:
+
+   TIMSCONV is a program which converts TIMS data from radiance to temperature,
+or vice versa.  The input must be a 3-D file of all 6 bands, and the
+output will also be a 3-D file of all 6 bands, though the user may choose
+the output format (byte, half, full, or real). 
+
+EXECUTION:
+
+   The following is the execution statement format for TIMSCONV:
+
+	TIMSCONV INP=PIX OUT=CALPIX PARAMS
+
+   where INP, OUT, and PARAMS are parameters discussed in their res-
+pective parameter sections. 
+
+
+
+WRITTEN BY:  Ron Alley    April, 1991
+
+COGNIZANT PROGRAMMER:  Ron Alley
+
+REVISION: 1.0  Conversion to remove central wavelengths    July, 1996
+
+.LEVEL1
+.VARI INP
+TIMS radiance or temperature
+image.
+.VARI OUT
+TIMS temperature or radiance
+image; opposite of INP
+.VARI SIZE
+The standard VICAR output size
+field.
+.VARI SL
+Starting line
+.VARI SS
+Starting sample
+.VARI NL
+Number of lines
+.VARI NS
+Number of samples
+.VARI MODE
+Conversion is to these units
+Valid: TEMP, RAD
+.VARI TEMPFAC
+Rescaling factor to get image
+data into degrees Celsius
+.VARI RADFAC
+Rescaling factor to get 
+image data into 
+milliwatts/(m*m*sr*micrometer)
+.VARI FORMAT
+Output data format
+Default is same as input format
+Valid: BYTE, HALF, FULL, REAL
+.VARI EMIT
+The emittance assumed for
+each band.
+.VARI DATE
+Date of data acquisition. Used
+to override the date in the
+VICAR label (yymmdd)
+.LEVEL2
+.VARI INP
+The file containing all six bands of a calibrated TIMS image, in either
+Temperature or Radiance units.  If the units are not the ones used by 
+TIMSCAL/TIMSCAL2, then the rescaling factor TEMPFAC or RADFAC must be used.
+.VARI OUT
+The file containing all six bands of a calibrated TIMS image, in either
+Radiance or Temperature units (opposite units from INP).  If the units to be
+output are not the ones used by TIMSCAL/TIMSCAL2, then the rescaling factor 
+TEMPFAC or RADFAC must be used.  The output data format (byte, half, full, or
+real) may be selected by the user via keyword.  If defaulted, the output
+format will be the same as the input format.
+.VARI SIZE
+The standard VICAR2 output size field.   Default will calibrate
+the entire data set.
+	Example: SIZE = (1,1,200,638)
+.VARI SL
+Starting line (same as SIZE(1)).
+.VARI SS
+Starting sample (same as SIZE(2)).
+.VARI NL
+Number of lines (same as SIZE(3)).
+.VARI NS
+Number of samples (same as SIZE(4)).
+.VARI MODE
+This keyword selects the type of decalibatrion to be performed.
+There is a choice of two possibilities:
+       TEMP - Conversion from radiance to temperature
+       RAD  - Conversion from temperature to radiance
+.VARI DATE
+	TIMSCONV uses the date of data acquisition to determine the proper
+	conversion coefficients.  If defaulted, the date in the VICAR 
+	label is used. This parameter is needed only if the VICAR label
+	is incorrect, or if an abnormal calibration set is to be used.
+.VARI TEMPFAC
+TEMPFAC is the rescaling factor to convert image data (either input or output)
+into degrees Celsius.  The dafault, 0.01, is the factor appropriate for
+TIMSCAL/TIMSCAL2 generated images.
+.VARI RADFAC
+TEMPFAC is the rescaling factor to convert image data (either input or output)
+into milliwatts/(m*m*sr*micrometer).  The dafault, 1.0, is the factor 
+appropriate for TIMSCAL/TIMSCAL2 generated images.
+.VARI FORMAT
+FORMAT allows the user to specify the output data format.  The default is for
+the output image to be the same as the input format.  BYTE, HALF, FULL, and
+REAL formats are valid
+.VARI EMIT
+The six values of EMIT are the emittance values assumed for each TIMS band in
+performing the Temperature/Radiance conversion.

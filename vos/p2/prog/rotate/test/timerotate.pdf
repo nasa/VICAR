@@ -1,0 +1,62 @@
+procedure        !  PROCEDURE FOR MEASURING rotate PERFORMANCE ON VAX
+refgbl $echo     !  R2LIB:rotate WAS THE UNPORTED VERSION; MODIFY ACCORDINGLY
+body             !  IF RERUNNING.
+let _onfail="continue"
+let $echo="yes"
+gen A NL=1000 NS=1000 IVAL=0 
+!
+rotate A B ANGLE=-45. 
+! 				PERFORMANCE RECORD FOR ABOVE RUN
+!
+!  				4-93  SP  CPU TIME ON MIPL2 (VAX8650)    17.66s
+!
+r2lib:rotate A B2 ANGLE=-45. 
+! 				PERFORMANCE RECORD FOR ABOVE RUN
+!
+!  				4-93  SP  CPU TIME ON MIPL2 (VAX8650)    15.84s
+!
+difpic (B B2)
+!
+rotate A B ANGLE=-90. 
+! 				PERFORMANCE RECORD FOR ABOVE RUN
+!
+!  				4-93  SP  CPU TIME ON MIPL2 (VAX8650)    17.66s
+!
+r2lib:rotate A B2 ANGLE=-90. 
+! 				PERFORMANCE RECORD FOR ABOVE RUN
+!
+!  				4-93  SP  CPU TIME ON MIPL2 (VAX8650)    15.84s
+!
+difpic (B B2)
+!
+! repeat for halfword
+!
+gen A NL=1000 NS=1000 IVAL=0 'HALF
+!
+rotate A B ANGLE=-45. 
+! 				PERFORMANCE RECORD FOR ABOVE RUN
+!
+!  				4-93  SP  CPU TIME ON MIPL2 (VAX8650)    17.66s
+!
+r2lib:rotate A B2 ANGLE=-45. 
+! 				PERFORMANCE RECORD FOR ABOVE RUN
+!
+!  				4-93  SP  CPU TIME ON MIPL2 (VAX8650)    15.84s
+!
+difpic (B B2)
+!
+rotate A B ANGLE=-90. 
+! 				PERFORMANCE RECORD FOR ABOVE RUN
+!
+!  				4-93  SP  CPU TIME ON MIPL2 (VAX8650)    17.66s
+!
+r2lib:rotate A B2 ANGLE=-90. 
+! 				PERFORMANCE RECORD FOR ABOVE RUN
+!
+!  				4-93  SP  CPU TIME ON MIPL2 (VAX8650)    15.84s
+!
+difpic (B B2)
+!
+!
+!
+end-proc

@@ -1,0 +1,35 @@
+procedure
+
+local w_t_sv1 real
+local w_t_sv2 real
+local w_t_sv3 real
+local w_q_sv0 real
+local w_q_sv1 real
+local w_q_sv2 real
+local w_q_sv3 real
+
+body
+
+enable-log
+
+scinterp peph=(0.0,3722048.0,4126137.9,3955545.4,31556737.5) +
+ patt=(0.06938316945407,0.20331591888905,0.82545247058087, +
+ -0.52199313380038,31556737.5) +
+ seph=(0.0,3722048.0,4126137.9,3955545.4,31556737.5) +
+ satt=(0.06938316945407,0.20331591888905,0.82545247058087, +
+ -0.52199313380038,31556737.5) +
+ imtime=31556737.5 +
+ w_t_sv1=w_t_sv1 w_t_sv2=w_t_sv2 w_t_sv3=w_t_sv3 w_q_sv0=w_q_sv0 +
+ w_q_sv1=w_q_sv1 w_q_sv2=w_q_sv2 w_q_sv3=w_q_sv3
+
+write "w_t_sv1 &w_t_sv1"
+write "w_t_sv2 &w_t_sv2"
+write "w_t_sv3 &w_t_sv3"
+write "w_q_sv0 &w_q_sv0"
+write "w_q_sv1 &w_q_sv1"
+write "w_q_sv2 &w_q_sv2"
+write "w_q_sv3 &w_q_sv3"
+
+disable-log
+
+end-proc

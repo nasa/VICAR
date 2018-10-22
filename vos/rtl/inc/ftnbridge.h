@@ -109,7 +109,14 @@
 #define FORSTR_METHOD_H	0
 #define FORSTR_METHOD_I	0
 
+/* GFORTRAN (thus GCC) 7 defines the length as size_t rather than int */
+
+#if defined(__GNUC__) && (__GNUC__ > 6)
+#include <stddef.h>
+#define FORSTR_STDARG_TYPE size_t
+#else
 #define FORSTR_STDARG_TYPE int
+#endif
 
 #if VAX_ARCH + ALPHA_ARCH
 #undef FORSTR_METHOD_A

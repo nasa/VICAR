@@ -1,0 +1,51 @@
+process help=*
+PARM INP TYPE=STRING COUNT=2:10
+PARM OUT TYPE=STRING
+END-PROC
+.TITLE
+VICAR Program APPEND
+.HELP
+PURPOSE:
+APPEND accepts up to ten data sets and writes them out, one after
+another, as a single data set.  All 3-D organizations are handled
+in the logically correct manner.
+
+EXECUTION:
+
+Example
+	APPEND INP=(A,B,C) OUT=D    will write A, B, and C out to D.
+
+Size and parameter fields are not used.
+
+Note:  APPEND outputs the total number of lines and samples written;
+if input images are of varying data types, the "number of samples written"
+will be the number of samples of the smallest data type. If real input 
+is mixed with integer, the data type of the output will be integer.
+.PAGE
+OPERATION:
+After opening all the inputs, APPEND computes the size of the output 
+data set. Each input is then copied into the output data set, in the 
+same order as specified in the command.  If the inputs are of varying 
+sample length, the output lines are padded with zeroes on the end.  
+All output lines are of the same length, the length of the longest 
+input line.
+
+Currently BYTE, HALF, FULL, and REAL formats are supported.
+
+WRITTEN BY:  Ron Alley, 25 October 1978
+COGNIZANT PROGRAMMER:  L. W. Kamp
+REVISION:  Converted to Vicar2, 26 November 1984.
+
+.LEVEL1
+.VARIABLE INP
+STRING - Input image files
+.VARIABLE OUT
+STRING - Output image file
+.LEVEL2
+.VARIABLE INP
+INP specifies the input data sets.  Up to ten are allowed.
+.VARIABLE OUT
+OUT specifies the output data set.  The number of lines in the output will 
+be the sum of the number of lines in all the inputs.  The number of samples 
+will be the maximum of the number of samples of all the inputs.
+.END

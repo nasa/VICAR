@@ -1,0 +1,52 @@
+procedure
+refgbl $echo
+refgbl $autousage
+parm version string def="ibis-2"
+parm org string def="column"
+body
+let _onfail="continue"
+let $autousage="none"
+let $echo="yes"
+
+! TEST SCRIPT FOR RGB2ISH
+
+enable-log
+
+! BYTE
+gen r nl=256 ns=256 sinc=1
+gen g nl=256 ns=256 sinc=2
+gen b nl=256 ns=256 sinc=3
+
+rgb2ish inp=(r,g,b) out=(i,s,h)
+rgb2ish inp=(i,s,h) out=(rr,gg,bb) reverse=1
+
+difpic inp=(r,rr) out=rdif
+hist rdif
+difpic inp=(g,gg) out=gdif
+hist gdif
+difpic inp=(b,bb) out=bdif
+hist bdif
+
+ush rm -f r g b rr gg bb i s h rdif gdif bdif
+
+! HALF WORD
+gen r nl=256 ns=256 sinc=10 format=half
+gen g nl=256 ns=256 sinc=20 format=half
+gen b nl=256 ns=256 sinc=30 format=half
+
+rgb2ish inp=(r,g,b) out=(i,s,h)
+rgb2ish inp=(i,s,h) out=(rr,gg,bb) reverse=1
+
+difpic inp=(r,rr) out=rdif
+hist rdif
+difpic inp=(g,gg) out=gdif
+hist gdif
+difpic inp=(b,bb) out=bdif
+hist bdif
+
+ush rm -f r g b rr gg bb i s h rdif gdif bdif
+
+disable-log
+
+theend>
+end-proc

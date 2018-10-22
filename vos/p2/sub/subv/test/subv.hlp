@@ -1,0 +1,69 @@
+1 SUBV
+
+PURPOSE: Subtracts the elements of two arrays
+
+USAGE:   CALL SUBV(DCODE, N, A, B [,AINC, BINC])
+
+PARAMETERS:
+
+      DCODE= Data types for A and B (See table next page)
+      A    = Input array
+      B    = Input array. 
+             On output B(i) = B(i)-A(i)   [i=1,..,N]
+      N    = The number of elements in A and B
+      AINC = Sorce vector address increment
+      BINC = Destination increment
+
+
+
+ 
+         TABLE OF AVAILABLE DATA TYPES FOR A AND B 
+       ====================================================
+       DCODE   A     B                DCODE   A     B 
+       ====================================================
+        1     byte  byte               6     half  full
+        2     half  half               7     real  real
+        3     byte  half               8     doub  double
+        4     full  full               9     real  double
+        5     byte  full
+       ====================================================         
+       Negative values  of DCODE (-1,-9) reverse data types
+       for A and B
+
+2 NOTES
+
+HISTORY
+
+  Origional Programmer: G.M. Yagi  02/04/75
+  Converted to Vax by:  L.W. Kamp  12/15/82
+  Current Cog Progr:    L.W. Kamp
+  Ported to Unix:       D.D. Knight 9/15/93
+
+DESCRIPTION
+
+  This MACRO routine provides the FORTRAN programmer with a function to
+  subtract the elements of two given arrays A and B. On output B(i) =
+  B(i)-A(i). The two arrays may be any of the data types listed in the
+  table for DCODE, which controls the assumed combination of data types.
+
+
+
+
+  The calling sequence:
+
+       CALL SUB(DCODE, N, A, B, AINC, BINC)
+
+  Is equivalent to the following code:
+
+
+       I = 1
+       J = 1
+       DO K=1,N
+          B(J) = B(J)-A(I)
+          I    = I + AINC
+          J    = J + BINC
+       ENDDO
+
+  Where all arguements are INTEGER*4 except for the arrays whose
+  data types are controlled by the data code DCODE
+

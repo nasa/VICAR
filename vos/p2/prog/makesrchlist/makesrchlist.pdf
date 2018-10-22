@@ -1,0 +1,65 @@
+procedure help=*
+! makesrchlist.pdf - will create a SRCH-format file from a
+!                    directory specification
+refgbl $syschar
+parm DIR	string
+parm FILE	string
+
+body
+let _onfail="continue"
+createfile &FILE
+addtofile &FILE "NEXT FILE=00001"
+if ($syschar(1) = "UNIX")
+  let DIR = "&DIR"//"/"		!inserts trailing '/' after directory
+  ush /bin/ls -1 &DIR | sed -e 's/^/`echo &DIR | sed -e 's/\//\\\\\//g'`/' +
+	>> &FILE	
+  !Inserts directory before filename but first puts a '\' before every '/'
+  !in the directory name telling sed to treat '/' as a literal.
+else
+  dcl dire/nohead/notrail/out=z.zz &DIR
+  dcl convert/append/trunc z.zz &FILE	!converts FILE to proper format
+  dcl delete z.zz;
+end-if
+!# annot function="VICAR Procedure Generation"
+!# annot keywords=(output,SRCH,NXT,CNT)
+end-proc
+.title
+Outputs a list of all files in a directory in SRCH format
+
+.help
+PURPOSE:
+	Makesrchlist creates an output file in SRCH format from a
+	directory specification.  This output file can then be used 
+	with nxt to sequentially access the files in the directory. The
+	filenames listed in the output file will include the directory.
+
+	Note:   In UNIX, don't put a trailing '/' after the directory
+		because makesrchlist puts it in automatically.
+
+EXECUTION:
+	makesrchlist DIR FILE
+
+REVISIONS:
+	7-97 ...RRD... Converted to pdf and ported to UNIX.
+
+.level1
+.variable DIR
+Name and path of directory.
+.variable FILE
+Output file in SRCH format.
+
+.level2
+.variable DIR
+The full directory specification that contains the files you wish to access.
+All files in the directory will be included in the output file.
+
+Note: In UNIX, don't put a trailing '/' after the directory name.
+      Makesrchlist will put that in for you.
+.variable FILE
+The name of the output file in SRCH format which you wish to create.
+This file can then be used as input for nxt to access the files.
+.end
+
+
+
+

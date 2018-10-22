@@ -1,0 +1,13 @@
+#define  PROGRAM   c130rect
+
+#define MODULE_LIST c130rect.f
+
+#define MAIN_LANG_FORTRAN
+#define R3LIB 
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_P3SUB

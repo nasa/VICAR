@@ -1,0 +1,36 @@
+1 HSTGNB
+
+   This subroutine generates a histogram on a picture.
+
+2  OPERATION
+
+        Each call to the routine processes one picture line.  
+
+2  CALLING SEQUENCE
+
+    FORTRAN:  CALL HSTGNB (NSAMP, PIXLIN, HIST) byte data
+    C:        STATUS = HSTGNB (NSAMP, PIXLIN, HIST) byte data
+
+2  ARGUMENTS
+ 
+
+    NSAMP    Number of samples in a picture line
+
+    PIXLIN   Array containing one picture line
+              (2 bytes/sample for HSTGEN)
+              (1 byte /sample for HSTGNB)
+
+    HIST     Array containing running accumulation for histogram
+              (full word integer)
+              256 words - HSTGNB
+              512 words - HSTGEN
+
+              note:  The HIST array should be set to zeros before the
+                     first call is issued.
+
+
+    Original Programmer: A. A. Schwartz
+    Current Cognizant Programmer: S. Pohorsky
+    Source Language: Fortran
+    Revisions: 31-OCT-94 AMS (CRI) Made portable for UNIX
+

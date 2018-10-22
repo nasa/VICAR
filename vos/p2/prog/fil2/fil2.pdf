@@ -1,0 +1,200 @@
+process help=*
+PARM	WTMAX	TYPE=INTEGER	COUNT=(0:1)			DEFAULT=--
+PARM	PRINT	TYPE=KEYWORD	COUNT=(0:1)	VALID="PRINT"	DEFAULT=--
+PARM	RECT	TYPE=KEYWORD	COUNT=(0:1)	VALID="RECT"	DEFAULT=--
+PARM	NLW	TYPE=INTEGER	COUNT=(0:1)	VALID=(1:1025)	DEFAULT=--
+PARM	NSW	TYPE=INTEGER	COUNT=(0:1)	VALID=(1:1025)	DEFAULT=--
+PARM	SCALE	TYPE=INTEGER	COUNT=(0:2)			DEFAULT=--
+PARM	DIVIDE	TYPE=INTEGER	COUNT=(0:1)			DEFAULT=--
+PARM	MTF	TYPE=REAL	COUNT=(0:66)			DEFAULT=--
+PARM	HIA	TYPE=REAL	COUNT=(0:32)			DEFAULT=--
+PARM	HIF	TYPE=REAL	COUNT=(0:32)			DEFAULT=--
+PARM	VIA	TYPE=REAL	COUNT=(0:32)			DEFAULT=--
+PARM	VIF	TYPE=REAL	COUNT=(0:32)			DEFAULT=--
+PARM	SN	TYPE=REAL	COUNT=(0:1)			DEFAULT=--
+PARM	RANGE	TYPE=INTEGER	COUNT=(0:2)			DEFAULT=--
+PARM	PSF	TYPE=REAL	COUNT=(0:32)			DEFAULT=--
+END-PROC
+.TITLE
+VICAR PROGRAM fil2  --  Generates filter wieghts
+.HELP
+PURPOSE
+fil2 is a VICAR applications program which calculates filter
+weights from point spread functions, modulation transfer functions,
+and optical transfer functions.  These weights are output in a
+parameter dataset suitable for input to program FILTER, which
+applies the weights in the spatial domain.
+
+fil2 and FILTER are combined in the procedure FILTER2.
+
+EXECUTION
+
+The following is the execution statement format for FILTER2:
+	fil2 PARAMS
+where PARAMS includes parameters that are described in the Tutor mode.
+
+OPERATION:
+
+fil2 distinguishes between symmetrical and asymmetrical OTFs in the
+following way.  There are two accumulation buffers, one for horizontal
+OTFs fed by the MTF, HIA, PSF, and HIF keywords and the other for vertical
+OTFs fed by the VIA and VIF keywords.  When both buffers contain OTFs,
+they are taken in pairs starting with the first entries to those buffers,
+and an asymmetrical two-dimensional OTF is generated from which one set
+of weights is created.  These weights are written to the parameter file 
+along with NLW, NSW, SCALE, DIVIDE, and the first RANGE data, if any.  The 
+program then returns to the buffers for the next pair, etc., until the
+buffers are exhausted.  If one buffer is exhausted before the other, 
+fil2 will assume that the user wants a symmetrical two-dimensional
+OTF.  Thus, as many weight matrices are created as there are OTFs in the 
+most populated buffer.  
+For one-dimensional weight vectors,  NLW or NSW  must equal unity.
+The OTFs must, however, be found in the horizontal buffer.
+.page
+fil2 uses Fast Fourier Transformations to compute the weights.  For 
+one-dimensional weights, a single transform is used of length greater 
+than the desired weight matrix but within the range 128 to 1024 elements.  
+For two-dimensional weight matrices, a 64x64 transform is used in all 
+cases regardless of the dimensions.  The transform is constructed from 
+the following equation:
+                   M-1 N-1
+	WT  = 1/N  SUM SUM  OTF  exp(-2#i[Km/M - ln/N] )
+         kl        m=0 n=0     mn
+
+or, in the one-dimensional case
+                   N-1
+	WT  = 1/N  SUM  OTF  exp( -2#i ln/N )
+          l        n=0     n
+
+where    SUM means summation and # is pi.
+
+Interpolation of the one-dimensional OTF's into a two-dimensional
+surface is performed with three different algorithms.  All interpolation
+is performed upon the final OTF, i.e., after any reciprocals have been 
+performed.
+
+SYMMETRICAL MODE ALGORITHM
+	If the symmetrical mode is used (only one OTF buffer), then
+	regardless of the shape of the OTF, the surface is set equal
+	to the amplitude of the OTF at the equivalent frequency position
+	as measured radially outward from the DC term.
+
+ASYMMETRICAL MODE ALGORITHM, RECT
+	If the asymmetrical mode is used (both OTF buffers are populated)
+	then the output surface is set equal to the smaller of the two 
+	closest one-dimensional OTF values.
+
+ASYMMETRICAL MODE ALGORITHM
+	If the asymmetrical mode is used and the OTFs are greater than 
+	unity in places, the surface is set equal to a combination of the
+	amplitude of both OTFs at the equivalent radial frequency.  Each
+	amplitude is weighted based on the square of the distance of the
+	point from the horizontal or vertical.
+
+The OTF computed from the raw weights does not necessarily agree with the OTF 
+desired.  fil2 automatically adjusts the central weight and the DIVIDE
+parameter so that the resultant OTF is equal to the input OTF at zero 
+frequency.  Adjusting the central weight does not distort the OTF but
+merely displaces it up or down by a constant.  The DIVIDE parameter mul-
+tiplies the OTF so that there is no amplitude distortion due to scaling
+the weights to large integers.  The formulae are:
+	new central wt = wt sum - old central wt + OTF(0)*64*64
+	DIVIDE = SCALE * 64*64 / abs(largest wt)
+where SCALE is the real-to-integer conversion factor, usually set to 32000.
+
+EXAMPLE:
+
+fil2 NLW=15 NSW=15 MTF=(1.,0.,.4,.2,.1,.5) SN=7.0
+
+WRITTEN BY: J. J. Lorre        2 DEC 1974
+CONVERTED TO VAX BY:    Charlie Avis
+MADE PORTABLE FOR UNIX: CRS (CRI) 1-JULY-94 
+CURRENT COGNIZANT PROGRAMMER:  L. W. Kamp
+.LEVEL1
+.VARI WTMAX
+Maximum weight value
+.VARI PRINT
+Prints the computed OTF
+.VARI RECT
+Indicates RECT algorithm
+.VARI DIVIDE
+Scaling paramater upon output
+.VARI NLW
+Size of weight matrix in lines
+.VARI NSW
+Size of weight matrix in samples
+.VARI SCALE
+Defines the linear output scaling
+.VARI MTF
+Input pairs of amplitude and freq
+.VARI HIA
+Horizontal amplitude values
+.VARI HIF
+Horizontal frequency values
+.VARI VIA
+Vertical amplitude values
+.VARI VIF
+Vertical frequency values
+.VARI SN
+Signal-to-noise ratio
+.VARI RANGE
+Dn interval over which weights apply
+.VARI PSF
+Input point spread function
+.LEVEL2
+.VARI WTMAX
+The magnitude of the largest weight to be used in the filtering. Default=32000
+.VARI PRINT
+The OTF as recomputed from the weights is to be printed out. Default is it 
+will be printed.
+.VARI RECT
+Use the RECT algorithm to computed the OTF.  Default is the RECT algorithm 
+will not be used.
+.VARI DIVIDE
+This is used in the final transformation equation.  Each output point 
+is scaled by OUT = A + B*dn / DIVIDE
+where A and B are defined by SCALE.  The default is that the sum of the 
+weights is used.  If this sum is zero, then 1 is used.
+.VARI SCALE
+This keyword specifies the application of a linear transformation to each
+output point .Default is SCALE=(A,B)=(0,1).
+.VARI NLW
+The extent of the weight matrix in lines. Must be odd.  For 1-dim filter,
+1 < NLW < 1025. For 2-dim filter, 1 < NLW < 65.  Default is 11.
+.VARI NSW
+The extent of the weight matrix in samples. Must be odd.  For 1-dim filter,
+1 < NSW < 1025. For 2-dim filter, 1 < NSW < 65.  Default is 11.
+.VARI MTF
+N pairs of real numbers may be input representing the (amplitude,frequency)
+values of the OTF. The last frequency value must be .5. N must be LE 33.
+No default.
+.VARI HIA
+N real numbers may be input representing the horizontal amplitude values of
+the OTF at the frequencies specified by HIF. 2 < N < 33. No default.
+.VARI HIF
+N real numbers may be input representing the horizontal frequencies cor-
+responding to the HIA amplitude values. 2 < N < 33. No default.
+.VARI VIA
+N real numbers may be input representing the vertical amplitude values of
+the OTF at the frequencies specified by VIF. 2 < N < 33. No default.
+.VARI VIF
+N real numbers may be input representing the vertical frequencies cor-
+responding to the VIA amplitude values. 2 < N < 33. No default.
+.VARI SN
+The signal-to-noise ratio used in the transformation of the OTF into its
+Wiener reciprocal.  The reciprocal will correct the image for degradation 
+due to the input OTF.  The expression is
+
+ 	OTF   =  OTF   / (OTF  **2 + 1/SN**2 )
+           out      in      in
+
+SN also serves as the flag to perform the reciprocal.  
+Default is no reciprocal.
+.VARI RANGE
+The pair of values (a,b) specifies the range of dn over which the filter
+weights are to be applied.
+.VARI PSF
+N real numbers may be input which represent the Point Spread Function or the
+right side of the Line Spread Function.  The central weight is first.  The 
+OTF will be computed from this.  1 < N < 33.  No default.
+.END

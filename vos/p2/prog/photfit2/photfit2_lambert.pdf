@@ -1,0 +1,153 @@
+procedure option=selftutor help=*
+
+        parm ALBEDOt		real count=0:1 			def=0.5
+        parm MIN_ALBEDOt	real count=0:1 			def=0.0
+        parm MAX_ALBEDOt	real count=0:1 			def=1.0
+        parm T_ALBEDOt		real count=0:1 			def=0.3
+        parm ALBEDO		real count=0:1 valid=(0:1)     	def=--
+        parm MIN_ALBEDO		real count=0:1 valid=(0:1)     	def=--
+        parm MAX_ALBEDO		real count=0:1 valid=(0:1)     	def=--
+        parm T_ALBEDO		real count=0:1 valid=(0:1)     	def=--
+
+	PARMSET name=photfit2_lambert_sub help=*
+
+             parm ALBEDO	real count=0:1 valid=(0:1)     	def=--
+             parm MIN_ALBEDO	real count=0:1 valid=(0:1)     	def=--
+             parm MAX_ALBEDO	real count=0:1 valid=(0:1)     	def=--
+             parm T_ALBEDO	real count=0:1 valid=(0:1)     	def=--
+
+	END-PROC
+
+body
+
+	if (_tutor=1)
+
+	  restore-parm pho_lambert.par
+
+	  if ($count(ALBEDO)=0)
+	 						let ALBEDOt=0.5
+	  else
+		let ALBEDOt=&ALBEDO
+	  end-if
+
+	  if ($count(MIN_ALBEDO)=0)
+	 						let MIN_ALBEDOt=0.0
+	  else
+		let MIN_ALBEDOt=&MIN_ALBEDO
+	  end-if
+
+	  if ($count(MAX_ALBEDO)=0)
+	 						let MAX_ALBEDOt=1.0
+	  else
+		let MAX_ALBEDOt=&MAX_ALBEDO
+	  end-if
+
+	  if ($count(T_ALBEDO)=0)
+	 						let T_ALBEDOt=0.3
+	  else
+		let T_ALBEDOt=&T_ALBEDO
+	  end-if
+
+
+	  tutor photfit2_lambert_sub 				+
+		|restore=pho_lambert.par, save=pho_lambert.par| +
+			ALBEDO=&ALBEDOt				+
+			T_ALBEDO=&T_ALBEDOt			+
+			MIN_ALBEDO=&MIN_ALBEDOt			+
+			MAX_ALBEDO=&MAX_ALBEDOt
+
+	  return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs needs "
+	   write " photometric function parameters "
+	   write " for the Lambert function."
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+
+.title
+'PHOTFIT2_LAMBERT' sub-menu 
+
+.help
+
+PURPOSE:
+
+This is the sub-menu associated with the Lambert photometric
+function. This function needs just one input parameter (ALBEDO) and its absolute  limits.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.page
+
+MATHEMATICAL BACKGROUND :
+
+Lambert's law does provide a reasonably good descrition of the reflectance of 
+high-albedo surfaces, like snow, but the approximation is poor for dark 
+surfaces.
+
+The Lambert's law is based on the empirical observation that the brightnessses 
+of many surfaces are nearly independent of the emmission angle and azimuthal 
+angle and on the fact that the brightness of any surface must be proportional 
+to cos(incidence angle).
+
+bidirectional reflectance [1/str] :
+
+r(i,e,g)=A*cos(i)
+
+
+.page
+PROGRAMMER:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+.level1
+
+.var ALBEDO
+Surface albedo
+
+.var MIN_ALBEDO
+Minimum of surface albedo
+
+.var MAX_ALBEDO
+Maximum of surface albedo
+
+.var T_ALBEDO
+Temperatur of Surface albedo
+
+.level2
+
+.var ALBEDO
+This parameter gives the albedo of the surface. 
+
+.var MIN_ALBEDO
+This parameter gives the absolut lower limit of the albedo of the surface. 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var MAX_ALBEDO
+This parameter gives the absolut upper limit of the albedo of the surface. 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_ALBEDO
+This parameter gives temperatur for the albedo of the surface. 
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    ALBEDO_NEW = T_ALBEDO * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_ALBEDO_NEW_* = T_ALBEDO_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.end
+

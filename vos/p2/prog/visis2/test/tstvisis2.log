@@ -1,0 +1,478 @@
+write "This is the test file for Program VISIS2"
+This is the test file for Program VISIS2
+ush cp /project/test_work/testdata/gll/g7jnfeap4101a.3 edr_file
+ush cp /project/test_work/testdata/gll/g7jnfeap4101a.aacs aacs_file
+ush cp /project/test_work/testdata/gll/nims98a_gs4_ref_g1_01.tab CAL_FILE
+ush cp /project/spice/ops/sun-solr/s980326b.bsp spk_file
+ush cp /project/test_work/testdata/gll/nims_ikernel_mab.dat ik_file
+ush cp /project/test_work/testdata/gll/nims_solar.dat sol_file
+ush cp /project/test_work/testdata/gll/boom_obscuration.nim dbm_file
+NIMSCMM2 edr=edr_file  +
+        cube=G7JNFEAP4101A.CUB 'NOCAL  +
+	aacsfil=aacs_file  +
+	calfil=CAL_FILE  +
+	spkernel=spk_file  +
+	ikernel=ik_file solfile=sol_file  +
+	dbmfile=dbm_file  +
+        prodnote="testbed EDR with simulated pointing"   +
+        obsnote="testbed EDR with simulated pointing"   +
+        target=GANYMEDE phase=GANYMEDE_7_ENCOUNTER  +
+        proj=pov slew_tol=-1.  +
+	outsiz=(9,5)
+Beginning VICAR task NIMSCMM2
+ *** NIMSCMM2 Version 11-jan-2012 ***
+ ** Body is not a spheroid, planetographic is undefined
+ 
+ No radiance calibration done, raw DN is output
+ Output image will be in perspective (POV) projection
+ Warning: user Target does not match Target in ObsTab!
+ User Target = GANYMEDE,  ObsTab Target = JUPITER
+ Gain state = 2
+ 
+ Instrument mode is SHORT MAP
+ 
+ Extracting pointing
+ mean slew rate = 0.02 * Nyquist, computed from 442 pairs of mfs
+ 443 mfs will be used
+ REFSCLK = 3897036.39, MP=9
+ Scale at sub-s/c point [km/pix] is: 663.187
+ 305 pixels were back of planet in set_pov
+ output image size: NL= 9, NS=5
+ OAL,OAS set to (   5.55,    1.90)
+ 
+ Beginning data extraction
+ processing range 3897034.00 to 3897038.78 
+  10% of data extracted
+  20% of data extracted
+  30% of data extracted
+  40% of data extracted
+  50% of data extracted
+  60% of data extracted
+  70% of data extracted
+  80% of data extracted
+  90% of data extracted
+ 6360 combs skipped or dummy in EDR 
+ 40 combs rejected for bad compression status
+ 7478 combs were off the planet
+ 11 combs fell outside the image
+ min/max lat/lon determined in write_latlon
+ 
+ Focal Length (mm) = 800.0, Camera Scale (pix/mm) = 2.5
+ Optical Axis Line/Sample = 5.548, 1.903
+ Spacecraft-Target Range (km) = 1329005.9, North Angle = 38.05
+ Subspacecraft Lat/Long (deg) = -0.31, 315.15
+ Subspacecraft Line/Samp = 4.362, 2.763
+ Min/max latitudes: -57.49, 59.06
+ Min/max longitudes: -102.44, 26.77
+ Min/max incidence angles: 57.80, 147.44
+ Min/max emission angles: 3.13, 61.11
+ Min/max phase angles: 95.48, 95.61
+list G7JNFEAP4101A.CUB nb=1
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:NIMSCMM2  User:wlb       Date_Time:Wed Feb 24 14:12:42 2016
+ ***********
+ Band =     1
+ ***********
+     Samp       1     2     3     4     5
+   Line
+      1       112   112   112   112-32768
+      2       114   113   112   112-32768
+      3       115   114   114   113-32768
+      4       116   115   115   115-32768
+      5       117   117   116   116-32768
+      6       118   118   118   117-32768
+      7       119   119   118-32768-32768
+      8       119   119   119-32768-32768
+      9    -32768-32768-32768-32768-32768
+hist2d G7JNFEAP4101A.CUB tst1.h2d out_nl=256 out_ns=408 'DN
+Beginning VICAR task hist2d
+ *** Program HIST2D version 26-May-03 ***
+VISIS2 (tst1.h2d G7JNFEAP4101A.CUB G7JNFEAP4101A.COC) G7JNFEAP4101A.QUB
+Beginning VICAR task VISIS2
+*** VISIS2 Version 2016-02-24 ***
+ Forward mode:  ISIS cube will be generated from VICAR files
+FILE 1 copied
+FILE 2 copied
+FILE 3 copied
+isislab G7JNFEAP4101A.QUB
+Beginning VICAR task isislab
+*** ISISLAB version 3-Nov-05 ***
+ 
+********** LABEL OBJECT **********
+ 
+CSD3ZF0000100000001NJPL3IF0PDS200000001 = SFDU_LABEL
+
+/* File Structure */
+
+RECORD_TYPE = FIXED_LENGTH
+RECORD_BYTES = 512
+FILE_RECORDS =    274
+LABEL_RECORDS =     31
+FILE_STATE = CLEAN
+
+^HISTORY =     32
+OBJECT = HISTORY
+END_OBJECT = HISTORY
+
+^HISTOGRAM_IMAGE =     55
+OBJECT = HISTOGRAM_IMAGE
+/* Two dim histogram image structure */
+ LINES = 256
+ LINE_SAMPLES = 408
+ SAMPLE_TYPE = UNSIGNED_INTEGER
+ SAMPLE_BITS = 8
+ SAMPLE_NAME = BAND
+ LINE_NAME = INTENSITY
+ NOTE = "This is an unannotated two-dimensional histogram 'image' showing
+  frequency of measured 'Intensity' versus band number.  The 'Intensity'
+  may be DN, Radiance, or BDRF (Bi-Directional Reflectance), or a
+  combination of BDRF with Radiance, with BDRF below a cutoff band
+  number and radiance above.  The cutoff is defined by:
+  BDRF_RAD_TRANSITION_BAND_NUMBER.
+  The 'Intensity' is DN only if CORE_NAME in the QUBE object is
+  RAW_DATA_NUMBER."
+ BDRF_RAD_TRANSITION_BAND_NUMBER = 1
+END_OBJECT = HISTOGRAM_IMAGE
+
+^QUBE =    259
+OBJECT = QUBE
+
+/* Qube structure */
+
+ AXES = 3
+ AXIS_NAME = (SAMPLE,LINE,BAND)
+
+/*  Core description */
+
+ CORE_ITEMS = (5,9,68)
+ CORE_ITEM_BYTES = 2
+ CORE_ITEM_TYPE = PC_INTEGER
+ CORE_BASE = 0.0
+ CORE_MULTIPLIER = 1.0
+/* Core scaling is:  True_value = base + (multiplier * stored_value) */
+ CORE_VALID_MINIMUM =         -32752
+ CORE_HIGH_REPR_SATURATION =  -32764
+ CORE_HIGH_INSTR_SATURATION = -32765
+ CORE_LOW_INSTR_SATURATION =  -32766
+ CORE_LOW_REPR_SATURATION =   -32767
+ CORE_NULL =                  -32768
+ CORE_NAME = RAW_DATA_NUMBER
+ CORE_UNIT = DIMENSIONLESS
+
+ SPATIAL_BINNING_TYPE = FOOTPRINT_AVERAGE
+ THRESHOLD_WEIGHT = 0.10000
+ FOOTPRINT_GRID_SIZE = 10
+ SATURATION_THRESHOLD_WEIGHT = 0.50000
+/* Each NIMS raw DN was averaged over its entire footprint, which was */
+/* approximated by computing the location of its four corner points and */
+/* covering the resulting quadrilateral with a grid;  the weight of each DN */
+/* in a given output pixel is the number of grid points falling in that */
+/* pixel, weighted by the instrument response function. */
+/* FOOTPRINT_GRID_SIZE is the number of points used in each dimension for */
+/* the grid. */
+/* THRESHOLD_WEIGHT is the lower limit for the average: if the total weight */
+/* contributing to an output pixel is below this limit, then the output DN */
+/* is set to NULL. */
+
+ DARK_UPDATE_TYPE = NOUPDAT
+ FILL_BOX_SIZE = 0
+ FILL_MIN_VALID_PIXELS = 0
+ PHOTOMETRIC_CORRECTION_TYPE = NONE
+
+/*  Suffix description  */
+
+ SUFFIX_BYTES = 4
+ SUFFIX_ITEMS = (0,0,9)
+ BAND_SUFFIX_NAME = (LATITUDE,LONGITUDE,INCIDENCE_ANGLE,
+  EMISSION_ANGLE,PHASE_ANGLE,SLANT_DISTANCE,INTERCEPT_ALTITUDE,
+  PHASE_ANGLE_STD_DEV,RAW_DATA_NUMBER_STD_DEV)
+ BAND_SUFFIX_UNIT = (DEGREE,DEGREE,DEGREE,DEGREE,DEGREE,KILOMETER,
+  KILOMETER,DEGREE,DIMENSIONLESS)
+ BAND_SUFFIX_ITEM_BYTES = (4,4,4,4,4,4,4,4,4)
+ BAND_SUFFIX_ITEM_TYPE = (PC_REAL,PC_REAL,PC_REAL,PC_REAL,PC_REAL,
+     PC_REAL,PC_REAL,PC_REAL,PC_REAL)
+ BAND_SUFFIX_BASE = (0.000000,0.000000,0.000000,0.000000,0.000000,
+     0.000000,0.000000,0.000000,0.000000)
+ BAND_SUFFIX_MULTIPLIER = (1.000000,1.000000,1.000000,1.000000,
+     1.000000,1.000000,1.000000,1.000000,1.000000)
+ BAND_SUFFIX_VALID_MINIMUM  = (16#FF7FFFFA#,16#FF7FFFFA#,16#FF7FFFFA#,
+     16#FF7FFFFA#,16#FF7FFFFA#,16#FF7FFFFA#,16#FF7FFFFA#,16#FF7FFFFA#,
+     16#FF7FFFFA#)
+ BAND_SUFFIX_NULL           = (16#FF7FFFFB#,16#FF7FFFFB#,16#FF7FFFFB#,
+     16#FF7FFFFB#,16#FF7FFFFB#,16#FF7FFFFB#,16#FF7FFFFB#,16#FF7FFFFB#,
+     16#FF7FFFFB#)
+ BAND_SUFFIX_LOW_REPR_SAT   = (16#FF7FFFFC#,16#FF7FFFFC#,16#FF7FFFFC#,
+     16#FF7FFFFC#,16#FF7FFFFC#,16#FF7FFFFC#,16#FF7FFFFC#,16#FF7FFFFC#,
+     16#FF7FFFFC#)
+ BAND_SUFFIX_LOW_INSTR_SAT  = (16#FF7FFFFD#,16#FF7FFFFD#,16#FF7FFFFD#,
+     16#FF7FFFFD#,16#FF7FFFFD#,16#FF7FFFFD#,16#FF7FFFFD#,16#FF7FFFFD#,
+     16#FF7FFFFD#)
+ BAND_SUFFIX_HIGH_INSTR_SAT = (16#FF7FFFFE#,16#FF7FFFFE#,16#FF7FFFFE#,
+     16#FF7FFFFE#,16#FF7FFFFE#,16#FF7FFFFE#,16#FF7FFFFE#,16#FF7FFFFE#,
+     16#FF7FFFFE#)
+ BAND_SUFFIX_HIGH_REPR_SAT  = (16#FF7FFFFF#,16#FF7FFFFF#,16#FF7FFFFF#,
+     16#FF7FFFFF#,16#FF7FFFFF#,16#FF7FFFFF#,16#FF7FFFFF#,16#FF7FFFFF#,
+     16#FF7FFFFF#)
+
+/* The backplanes contain 7 geometric parameters, the standard deviation */
+/* of one of them, the standard deviation of a selected data band, */
+/* and 0 to 10 'spectral index' bands, each a user-specified function of the */
+/* data bands.  (See the BAND SUFFIX NAME values.) */
+
+/* Longitude ranges from 0 to 360 degrees, with positive direction */
+/* specified by POSITIVE LONGITUDE DIRECTION in the IMAGE MAP PROJECTION */
+/*  group.  Latitudes are planetocentric. */
+
+/* SLANT DISTANCE contains the distance from the observer to the */
+/* intercept point of the line of sight with the target body surface. */
+/* Normally, this is the distance at the time of observation (or */
+/* the mean time, when projected pixels are averaged).  However, */
+/* in the case of a Perspective projection, the distance is measured */
+/* from the perspective point of the projection. */
+
+/* INTERCEPT ALTITUDE contains values for the DIFFERENCE between */
+/* the length of the normal from the center of the target body to the */
+/* line of sight AND the radius of the target body.  On-target points */
+/* have zero values.  Points beyond the maximum expanded radius have */
+/* null values.  This plane thus also serves as a set of "off-limb" */
+/* flags.  It is meaningful only for the ORTHOGRAPHIC and */
+/* POINT PERSPECTIVE projections; otherwise all values are zero. */
+
+/* The geometric standard deviation backplane contains the standard */
+/* deviation of the geometry backplane indicated in its NAME. */
+
+/* The data band standard deviation plane is computed for the NIMS data */
+/* band specified by STD DEV SELECTED BAND NUMBER.  This may be either */
+/* a raw data number, or spectral radiance, whichever is indicated by */
+/* CORE NAME. */"
+
+ STD_DEV_SELECTED_BAND_NUMBER = 34
+ STD_DEV_SELECTED_BACKPLANE = 5
+
+/*  Data description: general */
+
+ DATA_SET_ID = 'GO-J-NIMS-4-MOSAIC-V1.0'
+ SPACECRAFT_NAME = GALILEO_ORBITER
+ MISSION_PHASE_NAME = GANYMEDE_7_ENCOUNTER
+ INSTRUMENT_NAME = 'NEAR INFRARED MAPPING SPECTROMETER'
+ INSTRUMENT_ID = NIMS
+ ^INSTRUMENT_DESCRIPTION = "NIMSINST.TXT"
+
+ TARGET_NAME = GANYMEDE
+ START_TIME = "1997-04-03T17:31:10Z"
+ STOP_TIME = "1997-04-03T17:36:05Z"
+ NATIVE_START_TIME = "3897034.00.0"
+ NATIVE_STOP_TIME = "3897038.78"
+
+ OBSERVATION_NAME = ' '
+ PRODUCT_ID = ""
+ PRODUCT_CREATION_DATE = 2016-02-24
+ IMAGE_ID = NULL
+
+ INCIDENCE_ANGLE = 89.06
+ EMISSION_ANGLE = 11.84
+ PHASE_ANGLE = 95.53
+ SOLAR_AZIMUTH = 38.90
+ SUB_SPACECRAFT_AZIMUTH = 101.03
+ START_SUB_SPACECRAFT_LATITUDE = -0.31
+ START_SUB_SPACECRAFT_LONGITUDE = 315.12
+ STOP_SUB_SPACECRAFT_LATITUDE = -0.31
+ STOP_SUB_SPACECRAFT_LONGITUDE = 315.18
+ START_SUB_SOLAR_LATITUDE = -0.77
+ START_SUB_SOLAR_LONGITUDE = 219.60
+ STOP_SUB_SOLAR_LATITUDE = -0.77
+ STOP_SUB_SOLAR_LONGITUDE = 219.77
+ MINIMUM_SLANT_DISTANCE = 1325470.00
+ MAXIMUM_SLANT_DISTANCE = 1328470.00
+ SCAN_RATE_TOLERANCE = -0.071429
+ MEAN_SCAN_RATE = 0.021041
+/* The unit of SCAN RATE TOLERANCE is mrad/s. */
+/* The unit of MEAN SCAN RATE is the Nyquist scanning rate, which depends on */
+/* the instrument mode: it is one-half FOV (0.5 mrad) per grating cycle. */
+ MIN_SPACECRAFT_SOLAR_DISTANCE = 7.62945e+08
+ MAX_SPACECRAFT_SOLAR_DISTANCE = 7.62946e+08
+ MINIMUM_CENTRAL_BODY_DISTANCE = 990939.00
+ MAXIMUM_CENTRAL_BODY_DISTANCE = 993348.00
+
+/*  Data description: instrument status  */
+
+ INSTRUMENT_MODE_ID = SHORT_MAP
+ GAIN_MODE_ID = 2
+ CHOPPER_MODE_ID = REFERENCE
+ START_GRATING_POSITION = 01
+ OFFSET_GRATING_POSITION = 04
+ GRATING_POSITION_INCREMENT = 04
+ GRATING_POSITIONS = 06
+
+ MEAN_FOCAL_PLANE_TEMPERATURE = 65.00
+ MEAN_RAD_SHIELD_TEMPERATURE = 0.00
+ MEAN_TELESCOPE_TEMPERATURE = 0.00
+ MEAN_GRATING_TEMPERATURE = 130.00
+ MEAN_CHOPPER_TEMPERATURE = 0.00
+ MEAN_ELECTRONICS_TEMPERATURE = 0.00
+
+ GROUP = BAND_BIN
+
+/*  Spectral axis description */
+
+  BAND_BIN_CENTER = (0.7101,0.7361,0.7621,0.7882,0.8490,0.8751,
+     0.9012,0.9273,1.0028,1.0548,1.1067,1.1587,1.2807,1.3328,
+     1.3848,1.4369,1.5591,1.6112,1.6633,1.7154,1.8394,1.8916,
+     1.9438,1.9960,2.1207,2.1730,2.2253,2.2775,2.4008,2.4531,
+     2.5054,2.5578,2.6860,2.7384,2.7908,2.8432,2.9655,3.0180,
+     3.0704,3.1229,3.2489,3.3014,3.3539,3.4064,3.5315,3.5841,
+     3.6367,3.6892,3.8146,3.8672,3.9199,3.9725,4.0978,4.1505,
+     4.2032,4.2559,4.3818,4.4345,4.4872,4.5399,4.6638,4.7166,
+     4.7693,4.8221,4.9462,4.9990,5.0518,5.1046)
+  BAND_BIN_UNIT = MICROMETER
+  BAND_BIN_ORIGINAL_BAND = (1,2,3,4,7,8,9,10,13,14,15,16,19,20,
+     21,22,25,26,27,28,31,32,33,34,37,38,39,40,43,44,45,46,49,
+     50,51,52,55,56,57,58,61,62,63,64,67,68,69,70,73,74,75,76,
+     79,80,81,82,85,86,87,88,91,92,93,94,97,98,99,100)
+  BAND_BIN_GRATING_POSITION = (0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,
+     3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,
+     3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3,0,1,2,3)
+  BAND_BIN_DETECTOR = (1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,
+     5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,11,11,11,11,
+     12,12,12,12,13,13,13,13,14,14,14,14,15,15,15,15,16,16,16,
+     16,17,17,17,17)
+ END_GROUP = BAND_BIN
+
+ GROUP = IMAGE_MAP_PROJECTION
+/* Projection description */
+  MAP_PROJECTION_TYPE = POINT_PERSPECTIVE
+  MAP_SCALE = 663.187
+  MAP_RESOLUTION =  0.069
+  SUB_SPACECRAFT_LATITUDE =  -0.31
+  SUB_SPACECRAFT_LONGITUDE = 315.15
+  LINE_SUB_SPACECRAFT_OFFSET =  -3.36
+  SAMPLE_SUB_SPACECRAFT_OFFSET =  -1.76
+  TARGET_CENTER_DISTANCE = 1329005.9
+  LINE_OPTICAL_AXIS_OFFSET =  -4.55
+  SAMPLE_OPTICAL_AXIS_OFFSET =  -0.90
+  FOCAL_LENGTH = 800.0
+  FOCAL_PLANE_SCALE =  2.500
+  OFFSET_DIRECTION = TO_ORIGIN
+  MINIMUM_LATITUDE = -57.49
+  MAXIMUM_LATITUDE =  59.06
+  EASTERNMOST_LONGITUDE = 257.56
+  WESTERNMOST_LONGITUDE =  26.77
+  COORDINATE_SYSTEM_TYPE = "BODY-FIXED ROTATING"
+  COORDINATE_SYSTEM_NAME = PLANETOCENTRIC
+  POSITIVE_LONGITUDE_DIRECTION = WEST
+  A_AXIS_RADIUS = 2632.40
+  B_AXIS_RADIUS = 2632.29
+  C_AXIS_RADIUS = 2632.35
+  MAP_PROJECTION_ROTATION =  38.05
+  SAMPLE_FIRST_PIXEL = 1
+  SAMPLE_LAST_PIXEL = 5
+  LINE_FIRST_PIXEL = 1
+  LINE_LAST_PIXEL = 9
+
+ END_GROUP = IMAGE_MAP_PROJECTION
+
+END_OBJECT = QUBE
+END
+                                                                                                                                    
+                                                                                                                                    
+ 
+********** END OF LABEL OBJECT **********
+ 
+ 
+********** HISTORY OBJECT **********
+ 
+ROUP = VISIS2
+
+  VERSION_DATE = 2016-02-24
+  DATE_TIME = 2016-02-24T14:12:43
+  NODE_NAME = "MIPL"
+  USER_NAME = "NIMS Team"
+  SOFTWARE_DESC = "ISIS cube file with PDS label has been generated as
+    systematic product by MIPL using the following programs:
+      NIMSMERGE2 to create EDRs;
+      NIMSCMM2 to create the merged mosaic & geometry cube;
+      HIST2D to create a two-dimensional histogram;
+      VISIS2 to create the ISIS cube."
+
+  USERNOTE = "testbed EDR with simulated pointing"
+
+  GROUP = PARAMETERS
+
+    EDR_FILE_NAME = "edr_file"
+    AACS_FILE_NAME = "aacs_file"
+    SP_KERNEL_FILE_NAME = "spk_file"
+    I_KERNEL_FILE_NAME = "ik_file"
+    SPIKE_FILE_NAME = "DUMMY_DSPK.DAT"
+    BOOM_FILE_NAME = "dbm_file"
+    DARK_VALUE_FILE_NAME = " "
+    CALIBRATION_FILE_NAME = "CAL_FILE"
+    SOLAR_FLUX_FILE_NAME = " "
+    MERGED_MOSAIC_FILE_NAME = "G7JNFEAP4101A.CUB"
+    GRATING_POSITION_CORRECTION = -1.3000
+    GRATING_STEP_INFLATION = 0.0000
+/* The "Grating Position Correction" and "Grating Step Inflation" are */
+/* adjustments to the nominal grating positions, based on flight calibrations */
+/* and known sharp spectral features of the target, used in determination of */
+/* wavelengths.  GRATING_POSITION_CORRECTION is an additive term to the */
+/* grating position and (1.0 + GRATING_STEP_INFLATION) is a multiplicative */
+/* term modifying the grating stepsize. */
+
+  END_GROUP = PARAMETERS
+
+END_GROUP = VISIS2
+
+END
+ 
+********** END OF HISTORY OBJECT **********
+ 
+VISIS2 G7JNFEAP4101A.QUB (tst1.h2d G7JNFEAP4101A.CUB G7JNFEAP4101A.COC)
+Beginning VICAR task VISIS2
+*** VISIS2 Version 2016-02-24 ***
+Inverse mode:  VICAR files will be generated from ISIS cube
+ SUPPNOTE & PRODNOTE not found!
+ Keyword PHOTO_CORR_CUTOFF_WAVELENGTH not found in cube label
+ Keyword MINNAERT_EXPONENT not found in cube label
+ Keyword EXPANDED_RADIUS not found in cube label
+ Keyword PLATFORM_CKERNEL_NAME not found in cube label
+ Keyword ROTOR_CKERNEL_NAME not found in cube label
+ Keyword POINTING_OFFSET not found in cube label
+ Keyword WOBBLE_AMPLITUDE not found in cube label
+ Keyword WOBBLE_FREQUENCY not found in cube label
+ Keyword WOBBLE_PHASE not found in cube label
+ Keyword WOBBLE_CONE_ESTIMATE not found in cube label
+ Keyword SCLK_GAPS not found in cube label
+ Keyword STOP_SLIDE_MODE_ID not found in cube label
+ Keyword INSTRUMENT_THRESHOLD not found in cube label
+FILE 1 created
+FILE 2 created
+FILE 3 created
+list G7JNFEAP4101A.CUB nb=1
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:VISIS2    User:wlb       Date_Time:Wed Feb 24 14:12:43 2016
+ ***********
+ Band =     1
+ ***********
+     Samp       1     2     3     4     5
+   Line
+      1       112   112   112   112-32768
+      2       114   113   112   112-32768
+      3       115   114   114   113-32768
+      4       116   115   115   115-32768
+      5       117   117   116   116-32768
+      6       118   118   118   117-32768
+      7       119   119   118-32768-32768
+      8       119   119   119-32768-32768
+      9    -32768-32768-32768-32768-32768
+ush rm edr_file
+ush rm aacs_file
+ush chmod 777 spk_file
+ush rm spk_file
+ush rm ik_file
+ush rm dbm_file
+ush rm sol_file
+ush rm CAL_FILE
+disable-log

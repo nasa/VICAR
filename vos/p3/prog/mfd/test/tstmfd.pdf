@@ -1,0 +1,117 @@
+procedure
+refgbl $autousage
+refgbl $echo
+refgbl $syschar
+body
+
+let _onfail="continue"
+let $autousage="none"
+let $echo="yes"
+
+enable-log
+
+flag-add NOMESSAGE
+
+! add
+ush cp mfd.int a.int
+mfd a.int incols=(1,3) outcol=1 'add
+ibis-list a.int 'format
+
+! subtract
+ush cp mfd.int a.int
+mfd a.int incols=(1,3) outcol=1 'sub
+ibis-list a.int 'format
+
+! multiply
+ush cp mfd.int a.int
+mfd a.int incols=(1,3) outcol=7 'mult
+ibis-list a.int 'format
+
+! divide
+! after the divide, a should look as new
+mfd a.int incols=(1,7) outcol=7 'div
+ibis-list a.int 'format
+
+! int! 
+mfd a.int incols=2 outcol=3 'int
+ibis-list a.int 'format
+
+! absolute value
+ush cp mfd.int a.int
+mfd a.int incols=4 outcol=5 'abs
+ibis-list a.int 'format
+
+! square root
+ush cp mfd.int a.int
+mfd a.int incols=1 outcol=1 'sqr
+ibis-list a.int 'format
+
+! minimum value
+ush cp mfd.int a.int
+mfd a.int outcol=1 'min
+ibis-list a.int 'format
+
+! maximum value
+ush cp mfd.int a.int
+mfd a.int outcol=7 'max
+ibis-list a.int 'format
+
+! set a value
+ush cp mfd.int a.int
+mfd a.int outcol=1 'set value=99999.0
+ibis-list a.int 'format
+
+! index
+ush cp mfd.int a.int
+mfd a.int outcol=7 'index
+ibis-list a.int 'format
+
+!
+! for all logicals, there will be two tests
+! after the second test, the file should be 
+! the same as it started
+!
+! equal
+ush cp mfd.int a.int
+ibis-list a.int 'format
+mfd a.int incol=5 outcol=7 value=.05 'eq
+ibis-list a.int 'format
+mfd a.int incol=5 outcol=7 value=1.0 'eq
+ibis-list a.int 'format
+
+! not equal
+mfd a.int incol=5 outcol=7 value=1.0 'ne
+ibis-list a.int 'format
+mfd a.int incol=5 outcol=7 value=.05 'ne
+ibis-list a.int 'format
+
+! less than or equal
+mfd a.int incol=5 outcol=7 value=.05 'le
+ibis-list a.int 'format
+mfd a.int incol=5 outcol=7 value=1.0 'le
+ibis-list a.int 'format
+
+! less than 
+mfd a.int incol=5 outcol=7 value=.05 'lt
+ibis-list a.int 'format
+mfd a.int incol=5 outcol=7 value=1.0 'lt
+ibis-list a.int 'format
+
+! greater than or equal
+mfd a.int incol=5 outcol=7 value=2.0 'ge
+ibis-list a.int 'format
+mfd a.int incol=5 outcol=7 value=1.0 'ge
+ibis-list a.int 'format
+
+! greater than 
+mfd a.int incol=5 outcol=7 value=2.0 'gt
+ibis-list a.int 'format
+mfd a.int incol=5 outcol=7 value=0.5 'gt
+ibis-list a.int 'format
+
+
+flag-delete NOMESSAGE
+
+disable-log
+
+end-proc

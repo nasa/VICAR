@@ -194,11 +194,6 @@
 #     listing "jaxb" would match all of "jaxb-api.jar", "jaxb-impl.jar",
 #     and "jaxb-libs.jar".
 #
-# doxygen =
-#     If this flag is set to 1 then this package is included into the list
-#     of packages for which doxygen documentation is to be generated. The
-#     default value is 0.
-#
 #
 
 cd $V2JAVA/$1
@@ -244,7 +239,6 @@ set jaxb_schema =
 set wsdl_files =
 set ejb_descriptor = 0
 set dependency =
-set doxygen = 0
 
 # Property overrides from 0build.jmake
 
@@ -281,9 +275,6 @@ if ( -e 0build.jmake ) then
       set ejb_descriptor = `v2param ejb_descriptor`
    if (`v2param -test dependency` != 0) \
       set dependency = `v2param dependency`
-   if (`v2param -test doxygen` != 0) \
-      set doxygen = `v2param doxygen`
-
 else
 
    # If no *.java files are present, we can completely skip this directory
@@ -408,20 +399,13 @@ if ($no_java == 0) then
       if ( ! -e $V2HTML/javadoc/nopackage ) then
          mkdir -p $V2HTML/javadoc/nopackage
       endif
-      echo javadoc -J-Xmx32m -d $V2HTML/javadoc/nopackage -author -version *.java | fold -80
-      javadoc -J-Xmx32m -d $V2HTML/javadoc/nopackage -author -version *.java 
+      echo javadoc -J-Xmx2048 -d $V2HTML/javadoc/nopackage -author -version *.java | fold -80
+      javadoc -J-Xm2048m -d $V2HTML/javadoc/nopackage -author -version *.java 
    else   
       echo $package >> $V2HTML/packagelist.tmp
    endif
-   
-   if ($doxygen == 1) then
-     if ( ! -e $V2HTML/doxygenpackagelist.tmp ) then
-       echo -n "INPUT = " > $V2HTML/doxygenpackagelist.tmp
-     endif
-     echo -n " $V2JAVA/$1" >> $V2HTML/doxygenpackagelist.tmp
-   endif
 
-endif
+endif   
 
 # Generate stubs and skeletons via rmic
  

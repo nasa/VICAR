@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM transcol
+
+   To Create the build file give the command:
+
+		$ vimake transcol 			(VMS)
+   or
+		% vimake transcol          		(Unix)
+
+
+************************************************************************/
+
+#define PROGRAM	transcol
+#define R2LIB
+
+#define MODULE_LIST transcol.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_MATH77  
+/************************* End of Imake file ***************************/

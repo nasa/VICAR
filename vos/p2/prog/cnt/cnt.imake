@@ -1,0 +1,11 @@
+#define PROGRAM cnt
+
+#define MODULE_LIST cnt.c
+
+#define MAIN_LANG_C
+#define R2LIB
+
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE

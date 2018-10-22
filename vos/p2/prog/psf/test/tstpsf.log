@@ -1,0 +1,254 @@
+let INPIC= "vg/star.img"
+label-li vg/star.img
+Beginning VICAR task label
+LABEL version 15-Nov-2010
+************************************************************
+ 
+        ************  File vg/star.img ************
+                2 dimensional IMAGE file
+                File organization is BSQ
+                Pixels are in HALF format from a VAX-VMS host
+                50 lines
+                50 samples per line
+                0 lines of binary header
+                0 bytes of binary prefix per line
+---- Task: CONVIM -- User: LWK059 -- Thu Apr 11 11:31:57 1985 ----
+LAB01=
+'77                    50     100  50 100 I 2                          SC'
+LAB02=
+'PROJ = SATELLITE SEARCH    OBJECT = NEPTUNE                           UC'
+LAB03=
+'OBS DATE = 25 MAY  83 UT   CENTRAL WAVELENGTH = 8900A  WIDTH = 400A   UC'
+LAB04=
+'OBS TIME =    02:24   UT   EXP TIME= 60 SEC   INPUT TAPE= LCO8306     UC'
+LAB05=
+'INST = LAS CAMPANAS OBS   2.4M TELESCOPE  WITH CCD DETECTOR           UC'
+LAB06=
+'I4DIV                                                                1HL'
+NLABS=6
+ 
+************************************************************
+maxmin vg/star.img
+Beginning VICAR task maxmin
+*** maxmin - 06-Jul-2012
+
+Min. value:          -19   at  (    41,    10)
+Max. value:         2929   at  (    26,    26)
+
+psf inp=vg/star.img out=vgrpsf.vic size=(1,1,50,50) AREA=(10,10,30,30) SHIFT=SHIFT
+Beginning VICAR task psf
+PSF version 2016-06-08
+NL OF AREA INCREASED BY 1
+NS OF AREA INCREASED BY 1
+BACKGROUND DN =  89.000000
+??W - WARNING: Image contains negative values
+X CENTROID =         26
+Y CENTROID =         27
+list vgrpsf.vic (1,1,20,20)
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:CONVIM    User:LWK059    Date_Time:Thu Apr 11 11:31:57 1985
+ Task:PSF       User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+      1      2759  2525  2015  1391   902   548   290   216    70    25    42    28     0     0     9
+      2      2057  1884  1502  1099   727   429   194   183   115    17    25    33     0     5    24
+      3      1243  1164   915   713   526   316   212   137   112   107    51    10     0     0    22
+      4       595   611   589   424   294   277   105    56    69    25    38     0     0    13     2
+      5       400   337   342   338   209   157    90    15   105    51     0    20    69    35     0
+      6       183   216   140   145   150   104   113     2    37    17     7     0     0     2     0
+      7       130    59    55    56   153    71    52    37     8    18    16    30     4     3     0
+      8        29   119    32   136    95    40    53     0     0    34     0     0     0    27    12
+      9        65     5    34    88    11     0    89    27     5     0     1    66    23     9     0
+     10        26    28    32     0    40    30     0     0    23     0     0     8     0     0     1
+     11        35    38     2    50    12    19    13     0    21     0     0     0     0     0     0
+     12         0    52     0    33     0     0    39     5     1     0    29    24     0     8     0
+     13         0    20     3    25    11     0     0     4     0     0     0     0    20    29    27
+     14         0     0     1     0     0     0    33     0     0     0     0    30    19     6     0
+     15        24     3     0    35     0     0     0     0     0    14    23     6     0    27     0
+     16         2    23    42     0     0     8    27     0     0    20    55     4     0     0    42
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:CONVIM    User:LWK059    Date_Time:Thu Apr 11 11:31:57 1985
+ Task:PSF       User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+     Samp      16    17    18    19    20
+   Line
+      1        56     0     0     0     0
+
+      3        16     0     0     0     0
+
+      5         6     0     0     0     0
+
+      9        26     0     0     0     0
+
+     11        22     0     0     0     0
+     12        43     0     0     0     0
+
+     15        37     0     0     0     0
+     16        12     0     0     0     0
+spot   psf1.vic size=(1,1,50,50) shape=gaussian sigmax=5 sigmay=5 dnmax=50
+Beginning VICAR task spot
+SPOT version 04-Nov-2010
+****GAUSSIAN PATTERN GENERATED
+psf  psf1.vic psf1.out size=(1,1,50,50) AREA=(17,17,33,33) shift=shift
+Beginning VICAR task psf
+PSF version 2016-06-08
+BACKGROUND DN =  2.0000000
+X CENTROID =         25
+Y CENTROID =         25
+cform psf1.vic psfh1.vic oform=half
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     1.000+     0.000
+INPUT FORMAT = BYTE
+OUTPUT FORMAT = HALF
+CONVERSION COMPLETE
+psf  psfh1.vic psf1h.out size=(1,1,50,50) AREA=(17,17,33,33) shift=shift
+Beginning VICAR task psf
+PSF version 2016-06-08
+BACKGROUND DN =  2.0000000
+X CENTROID =         25
+Y CENTROID =         25
+list  psf1h.out (1,1,1,20)
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:SPOT      User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+ Task:PSF       User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+      1        48    47    44    39    34    28    22    16    11     7     4     2     0     0     0
+spot   psf2.vic size=(1,1,50,50) shape=gaussian sigmax=10 sigmay=10 dnmax=120
+Beginning VICAR task spot
+SPOT version 04-Nov-2010
+****GAUSSIAN PATTERN GENERATED
+cform psf2.vic psff2.vic oform=full
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     1.000+     0.000
+INPUT FORMAT = BYTE
+OUTPUT FORMAT = FULL
+CONVERSION COMPLETE
+f2 psff2.vic psff2a.vic func=(in1+5000)
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 2500 TIMES
+psf psff2a.vic psff2a.out size=(1,1,50,50) AREA=(17,17,33,33) shift=shift
+Beginning VICAR task psf
+PSF version 2016-06-08
+BACKGROUND DN =  5028.0000
+X CENTROID =         26
+Y CENTROID =         26
+list psff2a.out (1,1,1,20)
+Beginning VICAR task list
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:SPOT      User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+ Task:PSF       User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1             90         89         86         82         77         71         65         58         51         44
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:SPOT      User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+ Task:PSF       User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+     Samp           11         12         13         14         15         16         17         18         19         20
+   Line
+      1             37         30         23         16         10          5          0          0          0          0
+psf psff2a.vic psff2b.out size=(1,1,50,50) AREA=(6,6,44,44) shift=shift
+Beginning VICAR task psf
+PSF version 2016-06-08
+NL OF AREA INCREASED BY 1
+NS OF AREA INCREASED BY 1
+BACKGROUND DN =  5006.0000
+X CENTROID =         25
+Y CENTROID =         25
+list psff2b.out (1,1,1,20)
+Beginning VICAR task list
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:SPOT      User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+ Task:PSF       User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1            114        113        111        108        104         99         94         87         81         74
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:SPOT      User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+ Task:PSF       User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+     Samp           11         12         13         14         15         16         17         18         19         20
+   Line
+      1             66         59         52         45         39         32         27         22         17         13
+qplot2 psff2b.out proc=(1,1,1,1,25, 1,1,1,25,1)  +
+      title="PSF Test - Line1: Horiz PSF   Line2: Vertical PSF"  +
+      plotout=psff2b
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+cform psf2.vic psfr2.vic oform=real
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     1.000+     0.000
+INPUT FORMAT = BYTE
+OUTPUT FORMAT = REAL
+CONVERSION COMPLETE
+f2 psfr2.vic psfr2a.vic func=(in1+5000)
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 2500 TIMES
+psf psfr2a.vic psfr2a.out size=(1,1,50,50) AREA=(17,17,33,33) shift=shift
+Beginning VICAR task psf
+PSF version 2016-06-08
+BACKGROUND DN =  5028.0000
+X CENTROID =         26
+Y CENTROID =         26
+list psfr2a.out (1,1,1,20)
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:SPOT      User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+ Task:PSF       User:wlb       Date_Time:Wed Jun  8 14:20:35 2016
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       9.000E+01   8.900E+01   8.600E+01   8.200E+01   7.700E+01   7.100E+01   6.500E+01   5.800E+01   5.100E+01   4.400E+01
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:SPOT      User:wlb       Date_Time:Wed Jun  8 14:20:34 2016
+ Task:PSF       User:wlb       Date_Time:Wed Jun  8 14:20:35 2016
+     Samp            11          12          13          14          15          16          17          18          19          20
+   Line
+      1       3.700E+01   3.000E+01   2.300E+01   1.600E+01   1.000E+01   5.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+spot   psf3.vic size=(1,1,50,50) shape=gaussian sigmax=5 sigmay=5 dnmax=120 x0=10 y0=10
+Beginning VICAR task spot
+SPOT version 04-Nov-2010
+****GAUSSIAN PATTERN GENERATED
+psf   psf3.vic psf3.out size=(1,1,50,50) area=(1,1,19,19) shift=shift
+Beginning VICAR task psf
+PSF version 2016-06-08
+BACKGROUND DN =  15.000000
+X CENTROID =         10
+Y CENTROID =         10
+spot psf4.vic size=(1,1,50,50) shape=gaussian sigmax=10 sigmay=12 dnmax=120
+Beginning VICAR task spot
+SPOT version 04-Nov-2010
+****GAUSSIAN PATTERN GENERATED
+psf psf4.vic psf4.out size=(1,1,50,50) AREA=(6,6,44,44) shift=shift
+Beginning VICAR task psf
+PSF version 2016-06-08
+NL OF AREA INCREASED BY 1
+NS OF AREA INCREASED BY 1
+BACKGROUND DN =  10.000000
+X CENTROID =         25
+Y CENTROID =         25
+qplot2 psf4.out proc=(1,1,1,1,25, 1,1,1,25,1)  +
+    title="PSF Test - Line1: Horiz PSF   Line2: Vertical PSF"  +
+    plotout=psf4
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+let  $echo="no"

@@ -1,0 +1,25 @@
+#define PROGRAM difpic
+
+#define MODULE_LIST difpic.cc VicarImageUtil.cc VicarImageLabel.cc VicarHistoryLabel.cc DifpicParameters.cc difpic_bridges.cc difpic_pixel.f
+#define INCLUDE_LIST DifpicParameters.h  VicarHistoryLabel.h  VicarImageLabel.h  VicarImageUtil.h  difpic_bridges.h
+
+#define MAIN_LANG_C_PLUS_PLUS
+
+#define USES_C_PLUS_PLUS
+#define CCC_TEMPLATES
+
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define USES_ANSI_C
+#define LIB_RTL
+#define LIB_TAE
+
+#define LIB_P2SUB
+#define LIB_P1SUB
+#define R2LIB
+#define LIB_FORTRAN
+#define LIB_PDS
+
+/*#define DEBUG     for local build */
+/*#define LIB_LOCAL   for local build */

@@ -1,0 +1,23 @@
+1 TWOPOW
+
+  Logical function indicating whether a number is a power of two.
+ 
+  FORTRAN Calling Sequence:   
+                      INTEGER*2 TWOP, N, POW
+                      TWOP = TWOPOW( N , POW)
+
+  C Calling Sequence:	
+                      short int result,n,pow
+                      ztwopow(&result,n,&pow)
+
+  If |N| is a power of two, then TWOPOW is 1, otherwise it is 0.
+
+  The argument POW is optional.  If specified, it returns the first
+  power of two that is greater than or equal to |N|.  If N=0, then 
+  POW is undefined.
+
+  Original Programmer: L. W. Kamp, 10 May 1985.
+  Code Modified on 23 July 1993: D. D. Knight
+  Current Cognizant Programmer: D. D. Knight
+  Source Language: Fortran
+  Ported to Unix: 23 July 1993.

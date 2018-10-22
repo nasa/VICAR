@@ -1,0 +1,31 @@
+1 GTPRCS
+
+  PURPOSE - GTPRCS will return the process name or user id. 
+
+  FORTRAN CALLING SEQUENCE  - CALL GTPRCS(B)
+                              CHARACTER*8 B
+
+         C CALLING SEQUENCE - zgtprcs(b)
+                              char b[8]
+
+2  ARGUMENTS
+
+      B(b) is a character string of size 8.  Upon return this array 
+      will contain the user ID or process name in ASCII. 
+
+2  HISTORY
+
+      Original Programmer: Gary Yagi, 16 January 1977
+      Current Cognizant Programmer: Damon Knight,  5 October 1993
+      Source Language: C 
+      Ported to Unix:  Damon Knight,  5 October 1993
+
+      Aug. 30, 2000 AXC  Added Macros to Fortran calllable subroutine.
+                         (AR-104622)
+
+2  OPERATION
+
+      GETPRCS gets the process or user ID name and returns it in a
+      character string.  If the subroutine is not capable of finding
+      the process name or user ID, a blank character string is returned.
+

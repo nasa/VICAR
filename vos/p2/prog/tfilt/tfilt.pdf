@@ -1,0 +1,492 @@
+process help=*
+PARM INP      TYPE = (STRING,80)
+PARM OUT      TYPE = (STRING,80) count=2:3
+PARM SIZE     TYPE = INTEGER  COUNT = 4  DEFAULT = (1,1,0,0)
+PARM SL       TYPE=INTEGER DEFAULT=1
+PARM SS       TYPE=INTEGER DEFAULT=1
+PARM NL       TYPE=INTEGER DEFAULT=0
+PARM NS       TYPE=INTEGER DEFAULT=0
+PARM NLW      TYPE=INTEGER COUNT=(0:1) DEFAULT=--
+PARM NSW      TYPE=INTEGER COUNT=(0:1) DEFAULT=--
+PARM THRESH   TYPE=REAL  DEFAULT=0.0
+PARM FILTER TYPE=KEYWORD COUNT=1 VALID=(HIGH,LOW,SCENE,DIVIDE) DEFAULT=DIVIDE
+PARM SCALE    TYPE=REAL  DEFAULT=100.0
+PARM DCTRAN   TYPE=REAL  DEFAULT=0.0
+PARM BOOST    TYPE=REAL DEFAULT=1.0
+PARM DCLEVEL  TYPE=REAL  DEFAULT=128.0
+PARM OFFSET   TYPE=REAL DEFAULT=0.5
+PARM LIMITS   TYPE=REAL COUNT=(0,2) DEFAULT=--
+END-PROC
+.TITLE
+ tfilt  --  threshold filtering.
+.HELP
+PURPOSE:
+
+tfilt is a VICAR program which performs various boxfilter type convolutional
+filters.  It is a commonly used, especially in planetary image processing. 
+tfilt is often used to bring out detail that is not noticeable in the original
+image.  tfilt is able to ignore DN's below a threshold when computing the low
+pass average and is thus free of ringing in certain cases.  (See the threshold
+effects section below.)   Scaling allows the dynamic range of high pass filters
+to be improved before integer truncation. 
+.PAGE
+EXECUTION:
+
+tfilt is executed as a standard VICAR program.  The following 
+VICAR command line formats show the most common usages:
+
+      tfilt INP=a OUT=(b,x) SIZE=(sl,ss,nl,ns) optional parameters
+      tfilt INP=a OUT=(b,x) SL=sl SS=ss NL=nl NS=ns optional parameters
+      tfilt a (b,x) (sl,ss,nl,ns) optional parameters
+      tfilt a (b,x) optional parameters
+
+       Here 'a' represents the input image file name, 
+       'x' represents a scratch file name, and
+       'b' represents the output image file name.
+
+If the primary input is a multi-band image, then three output files
+are required, of which the last two are scratch files, e.g.:
+
+      tfilt a (b,x,y) optional parameters
+
+.PAGE
+USER INFORMATION:
+
+The size of the output image is determined by the the SIZE field if the SIZE
+field is entered by the user.  If the SIZE field is not entered, the output
+file is the same size as the input file. 
+
+The data type of the input image may be any valid format of 4 or fewer bytes
+per pixel.  The data type is obtained from the VICAR label of the input image.
+The output image has the same data format as the input image. 
+
+.page
+Available Filter Types:
+
+tfilt can be used to apply a high pass, a low pass, a scene dependent, or
+a divide filer to an image.  Each type of filter can be thought of as 
+emphasizing one aspect of the image and de-emphasizing another aspect of
+the image.  tfilt has a variety of uses in image restoration and
+image enhancement.  The major charactistics of each of these filters are
+described below.
+
+1)  The high pass filter emphasizes high frequency information and
+    de-emphasizes low frequency information.  (High frequency means
+    brightness changing rapidly as a function of distance.  Low frequency
+    means brightness changing slowly as a function of distance.)  The high
+    pass filter can be used to compensate for variations in illumination
+    between different areas of the image due to sun angle differences.  It
+    can also be used to make the picture sharper, to emphasize edges of
+    features, and to enhance fine detail.  Often the high pass filter will
+    bring out small scale structure that is not noticeable in the original
+    image.  The high pass filter tends to remove variations due to color
+    differences (albedo variations). The high pass filter can emphasize
+    noise if present, so it is best to remove noise before performing a
+    high pass filter.  If there are reseau marks in the image, they should
+    be removed with program RESSAR77 or a similar program before a high
+    pass filter is performed. 
+    
+2)  The low pass filter emphasizes low frequency information and
+    de-emphasizes high frequency information.  The low pass filter is used
+    mainly for smoothing the brightness variations in the image.  It can be
+    used to smooth noise in a noisy or grainy image to make it less
+    noticeable.  The low pass filter makes edges and features blurred or
+    smoother. 
+    
+3)  The scene dependent filter is a variant of the high pass filter that
+    can be useful in dealing with images having nonhomogeneous illumination
+    or images with mixtures of areas with little high frequency detail and
+    areas with a lot of high frequency detail.  It is called a scene
+    dependent filter because it compensates for dark areas by dividing the
+    high frequency information by the average brightness of the surrounding
+    area.  Thus it emphasizes high frequency information especially in
+    darker areas of the image, and de-emphasizes low frequency information
+    especially in brighter areas of the image. The scene dependent filter
+    has similar properties to the high pass filter (enhancing detail), but
+    compensates more for the darker areas of the image. The MIPL facility
+    at JPL has a display showing the use of the scene dependent filter on
+    an image of Mercury with only part of the planet illumined by the sun. 
+    The scene dependent filter improves feasture discriminability near the
+    edge of the illumined portion of the planet. 
+    
+4)  The divide filter amplifies darker parts of the image and scales down
+    brighter parts of the image, preserving the contrast and evening out
+    the overall intensity across the image.  It is useful for bringing out
+    subtle detail, especially in darker parts of the image. The divide
+    filter can be used to compensate for variations in illumination between
+    different areas of the image due to sun angle differences.  The divide
+    filter tends to remove variations due to color differences (albedo
+    variations). The divide filter tends to pass random noise without
+    adding emphasis. 
+.page
+Selection of Filter Type:
+
+The most commonly used of the four filter types is the high pass filter. This is
+partly because people like to see a lot of detail and imaging systems often
+attenuate higher frequency information.  (See reference 2.) The high pass
+filter also compensates for variations in illumination in the image. The divide
+filter is also commonly used.  It compensates for variations in illumination in
+the image without emphasizing high frequency information.  It can bring out
+detail in the image and in some cases produces a result quite similar to the
+high pass filter.  The scene dependent filter is less commonly used.  It is
+recommended when the results of the high pass filter are not satisfactory
+because of inhomogeneity in the image.  The low pass filter has a very
+different purpose from the other three filter types, namely smoothing the data.
+VICAR program BOXFLT2 is also used for low pass filtering
+and has some different methods for handling the edges of the image.
+.page
+Advantages and Disadvantages:
+
+tfilt has both good and bad features.  It is fast for a filter program, 
+If the threshold is chosen well, tfilt can do a good filtering job without 
+causing noticeable ringing near edges.  It is not an optimal filter, though, 
+and sometimes it can generate ringing problems.  This is because it uses a 
+uniform set of filter weights.(See reference 1.)  The VICAR program FILTER is 
+recommended for users wishing to do more optimal filtering.  FILTER can be 
+much slower than tfilt, though. FILTER requires the user specify the filter 
+weights.  There is, however, a default set of weights in FILTER.  VICAR 
+procedure FILTER2 can be used to generate the weights alternatively.
+ 
+.page
+Threshold Effects:
+
+Linear filtering with a uniform set of weights can often cause ringing
+in the output image, especially around a sharp edge.  The threshold (THRESH)
+parameter allows tfilt to filter without causing noticeable ringing in many
+cases.  In planetary image processing, the most distinct edge in a picture
+is often the boundary (limb) between a planet or moon (satelite) and the
+black of outer space.  For such an image the threshold should be set 
+slightly below the brightness of the planet so that basically all of the
+planet is brighter than the threshold and the black of outer space is
+darker than the threshold. Unfortunately, finding a threshold that minimizes
+ringing can be a matter of trial and error.  A histogram may be of value in
+picking an initial value. 
+.page
+Effects of Box Size:
+
+For all filter types the box size (parameters NLW and NSW) affects the
+output.  For a low pass filter a small box (3 by 3 to 11 by 11) is usually used.
+For the other filter types a large box is generally used since this
+produces a less grainy image and less noise enhancement than a smaller box.
+A large box can cause greater ringing than a small box, though, especially
+if the threshold parameter is not set optimally.  For an 800 by 800 
+Voyager image a box size in the range 15 by 15 to 75 by 75 is common.
+The exact size is not too important.  A square is commonly used for
+symmetry.  Because of the algorithm used by tfilt, the box size does not affect
+the execution time significantly.  (A 75 by 75 box took five percent more time
+than a 5 by 5 box.) 
+.page
+Effects of the DC Transmission Factor (DCTRAN):
+
+The DCTRAN parameter is used to soften the effect of the selected filter by
+making the output image a combination of the filter output and the input
+image.  DCTRAN can be used with all of the filter types except low pass.
+DCTRAN is commonly set to make the output image about 70 percent from
+the filter and 30 percent from the input image.  (For the high pass filter
+you can try DCTRAN = 0.1 to 0.2.)  The DC in DCTRAN stands for direct
+current.  This stems from the connection of filtering with signal processing
+theory.  DCTRAN reflects the amount of the original signal that is
+transmitted by the filter.  When DCTRAN is used with the high pass filter or 
+scene dependent filter, the output image will retain some low 
+frequency information, and albedo and illumination variations will still be
+present to some degree. 
+.page
+Control of Dynamic Range:
+
+Each of the filter types uses some parameters to control the dynamic
+range of DNs in the output image.  The default values for these
+parameters can sometimes produce a narrow dynamic range, especially
+with byte data, resulting in image degradation when integer truncation
+takes place.  Some recommendations on these parameters are given below
+for byte data, but a lot depends on the input image, and some trial
+and error may be appropriate until satisfactory results are produced.
+(For trial and error, try tfilt on a small portion of the 
+image and run VICAR program HIST with BINS=20 to check the dynamic
+range of the output image.)
+
+For the high pass filter, try BOOST=4, and default DCLEVEL.  Default DCTRAN if a
+straight high pass filter is desired or try DCTRAN = .1 to .2 to soften 
+the filter.
+
+For the scene dependent filter, try SCALE in the range 100 to 300 and default
+DCLEVEL. Default DCTRAN if a straight scene dependent filter is desired or try
+DCTRAN = .1 to .2 to soften the filter. 
+
+For the low pass filter the defaults for BOOST and OFFSET should be
+satisfactory.
+
+For the divide filter, try OFFSET in the range 0 to 50, and default DCLEVEL.  
+Default DCTRAN if a straight divide filter is desired or try 
+DCTRAN = .1 to .2 to soften the filter.
+.page
+EXAMPLES:
+
+1.     tfilt (A,X) HIGH.IMG  'HIGH BOOST=4 THRESH=25  NLW=21 NSW=21 DCTRAN=.1
+
+In this example tfilt is used to apply a high pass filter to image A, 
+producing image HIGH.IMG.  A 21 by 21 box is used.
+
+2.     tfilt (MIRANDA.IMG,X) DIV.IMG   'DIV SCALE=150 THRESH=25  NLW=21 NSW=21
+
+In this example tfilt is used to apply a divide filter to image MIRANDA.IMG, 
+producing image DIV.IMG.  A 21 by 21 box is used.
+.PAGE
+3.     tfilt (MIRANDA.IMG,X) SCENE.IMG 'SCENE SCALE=250 THRESH=25 NLW=21 NSW=21
+
+In this example tfilt is used to apply a scene dependent filter to image 
+MIRANDA.IMG, producing image SCENE.IMG.  A 21 by 21 box is used.
+
+4.     tfilt (MIRANDA.IMG,X) LOW.IMG   'LOW THRESH=25  NLW=3 NSW=3
+
+In this example tfilt is used to apply a low pass filter to image MIRANDA.IMG, 
+producing image LOW.IMG.  A 3 by 3 box is used.
+
+5.  The last example is the test procedure for tfilt.  This is
+    a complete example that could be run by the user and that 
+    demonstrates uses of the possible parameters.
+
+    GEN OUT=GEN NL=20 NS=17 ! generate a picture with byte format
+    GEN OUT=HST NL=20 NS=22 'HALF ! generate a scratch file with halfword format
+    LIST INP=GEN 'ZEROES ! check input data
+    tfilt INP=GEN OUT=(TEST1,IST)   !run tfilt - default all optional params.
+    LIST INP=TEST1 'ZEROES
+    tfilt INP=GEN OUT=(TEST2,IST)  ! run tfilt with byte
+    LIST INP=TEST2 'ZEROES
+    ! run tfilt with byte and nlw
+    tfilt INP=GEN OUT=(TEST4,IST) NLW=3
+    LIST INP=TEST4  'ZEROES
+    ! run tfilt with byte, nls and nsw
+    tfilt INP=GEN OUT=(TEST6,IST) NLW=2 NSW=3
+    LIST INP=TEST6 'ZEROES
+    ! run tfilt with byte, nls, nsw and thresh
+    tfilt INP=GEN OUT=(TEST7,IST) NLW=2 NSW=3 THRESH=3
+    LIST INP=TEST7 'ZEROES
+    ! run tfilt with nlw, nsw, thresh and high
+    tfilt INP=GEN OUT=(TEST8,IST) NLW=3 NSW=3 THRESH=3 'HIGH
+    LIST INP=TEST8 'ZEROES
+    ! run tfilt with thresh, scene
+    tfilt INP=GEN OUT=(TEST9,IST) THRESH=2 'SCENE
+    LIST INP=TEST9 'ZEROES
+    tfilt INP=GEN OUT=(TEST10,IST) NLW=4 'LOW !run tfilt with nlw and low
+    LIST INP=TEST10 'ZEROES
+    tfilt INP=GEN OUT=(TEST11,IST) 'DIVIDE ! run tfilt with divide
+    LIST INP=TEST11 'ZEROES
+    ! run tfilt with nlw and high - define boost,dctran, dclevel
+    tfilt INP=GEN OUT=(TEST12,IST) NLW=2 'HIGH BOOST=2 DCTRAN=0.1 DCLEVEL=50.0
+    LIST INP=TEST12 'ZEROES
+    !run tfilt with nlw, nsw, and low - define boost  and offset
+    tfilt INP=GEN OUT=(TEST14,IST) NLW=2 NSW=4 'LOW BOOST=2.00 OFFSET=20.
+    LIST INP=TEST14 'ZEROES
+    ! run tfilt with halfword and nsw
+    GEN OUT=HGEN NL=20 NS=22 'HALF !generate a picture with halfword format
+    LIST INP=HGEN 'ZEROES
+    tfilt INP=(HGEN,HST) OUT=(TEST3,IST)  ! run tfilt with halfword
+    LIST INP=TEST3 'ZEROES
+    tfilt INP=(HGEN,HST) OUT=(TEST5,IST) NSW=2
+    LIST INP=TEST5 'ZEROES
+    !run tfilt with halfword,nlw,nsw,thresh,scene,scale,dctran and dclevel
+    tfilt INP=(HGEN,HST) OUT=(TEST13,IST) NLW=2 NSW=2 THRESH=3 'SCENE+
+     SCALE=200.0 DCTRAN=0.3 DCLEVEL=10
+    LIST INP=TEST13 'ZEROES
+.page
+ OPERATION
+    
+tfilt operates as a convolutional filter.  At each pixel it computes the
+average of all DN's greater than the THRESH parameter within an area of
+dimensions NLW by NSW centered on that pixel and performs the filter using this
+value.  Values of pixels outside the image are obtained by reflection about the
+image edges. 
+
+If the local average is ADN, the pixel at the center of the averaged area is
+DN, and the output pixel DN is OUT, then the four filters are: 
+ 
+ HIGH     OUT=(DN-ADN)*BOOST+DCTRAN*DN+DCLEVEL
+ SCENE    OUT=((DN-ADN)/ADN)*SCALE+DCTRAN*DN+DCLEVEL
+ LOW      OUT=ADN*BOOST+OFFSET
+ DIVIDE   OUT=(DN/ADN)*SCALE+DCTRAN*DN+OFFSET
+
+Default values for the constants are:
+ 
+ SCALE = 100.0,  DCTRAN = 0.0,  BOOST = 1.0,
+ DCLEVEL= 128.0,  OFFSET = 0.5
+
+The calculations are performed in floating-point arithmetic and then truncated
+to the output format if necessary.  For SCENE and DIVIDE,
+1.0 is used in the denominator if ADN is 0.  The results of the calculations
+are checked for being in the valid range of DNs for the data type
+of the image and are adjusted if invalid.  For byte data, DNs less
+than 0 are set to 0, and DNs greater than 255 are set to 255.  For halfword
+data, DNs less than -32768 are set to -32768, and DNs greater than 32767 are
+set to 32767.  For fullword integer and real*4 data, the limits are set by
+default to (-1.0E10, +1.0E10), but may be changed using the LIMITS parameter.
+.PAGE
+TIMING: 
+
+tfilt takes about 23 CPU seconds on the VAX 8600 for a high pass filter 
+on an 800 by 800 byte image.  Because of the algorithm used by tfilt,
+the box size does not affect the execution time significantly.  (A 75 by
+75 box took five percent more time than a 5 by 5 box.)
+.page 
+
+  REFERENCES:
+
+   1.   K. R. Castleman, "Digital Image Processing",
+        Prentice Hall, Inc., 1979, p. 199.
+
+   2.   J. G. Moik, "Digital Processing of Remotely Sensed Images",
+        NASA Publication SP-431, 1980, p. 130.
+
+
+ WRITTEN BY: J. J. Lorre,                   Sept. 22, 1980
+ COGNIZANT PROGRAMMER:  L W.Kamp
+ REVISIONS:
+  19Dec12 ...LWK...  Revised to support FULL and REAL data types;  parameter THRESH
+                     behaves slight differently than before:  the default is 0 instead
+                     of -1 and DNs < THRESH are excluded, not <= THRESH;  parameter
+                     LIMITS added.
+  05MAR00 ...LWK...  Revised to allow multispectral files
+  Feb 21 96 ...FFM...  Renamed FILTER0 as FILTER. Obsolete programs FILTERAP &
+                       FILTER0.(There is no need to have procedure FILTER
+                       because there is no AP on any platform).
+                       Modified HELP & TEST slightly, retested on alpha, andes,
+                       solaris, & sunos.
+  AUG 06 89 ...GMY...  Fix bug in SDFILT (given SIZE field specification)
+  MAY-85   ...LWK... RENAMED tfilt FOR PROC TFILT
+  OCT. 84  ...LWK... BUG FIXES & SPEED UP I/O BY OMITTING OPTIONALS
+  OCT. 84  ...BXG... CONVERTED TO VICAR2
+  JAN. 84  ...DFS... CONVERTED TO VAX
+  NOV 24 82 ...JAM... THIS IS TFILT REWRITTEN IN FORTRAN. THE ORIGINAL 
+		     TFILT WAS WRITTEN IN PL/I BY J.J.LORRE
+.LEVEL1
+.VARIABLE INP
+input file
+.VARIABLE OUT
+output file and one or two 
+(if multi-band) scratch files
+.VARIABLE SIZE
+ FOUR INTEGERS -
+ VICAR size field
+.VARIABLE SL
+ INTEGER - starting line in
+ input picture
+.VARIABLE SS
+ INTEGER - starting sample in
+ input picture
+.VARIABLE NL
+ INTEGER - number of lines in
+ input picture to process
+.VARIABLE NS
+ INTEGER - number of samples per
+ line in input picture 
+ to process
+.VARIABLE NLW
+ INTEGER - number of lines 
+ in filter
+.VARIABLE NSW
+ INTEGER - number of pixels 
+ per line in filter
+.VARIABLE THRESH
+ INTEGER - pixel threshold level
+.VARIABLE FILTER
+ KEYWORD - filter type
+ Valid: HIGH,LOW,SCENE,
+ DIVIDE
+.VARIABLE SCALE
+ REAL - DN scale factor
+.VARIABLE DCTRAN
+ REAL - DC transmission factor
+.VARIABLE BOOST
+ REAL - amplitude boost factor
+.VARIABLE DCLEVEL
+ REAL - additive constant
+.VARIABLE OFFSET
+ REAL - additive constant
+.vari LIMITS
+Allows setting of upper and
+lower limits for FULL and 
+REAL data.
+.LEVEL2
+.VARIABLE INP
+ input file
+.VARIABLE OUT
+ output file and one or two scratch files
+
+ If the primary input is multi-band, then three output files are required
+ of which the last two are scratch files.  Otherwise, only one scratch
+ file is required, which is the second output file.
+
+ The first output file is always the output image.
+
+.VARIABLE SIZE
+ (number of lines,number of samples,
+ starting line number,starting sample number)
+ Specifies area of input image to process.
+.VARI SL
+Starting line.
+.VARI SS
+Starting sample.
+.VARI NL
+Number of lines.
+.VARI NS
+Number of samples per line.
+.VARIABLE NLW
+ NLW is an integer which specifies the number of lines dimension
+ of the convolution window.
+
+ The default is NLW=NL/10 where NL is the number of lines in the size field.
+ If NLW is an even number (whether user-specified or default), then 1 is
+ added to get an odd number.  E.g., for a 100x100 image, the default is
+ NLW=11.
+.VARIABLE NSW
+ NSW is an integer which specifies the number of pixels dimension of the
+ convolutional window.  The default is NL/10.
+
+ If NLW is an even number (whether user-specified or default), then 1 is
+ added to get an odd number.  
+.VARIABLE THRESH
+ THRESH is an integer which specifies a threshold
+ level above which pixels will be accepted into
+ the average (low pass).  When a pixel lies 
+ below THRESH the output picture pixel will
+ always be zero.  The default is THRESH=0,
+ which, at least for byte, converts tfilt into
+ a linear boxfilter.
+
+(NOTE:  until 20-Dec-2012, the default for THRESH was
+-1 and the criterion for exclusion was DN<=THRESH.  This
+was changed when support for REAL*4 data was added, to
+make the behaviour at THRESH=0 consistent with integer
+data types.  As a result, to obtain the same results as
+the older version of THRESH, 1 must be added to the old
+value.)
+.VARIABLE FILTER
+ This parameter specifies the type of filter to be used.
+ 
+ HIGH: performs a high pass filter using the following equation:
+ 	OUT = (DN-AVGDN)*BOOST+DCTRAN*DN+DCLEVEL
+ 
+ SCENE: performs a SCENE filter using the following equation:
+	OUT = (DN-AVGDN)/ADVDN*SCALE+DCTRAN*DN+DCLEVEL
+ 
+ LOW:  performs a low pass filter using the following equation:
+	OUT = AVGDN*BOOST+OFFSET
+ 
+ DIVIDE: performs a divide filter using the following equation:
+	OUT = DN/AVGDN*SCALE+DCTRAN*DN+OFFSET
+	 This is the default filter.
+.VARIABLE SCALE
+ SCALE is a real number, used to scale output for SCENE and
+ DIVIDE filters only.  The default is 100.
+.VARIABLE DCTRAN
+ DCTRAN is a real, DC transmission. Default = 0.0  (See the section on 
+ DCTRAN in the main help section for tfilt.)
+.VARIABLE BOOST
+ BOOST is a real number, used to scale output for HIGH and LOW
+ filters only.   Default is 1.0
+.VARIABLE DCLEVEL
+ DCLEVEL is a real additive factor in SCENE and HIGH filters only.
+ Default is 128.0
+.VARIABLE OFFSET
+ OFFSET is a real additive factor used with
+ LOW and DIVIDE filters only. (Default = 0.5)
+.END

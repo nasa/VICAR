@@ -61,6 +61,7 @@
 #define PROD_SITH
 #define PROD_POSSUM
 #define PROD_MICA
+#define PROD_JPIG
 *
 #define PROD_MER_RMC
 *
@@ -86,6 +87,7 @@
 #define PROD_TLM_JavaCore
 #define PROD_TLM_MRO
 #define PROD_TLM_SIRTF
+#define PROD_TLM_2020
 *
 #define PROD_UPLINK_CASSINI
 #define PROD_UPLINK_CAS_TOUR
@@ -164,7 +166,8 @@
 #define EXT_MATRACOMP
 #define EXT_PVM
 #define EXT_PGPLOT
-#define EXT_KERBEROS5
+#define EXT_KERBEROS
+#define EXT_OPENSSL
 #define EXT_KERBEROS4
 #define EXT_ACE_TAO
 #define EXT_XERCES_CXX
@@ -186,9 +189,16 @@
 #define EXT_JS
 #define EXT_GNUPLOT
 #define EXT_NATGRID
+#define EXT_EIGEN
+#define EXT_GLOG
+#define EXT_CERES
+#define EXT_SIFT
+#define EXT_MYSQLCONCPP
 *--------
 * Java Externals
 *--------
+#define JEXT_WIS
+#define JEXT_JSON
 #define JEXT_ORBACUS
 #define JEXT_COSNOTIFY
 #define JEXT_XERCES
@@ -237,8 +247,6 @@
 #define JEXT_JAI
 #define JEXT_JAI_IIO
 #define JEXT_JAI_EXT
-#define JEXT_TREEVOTEE
-#define JEXT_JUNAMI
 #define JEXT_JSON_SIMPLE
 #define JEXT_JOPT_SIMPLE
 #define JEXT_SLF4J
@@ -263,6 +271,15 @@
 #define JEXT_PDS4_TOOLS
 #define JEXT_WEBSOCKET
 #define JEXT_JMONKEYENGINE
+#define JEXT_COMMONS_JCS
+#define JEXT_PNGENCODER
+#define JEXT_AWS_SDK
+#define JEXT_JACKSON_CORE
+#define JEXT_JACKSON_ANNOTATIONS
+#define JEXT_JACKSON_DATABIND
+#define JEXT_JACKSON_DATAFORMAT_CBOR
+#define JEXT_JODA_TIME
+#define JEXT_HTTPCOMP_FOR_AWS
 *--------
 * Python Externals
 *--------
@@ -375,7 +392,7 @@
 * here.  Any differences are listed separately at the bottom.
 *
 ************************************************************************
-#if defined(PROJ_MER) || defined(PROJ_PHX) || defined(PROJ_MSL) || defined(PROJ_NSYT) || defined(PROJ_MARS)
+#if defined(PROJ_MER) || defined(PROJ_PHX) || defined(PROJ_MSL) || defined(PROJ_NSYT) || defined(PROJ_M2020) || defined(PROJ_MGSS)
 *
 #define PROD_XVD
 *
@@ -399,6 +416,7 @@
 #define PROD_WEBIFICATION
 #define PROD_MIS
 #define PROD_FFW
+#define PROD_JPIG
 *
 #define EXT_MATH77
 #define EXT_PVM
@@ -408,12 +426,14 @@
 #define EXT_EXPAT	/* only for xmln, whatever that is... */
 #define EXT_CPPUNIT
 #define EXT_NATGRID
+#define EXT_HDF
+#define EXT_GEOTRANS
 *
 #endif
 *
 *** MER only
 *
-#if defined(PROJ_MER) || defined(PROJ_MARS)
+#if defined(PROJ_MER) || defined(PROJ_MGSS)
 #define PROD_PLACES_CORE
 #define PROD_PLACES_MER
 #define PROD_FEI3
@@ -429,7 +449,7 @@
 *
 *** PHX only
 *
-#if defined(PROJ_PHX) || defined(PROJ_MARS)
+#if defined(PROJ_PHX) || defined(PROJ_MGSS)
 #define PROD_MATIS_PHX
 #define SS_V2CONFIG
 #define PROD_FEI3
@@ -438,7 +458,7 @@
 *
 *** MSL only
 *
-#if defined(PROJ_MSL) || defined(PROJ_MARS)
+#if defined(PROJ_MSL) || defined(PROJ_MGSS)
 #define PROD_PLACES
 #define PROD_PLACES_CORE
 #define PROD_MATIS_MSL
@@ -454,10 +474,27 @@
 *
 *** NSYT only
 *
-#if defined(PROJ_NSYT) || defined(PROJ_MARS)
+#if defined(PROJ_NSYT) || defined(PROJ_MGSS)
 #define PROD_MATIS_NSYT
 #define PROD_APPS
 #define EXT_MYSQL	/* for edrgen only */
+#endif
+*
+*** M2020 only
+*
+#if defined(PROJ_M2020) || defined(PROJ_MGSS)
+#define PROD_PLACES
+#define PROD_PLACES_CORE
+#define PROD_MATIS_MSL
+#define SS_V2CONFIG
+#define PROD_FEI3
+#define PROD_DBQ
+#define PROD_FEI5_Client_MSL
+#define EXT_MSLFSW
+#define EXT_MSLMMMDecomp
+#define JEXT_PDS_IMG_ATLAS
+#define PROD_APPS
+#define PROD_TLM_2020
 #endif
 *
 ************************************************************************
@@ -465,7 +502,7 @@
 * MRO
 *
 ************************************************************************
-#ifdef PROJ_MRO
+#if defined(PROJ_MRO) || defined (PROJ_MGSS)
 *
 #define PROD_FEI5
 #define PROD_FEI5_Savannah
@@ -552,109 +589,111 @@
 * MGSS INTEGRATED SYSTEM  (no Projects)
 *
 ************************************************************************
-#ifdef PROJ_MGSS
+*#ifdef PROJ_MGSS
 *
 *--------
 * Non-Java products
 *--------
-#define PROD_XVD
+*#define PROD_XVD
 *
-#define PROD_FEI3
-#define PROD_FEI5
-#define PROD_DBQ
-#define PROD_DBVIEW
-#define PROD_PWDSERVER
-#define PROD_PWDSERVER_CLIENT
-#define PROD_DBI
-#
-#define PROD_VICAR_EXEC
+*#define PROD_FEI3
+*#define PROD_FEI5
+*#define PROD_DBQ
+*#define PROD_DBVIEW
+*#define PROD_PWDSERVER
+*#define PROD_PWDSERVER_CLIENT
+*
+*#define PROD_DBI
+*#
+*#define PROD_VICAR_EXEC
 *
 *--------
 * Java products
 *--------
-#define PROD_JavaVicarIO
-#define PROD_JadeDisplay
-#define PROD_JADIS
-#define PROD_Marsviewer
-#define PROD_SITH
+*#define PROD_JavaVicarIO
+*#define PROD_JadeDisplay
+*#define PROD_JADIS
+*#define PROD_Marsviewer
+*#define PROD_SITH
+*#define PROD_JPIG
 *
 *  theres also PROD_FEI5 covering both client and server...
-#define PROD_FEI5_Client
-#define PROD_FEI5_Client_MSL
-#define PROD_FEI5_Server
-#define PROD_FEI5_Savannah
-#define PROD_FEI5_Spider
-#define PROD_PWDSERVER_JCLIENT
+*#define PROD_FEI5_Client
+*#define PROD_FEI5_Client_MSL
+*#define PROD_FEI5_Server
+*#define PROD_FEI5_Savannah
+*#define PROD_FEI5_Spider
+*#define PROD_PWDSERVER_JCLIENT
 *
-#define PROD_MATIS_CORE
-#define PROD_MATIS_MSL
+*#define PROD_MATIS_CORE
+*#define PROD_MATIS_MSL
 *
-#define PROD_SPICE_CORBA
-#define PROD_SPICE_JNI
+*#define PROD_SPICE_CORBA
+*#define PROD_SPICE_JNI
 *
-#define PROD_JEDI
-#define PROD_TLM_JavaCore
+*#define PROD_JEDI
+*#define PROD_TLM_JavaCore
 *
-#define PROD_Java_XPM
+*#define PROD_Java_XPM
 *
-#define PROD_WEBIFICATION
+*#define PROD_WEBIFICATION
 *
-#define PROD_APPS
+*#define PROD_APPS
 *
-#define PROD_MIS
-#define PROD_FFW
+*#define PROD_MIS
+*#define PROD_FFW
 *
 *--------
 * VICAR Subsystems
 *--------
-#define SS_TAE
-#define SS_P1PROG
-#define SS_P1SUB
-#define SS_P2PROG
-#define SS_P2SUB
-#define SS_P3PROG
-#define SS_P3SUB
-#define SS_TLM
-#define SS_SSV
-#define SS_V2DATA
-#define SS_V2CONFIG
-#define SS_VRDI
-#define SS_VIDS
-#define SS_MDMS
-#define SS_FEI
-#define SS_JAVA
-#define SS_PWDSERVER
-#define SS_PY
-#define SS_JS
+*#define SS_TAE
+*#define SS_P1PROG
+*#define SS_P1SUB
+*#define SS_P2PROG
+*#define SS_P2SUB
+*#define SS_P3PROG
+*#define SS_P3SUB
+*#define SS_TLM
+*#define SS_SSV
+*#define SS_V2DATA
+*#define SS_V2CONFIG
+*#define SS_VRDI
+*#define SS_VIDS
+*#define SS_MDMS
+*#define SS_FEI
+*#define SS_JAVA
+*#define SS_PWDSERVER
+*#define SS_PY
+*#define SS_JS
 *
 *--------
 * Non-Java Externals
 *--------
-#define EXT_SPICE
-#define EXT_SYBASE
-#define EXT_JNI
-#define EXT_CALLABLE_JDK
-#define EXT_GEOTRANS
-#define EXT_PDS
-#define EXT_ISIS
-#define EXT_PDS_LABEL
-#define EXT_SIMBAD
-#define EXT_PVM
-#define EXT_PGPLOT
-#define EXT_KERBEROS5
-#define EXT_KERBEROS4
-#define EXT_ACE_TAO
-#define EXT_XERCES_CXX
-#define EXT_ROGUEWAVE
-#define EXT_CANDELA
-#define EXT_MATH77
-#define EXT_MPI
-#define EXT_HDF
-#define EXT_EXPAT
-#define EXT_SUMMITT
-#define EXT_MYSQL
-#define EXT_CPPUNIT
-#define EXT_JS
+*#define EXT_SPICE
+*#define EXT_SYBASE
+*#define EXT_JNI
+*#define EXT_CALLABLE_JDK
+*#define EXT_GEOTRANS
+*#define EXT_PDS
+*#define EXT_ISIS
+*#define EXT_PDS_LABEL
+*#define EXT_SIMBAD
+*#define EXT_PVM
+*#define EXT_PGPLOT
+*#define EXT_KERBEROS5
+*#define EXT_KERBEROS4
+*#define EXT_ACE_TAO
+*#define EXT_XERCES_CXX
+*#define EXT_ROGUEWAVE
+*#define EXT_CANDELA
+*#define EXT_MATH77
+*#define EXT_MPI
+*#define EXT_HDF
+*#define EXT_EXPAT
+*#define EXT_SUMMITT
+*#define EXT_MYSQL
+*#define EXT_CPPUNIT
+*#define EXT_JS
 *--------
 * Java Externals
 *--------
@@ -663,8 +702,8 @@
 *------------------------
 * Python Externals
 *-------------------------
-#define PYEXT_VIRTUALENV
-#endif
+*#define PYEXT_VIRTUALENV
+*#endif
 *
 ************************************************************************
 *
@@ -688,6 +727,7 @@
 #define PROD_JadeDisplay
 #define PROD_JADIS
 #define PROD_SITH
+#define PROD_JPIG
 *
 *  theres also PROD_FEI5 covering both client and server...
 *
@@ -727,7 +767,7 @@
 *#define EXT_KERBEROS5
 *#define EXT_KERBEROS4
 *#define EXT_ACE_TAO
-*#define EXT_XERCES_CXX
+#define EXT_XERCES_CXX
 *#define EXT_ROGUEWAVE
 *#define EXT_CANDELA
 #define EXT_MATH77

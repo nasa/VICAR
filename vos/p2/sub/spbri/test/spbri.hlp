@@ -1,0 +1,264 @@
+1 VICAR SUBROUTINE spbri
+
+Purpose				
+
+SPBRI.com provides a C programming language interface to 
+a subset of functions from the FORTRAN-based NAIF SPICE 
+toolkits: general, Galileo, and MIPS extended library.
+We currently support the following routines with C bridges:
+
+     o  GENERAL NAIF TOOLKIT ROUTINES
+
+        BODEUL  DAFCLS  DPR     M2Q     SCENCD
+        BODFND  DAFENA  ERRACT  MXM     SCE2T
+        BODVAR  DAFFNA  ERRPRT  MXMT    SCS2E
+	CKGP			MXV	SCT2E
+				MTXV	SPKAPP
+        CKGPAV  DAFGS   ET2UTC  PI	SPKLEF
+        CKLPF   DAFHSF  FAILED  RECLAT  SPKSSB
+        CLPOOL  DAFOPR  HALFPI          TWOPI
+        DAFADA  DAFOPW  IRFROT  ROTATE  UTC2ET
+        DAFBFS  DAFPS   LDPOOL  ROTMAT  VMINUS
+        DAFBNA  DAFUS   M2EUL   RPD	RTPOOL
+	XPOSE
+
+     o  NAIF-MIPS TOOLKIT EXTENSIONS
+
+	DMPOOL_1
+	RSPOOL_1
+
+     o  NAIF-GALILEO TOOLKIT EXTENSIONS
+
+	BODN2C_G
+
+2 OPERATION
+
+Following some of the guidelines of the VICAR Porting
+Guide, D-9395, functions in C and FORTRAN have been
+written using the C STRLEN operator and the VICAR MVLC
+function to handle the strings that are passed between
+C and FORTRAN. 
+
+All C bridges to the NAIF SPICE functions begin with
+the letter 'z' followed by the SPICE function name.
+Calling sequences vary as shown below. See NAIF SPICE
+toolkit help for details on descriptions of arguments.
+
+CALLING SEQUENCES
+
+        zbodeul(int body,double et,double *ra,double *dec,
+                double *w,double *lambda);
+
+	int status =  zbodfnd( int body, char *item );
+
+	zbodn2c_g( char *body, int *body_id, int *status );
+
+	zbodvar( int body, char *item, int *dim, double *values );
+
+        zckgpav(int inst,double sclkdp,double tol,char *ref,
+                double cmat[3][3],double av[3],double *clkout,int *status);
+
+	zcklpf( char *x, int *handle );
+
+	zclpool();
+
+	zdafbfs( int handle );
+
+	zdafcls( int handle );
+
+	zdaffna( int *status );
+
+	zdafgs( double *sum );
+
+	zdafhsf( int handle, int *nd, int *ni );
+
+	zdafopr(char *fname, int *handle );
+
+	zdafus( double *sum, int nd, int ni, double *dc, int *ic );
+
+	zdmpool_1( char *dmpfil );
+
+        double deg_rad = zdpr();
+
+        double rad_deg = zrpd();
+
+	zerract( char *x, char *y );	
+
+	zerrprt(char *x, char *y );
+
+        zet2utc( double ephemeris_time, char format, int precision,
+                 char *UTC);
+
+	int status = zfailed();
+
+	double half_pi = zhalfpi();
+
+	zirfrot( int refa, int refb, double rotab[3][3] );
+
+	zldpool( char *x );
+
+	zm2eul(double r[3][3], int axis3, int axis2, int axis1,
+	       double *angle3, double *angle2, double *angle1 );
+
+	zmxm( double m1[3][3], double m2[3][3], double mout[3][3] );
+
+	zmxmt( double m1[3][3], double m2[3][3], double mout[3][3] );
+
+	zmxt( double matrix[3][3], double vin[3], double vout[3] );
+
+	zreclat( double rectan[3], double *radius, double *lon, double *lat );
+
+	zrotate(double angle, int iaxis, double mout[3][3] );
+
+	zrotmat(double m1[3][3], double angle, int iaxis,
+	        double mout[3][3] );
+
+	zrspool_1(char *dmpfil);
+
+	zrtpool( char *variable, int *dim, double *values, int *status );
+
+	zsct2e(int sc, double sclkdp, double *et );
+
+	zsce2t(int sc, double et, double *sclkdp);
+
+        zscs2e( int sc_code, char *SCLK, double *ephemeric_time )
+
+	zspkapp(int targ, double et, char *ref, double sobs[6],
+                char *abcorr, double starg[6], double *lt );
+
+	zspklef( char *x, int *handle );
+
+	zspkssb( int targ, double et, char *ref, double starg[6] );
+
+	zutc2et( char *utc, double *et );   
+
+	zvminus( double v1[3], double vout[3] );
+
+*** The following bridges were added by Sam Le to support new spice
+	routines. For more details on what these routines do, see
+	their implementation file 'zspbri.c'
+
+	zckbss(int, double, double, int)
+	zcksns(int*, double*, char*, int*)
+	zckpfs(int, double*, double, double, int, double, double, double, int)
+	zckupf(int)
+	zdafa2b(char*, char*, int)
+	zdafb2a(char*, char*)
+	zeul2m(double, double, double, int, int, int, double)
+	zspca2b(char*, char*)
+	zspcb2a(char*, char*)
+	zsctiks(int, char*, double*)
+	zspkuef(int)
+	zvadd_mat(double*, double*, double*)	
+	zsurfpt(double*, double*, double, double, double, double*, int*)
+	zvnorm(double*)
+	zvsub(double*, double*, double*)
+	zsurfnm(double, double, double, double*, double*)
+	zvsep(double*, double*)
+	ztxtopr(char*, int*)
+	zspct2b(int, char*)
+	ztxtcls(int)
+	zsce2s(int, double, char*)
+	zdafgh(int*)
+	zdafhfn(int*, char*)
+
+Libraries and subroutines required to run this
+routine: mp_routines, NAIF SPICELIB library
+
+3 ENVIRONMENT and LANGUAGE
+
+Software Platform:		VICAR 12.0 (VMS/UNIX)
+Hardware Platforms:		No particular hardware required;
+				tested on VAX 8650 and Sun Sparc.
+Programming Language:		ANSI C, Fortran
+
+3 HISTORY
+
+Author:			Thomas Roatsch, DLR
+			Justin McNeill, JPL
+			Thuy Troung, 	JPL
+Date of Original:	November 1993
+Cognizant Engineer:	Justin McNeill, JPL
+Traceability:		MSTP SRD D-10637 Section 3 <3>, Section 7 <3>
+
+Revision history:
+			June 24, 1994		(JFM)
+
+			Print statement (ZPRNT) after DAFGS removed.
+			SUMMARY array must be unpacked first by DAFUS.
+                        Null terminator added to SCLK_time string in
+			TSPBRI2.C to avoid failure on the DEC ALPHA. 
+			(FR 85089)
+
+			May 17, 1994		(JFM)
+
+			Removed incorrect inclusion of _G source files
+			in xspbri.f.  Removed BODTRN_G from source as it
+			already resides in the NAIF GLL SPICELIB.
+			(FR 82918, 82935)
+	
+			April 22, 1994		(JFM)
+
+			Revised HELP file to categorize NAIF TOOLKIT
+			routines into general, Galileo, and MIPS specific.
+			Grouped source code files into general bridges
+			(z/xspbri), Galileo (z/xspbri_gll_ext), and
+			MIPS specific (z/xspbri_vicar_ext). (FR 82921) 
+
+			March 30, 1994		(JFM)
+			
+			Added bridges for et2utc, rtpool, and scs2e.
+			Traceability for this revision is the
+			Mars 94 Post-telemetry Processing SRD 4.1.1, D-11125.
+		
+                   	March 21, 1994 		(TLT)
+			
+			For FR 83082, SPBRI was produced from the combination 
+			of zspbri.com and xspbri.com and with the following 
+			changes:
+
+			1. added bridges for dpr,dmpool_1,halfpi,
+                        rotate,rotmat,mxv,mxm,mxmt,sct2e,sce2t,
+                        bodeul,m2eul,failed,irfrot,rspool_1,
+			dafgs,dpr,dafus,dafbfs,dafhsf,daffna,
+			errprt,spkssb,spkapp,ckgpav,dafopr,
+			dafcls,reset,vminus,xpose,m2q,dafopw,
+                        dafps,dafbna,dafada,dafena.
+
+			2. Fixed incorrect function definition in
+			C bridge for UTC2ET (FR 76818).
+
+			20dec1994 (LWK) - added bridges for ckgp,
+			pi, twopi, mtxv, scencd;  changed xrtpool
+			to return -1 on success, consistent with
+			Fortran ".TRUE.".
+
+			
+			JUN-19-1995	(SVL)
+			Added: CKBSS   CKSNS   CKPFS   CKUPF
+			       DAFA2B  DAFB2A  EUL2M   SCTIKS
+			       SPCA2B  SPCB2A  SPKUEF  SURFPT
+			       VADD    VNORM   VSEP    VSUB
+			       TXTOPR  SPCT2B  TXTCLS  SCE2S
+			these are NAIF toolkit bridges used by
+			spice Cmatrix95, spice95, etc.
+
+			MARCH-05-1996	(SVL)
+			added prototypes for new bridges writen by
+			Sam Le.
+
+			06-MAR-1996 (LWK) - removed reset() because
+			this routine is replaced by reset1() (in c89.com)
+			due to name conflict; fixed problem with utc string
+			in zet2utc().
+
+			29 Mar 96 (GMY) Added rpd bridge (zrpd)
+
+			OCT-30-1996	(SVL)
+			Remove: zspbri_vicar_ext.c & xspbri_vicar_ext.f
+				from spbri.repack & spbri.imake file because
+				the new SPICE Toolkit no longer support
+				binary pool. Therefore, DMPOOL_1 & ZRSPOOL_1
+				is not in spicelib.a anymore.
+				Also commented out test case for DMPOOL_1
+				in tsubs.c

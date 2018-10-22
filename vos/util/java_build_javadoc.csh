@@ -29,6 +29,8 @@ cat $V2HTML/packagelist.tmp2
 
 # Run javadoc
 
-echo javadoc -J-mx512m -sourcepath ${V2JAVA} -d $V2HTML/javadoc -author -version -link http://java.sun.com/j2se/1.4/docs/api -link http://java.sun.com/products/java-media/jai/forDevelopers/jai-apidocs -link http://java.sun.com/products/java-media/3D/forDevelopers/J3D_1_2_API/j3dapi @$V2HTML/packagelist.tmp2
-javadoc -J-mx512m -sourcepath ${V2JAVA} -d $V2HTML/javadoc -author -version -link http://java.sun.com/j2se/1.4/docs/api -link http://java.sun.com/products/java-media/jai/forDevelopers/jai-apidocs -link http://java.sun.com/products/java-media/3D/forDevelopers/J3D_1_2_API/j3dapi @$V2HTML/packagelist.tmp2
+
+echo javadoc -J-Xmx2048m -sourcepath ${V2JAVA} -d $V2HTML/javadoc -author -version -link http://java.sun.com/j2se/1.4/docs/api -link http://java.sun.com/products/java-media/jai/forDevelopers/jai-apidocs -link http://java.sun.com/products/java-media/3D/forDevelopers/J3D_1_2_API/j3dapi @$V2HTML/packagelist.tmp2
+javadoc -Xdoclint:none -J-Xmx2048m -sourcepath ${V2JAVA} -d $V2HTML/javadoc -author -version -link http://java.sun.com/j2se/1.4/docs/api -link http://java.sun.com/products/java-media/jai/forDevelopers/jai-apidocs -link http://java.sun.com/products/java-media/3D/forDevelopers/J3D_1_2_API/j3dapi @$V2HTML/packagelist.tmp2
+
 

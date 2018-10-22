@@ -1,0 +1,12 @@
+procedure
+body
+
+ phottest out=phottest_m.ibis2 start=(10,10,180) delta=(30,30,70) +
+ 'PRINT SIGMA=0.000001 +
+ pho_func=MINNAERT ALBEDO=0.7 EXPONENT=0.6 
+
+ ibis-list phottest_m.ibis2 csize=16 units=units groups=groups formats=formats 
+
+ label-list phottest_m.ibis2
+
+end-proc

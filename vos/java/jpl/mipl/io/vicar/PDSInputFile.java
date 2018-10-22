@@ -49,6 +49,8 @@ import jpl.mipl.io.util.DOMutils;
 // import jpl.mipl.io.plugins.vicar.*;
 
 
+
+
 import javax.imageio.ImageIO;
 /*$$$$ Enable for IIO */
 // 9-28-01 commented out
@@ -65,10 +67,14 @@ import jpl.mipl.io.ImageUtils;
 import jpl.mipl.mars.viewer.image.RenderedOpLoaderGetImageInputStreamWrapper;
 ** InputStreamWrapper **/
 
+
+
 import org.apache.xpath.XPathAPI;
 import org.w3c.dom.*;
 import org.w3c.dom.traversal.NodeIterator;
 // import org.xml.sax.SAXException;
+
+
 
 
 
@@ -165,30 +171,37 @@ public class PDSInputFile extends VicarInputFile
     
    OaImageKeywords oaImageKeywords = null;
    
+   boolean _flip_image_horizontal = false;
+   boolean _flip_image_vertical = false;
+   
    // size of all labels in bytes, used as the start byte to begin reading data for a detached label
    int front_label_size = 0;
    
+   double validMinimum = 0.0;
+   double validMaximum = 0.0;
 
     // 20110907, xing
     PDSImageReadParam pdsImageReadParam;
    
 ////////////////////////////////////////////////////////////////////////
 
-/***********************************************************************
- * Dummy constructor (for now). Need to add good ones that call open().
- */
-    public PDSInputFile()
-    {
-	super();
-	if (debug) System.out.println("%%%%%%% PDSInputFile constructor $$$$$$$$$$$$$$$");
-    }
-
-    // 20110709, xing
+// 20110709, xing
     public PDSInputFile(PDSImageReadParam pdsImageReadParam) {
         super();
         this.pdsImageReadParam = pdsImageReadParam;
         if (debug) System.out.println("%%%%%%% PDSInputFile constructor $$$$$ with PDSImageReadParam");
     }
+
+////////////////////////////////////////////////////////////////////////
+	
+	/***********************************************************************
+	 * Dummy constructor (for now). Need to add good ones that call open().
+	 */
+	    public PDSInputFile()
+	    {
+		super();
+		if (debug) System.out.println("%%%%%%% PDSInputFile constructor $$$$$$$$$$$$$$$");
+	    }
 
 /***********************************************************************
  * Dummy constructor (for now). Need to add good ones that call open().
@@ -226,6 +239,7 @@ public class PDSInputFile extends VicarInputFile
     
 	public void setDebug(boolean d) {
 		debug = d;
+		if (debug) System.out.println("%%%%%%% PDSInputFile.setDebug("+debug+") ");
 	}
 
 	/***********************************************************************
@@ -274,23 +288,62 @@ public class PDSInputFile extends VicarInputFile
     DOMutils domUtils = new DOMutils();
 	// BufferedReader input = null;
 	// _input_stream
-	
+    // debug = true;
+    
+    PrintWriter writer = null;
 	if (debug) {
+		
 	    System.out.println("PDSInputFile.setupLabels()"); 
-	    System.out.println("input type: "+_input_stream); 
+	    System.out.println("input type: "+_input_stream);
+	    try {
+			writer = new PrintWriter("PDSLabelToDOM.txt", "UTF-8");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			System.out.println("FileNotFoundException "+e);
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			System.out.println("UnsupportedEncodingException "+e);
+			e.printStackTrace();
+		}
 	}
 	
-	if (_input_stream instanceof ImageInputStream) { 
+	if (_input_stream instanceof ImageInputStream || _input_stream instanceof FileImageInputStream) { 
 		if (debug) {
 		    System.out.println("PDSInputFile.setupLabels()  _input_stream instanceof ImageInputStream"); 
 		}
 	
         // System.out.println("calling PDSLabelToDOM"); 
         	// PDSLabelToDOM pdsLabel2Dom = new PDSLabelToDOM((DataInput) _input_stream, null); 
-            PDSLabelToDOM pdsLabel2Dom = new PDSLabelToDOM((ImageInputStream) _input_stream, null);
-            // System.out.println("after calling PDSLabelToDOM"); 
+		try {
+            // PDSLabelToDOM pdsLabel2Dom = new PDSLabelToDOM((ImageInputStream) _input_stream, null);
+            PDSLabelToDOM pdsLabel2Dom = new PDSLabelToDOM((ImageInputStream) _input_stream, writer);
+            if (writer != null) { 
+            	writer.close(); 
+            	}
+            
+            if (debug) {
+            	System.out.println("after calling PDSLabelToDOM"); 
+            }
+            
             _PDS_document = pdsLabel2Dom.getDocument();
-            if (debug) System.out.println("_PDS_document: "+_PDS_document); 
+            if (debug) {
+            	System.out.println("_PDS_document: "+_PDS_document); 
+            
+            	domUtils.serializeDocument( _PDS_document, "PDS_document.xml", "xml");
+			}
+		}
+        catch (Exception e) {
+        	if (debug) {
+        		System.out.println("Exception PDSLabelToDOM "+e);
+        		e.printStackTrace();
+        	}  
+        }
+            
+            if (debug) {
+            	System.out.println("_PDS_document: "+_PDS_document); 
+            	domUtils.serializeDocument( _PDS_document, "PDS_document.xml", "xml");
+            }
             // pdsMetadata is only for the ImageIO version
             // but the JAI codec will put the document into the properties
             // pdsMetadata = new PDSMetadata(_document);
@@ -391,7 +444,8 @@ public class PDSInputFile extends VicarInputFile
             return;
        }
 	
-  
+    // use the document to get a few other values
+	getValidMinimumMximum(_PDS_document ) ;
 	
 	// check _lblsize_front if it is -1 ERROR and exit read??
 	if (debug) {
@@ -533,12 +587,12 @@ public class PDSInputFile extends VicarInputFile
     }
     
     if (debug) {
-    System.out.println("  recordBytes "+recordBytes+"  _hasEmbeddedVicarLabel "+_hasEmbeddedVicarLabel); 
-    System.out.println("  _embedded_label_start = "+_embedded_label_start);
-    System.out.println("  _lblsize_front "+_lblsize_front+" really the image data start byte" );
-    System.out.println("  units "+units);
-    System.out.println("detachedFilename = "+detachedFilename);
-    System.out.println("detachedLabel = "+detachedLabel);
+	    System.out.println("  recordBytes "+recordBytes+"  _hasEmbeddedVicarLabel "+_hasEmbeddedVicarLabel); 
+	    System.out.println("  _embedded_label_start = "+_embedded_label_start);
+	    System.out.println("  _lblsize_front "+_lblsize_front+" really the image data start byte" );
+	    System.out.println("  units "+units);
+	    System.out.println("detachedFilename = "+detachedFilename);
+	    System.out.println("detachedLabel = "+detachedLabel);
     }
   
   
@@ -977,7 +1031,17 @@ protected void openInternalLast() {
 		System.out.println("nbb "+_isisSystem.getNBB());
 	}
 	
+	int nl = _system.getNL();
+	int ns = _system.getNS();
+	// Rectangle(int x, int y, int width, int height)
+	Rectangle r = new Rectangle(0,0, ns, nl);
+	setSourceRegion(r);
 	
+	// provided for subclasses to put good stuff here
+	if (debug) {
+		System.out.println("PDSInputFile.openInternalLast()");
+		System.out.println("sourceRegion "+r);	
+	}
 	
 	readLinePrefixData(_line_prefix_bytes); // this is a Vicar and PDS only operation
 	
@@ -1039,6 +1103,37 @@ protected void openInternalLast() {
 	    }
 	        
         
+    }
+    
+    
+    
+    
+    private void getValidMinimumMximum(Document doc) {
+    	if (debug) {
+    		System.out.println("==================================================================");
+    		System.out.println("*************** pdsInputFile.getValidMinimumMximum ******************");
+    	}
+    	DOMutils domUtils = new DOMutils();
+    	// get stuff out of the Document
+        Node root = doc.getDocumentElement();
+        Node result;
+        NodeList nlist;
+        String nodeValue;
+        
+        String xPath = "//OBJECT[@name='IMAGE']/item[@key='VALID_MINIMUM']" ;
+        nodeValue = domUtils.getItemValue(root, xPath);
+        if (nodeValue != null && nodeValue != "") {
+        	validMinimum = Double.parseDouble(nodeValue);
+        }
+        
+        xPath = "//OBJECT[@name='IMAGE']/item[@key='VALID_MAXIMUM']" ;
+        nodeValue = domUtils.getItemValue(root, xPath);
+        if (nodeValue != null && nodeValue != "") {
+        	validMaximum = Double.parseDouble(nodeValue);
+        }
+        if (debug) {
+        	System.out.printf("** pdsInputFile.getValidMinimumMaximum validMinimum = %f  validMinimum = %f \n" , validMinimum, validMaximum);
+        }
     }
 
     /**************************************************************
@@ -1108,7 +1203,7 @@ protected void openInternalLast() {
         
         // result = XPathAPI.selectSingleNode(root, PDSMetadata.nativeMetadataFormatName);
         // String xPath = "//"+PDSMetadata.nativeMetadataFormatName ;
-        // remove depnedancy on ImageIO
+        // remove dependancy on ImageIO
         String nativeMetadataFormatName = "PDS_LABEL";
         // 
         String xPath = "//"+nativeMetadataFormatName ;
@@ -1147,11 +1242,9 @@ protected void openInternalLast() {
     */
     if (node != null) { // ^IMAGE
     	
-    	if (debug) System.out.println("\n createSystemLabel for ^IMAGE     ###############");
         // serialize the Node returned to see if it's what was expected
         if (debug) {
-        	System.out.println("createSystemLabel for ^IMAGE");
-        
+        	System.out.println(" createSystemLabel for ^IMAGE");
         
         	Node pNode = node.getParentNode();
         	String pname = pNode.getNodeName();
@@ -1163,12 +1256,14 @@ protected void openInternalLast() {
         xPath = "//OBJECT[@name='IMAGE']/item[@key='SAMPLE_BITS']" ;
         nodeValue = domUtils.getItemValue(node, xPath);
         if (debug) System.out.println("SAMPLE_BITS <"+nodeValue+"> ");
-        bits = Integer.parseInt(nodeValue);
+        if (nodeValue != null && !nodeValue.isEmpty()) {
+        	bits = Integer.parseInt(nodeValue);
+        }
         // use this to get format or SAMPLE_TYPE
     
         xPath = "//OBJECT[@name='IMAGE']/item[@key='SAMPLE_TYPE']" ;
         nodeValue = domUtils.getItemValue(node, xPath);
-        if (debug) System.out.println("SAMPLE_TYPE <"+nodeValue+"> ");
+        if (debug) System.out.println("createSystemLabel SAMPLE_TYPE <"+nodeValue+"> bits = "+bits+" ");
         // convert PDS SAMPLE_TYPE to vicar
         
 		if (nodeValue.equalsIgnoreCase("IEEE_REAL") && bits == 64) {
@@ -1177,7 +1272,7 @@ protected void openInternalLast() {
 					realFormat = "IEEE";
 					unsignedFlag = false;
 			if (debug) { System.out.println("IEEE 64 DOUB"); }
-				}
+		}
 		// add RIEEE cases too ?? what do I look for ??
 				
         if (nodeValue.equalsIgnoreCase("IEEE_REAL") && bits == 32) {
@@ -1214,7 +1309,16 @@ protected void openInternalLast() {
         	intFormat = "HIGH";  // "HIGH"
         	unsignedFlag = false;
         	
-        	// System.out.println("MSB_INTEGER HALF");
+        } else if (nodeValue.equalsIgnoreCase("VAX_INTEGER") && bits == 16) {
+        	if (debug) { System.out.println("VAX_INTEGER 16 bits"); }
+        	/***
+        	format = "HALF" ; // "USHORT""
+        	intFormat = "HIGH";  // "HIGH"
+        	unsignedFlag = false;
+        	***/
+        	format = "HALF" ; // "USHORT""
+        	intFormat = "LOW";  // "HIGH"
+        	unsignedFlag = false;
         	
         } else if ( bits == 16) {
         	format = "HALF" ; // "USHORT""
@@ -1292,8 +1396,7 @@ protected void openInternalLast() {
         
         nodeValue = domUtils.getItemValue(node, xPath);
         if (debug) System.out.println("LINE_PREFIX_BYTES <"+nodeValue+"> ");
-        if (nodeValue != null && nodeValue != "") {
-        	
+        if (nodeValue != null && nodeValue != "") {       	
         	line_prefix_bytes = Integer.parseInt(nodeValue);
         }
         
@@ -1302,7 +1405,6 @@ protected void openInternalLast() {
         nodeValue = domUtils.getItemValue(node, xPath);
         if (debug) System.out.println("LINE_SUFFIX_BYTES <"+nodeValue+"> ");
         if (nodeValue != null && nodeValue != "") {
-        	
         	line_suffix_bytes = Integer.parseInt(nodeValue);
         }
         
@@ -1358,9 +1460,45 @@ protected void openInternalLast() {
                 axes = Integer.parseInt(nodeValue);
                 // can axes be other than 3 ??? ignore for now
                 
-                xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='AXES_NAME']" ;
+                xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='AXIS_NAME']" ;
                 nodeValue = domUtils.getItemValue(root, xPath);
+                if (debug) System.out.printf("root xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                
+                xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='AXIS_NAME']" ;
+                nodeValue = domUtils.getItemValue(node, xPath);
+                if (debug) System.out.printf("node xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                // check if it is null or "" if yes 
+                String axis_names[] = {"","",""};
+                if (nodeValue == null || nodeValue.equals("")) {
+                	// it has subitems. try again
+                	// can I use xPath to get all the subitems?? 
+                	// use axes to know how many to look for. use it to allocate the array of strings also
+                	
+                    xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='AXIS_NAME']/subitem[@key='AXIS_NAME'][1]" ;
+                	nodeValue = domUtils.getItemValue(node, xPath);
+                    if (debug) System.out.printf("xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                    axis_names[0] = nodeValue;
+                    
+                    xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='AXIS_NAME']/subitem[@key='AXIS_NAME'][2]" ;
+                	nodeValue = domUtils.getItemValue(node, xPath);
+                    if (debug) System.out.printf("xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                    axis_names[1] = nodeValue;
+                    
+                    xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='AXIS_NAME']/subitem[@key='AXIS_NAME'][3]" ;
+                	nodeValue = domUtils.getItemValue(node, xPath);
+                    if (debug) System.out.printf("xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                    axis_names[2] = nodeValue;
+                    
+                    
+                } else {
+                	
+                	axis_names = getItemStringArray ( nodeValue );
+                }
+                
+                if (debug) System.out.printf("axis_names %s %s %s \n", axis_names[0],axis_names[1],axis_names[2]);
+                /***
                 // convert ISIS AXIS_NAME to vicar
+                String axes_names[] = {"","",""};
                 if (nodeValue != null ) {
                     if (nodeValue.equalsIgnoreCase("(SAMPLE,LINE,BAND)") )  {
                         org = "BSQ";
@@ -1371,13 +1509,41 @@ protected void openInternalLast() {
                     else if (nodeValue.equalsIgnoreCase("(BAND,SAMPLE,LINE)") )  {
                         org = "BIP";
                     }
+                    axes_names = getItemStringArray ( nodeValue );
                 }
-                String[] axes_names = getItemStringArray ( nodeValue );
+                ****/
                 
                 
                 xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='CORE_ITEMS']" ;
                 nodeValue = domUtils.getItemValue(root, xPath);
-                int[] core_items = getItemIntArray ( nodeValue );
+             	int core_items[] = {0,0,0};
+                
+                
+                if (nodeValue != null && nodeValue != "") {
+                	core_items = getItemIntArray ( nodeValue );
+                } else {
+                	// int suffix_items[] = {0,0,0};
+                	// get each item individually
+                	xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='CORE_ITEMS']/subitem[@key='CORE_ITEMS'][1]" ;
+                	nodeValue = domUtils.getItemValue(node, xPath);
+                    if (debug) System.out.printf("xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                    if (nodeValue != null && nodeValue != "") {
+                    	core_items[0] = Integer.parseInt(nodeValue);
+                    }
+                    xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='CORE_ITEMS']/subitem[@key='CORE_ITEMS'][2]" ;
+                	nodeValue = domUtils.getItemValue(node, xPath);
+                    if (debug) System.out.printf("xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                    if (nodeValue != null && nodeValue != "") {
+                    	core_items[1] = Integer.parseInt(nodeValue);
+                    }
+                    xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='CORE_ITEMS']/subitem[@key='CORE_ITEMS'][3]" ;
+                	nodeValue = domUtils.getItemValue(node, xPath);
+                    if (debug) System.out.printf("xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                    if (nodeValue != null && nodeValue != "") {
+                    	core_items[2] = Integer.parseInt(nodeValue);
+                    }
+                	
+                }
                 
                 xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='CORE_ITEM_BYTES']" ;
                 nodeValue = domUtils.getItemValue(root, xPath);
@@ -1401,23 +1567,63 @@ protected void openInternalLast() {
                 
                 xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='CORE_VALID_MINIMUM']" ;
                 nodeValue = domUtils.getItemValue(root, xPath);
-                core_valid_minimum = Integer.parseInt(nodeValue);
+                if (debug) System.out.printf("xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                if (nodeValue != null && nodeValue != "") {
+                	core_valid_minimum = Integer.parseInt(nodeValue);
+                }
+                
                 
                 xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='CORE_BASE']" ;
                 nodeValue = domUtils.getItemValue(root, xPath);
-                core_base = Double.parseDouble(nodeValue);
+                if (nodeValue != null && nodeValue != "") {
+                	core_base = Double.parseDouble(nodeValue);
+                }
                 
                 xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='CORE_MULTIPLIER']" ;
                 nodeValue = domUtils.getItemValue(root, xPath);
-                core_multiplier = Double.parseDouble(nodeValue);
+                if (nodeValue != null && nodeValue != "") {
+                	core_multiplier = Double.parseDouble(nodeValue);
+                }
                 
+                // SUFFIX_BYTES and SUFFIX_ITEMS may not exists
                 xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='SUFFIX_BYTES']" ;
                 nodeValue = domUtils.getItemValue(root, xPath);
-                int suffix_bytes = Integer.parseInt(nodeValue);
+                int suffix_bytes = 0;
+                if (debug) System.out.printf("xPath=%s nodeValue=%s, suffix_bytes=%d \n", xPath, nodeValue, suffix_bytes );
+                
+                if (nodeValue != null && nodeValue != "") {
+                	suffix_bytes = Integer.parseInt(nodeValue);
+                }
+                if (debug) System.out.printf("xPath=%s nodeValue=%s, suffix_bytes=%d \n", xPath, nodeValue, suffix_bytes );
                 
                 xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='SUFFIX_ITEMS']" ;
                 nodeValue = domUtils.getItemValue(root, xPath);
-                suffix_items = getItemIntArray ( nodeValue );
+                if (nodeValue != null && nodeValue != "") {
+                	suffix_items = getItemIntArray ( nodeValue );
+                } else {
+                	// int suffix_items[] = {0,0,0};
+                	// get each item individually
+                	xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='SUFFIX_ITEMS']/subitem[@key='SUFFIX_ITEMS'][1]" ;
+                	nodeValue = domUtils.getItemValue(node, xPath);
+                    if (debug) System.out.printf("xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                    if (nodeValue != null && nodeValue != "") {
+                    	suffix_items[0] = Integer.parseInt(nodeValue);
+                    }
+                    xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='SUFFIX_ITEMS']/subitem[@key='SUFFIX_ITEMS'][2]" ;
+                	nodeValue = domUtils.getItemValue(node, xPath);
+                    if (debug) System.out.printf("xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                    if (nodeValue != null && nodeValue != "") {
+                    	suffix_items[1] = Integer.parseInt(nodeValue);
+                    }
+                    xPath = "//OBJECT[@name='SPECTRAL_QUBE']/item[@key='SUFFIX_ITEMS']/subitem[@key='SUFFIX_ITEMS'][3]" ;
+                	nodeValue = domUtils.getItemValue(node, xPath);
+                    if (debug) System.out.printf("xPath=%s nodeValue=%s< \n", xPath, nodeValue);
+                    if (nodeValue != null && nodeValue != "") {
+                    	suffix_items[2] = Integer.parseInt(nodeValue);
+                    }
+                	
+                }
+                if (debug) System.out.printf("suffix_items %d %d %d \n", suffix_items[0], suffix_items[1], suffix_items[2]);
                 /***
                 String[] getItemStringArray ( String array )
                 int[] getItemIntArray ( String array )
@@ -1435,19 +1641,19 @@ protected void openInternalLast() {
                 //  
                 if (debug) System.out.println("########################################################");
                 // axes_names core_items suffix_items
-                for ( int i = 0; i < axes_names.length; i++ )  {
-                    if (debug) System.out.println("axes="+axes_names[i]+"  "+core_items[i]+"   suffix="+suffix_items[i]);
-                    if ( axes_names[i].indexOf ( "SAMP" ) >= 0 )  {   //  if value at axes[i] resembles "SAMP"
+                for ( int i = 0; i < axis_names.length; i++ )  {
+                    if (debug) System.out.println("axes="+axis_names[i]+"  "+core_items[i]+"   suffix="+suffix_items[i]);
+                    if ( axis_names[i].indexOf ( "SAMP" ) >= 0 )  {   //  if value at axes[i] resembles "SAMP"
                         if ( i == 1 )  org = "BIP";             //  according to the above, this is unique enough
                         ns = core_items[i];
                         ssb = suffix_items[i] * suffix_bytes;
                         
-                    }  else if ( axes_names[i].indexOf ( "BAND" ) >= 0 )  {
+                    }  else if ( axis_names[i].indexOf ( "BAND" ) >= 0 )  {
                         if ( i == 1 )  org = "BIL";             //  according to the above, this is unique enough
                         nb = core_items[i];
                         bsb = suffix_items[i] * suffix_bytes;
                         
-                    }  else if ( axes_names[i].indexOf ( "LINE" ) >= 0 )  {
+                    }  else if ( axis_names[i].indexOf ( "LINE" ) >= 0 )  {
                         if ( i == 1 )  org = "BSQ";             //  according to the above, this is unique enough
                         nl = core_items[i];
                         lsb = suffix_items[i] * suffix_bytes;
@@ -2164,7 +2370,29 @@ protected void openInternalLast() {
 	else return false;
     }
 
-   
+    
+    
+    /***********************************
+     * * getValidMinimum
+     * 
+     * getValidMinimumMximum() is called from setupLabels() to get these values if they are in the label
+     * @return
+     */
+    public double getValidMinimum() {
+    	
+    	return validMinimum;
+    }
+    
+    /***********************************
+     * * getValidMaximum
+     * 
+     * getValidMinimumMximum() is called from setupLabels() to get these values if they are in the label
+     * @return
+     */
+    public double getValidMaximum() {
+    	
+    	return validMaximum;
+    } 
 
 
 ////////////////////////////////////////////////////////////////////////

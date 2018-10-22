@@ -1,0 +1,13 @@
+
+#define PROGRAM tbatch
+
+#define MODULE_LIST tbatch.f
+
+#define TEST
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE

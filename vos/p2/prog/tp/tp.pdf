@@ -1,0 +1,149 @@
+procedure help=*
+parm inp string count=(0:12) default=--
+parm tpfile string default="no tp file"
+parm options string default=""
+refgbl $syschar
+body
+local f string
+local files string
+let files = ""
+if ($count(inp) >= 1)
+   let f = inp(1)
+   let files = "&f"
+end-if
+if ($count(inp) >= 2)
+   let f = inp(2)
+   let files = "&files &f"
+end-if
+if ($count(inp) >= 3)
+   let f = inp(3)
+   let files = "&files &f"
+end-if
+
+local tpf string
+local tpfile_arg string
+let tpfile_arg = ""
+if (tpfile <> "no tp file")
+   let tpf = tpfile(1)
+   let tpfile_arg = "-pfile &tpf"
+end-if
+
+if ($syschar(1) = "UNIX")
+   ush $R2LIB/tp &options &tpfile_arg &files &
+else
+   dcl spawn/nowait tp &options &tpfile_arg &files
+end-if
+end-proc
+.title
+VICAR program tp
+.help
+The tp program is an X Windows tiepoint editing program.  It is intended as 
+the replacement for a number of VIDS/VRDI-base programs, most notably PICREG.
+
+Complete documentation for tp is available on-line at:
+<http://www-mipl.jpl.nasa.gov/tp/>
+or via clicking on the various Help options in the program.
+
+tp is an interactive, X Windows program.  Before using it, you must have
+set up the X display connection.  On a Unix machine, this is typically done
+via "setenv DISPLAY" while on VMS it is typically done via "set disp/create".
+Consult system documentation for details on establishing an X connection, or
+refer to the on-line tutorial in Mosaic at
+<http://www-mipl.jpl.nasa.gov/wstutor/set_x_display.html>
+Please note that the X display must be set up outside of the VICAR environment.
+.page
+Running the program:
+
+The tp program may be run either from within VICAR, or directly from
+the shell or DCL.  In order to run it from the shell (in Unix), make sure
+"$R2LIB" is in your path, or specify it explicitly:
+
+	% $R2LIB/tp image.red image.grn image.blu -pfile tpfile.ibis
+
+From VMS, "tp" is automatically defined for you:
+
+	$ tp image.red image.grn image.blu -pfile tpfile.ibis
+.page
+From VICAR, usage conforms to standard VICAR input file conventions:
+
+	VICAR> tp (image.red,image.grn,image.blu)
+
+tp can handle 0 to 12 image filenames
+
+Command-line options may be given to the program via the "options" parameter;
+see the help for that parameter for details.
+
+.page
+ADDITIONAL FEATURES
+
+In June 2010 several new features were added by rgd.  There was not time to
+find or update the online help, so the new features are documented here.
+
+1) Up to 6 windows can be displayed instead of just 3.  This is good for
+dual-monitor workstations (move the window around so the split between
+monitors falls between images).  No pretty icons for 4-6, just text.
+There's no reason the limit couldn't be raised beyond 6, if necessary.
+
+2) The image list in the upper right corner is now sized based on the number
+of images loaded (so you won't see all 12 all the time, you'll see however
+many are loaded).  However, the number shown never decreases (so if you delete
+an image, the slot will still be shown).  If you load lots of images, you may
+have to make the window bigger.
+
+3) Ability to load up to 25 images instead of just 12.  This was enabled by
+#2, so screen real estate is not used unless it is needed.  25 is a fairly
+arbitrary number and can easily be changed (TP_MAX_IMAGES in TpDefs.h, along
+with some minor changes to the resource file).
+
+4) A "Go-to tiepoint" feature allows you to type in a general qualifier value
+and select the first tiepoint that has the same qualifier.  It works similarly
+to the tiepoint number field; just key in the qual value, hit return, and the
+appropriate tiepoint will be selected.  If there is no match, the field will
+change to "UNK" (for Unknown).  This feature has only been tested with one
+general qualifier; it should behave like the qualifier text field.  Note that
+the orginal qualifier text field is still there; typing in it still allows
+you to change the qualifier value.
+
+NOTE: Feature #4 must be explicitly enabled.  To do this, turn on the enable
+flag:
+
+*enableGotoQual: True
+
+This can be done in the resource file, in a local config file, or on the
+command line (via:   -xrm "*enableGotoQual:True" ).  There is no interactive
+mechanism to enable this feature.
+
+.PAGE
+REVISIONS:
+  2016-09-01 WLB Fixed parsing of optional tpfile parm.
+
+.level1
+.vari inp
+Input file(s)
+.vari tpfile
+Tiepoint file (IBIS format)
+.vari options
+Command-line options
+.level2
+.vari inp
+Zero to twelve input files.  
+
+.vari options
+Various command-line options can be given to the program.  Typical options
+might be a -display to redirect the display somewhere, or a -xrm to set a
+resource.  See the on-line help for details.
+
+One trouble spot with TAE is when you need to quote strings.  For example,
+a -xrm specification has to be of the form:  -xrm "resource: value"  where the
+double quotes are actually present in the string submitted to DCL or the
+shell.  Specifying such resources is unfortunately platform-dependent.
+Unix will accept single quotes (usually), while VMS requires double quotes.
+You can double the quotes for VMS, however, this doesn't work on Unix.
+For example:
+
+Unix:
+	tp /usr/local/images/io.red opt="-xrm '*background: grey'"
+
+VMS:
+	tp images:io.red opt="-xrm ""*background: grey"""
+.end

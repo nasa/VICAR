@@ -1,0 +1,31 @@
+procedure
+refgbl $echo
+body
+let $echo="yes"
+!
+! generate a psf
+gen out=x.img nl=64 ns=64 linc=0 sinc=0
+qsar inp=x.img out=y.img area=(2,2,1,7,50,2,8,3,1,50)
+fft22 y.img ffty.img
+!
+! generate an image
+qsar inp=x.img out=z.img area=(32,32,5,5,200)
+fft22 z.img fftz.img
+!
+! blur the image & add noise
+wiener inp=(fftz.img,ffty.img) out=ffts.img 'direct
+fft22 inp=ffts.img out=blur.img 'inverse format=half
+gausnois out=nois.img nl=64 ns=64 mean=0 sigma=20 format=half
+f2 inp=(blur.img,nois.img) out=bn.img function="in1+in2"
+fft22 bn.img fftbn.img
+!
+! restore the image
+wiener inp=(fftbn.img,ffty.img) out=fftss.img 'wiener sn=6
+fft22 inp=fftss.img out=restored.img 'inverse format=half
+!xvd restored.img
+!
+copy y.img psf.img nl=11 ns=11
+mem inp=(bn.img,psf.img) out=rest.img rmserror=20 maxcrit=.1
+!xvd rest.img
+!
+end-proc

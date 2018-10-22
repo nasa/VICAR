@@ -1,0 +1,25 @@
+VICAR subroutine BATCH
+
+Purpose:
+
+       Batch is a subroutine that returns an integer values indicating
+   whether a TAE job is running interactively, asynchronously or in batch.
+
+
+Operation:
+
+       Batch uses zvp to obtain the value of the global variable
+   $RUNTYPE and returns an integer depending on its value. Batch
+   expects the $RUNTYPE global to be capitalized
+
+  Returned values:   0  if  $RUNTYPE == INTERACTIVE
+                     1  if  $RUNTYPE == BATCH
+                     2  if  $RUNTYPE == ASYNC
+                    99  if  $RUNTYPE has some undefined value
+
+Calling sequence:
+
+  Fortran:    call batch(i)
+
+  C:          i = batch();
+

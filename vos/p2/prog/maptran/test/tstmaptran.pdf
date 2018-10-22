@@ -1,0 +1,282 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+refgbl $syschar
+
+local dir string
+local dirg string
+
+if ($syschar(1) = "UNIX")
+   let dir = "/project/test_work/testdata/mipl/vgr/"
+   let dirg = "/project/test_work/testdata/mipl/gll/"
+else                            ! on Alpha:
+   let dir = "wms_test_work:[testdata.mipl.vgr]"
+end-if
+
+write " "
+write "This test produces 15 images, called mapt1.img to mapt16.img"
+write "( mapt8.img is not generated)"
+write "mapt7.img is used to store a mosaicking test and is comparable"
+write "to mapt12.img."
+write "Each image is a mosaic of 4 images which test one projection."
+write "The upper left is a perspective projection."
+write "The upper right is a map3 projection to be tested."
+write "The lower left is maptrans try at converting the upper right to"
+write "the upper left image."
+write "The lower right is maptrans try at converting the upper left to"
+write "the upper right image."
+write "Check each mosaic visually and remember that maptrans can only"
+write "project what it can see of the input."
+
+write "*** Perspective projection"
+cform &"dir"f1636832.geo a.img irange=(0,6000) orange=(0,255) oform=BYTE
+map3 a.img b.img nl=500 ns=500 scale=10. 'perspect 'remote target=io
+write "*** place overlay grid on the image of IO"
+overlay b.img perspect.img 
+
+write "*** Polar Orthographic projection"
+map3 a.img b.img NL=500 NS=500 'ORTH SCALE=10. 'remote +
+  LINE=250.  SAMP=250. LATI=90. LONG=330. 'POLE 'NOINTERP target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt1.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt1.img
+
+write "*** Oblique orthographic"
+map3 a.img b.img NL=500 NS=500 'ORTH SCAL=10. 'remote +
+    LINE=250. SAMP=250. LATI=-10. LONG=150. NORTH=30. target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt2.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt2.img
+
+write "*** Polar Stereographic projection"
+map3 a.img b.img NL=500 NS=500 'STER SCALE=10. 'remote +
+    LINE=250. SAMP=250. LATI=-90. LONG=180. 'POLE 'SOUTH target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt3.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt3.img
+
+write "*** Oblique stereographic"
+map3 a.img b.img NL=500 NS=500 'STER SCAL=10. 'remote +
+   LINE=250. SAMP=250. LATI=-10. LONG=150. NORTH=30. target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt4.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt4.img
+
+write "*** Lambert projection"
+map3 a.img b.img NL=500 NS=500 'LAMB SCALE=10. 'remote +
+    LINE=250. SAMP=250. LATI=-80. LONG=150. PAR1=-30. +
+    PAR2=-60. 'SOUTH target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt5.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt5.img
+
+write "*** Mercator projection"
+map3 a.img b.img NL=500 NS=500 'MERC SCALE=10. 'remote +
+     LATI=70. LONG=240. target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt6.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt6.img
+
+write "*** Cylindrical projection"
+map3 a.img b.img NL=500 NS=500 'CYLI SCALE=10. 'remote +
+    LINE=0. SAMP=1. LATI=90. LONG=240. target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt9.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt9.img
+
+write "*** Rectangular projection"
+map3 a.img b.img NL=500 NS=500 'RECT SCALE=10. 'remote +
+     SAMP=1.  LATI=90. LONG=225. target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500 'nocheck
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt10.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt10.img
+
+write "*** Oblique simple cylindrical projection"
+write "*** no planet rotation, sees the center of the input."
+map3 a.img b.img NL=500 NS=500 'OBCY SCALE=10. 'remote +
+     'RECENT target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt11.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt11.img
+
+write "*** Sinusoidal projection"
+write "*** test nointerp"
+map3 a.img b.img 'remote +
+  nl=500 ns=500 scale=10. 'sinusoid latitude=20 longitud=150 +
+  line=250 samp=250 target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500 +
+  'nointerp
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500 +
+  'nointerp
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt12.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt12.img
+
+write "*** Oblique Sinusoidal projection"
+write "*** no rotation , observe center of input"
+map3 a.img b.img 'remote +
+  nl=500 ns=500 scale=10. 'obsinuso 'recenter target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt13.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt13.img
+
+write "*** Mollweide projection"
+write "*** center input in output"
+map3 a.img b.img 'remote +
+  nl=500 ns=500 scale=10. 'mollweid 'recenter  target=io  
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt14.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt14.img
+
+write "*** Transverse Mercator projection"
+write "*** central meridian defaults to p5 point"
+map3 a.img b.img 'remote +
+  nl=500 ns=500 scale=10. 'tmercato target=io
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt15.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt15.img
+
+write "*** Perspective projection"
+map3 a.img b.img 'remote +
+  nl=500 ns=500 scale=10. 'perspect target=io +
+  north=45. latitude=80. longitud=150. line=200 samp=200
+overlay b.img map3.img
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500
+label-list c.img
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500
+label-list d.img
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt16.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+label-list mapt16.img
+
+write "*** Test of REAL data"
+cform perspect.img perspectR.img 'real
+maptran inp=(perspectR.img,map3.img) out=cR.img nl=500 ns=500
+label-list cR.img
+cform cR.img c1.img 'byte
+write " SMALL DIFFERENCES ARE DUE TO EDGE EFFECTS & ARE UNIMPORTANT:"
+difpic (c.img c1.img) d.img
+
+write "*** Test of cube format"
+insert3d (perspect.img perspect.img) test.cub band=2
+insert3d (test.cub perspect.img) test.cub band=3
+label-l test.cub
+maptran inp=(test.cub,map3.img) out=test1.cub nl=500 ns=500
+label-l test1.cub
+copy test1.cub c1.img nb=1
+difpic (c.img c1.img)
+copy test1.cub c3.img nb=1 sb=3
+difpic (c.img c3.img)
+maptran inp=(test.cub,map3.img) out=test1.cub nl=500 ns=500 nb=2
+label-l test1.cub
+copy test1.cub c2.img nb=1 sb=2
+difpic (c.img c2.img)
+
+write "*** Test of MOSAIC and other keywords"
+maptran inp=(perspect.img,map3.img) out=c.img nl=500 ns=500 +
+  'mosaic inc=11 range=11 thresh=1 dninter=1 code=-32741 'nointerp
+maptran inp=(map3.img,perspect.img) out=d.img nl=500 ns=500 +
+  'mosaic inc=11 range=11 thresh=1 dninter=1 code=-32741 'nointerp
+fastmos inp=(perspect.img,map3.img,d.img,c.img) out=mapt7.img +
+ off1=(1,1) off2=(1,501) off3=(501,1) off4=(501,501) nl=1000 ns=1000
+
+write "*** Test of DAR 26-Mar-2010 fix"
+maptran (&"dirg"maptran_test_1.img &"dirg"maptran_test_2.img) maptran_test_out.img
+write "this difpic should give zero (or few) differences:"
+difpic (maptran_test_out.img &"dirg"maptran_test_comp_new.img) 'mod
+write "this difpic should give many differences:"
+difpic (maptran_test_out.img &"dirg"maptran_test_comp_old.img) 'mod
+
+if ($syschar(1) = "UNIX")
+  ush rm perspect.img
+  ush rm a.img
+  ush rm b.img
+  ush rm c.img
+  ush rm c1.img
+  ush rm c2.img
+  ush rm c3.img
+  ush rm d.img
+  ush rm map3.img
+  ush rm cR.img
+  ush rm test.cub
+  ush rm test1.cub
+  ush rm maptran_test_*.img
+else
+  dcl del perspect.img;
+  dcl del a.img;
+  dcl del b.img;
+  dcl del c.img;
+  dcl del c1.img;
+  dcl del c2.img;
+  dcl del c3.img;
+  dcl del d.img;
+  dcl del map3.img;
+  dcl del test.cub
+  dcl del test1.cub
+end-if
+end-proc

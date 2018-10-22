@@ -1,0 +1,42 @@
+process help=*
+PARM INP TYPE=(STRING,32) COUNT=1
+PARM OUT TYPE=(STRING,32) COUNT=1
+END-PROC
+.TITLE
+VICAR2 Program SWAP -- swaps the quadrants of an image or fft.
+.HELP
+
+PURPOSE
+
+Switches the locations of the quadrants of an image or a complex fft.
+Upper left goes to lower right.
+Lower right goes to upper left.
+Upper right goes to lower left.
+Lower left goes to upper right.
+
+The main purpose of SWAP is to move the origin or DC term of the fft located
+at (1,1) to the center of the image at (nl/2,ns/2).
+
+EXECUTION
+
+fft22 a b
+swap b c 
+
+RESTRICTIONS
+
+Image must have an even number of lines and samples.
+
+Cognizant Programmer:  JJ Lorre   July 1998
+
+.LEVEL1
+.VARIABLE INP
+input image
+.VARIABLE OUT
+output image
+
+.LEVEL2
+.VARIABLE INP
+input image
+.VARIABLE OUT
+output image
+.END

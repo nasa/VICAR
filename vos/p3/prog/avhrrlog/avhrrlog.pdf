@@ -1,0 +1,51 @@
+process help=*
+PARM INP TYPE=(STRING,40)
+PARM OUT TYPE=(STRING,40) COUNT=5
+END-PROC
+.TITLE
+VICAR Program AVHRRLOG
+.HELP
+AVHRRLOG is used to log AVHRR data that is in the format of AVHRR LAC/HRPT data
+as supplied by NOAA.  LAC/HRPT AVHRR data consists of five channels of images,
+at the following wavelengths:
+                Channel             Micrometers
+                   1               0.55  -  0.68 (0.55-0.90 for TIROS-N)
+                   2               0.725 -  1.10
+                   3               3.55  -  3.93
+                   4              10.30  - 11.30 (for NOAA-7,-9,-11,-12,-I,-J)
+                                  10.50  - 11.50 (for TIROS-N and NOAA-6,-8,-10)
+                   5              11.50  - 11.50 for NOAA-7,-9,-11,-12,-I,-J
+                                  Ch 4 repeated for TIROS-N and NOAA-6,-8,-10)
+The data are acquired at 10 bit precision (data range 0-1023), and, after
+logging, are stored as 5 separate halfword (16 bit) images.  Output images 
+contain 2048 samples per scan line.
+
+The input tape data for LAC/HRPT AVHRR data consists of one 122 byte header
+record (called the TBM Header record), two 7400 byte header records (Data Set
+Header records), and 2*N 7400 byte image data records (N = number of scan lines
+in the image).  Prior to running AVHRRLOG, a VICAR label needs to be added to
+the file, by running CONVIM, or by similar means.
+.LEVEL1
+.VARIABLE INP
+Input filename,
+VICAR labelled
+.VARIABLE OUT
+Output filenames
+(five needed, one per band)
+.LEVEL2
+.VARIABLE INP
+INP contains the name of the INPut file, with VICAR label applied via CONVIM,
+or some similar means.
+.VARIABLE OUT
+OUT contains the names of the output files. AVHRRLOG produces five channels of
+output, with the following bandpasses:
+                Channel             Micrometers
+                   1               0.55  -  0.68 (0.55-0.90 for TIROS-N)
+                   2               0.725 -  1.10
+                   3               3.55  -  3.93
+                   4              10.30  - 11.30 (for NOAA-7,-9,-11,-12,-I,-J)
+                                  10.50  - 11.50 (for TIROS-N and NOAA-6,-8,-10)
+                   5              11.50  - 11.50 for NOAA-7,-9,-11,-12,-I,-J
+                                  Ch 4 repeated for TIROS-N and NOAA-6,-8,-10)
+The output datasets are halfword (16 bit) images, 2048 samples per line.
+.END

@@ -38,7 +38,7 @@ cp $TAE/include/unix/tmhost.inp $TAE/include
 # Because some Mac file systems are normal, we also copy back to the upper-case
 # one, just in case.
 
-if ("$TAEPLAT" != "mac_osx" && "$TAEPLAT" != "x86_macosx") then
+if ("$TAEPLAT" != "mac_osx" && "$TAEPLAT" != "x86_macosx" && "$TAEPLAT" != "mac64_osx") then
    rm $TAEINC/PGMINC.FIN
    cp $TAEINC/pgminc.fin $TAEINC/PGMINC.FIN
    rm $TAEINC/XIINC.FIN

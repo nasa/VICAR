@@ -1,0 +1,48 @@
+process help=*
+parm  INP    type=(string, 63)
+parm  TRANS  type=name
+
+!# annot function="VICAR Procedure Generation"
+!# annot keywords=(VMS,variable,translate,R2LIB,string,TAE,+
+!# "Enviroment variables","Logical names","shell-VICAR")
+
+end-proc
+.title
+Translates a logical name
+.help
+Program Description
+
+This procedure returns the translation of an input logical name (VMS)
+or environment variable (Unix).  (The example listed below will translate
+the name R2LIB).  A null string is returned if no translation is possible.
+The name is case-sensitive under Unix, since environment variables are
+case-sensitive.  It is not case-sensitive under VMS.
+
+Note:  This program must be used from TAE; it will not work with shell-VICAR
+due to implementation details.  But since all scripting languages (except
+PDFs!) have better facilities than this for accessing env vars/log names,
+this program is not needed with shell-VICAR.
+
+Calling Sequence:
+
+           VICAR> local trans type=(string,128)
+
+           VICAR> translog R2LIB trans
+           VICAR> disp trans
+
+Written By:            Glenn Dimit  (Nov. 27, 1984)
+Cognizant Programmer:  Bob Deen     (Nov. 21, 1997)
+.level1
+.variable INP
+Input name
+.variable TRANS
+Output equivalence of input's
+name
+.level2
+.variable INP
+Input logical name (VMS) or environment variable name (Unix).  Environment
+variables should not have the leading "$".
+.variable TRANS
+Output equivalence of input's logical name (VMS) or environment variable
+(Unix).
+.end

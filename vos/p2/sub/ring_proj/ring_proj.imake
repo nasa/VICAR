@@ -1,0 +1,10 @@
+/* Imake file for VICAR subroutine RING_PROJ */
+
+#define SUBROUTINE ring_proj
+#define MODULE_LIST ring_proj.f ring_inv.f ring_light.f ring_scale.f \
+	razimuth.f zring_proj.c zring_inv.c zring_light.c zring_scale.c \
+	zrazimuth.c
+#define P2_SUBLIB
+#define USES_FORTRAN
+#define USES_ANSI_C
+#define FTN_STRING

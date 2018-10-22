@@ -1,0 +1,46 @@
+process help=*	
+PARM INP	TYPE=STRING	
+PARM OUT        TYPE=STRING     
+
+!# annot function="Vicar Data Conversion"
+!# annot keywords=(IBIS,geoma,transform,VMS,"non-portable",tiepoint)
+
+END-PROC
+.TITLE
+Convert (obsolete) GEOMA parameters to IBIS format
+.HELP
+PURPOSE:
+
+             GEOMA no longer supports a non-IBIS second input file.  
+             Old non-IBIS 'GEOMA' files (which were often used to specify
+             the geometric transformation needed to correct for camera
+             distortion) can be converted on the VAX or Alpha using the program
+             OLDGEOMA2IBIS.
+             OLDGEOMA2IBIS converts an old non-portable (VMS) "geoma"
+             file into an IBIS tiepoint file.  OLDGEOMA2IBIS runs only under
+             VMS because it deals with a non-portable VMS-specific input file. 
+.PAGE
+EXECUTION:
+
+The following TAE command line formats show the most common usages:
+      OLDGEOMA2IBIS INP=a OUT=b 
+      OLDGEOMA2IBIS a b 
+
+       Here 'a' represents the input old 'GEOMA' file.
+       'b' represents an IBIS input file containing tiepoint information.
+
+The input parameter dataset contains tiepoint parameters. This dataset must
+have a standard VICAR label, and a record size of 3600. The first word of the
+first record following the label is an integer specifying the number of
+parameter words which follow. If one parameter record is not sufficient,
+additional records may be used. 
+
+.PAGE
+WRITTEN BY:	Steve Pohorsky		July 1995
+
+COGNIZANT PROGRAMMER:  Steve Pohorsky
+
+REVISION HISTORY
+  7-95    SP  Initial release - just a temporary program to convert those
+              old "geoma" files to IBIS tiepoint files.
+.end

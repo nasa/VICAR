@@ -1,0 +1,6 @@
+!*****************************************************************************
+! TABLE77V2.PDF - pdf for test program TABLE77V2.F for the subroutine ABLE77V2
+!*****************************************************************************
+PROCESS
+PARM INP  TYPE=STRING
+END-PROC

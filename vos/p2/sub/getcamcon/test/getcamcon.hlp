@@ -1,0 +1,51 @@
+1 GETCAMCON
+
+  Description:
+
+	VICAR2 subroutine GETCAMCON returns camera constants given project 
+  	and camera from GETPROJ.
+
+  FORTRAN calling sequence:
+
+	integer camera,ind
+	real*4 focal,oal,oas,scale
+	character*5 project
+
+	call getcamcon(project,camera,focal,oal,oas,scale,ind)
+
+  C calling sequence:
+
+	int ind,camera;
+	float focal,oal,oas,scale;
+	char *project;
+
+	zgetcamcon(project,camera,&focal,&oal,&oas,&scale,&ind);
+	
+2 ARGUMENTS
+     
+  Input:
+	project	- spacecraft id.      
+           	  valid=MAR-9 MAR10 VIKOR VGR-1 VGR-2 GLL
+                  WFPC1 (old system)
+                  WFPC2 (after first optics upgrade)
+                  CASSI
+	camera	- camera serial number
+
+  Output:	
+	focal	- focal length in mm.
+	oal	- optical axis line object space.
+	oas	- optical axis sample object space.
+	scale	- object space scale. pixels/mm.
+	ind	- 0=normal   1=error
+
+2 HISTORY
+
+  Written By: Jean Lorre        10/1/89
+  Cognizant Programmer: J Lorre
+  Revision : 01 MAR 91 ...CCA...  ADDED TEST PROGRAM, ADDED TEST
+                                    FOR VO, MVM, MAR-9
+             29 JUL 93 T. Truong  Ported to UNIX
+              9 aug 93 jjl        Added WFPC projects
+             24 Jul 96 SM Chang   Adjust oal, oas, scale for SSI Summation
+                                    Mode (FR 89116)
+             18 Apr 01 vrh        Added Cassini support, includes summation

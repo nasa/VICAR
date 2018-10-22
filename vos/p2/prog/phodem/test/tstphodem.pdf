@@ -1,0 +1,109 @@
+procedure
+    PARMSET name= tstphodem_parms
+    	parm PHO_FUNC	string 	count=0:1 	  +
+			valid=(	LAMBERT,	  +
+				MINNAERT,	  +
+				IRVINE,		  +
+				VEVERKA,	  +
+				BURATTI1,	  +
+				BURATTI2,	  +
+				BURATTI3,	  +
+				MOSHER,		  +
+				LUMME_BOWEL_HG1,  +
+				HAPKE_81_LE2,	  +
+				HAPKE_81_COOK,	  +
+				HAPKE_86_HG1,	  +
+				HAPKE_86_HG2,	  +
+				HAPKE_86_LE2,	  +
+				HAPKE_HG1_DOM,	  +
+				REGNER_HAPKE_HG1, +
+				ATMO_CORR_REGNER) +
+			default=MINNAERT
+
+    	parm ALBEDO 	real count=0:1 +
+			valid=(0:1)	default=1.0
+    	parm EXPONENT 	real count=0:1 +
+			valid=(0:1)	default=0.5
+    	parm A_VEVERKA 	real count=0:1 +
+					default=1.0
+    	parm B_VEVERKA 	real count=0:1 +
+					default=0.005
+    	parm C_VEVERKA 	real count=0:1 +
+					default=0.5
+    	parm D_VEVERKA 	real count=0:1 +
+					default=0.05 
+    	parm MO_EXP1 	real count=0:1 +
+					default=0.05
+    	parm MO_EXP2 	real count=0:1 +
+					default=.005
+    	parm E_BURATTI 	real count=0:1 +
+					default=2.0
+    	parm DEN_SOIL 	real count=0:1 +
+					default=0.005
+    	parm W_SOIL 	real count=0:1 +
+			valid=(0:1)	default=0.7
+    	parm HG1_SOIL 	real count=0:1 +
+					default=5.0
+    	parm HG2_SOIL 	real count=0:1 +
+					default=3.0
+    	parm HG_ASY_SOIL real count=0:1 +
+					default=1.0
+    	parm LE1_SOIL 	real count=0:1 +
+					default=3.0
+   	parm LE2_SOIL 	real count=0:1 +
+					default=2.0
+    	parm H_SHOE 	real count=0:1 +
+					default=0.4
+    	parm B_SHOE 	real count=0:1 +
+					default=0.22
+    	parm H_CBOE 	real count=0:1 +
+					default=0.3
+   	parm B_CBOE 	real count=0:1 +
+					default=0.1
+    	parm THETA 	real count=0:1 +
+					default=10.0
+   	parm COOK 	real count=0:1 +
+					default=0.9
+    	parm TAU_ATM 	real count=0:1 +
+					default=0.4
+    	parm W_ATM 	real count=0:1 +
+			valid=(0:1)	default=0.9
+    	parm HG1_ATM 	real count=0:1 +
+					default=3.0
+    	parm IRV_EXP1 	real count=0:1 +
+					default=0.8
+    	parm IRV_EXP2 	real count=0:1 +
+					default=0.08
+    	parm INC_ANG	real count=0:1 +
+					default=10.0
+    	parm EM_ANG 	real count=0:1 +
+					default=50.0
+    	parm PHAS_ANG 	real count=0:1 +
+					default=55.0
+   end-proc
+
+body
+
+tstphodem_parms |save=tstphodem_parms|
+phodem |restore=tstphodem_parms|	PHO_FUNC=LAMBERT
+phodem |restore=tstphodem_parms|	PHO_FUNC=MINNAERT
+end-proc
+phodem |restore=tstphodem_parms|	PHO_FUNC=IRVINE
+phodem |restore=tstphodem_parms|	PHO_FUNC=VEVERKA
+phodem |restore=tstphodem_parms|	PHO_FUNC=BURATTI1
+phodem |restore=tstphodem_parms|	PHO_FUNC=BURATTI2
+phodem |restore=tstphodem_parms|	PHO_FUNC=BURATTI3
+phodem |restore=tstphodem_parms|	PHO_FUNC=LUMME_BOWEL_HG1
+phodem |restore=tstphodem_parms|	PHO_FUNC=HAPKE_81_LE2
+phodem |restore=tstphodem_parms|	PHO_FUNC=HAPKE_81_COOK
+phodem |restore=tstphodem_parms|	PHO_FUNC=HAPKE_86_HG1
+phodem |restore=tstphodem_parms|	PHO_FUNC=HAPKE_86_HG2
+phodem |restore=tstphodem_parms|	PHO_FUNC=HAPKE_86_LE2
+phodem |restore=tstphodem_parms|	PHO_FUNC=HAPKE_HG1_DOM
+phodem |restore=tstphodem_parms|  	PHO_FUNC=REGNER_HAPKE_HG1
+phodem |restore=tstphodem_parms| 	PHO_FUNC=ATMO_CORR_REGNER
+
+phodem |restore=tstphodem_parms|	PHO_FUNC=MOSHER
+
+
+end-proc

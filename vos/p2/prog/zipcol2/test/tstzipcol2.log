@@ -1,0 +1,387 @@
+Test general capabilities, 1 to many and many to 1
+Beginning VICAR task ibis
+Beginning VICAR task ibis
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 2       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------
+         C:1         C:2
++-----------+-----------
+        1.00       51.00
+        1.00       52.00
+        2.00       53.00
+        3.00       54.00
+        4.00       55.00
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 2       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------
+         C:1         C:2
++-----------+-----------
+        1.00       81.00
+        3.00       82.00
+        4.00       83.00
+        4.00       84.00
+        5.00       85.00
+Beginning VICAR task zipcol2
+zipcol2 version 2016-06-09
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 2       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------
+         C:1         C:2
++-----------+-----------
+        1.00       81.00
+        1.00       81.00
+        2.00      789.00
+        3.00       82.00
+        4.00       84.00
+ Test general capabilities
+Beginning VICAR task ibis
+Beginning VICAR task ibis
+Beginning VICAR task mf
+mf version 05-May-2011
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task ibis
+ 
+Number of Rows:10  Number of Columns: 5       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:10
++-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5
++-----------+-----------+-----------+-----------+-----------
+        1.00        2.00       31.00       41.00       51.00
+        2.00        4.00       32.00       42.00       52.00
+        3.00        6.00       33.00       43.00       53.00
+        4.00        8.00       34.00       44.00       54.00
+        5.00        1.00       35.00       45.00       55.00
+        6.00        3.00       36.00       46.00       56.00
+        7.00        5.00       37.00       47.00       57.00
+        8.00        7.00       38.00       48.00       58.00
+        9.00        9.00       39.00       49.00       59.00
+       10.00        0.00       40.00       50.00       60.00
+Beginning VICAR task ibis
+ 
+Number of Rows:10  Number of Columns: 5       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:10
++-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5
++-----------+-----------+-----------+-----------+-----------
+        1.00        2.00        3.00        4.00        5.00
+        2.00        0.00        4.00        5.00        6.00
+        3.00        6.00        5.00        6.00        7.00
+        4.00        0.00        6.00        7.00        8.00
+        5.00        1.00        7.00        8.00        9.00
+        6.00        0.00        8.00        9.00       10.00
+        7.00        5.00        9.00       10.00       11.00
+        8.00        0.00       10.00       11.00       12.00
+        9.00        9.00       11.00       12.00       13.00
+       10.00        0.00       12.00       13.00       14.00
+Beginning VICAR task zipcol2
+zipcol2 version 2016-06-09
+Beginning VICAR task ibis
+ 
+Number of Rows:10  Number of Columns: 5       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:10
++-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5
++-----------+-----------+-----------+-----------+-----------
+        1.00        2.00        3.00        4.00        5.00
+        2.00        4.00      123.00      456.00      789.00
+        3.00        6.00        5.00        6.00        7.00
+        4.00        8.00      123.00      456.00      789.00
+        5.00        1.00        7.00        8.00        9.00
+        6.00        3.00      123.00      456.00      789.00
+        7.00        5.00        9.00       10.00       11.00
+        8.00        7.00      123.00      456.00      789.00
+        9.00        9.00       11.00       12.00       13.00
+       10.00        0.00       12.00       13.00       14.00
+ Test general capabilities, with the new nonull keyword
+Beginning VICAR task ibis
+Beginning VICAR task ibis
+Beginning VICAR task mf
+mf version 05-May-2011
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task ibis
+ 
+Number of Rows:10  Number of Columns: 5       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:10
++-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5
++-----------+-----------+-----------+-----------+-----------
+        1.00        2.00       31.00       41.00       51.00
+        2.00        4.00       32.00       42.00       52.00
+        3.00        6.00       33.00       43.00       53.00
+        4.00        8.00       34.00       44.00       54.00
+        5.00        1.00       35.00       45.00       55.00
+        6.00        3.00       36.00       46.00       56.00
+        7.00        5.00       37.00       47.00       57.00
+        8.00        7.00       38.00       48.00       58.00
+        9.00        9.00       39.00       49.00       59.00
+       10.00        0.00       40.00       50.00       60.00
+Beginning VICAR task ibis
+ 
+Number of Rows:10  Number of Columns: 5       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:10
++-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5
++-----------+-----------+-----------+-----------+-----------
+        1.00        2.00        3.00        4.00        5.00
+        2.00        0.00        4.00        5.00        6.00
+        3.00        6.00        5.00        6.00        7.00
+        4.00        0.00        6.00        7.00        8.00
+        5.00        1.00        7.00        8.00        9.00
+        6.00        0.00        8.00        9.00       10.00
+        7.00        5.00        9.00       10.00       11.00
+        8.00        0.00       10.00       11.00       12.00
+        9.00        9.00       11.00       12.00       13.00
+       10.00        0.00       12.00       13.00       14.00
+Beginning VICAR task zipcol2
+zipcol2 version 2016-06-09
+Beginning VICAR task ibis
+ 
+Number of Rows:10  Number of Columns: 5       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:10
++-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5
++-----------+-----------+-----------+-----------+-----------
+        1.00        2.00        3.00        4.00        5.00
+        2.00        4.00       32.00       42.00       52.00
+        3.00        6.00        5.00        6.00        7.00
+        4.00        8.00       34.00       44.00       54.00
+        5.00        1.00        7.00        8.00        9.00
+        6.00        3.00       36.00       46.00       56.00
+        7.00        5.00        9.00       10.00       11.00
+        8.00        7.00       38.00       48.00       58.00
+        9.00        9.00       11.00       12.00       13.00
+       10.00        0.00       12.00       13.00       14.00
+  Test numeric keys, alpha data
+Beginning VICAR task ibis
+Beginning VICAR task ibis
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          51     aaaaaa1     bbbbbb1
+           1          52     aaaaaa2     bbbbbb2
+           2          53     aaaaaa3     bbbbbb3
+           3          54     aaaaaa4     bbbbbb4
+           4          55     aaaaaa5     bbbbbb5
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          81     xxxxxx1     yyyyyy1
+           3          82     xxxxxx2     yyyyyy2
+           4          83     xxxxxx3     yyyyyy3
+           4          84     xxxxxx4     yyyyyy4
+           5          85     xxxxxx5     yyyyyy5
+Beginning VICAR task zipcol2
+zipcol2 version 2016-06-09
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          81     xxxxxx1     yyyyyy1
+           1          81     xxxxxx1     yyyyyy1
+           2         789       nulla            
+           3          82     xxxxxx2     yyyyyy2
+           4          84     xxxxxx4     yyyyyy4
+  Test alpha keys, alpha data
+Beginning VICAR task ibis
+Beginning VICAR task ibis
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          51     aaaaaa1     bbbbbb1
+           1          52     aaaaaa2     bbbbbb2
+           2          53     aaaaaa3     bbbbbb3
+           3          54     aaaaaa4     bbbbbb4
+           4          55     aaaaaa5     bbbbbb5
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          81     aaaaaa1     yyyyyy1
+           3          82     aaaaaa4     yyyyyy2
+           4          83     aaaaaa5     yyyyyy3
+           4          84     aaaaaa5     yyyyyy4
+           5          85     aaaaaa6     yyyyyy5
+Beginning VICAR task zipcol2
+zipcol2 version 2016-06-09
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          81     aaaaaa1     yyyyyy1
+           1         789     aaaaaa2       nulla
+           2         789     aaaaaa3       nulla
+           3          82     aaaaaa4     yyyyyy2
+           4          84     aaaaaa5     yyyyyy4
+  Test numeric keys, alpha data, 'nonull kwd
+Beginning VICAR task ibis
+Beginning VICAR task ibis
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          51     aaaaaa1     bbbbbb1
+           1          52     aaaaaa2     bbbbbb2
+           2          53     aaaaaa3     bbbbbb3
+           3          54     aaaaaa4     bbbbbb4
+           4          55     aaaaaa5     bbbbbb5
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          81     xxxxxx1     yyyyyy1
+           3          82     xxxxxx2     yyyyyy2
+           4          83     xxxxxx3     yyyyyy3
+           4          84     xxxxxx4     yyyyyy4
+           5          85     xxxxxx5     yyyyyy5
+Beginning VICAR task zipcol2
+zipcol2 version 2016-06-09
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          81     xxxxxx1     yyyyyy1
+           1          81     xxxxxx1     yyyyyy1
+           2          53     aaaaaa3     bbbbbb3
+           3          82     xxxxxx2     yyyyyy2
+           4          84     xxxxxx4     yyyyyy4
+  Test alpha keys, alpha data, 'nonull kwd
+Beginning VICAR task ibis
+Beginning VICAR task ibis
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task mf3
+mf3 version Wed Oct 07 2008
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          51     aaaaaa1     bbbbbb1
+           1          52     aaaaaa2     bbbbbb2
+           2          53     aaaaaa3     bbbbbb3
+           3          54     aaaaaa4     bbbbbb4
+           4          55     aaaaaa5     bbbbbb5
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          81     aaaaaa1     yyyyyy1
+           3          82     aaaaaa4     yyyyyy2
+           4          83     aaaaaa5     yyyyyy3
+           4          84     aaaaaa5     yyyyyy4
+           5          85     aaaaaa6     yyyyyy5
+Beginning VICAR task zipcol2
+zipcol2 version 2016-06-09
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
++-----------+-----------+-----------+-----------
+           1          81     aaaaaa1     yyyyyy1
+           1          52     aaaaaa2     bbbbbb2
+           2          53     aaaaaa3     bbbbbb3
+           3          82     aaaaaa4     yyyyyy2
+           4          84     aaaaaa5     yyyyyy4

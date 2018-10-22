@@ -1,0 +1,100 @@
+PROCESS		HELP=*
+! VERSION 1
+! SORT PDF - VICAR/IBIS MOSAIC SOFTWARE
+PARM INP TYPE=STRING
+PARM SORTCOL TYPE=INTEGER COUNT=(1:20)
+PARM INDEXCOL TYPE=INTEGER COUNT=1,DEFAULT=0
+PARM DESCEND TYPE=KEYWORD VALID=(DESCEND,ASCEND) DEFAULT=ASCEND
+END-PROC
+.TITLE
+VICAR/IBIS Program sort
+.HELP
+PURPOSE
+
+	SORT performs a multiple column sort on an IBIS interface file. The
+program starts with the column defined as primary and performs an incore sort.
+Subsequent columns are sorted only within limits established by equal values
+in previously sorted columns. The program incorporates two temporary fields as
+sorting and indexing columns. The index column can be retained for later use
+if specified.
+
+TAE COMMAND LINE FORMAT
+
+	sort INP=A SORTCOL=(B,C,D,E,...F) INDEXCOL=G
+	sort INP=A SORTCOL=(B,C,D,E,...F) DESCEND INDEXCOL=G
+
+	INP is a random access file which is read from or written to depending
+on the parameters. SORTCOL specifies the columns to be sorted in the order in
+which the sort is to occur. DESCEND is a keyword whose presence indicates that
+all the columns are to be sorted in descending order. INDEXCOL is an integer
+which designates the column to recieve the index numbers assigned to each
+unique combination of letters or numbers in the sorted columns created by the
+sorting process. The columns can be numdric or alphabetic, or a mixture of
+the two in the case of multiple column sorts.
+
+EXAMPLE
+
+	sort INP=A SORTCOL=(1,2) INDEXCOL=3
+
+	In this example an 8 character name is stored in the first 2 columns.
+The file is sorted into alphabetic order. The index stored in column 3 can be
+used in place of the names for other operations such as aggregation.
+
+OPERATION
+
+	SORT uses two temporary arrays. The first holds the SORT data and the
+second defines the boundary limits. Limits are defined using an index number
+which indicates the portion of the file to be sorted. The boundary index is
+initialized to 1 which indicates that the entire column is to be sorted. As
+subsequent sorts are made on the file the index number is broken into groupings
+of the same number which indicate the sort limits. The holding array is sorted
+each time the index changes to achieve a multiple column sort.
+
+	At the completion of the sort process, the reordering is in the form
+of pointers. The pointers are used to move all the columns of the file one at
+a time. The limit array serves as an index.
+
+WRITTEN BY		A. L. Zobrist		15 Dec 1976
+COGNIZANT PROGRAMMER	K. F. Evans
+DOCUMENTED BY		R. Wayne Bannister
+REVISION HISTORY
+  1995-03-06 C. Randy Schenk (CRI) - Ported to UNIX
+  2000-09-04 A. Zobrist - rewritten in C
+  2008-01-02 WLB - switched to USES_ANSI_C AND LIB_CARTO; misc cleanup  
+
+.LEVEL1
+.VARIABLE INP
+File to be sorted.
+.VARIABLE SORTCOL
+Columns to be sorted in order.
+.VARIABLE INDEXCOL
+Column to get index numbers.
+.VARIABLE DESCEND
+Descending order keyword.
+.LEVEL2
+.VARIABLE INP
+INP is a random access file
+which is read from and written
+to depending on the parameters
+.VARIABLE SORTCOL
+SORTCOL specifies 1 or more
+columns to be sorted in the
+order in which it is to occur.
+.VARIABLE INDEXCOL
+INDEXCOL specifies the column
+to recieve the index numbers
+assigned to each unique com-
+bination of letters or numbers
+in the sorted columns created
+by the sorting process.
+.VARIABLE DESCEND
+DESCEND is a keyword whose
+presence indicates that all
+the columns are to be
+sorted in descending order.
+.VARIABLE ALPHA
+ALPHA is a keyword indicating
+that the sorted columns are
+alphabetic.
+.END
+

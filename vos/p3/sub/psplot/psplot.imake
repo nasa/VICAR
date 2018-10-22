@@ -1,0 +1,9 @@
+
+#define SUBROUTINE psplot
+
+#define MODULE_LIST psplot.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

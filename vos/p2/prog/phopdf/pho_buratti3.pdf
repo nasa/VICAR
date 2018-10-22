@@ -1,0 +1,168 @@
+procedure option=selftutor help=*
+
+	parm ALBEDO_temp	 real count=0:1 		def=0.5 
+	parm B_VEVERKA_temp	 real count=0:1 		def=0.6
+	parm C_VEVERKA_temp	 real count=0:1 		def=-0.003
+	parm D_VEVERKA_temp	 real count=0:1 		def=0.14
+	parm E_BURATTI_temp	 real count=0:1 		def=0.14
+
+	parm ALBEDO	 real count=0:1 	def=-- 
+	parm B_VEVERKA	 real count=0:1 	def=--
+	parm C_VEVERKA	 real count=0:1 	def=--
+	parm D_VEVERKA	 real count=0:1 	def=--
+	parm E_BURATTI	 real count=0:1 	def=--
+
+	PARMSET name=pho_buratti3_sub help=*
+
+	    parm ALBEDO		 real count=0:1 		def=-- 
+	    parm B_VEVERKA	 real count=0:1 		def=--
+	    parm C_VEVERKA	 real count=0:1 		def=--
+	    parm D_VEVERKA	 real count=0:1 		def=--
+	    parm E_BURATTI	 real count=0:1 		def=--
+
+	END-PROC
+
+body
+
+	if (_tutor=1)
+
+	  restore-parm pho_buratti3.par
+
+
+	  if ($count(ALBEDO)=0)
+	 						let ALBEDO_temp=0.5
+	  else
+	 	let ALBEDO_temp=&ALBEDO
+	  end-if
+
+	  if ($count(B_VEVERKA)=0)
+	 						let B_VEVERKA_temp=0.6
+	  else
+	 	let B_VEVERKA_temp=&B_VEVERKA
+	  end-if
+
+	  if ($count(C_VEVERKA)=0)
+	 					     let C_VEVERKA_temp=-0.003
+	  else
+	 	let C_VEVERKA_temp=&C_VEVERKA
+	  end-if
+
+	  if ($count(D_VEVERKA)=0)
+	 						let D_VEVERKA_temp=0.14
+	  else
+	 	let D_VEVERKA_temp=&D_VEVERKA
+	  end-if
+
+	  if ($count(E_BURATTI)=0)
+	 						let E_BURATTI_temp=0.14
+	  else
+	 	let E_BURATTI_temp=&E_BURATTI
+	  end-if
+
+
+
+	   tutor pho_buratti3_sub 					+
+		|restore=pho_buratti3.par, save=pho_buratti3.par|	+
+			ALBEDO=&ALBEDO_temp				+
+			B_VEVERKA=&B_VEVERKA_temp			+
+			C_VEVERKA=&C_VEVERKA_temp			+
+			D_VEVERKA=&D_VEVERKA_temp			+
+			E_BURATTI=&E_BURATTI_temp
+
+
+	   return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs needs "
+	   write " photometric function parameters "
+	   write " for the BURATTI3 function."
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+
+.title
+'PHO_BURATTI3' sub-menu (for a photometry VICAR application program)
+
+.help
+
+PURPOSE:
+
+In this PDF, the user is asked for the only parameters needed for the Buratti's
+photometric function.
+
+.page
+MATHEMATICAL BACKGROUND :
+
+bidirectional reflectance [1/str] :
+
+r(i,e,g) = A * cos(i)/(cos(i)+cos(e)) * burf + (1 - A) * cos(i)
+
+burf = ((1 - A) * 2/3 + A*E)*phi - (1 - A) * 2/3 * ((sin(phase) + (PI - phase) 
+* cos(phase))/PI)
+
+BURATTI3 approximation : 
+phi=1.0 + params[1] * phase + params[2] * (exp(-params[3] * phase) - 1.0)
+
+
+REFERENCE :
+Bonnie Buratti, Voyager Disk Resolved Photometry of the Saturnian Satellites,
+	Icarus, Vol. 59, p. 392-405, 
+Bonnie Buratti, Joseph Veverka, Voyager Photometry of Europa,
+	Icarus, Vol. 55, p. 93-110, 1983
+
+.page
+PROGRAMMER:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+
+.level1
+
+.VARI ALBEDO
+isotropic/unisotropic 
+reflectance weight 
+
+.VARI B_VEVERKA
+Veverka parameter
+
+.VARI C_VEVERKA
+Veverka parameter
+
+.VARI D_VEVERKA
+Veverka parameter
+
+.VARI E_BURATTI
+Buratti's parameter
+
+
+.level2
+
+.VARI ALBEDO
+Weight of unisotropic and isotropic reflectance.
+
+.VARI B_VEVERKA
+Parameter of the Veverka, Mosher and Buratti 
+photometric functions.
+
+.VARI C_VEVERKA
+Parameter of the Veverka, Mosher and Buratti 
+photometric functions.
+
+.VARI D_VEVERKA
+Parameter of the Veverka, Mosher and Buratti 
+photometric functions.
+
+.VARI E_BURATTI
+Buratti's parameter for modification of the Veverka photometric function.
+
+.end

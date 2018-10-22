@@ -1,0 +1,52 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+write "This is a test for FIT"
+write ""
+write "Test halfword output,SIZE,PERC,LVAL,HVAL,EXCLUDE,EHIST"
+write ""
+gen a 20 20 'half ival=-100 sinc=20 linc=50
+fit a b (2,2,18,18) perc=1. lval=10 hval=300 exclude=(-32768,0) 'ehist
+list b
+write ""
+write "Test byte output, LPERC, HPERC, PHIST"
+write ""
+fit a b  lperc=2. hperc=4. 'include  'phist  'byte
+list b
+write ""
+write "Test SPEED,AREA"
+write ""
+fit a b  speed=2 area=(4,4,16,16) 'byte
+list b
+write ""
+write "Test no output file,HINC,LOG"
+write ""
+fit a hinc=20 nlines=80 'log 'phist
+write "Test FR 88195"
+write "The histogram should not be displayed because phist is not specified"
+gen a.dat 200 200 'half
+fit a.dat b.dat perc=.5 'byte
+
+write "Test with nl and ns bigger then file size."
+
+gen a.dat 200 200 'half
+fit inp=a.dat out=a.out sl=1 nl=800 ss=1 ns=800 +
+lvalue=0 hvalue=255  area=(1,10,20,40)
+
+fit inp=a.dat out=a.out size=(1,1,800,800) +
+lvalue=0 hvalue=255  area=(1,10,20,40)
+
+write "Test 3D (multibanded) processing capability (simple)"
+gen a NS=10 NL=10 NB=10 'half
+fit a
+fit a NB=4
+
+
+write "Test 3D (multibanded) processing capability (linc, sinc)"
+gen a NS=10 NL=10 NB=10 'half ival=-100 sinc=20 linc=50
+fit a
+
+end-proc
+

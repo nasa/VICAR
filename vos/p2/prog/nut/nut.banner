@@ -1,0 +1,34 @@
+procedure
+refgbl $syschar
+body
+if ($syschar(1) = "VAX_VMS")
+  dcl write sys$output " "
+  dcl write sys$output " "
+  dcl write sys$output "***************************************"
+  dcl write sys$output "*                                     *"
+  dcl write sys$output "*       VICAR NEW USER TUTORIAL       *"
+  dcl write sys$output "*                                     *"
+  dcl write sys$output "***************************************"
+  dcl write sys$output " "
+  dcl write sys$output " "
+  dcl write sys$output " "
+  dcl write sys$output " "
+  dcl write sys$output " "
+  dcl write sys$output " "
+  dcl wait 0:00:03.0
+else
+  write  " "
+  write  " "
+  write  "***************************************"
+  write  "*                                     *"
+  write  "*       VICAR NEW USER TUTORIAL       *"
+  write  "*                                     *"
+  write  "***************************************"
+  write  " "
+  write  " "
+  write  " "
+  write  " "
+  write  " "
+  ush sleep 3 
+end-if
+end-proc

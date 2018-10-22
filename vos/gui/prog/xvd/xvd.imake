@@ -1,0 +1,37 @@
+#define PROGRAM xvd
+#define MODULE_LIST XvdApp.cc
+
+#define GUILIB
+
+#define MAIN_LANG_C_PLUS_PLUS
+#define USES_C_PLUS_PLUS
+
+/* #define ENABLE_SAGE */
+#ifdef ENABLE_SAGE
+#define LIB_DALI
+#define LIB_SAGE_BASE
+#define LIB_SAGE_CLIENT
+#define LIB_DD_PLUS_PLUS
+#define CCC_TEMPLATES
+#endif
+
+#ifndef NO_PDS
+#define LIB_PDS
+#endif
+
+#define LIB_GUISUB
+#define LIB_MOTIFAPP
+#define LIB_MOTIF
+#define LIB_XMU
+#define LIB_P1SUB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_XPM
+
+#if 0
+#define LIB_LOCAL
+#define LOCAL_LIBRARY `ar t sublib.a`
+#define DEBUG
+#endif
+
+

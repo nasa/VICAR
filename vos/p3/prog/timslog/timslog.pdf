@@ -1,0 +1,127 @@
+Process help=*
+PARM INP     (STRING,40)
+PARM OUT     (STRING,40)  COUNT=1:2
+PARM SIZE    INTEGER 	  COUNT=0:4 	DEFAULT=--
+PARM SL      INTEGER 			DEFAULT=1
+PARM SS      INTEGER 			DEFAULT=1
+PARM NL      INTEGER 			DEFAULT=0
+PARM NS      INTEGER 			DEFAULT=0
+PARM TITLE   (STRING,15)
+PARM NCHAN   INTEGER			DEFAULT=6	VALID=(1:6)
+PARM SOURCE  KEYWORD 	DEFAULT=EXABYTE	VALID=(EXABYTE,AMES,NSTL)
+PARM ORDER   INTEGER 	  COUNT=1:6	DEFAULT=(1,2,3,4,5,6)
+PARM ALL     KEYWORD 	  COUNT=0:1 	DEFAULT=ALL	VALID=(ALL,SHORT)
+PARM MAXBAD  INTEGER 			DEFAULT=100
+PARM ORG     KEYWORD    VALID=(BIL,BSQ) DEFAULT=BIL
+End-proc
+ 
+.TITLE
+VICAR Program TIMSLOG
+.HELP
+PURPOSE:
+ 
+   TIMSLOG is a VICAR program that logs Thermal Infrared Multispectral
+Scanner (TIMS) data into a format readable to the program TIMSCAL.
+ 
+EXECUTION:
+ 
+   The following is the execution statement format for TIMSLOG:
+		 TIMSLOG RAW (PIX,AUX) PARAMS
+   where PARAMS are parameters discussed in the parameter section. 
+ 
+.PAGE
+OPERATION:
+   TIMSLOG takes a raw TIMS data file that has been moved to disk via CONVIM
+and reformats it into two files; an image file (PIX) and an auxiliary 
+calibration data file (AUX).  The input file may be in any of three formats:
+the old NSTL (now Stennis) decommutated tape format, the old AMES decommutated
+tape format, and (the current default) the EXABYTE non-decommutated format
+from AMES.
+   The first file (PIX) consists of the NCHAN bands of data in BIL format.
+It can be any number of lines in length.
+   The second file (AUX) is optional, and used by the program TIMSCAL to
+calibrate the raw data contained in the PIX file.  It normally has a record 
+length of 16 fullwords. All words are in REAL*4 format. The first two values 
+have the respective temperatures of the two black bodies used for calibration, 
+one seen by the sensor at the beginning of each scan sweep and one seen at the 
+end.  Generally, one BB temperature should be above any seen in PIX and one 
+should be below.  The next 12 values in the AUX file are the DN's of the two 
+black bodies as seen by each of the six bands of the sensor.  The final two
+values are the temperatures of the two ambient temperature probes.
+.PAGE
+EXAMPLES:
+ 
+1) MOUNT /dev/rmt/0n T
+   CONVIM T OUT=RAW FILE=1 'LABEL
+   TIMSLOG RAW (PIX,AUX) TITLE="MUD LAKE" 
+                                         (this is the typical sequence for
+                                          a non-decommutated EXABYTE tape)
+
+2) TIMSLOG RAW (PIX,AUX)  TITLE="PETALUMA 1" 'AMES
+ 
+3) TIMSLOG RAW (BELL.PIX,BELL.AUX)  TITLE="BELL" 'NSTL ORDER=(1,3,5,4,2,6)
+ 
+4) TIMSLOG RAW OUARZ.PIX NCHAN=1 TITLE="OUARZAZATE 3" 'NSTL
+ 
+WRITTEN BY:  J. H. REIMER 
+    (VICAR2 CONVERSION AND AMESLOG REWORKING BY: R. E. WALKER     11 OCT 1984)
+ 
+COGNIZANT PROGRAMMER:  RON ALLEY  26 MAR 1991
+.LEVEL1
+.VARI INP
+Input raw TIMS file
+.VARI OUT
+(1) Output image file
+(2) Output calibration data
+.VARI SIZE
+Window into input
+.VARI SL
+Starting line
+.VARI SS
+Starting sample
+.VARI NL
+Number of lines
+.VARI NS
+Number of samples
+.VARI TITLE
+A title for the output files 
+of up to 15 characters
+Example: TITLE="DEATH VALLEY 11"
+.VARI NCHAN
+The number of sequential bands
+of data
+.VARI SOURCE
+Decommutation mode
+(EXABYTE, AMES or NSTL)
+.VARI ORDER
+Indicates the band order of the
+interleaved data.
+Example: ORDER=(1,3,2,4,6,5)
+.VARI MAXBAD
+Specifies the maximum number of
+lines of which the band can be
+out of the sequence specified 
+with ORDER.
+Example: MAXBAD=100
+.VARI ALL
+To include nav data with 
+data calibration (ALL=ALL)
+.VARI ORG
+Organization of output pix dataset
+.LEVEL2
+.VARI ORG
+ORG specifies the organizational format of the output image (PIX) dataset. 
+BIL (the default) and BSQ are supported.  Use of this keyword has no effect
+upon the AUX files generated.
+.VARI SOURCE
+There are three options for this parameter:
+
+EXABYTE (the default) should be used for the EXABYTE tapes that AMES sends
+        out without decommutation.  This is the current normal mode of
+        operation.  These files have a logical record length of 32768 bytes.
+AMES should be used for tapes that have been decommutated at the AMES
+        facility. These files have a logical record length of 4188 bytes.
+NSTL should be used for tapes (generally of ancient vintage) that have been
+        decommutated at the NSTL (now Stennis) facility. Thes files have
+        a record length of 1024 bytes, or less.
+.END

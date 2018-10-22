@@ -1,0 +1,236 @@
+process help=*
+PARM ARCHIVE    TYPE=(STRING,80) COUNT=(0:1) +
+   DEFAULT=TRIAXIAL_ARCHIVE.IBIS
+PARM PLANET     TYPE=(STRING,12) COUNT=(0:1)              DEFAULT=--
+PARM RADIUS     TYPE = REAL      COUNT=(0:3)              DEFAULT=--
+PARM MLIMIT     TYPE = INTEGER   COUNT=(0:1) VALID=(1:15) DEFAULT=5
+PARM KLIMIT     TYPE = INTEGER   COUNT=(0:1) VALID=(1:15) DEFAULT=5
+PARM NLIMIT     TYPE = INTEGER   COUNT=(0:1) VALID=(1:15) DEFAULT=5
+PARM TEST       TYPE = KEYWORD   COUNT=(0:1) VALID=(TEST,NOTEST) +
+   DEFAULT=NOTEST
+END-PROC
+.TITLE
+VICAR program TRICOEF.
+
+.HELP
+PURPOSE:
+TRICOEF is used to compute and store for later retrieval the conformal
+and authalic coefficients permitting computation of conformal 
+(angle preserving) and authalic (equal area) projections of 
+triaxial ellipsoids.
+Tricoef computes the triaxial ellipsoid coefficients for computing:
+1. Conformal latitude and longitude  from Snyder latitude and longitude.
+2. Authalic  latitude and longitude  from Snyder latitude and longitude.
+Coefficients are stored in an IBIS archive whose name is defined via the
+ARCHIVE parameter.
+To use these coefficients see the subroutine TRIAXTRAN.
+
+Warning:
+1. The mp routines compute the same coefficients but without a random number
+generator to permit you to observe how sensitive the solution is to the
+KLIMIT, MLIMIT, & NLIMIT parameters. You can run tricoef several times to
+check the repeatability of lat & lon for the conformal case.
+
+2. Occasionally the archive gets corrupted, You can tell when the computed
+lat & lon's are erroneous. To clear this condition "rm triaxial_archive.ibis".
+
+.PAGE
+USAGE & EXECUTION examples:
+
+tricoef radius=(1000.,998.,900.)   Coefficients are computed and
+                                   then discarded since no planet was
+                                   specified.
+
+tricoef planet=IO mlimit=7 nlimit=7 klimit=7
+                                   Radii come from the spice. 
+                                   Coefficients are saved in the 
+                                   archive under the name IO. If no
+                                   archive exists one is created.
+ 
+tricoef planet=XYZ radius=(1.,.9,.8) 
+                                   A Synthetic planet XYZ is created and 
+                                   the coefficients are saved under XYZ 
+                                   in the same archive as above.
+where:
+ radius=(a,b,c)
+ a = X radius (largest)  defining prime meridian (longitude=0).
+ b = Y radius (middle)   defining +90 degrees east longitude.
+ c = Z radius (smallest) defining spin axis.
+
+
+.PAGE
+OPERATION:
+See: Snyder J P, Conformal Mapping of the Triaxial Ellipsoid, 
+     Survey Review Vol.28, 217, July 1985
+     Also private communications for the authalic case.
+
+The coordinate systems here are all right handed. Longitude increases 
+towards the east. Holding the planet before you with north up and the
+prime meridian in front of you east increases to your right. 
+Mother will help you distinguish between left and right.
+Snyder describes the Snyder system in his article. I have derived the triaxial
+definition of planetodetic so see me for clarification (j Lorre).
+
+The purpose of this program is to compute an adequate set of coefficients
+permitting accurate computation of conformal & authalic lat & lon. Precision
+depends upon the MLIMIT & NLIMIT parameters for conformal and the MLIMIT
+& KLIMIT & NLIMIT parameters for authalic projections. 
+The larger they are the
+more accurate the results but the longer the computation time.
+Each computation of lat & lon requires MLIMIT*NLIMIT*2 trigonometric
+computations for conformal and MLIMIT*KLIMIT+NLIMIT computations for 
+authalic.
+.PAGE
+The more eccentric the object the larger MLIMIT & NLIMIT & KLIMIT
+must be. To determine when you have arrived at good values:
+
+1. Scrutinize the RMS error term printed for a measure of 
+   conformality or authalicity constraint violation.
+   An rms of .001 is a 0.1 percent violation of the constraint.
+   The number should look like: .00000000854 but not like: .00456.....
+
+2. Compare runs with increasing values of MLIMIT & NLIMIT &KLIMIT until the
+   computed lat & lon's don't change. TRICOEF uses a random number 
+   ( only in the conformal case where ill conditioning is critical)
+   generator to produce points for fitting, thus assuring that each
+   run is unique. You can run the same command line repeatedly to 
+   assure that computed lat,lon values are repeatable. Note that
+   different coefficients can give you similar lat,lon values but if
+   the coefficients are large or vary widely between runs it might
+   indicate ill conditioning.
+
+.PAGE
+The archive is an IBIS file in the new IBIS format.
+The ibis coefficient storage file is used to store coefficients for 
+other programs to retrieve. This file has columns of 1024 elements
+per column. Each planet has one column with the planet name as a header.
+All values are real*8.
+The order of coefficients in each column is as follows:
+Word 1  Contains the constant MLIMIT
+Word 2  Contains the constant KLIMIT
+Word 3  Contains the constant NLIMIT
+Word 4  Contains the planet major radius A normalized to 1.0
+Word 5  Contains the planet middle radius B normalized to B/A
+Word 6  Contains the planet minor radius C normalized to C/A
+Word 7  Begins the NLIMIT*MLIMIT CC matrix coefficients for conformal.
+        k=7+nlimit*mlimit
+Word k  Begins the NLIMIT*MLIMIT CP matrix coefficients for conformal.
+        k=k+nlimit*mlimit
+Word k  Begins the (MLIMIT+1)*(KLIMIT+1) COEF coefficients for authalic.
+        k=k+(mlimit+1)*(klimit+1)
+Word k  Begins the NLIMIT coefficients for authalic.
+        k=k+nlimit-1
+( k is the total number of words used )
+
+These values are needed to operate the coordinate conversion subroutine
+Triaxtran. When a planet is added a new column will be created.
+If a planet is specified which is already in the archive
+the old column will be overwritten by the new data. Thus the archive
+grows to accomodate all planets of interest.
+Notice that the archive defaults to your local directory. Change the
+archive default if you want it elsewhere.
+
+.PAGE
+For your convenience the subroutine GET_ELLIPSOID is provided in the 
+source code for extracting the data from the archive in a format 
+required by Triaxtran. You can copy the source to your own application
+to read the archive.
+
+A WARNING TO ALL:
+The subroutine TRIAXTRAN uses ALL the coefficients in the appropriate
+archive column to perform authalic and conformat transformations. This
+includes the normalized planet radii stored as column elements 4,5, and 6.
+If you try using other radii than the ones stored with their column
+coefficients the results will be incorrect.
+
+HISTORY:
+7-15-93  J Lorre. 
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+05-11-98   RRP   Updated pdf to constrain mlimit, klimit, and nlimit to have
+                 positive values less then 15.
+
+.LEVEL1
+
+.VARI ARCHIVE
+Coefficients
+archive.
+
+.VARI PLANET
+Planet name
+
+.VARI RADIUS
+Three planet radii.
+A,B, and C.
+
+.VARI MLIMIT
+Number of longitude
+terms.
+
+.VARI KLIMIT
+Number of latitude
+terms. Authalic only.
+
+.VARI NLIMIT
+Number of latitude
+terms.
+
+.VARI TEST
+Test TRIAXTRAN
+subroutine using
+coefficients
+
+.LEVEL2
+
+.VARI ARCHIVE
+The name of the IBIS archive containing the conformal and authalic
+coefficients. If no archive exists one will be created with the name
+provided via the ARCHIVE parameter. New archives have 1 column
+and 1024 points/column. Each planet uses one column. Each column
+is headed by the name of the planet provided via the PLANET parameter.
+Default is:   ARCHIVE=TRIAXIAL_ARCHIVE.IBIS
+
+.VARI PLANET
+Specifies the planet for which a model is desired. To later retrieve this
+model the same planet name will be required. If no planet is specified
+the coefficients are not saved in the archive.
+
+.VARI RADIUS
+Three planet radii (a,b,c) in arbitrary units.
+where:
+ a = X radius (largest)  defining prime meridian (longitude=0).
+ b = Y radius (middle)   defining +90 degrees east longitude.
+ c = Z radius (smallest) defining spin axis.
+If PLANET is specified RADIUS is not necessary since the planet radii 
+are retrieved from the SPICE. You can still specify RADIUS to either:
+1. Change the radii for an existing planet.
+2. Permit specification of a fictitious planet for testing purposes.
+
+.VARI MLIMIT
+Coefficient matrix width for modelling the longitude conversion.
+Highly eccentric objects require more terms.
+MLIMIT is typically about 6. The maximum is about 14.
+
+.VARI KLIMIT
+Coefficient array length for modelling the latitude conversion for
+authalic only.
+Highly eccentric objects require more terms.
+NLIMIT is typically about 6. The maximum is about 14.
+
+.VARI NLIMIT
+Coefficient matrix width for modelling the latitude conversion.
+Highly eccentric objects require more terms.
+NLIMIT is typically about 6. The maximum is about 14.
+
+.VARI TEST
+(This is provided more as a test of the triaxtran subroutine than as a
+test of the tricoef program.)
+Test the coefficients just computed by calling the subroutine
+TRIAXTRAN in every combination of lat/lon modes in all 8 octants of
+the sphere. Default is NOTEST.
+At the end of the program the coefficients will be re-read from the
+catalogue and two points computed which can be checked against the
+previously printed test. This verifies that the coefficients are
+read properly.
+
+.END

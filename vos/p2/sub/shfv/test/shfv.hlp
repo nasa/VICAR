@@ -1,0 +1,56 @@
+1 SHFV
+
+ PURPOSE: Performs an arithmetic shift on elements of an array
+
+ FORTRAN Calling Sequence:  CALL SHFV( DCODE, N, NSHIFT, A, INC )
+ C Calling Sequence:        zshfv( dcode, n, nshift, a, inc );
+
+ PARAMETERS:
+
+    DCODE  = Data type code for A
+    N      = Number of data elements to perform shift on.
+    NSHIFT = Number of bits to shift left (pos.) or right (neg.)
+    A      = Input vector of original bits.
+             On output contains shifted bits.
+    INC    = Input vector index increment
+
+  INC is a REQUIRED argument. (dcode, n, nshift, and inc are
+  passed by value for zshfv.)
+
+
+    DATA TYPES 
+    =================
+    DCODE     A
+    =================
+      1      BYTE    (unsigned interpretation)
+      2      HALF    (signed interpretation)
+      4      FULL    (signed interpretation)
+    =================
+
+2 NOTES
+
+DESCRIPTION
+
+ This routine performs an arithmetic shift (not a circulate) with
+ no attention paid to bits shifted off the end.  Since DCODE 2 and 4
+ involve signed interpretation, the arithmetic shift to the right brings
+ copies of the most significant (sign) bit of the input value into the
+ most significant bits of the output value.  Thus, if NSHIFT = -2, an
+ INTEGER*4 value of 'FFFFFFF8'X (i.e. -8) would be changed to
+ 'FFFFFFFE'X (i.e. -2).  The arithmetic shift to the left always brings
+ 0s into the least significant bits of the output value.  
+
+HISTORY
+
+  Original Programmer: G.M. Yagi
+  Converted to Vax by: L.W. Kamp
+  Current Cog Progr:   S. Pohorsky
+  Source Language:       C
+
+
+ REVISION HISTORY:                                          
+   92-5-18  ..SP....  Made portable for UNIX - Adapted version from ASU.
+                      Added zshfv for calls from C.  Changed name from
+                      shf to shfv (added v for most of the vector routines).
+                      ELIMINATED OPTIONAL PARAMETERS FOR PORTABILITY.
+

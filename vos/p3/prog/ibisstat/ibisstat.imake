@@ -1,0 +1,29 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM ibisstat
+
+   To Create the build file give the command:
+
+		$ vimake ibisstat 			(VMS)
+   or
+		% vimake ibisstat          		(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	ibisstat
+#define R2LIB
+
+#define MODULE_LIST ibisstat.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_P3SUB
+#define LIB_MATH77
+/************************* End of Imake file ***************************/

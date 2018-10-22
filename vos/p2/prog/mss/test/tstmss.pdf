@@ -1,0 +1,82 @@
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+body
+let $autousage = "none"
+let _onfail="continue"
+let $echo="yes"
+
+! TEST SCRIPT FOR mss
+!
+write "This is a small example to show how to use mss. This example takes"
+write "3 datasets with different number of samples and concatenates them"
+write "side by side to result in a 10x28 size dataset. NOTE: Each dataset"
+write "MUST have the same number of lines"
+gen ba.img 10 10
+gen bb.img 10 8 
+gen bc.img 10 10
+mss (ba.img, bb.img, bc.img) bd.img
+list bd.img
+
+write "This example shows the use of the SIZE parameter. If NS of"
+write "the size field is equal to the number of samples in the"
+write "first input file, NS of the SIZE parameter is not used;"
+write "the actual number of samples in each input file will be used instead."
+mss (ba.img, bb.img, bc.img) bd.img SIZE=(1,1,10,10)
+list bd.img
+
+! try SL and SS not equal to 1.
+mss (ba.img, bb.img, bc.img) be.img SIZE=(2,3,8,5)
+list be.img
+ 
+
+! TRY HALFWORD DATA
+gen ha.img 10 10 'HALF
+gen hb.img 10 8  'HALF
+gen hc.img 10 10 'HALF
+mss (ha.img, hb.img, hc.img) hd.img 
+list hd.img
+ 
+! try SL and SS not equal to 1.
+mss (ha.img, hb.img, hc.img) he.img SIZE=(2,3,8,5)
+list he.img
+
+! TRY REAL*4 DATA
+gen ra.img 10 10 'REAL4
+gen rb.img 10 8  'REAL4
+gen rc.img 10 10 'REAL4
+mss (ra.img, rb.img, rc.img) rd.img 
+list rd.img
+
+! try SL and SS not equal to 1.
+mss (ra.img, rb.img, rc.img) re.img SIZE=(2,3,8,5)
+list re.img 'REAL4
+
+write "This is a small example to show how to use mss. This example takes"
+write "3 datasets with the same number of samples and concatenates them side"
+write "by side to result in a 10x30 size dataset. NOTE: Each dataset "
+write "MUST have the same number of lines"
+gen a.img 10 10 IVAL=1 SINC=0 LINC=0
+gen b.img 10 10 IVAL=2 SINC=0 LINC=0
+gen c.img 10 10 IVAL=3 SINC=0 LINC=0
+mss INP=(a.img, b.img, c.img) OUT=d.img
+list d.img
+
+write "This example shows the use of the SIZE parameter. mss can also take"
+write "a portion of the input pictures and concatenate them side by side."
+gen a2.img 20 20
+gen b2.img 20 20
+gen c2.img 20 20
+mss (a2.img, b2.img, c2.img) d2.img SIZE=(1,1,10,10)
+list d2.img
+
+write "Now, clean up!!"
+if ($syschar(1)="UNIX")
+   ush rm *.img
+else
+   dcl del *.img;*
+end-if
+!
+!
+end-proc

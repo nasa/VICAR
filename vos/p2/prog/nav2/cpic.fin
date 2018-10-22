@@ -1,0 +1,5 @@
+      common/cpic/project_id,camera_id,frame_id,planet_id
+      common/cpic/target_id,idate,itime
+      integer project_id,camera_id,frame_id,planet_id
+      integer target_id, idate, itime
+

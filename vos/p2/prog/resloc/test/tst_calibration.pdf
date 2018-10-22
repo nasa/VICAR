@@ -1,0 +1,34 @@
+!Test resloc as part of a procedure for performing both radiometric and
+!geometric calibration...
+
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="no"
+local DIR  string init="WMS_TEST_WORK:[TESTDATA.VGR]"
+if ($syschar(1) = "UNIX")
+  let DIR="/project/test_work/testdata/vgr/"
+end-if
+
+!  D --> R --> G
+
+!Create radiometrically calibrated image 1134710.fic ...
+!ficor77 (&"DIR"1134710.cln,&"DIR"v2_wa_ora.calib,&"DIR"dc.wa_5to1) R +
+!       scf=&"DIR"vgrscf.dat
+! this step is temporarily removed because ficor77 crashes on 32-bit Linux,
+! probably due to a compiler bug.  The file R has been replaced by the
+! file 1134710.fic in the test directory  / L.Kamp (16Apr2013)
+
+!Locate the reseau and output geometric tiepoints geo...`
+resloc (&"DIR"1134710.cln,&"DIR"cresn.fil) (res,geo)
+
+!Create geometrically calibrated image G...
+!geoma (R,geo) G nl=1000 ns=1000 format="HALF"
+! above replaced by:
+geoma (&"DIR"1134710.fic geo) G nl=1000 ns=1000 format="HALF"
+hist G
+end-proc

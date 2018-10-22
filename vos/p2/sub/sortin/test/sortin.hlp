@@ -1,0 +1,98 @@
+1 SORTIN
+
+  The following subroutines are available for sorting an array (BUF)
+  in ascending order:
+
+        CALL SORTIN(BUF,LEN)		!INTEGER*4 BUF(LEN)
+        CALL I2SORT(BUF,PTR,LEN)	!INTEGER*2 BUF(LEN),PTR(LEN)
+  where
+        BUF is an array to be sorted in ascending order.
+        PTR is an array which is moved in parallel with BUF.
+        LEN is the number of elements in the array
+
+  Note that BUF and PTR CANNOT be the same array.  You must include a PTR
+  array even if you do not need it.
+
+  A more complete list of sort routines are available in the MATH77 library:
+
+	ISORT(BUF,M,N)		ISORTP(BUF,M,N,PTR)	INTEGER*4 BUF(K)
+        SSORT(SBUF,M,N)		SSORTP(SBUF,M,N,PTR)	REAL*4 SBUF(K)
+	DSORT(DBUF,M,N)		DSORTP(DBUF,M,N,PTR)	REAL*8 DBUF(K)
+
+  Note that the MATH77 routines sort array elements M thru N.  The C-bridges for
+  these routines are in MATH77_SORT.COM.  You must include the following in
+  your imake file if you use any of the MATH77 routines:
+
+	#define LIB_MATH77 
+
+  The subroutines I4SORT and R4SORT (formerly included here) have been obsoleted
+  because they could not be made portable.  Instead, replace the calls to
+  I4SORT and R4SORT with the following MATH77 routines:
+
+     INTEGER*4 BUF(N),BUF2(N)
+     REAL*4 SBUF(N),SBUF2(N)
+     INTEGER*4 PTR(N),PTR2(N),IP(N)
+
+  Change:                        To:
+
+      CALL I4SORT(BUF,BUF,N)         CALL ISORT(BUF,1,N)
+      CALL R4SORT(SBUF,SBUF,N)       CALL SSORT(SBUF,1,N)
+
+      CALL I4SORT(BUF,PTR,N)         CALL MVE(4,N,BUF,BUF2,1,1)
+                                     CALL MVE(4,N,PTR,PTR2,1,1)
+                                     CALL ISORTP(BUF,1,N,IP)
+                                     DO K=1,N
+                                        BUF(K) = BUF2(IP(K))
+                                        PTR(K) = PTR2(IP(K))
+                                     END DO
+
+
+      CALL R4SORT(SBUF,PTR,N)        CALL MVE(7,N,SBUF,SBUF2,1,1)
+                                     CALL MVE(7,N,PTR,PTR2,1,1)
+                                     CALL SSORTP(SBUF,1,N,IP)
+                                     DO K=1,N
+                                         SBUF(K) = SBUF2(IP(K))
+                                         PTR(K) = PTR2(IP(K))
+                                     END DO
+
+
+1 C BRIDGES:
+
+	int buf[k],ptr[k];
+	short hbuf[k],hptr[k];
+
+        zsortin(buf,n);
+        zi2sort(hbuf,hptr,n);
+
+2 EXAMPLES
+
+  The PTR is commonly used as an index:
+
+		INTEGER*2 BUF(5),PTR(5)
+
+		DO I=1,5
+		   PTR(I) = I
+		ENDDO
+		CALL I2SORT(BUF,PTR,5)
+
+   The following example sorts a set of line-sample coordinates by line
+   number:
+		INTEGER*2 LINE(N),SAMP(N)
+		CALL I2SORT(LINE,SAMP,N)
+
+2 HISTORY
+
+SORTIN and I2SORT written by Gary Yagi, Jan 77 and Mar 88.
+Converted to VAX by:  C. C. Avis,  25 Mar 83
+Current Cognizant Programmer: G.M. Yagi
+Source Language: Fortran
+Ported to UNIX by:    Steve Pohorsky, 18 Dec 92
+
+REVISION HISTORY:
+  17 Jan 89  GMY  Handle case where N=1 in SORTIN.
+  13 Mar 88  GMY  Added I2SORT.  Rewrote help and test files.  
+  18 Dec 92  SP   Added C bridge (zsortin) for SORTIN. Obsoleted
+                  I4SORT, and R4SORT because they were not portable
+                  and were slower than the MATH77 routines (ISORT,ISORTP,
+                  SSORT, SSORTP.)
+  02 May 01  GMY  Added C bridge for I2SORT.

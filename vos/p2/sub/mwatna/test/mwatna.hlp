@@ -1,0 +1,47 @@
+1 MWATNA
+
+  Given a (line,sample) coordinate in a Voyager wide-angle image,
+  transforms these coordinates to the corresponding (line,sample)
+  coordinates in the narrow-angle camera field of view.  Both
+  input and output coordinates are assumed to be in object space
+  (i.e. IPL defined geometrically corrected coordinate space).
+
+  Note: Due to the nature of this subroutine's call interface, the
+        last parameter, it is not recommended for use with the C
+        language.
+
+  FORTRAN Calling Sequence: 
+                CALL MWATNA(ICAM,WALINE,WASAMP,NALINE,NASAMP,&nnn)
+
+  Arguments: 
+
+      INTEGER*4 ICAM         Input Voyager camera serial number
+      REAL*4 WALINE,WASAMP   Input wide-angle (line,sample)
+      REAL*4 NALINE,NASAMP   Output narrow-angle (line,sample)
+
+      &nnn is a statement label to which MWATNA will return if ICAM
+  is an invalid Voyager camera serial number.  Valid serial numbers
+  are:
+		4 = VGR-2 WA
+		5 = VGR-2 NA
+		6 = VGR-1 WA
+		7 = VGR-1 NA
+      ICAM (icam) may either specify the wide-angle or narrow-angle camera
+  (i.e. ICAM (icam) =4 or 5 will produce the same effect).
+
+2 History
+
+  Original Programmer: Gary Yagi, 1 October 1985
+  Current Cognizant Programmer: Damon D.. Knight
+  Source Language: FORTRAN
+  Ported to UNIX: Damon D. Knight 11 August 1993
+
+3 Operation
+
+  The wide-angle (line,sample) coordinate is converted into a vector
+  (x,y,z) from the camera objective to the point in the focal plane
+  corresponding to the pixel location.  The vector is then transformed
+  into the narrow-angle camera field of view by multiplying the
+  vector by a rotation matrix provided by Mert Davies (see Nov 1979
+  Rand report), and subsequently converted into narrow-angle
+  (line,sample) coordinates.

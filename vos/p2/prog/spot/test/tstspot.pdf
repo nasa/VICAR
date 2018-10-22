@@ -1,0 +1,60 @@
+procedure
+refgbl $echo
+refgbl $autousage
+! Jun 26, 2012 - RJB
+! TEST SCRIPT FOR SPOT   
+! tests BYTE images
+!
+! Vicar Programs:
+!       label-list list cform
+! 
+! parameters:
+!   <none>
+!
+! Requires NO external test data: 
+
+body
+let $autousage="none"
+let _onfail="stop"
+write "A more extensive test than that used for GALILEO"
+let $echo="yes"
+!
+spot out=sp.dat size=(1,1,24,24)
+label-li sp.dat
+list sp.dat sl=2 ss=2 nl=22 ns=22
+!
+spot out=sp2.dat nl=256 ns=256 shape=dome sigmax=20 sigmay=20
+list sp2.dat sl=108 ss=108 nl=40 ns=40
+label-li sp2.dat
+
+spot out=sp3.dat nl=50 ns=50 shape=dome sigmax=10 sigmay=5
+list sp3.dat sl=20 ss=20 nl=10 ns=10
+
+spot out=spx.dat nl=50 ns=50 shape=dome sigmax=7 sigmay=7
+cform spx.dat spy.dat irange=(0,1) orange=(0.,255.) oform=byte
+list spy.dat sl=15 ss=20 nl=15 ns=15
+
+spot out=sp4.dat nl=50 ns=50 shape=conical sigmax=10 sigmay=10
+list sp4.dat sl=20 ss=20 nl=10 ns=10
+
+spot out=sp5.dat nl=50 ns=50 shape=recprocl sigmax=10 sigmay=10
+list sp5.dat sl=14 ss=14 nl=10 ns=10
+
+spot out=sp6.dat nl=50 ns=50 shape=recpsqre sigmax=10 sigmay=10
+list sp6.dat sl=14 ss=14 nl=10 ns=10
+
+spot out=sp7.dat nl=50 ns=50 shape=exponent sigmax=10 sigmay=10
+list sp7.dat sl=20 ss=20 nl=10 ns=10
+
+spot out=sp8.dat nl=50 ns=50 shape=disk sigmax=10 sigmay=10
+list sp8.dat sl=14 ss=14 nl=10 ns=10
+
+spot out=sp9.dat nl=256 ns=256 shape=disk sigmax=50 sigmay=50
+list sp9.dat sl=98 ss=80 nl=10 ns=10
+let $echo="no"
+
+! clean up:
+ush rm -f sp*.dat
+
+end-proc
+

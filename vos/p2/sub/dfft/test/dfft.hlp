@@ -1,0 +1,388 @@
+1  dfft
+
+         A general purpose Fast Fourier Transform routine
+                                                
+2  PURPOSE
+
+     dfft is a general purpose Fast Fourier Transform routine offering
+     the following features:
+
+        * The number, n, of samples need not be a power of 2.  In fact,
+          all but a very small percentage of values of n may be used.
+
+        * Complex sample arrays of any number of subscripts may be 
+          transformed.  dfft is called once per subcript.
+
+        * The transform is done in place.
+
+     REALTR, used in conjunction with dfft, provides a fast transform
+     capability in cases involving a one-dimensional array of real
+     samples.  Compared with complex samples, this saves nearly a factor
+     of two in memory space and also saves computer time.
+
+2  CALLING SEQUENCE
+
+	Note: Due to the nature of this subroutine's call interface, the
+	      last two parameters, it is not recomended for use with the
+	      C language.
+
+   A) K-DIMENSIONAL COMPLEX TRANSFORM
+
+        One call is made for each variate (subscript).  The calls may be
+        made in any order.  For each variate, the call is of the form:
+
+                  CALL dfft(A,B,NTOT,N,NSPAN,ISN,&P,&Q)
+
+        ARGUMENTS
+
+           A         is a REAL array containing the real components
+                     of the data or Fourier coefficients.
+
+           B         is a REAL array containing the imaginary components
+                     ok the data or Fourier coefficients.
+
+           NTOT      is the total number of complex data values.
+
+           N         is the dimiension of the current variate.
+
+           NSPAN/N   is the spacing of consecutive data values while
+                     indexing the current variate.
+
+           ISN       is positive for a forward transform, negative
+                     for inverse.
+
+           ISN*NSPAN/N   is the spacing of consecutive data values.           
+
+           &P        is a reference to a statement number in the caller's
+                     program to which control is transferred if N has a 
+                     prime factor exceeding 23.
+                        
+           &Q        is a reference to a statement number in the caller's
+                     program to which control is transferred if the square-
+                     free prrtion of N has two or more factors and exceed 
+                     210 or if the number of prime factors exceeds 208.
+
+        If A and B are independent arrays, ISN should be plus or minus 1 for
+        the forward and inverse transforms, respectively.  If real and 
+        imaginary parts are adjacent, A(2) should be substituted for B in 
+        the call sequence and the magnitude of ISN should be 2.
+
+   B) ONE-DIMENSIONAL REAL TRANSFORM
+
+        Forward transform
+
+                  CALL dfft(A,A(2),N,N,N,2,&P,&Q)
+                  CALL REALTR(A,A(2),N,2)
+
+        Inverse transform
+
+                  CALL REALTR(A,A(2),N,-2)
+                  CALL dfft(A,A(2),N,N,N,-2,&P,&Q)
+
+        ARGUMENTS 
+
+
+          A          is a REAL array of dimension 2*N+2 containing the 2*n 
+                     real data values or the N+1 complex coefficients.
+
+          N          is one-half the number (which must be even) of real 
+                     data values.
+
+          &P,&Q      are as before.
+
+2  HISTORY
+
+     Original Programmer: Richard C Singleton (Stanford Research Institute)
+     Current Cognizant Programmer: John Kreznar
+     Ported to Unix by Payam Zamani on 4-Mar-1993
+     Source Language: Fortran
+     Revision: New,6 April 1977 (Incorporated into VICAR from
+                                 Stanford Research Institute)
+     Reference: Singleton, Richard C., "An Algorithm for Computing the 
+                Mixed Radix Fast Fourier Transform," IEEE Trans. Audio
+                Electroacoustics AU-17, 2 (June 1969) 93-103.
+
+2  OPERATION
+
+     The fast Fourier transform has been thoroughly treated in the liter-
+     ature and will not be reviewed here.  Suffice it to say that the 
+     technique achieves computational efficiency by avoiding redundant
+     computations which arise if the number, n, of samples is composite.
+     The FFT offers no advantage if n is prime and large advantage if n
+     is the product of many small factors.
+
+     These programs were written by Richard C. Singleton of the Stanford 
+     Research Institute.  His paper, referenced above, should be studied
+     by all who have more than a superficial interest in this software.
+     Much of this document is taken verbatim from his paper.
+
+     REALTR is axactly as received from SRI, which SRI claims agrees with
+     the paper.  dfft differs from what was received from SRI in the
+     following repects only:
+
+      * The name was changed from FFT.
+
+      * The error conditions which now cause error returns used to cause
+        the printing of an error message followed by termination of the
+        job.
+
+     TRANSFORMING COMPLEX DATA
+
+     dfft computes either a single-variate complex Fourier transform
+     or the calculation for one variate of a multivariate transform.
+
+     To compute a single-variate transform
+         
+                        n-1
+                       _____
+                       \
+          (alpha)(k) =  \    X(j)exp(2(PI)ijk/n)
+                        /
+                       /____
+                        j=0
+
+     of complex data values,
+
+            CALL dfft(A,B,n,n,n,1,&p,&q)
+
+     The "inverse" transform
+
+                       n-1
+                     ______
+                     \
+             x(j) =   \       (alpha)(k)exp(-2(PI)ijk/n)
+                      /
+                     /_____
+                      k=0
+
+    is computed by
+
+           CALL dfft(A,B,n,n,n,-1,&p,&q).
+
+    Scaling is left to the user.  The two calls in succession give 
+    the transformation
+
+           T*Tx=nx,
+
+    i.e., n times the original values, except for round-off errors.
+    The arrays A and B originally hold the ral and imaginary com-
+    ponents of the data, indexed from 1 to n; the data values are 
+    replaced by the complex Fourier coefficients.  Thus the real
+    component of (alpha)(k) is found in A(k+1), and the imaginary
+    component in B(k+1), for k=0,1...,n-1.
+
+    The difference between the transform and inverse calculation is
+    primarily one of changing the sign of a variable holding the value
+    2(PI).  The one additional change is to follow an alternative
+    path within the radix-4 sectin of the program, using the angle
+    -(PI)/2 rather than (PI)/2.
+
+    To compute a bivariate transform on the data stored in rectangular
+    arrays A and B, the subroutine is called once to transform the
+    columns and again to transform the rows.  A multivariate transform
+    is essentially a single-variate transform with modified indexing.
+    Multivariate data are indexed according to the Fortran array
+    element successor function, without limit on the number of implied
+    multiple subscripts.  The subroutine is called once for each 
+    variate.  These calls may be in any order.
+
+    Restrictions on n-values result from finite array sizes built into
+    the program.  The subroutine as presented permits a maximum prime 
+    factor of 23, using four arrays of this dimension.  The dimension
+    of these arrays may be reduced to 1 if n contains no prime factors
+    greater than 5.  An array NP(209) is used in permuting the results
+    to normal order; the present value permits a maximum of 210 for the
+    product of the square-free if it cannot be paired with another factor
+    of p in n; i.e., each prime occurring an odd number of times in n is 
+    a square-free factor, the dimension of this array can be reduced to
+    j+1, where j is the maximum number of prime factors if n.  A sixth
+    array NFAC(11) holds the factors of n.  This is ample for any transform
+    that can be done on a computer with core storage for 2**17 REAL values
+    (2**16 complex values);
+
+                    52 488 = 2 x 3**4 x 2 x 3**4 x 2
+
+    is the only number <2**16 with as many as 11 factors, given the 
+    factoring used in this algorithm.  The existing array dimensions
+    do not permit unrestricted choice of n, but they rule out only a small 
+    percentage of the possible values.
+
+    The transform portion of the subroutine includes sections for factors
+    of 2, 3, 4 and 5, as well as general section for odd factors.  The
+    sections for 2 and 4 include multiplication of each result value by 
+    the rotation factor; combining the two steps gives bout a 10 percent 
+    speed improvement over using the general rotation factor section in
+    the program, due to reduced indexing.  The sections for 3 and 5 are
+    similar to the general odd factors section, and they improve speed 
+    substantially for these factors by reducing indexing operations.  
+    The odd factors section is used for odd primes >5, burt can handle
+    any odd factor.  The rotation factor section works for any factor
+    but is used only for odd factors.
+
+    The permutation for square factors of n contains special code for
+    single-variate transforms, since less indexing is required.  However,
+    the permutation for multivariate transforms also works on 
+    single-variate transforms.
+
+    TRANSFORMING REAL DATA
+
+    A single-variate Fourier transform of 2n real data values can be
+    computed by use of a complex Fourier transform of dimension n. Sub-
+    routine REALTR provides this capability.
+
+    The real data vlaues are stored alternately in the arrays A and B,
+
+                    A(1),B(1),A(2),B(2),...A(n),B(n),
+
+    then we
+
+                    CALL dfft(A,B,n,n,n,1)
+                    CALL REALTR(A,B,n,1)
+
+    After scaling by 0.5/n, the results in A and B are the Fourier
+    cosine and sine coefficients, i.e.,
+
+                    a(k) = A(k+1)
+                      
+                    b(k) = B(k+1)
+
+    for k=0,1,...,n,with b(0)=b(n)=0.  The inverse operation,
+
+                    CALL REALTR(A,B,n,-1)
+                    CALL dfft(A,B,n,n,n,-1),
+
+    after scaling by 1/2, evaluates the Fourier series and leaves 
+    the time domain values stored
+
+                    A(1),B(1),A(2),B(2),...A(n),B(n),
+
+    as originally.
+
+    The subroutine REALTR, called with ISN=1*, separates the complex
+    transforms of the even- and odd-numbered data values, using the
+    fact that the transform of real data has the complex conjugate
+    symmetry
+                                              *
+                     (alpha)(n-k) = (alpha)(k) 
+
+               * ISN is the fourth (last) argument to REALTR
+
+    for k=1,2,...,n-1, then performs a final radix-2 step to complete 
+    the transform for the 2n real values.  If called with ISN = -1,
+    the inverse operation is performed.  The pair of calls
+
+                      CALL REALTR(A,B,n,1)
+                      CALL REALTR(A,B,n,-1)
+
+    return the original values multiplied by 4, except for round-off 
+    errors.
+
+    The data may alternatively be stored in a single complex array A, 
+    then the magnitude of ISN changed to two to give the correct indexing
+    increment and A(2) used to pass the initial address for the sequence
+    of imaginary values, e.g.,
+
+                       CALL dfft(A,A(2),n,n,n,2)
+                       CALL REALTR(A,A(2),n,2)
+
+    In this case, the cosine and sine coefficients alternate in A.
+
+2  TIMING AND ACCURACY
+   
+    The subroutine dfft was tested for time and accuracy on the IPL 
+    360/65 computer.  The results are shown in Table 1 below.  The times 
+    areCPU times measured with 1/60 second resolution.
+
+    The data used in the trials were random normal deviates with a mean of 
+    zero and a standard deviation of one (i.e., an expected rms value of 
+    one). The subroutine was called twice:
+
+                        CALL dfft(A,B,n,n,n,1)
+                        CALL dfft(A,B,n,n,n,-1);
+
+    then the result was scaled by 1/n.  The square deviations from the 
+    original data values were summed, the real and imaginary quantities
+    separately, then divided by n and square roots taken to yield an rms
+    error value.  The two values were in all cases comparable in magnitude,
+    and an average is reported in Table 1.
+
+    The measured times were normalized in two ways, first by dividing by
+
+              m
+              ____
+           n  \    n(i),
+              /___
+              1-l
+
+     and second by dividing by
+
+              n log(2)(n).
+
+     To a first approximation, computing time for the mixed radix FFT is
+     proportional to n times the sum of the factors of n, and we observe
+     in the present case that a proportionality constant of 21 (us) gives 
+     a fair fit to this model.  On the basis of counting complex multi-
+     plications, we would expect a decline in this proportionality constant
+     with increasing radix; a decline is observed for odd primes >5.  
+     Factors of 5 or less are of course favored by special coding in the 
+     program.  The second normalized time value places all times on a 
+     comparable scale, allowing one to assess the relative efficiency of 
+     using values other than powers of 2.
+
+     Singleton's paper provides a table listing numbers up to 100,000 
+     containing no prime factor greater than 5 to aid the user in 
+     selecting efficient values of n.
+
+                                Table 1
+                                                             
+                              Time,   Time, (mu)s   Time, (mu)s      rms
+     Factoring of n         Seconds   -----------   -----------     error
+                                      n(sigma)n(i)  n log(2)n      x10(**-6)
+     _______________________________________________________________________
+
+      512 = 4**2x2x4**2       .180        19.5         39.1           6.2
+     1024 = 4**2x4x4**2       .432        21.1         42.2           8.3
+     2048 = 4**2x2x2x2x4**2   .842        18.7         37.4           9.3
+     4096 = 4**3x4**3        1.784        18.1         36.3          14.7
+     2187 = 3**3x3x3**3      1.343        29.2         55.4          10.8
+     3125 = 5**2x5x5**2      1.713        21.9         47.2          15.7     
+     2401 = 7**2x7**2        2.152        32.0         79.8          15.3
+     1331 = 11x11x11         1.142        26.0         82.6          15.2
+     2197 = 13x13x13         2.042        23.8         83.7          20.1
+      289 = 17x17             .216        22.0         91.4           9.1
+      361 = 19x19             .288        21.0         93.7          10.0
+      529 = 23x23             .506        20.8        105.7          14.1
+     1000 = 2x5x2x5x2x5       .473        22.5         47.5           9.5
+     2000 = 4x5x5x5x4         .933        20.3         42.6          11.4
+      210 = 2x3x5x7           .122        34.1         75.1           5.8
+      216 = 2**3x3**3         .093        28.8         55.7           6.0
+      221 = 13x17*             ---         ---          ---           ---
+      202 = 2x101**            ---         ---          ---           ---
+
+              * Fails because square-free part exceeds 210 and has two
+                factors.
+
+             ** Fails because a prime factor exceeds 23.
+
+2  RESTRICTIONS
+ 
+     dfft cannot be used for values of n containing prime factors >23 or
+     for values of n having square-free portions >210 containing two or more
+     factors or for values of n having more than 208 prime factors.  These 
+     restrictions can be relaxed by increasing certain array sizes in the 
+     program and recompiling.
+
+     SIZE
+
+         dfft uses 10132(10) bytes.  REALTR uses 1054(10) bytes.
+
+2  EXAMPLE
+
+     A tri-variate transform with real components in A(n1,n2,n3) and
+     imaginary components in B(n1,n2,n3) is computed by
+
+                  CALL dfft(A,B,n1*n2*n3,n1,n1,1)
+                  CALL dfft(A,B,n1*n2*n3,n2,n1*n2,1)
+                  CALL dfft(A,B,n1*n2*n3,n3,n1*n2*n3,1).
+
+

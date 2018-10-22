@@ -1,0 +1,212 @@
+PROCESS HELP=*
+PARM INP    TYPE=STRING COUNT=1
+PARM OUT    TYPE=STRING COUNT=1
+PARM SIZE   TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM FONT   TYPE=INTEGER COUNT=(0:30) VALID=(1:131) DEFAULT=3
+PARM TALL   TYPE=INTEGER COUNT=(0:30) DEFAULT=15
+PARM WIDE   TYPE=REAL COUNT=(0:30) VALID=(.5:2.) DEFAULT=.8
+PARM THICK  TYPE=INTEGER COUNT=(0:30) VALID=(1:100) DEFAULT=1
+PARM POSITION  TYPE=INTEGER COUNT=(0:60) DEFAULT=(1,1)
+PARM TEXT   TYPE=(STRING,100)  COUNT=(0:30) DEFAULT=" "
+PARM ROTATE TYPE=REAL COUNT=(0:30) VALID=(-180.:180.) DEFAULT=0.
+PARM DN     TYPE=INTEGER COUNT=(0:30) VALID=(0:255) DEFAULT=255
+PARM LOC    TYPE=INTEGER COUNT=(0:30) VALID=(1,2,3) DEFAULT=1
+PARM PARMS  TYPE=(STRING,40) COUNT=0:1 DEFAULT=--
+END-PROC
+.TITLE
+VICAR2 program "font"--
+       Writes text on an image allowing choices of FONT type, size and dn.
+.HELP
+PURPOSE:
+
+"font" is a VICAR2 applications program which may be used to write text onto
+any  VICAR2 byte image with a choice of seven available FONT styles.  Along
+with  varying  the  FONT  style  the user can specify the height, width, dn
+value  and  line  thickness  of each character and whether to left justify,
+right  justify  or  center  the  text string above a specified point.  "font"
+operates  in  a  completely  different  manner  than  "textad" and is no way
+related.
+
+.page 
+EXECUTION STATEMENT:
+		  font in out SIZE=(SL,SS,NL,NS) PARAMS
+				    or
+			    font in out PARMS
+
+OPERATION:
+
+"font" first  checks  the user entered parameters to insure that they are of
+the  correct  format  and  number.   The  area  of  the input image that is
+specified  by  the size field is copied from the input to the output image.
+If  no  size field is specified, the entire input is copied to output.  The
+input  image  is  closed and all subsequent work is performed on the output
+image.   Due  to  the  fact that the various characters within a particular
+FONT  have different sizes, it becomes extremely difficult to determine the
+exact  dimensions  of  a text string.  (If exact text string dimensions and
+character  positioning  are  required,  the user is encouraged to preform a
+test  on  a  image  and  then  use IDISPLAY to measure the results.) If any
+portion  of  a  text string is to written off the output image, the user is
+notified  and  given  the  string number.  That portion of the string which
+will  fit  in  the  output image is written and subsequent strings are then
+processed.
+
+EXAMPLES:
+	font in out SIZE=(1,1,400,600) POSITION=(100,20,130,20) +
+	     TEXT=("How goes it Laddy?","Just fine, Thanks!")
+ 
+In  the  above  example,  both  text strings would be written in the output
+image  with all six parameters being defaulted.  The results would have the
+following  characteristics:  Both text strings, would be written in a Roman
+style  FONT  (FONT=3),  the upper case letters are 15 pixels tall (tall=15)
+and  12  pixels  wide (wide=.8,width is based on the height selected), both
+upper  and lower case letters are allowed, the DN of the pixels in the text
+is  255  (dn=255), the thickness of lines in the characters is 1 (thick=1),
+and  the  starting  line  and  sample  coordinates given (POSITION(1,2) and
+POSITION(3,4) indicated where the bottom left of the first character in the
+text  strings TEXT(1,2) is to be written (loc=1).  The output data set will
+be 400 lines by 600 samples.
+
+      font in out SIZE=(100,100,300,500) POSITION=(300,20,350,20) +
+	  TEXT=("How goes it Bobby?","None of your business.") +
+			FONT=(11) TALL=(40)
+
+The  example  above  illustrates  three  features  of program "font" that are
+important to understand:
+
+1) The size field determines the portion of the input data set that will be
+copied  to  the  output  and consequently determines the size of the output
+image.
+
+2)  The  line  and sample coordinates given for text positioning (values in
+POSITION(1,2)  POSITION(3,4))  are locations in the input image.  POSITIONs
+are  always  related  to  the output image.  This means that the first text
+string  TEXT(1) ("How goes it Bobby?") will start at line 200 and sample 20
+in the output image.
+
+3)  The  number  of values for the parameters TEXT, FONT, WIDE, THICK, etc.
+need  not  match  exactly.   If  there are more TEXT strings than there are
+values  for  FONT,  WIDE, THICK, etc., the last value given is used for all
+remaining  strings.   Thus  in this example FONT=11 and TALL=40 is used for
+both strings.
+
+.page
+TIMING:
+
+WRITTEN BY: Bob Mortensen and Kevin Hussey
+
+           (Parameter modification by Rich Walker AUG85)
+
+COGNIZANT PROGRAMMER: nghia
+
+REVISION:  1.0 -- Original Version
+	   2.0 -- Added ROTATE parameter and removed many restrictions
+           3.0 Made portable for UNIX ... V. Unruh ... (CRI) (Jan  2, 1995)
+           3.1 fixed "loc" bug and space in text strings bug, added to help
+
+.LEVEL1
+.VARI INP
+The data set into which the
+text is to be scribed
+
+Example: INP=raw.img
+.VARI OUT
+Output data set containing
+image input plus text added.
+
+Example: OUT=annotated.img
+.VARI SIZE
+Output data set dimensions.
+
+Example: SIZE=(1,1,400,3360)
+.VARI FONT
+An integer code referring to
+the nth (based on position)
+text string letter type.
+
+Example: FONT=(1,1,1,3,2,1,2)
+.VARI TALL
+The number of pixels tall the
+characters of the nth text
+are to be.
+
+Example: 
+TALL=(20,20,20,40,10,10,20)
+.VARI WIDE
+The number of pixels wide of
+the characters in the nth
+string will be wide(n)*tall(n).
+
+Example: 
+WIDE=(.8,.8,.5,.8,.9,.3,.6,.9)
+.VARI THICK
+The thickness in pixels of
+the characters in the nth
+text string
+
+Example: THICK=(1,2,3,2,2,3,4,2)
+.VARI POSITION
+The sl  and ss  locations of the
+nth text  string  given.   There
+should be 2*n entries for this.
+If LOC is 2, this indicates the
+pixel position of the bottom
+center of the string, otherwise
+it is the lower left/right cor-
+ner of the string, according to
+the justification given (LOC).
+
+Example: 
+POSITION=(201,301,501,701, +
+          101,101,1001,551)
+.VARI TEXT
+The text strings to be
+written into the output
+image.
+
+Example:  
+TEXT=("This is string 1", +
+      "This is string 2")
+.VARI ROTATE
+The counterclockwise angle to 
+rotate the text string using 
+the given position as the 
+center of rotation.
+range = -180 to 180
+
+Example:
+ROTATE=(-90,0,180)
+.VARI DN
+The DN values of the pixels
+of each of the strings to be
+written.
+
+Example: DN=(255,254,253)
+.VARI LOC
+This parameter indicates the
+point in the text string to
+be located at the 'position'
+parameter value.  Use
+ 1 for lower left corner
+ 2 for center bottom, or
+ 3 for lower right corner.
+
+Example:  LOC=(1,2,3,2,3)
+.vari parms
+This parameter is created in
+order to handle more than one
+datum passed to font by conlab
+
+.LEVEL2 
+.VARI FONT
+The  following  values for  font 
+point to the font-type indicated
+
+1  = Simplex
+2  = Duplex
+3  = Roman
+5  = Standard 2
+7  = Script
+11 = English Gothic
+13 = Italian Gothic
+
+.END

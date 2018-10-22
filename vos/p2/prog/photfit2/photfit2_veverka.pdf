@@ -1,0 +1,392 @@
+procedure option=selftutor help=*
+
+	parm A_VEVERKAt	 			real count=0:1 def=0.997
+	parm MIN_A_VEVERKAt	 		real count=0:1 def=0.0
+	parm MAX_A_VEVERKAt	 		real count=0:1 def=1.5
+	parm T_A_VEVERKAt	 		real count=0:1 def=0.2
+	parm B_VEVERKAt	 			real count=0:1 def=0.6 
+	parm MIN_B_VEVERKAt	 		real count=0:1 def=-3.0 
+	parm MAX_B_VEVERKAt	 		real count=0:1 def=3.0
+	parm T_B_VEVERKAt	 		real count=0:1 def=0.05 
+	parm C_VEVERKAt				real count=0:1 def=0.003 
+	parm MIN_C_VEVERKAt			real count=0:1 def=-3.0 
+	parm MAX_C_VEVERKAt			real count=0:1 def=3.0
+	parm T_C_VEVERKAt			real count=0:1 def=0.05 
+	parm D_VEVERKAt	 			real count=0:1 def=0.14 
+	parm MIN_D_VEVERKAt	 		real count=0:1 def=-2.0 
+	parm MAX_D_VEVERKAt	 		real count=0:1 def=2.0
+	parm T_D_VEVERKAt	 		real count=0:1 def=0.02 
+
+	parm A_VEVERKA	 	real count=0:1 	def=-- 
+	parm MIN_A_VEVERKA	real count=0:1 	def=-- 
+	parm MAX_A_VEVERKA	real count=0:1 	def=-- 
+	parm T_A_VEVERKA	real count=0:1 	def=-- 
+	parm B_VEVERKA	 	real count=0:1 	def=--
+	parm MIN_B_VEVERKA	real count=0:1 	def=--
+	parm MAX_B_VEVERKA	real count=0:1 	def=--
+	parm T_B_VEVERKA	real count=0:1 	def=--
+	parm C_VEVERKA	 	real count=0:1 	def=-- 
+	parm MIN_C_VEVERKA	real count=0:1 	def=-- 
+	parm MAX_C_VEVERKA	real count=0:1 	def=-- 
+	parm T_C_VEVERKA	real count=0:1 	def=-- 
+	parm D_VEVERKA	 	real count=0:1 	def=-- 
+	parm MIN_D_VEVERKA	real count=0:1 	def=-- 
+	parm MAX_D_VEVERKA	real count=0:1 	def=-- 
+	parm T_D_VEVERKA	real count=0:1 	def=-- 
+
+	procedure name=photfit2_veverka_sub help=*
+
+		parm A_VEVERKA	 	real count=0:1 	def=-- 
+		parm MIN_A_VEVERKA	real count=0:1 	def=-- 
+		parm MAX_A_VEVERKA	real count=0:1 	def=-- 
+		parm T_A_VEVERKA	real count=0:1 	def=-- 
+		parm B_VEVERKA	 	real count=0:1 	def=--
+		parm MIN_B_VEVERKA	real count=0:1 	def=--
+		parm MAX_B_VEVERKA	real count=0:1 	def=--
+		parm T_B_VEVERKA	real count=0:1 	def=--
+		parm C_VEVERKA	 	real count=0:1 	def=-- 
+		parm MIN_C_VEVERKA	real count=0:1 	def=-- 
+		parm MAX_C_VEVERKA	real count=0:1 	def=-- 
+		parm T_C_VEVERKA	real count=0:1 	def=-- 
+		parm D_VEVERKA	 	real count=0:1 	def=-- 
+		parm MIN_D_VEVERKA	real count=0:1 	def=-- 
+		parm MAX_D_VEVERKA	real count=0:1 	def=-- 
+		parm T_D_VEVERKA	real count=0:1 	def=-- 
+
+	body
+	end-proc
+
+body
+
+	if (_tutor=1)
+
+	  restore-parm pho_veverka.par
+
+	  if ($count(A_VEVERKA)=0)
+	 					let A_VEVERKAt=0.997
+	  else 
+		let A_VEVERKAt=&A_VEVERKA
+	  end-if
+
+	  if ($count(MIN_A_VEVERKA)=0)
+	 					let MIN_A_VEVERKAt=0.0
+	  else 
+		let MIN_A_VEVERKAt=&MIN_A_VEVERKA
+	  end-if
+
+	  if ($count(MAX_A_VEVERKA)=0)
+	 					let MAX_A_VEVERKAt=1.5
+	  else 
+		let MAX_A_VEVERKAt=&MAX_A_VEVERKA
+	  end-if
+
+	  if ($count(T_A_VEVERKA)=0)
+	 					let T_A_VEVERKAt=0.2
+	  else 
+		let T_A_VEVERKAt=&T_A_VEVERKA
+	  end-if
+
+
+	  if ($count(B_VEVERKA)=0)
+	 					let B_VEVERKAt=0.6
+	  else
+		let B_VEVERKAt=&B_VEVERKA
+	  end-if
+
+	  if ($count(MIN_B_VEVERKA)=0)
+	 					let MIN_B_VEVERKAt=-3.0
+	  else
+		let MIN_B_VEVERKAt=&MIN_B_VEVERKA
+	  end-if
+
+	  if ($count(MAX_B_VEVERKA)=0)
+	 					let MAX_B_VEVERKAt=3.0
+	  else
+		let MAX_B_VEVERKAt=&MAX_B_VEVERKA
+	  end-if
+
+	  if ($count(T_B_VEVERKA)=0)
+	 					let T_B_VEVERKAt=0.05
+	  else
+		let T_B_VEVERKAt=&T_B_VEVERKA
+	  end-if
+
+
+	  if ($count(C_VEVERKA)=0)
+	 					let C_VEVERKAt=0.003
+	  else
+		let C_VEVERKAt=&C_VEVERKA
+	  end-if
+
+	  if ($count(MIN_C_VEVERKA)=0)
+	 					let MIN_C_VEVERKAt=-3.0
+	  else
+		let MIN_C_VEVERKAt=&MIN_C_VEVERKA
+	  end-if
+
+	  if ($count(MAX_C_VEVERKA)=0)
+	 					let MAX_C_VEVERKAt=3.0
+	  else
+		let MAX_C_VEVERKAt=&MAX_C_VEVERKA
+	  end-if
+
+	  if ($count(T_C_VEVERKA)=0)
+	 					let T_C_VEVERKAt=0.05
+	  else
+		let T_C_VEVERKAt=&T_C_VEVERKA
+	  end-if
+
+
+	  if ($count(D_VEVERKA)=0)
+						let D_VEVERKAt=0.14
+	  else
+		let D_VEVERKAt=&D_VEVERKA
+	  end-if
+
+	  if ($count(MIN_D_VEVERKA)=0)
+						let MIN_D_VEVERKAt=-2.0
+	  else
+		let MIN_D_VEVERKAt=&MIN_D_VEVERKA
+	  end-if
+
+	  if ($count(MAX_D_VEVERKA)=0)
+						let MAX_D_VEVERKAt=2.0
+	  else
+		let MAX_D_VEVERKAt=&MAX_D_VEVERKA
+	  end-if
+
+	  if ($count(T_D_VEVERKA)=0)
+						let T_D_VEVERKAt=0.02
+	  else
+		let T_D_VEVERKAt=&T_D_VEVERKA
+	  end-if
+
+
+
+	   tutor photfit2_veverka_sub 					+
+		|restore=pho_veverka.par, save=pho_veverka.par|		+
+			A_VEVERKA=&A_VEVERKAt				+
+			MIN_A_VEVERKA=&MIN_A_VEVERKAt			+
+			MAX_A_VEVERKA=&MAX_A_VEVERKAt			+
+			T_A_VEVERKA=&T_A_VEVERKAt			+
+			B_VEVERKA=&B_VEVERKAt				+
+			MIN_B_VEVERKA=&MIN_B_VEVERKAt			+
+			MAX_B_VEVERKA=&MAX_B_VEVERKAt			+
+			T_B_VEVERKA=&T_B_VEVERKAt			+
+			C_VEVERKA=&C_VEVERKAt				+
+			MIN_C_VEVERKA=&MIN_C_VEVERKAt			+
+			MAX_C_VEVERKA=&MAX_C_VEVERKAt			+
+			T_C_VEVERKA=&T_C_VEVERKAt			+
+			D_VEVERKA=&D_VEVERKAt				+
+			MIN_D_VEVERKA=&MIN_D_VEVERKAt			+
+			MAX_D_VEVERKA=&MAX_D_VEVERKAt			+
+			T_D_VEVERKA=&T_D_VEVERKAt
+
+
+	   return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs needs "
+	   write " photometric function parameters "
+	   write " for the VEVERKA function."
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+
+.title
+'PHOTFIT2_VEVERKA' sub-menu
+
+.help
+
+PURPOSE:
+
+In this PDF, the user is asked for the only parameters and there absolute 
+limits needed to fit Veverka's photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.page
+MATHEMATICAL BACKGROUND :
+
+Exept close to zero phase, this expression is a good description of light 
+scattered by low-albedo bodies of the solar system, such as the Moon and 
+Mercury, for which only light that has been scattered once contributes 
+significantly to the brightnes.
+
+bidirectional reflectance [1/str] :
+
+r(i,e,g) = ( cos(i) / (cos(e)+cos(e)) )  
+	 * (A_VEVERKA + B_VEVERKA * phase + C_VEVERKA * exp(-DVEVERKA * phase))
+
+usually :
+C_VEVERKA=1-A_VEVERKA
+
+
+.page
+REFERENCE :
+Joseph Veverka, J. Goguen, S. Young, J. Elliont, Scattering of light from 
+particulate surfaces. 
+I. A laboratory assessment of multiple-scattering effects.
+Icarus, Vol. 34, p. 406-414
+
+
+.page
+PROGRAMMER:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+.level1
+
+.VARI A_VEVERKA 
+Veverka parameter
+
+.VARI MIN_A_VEVERKA 
+Minimum of Veverka parameter
+
+.VARI MAX_A_VEVERKA 
+Maximum of Veverka parameter
+
+.VARI T_A_VEVERKA 
+Temperatur of Veverka parameter
+
+.VARI B_VEVERKA
+Veverka parameter
+
+.VARI MIN_B_VEVERKA
+Minimum of Veverka parameter
+
+.VARI MAX_B_VEVERKA
+Maximum of Veverka parameter
+
+.VARI T_B_VEVERKA
+Temperatur of Veverka parameter
+
+.VARI C_VEVERKA
+Veverka parameter
+
+.VARI MIN_C_VEVERKA
+Minimum of Veverka parameter
+
+.VARI MAX_C_VEVERKA
+Maximum of Veverka parameter
+
+.VARI T_C_VEVERKA
+Temperatur of Veverka parameter
+
+.VARI D_VEVERKA
+Veverka parameter
+
+.VARI MIN_D_VEVERKA
+Minimum of Veverka parameter
+
+.VARI MAX_D_VEVERKA
+Maximum of Veverka parameter
+
+.VARI T_D_VEVERKA
+Temperatur of Veverka parameter
+
+.level2
+
+.VARI A_VEVERKA 
+Parameter of the Veverka photometric function.
+Usually :
+C_VEVERKA=1-A_VEVERKA
+
+.VARI MIN_A_VEVERKA 
+This parameter gives the absolut lower limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_A_VEVERKA 
+This parameter gives the absolut upper limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_A_VEVERKA 
+This parameter gives temperatur for the parameter of the Veverka photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    A_VEVERKA_NEW = T_A_VEVERKA * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_A_VEVERKA_NEW_* = T_A_VEVERKA_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI B_VEVERKA
+Parameter of the Veverka photometric function.
+
+.VARI MIN_B_VEVERKA
+his parameter gives the absolut lower limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_B_VEVERKA
+This parameter gives the absolut upper limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_B_VEVERKA
+This parameter gives temperatur for the parameter of the Veverka photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    B_VEVERKA_NEW = T_B_VEVERKA * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_B_VEVERKA_NEW_* = T_B_VEVERKA_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI C_VEVERKA
+Parameter of the Veverka photometric function.
+Usually :
+C_VEVERKA=1-A_VEVERKA
+
+.VARI MIN_C_VEVERKA
+his parameter gives the absolut lower limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_C_VEVERKA
+This parameter gives the absolut upper limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_C_VEVERKA
+This parameter gives temperatur for the parameter of the Veverka photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    C_VEVERKA_NEW = T_C_VEVERKA * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_C_VEVERKA_NEW_* = T_C_VEVERKA_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI D_VEVERKA
+Parameter of the Veverka photometric function.
+
+.VARI MIN_D_VEVERKA
+This parameter gives the absolut lower limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_D_VEVERKA
+This parameter gives the absolut upper limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_D_VEVERKA
+This parameter gives temperatur for the parameter of the Veverka photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    D_VEVERKA_NEW = T_D_VEVERKA * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_D_VEVERKA_NEW_* = T_D_VEVERKA_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.end

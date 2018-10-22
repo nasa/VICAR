@@ -31,7 +31,7 @@ public class MgnFbidrImageReaderSpi extends ImageReaderSpi {
     private static final String[] suffixes = {""};
 
     // no idea what we should use for mime types
-    private static final String[] MIMEtypes = {"image/x-pds" };
+    private static final String[] MIMEtypes = {"image/x-mgn-fbidr" };
                                                
     // use in the super constructor for nemonic value                                           
     private static boolean _supportsStandardStreamMetadataFormat    =  false;

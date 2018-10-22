@@ -1,0 +1,21 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+
+enable-log
+
+use xwa0
+
+ush rm -f o.tmp
+
+fracgen filea power=2.0 seed=32161267
+fft22   filea fileb
+enable-script tstifft.scr
+
+disable-log
+
+end-proc

@@ -1,0 +1,48 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!
+!  THIS IS A TEST OF PROGRAM VLOOKUP
+!
+!
+! Generate the lookup tables with standard IBIS calls
+
+!
+!  a one-column lut:
+ibis-gen lut1 nc=1 nr=256
+mf lut1 fun=("c1=index-1","c1=(c1-30)*255/70","c1=max(min(c1,255),0)")
+
+! replaces:
+!jstretch-linear 30 100 red
+!jsave-stretch lut1 red
+
+!
+!  a 3-column lut -- standard for (pseudo-)color
+ibis-gen lut2 nc=3 nr=256
+mf lut2 fun=("c1=index-1", +
+   "c2 = (c1-20)*255/100","c2=max(min(c2,255),0)",+
+    "c3 = (c1-20)*255/100","c3=max(min(c3,255),0)")
+
+! replaces:
+!jstretch-linear 20 120 green
+!jstretch-linear 10 150 blue
+!jsave-stretch lut2 (red,green,blue)
+
+!  make a big image
+gen a nl=2000 ns=2000 ival=10 sinc=5 linc=15
+!
+!  simplest case:  1 input, 1 output:
+vlookup a a1 lut1
+usage
+!
+!  simplest case:  1 input, 1 output: without IBIS2
+vlookup a a1 table=2
+usage
+!
+!  test the special "pseudo-color" case:  1 input, 3 outputs:
+vlookup a (a1,b1,c1) lut2
+usage
+!
+end-proc

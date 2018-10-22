@@ -1,0 +1,19 @@
+/***********************************************************************
+                     IMAKE FILE FOR PROGRAM morph
+
+   To Create the build file give the command:
+
+		$ vimake morph			(VMS)
+   or
+		% vimake morph			(Unix)
+************************************************************************/
+#define PROGRAM	morph
+#define R2LIB
+#define MODULE_LIST morph.f
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

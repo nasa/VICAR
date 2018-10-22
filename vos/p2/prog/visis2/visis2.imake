@@ -1,0 +1,14 @@
+#define PROGRAM visis2
+#define MODULE_LIST visis2.c 
+#define MAIN_LANG_C
+#define USES_C
+/*#define LIB_GLLSUB*/
+#define LIB_P2SUB
+/*#define LIB_SYBASE*/
+/*#define LIB_MDMS*/
+/*#define LIB_KERBEROS*/
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_FORTRAN
+/*#define LIB_LOCAL	/* remove on delivery */
+/*#define DEBUG		/* remove on delivery */

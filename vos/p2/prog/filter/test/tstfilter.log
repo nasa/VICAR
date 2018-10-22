@@ -1,0 +1,506 @@
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+*******************************************************
+THIS IS A TEST OF MODULE filter
+WE WILL SPATIALLY filter AN IMAGE AND LIST THE RESULTS
+AFTER EACH RUN.
+*******************************************************
+ 
+Generate a picture
+gen A nl=64 ns=64 ival=0 linc=1 sinc=1 modulo=6
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list A size=(1,1,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   0   1   2   3
+      2       1   2   3   4   5   0   1   2   3   4
+      3       2   3   4   5   0   1   2   3   4   5
+      4       3   4   5   0   1   2   3   4   5   0
+      5       4   5   0   1   2   3   4   5   0   1
+      6       5   0   1   2   3   4   5   0   1   2
+      7       0   1   2   3   4   5   0   1   2   3
+      8       1   2   3   4   5   0   1   2   3   4
+      9       2   3   4   5   0   1   2   3   4   5
+     10       3   4   5   0   1   2   3   4   5   0
+f2 A filter.A func=("in1*51")
+Beginning VICAR task f2
+F2 version 26-Jul-11
+F2 using byte table lookup
+FUNCTION EVALUATED 256 TIMES
+list filter.A size=(1,1,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:F2        User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0  51 102 153 204 255   0  51 102 153
+      2      51 102 153 204 255   0  51 102 153 204
+      3     102 153 204 255   0  51 102 153 204 255
+      4     153 204 255   0  51 102 153 204 255   0
+      5     204 255   0  51 102 153 204 255   0  51
+      6     255   0  51 102 153 204 255   0  51 102
+      7       0  51 102 153 204 255   0  51 102 153
+      8      51 102 153 204 255   0  51 102 153 204
+      9     102 153 204 255   0  51 102 153 204 255
+     10     153 204 255   0  51 102 153 204 255   0
+let $echo="no"
+TEST 1 - Do a default filter  (Surveyor Footpad Filter Kernel)
+filter filter.A filter.Y1
+Beginning VICAR task filter
+** Filter 13-Aug-2010 (64-bit) - RJB
+list filter.Y1 size=(1,1,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:FILTER    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   0   0  82 255 255   0   0   0  89
+      2       0  87 148 255 255   0   0  78 141 255
+      3       0 147 255 255   0   0  75 177 255 255
+      4      82 255 255   0   0  66 165 255 255   0
+      5     255 255   0   0  79 175 255 255   0   0
+      6     255   0   0  64 174 255 255   0   0  75
+      7       0   0  73 163 255 255   0   0  76 175
+      8       0  78 177 255 255   0   0  78 177 255
+      9       0 141 255 255   0   0  75 177 255 255
+     10      87 255 255   0   0  75 175 255 255   0
+difpic (filter.A,filter.Y1) filter.dif1
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ AVE VAL OF POS DIFFS=  39.1419
+ NUMBER OF POS DIFF=1367
+ AVE VAL OF NEG DIFFS= -39.1201
+ NUMBER OF NEG DIFFS=1365
+ TOTAL NUMBER OF DIFFERENT PIXELS=2732
+ AVE VAL OF DIFFS= 0.263672E-01
+ % DIFF PIXELS=  66.6992
+list filter.dif1 size=(1,1,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:DIFPIC    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0  51 102  71   0   0   0  51 102  64
+      2      51  15   5   0   0   0  51  24  12   0
+      3     102   6   0   0   0  51  27   0   0   0
+      4      71   0   0   0  51  36   0   0   0   0
+      5       0   0   0  51  23   0   0   0   0  51
+      6       0   0  51  38   0   0   0   0  51  27
+      7       0  51  29   0   0   0   0  51  26   0
+      8      51  24   0   0   0   0  51  24   0   0
+      9     102  12   0   0   0  51  27   0   0   0
+     10      66   0   0   0  51  27   0   0   0   0
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+TEST 2 - Do default filter using size field
+filter filter.A filter.Y2 (7,7,39,39)
+Beginning VICAR task filter
+** Filter 13-Aug-2010 (64-bit) - RJB
+list filter.Y2 size=(1,1,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:FILTER    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   0   0  82 255 255   0   0   0  89
+      2       0  87 148 255 255   0   0  78 141 255
+      3       0 147 255 255   0   0  75 177 255 255
+      4      82 255 255   0   0  66 165 255 255   0
+      5     255 255   0   0  79 175 255 255   0   0
+      6     255   0   0  64 174 255 255   0   0  75
+      7       0   0  73 163 255 255   0   0  76 175
+      8       0  78 177 255 255   0   0  78 177 255
+      9       0 141 255 255   0   0  75 177 255 255
+     10      87 255 255   0   0  75 175 255 255   0
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+TEST 3 - Now filter with halfword input and output
+cform filter.A filter.Z oform=half
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     1.000+     0.000
+INPUT FORMAT = BYTE
+OUTPUT FORMAT = HALF
+CONVERSION COMPLETE
+filter filter.Z filter.W
+Beginning VICAR task filter
+** Filter 13-Aug-2010 (64-bit) - RJB
+list filter.W size=(1,1,10,15)
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:FILTER    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+      1         0     0     0    82   295   568     0     0     0    89   303   569     0     0     0
+      2         0    87   148   266   476     0     0    78   141   267   481     0     0    78   141
+      3         0   147   307   491     0     0    75   177   305   483     0     0    75   177   305
+      4        82   265   490     0     0    66   165   303   491     0     0    67   167   303   491
+      5       297   477     0     0    79   175   300   481     0     0    78   174   300   481     0
+      6       571     0     0    64   174   308   485     0     0    75   177   306   483     0     0
+      7         0     0    73   163   299   485     0     0    76   175   303   483     0     0    76
+      8         0    78   177   303   481     0     0    78   177   303   480     0     0    78   177
+      9         0   141   307   494     0     0    75   177   303   480     0     0    78   177   303
+     10        87   267   484     0     0    75   175   303   480     0     0    78   177   303   480
+difpic (filter.Z,filter.W) filter.dif2
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ AVE VAL OF POS DIFFS=  39.1419
+ NUMBER OF POS DIFF=1367
+ AVE VAL OF NEG DIFFS= -116.115
+ NUMBER OF NEG DIFFS=2047
+ TOTAL NUMBER OF DIFFERENT PIXELS=3414
+ AVE VAL OF DIFFS= -44.9658
+ % DIFF PIXELS=  83.3496
+list filter.dif2 size=(1,1,10,10)
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:DIFPIC    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         0    51   102    71   -91  -313     0    51   102    64
+      2        51    15     5   -62  -221     0    51    24    12   -63
+      3       102     6  -103  -236     0    51    27   -24  -101  -228
+      4        71   -61  -235     0    51    36   -12   -99  -236     0
+      5       -93  -222     0    51    23   -22   -96  -226     0    51
+      6      -316     0    51    38   -21  -104  -230     0    51    27
+      7         0    51    29   -10   -95  -230     0    51    26   -22
+      8        51    24   -24   -99  -226     0    51    24   -24   -99
+      9       102    12  -103  -239     0    51    27   -24   -99  -225
+     10        66   -63  -229     0    51    27   -22   -99  -225     0
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+TEST 4 - Now filter with nonsymmetric weights
+filter filter.A filter.V nlw=5 nsw=5 'nons  +
+   weights=(-60,10,10,10,-50,    +
+	    -10,60,40,50,-20,    +
+	     -5,80,100,70,-10)
+Beginning VICAR task filter
+** Filter 13-Aug-2010 (64-bit) - RJB
+list filter.V size=(1,1,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:FILTER    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   0 180 250 194  80  34  27 180 250
+      2       0  71 179 230 174  70   4 108 179 230
+      3     180 158 207 161 115  49  86 147 207 161
+      4     240 219 161 115  49  86 147 207 161 115
+      5     189 182 115  49  86 147 207 161 115  49
+      6      85  83  49  86 147 207 161 115  49  86
+      7      39  17  86 147 207 161 115  49  86 147
+      8      32 107 147 207 161 115  49  86 147 207
+      9     180 158 207 161 115  49  86 147 207 161
+     10     240 219 161 115  49  86 147 207 161 115
+difpic (filter.A,filter.V) filter.dif3
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ AVE VAL OF POS DIFFS=  31.8498
+ NUMBER OF POS DIFF=2649
+ AVE VAL OF NEG DIFFS= -58.5336
+ NUMBER OF NEG DIFFS=1445
+ TOTAL NUMBER OF DIFFERENT PIXELS=4094
+ AVE VAL OF DIFFS=-0.515137E-01
+ % DIFF PIXELS=  99.9512
+list filter.dif3 size=(1,1,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:DIFPIC    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0  51   0   0  10 175   0  24   0   0
+      2      51  31   0   0  81   0  47   0   0   0
+      3       0   0   0  94   0   2  16   6   0  94
+      4       0   0  94   0   2  16   6   0  94   0
+      5      15  73   0   2  16   6   0  94   0   2
+      6     170   0   2  16   6   0  94   0   2  16
+      7       0  34  16   6   0  94   0   2  16   6
+      8      19   0   6   0  94   0   2  16   6   0
+      9       0   0   0  94   0   2  16   6   0  94
+     10       0   0  94   0   2  16   6   0  94   0
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+TEST 5 - Now do same with a scale factor to multiply values by 2
+filter filter.A filter.U nlw=5 nsw=5 'nons scale=(0,2)  +
+   weights=(-60,10,10,10,-50,    +
+	    -10,60,40,50,-20,    +
+	     -5,80,100,70,-10)
+Beginning VICAR task filter
+** Filter 13-Aug-2010 (64-bit) - RJB
+list filter.U size=(1,1,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:FILTER    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   0 255 255 255 160  68  53 255 255
+      2       0 142 255 255 255 139   8 217 255 255
+      3     255 255 255 255 230  99 172 255 255 255
+      4     255 255 255 230  99 172 255 255 255 230
+      5     255 255 230  99 172 255 255 255 230  99
+      6     170 165  99 172 255 255 255 230  99 172
+      7      78  34 172 255 255 255 230  99 172 255
+      8      63 214 255 255 255 230  99 172 255 255
+      9     255 255 255 255 230  99 172 255 255 255
+     10     255 255 255 230  99 172 255 255 255 230
+difpic (filter.A,filter.U) filter.dif4
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ AVE VAL OF POS DIFFS=  55.5652
+ NUMBER OF POS DIFF=  92
+ AVE VAL OF NEG DIFFS= -99.9327
+ NUMBER OF NEG DIFFS=3341
+ TOTAL NUMBER OF DIFFERENT PIXELS=3433
+ AVE VAL OF DIFFS= -80.2644
+ % DIFF PIXELS=  83.8135
+list filter.dif4 size=(1,1,10,10) 'zer
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:DIFPIC    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0  51   0   0   0  95   0   0   0   0
+      2      51   0   0   0   0   0  43   0   0   0
+      3       0   0   0   0   0   0   0   0   0   0
+      4       0   0   0   0   0   0   0   0   0   0
+      5       0   0   0   0   0   0   0   0   0   0
+      6      85   0   0   0   0   0   0   0   0   0
+      7       0  17   0   0   0   0   0   0   0   0
+      8       0   0   0   0   0   0   0   0   0   0
+      9       0   0   0   0   0   0   0   0   0   0
+     10       0   0   0   0   0   0   0   0   0   0
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+TEST 6 - Now filter with asymmetric weights
+filter filter.A filter.R nlw=3 nsw=3 'asym  +
+	weights=(-20,50,20       +
+	           5,100,0       +
+	         -10,20,-10)
+Beginning VICAR task filter
+** Filter 13-Aug-2010 (64-bit) - RJB
+list filter.R size=(1,1,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:FILTER    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp     1       3       5       7       9
+   Line
+      1      12  79 130 181 212 125  38  79 130 181
+      2      30  97 148 219 230  64   7  97 148 219
+      3      81 148 219 230  64   7  97 148 219 230
+      4     132 219 230  64   7  97 148 219 230  64
+      5     222 230  64   7  97 148 219 230  64   7
+      6     224  64   7  97 148 219 230  64   7  97
+      7      77   7  97 148 219 230  64   7  97 148
+      8      30  97 148 219 230  64   7  97 148 219
+      9      81 148 219 230  64   7  97 148 219 230
+     10     132 219 230  64   7  97 148 219 230  64
+difpic (filter.A,filter.R) filter.dif5
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ AVE VAL OF POS DIFFS=  20.0923
+ NUMBER OF POS DIFF=2720
+ AVE VAL OF NEG DIFFS= -39.8408
+ NUMBER OF NEG DIFFS=1376
+ TOTAL NUMBER OF DIFFERENT PIXELS=4096
+ AVE VAL OF DIFFS=-0.415039E-01
+ % DIFF PIXELS=  100.000
+list filter.dif5 size=(1,1,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:DIFPIC    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+     Samp     1       3       5       7       9
+   Line
+      1       0   0   0   0   0 130   0   0   0   0
+      2      21   5   5   0  25   0  44   5   5   0
+      3      21   5   0  25   0  44   5   5   0  25
+      4      21   0  25   0  44   5   5   0  25   0
+      5       0  25   0  44   5   5   0  25   0  44
+      6      31   0  44   5   5   0  25   0  44   5
+      7       0  44   5   5   0  25   0  44   5   5
+      8      21   5   5   0  25   0  44   5   5   0
+      9      21   5   0  25   0  44   5   5   0  25
+     10      21   0  25   0  44   5   5   0  25   0
+if (mode = "nobatch" or mode = "inter")
+end-if
+gen filter.3X nl=100 ns=100 nb=3 ival=10 sinc=15 linc=20 binc=30
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list filter.3X size=(41,41,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ ***********
+ Band =     1
+ ***********
+     Samp    41      43      45      47      49
+   Line
+     41     130 145 160 175 190 205 220 235 250   9
+     42     150 165 180 195 210 225 240 255  14  29
+     43     170 185 200 215 230 245   4  19  34  49
+     44     190 205 220 235 250   9  24  39  54  69
+     45     210 225 240 255  14  29  44  59  74  89
+     46     230 245   4  19  34  49  64  79  94 109
+     47     250   9  24  39  54  69  84  99 114 129
+     48      14  29  44  59  74  89 104 119 134 149
+     49      34  49  64  79  94 109 124 139 154 169
+     50      54  69  84  99 114 129 144 159 174 189
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ ***********
+ Band =     2
+ ***********
+     Samp    41      43      45      47      49
+   Line
+     41     160 175 190 205 220 235 250   9  24  39
+     42     180 195 210 225 240 255  14  29  44  59
+     43     200 215 230 245   4  19  34  49  64  79
+     44     220 235 250   9  24  39  54  69  84  99
+     45     240 255  14  29  44  59  74  89 104 119
+     46       4  19  34  49  64  79  94 109 124 139
+     47      24  39  54  69  84  99 114 129 144 159
+     48      44  59  74  89 104 119 134 149 164 179
+     49      64  79  94 109 124 139 154 169 184 199
+     50      84  99 114 129 144 159 174 189 204 219
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ ***********
+ Band =     3
+ ***********
+     Samp    41      43      45      47      49
+   Line
+     41     190 205 220 235 250   9  24  39  54  69
+     42     210 225 240 255  14  29  44  59  74  89
+     43     230 245   4  19  34  49  64  79  94 109
+     44     250   9  24  39  54  69  84  99 114 129
+     45      14  29  44  59  74  89 104 119 134 149
+     46      34  49  64  79  94 109 124 139 154 169
+     47      54  69  84  99 114 129 144 159 174 189
+     48      74  89 104 119 134 149 164 179 194 209
+     49      94 109 124 139 154 169 184 199 214 229
+     50     114 129 144 159 174 189 204 219 234 249
+let $echo="no"
+TEST 7 - Test a 3D image
+filter filter.3X filter.3Y
+Beginning VICAR task filter
+** Filter 13-Aug-2010 (64-bit) - RJB
+list filter.3Y size=(1,1,10,10) sb=1 nb=3
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:FILTER    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ ***********
+ Band =     1
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1       0  11  30  40  49  58  69  88 115 135
+      2      23  56  71  80  91 104 118 134 153 165
+      3      44  76  88  97 113 133 150 160 164 164
+      4      53  86 101 114 134 153 164 168 174 189
+      5      61  97 120 138 154 162 163 175 212 255
+      6      82 118 141 155 164 166 173 212 255 255
+      7     115 145 155 160 171 191 232 255 255   0
+      8     140 164 162 167 204 255 255 255   0   0
+      9     140 166 177 210 255 255   0   0   0  51
+     10     141 183 233 255 255   0   0  30  70  85
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:FILTER    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ ***********
+ Band =     2
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      12  42  53  58  68  88 115 135 139 133
+      2      51  83  96 105 117 135 154 165 169 177
+      3      62  97 118 135 150 160 165 164 175 218
+      4      72 109 136 153 164 169 175 189 228 255
+      5      96 132 151 158 162 176 213 255 255 255
+      6     128 157 163 159 169 212 255 255   0   0
+      7     141 170 178 188 226 255 255   0   0  32
+      8     129 171 217 255 255 255   0   0  51  89
+      9     136 201 255 255   0   0   0  51  87  94
+     10     222 255 255   0   0  30  70  85  90  94
+
+
+ Task:GEN       User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ Task:FILTER    User:wlb       Date_Time:Mon Feb  9 15:05:33 2015
+ ***********
+ Band =     3
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1      28  60  75  89 114 135 140 133 132 157
+      2      68 103 121 136 153 165 169 177 204 255
+      3      91 127 148 159 164 166 176 218 255 255
+      4     119 149 160 164 172 189 229 255 255   0
+      5     143 166 165 171 207 255 255 255   0   0
+      6     142 168 179 213 255 255   0   0   0  49
+      7     142 184 234 255 255   0   0  32  70  84
+      8     204 255 255 255   0   0  50  89  93  90
+      9     255 255   0   0   0  54  87  94  92 101
+     10     255   0   0  28  74  89  91  94 105 129
+let $echo="no"
+### endit> | SFI = 1   SKEY =  | oldSFI = 0 oldSKEY = 

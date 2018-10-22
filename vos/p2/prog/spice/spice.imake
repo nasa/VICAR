@@ -1,0 +1,15 @@
+#define PROGRAM spice
+
+#define MODULE_LIST spice.f  
+                            
+#define MAIN_LANG_FORTRAN
+#define R2LIB
+
+#define USES_FORTRAN
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_MATH77
+#define LIB_SPICE
+#define LIB_NETWORK
+

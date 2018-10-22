@@ -1,0 +1,15 @@
+/* Imake file for Test of VICAR subroutine MWATNA */
+
+#define PROGRAM tmwatna
+
+#define MODULE_LIST tmwatna.f 
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+
+#define LIB_FORTRAM
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB 

@@ -1,0 +1,155 @@
+process help=*
+PARM INP TYPE=STRING
+PARM OUT TYPE=STRING
+PARM BY TYPE=INTEGER DEFAULT=0
+PARM BYS TYPE=INTEGER DEFAULT=0
+PARM BYL TYPE=INTEGER DEFAULT=0
+END-PROC
+.TITLE
+"fftmag"
+.HELP
+PURPOSE:
+"fftmag" will expand a picture's size by a factor of 2^N by enlarging
+the Fourier Transform of the picture.  This technique provides correct 
+interpolation using the Sampling Theorem.
+
+ 
+EXECUTION:
+
+Examples
+
+fftmag  INP=FFTIN  OUT=FFTOUT  BY=2
+
+This command will enlarge input transform FFTIN by a factor of two in both the
+line and sample directions.
+
+fftmag  INP=FFTIN  OUT=FFTOUT  BYL=5  BYS=2
+
+This command will enlarge the transform by a factor of two in the sample
+direction, but by a factor of four in the line direction.  This is because 
+expansion factors must be powers of 2, and are rounded down to the next-lower 
+power, as necessary.
+
+Note that ALLOC must be used to allocate space for the output transform before
+"fftmag" is run.
+
+
+OPERATION:
+"fftmag" expands a picture by partitioning the Fourier Tranform and placing the 
+four quadrants into a larger transform array.  The details of the partitioning
+are illustrated in the figure.  The expansion of the spatial dimension is
+accomplished by a reduction in the apparent frequency (apparent because of the
+larger format of the new FFT) according to the Similarity Theorem:
+
+					       1      fx fy
+If FT(g(x,y)) = G(fx,fy), then FT(g(ax,by)) = ---- G (--,--)
+					      |ab|     a  b
+
+where a = the sample magnification and b = the line magnification as specified
+by the magnification keywords.
+
+The interpolation algorithm which results in the above operation is the
+Sampling Theorem, or optimal interpolation method for band limited data.  By
+partitioning the FFT we equivalently band limit the larger image of the scene
+until it contains the same frequencies we actually possess.  For BY=2, for 
+example:
+				    ____
+	FT(I(i,j)) = FT(I(i,j)) * __|  |__0.25 cps
+	  actual       double
+
+Taking the FFT of both sides results in the Sampling Theorem, which is superior
+to all other interpolation theorems.
+
+
++--+------------+--+------------+--+	\
+|DC|		|  |		|DC|	|
++--+------------+--+------------+--+	|
+|  |            |  |		|	|
+|  | FFT        |  |		|	| N/2+1
+|  | INPUT      |  |		|	|
+|  | FORMAT     |  |		|	|
+|  |            |  |		|	|
+|  |            |  |		|	|
++--+------------+--+------------+	|	
+|  |		|XX|		|	/
++--+------------+--+------------+
+|  |            |  |		|	\
+|  |            |  |		|	|
+|  |            |  |		|	| N/2-1
+|  |            |  |		|	|
+|  |            |  |		|	|
+|  |            |  |		|	/
++--+------------+--+------------+--+
+|DC|				|DC|
++--+                            +--+
+
+\-----------------/ \-----------/
+      8(M/2+1)         8(M/2-1)
+
+
++--+------------+--+----------------------------+---------------+
+|DC|		|  |				|		|
++--+------------+--+                            +---------------+
+|  |            |  |				|		|
+|  |            |  |				|		|
+|  |            |  |				|		|
+|  |            |  |				|		|
+|  |            |  |				|		|
+|  |            |  |				|		|
++--+------------+--+                            +---------------+
+|  |            |XX|                            |               |
++--+------------+--+				+---------------+
+|								|
+|			FFT OUTPUT FORMAT			|
+|								|
+|								|
+|								|
+|								|
++--+------------+--+                            +---------------+
+|  |            |  |				|		|
+|  |            |  |				|		|
+|  |            |  |				|		|
+|  |            |  |				|		|
+|  |            |  |				|		|
+|  |            |  |				|		|
++--+------------+--+----------------------------+---------------+
+
+WRITTEN BY:  J. J. Lorre, 1 April 1980
+COGNIZANT PROGRAMMER:  A. S. Mazer
+REVISION:  New
+Made portable for UNIX: A. Scop (CRI) 1 July 1994
+27.04.98.....RRP.....Changed COMPLEX format keyword to COMP as per AR-9582.
+.LEVEL1
+.VARIABLE INP
+STRING - Input FFT
+.VARIABLE OUT
+STRING - Output FFT
+.VARIABLE SL
+INTEGER - Starting line
+.VARIABLE SS
+INTEGER - Starting sample
+.VARIABLE NS
+INTEGER - Number of lines
+.VARIABLE NL
+INTEGER - Number of samples
+.VARIABLE SIZE
+INTEGER - Standard VICAR size field
+.VARIABLE BY
+INTEGER - Line/sample magnification
+.VARIABLE BYL
+INTEGER - Line magnification
+.VARIABLE BYS
+INTEGER - Sample magnification
+.LEVEL2
+.VARIABLE BY
+BY specifies the desired expansion factor of the output picture.  It should be
+equal to 2^N where N is an integer.  If BY is not an integer power of two, it
+will be rounded down as necessary. If BY is defaulted, it will be computed from
+the SIZE specification; if BY and SIZE are specified, BY will take precedence.
+.VARIABLE BYL
+BYL is the same as BY, except only in the line direction. The default if BY
+wasn't specified is to calculate BYL from the SIZE specification.
+.VARIABLE BYS
+BYS is the same as BY, except only in the sample direction. The default if BY
+wasn't specified is to calculate BYS from the SIZE specification.
+.END

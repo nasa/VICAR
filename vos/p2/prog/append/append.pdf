@@ -1,0 +1,67 @@
+PROCESS HELP=*
+PARM INP TYPE=STRING COUNT=2:30
+PARM OUT TYPE=STRING
+!# parm inp(3-30) hints=default
+END-PROC
+.TITLE
+VICAR Program APPEND
+.HELP
+PURPOSE:
+APPEND accepts up to thirty data sets and writes them out, one after
+another, as a single data set.
+
+EXECUTION:
+
+Example
+	APPEND INP=(A,B,C) OUT=D    will write A, B, and C out to D.
+
+Size and parameter fields are not used.
+
+Note:  APPEND outputs the total number of lines and samples written;
+if input images are of varying data types, the "number of samples written"
+will be the maximum number of samples of all the inputs. If real input 
+is mixed with integer, the data type of the output will be real.
+.PAGE
+OPERATION:
+After opening all the inputs, APPEND computes the size of the output 
+data set. It will choose the format of the largest data type, where
+the order (largest to smallest) is: COMP, DOUB, REAL, FULL, HALF,
+and BYTE.  Each input is then copied into the output data set, in the 
+same order as specified in the command.  If the inputs are of varying 
+sample length, the output lines are padded with zeroes on the end.  
+All output lines are of the same length, the length of the longest 
+input line(maximum # of samples x largest format).
+	Note that APPEND does not copy over any binary labels.
+
+Currently BYTE, HALF, FULL, REAL, DOUB, and COMP formats are supported.
+.page
+HISTORY:
+
+  WRITTEN BY:  Ron Alley, 25 October 1978
+  CONVERTED TO VAX BY:  A. S. Mazer,  26 Aug. 1983
+  CONVERTED TO VICAR2 BY:  L. W. Kamp,  26 Nov. 1984
+  PORTED TO UNIX BY: S. V. Hwan, 20 July 1994
+
+  COGNIZANT PROGRAMMER:  S. V. Hwan
+
+REVISIONS: 
+ Number of input images increased to 30 -- BAM --  26 Nov. 1984.
+
+ In mixed case, chooses largest type now instead of smallest. -SVH 20 July 1994
+ Switched from FORTRAN to C -- SVH -- 20 July 1994
+ Added capability for DOUB and COMP data types. -- SVH -- 20 July 1994
+
+.LEVEL1
+.VARIABLE INP
+STRING - Input image files
+.VARIABLE OUT
+STRING - Output image file
+.LEVEL2
+.VARIABLE INP
+INP specifies the input data sets.  Up to thirty are allowed.
+.VARIABLE OUT
+OUT specifies the output data set.  The number of lines in the output will 
+be the sum of the number of lines in all the inputs.  The number of samples 
+will be the maximum of the number of samples of all the inputs.  The format
+of the output will the the format of the largest input data type.
+.END

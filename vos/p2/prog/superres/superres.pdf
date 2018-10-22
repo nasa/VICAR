@@ -1,0 +1,96 @@
+process help=*
+PARM INP TYPE=STRING COUNT=2
+PARM OUT TYPE=STRING COUNT=1
+PARM SCALE TYPE=REAL COUNT=(0:1) VALID=(1:20) DEFAULT=4.9
+PARM RESOLUTION TYPE=REAL COUNT=(0:1) VALID=(.00001:10.) DEFAULT=0.5
+PARM MODE TYPE=INTEGER COUNT=(0:1) VALID=(1,2) DEFAULT=2
+END-PROC
+
+.TITLE
+VICAR program SUPERRES
+
+.HELP
+PURPOSE:
+To combine many images into a larger image which can be processed to give
+super resolution.
+
+EXECUTION:
+register2 inp=listoffiles out=tiepoints
+superres inp=(listoffiles,tiepoints) out=superimage
+( & optionally ...)
+filter2 inp=superimage out=evenbettersuperimage nlw=15 nsw=15 +
+ mtf=(1.,0.,5.,.35,5.,.5)
+
+where:
+Listoffiles is an ascii list of filenames, one per record.
+Tiepoints is an ascii list of tiepoints created by vicar program REGISTER2.
+
+.PAGE
+METHOD:
+1. Superres reads the image and tiepoints file.
+   It creates polynomials from the tiepoints mapping each input to the output. 
+2. An output is created SCALE times the inputs in size.
+3. For each output pixel..
+4. All the nearest input pixels are identified (4 per input image).
+5. These pixel centers are mapped to the output sub pixel location.
+6. output_dn=sum(dn_in/r_in**2)/sum(1/r_in**2)
+     where r_in is the distance between the input pixels mapped to the output
+     and the output pixel location. 
+
+HISTORY:
+3-1-99  J Lorre. 
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+.LEVEL1
+
+.VARI INP
+1. Filenames list.
+2. Tiepoints list.
+
+.VARI OUT
+Superesolution image.
+
+.VARI SCALE
+Image magnification
+factor.
+
+.VARI RESOLUTION
+Output pixel resolution.
+
+.VARI MODE
+1 = offset only
+2 = 1st order polynomial
+
+.LEVEL2
+
+.VARI INP
+Two input files:
+1. An ascii list of filenames, one per record.
+2. An ascii list of tiepoints created by vicar program REGISTER2.
+
+.VARI OUT
+The superresolution image.
+You may need to deconvolve this image to make higher resolution apparent.
+HALF format.
+
+.VARI SCALE
+Image magnification factor.
+Sometimes an irrational number is better than an integer because it breaks up
+standing patterns in the image. 
+Defaults to 4.9
+
+.VARI RESOLUTION
+Output pixel resolution.
+Each input pixel is projected into the output. It's distance R is measured from
+the output target pixel. If R < RESOLUTION it is reset to = RESOLUTION. This
+limits the sharpness of the output image but it stabilizes the output dn
+values by limiting artifact due to poor registration.
+Defaults to 0.5 (0.5 output pixel diameter). 
+
+.VARI MODE
+Type of registration polynomial permitted.
+1 = offset only
+2 = 1st order polynomial (affine)
+(default is 2)
+
+.END

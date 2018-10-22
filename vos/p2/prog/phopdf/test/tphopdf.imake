@@ -1,0 +1,22 @@
+#define PROGRAM  	tphopdf
+
+#define MODULE_LIST  	tphopdf.c
+
+#define MAIN_LANG_C
+
+#define USES_ANSI_C
+
+#define TEST
+
+#define LIB_TAE
+#define LIB_RTL
+#define LIB_P2SUB
+
+/********************************************
+LOCAL LIBRARY and DEBUGGER for development 
+
+#define LIB_LOCAL
+#define DEBUG
+
+*******************************************/
+

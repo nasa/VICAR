@@ -1,0 +1,62 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+! "camera" parameters:
+! 1=focal length in pixels
+! 2=camera x location
+! 3=camera y location
+! 4=camera z location
+! 5=first rotation degrees
+! 6=second rotation degrees
+! 7=third rotation degrees
+! 8=sample of optical axis
+! 9=line of optical axis
+!The coordinate system is cartesian and right handed. 
+!The uncommanded camera points down the -Z axis. 
+!+X is to the right 
+!+Y is up
+!
+! pixel test
+stereocam camera1=(100.,-100.,0.,0.,0.,0.,0.,320.,240.) +
+          camera2=(100., 100.,0.,0.,0.,0.,0.,320.,240.) +
+          nl=480 ns=640 +
+          coords=(420.,240.,220.,240.)
+! elevation test
+stereocam camera1=(100.,0.,-100.,0.,0., 45.,0.,100.,100.) +
+          camera2=(100.,0., 100.,0.,0.,-45.,0.,100.,100.) +
+          nl=200 ns=200. +
+          coords=(100.,100.,100.,100)
+! elevation & pixel test
+stereocam camera1=(100.,0.,-100.,0.,0., 45.,0.,100.,100.) +
+          camera2=(100.,0., 100.,0.,0.,-45.,0.,100.,100.) +
+          nl=200 ns=200. +
+          coords=(200.,100.,200.,100)
+! az  test
+stereocam camera1=(100.,-100.,0.,0.,-80.,0.,0.,100.,100.) +
+          camera2=(100., 100.,0.,0., 80.,0.,0.,100.,100.) +
+          nl=200 ns=200. +
+          coords=(100.,100.,100.,100)
+! az  & pixel test
+stereocam camera1=(100.,-100.,0.,0.,-45.,0.,0.,100.,100.) +
+          camera2=(100., 100.,0.,0., 45.,0.,0.,100.,100.) +
+          nl=200 ns=200. +
+          coords=(100.,200.,100.,200)
+! az & el & twist test
+stereocam camera1=(100.,-100.,0.,0.,-45.,-45.,10.,100.,100.) +
+          camera2=(100., 100.,0.,0., 45.,-45.,10.,100.,100.) +
+          nl=200 ns=200. +
+          coords=(100.,100.,100.,100)
+! twist test
+stereocam camera1=(100.,-100.,0.,0.,-45.,0.,-10.,100.,100.) +
+          camera2=(100., 100.,0.,0., 45.,0., 10.,100.,100.) +
+          nl=200 ns=200. +
+          coords=(100.,100.,100.,100)
+! twist pixel test
+stereocam camera1=(100.,-100.,0.,0.,0.,0., 45.,100.,100.) +
+          camera2=(100., 100.,0.,0.,0.,0.,-45.,100.,100.) +
+          nl=200 ns=200. +
+          coords=(200.,100.,0.,100)
+!
+end-proc

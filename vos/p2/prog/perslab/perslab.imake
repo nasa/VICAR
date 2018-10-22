@@ -1,0 +1,21 @@
+#define PROGRAM perslab
+
+#define MODULE_LIST perslab.f  
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB
+
+#define USES_FORTRAN
+
+#define FTNINC_LIST fspc
+#define LIB_P2INC
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_MATH77
+#define LIB_SPICE   /* to be removed when MP routine's dependency is removed
+                     * from LIB_SPICE.  Prabhu knows when the removal is done
+                     */
+#define LIB_NETWORK
+
+/* #define DEBUG  /* Remove upon delivery */

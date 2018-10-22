@@ -1,0 +1,17 @@
+procedure
+refgbl $echo
+body
+let $echo="yes"
+!
+gen out=a.img nl=8 ns=8
+swap a.img b.img
+list a.img
+list b.img
+!
+gausnois out=a.img nl=16 ns=16
+fft22 a.img b.img
+swap b.img c.img
+list b.img
+list c.img
+!
+end-proc

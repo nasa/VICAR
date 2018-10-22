@@ -1,0 +1,46 @@
+procedure
+
+body
+
+enable-log
+
+write "tstsargon.pdf version 2018-03-27"
+
+! Byte test
+gen a nl=300 ns=300 form=byte
+
+use xwa0
+
+write "******************* TEST INSTRUCTIONS *****************"
+write "Test: Zero-fill polygon"
+write "In this test, a triangle will be drawn, and the interior zero-filled."
+write "Enter 'ZERO (note the apostrophe)."
+write "Position cursor in image at first virtex and enter 'NEXT expecting to see nothing."
+write "Repeat positioning and entering 'NEXT two more times to draw two triangle sides."
+write "Enter 'NEXT to close triangle."
+write "Enter 'Y to accept triangle."
+write "The triangle interior will be set to black."
+
+write "Test: Brighten polygon interior by 50 DN"
+write "In this test, a triangle will be drawn, and the interior brightened by 50 DN."
+write "Enter ADD=50 (note NO apostrophe)."
+write "Position cursor in image at first virtex and enter 'NEXT expecting to see nothing."
+write "Repeat positioning and entering 'NEXT two more times to draw two triangle sides."
+write "Enter 'NEXT to close triangle."
+write "Enter 'Y to accept triangle."
+write "The triangle interior will be brightened by 50 DN."
+
+write "Enter 'EXIT"
+write "XVD will popup with saved output image looking like edited image."
+write "Another XVD will popup with an example output image."
+write "Manually close XWA0 window and XVD windows."
+write "**************** END OF TEST INSTRUCTIONS **************"
+
+sargon a b
+
+xvd b
+xvd example_output.vic
+
+disable-log
+
+end-proc

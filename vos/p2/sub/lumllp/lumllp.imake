@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine lumllp */
+
+#define SUBROUTINE lumllp
+
+#define MODULE_LIST lumllp.f
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

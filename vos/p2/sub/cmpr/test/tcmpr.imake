@@ -1,0 +1,16 @@
+/* Imake file for Test of VICAR subroutine cmpr */
+
+#define PROGRAM tcmpr
+
+#define MODULE_LIST tcmpr.f 
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+

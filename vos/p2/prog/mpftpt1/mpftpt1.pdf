@@ -1,0 +1,122 @@
+process help=*
+PARM INP TYPE=STRING COUNT=2
+PARM OUT TYPE=STRING COUNT=3
+PARM NLW TYPE=INTEGER COUNT=(0:1) VALID=(1:15) DEFAULT=9
+PARM TEMPLATE TYPE=INTEGER COUNT=(0:1) DEFAULT=23
+PARM SEARCH TYPE=INTEGER COUNT=(0:1) DEFAULT=95
+PARM SHIFT TYPE=INTEGER COUNT=(0:1) VALID=(0:10) DEFAULT=0
+PARM QUALITY TYPE=REAL COUNT=(0:1) VALID=(0.:1.) DEFAULT=.5
+END-PROC
+
+.TITLE
+VICAR program MPFTPT1
+
+.HELP
+PURPOSE:
+To compute, from a stereo pair, the line and sample disparity
+of every pixel in the scene.
+This program only computes horizontal disparity by 1-d correlations using
+many lines taken together.
+
+EXECUTION:
+mpftpt1 inp=(left,right) out=(line_disparity,sample_disparity,quality) parameters
+where:
+left is the left eye image of a stereo pair
+right is the corresponding right eye image of a stereo pair
+line_disparity is the right eye line value.
+sample_disparity is the right eye sample value.
+quality is the correlation quality.
+
+.PAGE
+
+METHOD:
+MPFTPT1 performs a fast 1-d correlation between the left and the right
+eye images using NLW lines at a time.
+Note: correlations are only computed on integral pixel boundaries.
+
+Output file contents:
+ 
+All output files are in the coordinates of the first (left eye) image.
+For example if output file #2 has a value of 56.67 at sample 50 it means
+that the sample location of a tiepoint located at sample 50 in the left
+eye image corresponds to sample 56.67 in the right eye image.
+ 
+First output: A REAL image containing the line disparity. This is the line in
+the second input (right eye) which corresponds to the line in the first
+input image (left eye). This program generates a line disparity which is
+always zero (unless the SHIFT keyword is used).
+If both left & right disparity values are 0.000 the point has no value.
+ 
+Second output: A REAL image containing the sample disparity. This is the sample
+in the second input (right eye) which corresponds to the sample in the first
+input image (left eye).
+If both left & right disparity values are 0.000 the point has no value.
+
+HISTORY:
+6-30-97  J Lorre. 
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+.LEVEL1
+.VARI INP
+2 input images
+
+.VARI OUT
+3 Output images
+
+.VARI NLW
+correlation size
+ height
+
+.VARI TEMPLATE
+correlation size
+width
+ 
+.VARI SEARCH
+correlation search
+area
+
+.VARI SHIFT
+Line shift of
+right image.
+- is down.
+
+.VARI QUALITY
+Minimum acceptable
+correlation quality
+
+.LEVEL2
+
+.VARI INP
+First left eye image, then right eye image.
+ 
+.VARI OUT
+First output: A REAL image containing the line disparity. This is the line in
+the second input (right eye) which corresponds to the line in the first
+input image (left eye).
+Second output: A REAL image containing the sample disparity. This is the sample
+in the second input (right eye) which corresponds to the sample in the first
+input image (left eye).
+Third output: A REAL image containing the normalized quality, 0 to 1.
+
+.VARI NLW
+Correlation size height. An odd number.
+The number of lines correlated at one time.
+Defaults to 9.
+
+.VARI TEMPLATE
+Correlation size. Odd number. Defaults to 23.
+ 
+.VARI SEARCH
+Correlation search area. Odd number. Defaults to 95.
+SEARCH > TEMPLATE.
+
+.VARI SHIFT
+Line displacement of right image before correlation.
+- is down, + is up. 
+A shift were +1, means that the right image is shifted up one line to match
+the left image before correlation begins.
+Default shift is zero.
+
+.VARI QUALITY
+Minimum acceptable correlation quality. Zero to 1.0 .
+Defaults to 0.5

@@ -1,0 +1,33 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!
+gen out=aa.img nl=100 ns=100 linc=0 sinc=0 ival=100
+gen out=bb.img nl=100 ns=100 linc=0 sinc=0 ival=90
+gen out=cc.img nl=100 ns=100 linc=0 sinc=0 ival=80
+colorme inp=(aa.img,bb.img,cc.img) out=(r.img,g.img,b.img) device=alps +
+ monitor=left xyy=(.44,.4,35.)
+list inp=r.img linc=10 sinc=10
+list inp=g.img linc=10 sinc=10
+list inp=b.img linc=10 sinc=10
+colorme inp=(aa.img,bb.img) out=(r.img,g.img,b.img) device=alps +
+ monitor=left xyy=(.44,.4,35.)
+list inp=r.img linc=10 sinc=10
+list inp=g.img linc=10 sinc=10
+list inp=b.img linc=10 sinc=10
+colorme inp=(aa.img) out=(r.img,g.img,b.img) device=alps +
+ monitor=left xyy=(.44,.4,35.)
+list inp=r.img linc=10 sinc=10
+list inp=g.img linc=10 sinc=10
+list inp=b.img linc=10 sinc=10
+!xvd (earth.red,earth.green,earth.blue)
+!colorme inp=(earth.red,earth.green,earth.blue) +
+! out=(r.img,g.img,b.img) device=alps +
+! monitor=left xyy=(.44,.4,25.) area=(550,350,50,50)
+!xvd inp=(r.img,g.img,b.img)
+!xvd inp=(/home/rdb/mars_norm.r,/home/rdb/mars_norm.g, +
+! /home/rdb/mars_norm.b)
+!
+end-proc

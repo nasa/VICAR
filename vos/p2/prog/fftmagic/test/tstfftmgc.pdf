@@ -1,0 +1,13 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+gausnois a nl=64 ns=64 seed=666
+boxflt2 a b nlw=9 nsw=9
+stretch b a table=(0.,0.,127.,0.,128.,255.,255.,255.)
+gausnois b nl=64 ns=64 seed=1234567
+fftmagic (b,a) c 'print
+end-proc

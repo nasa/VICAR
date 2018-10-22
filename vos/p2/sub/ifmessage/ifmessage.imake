@@ -1,0 +1,11 @@
+/* Imake file for VICAR subroutine IFMESSAGE */
+
+#define SUBROUTINE ifmessage
+
+#define MODULE_LIST ifmessage.f zifmessage.c
+
+#define P2_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+

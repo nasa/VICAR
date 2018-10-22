@@ -1,0 +1,72 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+
+! NOTE THAT THIS PROC IS IDENTICAL TO TSTRATIO.PDF (IN RATIO.COM)
+
+! RATIO TEST SCRIPT
+! SET TERMINAL WIDTH=132 BEFORE RUNNING THIS SCRIPT
+!
+! CREATE 4 TEST IMAGES
+gen 1 20 20
+gen 2 20 20 IVAL=1
+genthis tmp1 5 5 dn=(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,+
+                     18,19,20,21,22,23,24,25)
+size tmp1 3 zoom=4 'noin
+genthis tmp2 10 10 dn=(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,+
+                       18,19,20,21,22,23,24,25,26,27,28,29,30,31,+
+                       32,33,34,35,36,37,38,39,40,41,42,43,44,45,+
+                       46,47,48,49,50,51,52,53,54,55,56,57,58,59,+
+                       60,61,62,63,64,65,66,67,68,69,70,71,72,73,+
+                       74,75,76,77,78,79,80,81,82,83,84,85,86,87,+
+                       88,89,90,91,92,93,94,95,96,97,98,99,100)
+size tmp2 4 zoom=2 'noin
+!
+! RATIO OF 1 AND 2 WITH HISTOGRAM DISPLAY
+ratio (1,2) C 
+list C
+!
+! LOG RATIO OF 1 AND 2 WITH HISTOGRAM
+ratio (1,2) C 'LOG
+list C
+!
+! DIFFERENCE OF 2 AND 3 WITH HISTOGRAM
+ratio (2,3) C 'DIFF
+list C
+!
+! LOG DIFFERENCE OF 1 AND 4 WITH HISTOGRAM
+ratio (1,4) C 'LOG 'DIFF
+list C
+!
+! COMPUTATION ONLY (NO OUTPUT SET OR HISTOGRAM)
+ratio (3,4) 'NODISP
+! 
+! COMPUTATION ONLY AND NO FILTERING
+ratio (3,4) 'NODISP 'NOFILTER
+!
+! SAMPLING AREA SPECIFIED, ALONG WITH ATM CORRECTIONS
+ratio (3,4) C AREA=(1,1,4,4) SAMPLE=100.0 ATM1=0.5 ATM2=0.5 'NODISP
+label-list C
+!
+! ABOVE, WITH ALL LINES SAMPLES
+ratio (3,4) C LINC=1 ATM1=0.5 ATM2=0.5 'NODISP 
+label-list C
+!
+! RATIO BETWEEN 1 AND 2 WITH BOTTOM 10 PERCENT EXCLUDED
+ratio (1,2) C THRESH=10.0
+list C
+!
+! AS ABOVE, BUT INCLUDING ONLY THOSE RATIO'S ABOVE .90
+ratio (1,2) C INCLUDE=(.90,5.0)
+list C
+!
+! AS ABOVE, BUT WITH 10 PERCENT SATURATION
+ratio (1,2) C INCLUDE=(.90,5.0) PERCENT=10.0
+list C
+! 
+! END-SCRIPT
+end-proc

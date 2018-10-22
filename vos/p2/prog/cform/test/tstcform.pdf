@@ -1,0 +1,107 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let _onfail="continue"
+let $autousage="none"
+let $echo="yes"
+
+enable-log
+
+! 
+write " This is a test of program CFORM"
+write "  Requires SITOD1"
+!
+!Convert BYTE to HALF
+! First, generate an input file
+GEN X 10 10 IVAL=0 LINC=20 SINC=39
+! Now convert first file to Halfword, which is default
+CFORM X Y 
+LIST Y
+! Convert to other formats
+CFORM X Y OFORM=FULL
+LIST Y
+!
+CFORM X Y OFORM=REAL
+LIST Y
+!
+CFORM X Y OFORM=DOUB
+LIST Y
+!
+CFORM X Y OFORM=COMP
+! Must print out complex data as reals
+LIST Y 'REAL
+!
+! Now go from large format to small format performing linear transformations.
+!
+! Input file:
+GEN X2 10 80 'REAL8 IVAL=-9999 LINC=100 SINC=200
+CFORM X2 Y OFORM=BYTE SO=(2,3)
+LIST Y
+!
+CFORM X2 Y IRANGE=(0,18)  ORANGE=(3,39) OFORM=HALF
+LIST Y
+!
+! Test size field: read only 6 lines @ 16 bytes/line starting at sample 5
+CFORM X2 Y SIZE=(1,5,6,16) OFORM=HALF SO=(3.46,1.6)
+LIST Y
+!
+! test other input formats
+GEN A 10 10 'HALF
+CFORM A B
+LIST B
+!
+GEN A 10 10 'FULL
+CFORM A B
+LIST B
+!
+GEN A 10 10 'REAL4
+CFORM A B
+LIST B
+!
+GEN A 10 10 'REAL8
+CFORM A B
+LIST B
+!
+GEN A 128 128 'REAL4
+! convert to complex
+CFORM A B oform=complex
+LIST A (1,1,4,4)
+CFORM B D
+LIST D (1,1,4,4)
+! Check FR 44888 COMPLEX->BYTE
+CFORM B G oform=byte
+list G (1,1,10,10)
+! Check FR 44888 COMP->BYTE
+label-replace B D items="format=comp" type=system 
+CFORM D G oform=byte
+list G (1,1,10,10)
+!
+!  test binary option:
+! Verify that with 'BINARY, CFORM preserves the binary labels,
+! but without 'BINARY, it drops them.
+! To simulate an image with binary labels, just replace the label ...
+gen a nl=10 ns=10
+label-remove a b
+label-create b c nl=8 ns=7 nlb=2 nbb=3 'bin 
+label-list c
+cform c d1 'binary
+cform c d2
+label-list d1
+label-list d2
+!  also check that the data were not corrupted:
+list a
+list c
+list d1
+list d2
+!
+!  test multi-spectral support:
+gen a nl=5 ns=4 nb=3
+list a
+cform a b
+list b
+!
+
+disable-log
+
+end-proc

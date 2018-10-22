@@ -1,0 +1,79 @@
+1 MIPS SUBROUTINE mpGetValues
+
+PURPOSE
+
+The function mpGetValues retrieves desired map projection 
+(MP) data object values given a PDS standard map projection 
+keyword.
+
+2 OPERATION
+
+This function allows controlled access to the MP data object
+values. Given a set of valid MP keywords, the function checks
+internally set bits in the MP software that specify which valid
+MP data object keyword values have been set by mpSetValues,
+mp_set_value, and/or mp_set_value_str. It returns the values
+for previously set keywords.
+
+
+CALLING SEQUENCE
+
+from C:		status = mpGetValues( MP mp, char *keyword, 
+			<any-type> *value, ... char *keyword, 
+			<any-type> *value, NULL );
+
+from FORTRAN:	(see functions mp_get_value and mp_get_value_str)
+
+Necessary include files from calling routine or program: mp_routines.h
+
+
+INPUT 
+
+mp		(MP type)
+
+A pointer to the MP data structure as returned by mpInit.
+In FORTRAN, this variable is of type REAL*8.  MP type is defined
+in include file mp_routines.h.
+
+keyword		(character string)
+
+Character string which contains the keyword name of the MP data object
+value to be set.
+
+OUTPUT 
+
+value 		(any-type)
+
+Pointer to value retrieved from the MP data object for the associated
+keyword.
+
+RETURN
+
+status 		(integer)
+
+Status flag for the operation of the routine. 
+Zero (0) signifies success.  Negative one (-1) signifies failure.
+
+
+3 ENVIRONMENT
+
+Software platforms:	VICAR 11.0 (VMS/UNIX)
+Hardware platforms:	This routine has been tested on 
+			DEC Alpha, DEC VAX-VMS, Sun Sparcstation 
+			(Solaris and SunOS), Silicon Graphics (SGI), 
+			and HP 700. No particular hardware requirements.
+
+3 BACKGROUND
+
+Author:			Lucas Kamp (lwk059@ipl.jpl.nasa.gov)
+Cognizant Engineer:	Justin McNeill (jfm059@ipl.jpl.nasa.gov)
+Date written:		October 1993
+Revision history: 	(see release_notes.txt in mp_routines.com)
+Background and References:	
+
+1. Map Projection Software Set Software Specification Document,
+	JPL, April 28, 1993;
+2. "Conformal Mapping of the Triaxial Ellipsoid," Survey Review,
+	vol. 28, July 1985.
+3. MIPS Map Projection Software Users' Guide, D-11810, version 1.0,
+	May 1994.

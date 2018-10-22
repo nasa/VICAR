@@ -1,0 +1,26 @@
+!TEST OF FIXVGR
+!  Checks scaling, re-scaling and planet correction.
+!  Note: Tests for compatibility with FICOR77 are included in the FICOR77
+!        test script.
+procedure
+refgbl $autousage
+refgbl $syschar
+refgbl $echo
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+local path type=string init="wms_test_work:[testdata.mipl.vgr]"
+if ($syschar(1) = "UNIX")
+    let path="/project/test_work/testdata/mipl/vgr/"
+end-if
+
+fixvgr &"path"vioh.img A (30,30,5,5) scf=&"path"vgrscf.dat !First, do it right
+fixvgr &"path"vioh.img B (30,30,5,5) scf=&"path"vgrscf.dat 'SATURN  !Start with wrong planet
+fixvgr B C scf=&"path"vgrscf.dat 'JUPITER	!Now correct it
+label-list C				!Note labels added by fixvgr
+list &"path"vioh.img (30,30,5,5)	!Compare the input with output...
+list A			 	        !Scale should be 1.0689*VIOH
+list B				        !Scale should be 3.345*A (Saturn)
+list C				        !Scale should be same as A
+end-proc

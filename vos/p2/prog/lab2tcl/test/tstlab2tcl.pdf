@@ -1,0 +1,151 @@
+procedure
+! Regular tests
+    local ival integer
+    local rval real
+    local cval string
+    local sum_1 string count=2
+    local sum_2 integer count=5
+    local i1 integer
+    local i2 integer
+    local i3 integer
+    local i4 integer
+    local i5 integer
+    local c1 string
+    local c2 string
+
+! Mass read test
+    local a integer         !LBLSIZE
+    local b string          !FORMAT
+    local c string          !TYPE
+    local d integer         !BUFSIZ
+    local e integer         !DIM
+    local f integer         !EOL  
+    local g integer         !RECSIZE        
+    local h string          !ORG
+    local i integer         !NL
+    local j integer         !NS
+    local k integer         !NB
+    local l integer         !NBB
+    local m integer         !NLB
+    local n real            !R
+    local o string          !YUMMY
+    local p integer         !I
+    local q string          !NEWPROMP
+    local r string          !C
+    local s real            !SINC
+    local t real            !LINC
+
+    refgbl $echo
+    refgbl $prompt
+    refgbl $autousage
+! Jun 24, 2012 - RJB
+! TEST SCRIPT FOR LAB2TCL
+! tests IBIS tabular files
+!
+! Vicar Programs:
+!       gen label-add label-list
+!
+! External Programs:
+!   <none> 
+!
+! Parameters:
+!   <none>
+!
+! Requires NO external test data: 
+!
+    body
+    let $echo="no"
+        let $autousage="none"
+    let _onfail="stop"
+    let $echo="yes"
+
+! Create an image with some history labels added
+    gen image nl=8 ns=13
+    label-add image items="c='a string', i=5, r=1.452 newpromp='Hi!'"
+    label-list image 'dump
+             
+! Read the integer, real, and character labels
+    lab2tcl image v1=ival keyword=i
+    let $echo="no"
+    write "Integer value from image: (&ival)"
+    let $echo="yes"
+    lab2tcl image v1=rval keyword=r 'HISTORY
+    let $echo="no"
+    write "Real value from image: (&rval)"
+    let $echo="yes"
+    lab2tcl image v1=cval keyword=c
+    let $echo="no"
+    write "String value from image: (&cval)"
+
+! Redefine a global variable using lab2tcl
+    let cval = $prompt
+    let $echo="yes"
+    lab2tcl image $prompt keyword=newpromp 'History
+    let $echo="no"
+    write "New prompt is (&$prompt)"
+    let $prompt = cval
+    let _onfail="continue"
+    write "**************************************************"
+    write "Next call is ABEND - system label from history area"
+    write "**************************************************"
+    let $echo="yes"
+! Try to read a system label from the history area; expect an error
+    
+    lab2tcl image v1=ival keyword=nl 
+
+    let _onfail="stop"
+! Read labels while looking in both sections
+    lab2tcl image ival keyword=i 'all
+    let $echo="no"
+    write "Integer value from image: (&ival)"
+    let $echo="yes"
+        lab2tcl image ival keyword=nl 'all
+    let $echo="no"
+    write "Number of lines is (&ival)"
+    let $echo="yes"
+! Read several values at a time
+    lab2tcl image i1 i2 i3 i4 i5 keyword=(dim,nl,ns,nb,bufsiz) 'system
+    let sum_2 = (i1,i2,i3,i4,i5)
+    let $echo="no"
+    write "Image dim,nl,ns,nb,bufsiz = &sum_2"
+    let $echo="yes"
+    lab2tcl image c1 c2 keyword=(format,type) 'System
+    let sum_1 = (c1,c2)
+    let $echo="no"
+    write "Image format,type = &sum_1"
+    let _onfail="continue"
+    write "**************************************************"
+    write "Next call is ABEND - Cannot have blank initial key"
+    write "**************************************************"
+
+    let $echo="yes"
+! Fill a list with repeat values, beginning with an error (blank initial key)
+    lab2tcl image i1 i2 i3 i4 keyword=("","",bufsiz,"") 'system
+    let _onfail="stop"
+    lab2tcl image i1 i2 i3 i4 i5 keyword=(dim,"","",bufsiz,"") 'all
+    let sum_2 = (i1,i2,i3,i4,i5)
+    let $echo="no"
+    write "dim*3, bufsiz*2: &sum_2"
+    let $echo="yes"
+! Add a new task with some new keywords and some repeat keywords, then do a 
+! massive read. We should get the second versions of the repeated keywords.
+    label-add image image2  +
+        items="r=448e8 yummy='avocado',i=1984, newpromp='Hello.'"
+    label-list image2 'dump
+    let _onfail="continue"
+    lab2tcl image2   +
+            a b c d e f g h i j k l m n o p q r s t  +
+        keyword=(LBLSIZE,FORMAT,TYPE,BUFSIZ,DIM,EOL,RECSIZE,ORG, +
+        NL,NS,NB,NBB,NLB,R,YUMMY,I,NEWPROMP,C,SINC,LINC) +
+        type=all
+    let $echo="no"
+    write "System info (LBLSIZE to NB, NBB, NLB (see help)):"
+    write "    &a,&b,&c,&d,&e,"
+    write "    &f,&g,&h,&i,&j,"
+    write "    &k,&l,&m"
+    write "History info from first task (SINC,LINC,C):"
+    write "    &s,&t,&r"
+    write "History info from second task (R,YUMMY,I,NEWPROMP):"
+    write "    &n,&o,&p,&q"
+end-proc
+

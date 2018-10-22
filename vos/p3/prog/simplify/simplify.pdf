@@ -1,0 +1,206 @@
+process help=*
+!  FILE NAMES      
+!
+PARM INP     TYPE=STRING   COUNT=1
+PARM OUT     TYPE=STRING   COUNT=1
+!
+PARM SIZE    TYPE=INTEGER  COUNT=4       DEFAULT=(1,1,0,0)
+PARM SL      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM SS      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM NL      TYPE=INTEGER  COUNT=1       DEFAULT=0
+PARM NS      TYPE=INTEGER  COUNT=1       DEFAULT=0
+!
+PARM NCLASS  TYPE=INTEGER  COUNT=1       DEFAULT=255        VALID=(1:255)
+PARM THRESHLD TYPE=INTEGER COUNT=1       DEFAULT=4          VALID=(1:99999)
+PARM WINDOW  TYPE=INTEGER  COUNT=1       DEFAULT=3          VALID=(3:99999)
+PARM REPLACE TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=--         VALID=REPLACE
+PARM VALUE   TYPE=INTEGER  COUNT=1       DEFAULT=0          VALID=(0:255)
+!
+END-PROC
+.TITLE
+SIMPLIFY
+.HELP
+ PURPOSE:
+
+SIMPLIFY is a VICAR applications program used to remove high frequency
+information (noise) components from digital images.  It is usually used
+to remove visually distracting detail from classified or stratified images
+such as images derived from the operation of VICAR program FASTCLAS.  Such
+images usually are composed of a number of regions, where each pixel in a
+region has the same DN except possibly for some isolated noise pixels.
+SIMPLIFY changes the DNs of these isolated noise pixels to match the DN of
+the surrounding pixels and writes the resulting image to an output file.
+.PAGE
+ EXECUTION:
+
+The DNs for the regions in the input image are assumed to lie in the range
+from 1 to some upper limit specified by the user through the NCLASS parameter.
+No assumptions are made on the DNs of noise pixels.  Pixels with a DN of 0
+are considered to be unclassified (not associated with any region).
+
+In order to determine which DNs to change, SIMPLIFY applies a test to each
+pixel in the input image.  The test involves finding the most frequently
+occurring DN in a square window centered around the pixel being tested.
+The exact form of the test depends on the various parameters specified by the
+user, but in order to provide an overview, the test for the case where neither
+the REPLACE nor the VALUE option is used is described below.  Much of the
+description also applies to when REPLACE or VALUE is used.  (See under
+REPLACE and VALUE.)
+
+For the sake of determining the most frequently occurring DN, only DNs from 1
+to the value of the NCLASS parameter are considered.  In case of a tie in
+determining the most frequent DN, the lowest of the DNs in the tie is used.
+Since the window is centered around the pixel being tested, we will refer to
+the pixel being tested as the center pixel and will refer to its DN as the
+center DN. When the center DN is nonzero it is changed to the most frequent DN
+if the most frequent DN occurs more times than the center DN and the number of
+times the most frequent DN occurs is greater than or equal to the threshold
+(THRESHLD) parameter.  (This insures that a nonzero DN is not changed if no DN
+occurs a substantial number of times in the window or if the center DN occurs
+just as many times as the most frequent DN.)  When the center DN is zero it is
+changed to the most frequent DN if the number of times the most frequent DN
+occurs is greater than or equal to the threshold parameter.  When a DN is
+changed, the change is not included in the subsequent windows. 
+.PAGE
+TAE COMMAND LINE FORMAT
+      The following command line formats show the major allowable forms:
+      SIMPLIFY INP=a OUT=b SIZE=(sl,ss,nl,ns) optional parameters
+      SIMPLIFY INP=a OUT=b  SL=sl SS=ss NL=nl NS=ns optional parameters
+      SIMPLIFY a b (sl,ss,nl,ns) optional parameters
+      SIMPLIFY a b optional parameters
+
+       Here 'a' represents the input image file name, and
+       'b' represents the output image file name.
+.PAGE
+EXAMPLE
+
+      SIMPLIFY INP=A OUT=B NCLASS=9 THRESHLD=8 WINDOW=5 'REPLACE
+
+      In this example a five by five window is used.  The most frequent DN
+      must occur at least 8 out of 25 times in a window to be used to replace
+      a center DN.  Unclassified pixels will be replaced where possible.
+
+
+RESTRICTIONS
+1. The input and output images must be byte data.
+.PAGE
+ OPERATION:
+
+The operation of SIMPLIFY is similar to the operation of any box-filtering
+routine with the exception that surface smoothing DOES NOT take place.  In a
+pictorial sense, a window is passed over each pixel in the input image.  For
+each pixel and its surrounding neighborhood, defined by the size of the window,
+a histogram is accumulated to identify the most most frequently occurring DN
+value.  When the center DN is nonzero it is changed to the most frequent DN 
+if the most frequent DN occurs more times than the center DN and the number of
+times the most frequent DN occurs is greater than or equal to the threshold 
+parameter.  When the center DN is zero it is changed to the most frequent 
+DN if the number of times the most frequent DN occurs is greater than or 
+equal to the threshold parameter.  
+
+In order to accommodate the edges of the image which normally could not be
+simplified due to edge overlap of the window, the pixels outside the image 
+are considered unclassified (DN=0).  This action eliminates the need for 
+special edge processing feature.
+
+The following window operations will demonstrate the operation of SIMPLIFY
+on various windows.
+
+Example 1:  specifying THRESHLD=4
+
+                    5   5   5                   5   5   5 
+
+            INPUT:  3   2   5          OUTPUT:  3   5   5
+
+                    4   3   3                   4   3   3
+
+Example 2:  specifying THRESHLD=4
+
+                    5   5   5
+
+            INPUT:  3   2   2          OUTPUT:  no change
+
+                    2   2   2 
+
+Example 3:  specifying THRESHLD=4 and REPLACE
+
+                    0   0   0                   0   0   0
+
+            INPUT:  0   0   0          OUTPUT:  0   2   0
+
+                    2   2   1                   2   2   1
+
+
+ WRITTEN BY:             Steve Pohorsky               1 Dec 1983
+
+ COGNIZANT PROGRAMMER:   A. L. Zobrist               14 Sept. 1984
+
+ REVISION:               2                           21 Feb 1982
+
+.LEVEL1
+.VARIABLE INP
+Input file name
+.VARIABLE OUT
+Output file name
+.VARIABLE SIZE
+Standard Vicar size field:
+  (SL,SS,NL,NS)
+You can enter SL,SS,NL,
+and NS together as SIZE, OR
+enter the SL,SS,NL, and NS
+parameters separately.
+By default, the entire input
+image is used if these
+parameters are not entered.
+.VARIABLE SL
+Starting line number
+.VARIABLE SS
+Starting sample number
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples
+.VARIABLE NCLASS
+Largest DN other than noise
+.VARIABLE THRESHLD
+Threshold for number of
+occurrences of most frequent
+DN in window.
+.VARIABLE WINDOW
+Window size
+.VARIABLE REPLACE
+Enter to replace
+unclassified pixels where
+possible.
+.VARIABLE VALUE
+DN value when only one value
+is to be checked for replacement.
+.LEVEL2
+.VARIABLE NCLASS
+The NCLASS value gives an upper limit for DNs for the regions of the input
+image.  Only DNs from 1 to NCLASS are considered in finding the most frequent
+DN in a window.  The NCLASS value should be set as low as the input image 
+allows in order to reduce execution time.  NCLASS must be in the range 1 to
+255.  The default value is 255.
+.VARIABLE THRESHLD
+The THRESHLD threshold value limits the cases where a DN value will be changed.
+Except for the case of unclassified DNs when the REPLACE option is selected,
+a DN will not be changed if the most frequent DN does not occur at least the
+THRESHLD number of times in the window.  The default THRESHLD value is 4.
+.VARIABLE WINDOW
+The window size gives the linear size in pixels of the moving window used in
+testing DNs for changing.  The window size must be an odd integer greater than
+or equal to 3.  A size of 3 means a 3x3 window with eight neighbor pixels
+surrounding the center pixel.  The default size is 3.
+.VARIABLE REPLACE
+When the REPLACE option is specified, all pixels with a DN of zero will be
+replaced with the most frequent DN (in the window) if the window around the 
+pixel contains at least one DN in the range 1 to the NCLASS value. 
+No replacement is the default.
+.VARIABLE VALUE
+This optional parameter limits the cases where a DN value will be changed.
+If this parameter is entered, only DNs equal to the VALUE parameter can be
+changed.  DN values equal to the VALUE parameter are changed or left the
+same according to the usual rules based on the THRESHLD and REPLACE
+parameters.
+.END

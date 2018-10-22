@@ -49,6 +49,7 @@ public class MgnFbidrImageReader extends ImageReader {
      */
      
     protected MgnFbidrInputFile _mif;
+    protected MgnFbidrImageReadParam _mgnFbidrImageReadParam;
     protected SystemLabel _sys;
     protected boolean _haveReadHeader = false;
 
@@ -158,6 +159,9 @@ public class MgnFbidrImageReader extends ImageReader {
             throw new IndexOutOfBoundsException ();
         }
 
+        if (param instanceof MgnFbidrImageReadParam)
+            _mgnFbidrImageReadParam = (MgnFbidrImageReadParam)param;
+    
         readHeader();
 
 	if (debug) 
@@ -209,7 +213,7 @@ public class MgnFbidrImageReader extends ImageReader {
             throw new IllegalStateException ("Input stream not set");
         }
 
-	_mif = new MgnFbidrInputFile();
+	_mif = new MgnFbidrInputFile(_mgnFbidrImageReadParam);
 	_mif.open(_input_stream);
 
 	_sys = _mif.getSystemLabel();
@@ -232,7 +236,7 @@ public class MgnFbidrImageReader extends ImageReader {
             	System.out.println("MgnFBidrImageReader new MgnFBidrMetadata with document");
             	System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++");
             }
-            _mgnFbidrMetadata = new MgnFbidrMetadata(document,_mif.getHeader());
+            _mgnFbidrMetadata = new MgnFbidrMetadata(document,_mif.getHeaders());
 	} else {
 	    if (debug) {
             	System.out.println("no document avaiable from _mif");
@@ -289,7 +293,28 @@ public class MgnFbidrImageReader extends ImageReader {
         return _sys.getNL();
     }
 
+    public int getTileWidth(int imageIndex) throws IOException {
+        if (imageIndex != 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (_haveReadHeader == false)
+            readHeader();
+        SampleModel sm = _mif.createSampleModel();
+        return sm.getWidth();
+    }
 
+    public int getTileHeight(int imageIndex) throws IOException {
+        if (imageIndex != 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (_haveReadHeader == false)
+            readHeader();
+        SampleModel sm = _mif.createSampleModel();
+        return sm.getHeight();
+    }
+    
+
+    
     // I think these are not useful
     public ImageTypeSpecifier getRawImageType(int imageIndex)
 						throws IOException {
@@ -336,7 +361,7 @@ public class MgnFbidrImageReader extends ImageReader {
     public ImageReadParam getDefaultReadParam() {
 	if (debug)
 	    System.out.println("MgnFbidrImageReader.getDefaultReadParam");
-        return new ImageReadParam();
+        return new MgnFbidrImageReadParam();
     }
 
     /**
@@ -380,6 +405,12 @@ public class MgnFbidrImageReader extends ImageReader {
             System.out.println("param.sourceYSubsampling "+param.getSourceYSubsampling() );
             System.out.println("param.subsamplingXOffset "+param.getSubsamplingXOffset() );
             System.out.println("param.subsamplingYOffset "+param.getSubsamplingYOffset() );
+            if (param instanceof MgnFbidrImageReadParam) {
+                MgnFbidrImageReadParam mp = (MgnFbidrImageReadParam)param;
+                System.out.println("param.minLogicalLine "+mp.getMinLogicalLine()+" set="+mp.isMinSet());
+                System.out.println("param.maxLogicalLine "+mp.getMaxLogicalLine()+" set="+mp.isMaxSet());
+                System.out.println("param.maxNumLines "+mp.getMaxNumLines());
+            }
          }
          System.out.println("------------------------------------------");
     }
@@ -402,6 +433,9 @@ public class MgnFbidrImageReader extends ImageReader {
             throw new IndexOutOfBoundsException ();
         }
 
+         if (param instanceof MgnFbidrImageReadParam)
+            _mgnFbidrImageReadParam = (MgnFbidrImageReadParam)param;
+    
         readHeader();
 
         if (debug) printParam(param);

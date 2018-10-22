@@ -1,0 +1,16 @@
+#==============================================================
+# List of things to build
+
+PROG_LIST = filter
+
+# Include makefile to get rules
+include $(AFIDS_ROOT)/AfidsMakefile.in
+
+#CPPFLAGS += -I$(AFIDSTOP)/include -I.
+FFLAGS += -Wunused -Wuninitialized -Wsurprising
+
+#==============================================================
+# Extra files stretch depends on.
+
+
+

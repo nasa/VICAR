@@ -1,0 +1,70 @@
+1  PHIST
+
+PURPOSE: Prints out a histogram in a format similar to the VICAR program
+         LIST. The number of histogram levels to be printed, and the number 
+         of spikes within the histogram may be specified. Zero frequency
+         levels may be printed where needed.
+
+USAGE:   CALL PHIST(HIS, NFREQ, LOW, HIGH, NSPIKE, MODE)
+
+PARAMETERS:
+
+      HIS    = Fullword integer histogram array.
+
+      NFREQ  = Fullword integer, total number of sample frequencies
+
+      LOW    = Fullword integer, is the optional lower value of the DN range
+               included within the histogram (Default: LOW = 0).
+
+      HIGH   = Fullword integer, is the optional upper value of the DN range
+               included within the histogram (Default: HIGH = 225).
+
+      NSPIKE = Fullword integer, is the optional number of spikes within the 
+               histogram. The LOW and HIGH DN values are excluded when 
+               searching for spikes (Default: NSPIKE = 0).
+
+      MODE   = MODE = 1 if zero frequecy levels are to be listed, 
+               MODE = 0 otherwise (Default MODE = 0). Optional arguement.
+
+
+      NOTE: ALL OPTIONALS REQUIREMENTS ARE NOW REQUIRED ARGUMENTS.
+
+2 NOTES
+
+  EXAMPLE
+
+  In this example, a histogram containing 512 grey levels will be 
+  printed out.
+
+         INTEGER HIS(512)
+                  .
+                  .
+                  .
+         NFREQ = 0
+         DO I = 1,512
+            NFREQ = NFREQ + HIS(I)
+         ENDDO
+         LOW = 0
+         HIGH = 511
+         NSPIKE = 5
+         MODE = 0
+    
+         CALL PHIST(HIS, NFREQ, LOW, HIGH, NSPIKE, MODE) 
+
+HISTORY
+
+Original Programmer: H. J. Frieden, 2 June 1974
+Current Cognizant Programmer: Lucas W. Kamp, 1 May 1983
+Source Language: Fortran
+Revision:
+  11 Jul 97  T. Huang  ...Changed GRAY index from a 4-character display
+                          to a 5-character display for Cassini support.
+                          Cassini has data range (-4095..4095).
+                       ...Modified tphist.imake to use ANSI C.  This allows
+                          tzphist.c to be compiled under HP.
+  24 Oct 96  S. Chang  ...Fixed histogram legend display.  (FR89363)
+   1 SEP 93  D. Knight ...Ported to Unix
+  14 Jan 89  G. Yagi   ...Reduce spikes of it results in 0 max frequency.
+  21 JUN 84  C. Avis   ...ADDED '.'S TO PRNT CALLS
+  18 MAY 83  L. Kamp   ...CONVERTED TO VAX.
+  04 MAR 75  G. Yagi   ...Added four optional arguements, calls to ARGQ and MVE.

@@ -1,0 +1,690 @@
+tstknuth
+write "*** Test KNUTH, KNUTH_DUMP ***"
+*** Test KNUTH, KNUTH_DUMP ***
+TKNUTH
+Beginning VICAR task TKNUTH
+   LOAD   1
+   RETN   0
+TKNUTH  FUNCTION="LINE"
+Beginning VICAR task TKNUTH
+   LOAD  49
+   RETN   0
+TKNUTH  FUNCTION="SAMP"
+Beginning VICAR task TKNUTH
+   LOAD  50
+   RETN   0
+TKNUTH  FUNCTION="IN1+1"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   ADD   52
+   RETN   0
+TKNUTH  FUNCTION="SQRT(IN1**1.1234+7)"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   EXP   52
+   ADD   53
+   STOR  93
+   SQRT  93
+   RETN   0
+TKNUTH  FUNCTION="SQRT(IN1**1.1234e1+7)"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   EXP   52
+   ADD   53
+   STOR  93
+   SQRT  93
+   RETN   0
+TKNUTH  FUNCTION="IN1.AND.IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   AND    2
+   RETN   0
+TKNUTH  FUNCTION="IN1.OR.IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   OR     2
+   RETN   0
+TKNUTH  FUNCTION="IN1.XOR.IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   XOR    2
+   RETN   0
+TKNUTH  FUNCTION="IN1.LT.IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   LT     2
+   RETN   0
+TKNUTH  FUNCTION="IN1.GT.IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   GT     2
+   RETN   0
+TKNUTH  FUNCTION="IN1.LE.IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   LE     2
+   RETN   0
+TKNUTH  FUNCTION="IN1.EQ.IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   EQ     2
+   RETN   0
+TKNUTH  FUNCTION="IN1.EQ..5"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   EQ    52
+   RETN   0
+TKNUTH  FUNCTION="5..EQ.IN1"
+Beginning VICAR task TKNUTH
+   LOAD  52
+   EQ     1
+   RETN   0
+TKNUTH  FUNCTION=".NOT.(IN1.GE.IN2)"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   GE     2
+   STOR  93
+   NOT   93
+   RETN   0
+TKNUTH  FUNCTION="MOD(IN2,IN1)"
+Beginning VICAR task TKNUTH
+   LOAD   2
+   MOD    1
+   RETN   0
+TKNUTH  FUNCTION="MIN(IN1,IN2)"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   MIN    2
+   RETN   0
+TKNUTH  FUNCTION="MAX(IN1,IN2)"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   MAX    2
+   RETN   0
+TKNUTH  FUNCTION="MAX(COS(SIN(-IN1)+-3)/2,TAN(0))"
+Beginning VICAR task TKNUTH
+   LCMP   1
+   STOR  93
+   SIN   93
+   STOR  95
+   LCMP  52
+   ADD   95
+   STOR  97
+   COS   97
+   DIV   53
+   STOR  99
+   TAN   54
+   MAX   99
+   RETN   0
+TKNUTH  FUNCTION="MAX(IN1,IN2,IN3,IN4,IN5)"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   MAX    2
+   MAX    3
+   MAX    4
+   MAX    5
+   RETN   0
+TKNUTH  FUNCTION="100.*SIN(IN1/10.)+100.*COS(IN2/10)"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   DIV   53
+   STOR  93
+   SIN   93
+   MUL   52
+   STOR  95
+   LOAD   2
+   DIV   55
+   STOR  97
+   COS   97
+   MUL   54
+   ADD   95
+   RETN   0
+TKNUTH  FUNCTION="LINE+SAMP"
+Beginning VICAR task TKNUTH
+   LOAD  49
+   ADD   50
+   RETN   0
+TKNUTH  FUNCTION="MOD(SAMP,LINE)"
+Beginning VICAR task TKNUTH
+   LOAD  50
+   MOD   49
+   RETN   0
+write "*** Test C-language Constructs ***"
+*** Test C-language Constructs ***
+TKNUTH  FUNCTION="IN1 | IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   OR     2
+   RETN   0
+TKNUTH  FUNCTION="IN1 & IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   AND    2
+   RETN   0
+TKNUTH  FUNCTION="IN1 % IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   MOD    2
+   RETN   0
+TKNUTH  FUNCTION="IN1 ^ IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   XOR    2
+   RETN   0
+TKNUTH  FUNCTION="!IN1"
+Beginning VICAR task TKNUTH
+   NOT    1
+   RETN   0
+TKNUTH  FUNCTION="IN1 < IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   LT     2
+   RETN   0
+TKNUTH  FUNCTION="IN1 > IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   GT     2
+   RETN   0
+TKNUTH  FUNCTION="IN1 != IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   NE     2
+   RETN   0
+TKNUTH  FUNCTION="IN1 == IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   EQ     2
+   RETN   0
+TKNUTH  FUNCTION="IN1 <= IN2"
+Beginning VICAR task TKNUTH
+   LOAD   1
+   LE     2
+   RETN   0
+write "The following strings should all result in BAD FUNCTION errors"
+The following strings should all result in BAD FUNCTION errors
+TKNUTH  FUNCTION="IN1.EQ./4"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="3*("
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="(3,4)"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="NONSENSE"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="IN1+"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION=")"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="IN1.EQ.*4"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="ATAN7(1,2)"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="SIN5"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="MOD(0)"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="MOD(IN1)"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="ATAN2(IN1)"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="ATAN2(1,2,3)"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="3 2"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="MOD(1,2,3)"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="LOG 10,2"
+Beginning VICAR task TKNUTH
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+TKNUTH  FUNCTION="JUNK" 'KNVAR
+Beginning VICAR task TKNUTH
+VARIABLE "JUNK " INDEX= -1
+BAD FUNCTION STRING
+ ** ABEND called **
+continue
+write "*** Tests on XKNUTH, KNUTH_LOOKUP ***"
+*** Tests on XKNUTH, KNUTH_LOOKUP ***
+TKNUTH  FUNCTION="IN1+IN2" 'XKNUTH
+Beginning VICAR task TKNUTH
+   LOAD   1
+   ADD    2
+   RETN   0
+FUNCTION VALUES:
+    XKNUTH(   0.0,   0.0)=   0.0
+    XKNUTH(   0.0,   2.0)=   2.0
+    XKNUTH(   3.0,   0.0)=   3.0
+    XKNUTH(   3.0,   2.0)=   5.0
+    XKNUTH( 130.0, 255.0)= 385.0
+LOOKUP TABLE VALUES (trunc.,int indx):
+    TABLE(   0,   0)=   0
+    TABLE(   0,   2)=   2
+    TABLE(   3,   0)=   3
+    TABLE(   3,   2)=   5
+LOOKUP TABLE VALUE (trunc,byte indx):
+    TABLE( 130, 255)= 255
+LOOKUP TABLE VALUES (round):
+    TABLE(   0,   0)=   0
+    TABLE(   0,   2)=   2
+    TABLE(   3,   0)=   3
+    TABLE(   3,   2)=   5
+LOOKUP TABLE VALUE (round,byte index):
+    TABLE( 130, 255)= 255
+TKNUTH  FUNCTION="(IN1+1)/(IN2+1)" 'XKNUTH
+Beginning VICAR task TKNUTH
+   LOAD   1
+   ADD   52
+   STOR  93
+   LOAD   2
+   ADD   53
+   STOR  95
+   LOAD  93
+   DIV   95
+   RETN   0
+FUNCTION VALUES:
+    XKNUTH(   0.0,   0.0)=   1.0
+    XKNUTH(   0.0,   2.0)=   0.3
+    XKNUTH(   3.0,   0.0)=   4.0
+    XKNUTH(   3.0,   2.0)=   1.3
+    XKNUTH( 130.0, 255.0)=   0.5
+LOOKUP TABLE VALUES (trunc.,int indx):
+    TABLE(   0,   0)=   1
+    TABLE(   0,   2)=   0
+    TABLE(   3,   0)=   4
+    TABLE(   3,   2)=   1
+LOOKUP TABLE VALUE (trunc,byte indx):
+    TABLE( 130, 255)=   0
+LOOKUP TABLE VALUES (round):
+    TABLE(   0,   0)=   1
+    TABLE(   0,   2)=   0
+    TABLE(   3,   0)=   4
+    TABLE(   3,   2)=   1
+LOOKUP TABLE VALUE (round,byte index):
+    TABLE( 130, 255)=   1
+TKNUTH  FUNCTION="min(int(IN1/IN2),999)" 'XKNUTH
+Beginning VICAR task TKNUTH
+   LOAD   1
+   DIV    2
+   STOR  93
+   INT   93
+   MIN   52
+   RETN   0
+FUNCTION VALUES:
+    XKNUTH(   0.0,   0.0)=   0.0
+    XKNUTH(   0.0,   2.0)=   0.0
+    XKNUTH(   3.0,   0.0)= 999.0
+    XKNUTH(   3.0,   2.0)=   1.0
+    XKNUTH( 130.0, 255.0)=   0.0
+LOOKUP TABLE VALUES (trunc.,int indx):
+    TABLE(   0,   0)=   0
+    TABLE(   0,   2)=   0
+    TABLE(   3,   0)= 255
+    TABLE(   3,   2)=   1
+LOOKUP TABLE VALUE (trunc,byte indx):
+    TABLE( 130, 255)=   0
+LOOKUP TABLE VALUES (round):
+    TABLE(   0,   0)=   0
+    TABLE(   0,   2)=   0
+    TABLE(   3,   0)= 255
+    TABLE(   3,   2)=   1
+LOOKUP TABLE VALUE (round,byte index):
+    TABLE( 130, 255)=   0
+TKNUTH  FUNCTION="ABS(IN1-IN2)" 'XKNUTH
+Beginning VICAR task TKNUTH
+   LOAD   1
+   SUB    2
+   STOR  93
+   ABS   93
+   RETN   0
+FUNCTION VALUES:
+    XKNUTH(   0.0,   0.0)=   0.0
+    XKNUTH(   0.0,   2.0)=   2.0
+    XKNUTH(   3.0,   0.0)=   3.0
+    XKNUTH(   3.0,   2.0)=   1.0
+    XKNUTH( 130.0, 255.0)= 125.0
+LOOKUP TABLE VALUES (trunc.,int indx):
+    TABLE(   0,   0)=   0
+    TABLE(   0,   2)=   2
+    TABLE(   3,   0)=   3
+    TABLE(   3,   2)=   1
+LOOKUP TABLE VALUE (trunc,byte indx):
+    TABLE( 130, 255)= 125
+LOOKUP TABLE VALUES (round):
+    TABLE(   0,   0)=   0
+    TABLE(   0,   2)=   2
+    TABLE(   3,   0)=   3
+    TABLE(   3,   2)=   1
+LOOKUP TABLE VALUE (round,byte index):
+    TABLE( 130, 255)= 125
+TKNUTH  FUNCTION="Amod(IN1,IN2+1)" 'XKNUTH
+Beginning VICAR task TKNUTH
+   LOAD   2
+   ADD   52
+   STOR  93
+   LOAD   1
+   MOD   93
+   RETN   0
+FUNCTION VALUES:
+    XKNUTH(   0.0,   0.0)=   0.0
+    XKNUTH(   0.0,   2.0)=   0.0
+    XKNUTH(   3.0,   0.0)=   0.0
+    XKNUTH(   3.0,   2.0)=   0.0
+    XKNUTH( 130.0, 255.0)= 130.0
+LOOKUP TABLE VALUES (trunc.,int indx):
+    TABLE(   0,   0)=   0
+    TABLE(   0,   2)=   0
+    TABLE(   3,   0)=   0
+    TABLE(   3,   2)=   0
+LOOKUP TABLE VALUE (trunc,byte indx):
+    TABLE( 130, 255)= 130
+LOOKUP TABLE VALUES (round):
+    TABLE(   0,   0)=   0
+    TABLE(   0,   2)=   0
+    TABLE(   3,   0)=   0
+    TABLE(   3,   2)=   0
+LOOKUP TABLE VALUE (round,byte index):
+    TABLE( 130, 255)= 130
+TKNUTH  FUNCTION="1.5" 'XKNUTH
+Beginning VICAR task TKNUTH
+   LOAD  52
+   RETN   0
+FUNCTION VALUES:
+    XKNUTH(   0.0,   0.0)=   1.5
+    XKNUTH(   0.0,   2.0)=   1.5
+    XKNUTH(   3.0,   0.0)=   1.5
+    XKNUTH(   3.0,   2.0)=   1.5
+    XKNUTH( 130.0, 255.0)=   1.5
+LOOKUP TABLE VALUES (trunc.,int indx):
+    TABLE(   0,   0)=   1
+    TABLE(   0,   2)=   1
+    TABLE(   3,   0)=   1
+    TABLE(   3,   2)=   1
+LOOKUP TABLE VALUE (trunc,byte indx):
+    TABLE( 130, 255)=   1
+LOOKUP TABLE VALUES (round):
+    TABLE(   0,   0)=   2
+    TABLE(   0,   2)=   2
+    TABLE(   3,   0)=   2
+    TABLE(   3,   2)=   2
+LOOKUP TABLE VALUE (round,byte index):
+    TABLE( 130, 255)=   2
+TKNUTH  FUNCTION="1.4" 'XKNUTH
+Beginning VICAR task TKNUTH
+   LOAD  52
+   RETN   0
+FUNCTION VALUES:
+    XKNUTH(   0.0,   0.0)=   1.4
+    XKNUTH(   0.0,   2.0)=   1.4
+    XKNUTH(   3.0,   0.0)=   1.4
+    XKNUTH(   3.0,   2.0)=   1.4
+    XKNUTH( 130.0, 255.0)=   1.4
+LOOKUP TABLE VALUES (trunc.,int indx):
+    TABLE(   0,   0)=   1
+    TABLE(   0,   2)=   1
+    TABLE(   3,   0)=   1
+    TABLE(   3,   2)=   1
+LOOKUP TABLE VALUE (trunc,byte indx):
+    TABLE( 130, 255)=   1
+LOOKUP TABLE VALUES (round):
+    TABLE(   0,   0)=   1
+    TABLE(   0,   2)=   1
+    TABLE(   3,   0)=   1
+    TABLE(   3,   2)=   1
+LOOKUP TABLE VALUE (round,byte index):
+    TABLE( 130, 255)=   1
+write "*** Tests on KNUTH_VAR ***"
+*** Tests on KNUTH_VAR ***
+TKNUTH  FUNCTION="IN1" 'KNVAR
+Beginning VICAR task TKNUTH
+VARIABLE "IN1  " INDEX=  1
+   LOAD   1
+   RETN   0
+TKNUTH  FUNCTION="IN50" 'KNVAR
+Beginning VICAR task TKNUTH
+VARIABLE "IN50 " INDEX= 50
+   LOAD  50
+   RETN   0
+TKNUTH  FUNCTION="DN" 'KNVAR
+Beginning VICAR task TKNUTH
+VARIABLE "DN   " INDEX=  1
+   LOAD   1
+   RETN   0
+TKNUTH  FUNCTION="LINE" 'KNVAR
+Beginning VICAR task TKNUTH
+VARIABLE "LINE " INDEX= 49
+   LOAD  49
+   RETN   0
+TKNUTH  FUNCTION="SAMP" 'KNVAR
+Beginning VICAR task TKNUTH
+VARIABLE "SAMP " INDEX= 50
+   LOAD  50
+   RETN   0
+TKNUTH  FUNCTION="BAND" 'KNVAR
+Beginning VICAR task TKNUTH
+VARIABLE "BAND " INDEX= 51
+   LOAD  51
+   RETN   0
+TKNUTH  FUNCTION="X1" 'KNVAR
+Beginning VICAR task TKNUTH
+VARIABLE "X1   " INDEX=  1
+   LOAD   1
+   RETN   0
+TKNUTH  FUNCTION="C13" 'KNVAR
+Beginning VICAR task TKNUTH
+VARIABLE "C13  " INDEX= 13
+   LOAD  13
+   RETN   0
+write "*** Test COMPLEX Operations ***"
+*** Test COMPLEX Operations ***
+TKNUTH  FUNCTION="IN1+IN2" 'XKNUTH 'COMPLEX CVALUES=(0,1,2,0)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   ADD    2
+   RETN   0
+COMPLEX-RESULT=  2.000  1.000
+REAL-RESULT=  1.000
+TKNUTH  FUNCTION="IN1+IN2+IN3" 'XKNUTH 'COMPLEX CVALUES=(0,1,2,0,4,5)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   ADD    2
+   ADD    3
+   RETN   0
+COMPLEX-RESULT=  6.000  6.000
+REAL-RESULT=  3.000
+TKNUTH  FUNCTION="IN1-IN2" 'XKNUTH 'COMPLEX CVALUES=(5,4,2,-1)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   SUB    2
+   RETN   0
+COMPLEX-RESULT=  3.000  5.000
+REAL-RESULT=  1.000
+TKNUTH  FUNCTION="IN1*IN2" 'XKNUTH 'COMPLEX CVALUES=(1,1,1,1)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   MUL    2
+   RETN   0
+COMPLEX-RESULT=  0.000  2.000
+REAL-RESULT=  1.000
+TKNUTH  FUNCTION="IN1/IN2" 'XKNUTH 'COMPLEX CVALUES=(0,2,1,1)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   DIV    2
+   RETN   0
+COMPLEX-RESULT=  1.000  1.000
+REAL-RESULT=  0.000
+TKNUTH  FUNCTION="ABS(IN1)" 'XKNUTH 'COMPLEX CVALUES=(1,1)
+Beginning VICAR task TKNUTH
+   ABS    1
+   RETN   0
+COMPLEX-RESULT=  1.414  0.000
+REAL-RESULT=  1.000
+TKNUTH  FUNCTION="SIN(IN1/4)" 'XKNUTH 'COMPLEX CVALUES=(3.14159,0)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   DIV   52
+   STOR  93
+   SIN   93
+   RETN   0
+COMPLEX-RESULT=  0.707  0.000
+REAL-RESULT=  0.707
+TKNUTH  FUNCTION="COS(IN1/4)" 'XKNUTH 'COMPLEX CVALUES=(0,1)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   DIV   52
+   STOR  93
+   COS   93
+   RETN   0
+COMPLEX-RESULT=  1.031  0.000
+REAL-RESULT=  1.000
+TKNUTH  FUNCTION="TAN(IN1/4)" 'XKNUTH 'COMPLEX CVALUES=(3.14159,1)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   DIV   52
+   STOR  93
+   TAN   93
+   RETN   0
+COMPLEX-RESULT=  1.000  0.000
+REAL-RESULT=  1.000
+TKNUTH  FUNCTION="3 + 4*SQRT(-1)" 'XKNUTH 'COMPLEX
+Beginning VICAR task TKNUTH
+   LCMP  54
+   STOR  93
+   SQRT  93
+   MUL   53
+   ADD   52
+   RETN   0
+COMPLEX-RESULT=  3.000  4.000
+REAL-RESULT=  7.000
+TKNUTH  FUNCTION="IN1 ** sqrt(-1)*IN2" 'XKNUTH 'COMPLEX  +
+   CVALUES=(2.71828,0,3.1416,0)
+Beginning VICAR task TKNUTH
+   LCMP  52
+   STOR  93
+   SQRT  93
+   STOR  95
+   LOAD   1
+   EXP   95
+   MUL    2
+   RETN   0
+COMPLEX-RESULT=  1.697  2.644
+REAL-RESULT=  0.000
+TKNUTH  FUNCTION="MOD(IN1,IN2)" 'XKNUTH 'COMPLEX CVALUES=(16,7,4,3)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   MOD    2
+   RETN   0
+COMPLEX-RESULT=  0.000  1.000
+REAL-RESULT=  2.000
+TKNUTH  FUNCTION="MAX(IN1,IN2)" 'XKNUTH 'COMPLEX CVALUES=(16,2,4,3)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   MAX    2
+   RETN   0
+COMPLEX-RESULT= 16.000  3.000
+REAL-RESULT= 16.000
+TKNUTH  FUNCTION="MIN(IN1,IN2)" 'XKNUTH 'COMPLEX CVALUES=(16,2,4,3)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   MIN    2
+   RETN   0
+COMPLEX-RESULT=  4.000  2.000
+REAL-RESULT=  2.000
+TKNUTH  FUNCTION="IN1 == IN2" 'XKNUTH 'COMPLEX CVALUES=(16,16,4,3)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   EQ     2
+   RETN   0
+COMPLEX-RESULT=  0.000  0.000
+REAL-RESULT=  1.000
+TKNUTH  FUNCTION="IN1 != IN2" 'XKNUTH 'COMPLEX CVALUES=(16,16,16,3)
+Beginning VICAR task TKNUTH
+   LOAD   1
+   NE     2
+   RETN   0
+COMPLEX-RESULT=  1.000  0.000
+REAL-RESULT=  0.000
+write "This should return e (2.718) for COMPLEX"
+This should return e (2.718) for COMPLEX
+tknuth fun="cos(in1) + sqrt(-1) * sin(in1)" 'xkn 'comp cval=(0,1)
+Beginning VICAR task tknuth
+   COS    1
+   STOR  93
+   LCMP  52
+   STOR  95
+   SQRT  95
+   STOR  97
+   SIN    1
+   MUL   97
+   ADD   93
+   RETN   0
+COMPLEX-RESULT=  2.718  0.000
+REAL-RESULT=  1.000
+write "This should return PI (3.1415) *i for COMPLEX"
+This should return PI (3.1415) *i for COMPLEX
+TKNUTH  FUNCTION="2*LOG(IN1)" 'XKNUTH 'COMPLEX CVALUES=(0,1)
+Beginning VICAR task TKNUTH
+   LN     1
+   MUL   52
+   RETN   0
+COMPLEX-RESULT=  0.000  3.142
+REAL-RESULT=-92.103
+end-proc
+exit
+slogoff
+if ($RUNTYPE = "INTERACTIVE")
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+else
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+end-if
+ulogoff
+END-PROC
+END-PROC
+
+! 11-Feb-2007:  the test log on Linux is identical to this one (lwk)

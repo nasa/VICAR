@@ -42,7 +42,19 @@ if ($?V2INC != 0) then
   if ($VICCPU == 'sun-solr') then
     alias vimake 'imake -D__sparc -DSOLARIS -I$V2INC -I$V2UTIL -T$V2UTIL/imake_unix.tmpl -f \!*.imake -s \!*.make' 
   else
-    alias vimake 'imake -I$V2INC -I$V2UTIL -T$V2UTIL/imake_unix.tmpl -f \!*.imake -s \!*.make'
+    if ($?V2_FORCE_32 != 0) then
+      set force = -DV2_FORCE_32
+    else
+      set force = ""
+    endif
+    if ($?V2_COVERAGE) then
+      set cover = -DV2_COVERAGE
+      echo "CODE COVERAGE BUILD ENABLED"
+    else
+      set cover = ""
+    endif
+    alias vimake 'imake '$force' '$cover' -I$V2INC -I$V2UTIL -T$V2UTIL/imake_unix.tmpl -f \!*.imake -s \!*.make'
+    endif
   endif
 else
   unalias vimake

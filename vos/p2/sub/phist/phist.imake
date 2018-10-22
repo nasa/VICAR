@@ -1,0 +1,12 @@
+/* Imake file for VICAR subroutine PHIST */
+
+#define SUBROUTINE phist
+
+#define MODULE_LIST phist.f zphist.c
+
+#define P2_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+

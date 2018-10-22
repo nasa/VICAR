@@ -1,0 +1,227 @@
+tstpixmap
+let $autousage="none"
+let $echo="yes"
+gen xim0 nl=100 ns=200
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtgen xim0 xim 'tiecnvrt  +
+   geotiff=("ModelTiePointTag=(2,3,0,350807.4,5317081.3,0.0)",  +
+          "ModelTiePointTag=(102,83,0,351807.4,5316081.3,0.0)",  +
+          "ModelTiePointTag=(2,83,0,350807.4,5316081.3,0.0)",  +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+Beginning VICAR task gtgen
+gtgen version Fri Jan 11 2008
+gtlist xim
+Beginning VICAR task gtlist
+gtlist version Wed Jan  2 2008
+ibis-gen a version=ibis-2 org=column  datacol=(1,2,3,4)  +
+    nc=4 nr=2 deff="DOUB"
+Beginning VICAR task ibis
+mf a func=("c1=index*99-98","c2=index*199-198")
+Beginning VICAR task mf
+ibis-list a 'format
+Beginning VICAR task ibis
+ 
+Number of Rows:2  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
+        DOUB        DOUB        DOUB        DOUB
++-----------+-----------+-----------+-----------
+        1.00        1.00        0.00        0.00
+      100.00      200.00        0.00        0.00
+pixmap (a,xim) mapcol=(3,4) pixcol=(1,2) 'pixtomap
+Beginning VICAR task pixmap
+pixmap version Thu Jan  3 2008
+ibis-list a 'format
+Beginning VICAR task ibis
+ 
+Number of Rows:2  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
+        DOUB        DOUB        DOUB        DOUB
++-----------+-----------+-----------+-----------
+        1.00        1.00   350792.40  5317112.55
+      100.00      200.00   352782.40  5315875.05
+mf a func=("c1=0","c2=0")
+Beginning VICAR task mf
+ibis-list a 'format
+Beginning VICAR task ibis
+ 
+Number of Rows:2  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
+        DOUB        DOUB        DOUB        DOUB
++-----------+-----------+-----------+-----------
+        0.00        0.00   350792.40  5317112.55
+        0.00        0.00   352782.40  5315875.05
+pixmap (a,xim) mapcol=(3,4) pixcol=(1,2) 'maptopix
+Beginning VICAR task pixmap
+pixmap version Thu Jan  3 2008
+ibis-list a 'format
+Beginning VICAR task ibis
+ 
+Number of Rows:2  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
+        DOUB        DOUB        DOUB        DOUB
++-----------+-----------+-----------+-----------
+        1.00        1.00   350792.40  5317112.55
+      100.00      200.00   352782.40  5315875.05
+ibis-gen a version=ibis-2 org=column  datacol=(1,2,3,4)  +
+    nc=4 nr=10 deff="DOUB"
+Beginning VICAR task ibis
+mf a func=("c1=sqrt(index*17+2763)","c2=sqrt(index*7+3431)")
+Beginning VICAR task mf
+mf a func=("c1=mod(c1,0.0001)*1000000","c2=mod(c2,0.0001)*1000000")
+Beginning VICAR task mf
+ibis-list a 'format
+Beginning VICAR task ibis
+ 
+Number of Rows:10  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:10
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
+        DOUB        DOUB        DOUB        DOUB
++-----------+-----------+-----------+-----------
+        5.53       61.93        0.00        0.00
+       74.31       23.80        0.00        0.00
+       51.00       24.63        0.00        0.00
+       43.22       64.43        0.00        0.00
+       58.61       47.00        0.00        0.00
+       97.15       64.73        0.00        0.00
+       62.68       25.23        0.00        0.00
+       62.81       28.52        0.00        0.00
+        1.36       66.95        0.00        0.00
+       78.34       51.98        0.00        0.00
+pixmap (a,xim) mapcol=(3,4) pixcol=(1,2) 'pixtomap
+Beginning VICAR task pixmap
+pixmap version Thu Jan  3 2008
+ibis-list a 'format
+Beginning VICAR task ibis
+ 
+Number of Rows:10  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:10
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
+        DOUB        DOUB        DOUB        DOUB
++-----------+-----------+-----------+-----------
+        5.53       61.93   351401.70  5317055.99
+       74.31       23.80   351020.37  5316196.18
+       51.00       24.63   351028.69  5316487.57
+       43.22       64.43   351426.65  5316584.80
+       58.61       47.00   351252.41  5316392.48
+       97.15       64.73   351429.67  5315910.64
+       62.68       25.23   351034.73  5316341.57
+       62.81       28.52   351067.58  5316339.92
+        1.36       66.95   351451.93  5317108.00
+       78.34       51.98   351302.23  5316145.81
+mf a func=("c1=0","c2=0")
+Beginning VICAR task mf
+ibis-list a 'format
+Beginning VICAR task ibis
+ 
+Number of Rows:10  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:10
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
+        DOUB        DOUB        DOUB        DOUB
++-----------+-----------+-----------+-----------
+        0.00        0.00   351401.70  5317055.99
+        0.00        0.00   351020.37  5316196.18
+        0.00        0.00   351028.69  5316487.57
+        0.00        0.00   351426.65  5316584.80
+        0.00        0.00   351252.41  5316392.48
+        0.00        0.00   351429.67  5315910.64
+        0.00        0.00   351034.73  5316341.57
+        0.00        0.00   351067.58  5316339.92
+        0.00        0.00   351451.93  5317108.00
+        0.00        0.00   351302.23  5316145.81
+pixmap (a,xim) mapcol=(3,4) pixcol=(1,2) 'maptopix
+Beginning VICAR task pixmap
+pixmap version Thu Jan  3 2008
+ibis-list a 'format
+Beginning VICAR task ibis
+ 
+Number of Rows:10  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:10
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
+        DOUB        DOUB        DOUB        DOUB
++-----------+-----------+-----------+-----------
+        5.53       61.93   351401.70  5317055.99
+       74.31       23.80   351020.37  5316196.18
+       51.00       24.63   351028.69  5316487.57
+       43.22       64.43   351426.65  5316584.80
+       58.61       47.00   351252.41  5316392.48
+       97.15       64.73   351429.67  5315910.64
+       62.68       25.23   351034.73  5316341.57
+       62.81       28.52   351067.58  5316339.92
+        1.36       66.95   351451.93  5317108.00
+       78.34       51.98   351302.23  5316145.81
+gen xim0 nl=100 ns=200
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtgen xim0 xim 'tiecnvrt  +
+   geotiff=("ModelTiePointTag=(2,3,0,350807.4,5317081.3,0.0)",  +
+          "ModelTiePointTag=(102,83,0,351807.4,5316081.3,0.0)",  +
+          "ModelTiePointTag=(2,83,0,350807.4,5316081.3,0.0)",  +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+Beginning VICAR task gtgen
+gtgen version Fri Jan 11 2008
+ibis-gen a version=ibis-2 org=column  datacol=(1,2,3,4)  +
+    nc=4 nr=2 deff="DOUB"
+Beginning VICAR task ibis
+mf a func=("c1=index*99-98","c2=index*199-198")
+Beginning VICAR task mf
+pixmap (a,xim) mapcol=(3,4) pixcol=(1,2) 'pixtomap  +
+      ignore=(100.0,200.0)
+Beginning VICAR task pixmap
+pixmap version Thu Jan  3 2008
+ibis-list a 'format
+Beginning VICAR task ibis
+ 
+Number of Rows:2  Number of Columns: 4       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4
+        DOUB        DOUB        DOUB        DOUB
++-----------+-----------+-----------+-----------
+        1.00        1.00   350792.40  5317112.55
+      100.00      200.00      100.00      200.00
+end-proc
+exit
+slogoff
+if ($RUNTYPE = "INTERACTIVE")
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+else
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+end-if
+ulogoff
+END-PROC
+END-PROC

@@ -1,0 +1,21 @@
+#define PROGRAM   tmpgetpar
+
+#define MODULE_LIST tmpgetpar.c
+
+#define MAIN_LANG_C
+#define R2LIB 
+
+#define USES_C
+#define LIB_SPICE
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_FORTRAN
+#define LIB_P2SUB
+
+/**********
+
+LOCAL LIBRARY for development 
+
+#define DEBUG
+#define LIB_LOCAL
+**********/

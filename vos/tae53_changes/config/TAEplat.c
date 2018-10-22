@@ -352,7 +352,7 @@
 #define MacroIncludeFile <ppc_linux.cf>
 #define MacroFile ppc_linux.cf
 #else
-#ifdef __x86_64
+#if defined(__x86_64__) && !defined(V2_FORCE_32def)
 #define LinuxX8664Architecture
 #define MachineDep X86_64_Linx
 #define machinedep x86_64_linx
@@ -377,11 +377,19 @@
 #define MacroIncludeFile <mac_osx.cf>
 #define MacroFile mac_osx.cf
 #else
+#if defined(__x86_64__) && !defined(V2_FORCE_32def)
+#define Mac64OSXArchitecture
+#define MachineDep Mac64_OSX
+#define machinedep mac64_osx
+#define MacroIncludeFile <mac64_osx.cf>
+#define MacroFile mac64_osx.cf
+#else
 #define MacX86OSXArchitecture
 #define MachineDep X86_MacOSX
 #define machinedep x86_macosx
 #define MacroIncludeFile <x86_macosx.cf>
 #define MacroFile x86_macosx.cf
+#endif
 #endif
 #endif
 

@@ -1,0 +1,127 @@
+1 PRNT
+
+ Print a string (TITLE) followed by an array BUF of N elements.  
+ The data format (DCODE) of BUF may  be one of the following:
+
+        0=HEX        1=BYTE        2=INTEGER*2     4=INTEGER*4
+        7=REAL*4     8=REAL*8     10=COMPLEX*8    99=ASCII string
+
+
+  FORTRAN Calling Sequence:  CALL PRNT( DCODE, N, BUF ,TITLE)
+  C Calling Sequence:        zprnt( dcode, n, buf ,title);
+
+  Arguments: 
+
+   DCODE  -  input, integer  -  data format code
+   N  -  input, integer  -  number of elements to print
+   BUF  -  input array, any valid data type
+   TITLE - input, CHARACTER variable or quoted string for FORTRAN.
+                  null-terminated string for C.  If no title is desired,
+                  a ' ' may be passed from FORTRAN, or a "" may be passed
+                  from C.
+
+
+2 History
+
+  Original Programmer:   Gary Yagi, 13 January 1977
+  Conversion to VAX:     L. W. Kamp
+  Conversion to Vicar2:  J. R. Stagner
+  Cognizant Engineer:    Steve Pohorsky
+  Source Language:       C
+  Revisions:
+   93-3-24  ..SP....  Added more significant digits (total=8) if 
+                      only one value to print for float or double and absolute 
+                      value between .0001 and 9999999.9.
+   92-4-20  ..SP....  Made portable for UNIX - converted from Fortran
+                      to C to handle CHARACTER titles, made TITLE a
+                      required parameter, changed to use sprintf
+                      instead of OUTCON, changed to use zvmessage
+                      instead of QPRINT (pulled in code to handle
+                      non-printable characters), added features from
+                      old PRNT2: a) print title and value on same line
+                      if room, b) if only one value to print for float or
+                      double and absolute value between .1 and 9999.9999, 
+                      use fixed point format.  (If more than one value to
+                      print, exponential format is used to insure uniformity.)
+   89-10-24 ..GMY...  Add ASCII string data format (DCODE=99)
+   85-2-28 ...JRS...  ADDED COMPLEX DATA TYPE
+   85-4-04 ...JRS...  CHANGED DCODE FROM 9 TO 10 FOR COMPLEX DATA TYPE 
+                      TO BE CONSISTENT WITH OTHER VICAR ROUTINES
+   84-9-5  ...LWK...  fix bugs in TITLE & # elements/line,
+                      reduce hwd field 
+   83-6-2  ...LWK...  increase halfword field to 6 chars
+   83-4-18 ...LWK...  fixed 0 DCODE negative byte data  
+   83-3-15 ...LWK...  fixed halfword OUTCON call 
+   83-3-1  ...LWK...  fixed DCODE=0  
+
+2 OPERATION
+
+  PRNT formats the output into lines of up to 132 characters and
+  then calls zvmessage.  Here are some details:
+
+  1) If there is a title and only one value to be printed (and the title
+     is <= 100 characters), the title and value are printed on the same
+     line.  Otherwise, assuming there is a title, it is printed (up to 132
+     characters) on the first line and data from BUF starts on the second
+     line of output.
+  2) If there is more than one value (N>1), each line of data starts in
+     column 11.  (Column 11 may be blank due to the single space used
+     to separate values for DCODE = 1,4,7,8,10 or due to leading blanks
+     in the output of the numeric values.)
+  3) For DCODE=0, the HEX values on a line are printed first, with a
+     space separating each eight HEX digits (2 HEX digits per unsigned byte).
+     The HEX is followed by three blanks and the corresponding ASCII
+     representation of each byte.  Non-printing values are handled as
+     follows: unsigned bytes in the range from 127 to 255 are displayed
+     as a '#' and unsigned bytes in the range from 0 to 31 are displayed
+     as a '|'.
+  4) For DCODE=2, PRNT allows six characters per value.  This provides
+     spacing between values unless the values are in the range -10000 to
+     -32768.  In the latter case, the minus sign also servers as the
+     separator between values.  This allows 20 values per line.
+  5) For DCODE=4, if N>1, PRNT allows 10 characters per value plus a separating
+     space.  This accomodates all 32-bit signed integers except values in 
+     the range -(2**31), i.e. -2,147,483,648, through -1,000,000,000.
+     Ten '*'s are displayed for values in this range.  For N=1, PRNT will
+     use extra characters if necessary to display any INTEGER*4 value.
+  6) For DCODE=7 or 8, fixed point is used if the number of values to
+     be printed is 1 and the absolute value of the number is in the
+     range .0001 to 9999999.9 inclusive.  In this case, eight significant
+     digits are printed.
+     Otherwise, the format " %10.3E" is used.  The latter
+     provides 4 significant digits since there is 1 digit to the left of the
+     decimal point. 
+  7) For DCODE=10, each complex value is displayed as a pair of real values.
+     (The input format expected in BUF is also a pair of reals.)
+  8) For DCODE=99, the ASCII data is expected in a BYTE array or equivalent
+     form.  The data may not be in a FORTRAN quoted string or a CHARACTER 
+     variable, which may be passed directly to XVMESSAGE.  DCODE 99 is
+     maintained to provide backwards compatability.
+
+2 ARGUMENTS
+
+ DCODE (input): Data format code, as follows:
+
+               DCODE         Array Type        Elements per line
+               -----         ----------        -----------------
+                 0       Hexadecimal and ASCII       32
+                 1       Byte                        30
+                 2       Integer*2                   20
+                 4       Integer*4                   10
+                 7       Real*4                      10
+                 8       Real*8                      10
+                10       Complex*8                    5
+                99       ASCII string              up to 120
+
+  N (input): number of elements to be printed.  For DCODE 0, 1, and 99,
+             this is the number of bytes.
+
+  BUF (input): this specifies the first element to be printed. The
+               number of bytes per element is determined by DCODE.
+
+   TITLE - input, CHARACTER variable or quoted string for FORTRAN.
+                  null-terminated string for C.  If no title is desired,
+                  a ' ' may be passed from FORTRAN, or a "" may be passed
+                  from C.  Since PRNT used to expect a string
+                  terminated by a period ("."), PRNT will ignore a period
+                  at the end of the string (for backwards compatability).

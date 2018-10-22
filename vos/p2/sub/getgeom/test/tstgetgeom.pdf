@@ -1,0 +1,73 @@
+procedure
+refgbl $echo
+refgbl $syschar
+LOCAL DIR    TYPE=STRING 
+local  vgr2_4         string
+local  vgr2_5         string
+local  vgr1_6         string
+local  vgr1_7         string
+local  vik_4          string
+local  vik_6          string
+local  vik_7          string
+local  vik_8          string
+local  m10_1          string
+local  m10_2          string
+local  m9_1           string
+local  m9_2           string
+
+body
+let _onfail="continue"
+let $echo="yes"
+! test each camera without reading input file
+!
+TGETGEOM PROJ="GLL  " CAM=1
+TGETGEOM PROJ="VGR-2" CAM=4
+TGETGEOM PROJ="VGR-2" CAM=5
+TGETGEOM PROJ="VGR-1" CAM=6
+TGETGEOM PROJ="VGR-1" CAM=7
+TGETGEOM PROJ="VIKOR" CAM=4
+TGETGEOM PROJ="VIKOR" CAM=6
+TGETGEOM PROJ="VIKOR" CAM=7
+TGETGEOM PROJ="VIKOR" CAM=8
+TGETGEOM PROJ="MAR10" CAM=1
+TGETGEOM PROJ="MAR10" CAM=2
+TGETGEOM PROJ="MAR-9" CAM=1
+TGETGEOM PROJ="MAR-9" CAM=2
+!TEST WITH READING INPUT FILE 
+!PRINT OUT SHOULD BE IDENTICAL WITH CORRESPONDING ONE ABOVE
+Write  " "  
+!
+if ($syschar(1) = "UNIX")
+   LET DIR  ="/project/test_work/testdata/sitod1/test_data/geoma/"
+else 
+   LET DIR  ="WMS_TEST_WORK:[TESTDATA.SITOD1.TEST_DATA.GEOMA]"
+end-if
+
+   let vgr2_4   = "&DIR"//"vgr2.cam4"
+   let vgr2_5   = "&DIR"//"vgr2.cam5"
+   let vgr1_6   = "&DIR"//"vgr1.cam6"
+   let vgr1_7   = "&DIR"//"vgr1.cam7"
+   let vik_4    = "&DIR"//"vikor.cam4"
+   let vik_6    = "&DIR"//"vikor.cam6"
+   let vik_7    = "&DIR"//"vikor.cam7"
+   let vik_8    = "&DIR"//"vikor.cam8"
+   let m10_1    = "&DIR"//"mar10.cam1"
+   let m10_2    = "&DIR"//"mar10.cam2"
+   let m9_1     = "&DIR"//"mar9.cam1"
+   let m9_2     = "&DIR"//"mar9.cam2"
+!
+TGETGEOM  inp=@vgr2_4  PROJ="VGR-2"  CAM=4
+TGETGEOM  inp=@vgr2_5  PROJ="VGR-2"  CAM=5
+TGETGEOM  inp=@vgr1_6  PROJ="VGR-1"  CAM=6
+TGETGEOM  inp=@vgr1_7  PROJ="VGR-1"  CAM=7
+TGETGEOM  inp=@vik_4   PROJ="VIKOR"  CAM=4
+TGETGEOM  inp=@vik_6   PROJ="VIKOR"  CAM=6
+TGETGEOM  inp=@vik_7   PROJ="VIKOR"  CAM=7
+TGETGEOM  inp=@vik_8   PROJ="VIKOR"  CAM=8
+TGETGEOM  inp=@m10_1   PROJ="MAR10"  CAM=1
+TGETGEOM  inp=@m10_2   PROJ="MAR10"  CAM=2
+TGETGEOM  inp=@m9_1    PROJ="MAR-9"  CAM=1
+TGETGEOM  inp=@m9_2    PROJ="MAR-9"  CAM=2
+!
+Let  $echo="no"
+End-Proc

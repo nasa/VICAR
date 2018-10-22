@@ -1,0 +1,29 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM zfill
+
+   To Create the build file give the command:
+
+		$ vimake f2			(VMS)
+   or
+		% vimake f2			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	zfill
+#define R2LIB
+
+#define MODULE_LIST zfill.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+/* #define DEBUG        /* comment out upon delivery */
+/************************* End of Imake file ***************************/

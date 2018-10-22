@@ -1,0 +1,56 @@
+1 SDRDATE
+
+  Routine to convert SFDU time format to SDR time format.
+
+  C Calling Sequence:  zsdrdate(sfdut,sdrt,*sdr_year)
+
+  Arguments:  struct sfdu_time sfdut	!Output Epoch 1950 time
+	      struct sdr_time  sdrt     !Input Julian day_of_year,sec_of_hour,
+					 and millisecond of second.
+	      int *sdr_year		!Input year of century (0-99)
+
+  Note: Data structures sfdu_time and sdr_time may be obtained by including
+        SFDUTIME.H from the C-Include Library.
+  
+  FORTRAN Calling Sequence: SDRDATE(SFDUT1,SFDUT2,SDRTIM,SDR_YEAR) 
+
+  Arguments:  INTEGER*4 SFDUT1, SFDUT2, SDR_YEAR
+              INTEGER*2 SDRTIM(3)
+  
+  For SDRDATE:
+
+             The sfdut structure or SFDUT1 and SFDUT2 are the inputs
+             where the first object in sfdut and SFDUT1 are the seconds
+             since 1950 and the second object in sfdut and SFDUT2 are the
+             fractional seconds.
+
+             The output for SDRDATE is the year (SDR_YEAR or sdr_year) and
+             for the sdrt structure and SDRTIM(3) array the hour of year,
+             second of hour, and msec of second.
+
+2 History
+
+  Original Programmer: Gary Yagi, November 22, 1984
+  Current Cognizant Programmer: Gary Yagi
+  Source Language: C
+  Ported to Unix:  Damon D. Knight  August 17, 1993
+
+3 Operation
+
+  This routine is valid between 1950 and 2050.  The only obscure part of 
+  the code is the calculation of leap years.  Starting from 0 A.D., leap
+  years are all years divisible by 4, except years divisible by 100 but not
+  by 400.  Note that the year 2000 is a leap year.  To keep things simple,
+  this routine ignores the 100 and 400 years rules since they cancel out for
+  the coming century.
+
+  The year 1900 is used as a base for calculating leap years, rather than 
+  the year 0 to reduce the possibility of round-off errors.  The total
+  number of days elasped for the year 1900 to the beginning of the current
+  year is 365.25*year + 0.75.  The 0.75 adjusts for the century (1900) 
+  starting on a leap year.  The total number of days elapsed since the year
+  1950 is:
+
+         days = 365.25*year+0.75            !days since 1900
+                    - 18263                 !days between 1900 and 1950
+                    + 0.125                 !half of 0.25 to reduce rnd-off err

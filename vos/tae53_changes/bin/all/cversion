@@ -52,7 +52,11 @@ else
 if [ $TAEPLAT = x86_macosx ]; then
 CCMD="gcc -m32"
 else
+if [ $TAEPLAT = x86_linux ]; then
+CCMD="gcc -m32"
+else
 CCMD=cc
+fi
 fi
 fi
 $CCMD -c \

@@ -1,0 +1,133 @@
+procedure
+parm    mode    type=keyword count=(0:1) valid=(batch,nobatch,inter) default=batch
+
+local   clen    type=integer count=1
+! Oct 15, 2012 - RJB
+! TEST SCRIPT FOR TIEPLOT
+!
+! Vicar Programs:
+!       ibis-gen mf3 ibis-list ibis2asc
+!
+! External programs
+!       gnuplot 4.6.x, gimp 2.6
+! 
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no display but creates .eps files
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!           
+!   In batch mode it produces files testx.eps by calling gnuplot
+!       to create the encapsulated postscript file which can be
+!       later viewed with ghostscript or gimp
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
+!            
+! External test data: 
+!       <none>
+! Output:    
+!   GENed test data sets, .gpi and .eps files and intermediate 
+!       tmp* files 
+!   the *.gpi data produced by statplt are gnuplot scripts
+!
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="stop"
+let $echo="yes"
+ibis-gen out=table1.dat nc=7 nr=30
+mf3 inp=table1.dat func=("c1=@aint(@index/31)+1"$"c2=100*@index"$ +
+    "c3=100*@index"$"c4=c2+101"$"c5=c3-200"$"c6=@aint(@index)"$"c7=0")
+
+ibis-list inp=table1.dat screen=132 nc=10 cols=(1,2,3,4,5,6,7)
+ibis2tcl table1.dat vclen=clen
+!ibis2asc table1.dat table1.dat.asc nr=&clen cols=(1,2,3,4,5,6,7)
+
+!
+! TEST 1 - Simple table - Only 1 in keycol - numcol is entry number
+!
+!ibis2asc table1.dat test1.asc nr=&clen cols=(1,2,3,4,5,6,7)
+tieplot inp=table1.dat NL=3000 NS=3000 KEYCOL=1 KEY=(1) +
+     OLDCOLS=(2,3) NEWCOLS=(4,5) NUMCOL=6  +
+    plotout=test1
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test1.gpi
+end-if
+
+!
+! TEST 2 - Simple table but scale vectors by 3
+!ibis2asc table1.dat test2.asc nr=&clen cols=(1,2,3,4,5,6,7)
+tieplot inp=table1.dat NL=3000 NS=3000 KEYCOL=1 KEY=(1) +
+     OLDCOLS=(2,3) NEWCOLS=(4,5) NUMCOL=6 SCALE=3  +
+    plotout=test2
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test2.gpi
+end-if
+
+
+
+ibis-gen out=table2.dat nc=7 nr=30
+
+mf3 inp=table2.dat func=("c1=@aint(@index/16)+1"$"c2=100*@index"$ +
+    "c3=100*@index"$"c4=c2+0.1"$"c5=c3-0.2"$"c6=@aint(@index)"$"c7=0")
+ibis-list inp=table2.dat screen=132 nc=7 cols=(1,2,3,4,5,6,7)
+ibis2tcl    table2.dat vclen=clen
+!write "&clen"
+!ibis2asc table2.dat table2.dat.asc nr=&clen cols=(1,2,3,4,5,6,7)
+!
+! TEST 3 - Complex table - Control column has 1 and 2 in it
+!          create 2 plots - use default PLOTOUT=tieplot
+!  You can omit 1st plot it you set key=(2)
+!ibis2asc table2.dat tieplot.asc nr=&clen cols=(1,2,3,4,5,6,7)
+tieplot inp=table2.dat NL=3000 NS=3000 KEYCOL=1 KEY=(1,2) +
+	SCALE=1000 OLDCOLS=(2,3) NEWCOLS=(4,5) NUMCOL=6  +
+    plotout=tieplot
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot tieplot.gpi
+end-if
+
+!
+! TEST 4 - Complex table - Control column has 1 and 2 in it
+!          create 2 plots
+!  You can omit 1st plot it you set key=(2)
+!ibis2asc table2.dat test4.asc nr=&clen cols=(1,2,3,4,5,6,7)
+tieplot inp=table2.dat NL=3000 NS=3000 KEYCOL=1 KEY=(2) +
+    SCALE=1000 OLDCOLS=(2,3) NEWCOLS=(4,5) NUMCOL=6 +
+    plotout=test4
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test4.gpi
+end-if
+
+!
+! TEST 5 - Simple plot - encapsulated postscript file
+!
+!ibis2asc table1.dat test5.asc nr=&clen cols=(1,2,3,4,5,6,7)
+tieplot inp=table1.dat NL=3000 NS=3000 KEYCOL=1 KEY=(1) +
+     OLDCOLS=(2,3) NEWCOLS=(4,5) NUMCOL=6  +
+    plotout=test5 plotfmt=eps
+ush gnuplot test5.eps.gpi
+
+if (mode = "nobatch" or mode = "inter")
+    ush gimp test5.eps
+end-if
+
+!
+!  TEST 6 - Simple plot large plot
+!
+!ibis2asc table1.dat test6.asc nr=&clen cols=(1,2,3,4,5,6,7)
+tieplot inp=table1.dat NL=5000 NS=5000 KEYCOL=1 KEY=(1) +
+     OLDCOLS=(2,3) NEWCOLS=(4,5) NUMCOL=6  +
+    plotout=test6 
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test6.gpi
+end-if
+
+let $echo="no"
+end-proc

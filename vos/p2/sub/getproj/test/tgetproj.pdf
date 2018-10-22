@@ -1,0 +1,6 @@
+!*****************************************************************************
+! TGETPROJ.PDF - pdf for test program TGETPROJ.F for the subroutine GETPROJ
+!*****************************************************************************
+process 
+PARM INP          TYPE=STRING       COUNT=1
+END-PROC

@@ -1,0 +1,18 @@
+#if VMS_OS
+#define PROGRAM wildcard_vms
+#define MODULE_LIST wildcard_vms.c 
+#define CLEAN_OTHER_LIST wildcard_unix.c wildcard.ush
+#else
+#define PROGRAM wildcard_unix
+#define MODULE_LIST wildcard_unix.c
+#define CLEAN_OTHER_LIST wildcard_vms.c
+#endif
+
+#define MAIN_LANG_C
+#define R2LIB
+
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+

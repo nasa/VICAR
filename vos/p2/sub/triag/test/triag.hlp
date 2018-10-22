@@ -1,0 +1,27 @@
+1 TRIAG
+
+      To pack two reseau data sets into GEOMA format.  This routine
+      is specific to VOYAGER.
+
+2  CALLING SEQUENCE
+
+      CALL TRIAG(LINRES,ISR,OSR,GEOMAB)
+
+2  ARGUMENTS
+
+      LINRES   Row of reseaus to be packed     I*4
+
+      ISR      Image reseau line               R*4
+
+      OSR      Object reseau line              R*4
+
+      GEOMAB   Output GEOMA ordered buffer     R*4
+
+2  HISTORY
+
+      Original Programmer: J. J. Lorre, 16 June 1977
+      Current Cognizant Programmer: J. J. Lorre
+      Source Language: Fortran
+      Latest Revision: New
+
+      Ported for UNIX Conversion:  Dec-14-1992  by W.P. Lee

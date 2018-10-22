@@ -1,0 +1,40 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let _onfail="continue"
+let $echo="no"
+let $autousage="none"
+write " "
+write " GENERATE TEST IMAGE "
+fracgen out=terrain.img nl=10 ns=10 format=byte seed=32161267
+write " "
+write "-----------------------------------"
+write "!! !! !! TEST ALL DEFAULTS !! !! !!"
+write "-----------------------------------"
+write " "
+write "radagen inp=terrain.img out=rada.img"
+radagen inp=terrain.img out=rada.img
+list rada.img
+write " "
+write "------------------------------------------------------------"
+write "!1 !! !! TEST MAGELLAN BACKSCATTER MODEL"
+write "                    AND "
+write "         INTERNAL RECTIFICATION ADDITIONS !! !! !! "
+write "------------------------------------------------------------"
+write " "
+write "radagen inp=terrain.img out=radb.img 'mgn 'rectify 'log 'fill 'half"
+radagen inp=terrain.img out=radb.img 'mgn 'rectify 'log 'fill 'half
+list radb.img
+write " "
+write "---------------------------------------"
+write "!! !! !! TEST SAMPLE EXECUTION !! !! !!"
+write "---------------------------------------"
+write " "
+write "radagen inp=terrain.img out=radd.img height=229. sscale=98.4252 +"
+write "            lscale=98.4252 toff=0 zscale=3.280840 el=15."
+radagen inp=terrain.img out=radd.img height=229. sscale=98.4252 +
+            lscale=98.4252 toff=0 zscale=3.280840 el=15.
+write "list radd.img"
+list radd.img
+end-proc

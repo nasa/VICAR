@@ -1,0 +1,15 @@
+/* IMAKE file for Test of VICAR subroutine  MVM73B  */
+
+#define PROGRAM  tmvm73b
+
+#define MODULE_LIST tmvm73b.f 
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+
+#define   LIB_RTL         
+#define   LIB_TAE           
+/*  #define   LIB_LOCAL   */  /*  Disable during delivery   */
+#define   LIB_P2SUB         

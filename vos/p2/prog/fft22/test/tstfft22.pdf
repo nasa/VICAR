@@ -1,0 +1,66 @@
+procedure
+refgbl $autousage
+refgbl $echo
+refgbl $syschar
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+local PREF  type=string init="ush /bin/rm"
+local SUFF  type=string init=""
+local LOUTL type=string init="abcdefghijklmnopqrstuvwxyz1234567890.out"
+local LINL  type=string init="1234567890abcdefghijklmnopqrstuvwxyz.in"
+if ($syschar(1)="VAX_VMS")
+  let PREF = "dcl del"
+  let SUFF = ";*"
+end-if
+!
+! BASIC TEST: DO FORWARD + INVERSE, MUST RECOVER ORIGINAL
+! USE IMAGE SIZE LARGE ENOUGH TO REQUIRE SCRATCH FILE
+gen A.MAT 256 256
+list A.MAT (1,1,10,10)
+fft22 A.MAT B.MAT
+fft22 B.MAT C.MAT 
+list C.MAT (1,1,10,10)
+!
+! FOR OTHER TESTS, USE SMALLER SIZE (NO SCRATCH FILE)
+! TEST 'FORMAT'
+fft22 B.MAT C.MAT 'HALF
+list C.MAT (1,1,10,10)
+!
+fft22 B.MAT C.MAT 'FULL
+list C.MAT (1,1,10,10)
+!
+fft22 B.MAT C.MAT 'REAL
+list C.MAT (1,1,10,10)
+!
+! TEST UNEQUAL DIMENSION & NOT A POWER OF 2:
+gen A.MAT 100 120
+list A.MAT (91,111,10,10)
+fft22 A.MAT B.MAT
+label-list B.MAT
+fft22 B.MAT C.MAT 
+label-list C.MAT
+list C.MAT  (91,111,10,10)
+!
+! TEST 'SCRATCH' PARAMETER
+gen A.MAT 256 256
+fft22 A.MAT B.MAT
+fft22 B.MAT C.MAT SCRATCH="fftscr.dat"
+!  SEE IF IT'S THERE -- SHOULDN'T BE:
+!if ($syschar(1) = "VAX_VMS")
+!   dcl dir fftscr.dat
+!end-if
+!
+gen A.MAT 10 10
+fft22 A.MAT &"LINL"
+list &"LINL"
+fft22 &"LINL" &"LOUTL"
+list &"LOUTL"
+
+&PREF A.MAT&"SUFF"
+&PREF B.MAT&"SUFF"
+&PREF C.MAT&"SUFF"
+
+
+end-proc

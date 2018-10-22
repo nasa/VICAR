@@ -1,0 +1,12 @@
+/* Imake file for VICAR subroutine DARRAY */
+
+#define SUBROUTINE darray
+
+#define MODULE_LIST darray.f zdarray.c
+
+#define P2_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+

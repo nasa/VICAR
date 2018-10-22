@@ -1,0 +1,9 @@
+
+#define SUBROUTINE ztimsfilt
+
+#define MODULE_LIST ztimsfilt.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

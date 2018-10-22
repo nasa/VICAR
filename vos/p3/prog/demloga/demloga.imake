@@ -1,0 +1,13 @@
+#define  PROGRAM   demloga
+
+#define MODULE_LIST demloga.f
+
+#define MAIN_LANG_FORTRAN
+#define R3LIB 
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_P3SUB

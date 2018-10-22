@@ -1,0 +1,127 @@
+================================================================================
+VICAR SUBROUTINE			phoSetFunc
+================================================================================
+
+Purpose:		This routine sets the photometric function name 
+			in the PHO (photometric data object).
+
+================================================================================
+
+Function:		It checks whether the function name is valid. 
+			It sets the name in the photometric data 
+			object and sets the "function set" and "function 
+			changed" flags. 
+
+================================================================================
+
+Requirements and Dependencies:
+
+	Libraries and subroutines
+	required to run routine:	
+
+	Other requirements: 		need to run routines phoInit first
+
+	Necessary include files
+	for calling routine 
+	or program:			pho.h (for C routines )
+					pho.fin (for FORTRAN routines )
+
+	Main programs from which
+	subroutine will be called:	general application software and 
+					higher-level subroutines; 
+					phoGetParms, phoParFilRead;
+					hwphomas; 
+					PHOTEST, PHOTFIT2; 
+					HWGEOM*, HWORTH*, HWPHOCOE,....
+
+	Other requirements: 		need to run routine phoInit first
+
+================================================================================
+
+Interfaces: Input / Output Parameters:
+
+Calling Sequence:		
+
+	calling from C:	include "pho.h"
+				PHO PHO_DATA;
+				char PHO_FUNC[phoMAX_FUNC_NAME_LENGTH+1];
+				int status;
+				...
+				status = phoSetFunc( PHO_DATA, PHO_FUNC); 
+
+	calling from FORTRAN:
+	for scalar values:	INCLUDE 'pho'
+				CHARACTER*(PHO_MAX_FUNC_NAME_LENGTH) PHO_FUNC
+				INTEGER PHO_DATA, status
+				...
+				call pho_set_func( PHO_DATA, PHO_FUNC, status )
+
+Necessary include files
+from calling routine 
+or program:			pho.h (in C routines) 
+				pho.fin ( in FORTRAN routines)
+
+Parameters:
+	
+	Name		Type		In/Out	Description
+
+	
+	PHO_DATA	PHO_STRUCT	Input	Address of photometric data 
+						object
+
+	PHO_FUNC	char		Input	the photometric function name
+			[phoMAX_FUNC_NAME_LENGTH+1]
+
+	status	int			Input	Error status:
+					/Output	phoSUCCESS - success: 
+							photometric function 
+							set in the pho_object 
+							for the first time
+						phoFUNC_CHANGED - success: 
+							photometric function 
+							has been set in the 
+							pho_object, 
+							but it was already set 
+							before
+						phoINVALID_FUNCTION - 
+							invalid photometric 
+							function has been passed
+
+================================================================================
+Background and References:
+================================================================================
+
+Other Information:
+
+	Software Platforms:		VICAR (VMS/UNIX)
+
+	Software Platforms:		No particular hardware required;
+					tested on ....
+
+	Programming Language:		ANSI-C, 
+					ANSI-FORTRAN-bridge
+
+	Specification by:		Friedel Oschuetz, DLR
+
+	Initial version:		Lucas Kamp, JPL
+
+	Cognizant Programmer:		Friedel Oschuetz
+
+	ate of Specification:		Jan. '94
+
+	Time Estimated for 
+	Routine Development:		1/2 day 
+
+	Estimate of Delivery Date:
+
+	History:			L. Kamp, Jan. '94: 
+						Original
+					F. Oschuetz, March '94: 
+						error action in case that
+						the function name has been 
+						changed
+
+================================================================================
+
+
+

@@ -1,0 +1,19 @@
+PROCESS help=*
+	parm INFILE	type=string
+	parm OUTFILE	type=string
+
+!# annot function="VICAR utilities"
+!# annot keywords=(header)
+END-PROC
+.title
+Combines multiple records of an ASCII file into a single record
+.help
+PURPOSE
+	Headergen is a VICAR program that takes an ascii file of records and 
+	combines them into one record in outfile.
+EXECUTION
+	headergen INFILE OUTFILE
+REVISION HISTORY
+	7-97 RRD Combined modules headergen and headers, rewrote in C,
+		 added pdf file and tstheadergen, and ported to UNIX 
+END-PROC

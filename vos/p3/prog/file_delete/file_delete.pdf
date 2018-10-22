@@ -1,0 +1,30 @@
+process help=*
+PARM INP TYPE=STRING COUNT=1:30
+END-PROC
+.TITLE
+VICAR Program FILE_DELETE
+.HELP
+PURPOSE:
+FILE_DELETE deletes all files supplied as inputs.
+
+EXECUTION:
+
+Example
+        FILE_DELETE (file1,file2,file3)
+
+Output, size and parameter fields are not used.
+
+OPERATION:
+FILE_DELETE opens each input file, then closes it with the close status
+of DELETE.
+
+WRITTEN BY:  Ron Alley, 13 January 1998
+COGNIZANT PROGRAMMER:  Ron Alley
+
+.LEVEL1
+.VARIABLE INP
+Input files
+.LEVEL2
+.VARIABLE INP
+INP specifies the input data sets to be deleted.  Up to thirty are allowed.
+.END

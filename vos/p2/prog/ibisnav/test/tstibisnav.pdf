@@ -1,0 +1,67 @@
+! Test of program IBISNAV
+procedure
+  RefGbl $echo
+  RefGbl $syschar
+body
+  local VgrImgList
+  local GllImgList
+  local CasImgList
+  if ($SysChar(1)="VAX_VMS")
+   let VgrImgList="vgr_img_lst.vms"
+   let GllImgList="gll_img_lst.vms"
+   let CasImgList="cas_img_lst.vms"
+  else
+   let VgrImgList="vgr_img_lst.unx"
+   let GllImgList="gll_img_lst.unx"
+   let CasImgList="cas_img_lst.unx"
+  end-if
+
+!***************** Begin Voyager Test ***********************"
+ IBISNAV table.ibis  PROJECT=VGR-1 TARGET=IO +
+    CKNAME=(NAIF,NAIF,"FARE",NAIF) +
+    SCET=(1979,63,19,22,57,926, +
+	  1979,63,19,24,33,926, +
+	  1979,63,19,26,9,926, +
+	  1979,63,19,27,45,926) +
+    CAMERA=(7,7,7,7)
+
+ LABEL-LIST table.ibis
+ IBIS-LIST table.ibis
+
+ IBISNAV table.ibis FILENAME=&"VgrImgList" PROJECT=VGR-1 TARGET=JUPITER
+ LABEL-LIST table.ibis
+ IBIS-LIST table.ibis
+
+!***************** Begin Gailileo Test ***********************"
+ IBISNAV OUT=table.ibis CKNAME=(FARE,FARE) TARGET=venus PROJECT=GLL +
+         SCET=(1990,44,5,58,16,962, +
+               1990,44,7,58,36,296) CAMERA=(1,1)
+ LABEL-LIST table.ibis
+ IBIS-LIST table.ibis
+
+ IBISNAV table.ibis FILENAME=&"GllImgList" TARGET=earth PROJECT=GLL
+ LABEL-LIST table.ibis
+ IBIS-LIST table.ibis
+
+!****************** Test summation mode image ********************"
+ IBISNAV table.ibis TARGET=Ganymede PROJECT=GLL CAMERA=(2,2,2,2) +
+         SCET=(1996,178,8,47,5,459,  +
+               1996,178,8,46,4,893,  +
+               1996,178,8,46,20,126, +
+               1996,178,8,46,35,293)
+ LABEL-LIST table.ibis
+ IBIS-LIST table.ibis
+
+!***************** Begin Cassini Test ***********************"
+ IBISNAV table.ibis  PROJECT=CASSI TARGET=JUPITER +
+    SCET=(2000,342,16,10,56,162, +
+	  2001,2,1,4,40,72,+
+	  2000,348,4,2,5,505) +
+    CAMERA=(1,22,41)
+ LABEL-LIST table.ibis
+ IBIS-LIST table.ibis
+
+ IBISNAV table.ibis FILENAME=&"CasImgList" PROJECT=CASSI TARGET=JUPITER
+ LABEL-LIST table.ibis
+ IBIS-LIST table.ibis
+end-proc

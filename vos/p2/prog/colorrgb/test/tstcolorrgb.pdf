@@ -1,0 +1,52 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+
+! first run creates file color_calibration.txt:
+colorrgb inp=( +
+ /project/test_work/testdata/p2/colorrgb/pan_s1p1_scrubbed_l_r.mca, +
+ /project/test_work/testdata/p2/colorrgb/pan_s1p1_scrubbed_l_g.mca, +
+ /project/test_work/testdata/p2/colorrgb/pan_s1p1_scrubbed_l_b.mca) +
+ out=(lr.img,lg.img,lb.img) area=10 color=( +
+ 243,8288,154,109,93, 219,5771,139,98,80, 24,18921,204,167,151, +
+ 127,19244,65,41,31, 243,8288,154,109,93, 219,5771,139,98,80)
+
+! second run uses calibration file instead of specifying
+! 'color' parameter:
+colorrgb inp=( +
+ /project/test_work/testdata/p2/colorrgb/pan_s1p1_scrubbed_r_r.mca, +
+ /project/test_work/testdata/p2/colorrgb/pan_s1p1_scrubbed_r_g.mca, +
+ /project/test_work/testdata/p2/colorrgb/pan_s1p1_scrubbed_r_b.mca) +
+ out=(rr.img,rg.img,rb.img)
+
+! output some DNs so that future runs can check results:
+list lr.img linc=200 sinc=2000
+list rr.img linc=200 sinc=2000
+
+! can view interactively, if desired (s/b stereo pair):
+!xvd inp=(lr.img,lg.img,lb.img)
+!xvd inp=(rr.img,rg.img,rb.img)
+
+! with colored glasses, this anaglyph should appear as stero:
+!xvd inp=(lr.img,rg.img,rb.img)
+
+! clean up
+ush rm lr.img
+ush rm lg.img
+ush rm lb.img
+ush rm rr.img
+ush rm rg.img
+ush rm rb.img
+
+! these images are of unknown provenance ... (lwk)
+!colorrgb inp=(lrin.img,lgin.img,lbin.img) +
+! out=(lr.img,lg.img,lb.img) area=8 color=( +
+! 6,261,145,147,162, 97,473,154,109,93, 137,2146,139,98,80, +
+! 342,843,204,167,151, 6,3740,197,174,180, 20,1556,65,41,31)
+!colorrgb inp=(rrin.img,rgin.img,rbin.img) +
+! out=(rr.img,rg.img,rb.img)
+
+let $echo="no"
+end-proc

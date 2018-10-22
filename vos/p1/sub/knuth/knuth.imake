@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY knuth
+
+   To Create the build file give the command:
+
+    $ vimake knuth                     (VMS)
+   or
+    % vimake knuth                     (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE knuth
+
+#define MODULE_LIST knuth.c knuth_var.c knuth_dump.c \
+	knuth_lookup.c xknuth.c xknuth_comp.c
+#define INCLUDE_LIST knuth_int.h
+
+#define FTN_STRING
+#define P1_SUBLIB
+
+#define USES_ANSI_C
+
+/*#define LIB_LOCAL	/* remove on delivery */
+/*#define DEBUG		/* remove on delivery */
+/*************************************************************************/

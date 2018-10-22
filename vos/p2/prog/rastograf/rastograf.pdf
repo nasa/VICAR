@@ -1,0 +1,72 @@
+PROCESS    HELP=*
+PARM INP 	TYPE=(STRING,72)
+PARM OUT 	TYPE=(STRING,72)
+PARM SIZE 	INTEGER DEFAULT=--	COUNT=0:4 
+PARM SL 	INTEGER DEFAULT=1
+PARM SS		INTEGER DEFAULT=1
+PARM NL 	INTEGER DEFAULT=0
+PARM NS 	INTEGER DEFAULT=0
+PARM DIM	INTEGER DEFAULT=2 VALID=(2:3)
+PARM BACK	INTEGER DEFAULT=0
+END-PROC
+.TITLE
+VICAR/IBIS Program RASTOGRAF
+.HELP
+PURPOSE
+     RASTOGRAF is a program used to convert from a line image in raster format
+into an IBIS Graphics I file consisting of line segment information. All pixels 
+not equal to the BACKground value are considered as parts of lines and are 
+included as vectors. For 3-D files, the third value is the DN of the line.
+
+WRITTEN BY:                     Ron Alley, 10 May, 1988
+CURRENT COGNIZANT PROGRAMMER:   Ron Alley
+REVISION:                       Original
+       Made portable for UNIX   AMS (CRI)   2 Jan, 1995
+.LEVEL1
+.VARIABLE INP
+Input raster image
+.VARIABLE OUT
+Output Graphics I file
+.VARIABLE SIZE
+VICAR size field
+.VARIABLE SL
+Starting line
+.VARIABLE SS
+Starting sample
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples
+.VARIABLE DIM
+Dimension of the graphics file
+.VARIABLE BACK
+DN value of background pixels
+.LEVEL2
+.VARIABLE INP
+The input image, which is a standard VICAR raster image. In the image, pixel
+values not equal to the BACKground value are considered lines, and are 
+converted into vectors. 
+.VARIABLE OUT
+Output Graphics I file.
+.VARIABLE SIZE
+The size parameter determines the boundaries in the input
+file from which the copy is to take place.  It is specified
+as  (SL,SS,NL,NS), where
+	SL is the starting line 
+	SS is the starting sample
+	NL is the number of lines to be copied
+	NS is the number of samples (pixels) in each line
+.VARIABLE SL
+Starting line, the first image line to be examined for output vectors.
+.VARIABLE SS
+Starting sample, the leftmost image pixel to be examined for output vectors.
+.VARIABLE NL
+Number of lines to be examined for output vectors.
+.VARIABLE NS
+Number of pixels per line to be examined for output vectors.
+.VARIABLE DIM
+DIM specifies the number of dimensions of the output graphics file, either
+2 or 3.  If DIM=3, the third dimension is used to store the DN of the line.
+.VARIABLE BACK
+BACK specifies the DN of background pixels. All pixels that are not of this
+DN are included as part of an output vector.

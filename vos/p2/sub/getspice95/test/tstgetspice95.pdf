@@ -1,0 +1,67 @@
+!*****************************************************************************
+! tstgetspice.pdf - unit test for getspice95
+!
+! Testers: please read the unit test for information!
+! ftp from the vax into your local directory the test file venus.img
+! located in mipldisk:[mipl.gll]
+! (don't foget to say binary )
+! make sure that the spiceserver is up and running.....
+! If it's not ask Pam Woncik or Sam Le to start it
+! get into VICAR and run tstgetspice.
+! Getspice will ask you for the mode to use. Answer 0 for local access or
+!  1 for remote server access. You can test remote on all platforms but
+!  local only where the spice kernels exist, as on sun-solr.
+!*****************************************************************************
+procedure help=*
+refgbl $echo
+refgbl $syschar
+refgbl $autousage
+body
+let _onfail="continue"
+let $echo="yes"
+let  $autousage="none"
+
+local path1 string
+local path2 string
+
+if ($syschar(1) = "VAX_VMS")
+   let path1="wms_test_work:[testdata.mipl.gll]"
+   let path2="wms_test_work:[testdata.mipl.vgr]"
+else
+   let path1="/project/test_work/testdata/mipl/gll/"
+   let path2="/project/test_work/testdata/mipl/vgr/"
+end-if
+
+!**************
+!testonly
+!**************
+
+
+!  Tests for UNIX only (not VMS).
+
+if ($syschar(1) = "VAX_VMS")
+else
+
+write "Testing CAS getspice95"
+tgetspice95 inp=/project/test_work/testdata/mipl/cas/n1373703343.1 source=FARE project=-82 camera=ISSN
+
+end-if
+
+
+! Tests for UNIX and VMS 
+
+write ""
+write ""
+write ""
+write "Testing VGR getspice95"
+tgetspice95 inp=&"path2"f1636832.fic source=NEAR project=-31 +
+   target=IO camera=ISSN
+
+write ""
+write ""
+write ""
+write "Testing GLL getspice95"
+tgetspice95 inp=&"path1"venus.img source=FARE project=-77
+
+
+end-proc

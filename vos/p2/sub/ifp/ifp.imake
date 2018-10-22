@@ -1,0 +1,11 @@
+/* Imake file for VICAR function ifp */
+
+#define SUBROUTINE ifp
+
+#define MODULE_LIST ifp.f zifp.c
+
+#define P2_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+#define FTNINC_LIST fortport

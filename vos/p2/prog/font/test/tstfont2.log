@@ -1,0 +1,540 @@
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+###=============================================================
+### >>> tstfont2.pdf
+### tsttestfont2.pdf | Version - Mon Feb 23 2015 WLB
+gen ./black100x100.byte nl=100  ns=100  format=byte      l+
+inc=0 sinc=0 ival=0
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+font ./black100x100.byte ./M_50.50_10_0.8_2_1      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 10      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_10_0.8_2_1, gl/M_50.50_10_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_10_0.8_2_1      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 10      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_10_0.8_2_1, gl/y_50.50_10_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_10_0.8_2_1      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 10      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_10_0.8_2_1, gl/My_50.50_10_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_20_0.8_2_1      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_20_0.8_2_1, gl/M_50.50_20_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_20_0.8_2_1      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_20_0.8_2_1, gl/y_50.50_20_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_20_0.8_2_1      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_20_0.8_2_1, gl/My_50.50_20_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_20_0.8_2_2      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 2
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_20_0.8_2_2, gl/M_50.50_20_0.8_2_2)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_20_0.8_2_2      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 2
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_20_0.8_2_2, gl/y_50.50_20_0.8_2_2)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_20_0.8_2_2      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 2
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_20_0.8_2_2, gl/My_50.50_20_0.8_2_2)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_20_0.8_2_3      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 3
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_20_0.8_2_3, gl/M_50.50_20_0.8_2_3)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_20_0.8_2_3      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 3
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_20_0.8_2_3, gl/y_50.50_20_0.8_2_3)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_20_0.8_2_3      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 3
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_20_0.8_2_3, gl/My_50.50_20_0.8_2_3)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_20_0.8_2_4      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_20_0.8_2_4, gl/M_50.50_20_0.8_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_20_0.8_2_4      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_20_0.8_2_4, gl/y_50.50_20_0.8_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_20_0.8_2_4      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.8      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_20_0.8_2_4, gl/My_50.50_20_0.8_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_30_0.8_2_1      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_30_0.8_2_1, gl/M_50.50_30_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_30_0.8_2_1      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_30_0.8_2_1, gl/y_50.50_30_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_30_0.8_2_1      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_30_0.8_2_1, gl/My_50.50_30_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_30_0.8_2_4      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_30_0.8_2_4, gl/M_50.50_30_0.8_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_30_0.8_2_4      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_30_0.8_2_4, gl/y_50.50_30_0.8_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_30_0.8_2_4      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_30_0.8_2_4, gl/My_50.50_30_0.8_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_30_0.8_3_4      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 3      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_30_0.8_3_4, gl/M_50.50_30_0.8_3_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_30_0.8_3_4      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 3      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_30_0.8_3_4, gl/y_50.50_30_0.8_3_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_30_0.8_3_4      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 3      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_30_0.8_3_4, gl/My_50.50_30_0.8_3_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_15_0.8_2_1      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 15      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_15_0.8_2_1, gl/M_50.50_15_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_15_0.8_2_1      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 15      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_15_0.8_2_1, gl/y_50.50_15_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_15_0.8_2_1      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 15      wide =+
+ 0.8      thick +
+= 2      font =+
+ 1
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_15_0.8_2_1, gl/My_50.50_15_0.8_2_1)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_15_0.8_2_4      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 15      wide =+
+ 0.8      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_15_0.8_2_4, gl/M_50.50_15_0.8_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_15_0.8_2_4      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 15      wide =+
+ 0.8      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_15_0.8_2_4, gl/y_50.50_15_0.8_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_15_0.8_2_4      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 15      wide =+
+ 0.8      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_15_0.8_2_4, gl/My_50.50_15_0.8_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_15_0.6_2_4      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 15      wide =+
+ 0.6      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_15_0.6_2_4, gl/M_50.50_15_0.6_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_15_0.6_2_4      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 15      wide =+
+ 0.6      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_15_0.6_2_4, gl/y_50.50_15_0.6_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_15_0.6_2_4      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 15      wide =+
+ 0.6      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_15_0.6_2_4, gl/My_50.50_15_0.6_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_30_0.8_4_3      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 4      font =+
+ 3
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_30_0.8_4_3, gl/M_50.50_30_0.8_4_3)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_30_0.8_4_3      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 4      font =+
+ 3
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_30_0.8_4_3, gl/y_50.50_30_0.8_4_3)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_30_0.8_4_3      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 30      wide =+
+ 0.8      thick +
+= 4      font =+
+ 3
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_30_0.8_4_3, gl/My_50.50_30_0.8_4_3)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./M_50.50_20_0.6_2_4      text =+
+ ("M")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.6      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./M_50.50_20_0.6_2_4, gl/M_50.50_20_0.6_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./y_50.50_20_0.6_2_4      text =+
+ ("y")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.6      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./y_50.50_20_0.6_2_4, gl/y_50.50_20_0.6_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+font ./black100x100.byte ./My_50.50_20_0.6_2_4      text =+
+ ("My")      positi+
+on = (50,50)      tall =+
+ 20      wide =+
+ 0.6      thick +
+= 2      font =+
+ 4
+Beginning VICAR task font
+FONT version Feb 14, 2010 (64-bit) - RJB
+difpic (./My_50.50_20_0.6_2_4, gl/My_50.50_20_0.6_2_4)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+ush rm gl
+end-proc

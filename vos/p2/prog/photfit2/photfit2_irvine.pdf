@@ -1,0 +1,316 @@
+procedure option=selftutor help=*
+
+        parm EXPONENTt		real count=0:1 			def=0.9
+ 	parm MIN_EXPONENTt	real count=0:1 			def=0.0
+ 	parm MAX_EXPONENTt	real count=0:1 			def=1.0
+ 	parm T_EXPONENTt	real count=0:1 			def=0.3
+	parm IRV_EXP1t		real count=0:1 			def=0.118
+	parm MIN_IRV_EXP1t	real count=0:1 			def=0.0
+	parm MAX_IRV_EXP1t	real count=0:1 			def=1.0
+	parm T_IRV_EXP1t	real count=0:1 			def=0.1
+	parm IRV_EXP2t		real count=0:1 			def=0.0039
+	parm MIN_IRV_EXP2t	real count=0:1 			def=0.0
+	parm MAX_IRV_EXP2t	real count=0:1 			def=0.01
+	parm T_IRV_EXP2t	real count=0:1 			def=0.004
+
+        parm EXPONENT		real count=0:1 	def=--
+ 	parm MIN_EXPONENT	real count=0:1 	def=--
+ 	parm MAX_EXPONENT	real count=0:1 	def=--
+        parm T_EXPONENT		real count=0:1 	def=--
+	parm IRV_EXP1		real count=0:1  def=--
+	parm MIN_IRV_EXP1	real count=0:1  def=--
+	parm MAX_IRV_EXP1	real count=0:1  def=--
+	parm T_IRV_EXP1		real count=0:1  def=--
+	parm IRV_EXP2		real count=0:1  def=--
+	parm MIN_IRV_EXP2	real count=0:1  def=--
+	parm MAX_IRV_EXP2	real count=0:1  def=--
+	parm T_IRV_EXP2		real count=0:1  def=--
+
+	PARMSET name=photfit2_irvine_sub help=*
+
+             parm EXPONENT	real count=0:1	def=--
+ 	     parm MIN_EXPONENT	real count=0:1 	def=--
+ 	     parm MAX_EXPONENT	real count=0:1 	def=--
+             parm T_EXPONENT	real count=0:1	def=--
+	     parm IRV_EXP1	real count=0:1	def=--
+	     parm MIN_IRV_EXP1	real count=0:1	def=--
+	     parm MAX_IRV_EXP1	real count=0:1	def=--
+	     parm T_IRV_EXP1	real count=0:1	def=--
+	     parm IRV_EXP2	real count=0:1  def=--
+	     parm MIN_IRV_EXP2	real count=0:1  def=--
+	     parm MAX_IRV_EXP2	real count=0:1  def=--
+	     parm T_IRV_EXP2	real count=0:1  def=--
+
+	end-proc
+
+body
+
+	if (_tutor=1)
+
+	  restore-parm pho_irvine.par
+
+	  if ($count(EXPONENT)=0)
+	 					let EXPONENTt=0.9
+	  else
+	 	let EXPONENTt=&EXPONENT
+	  end-if
+
+	  if ($count(MIN_EXPONENT)=0)
+	 					let MIN_EXPONENTt=0.6
+	  else
+		let MIN_EXPONENTt=&MIN_EXPONENT
+	  end-if
+
+	  if ($count(MAX_EXPONENT)=0)
+	 					let MAX_EXPONENTt=0.6
+	  else
+		let MAX_EXPONENTt=&MAX_EXPONENT
+	  end-if
+
+	  if ($count(T_EXPONENT)=0)
+	 						let T_EXPONENTt=0.3
+	  else
+		let T_EXPONENTt=&T_EXPONENT
+	  end-if
+
+
+	  if ($count(IRV_EXP1)=0)
+	 					let IRV_EXP1t=0.118
+	  else
+	 	let IRV_EXP1t=&IRV_EXP1
+	  end-if
+
+	  if ($count(MIN_IRV_EXP1)=0)
+	 					let MIN_IRV_EXP1t=0.0
+	  else
+	 	let MIN_IRV_EXP1t=&MIN_IRV_EXP1
+	  end-if
+
+	  if ($count(MAX_IRV_EXP1)=0)
+	 					let MAX_IRV_EXP1t=1.0
+	  else
+	 	let MAX_IRV_EXP1t=&MAX_IRV_EXP1
+	  end-if
+
+	  if ($count(T_IRV_EXP1)=0)
+	 					let T_IRV_EXP1t=0.1
+	  else
+	 	let T_IRV_EXP1t=&T_IRV_EXP1
+	  end-if
+
+
+	  if ($count(IRV_EXP2)=0)
+	 					let IRV_EXP2t=0.0039
+	  else
+	 	let IRV_EXP2t=&IRV_EXP2
+	  end-if
+
+	  if ($count(MIN_IRV_EXP2)=0)
+	 					let MIN_IRV_EXP2t=0.0
+	  else
+	 	let MIN_IRV_EXP2t=&MIN_IRV_EXP2
+	  end-if
+
+	  if ($count(MAX_IRV_EXP2)=0)
+	 					let MAX_IRV_EXP2t=1.0
+	  else
+	 	let MAX_IRV_EXP2t=&MAX_IRV_EXP2
+	  end-if
+
+	  if ($count(T_IRV_EXP2)=0)
+	 					let T_IRV_EXP2t=0.004
+	  else
+	 	let T_IRV_EXP2t=&T_IRV_EXP2
+	  end-if
+
+
+	  tutor photfit2_irvine_sub 				+
+		|restore=pho_irvine.par, save=pho_irvine.par|	+
+			EXPONENT=&EXPONENTt			+
+			MIN_EXPONENT=&MIN_EXPONENTt		+
+			MAX_EXPONENT=&MAX_EXPONENTt		+
+			T_EXPONENT=&T_EXPONENTt			+
+			IRV_EXP1=&IRV_EXP1t			+
+			MIN_IRV_EXP1=&MIN_IRV_EXP1t		+
+			MAX_IRV_EXP1=&MAX_IRV_EXP1t		+
+			T_IRV_EXP1=&T_IRV_EXP1t			+
+			IRV_EXP2=&IRV_EXP2t			+
+			MIN_IRV_EXP2=&MIN_IRV_EXP2t		+
+			MAX_IRV_EXP2=&MAX_IRV_EXP2t		+
+			T_IRV_EXP2=&T_IRV_EXP2t			
+
+	   return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs needs "
+	   write " photometric function parameters "
+	   write " for the Irvine function."
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+
+.title
+'PHOTFIT2_IRVINE' sub-menu 
+
+.help
+PURPOSE:
+
+This is the sub-menu associated with Irvine's photometric
+function. This function needs three input parameters and there absolute limits :
+ EXPONENT,     IRV_EXP1,     IRV_EXP2.
+ MIN_EXPONENT, MIN_IRV_EXP1, MIN_IRV_EXP2.
+ MAX_EXPONENT, MAX_IRV_EXP1, MAX_IRV_EXP2.
+ T_EXPONENT,   T_IRV_EXP1,   T_IRV_EXP2.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.page
+
+
+
+MATHEMATICAL BACKGROUND :
+
+bidirectional reflectance [1/str] :
+
+r(i,e,g)=( cos(i)*cos(e) )**EXPONENT) / cos(e) * (1-exp(-cos(i)*IRV_EXP1))/(1-exp(-cos(e)*IRV_EXP2))
+
+
+REFERENCES :
+old VICAR Photometry programs
+
+.page
+PROGRAMMER:
+
+.page
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+
+.level1
+
+.vari EXPONENT
+Minnaert exponent
+
+.vari MIN_EXPONENT
+Minimum of Minnaert exponent
+
+.vari MAX_EXPONENT
+Maximum of Minnaert exponent
+
+.vari T_EXPONENT
+Temperatur of Minnaert exponent
+
+.vari IRV_EXP1
+Irvine's first exponent
+
+.vari MIN_IRV_EXP1
+Minimum of Irvine's first exponent
+
+.vari MAX_IRV_EXP1
+Maximum of Irvine's first exponent
+
+.vari T_IRV_EXP1
+Temperatur of Irvine's first exponent
+
+.vari IRV_EXP2
+Irvine's second exponent
+
+.vari MIN_IRV_EXP2
+Minimum of Irvine's second exponent
+
+.vari MAX_IRV_EXP2
+Maximum of Irvine's second exponent
+
+.vari T_IRV_EXP2
+Temperatur of Irvine's second exponent
+
+
+.level2
+
+.vari EXPONENT
+Exponent - the geometrical constant k of the Minnaert part of the photometric 
+function.
+
+.VARI MIN_EXPONENT
+This parameter gives the absolut lower limit of the Minnaert exponent - the 
+geometrical constant k of the Minnaert photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_EXPONENT
+This parameter gives the absolut upper limit of the Minnaert exponent - the 
+geometrical constant k of the Minnaert photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_EXPONENT
+This parameter gives temperatur for the Exponent - the geometrical constant k
+of the Minnaert photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    EXPONENT_NEW = T_EXPONENT * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_EXPONENT_NEW_* = T_EXPONENT_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.vari IRV_EXP1
+Irvine's first exponent - parameter of the Irvine photometric function.
+
+.vari MIN_IRV_EXP1
+This parameter gives the absolut lower limit of the Irvine's first exponent - 
+parameter of the Irvine photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.vari MAX_IRV_EXP1
+This parameter gives the absolut upper limit of the Irvine's first exponent - 
+parameter of the Irvine photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.vari T_IRV_EXP1
+This parameter gives temperatur for the Irvine's first exponent - parameter 
+of the Irvine photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+   IRV_EXP1_NEW = T_IRV_EXP1 * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_IRV_EXP1_NEW_* = T_IRV_EXP1_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.vari IRV_EXP2
+Irvine's second exponent - parameter of the Irvine photometric function.
+
+.vari MIN_IRV_EXP2
+This parameter gives the absolut lower limit of the Irvine's second exponent - 
+parameter of the Irvine photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.vari MAX_IRV_EXP2
+This parameter gives the absolut upper limit of the Irvine's second exponent - 
+parameter of the Irvine photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.vari T_IRV_EXP2
+This parameter gives temperatur for the Irvine's second exponent - parameter 
+of the Irvine photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    IRV_EXP2_NEW = T_IRV_EXP2 * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_IRV_EXP2_NEW_* = T_IRV_EXP2_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.end
+

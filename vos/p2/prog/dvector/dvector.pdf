@@ -1,0 +1,122 @@
+process help=*
+PARM INP          TYPE=STRING       COUNT=(2:101)
+PARM OUT          TYPE=STRING       COUNT=1
+PARM EXAG TYPE=REAL DEFAULT=1.0
+PARM DN   TYPE=INTEGER DEFAULT=255
+END-PROC
+
+.TITLE
+VICAR2 program DVECTOR
+
+.HELP
+    dvector can draw any number of vectors on a picture of any size.
+Vectors are drawn from the left tiepoint location towards the right
+tiepoint location. The left coordinate will have a 3 by 3 pixel cross
+at that location. The right coordinate will be at the vector tip IF
+EXAG is defaulted to 1.0. Otherwise the vector will fall short or
+cross over the right point.
+    Vectors come from the second (and beyond) input files in mark
+format. They are essentially tiepoints in the order:
+left_line, left_sample, right_line, right_sample.
+    Internal image storage is as integer*2 so real images will
+be rounded.
+    Dvector uses a storage buffer of 500000 integers. It will process
+all the vectors for each image buffer, making as many passes as
+required to process the entire input taken 500000 pixels at a time.
+    Up to 100 mark files can be input to DVECTOR. An X will be drawn
+at the base of the vector for only the first mark files vectors.
+All mark files must be identical in size and number of tiepoints.
+
+If DN is negative:
+1. Vectors are drawn on an image of zero dn.
+2. Vectors are written from 1 to 255 dn representing angles from 0
+   to 360 degrees.
+3. No X is drawn at the vector base.
+
+
+.page
+Example:
+       dvector in,points out parameters
+  where: IN is an input image to superimpose vectors upon.
+         POINTS is a MARK file containing the vectors to draw.
+          Mark files contain 512 byte records of real*4 data.
+          Coordinates are stored in groups of 4 words in the
+          order left_line,left_sample,right_line,right_sample...
+         OUT is a copy of IN with superimposed vectors.
+
+EXAMPLE:
+  (one mark file)
+      tracker a,c t
+      dvector a,t b
+  (two mark files)
+      tracker2 c,d,t tt
+      dvector a,t,tt b
+
+HISTORY
+
+Written By: J Lorre			    1 AUGUST 1978
+Cognizant Programmer: J Lorre
+REVISIONS:
+03 Oct 94 CRI Made portable for UNIX ... Jim Turner (CRI)
+29 Aug 01 GMY Fixed bug to allow use of all 500,000 bytes of buffer allocated.
+
+.LEVEL1
+.VARI INP
+Two inputs minimum.
+#1 is the left image
+#2 is the MARK file.
+#3-#101 optional
+
+.VARI OUT
+Image with superimposed
+vectors.
+
+.VARIABLE EXAG
+Exag is a real number 
+which exaggerates the 
+vector length.
+Default is exag=1.0
+
+.VARIABLE DN
+DN is an integer which 
+sets the DN intensity 
+value of the
+vectors. 
+Default is n=255
+(see special case if
+dn is negative)
+
+.LEVEL2
+
+.VARI INP
+There are two input files minimum.
+File#1: This is the left or first input image given to
+        program TRACKER. Vectors will be grawn upon this
+        image with the base at the correct location.
+File#2: This is the MARK file written by program TRACKER.
+        It is 'REAL' format with 512 byte records containing
+        pairs of tiepoints in the order:
+        left_line,left_samp,right_line,right_samp.
+Files 3 to 101 are optional mark files forming a chain vector end to
+        end.  
+NOTE: all mark files must be the same size and length.
+
+.VARI OUT
+This is the output image. It is a copy of input #1 (in that 
+format) with superimposed vectors contained in the MARK file.
+Vectors are drawn from left_line,left_samp  to
+right_line,right_samp.
+
+.VARIABLE EXAG
+Exag is a real number which exaggerates the vector length.
+Default is exag=1.0
+
+.VARIABLE DN
+DN is an integer which sets the DN intensity value of the
+vectors. Default is n=255
+If DN is negative then:
+1. Vectors are drawn on an image of zero dn.
+2. Vectors are written from 1 to 255 dn representing angles from 0
+   to 360 degrees.
+3. No X is drawn at the vector base.
+

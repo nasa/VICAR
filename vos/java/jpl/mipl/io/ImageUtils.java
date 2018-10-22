@@ -86,7 +86,7 @@ public class ImageUtils {
 	BufferedImage bufferedImage = null;
 	
 	boolean debug = false;
-	// boolean debug = true; // false;
+	 // boolean debug = true; // false;
 	boolean useRawReader = false; // test of RawImageReader
 	String rawReaderName = "raw";
 	
@@ -401,6 +401,15 @@ public class ImageUtils {
 	
 	public IIOMetadata getIIOMetadata() {
 		return this.iioImage.getMetadata() ;
+	}
+	
+	/**
+	 * Sets the parent location of the product to be loaded, useful
+	 * for remote detached label'd products mainly
+	 * @param parent Location of parent directory (local or remote)
+	 */
+	public void setFilePath(String parent) {
+	    this.filePath = parent;
 	}
 	
 	
@@ -799,7 +808,9 @@ ImageReadParam imageReadParam ;
 	 System.out.println("ImageUtils.fullRead open: could not open file:" + fileName);
 	 return null;	 
  }
- 
+ if (debug) {
+		System.out.println("ImageUtils.fullRead open: inputImageReadParam "+inputImageReadParam);
+ }
  if (inputImageReadParam != null) {
 	 if (debug) {
 		System.out.println("ImageUtils.fullRead open: inputImageReadParam "+inputImageReadParam);
@@ -877,7 +888,7 @@ public IIOImage fullRead(ImageInputStream iis)  throws IOException  {
 	
 	 RenderedImage image = null;
 	 BufferedImage bufferedImage = null;
-	 IIOImage iioImage = null;
+	 // IIOImage iioImage = null; // this is a global. we need to keep it so other methods will work
 	 InputStream is = null;
 	 
 	 
@@ -891,6 +902,7 @@ public IIOImage fullRead(ImageInputStream iis)  throws IOException  {
 	
 		 System.out.println(" getAsRenderedImage "+getAsRenderedImage );
 		 System.out.println(" useMarsviewerCallback  "+useMarsviewerCallback);
+		 System.out.println(" inputImageReadParam "+inputImageReadParam);
 		 System.out.println("*************************************************************");
 	 }
 	 
@@ -971,16 +983,27 @@ if (debug) {
      	}
 
          if (reader == null) {
-             // System.err.println("ImageUtils.fullRead Unable to find a reader!");
+        	 if (debug) {
+        		 System.err.println("ImageUtils.fullRead Unable to find a reader!");
+        	 }
           // System.exit(1); // 1 is error return
              return null;
          }
          
         if (debug) System.out.println("readerFormat "+readerFormat+"   readerClassName "+readerClassName+"  debug = "+debug);
- 		if (reader instanceof PDSImageReader || readerFormat == "pds") {	
+ 		if (reader instanceof PDSImageReader ) {	
  			if (debug) System.out.println("reader instanceof PDSImageReader" );
- 			((PDSImageReader) reader).setDebug(debug);
+ 			/***
+ 			 *  This isn't allowed. It must be cast
+ 			PDSImageReader pdsReader = null;
+ 			pdsReader = reader;
+ 			pdsReader.setDebug(debug);
+ 			***/
+ 		} else if (readerFormat == "pds") {	
+ 			if (debug) System.out.println("readerFormat == pds" );
+ 			// ((PDSImageReader) reader).setDebug(debug);
  		} 
+ 		
  		/** pds4table **
  		else if (reader instanceof PDS4TableReader ) {	
 

@@ -1,0 +1,83 @@
+1 MIPS SUBROUTINE mpLabelWrite
+
+PURPOSE
+
+The function mpLabelWrite writes map projection property 
+and history labels of VICAR images using the information 
+stored in the map projection data object.
+
+2 OPERATION
+
+This function takes as input a VICAR file unit number and 
+a pointer to the map projection data object and writes 
+appropriate values to the MAP property or history label
+of the VICAR image file.
+
+When a map projection value is not present in the data object, 
+the associated value in the label is not written. 
+The description of the map projection (MAP_PROJECTION_DESC) 
+is predefined text which is written to the label based on the 
+map projection type stored in the data object. The label values 
+MAXIMUM_LATITUDE, MAXIMUM_LONGITUDE, MINIMUM_LATITUDE, 
+MINIMUM_LONGITUDE are calculated and written when they are 
+appropriate for the image (e.g. if the pole is visible in the 
+image, these values will not be calculated.)
+
+CALLING SEQUENCE
+
+from C:		status = mpLabelWrite( MP mp, int file_unit,
+					char label_type );
+from FORTRAN:	call mp_label_write( mp, file_unit, label_type )
+
+Necessary include files from calling routine or program: 
+		mp_routines.h or mp_for_defs.fin
+
+
+INPUT 
+
+mp		(MP type)
+
+A pointer to the MP data structure as returned by mpInit.
+In FORTRAN, this variable is of type REAL*8.  MP type is defined
+in include file mp_routines.h.
+
+file_unit	(integer)
+
+VICAR file unit number as returned by x/zvunit().
+
+label_type	(character array)
+
+Specifies whether the label is written as a VICAR history or property
+label.  Valid values are "HISTORY" and "PROPERTY".
+
+
+RETURN
+
+status 		(integer)
+
+Status flag for the operation of the routine. 
+Zero (0) signifies success. Negative one (-1) 
+signifies failure.
+
+3 ENVIRONMENT
+
+Software platforms:	VICAR 11.0 (VMS/UNIX)
+Hardware platforms:	This routine has been tested on the
+			DEC Alpha, DEC VAX-VMS, Sun 
+			Sparcstation running SunOS and Solaris,
+			Silicon Graphics (SGI), and HP 700.
+			No particular hardware requirements.
+3 BACKGROUND
+
+Author:			Lucas Kamp (lwk059@ipl.jpl.nasa.gov)
+Cognizant Engineer:	Justin McNeill (jfm059@ipl.jpl.nasa.gov)
+Date written:		October 1993
+Revision history:	(see release_notes.txt in mp_routines.com)
+Background and References:	
+
+1. Map Projection Software Set Software Specification Document,
+	JPL, April 28, 1993;
+2. "Conformal Mapping of the Triaxial Ellipsoid," Survey Review,
+	vol. 28, July 1985.
+3. MIPS Map Projection Software Users' Guide, D-11810, version 1.0,
+	May 1994.

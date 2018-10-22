@@ -1,0 +1,2495 @@
+##############################################################################
+		SPECIFICATIONS FOR IMAGING WIDGET
+##############################################################################
+==============================================================================
+		Inheritance Hierarchy and Functions
+==============================================================================
+
+BasicImage : XmPrimitive
+	basic display, dithering
+	view, image, tile size
+	zoom, pan, stretch
+	bw, color BYTE data
+	handling of non-byte data
+	maintains colormap
+
+Image : BasicImage
+	overlay support (instantiates, not inherits, ImageOverlay)
+	optional scrollbars
+	mouse-based panning (off an action)
+	cursor planting (i.e. sw draw cursor in image) (action-based)
+
+ImageOverlay : core
+	placeholder for hardware overlay window
+	completely controlled by Image
+	no public interface
+
+All of this is subject to change in the next revision, but the changes
+should be minor and generally backward-compatible.
+
+##############################################################################
+		BasicImage
+##############################################################################
+==============================================================================
+		BasicImage Resources
+==============================================================================
+------------------------------------------------------------------------------
+		BasicImage Resources - General Info
+------------------------------------------------------------------------------
+
+There are three basic display modes: color (3-band), black & white (1-band
+gray scale), and pseudocolor (1-band with a color lookup table).  It is
+usually desirable to display data in these three modes in different ways
+(based on the hardware capabilities), and to allow the user to specify the
+preferred display options for each mode separately.  This is supported by
+having four resources for each of the four display options - colormapPolicy,
+stretchPolicy, ditherMode, and visualType.
+
+These four resources represent the current state of the display, and the
+saved states for each of the four display modes.  For example,
+XvicNcolormapPolicy contains the current colormap policy regardless of what
+display mode is being used.  XvicNcolorColormapPolicy, XvicNbwColormapPolicy,
+and XvicNpseudoColormapPolicy contain the "saved" state of the colormap
+policy for each of the three modes.
+
+When the display mode is switched, the current settings are saved into the
+appropriate set of resources, and another set is copied into current.  For
+example, if the mode were switched from bw to color, first colormapPolicy
+would be saved in bwColormapPolicy, and then colorColormapPolicy would be
+copied into colormapPolicy.  Same with stretchPolicy, ditherMode, and
+visualType.  This allows the user to specify in a resource file what settings
+to use for each display mode separately, and yet still allow for easy changes
+via the current resource set.  Of course, the user may override a setting by
+setting either the current resource, or the saved resource corresponding to the
+display mode, at any time.
+
+Essentially, the saved set of resources is indistinguishable from the current
+set, as long as the display mode matches.  Changes in either one affect the
+other, and the current display.  If both the current and the active saved
+resources are changed simultaneously (in one SetValues call), the current
+resource setting will take precedence.  When the display mode changes, a
+different saved set becomes current.
+
+At widget initialization time, if values are explicitly set for the current
+resources, they are used in lieu of the saved values, in order to provide
+backward compatibility.  These values are then copied into the saved set.
+If values are not explicitly set in the current resources, then the appropriate
+saved resources are used instead.
+
+------------------------------------------------------------------------------
+		BasicImage Resources - Modes and Policies
+------------------------------------------------------------------------------
+
+XvicNimageMode		XvicCImageMode	unsigned char	XvicCOLOR	CSG
+	XvicCOLOR, XvicBW
+Sets the mode of the original image data.  XvicCOLOR means 3-band color data
+will be supplied.  XvicBW means that 1-band color data will be supplied (even
+if that data is displayed with pseudocolor).  This resource, along with
+XvicNlutType and XvicNlut16Type, determine the "display mode" described in
+General Info above.
+
+XvicNdataType		XvicCDataType	unsigned char	XvicBYTE	CSG
+	XvicBYTE, XvicHALF, XvicUHALF, XvicFULL, XvicUFULL, XvicREAL, XvicDOUBLE
+Specifies the data type of the image data.  The valid values correspond to
+C typedef's of the same name.  All data supplied via XvicImageWrite must be
+of this type.  Some performance degradation will occur for any data type other
+than XvicBYTE, (or even with XvicBYTE if the 16-bit LUT is used).  For
+any data type other than XvicBYTE, the scaling factors XvicNrawDataMin and
+XvicNrawDataMax must be used (they may be used for BYTE as well).  See the
+section on "Data Type Transformation" below for details on the algorithm used
+to convert non-byte data to bytes for display.  Changing the value of
+XvicNdataType will reset XvicNrawDataMin and XvicNrawDataMax to their default
+values, unless they are set in the same Xt(Va)SetValues call.  These data
+types are defined in terms of their sizes, *not* any particular C data type,
+so the Xvic* typedefs should be used.  The size of a pixel may be determined
+via sizeof(Xvic*) where Xvic* is one of the C typedefs.  The C data type may
+vary per platform, but all current implementations use the sample types
+described below.  Complex data is not supported.  The names HALF and FULL are
+used for historical reasons.
+
+Resource value	C typedef	Description		Sample C type
+--------------	---------	-----------		-------------
+XvicBYTE	XvicByte	8-bit unsigned integer	unsigned char
+XvicHALF	XvicHalf	16-bit signed integer	short int
+XvicUHALF	XvicUHalf	16-bit unsigned integer	unsigned short int
+XvicFULL	XvicFull	32-bit signed integer	int
+XvicUFULL	XvicUFull	32-bit unsigned integer	unsigned int
+XvicREAL	XvicReal	32-bit floating point	float
+XvicDOUBLE	XvicDouble	64-bit floating point	double
+
+XvicNditherMode		XvicCDitherMode	unsigned char	dynamic		CSG
+	XvicNONE, XvicORDERED, XvicKAGELS
+Specifies how to perform dithering for the current mode.  Note that dithering
+is only performed on 8-bit displays; with a 24-bit visual type (colormapPolicy
+of FULL_COLOR), ditherMode is ignored.  XvicNONE turns off dithering altogether.
+In color mode, this forces a straight 3/3/2 or 2/3/2 RGB display (3 or 2 bits
+in the lookup table are used for red, 3 for green, and 2 for blue).
+XvicORDERED uses a simple 4x4 ordered dither to reduce the number of colormap
+cells needed to display the image (the 3/3/2 or 2/3/2 RGB colormap is used for
+color).  XvicKAGELS uses a dither algorithm developed by Dave Kagels of
+JPL/DIAL.  This algorithm dithers green independently and combines red and
+blue in a separate dither pattern.  The green and red-blue pixels are
+arranged in a checkerboard pattern.  This mode is not generally recommended
+for BW images (since there is no grayscale), but can be used for colormap
+compatibility with other color images.  XvicKAGELS can only be used when
+colormapPolicy is DITHER or ALLOC.  XvicNONE and XvicORDERED can be used with
+any colormapPolicy in bw mode or FULL or HALF in color mode.  Pseudocolor
+with stretchPolicy set to XvicUSE_HW follows the rules of BW above, while
+stretchPolicy of XvicUSE_SW follows the rules of color above.  There is no
+specific default value; it is derived from whichever display mode is current.
+
+XvicNbwDither		XvicCDitherMode	unsigned char	XvicNONE	CSG
+XvicNcolorDither	XvicCDitherMode	unsigned char	XvicORDERED	CSG
+XvicNpseudoDither	XvicCDitherMode	unsigned char	XvicORDERED	CSG
+	XvicNONE, XvicORDERED, XvicKAGELS
+Saved settings for XvicNditherMode for each display mode.  See "General Info"
+above for details.  These resources should be named "bwDitherMode",
+"colorDitherMode", etc. but the "Mode" is absent for historical reasons.
+
+XvicNlutType		XvicCLutType	 unsigned char	XvicSTRETCH	CSG
+	XvicSTRETCH, XvicRAW, XvicPSEUDO, XvicPSEUDO_ONLY
+Specifies how the 8-bit lookup tables (LUTs) are to be used.  XvicSTRETCH
+causes the currently defined stretch tables to be used.  XvicRAW causes the
+data to be displayed straight, without a lookup table (the same effect as
+setting the lookup tables to straight ramps).  XvicPSEUDO causes both the b&w
+stretch and the pseudocolor lookup tables to be used, and is valid only when
+imageMode is set to XvicBW.  The data is first sent through the stretch, and
+then through the pseudocolor table.  XvicPSEUDO_ONLY uses only the pseudocolor
+table; the stretch is not used (it is treated as a ramp).  Both XvicPSEUDO and
+XvicPSEUDO_ONLY set a "pseudocolor mode", which change the current settings
+for the display options (see General Info above for details).  The 8-bit
+pseudocolor modes may not be used if XvicNlut16Type sets a pseudocolor mode,
+as the data appears to be color.  In this case, the 8-bit color LUTs are used
+on the pseudocolored data, if XvicNlutType is set to XvicSTRETCH.
+
+XvicNlut16Type		XvicCLut16Type	 unsigned char	XvicRAW		CSG
+	XvicSTRETCH, XvicRAW, XvicPSEUDO, XvicPSEUDO_ONLY
+Specifies how the 16-bit lookup tables (LUTs) are to be used.  XvicSTRETCH
+causes the currently defined stretch tables to be used.  XvicRAW causes the
+data to bypass the 16-bit LUTs (the same effect as setting the lookup tables
+to straight ramps).  In the case of byte data, it also means to skip the entire
+linear scaling operation.  XvicPSEUDO causes both the b&w stretch and the
+pseudocolor lookup tables to be used, and is valid only when imageMode is set
+to XvicBW.  The data is first sent through the stretch, and then through the
+pseudocolor table.  XvicPSEUDO_ONLY uses only the pseudocolor table; the
+stretch is not used (it is treated as a ramp).  Both XvicPSEUDO and
+XvicPSEUDO_ONLY set a "pseudocolor mode", which change the current settings
+for the display options (see General Info above for details).  If pseudocolor
+mode is set using the 16-bit LUTs, pseudocolor may not be used for XvicNlutType
+(the data already appears to be color when it gets to the 8-bit LUTs).
+XvicNlutType will be reset to RAW or STRETCH in this case.  See the section
+on "Data Type Transformation" below for details on the algorithm used to
+convert non-byte data to bytes for display.
+
+XvicNstretchPolicy	XvicCStretchPolicy unsigned char dynamic	CSG
+	XvicUSE_HW, XvicUSE_SW
+Specifies whether stretches are to be performed using the hardware colormap
+or in software for the current display mode.  Hardware stretches are much
+faster, but can cause colormap flashing if there are not enough hardware
+colormaps available.  If a hardware stretch is not available (such as a
+TrueColor-only display), then software is always used.  A stretchPolicy of
+XvicUSE_HW is only valid on a 24-bit DirectColor display, or on an 8-bit
+display when imageMode is BW and colormapPolicy is FULL, HALF, or ALLOC, and
+the colormap is changeable.  If XvicUSE_HW is specified when only XvicUSE_SW
+is valid, the resource is quietly reset to XvicUSE_SW and no error results.
+A BW image with lutType or lut16Type set to PSEUDO or PSEUDO_ONLY will be
+treated as a color image for purposes of display in most cases when
+stretchPolicy is USE_SW (see colormapPolicy for more details).  There is no
+specific default value; it is derived from whichever display mode is current.
+
+XvicNbwStretchPolicy	XvicCStretchPolicy unsigned char	XvicHW	CSG
+XvicNcolorStretchPolicy	XvicCStretchPolicy unsigned char	XvicSW	CSG
+XvicNpseudoStretchPolicy XvicCStretchPolicy unsigned char	XvicSW	CSG
+	XvicUSE_HW, XvicUSE_SW
+Saved settings for XvicNstretchPolicy for each display mode.  See "General
+Info" above for details.
+
+XvicNcolormapPolicy	XvicCColormapPolicy unsigned char dynamic	CSG
+	XvicFULL, XvicHALF, XvicDITHER, XvicALLOC, XvicFULL_COLOR
+Specifies how the colormap is managed for an 8-bit visual type for the current
+display mode.  8-bit visuals are normally used on 8-bit displays, or when
+imageMode is BW.  This resource is ignored (and quietly set to XvicFULL_COLOR)
+when a 24-bit visual is in use (see XvicNvisualType).  Colormap selection is
+an important topic.  Since each window potentially has its own colormap, a bad
+choice of colormap can create undesirable "color flashing" on the display as
+the cursor is moved between windows.  To reduce this, a (mostly) standardized
+set of colormaps are used.  If two instances of the widget use the same
+settings for the colormap-related resources (colormapPolicy, imageMode,
+ditherMode, lutType, stretchPolicy, and *Levels), then the same colormap
+structure will be used as well, and there will be no flashing between the
+windows (except in some cases with a colormapPolicy of XvicALLOC).  The setting
+of colormapPolicy sets some constraints on the values of other resources; these
+are defined below.  The setting of colormapPolicy takes precedence over
+everything except visualType, so any values that conflict with it are quitely
+changed so they don't conflict.  Also, colormapPolicy means slightly different
+things for BW vs. COLOR images, so they are separated out below.  "Pseudocolor
+mode" below means that lutType or lut16Type is set to PSEUDO or PSEUDO_ONLY.
+In all cases, if stretchPolicy is USE_HW in pseudocolor mode, the data is
+displayed using the BW colormap rules.  If it is USE_SW, the pseudocolor data
+is displayed like color data (after going through the pseudocolor LUT), using
+the COLOR rules.  There is no specific default value for colormapPolicy; it is
+derived from whichever display mode is current.
+
+FULL, BW:	Private colormap, all entries are used for a gray scale ramp.
+	If stretchPolicy is USE_HW, the stretched gray LUT or the pseudocolor
+	LUT are put in the colormap instead of the gray ramp.  Graphics
+	overlay colors are chosen from the colormap.
+	ditherMode:	NONE or ORDERED (ORDERED forces USE_SW).
+	stretchPolicy:	USE_HW or USE_SW
+
+FULL, COLOR:	Private colormap, all entries are used for a 3/3/2 RGB
+	pattern, with 3 bits each of red and green ramps, and 2 bits of blue
+	ramp.  Graphics overlay colors are treated like any other colors.
+	ditherMode:	NONE or ORDERED
+	stretchPolicy:	USE_SW
+
+HALF, BW:	Private colormap, like FULL,BW except only the uppermost 128
+	entries are used in the colormap.  The low-order bit is truncated if
+	ditherMode is NONE.  If stretchPolicy is USE_HW, the stretched gray LUT
+	or the pseudocolor LUT are decimated and put in the colormap instead
+	of the gray ramp (only every other entry is used).  The bottom half of
+	the colormap is copied from the system colormap, and graphics overlay
+	colors are allocated from the system colormap as long as they are in
+	the bottom half, otherwise they are allocated from the lower 128
+	entries of the private colormap.
+	ditherMode:	NONE or ORDERED (ORDERED forces USE_SW).
+	stretchPolicy:	USE_HW or USE_SW
+
+HALF, COLOR:	Private colormap, like FULL,COLOR except only the uppermost
+	128 entries are used in the colormap, in a 2/3/2 RGB pattern.  Graphics
+	overlay colors are treated like any other colors.
+	ditherMode:	NONE or ORDERED
+	stretchPolicy:	USE_SW
+
+DITHER, BW:	Private colormap with the Kagels dithering pattern.  The
+	uppermost greenLevels cells contain a green ramp, the next lowest
+	redLevels * blueLevels cells contain a red/blue mixture, and the
+	next lowest grayLevels cells contain a gray scale ramp.  Any cells
+	left over at the bottom of the colormap are copied from the system
+	colormap.  If ditherMode is NONE or ORDERED the gray scale ramp is
+	used, while if it is KAGELS the red/blue and green ramps are used.
+	KAGELS dithering should not generally be used for BW images, but can
+	be if needed for colormap matching.  Graphics overlay colors are
+	dithered using KAGELS.  Since only SW stretches are allowed, all
+	pseudocolor is displayed like color mode.
+	ditherMode:	NONE, ORDERED, or KAGELS
+	stretchPolicy:	USE_SW
+
+DITHER, COLOR:	Private colormap with the Kagels dithering pattern.  The
+	uppermost greenLevels cells contain a green ramp, the next lowest
+	redLevels * blueLevels cells contain a red/blue mixture, and the
+	next lowest grayLevels cells contain a gray scale ramp.  Any cells
+	left over at the bottom of the colormap are copied from the system
+	colormap.  Graphics overlay colors are treated like any other colors.
+	ditherMode:	KAGELS
+	stretchPolicy:	USE_SW
+
+ALLOC, BW:	Color cells are allocated from the system colormap.  If
+	ditherMode is NONE or ORDERED, a gray scale ramp of grayLevels cells is
+	allocated. If ditherMode is KAGELS, a Kagels dither pattern of
+	greenLevels + (redLevels * blueLevels) cells is allocated.
+	A warning is issued if not enough colors are available, and the number
+	of levels requested is reduced until it fits in the colormap.  If
+	stretchPolicy is USE_HW, the cells are allocated private, while for
+	USE_SW they are allocated shared.  For KAGELS or ORDERED dithering,
+	stretchPolicy must be USE_SW.  Graphics overlay colors are allocated
+	from the system as well, unless ditherMode is KAGELS, in which case
+	they are dithered.
+	ditherMode:	NONE, ORDERED, KAGELS (all but NONE force USE_SW)
+	stretchPolicy:	USE_HW or USE_SW
+
+ALLOC, COLOR:	Color cells are allocated from the system colormap.  A
+	Kagels dither pattern of greenLevels + (redLevels * blueLevels) cells
+	is allocated.  A warning is issued if not enough colors are available,
+	and the number of levels requested is reduced until it fits in the
+	colormap.  Graphics overlay colors are treated like any other colors.
+	This mode is not recommended; use DITHER,COLOR instead.
+	ditherMode:	KAGELS
+	stretchPolicy	USE_SW
+
+FULL_COLOR:	This value should never be set by application code.  If the
+	visual type in use is a 24-bit visual (see XvicNvisualType), then this
+	resource is internally set to XvicFULL_COLOR.  You may retrieve
+	colormapPolicy and check for this value to see if a full 24-bit
+	display is in use, but you should always set colormapPolicy to one of
+	the other four values, because you never know when you might be
+	displaying on an 8-bit screen.
+	ditherMode:	NONE
+	stretchPolicy:	USE_HW or USE_SW (USE_HW only with DirectColor visual)
+
+XvicNbwColormapPolicy	XvicCColormapPolicy	unsigned char	XvicHALF CSG
+XvicNcolorColormapPolicy XvicCColormapPolicy	unsigned char	XvicHALF CSG
+XvicNpseudoColormapPolicy XvicCColormapPolicy	unsigned char	XvicHALF CSG
+	XvicFULL, XvicHALF, XvicDITHER, XvicALLOC, XvicFULL_COLOR
+Saved settings for XvicNcolormapPolicy for each display mode.  See "General
+Info" above for details.
+
+XvicNvisualType		XvicCVisualType	unsigned char	XvicUSE_DEFAULT	CSG
+	XvicUSE_DEFAULT, XvicUSE_8BIT, XvicUSE_24BIT
+Suggests what kind of visual to use for the display.  If set to XvicUSE_DEFAULT,
+then the widget will attempt to use a 24-bit visual for color images and
+an 8-bit visual for BW and pseudocolor images.  Setting this resource to
+USE_8BIT or USE_24BIT causes the widget to try to use that kind of visual,
+regardless of what the imageMode is.  However, in all cases, if the requested
+visual is not present, and another kind is (say USE_24BIT is specified on an
+8-bit-only screen), then the available visual is used instead with no error
+message.  Changing the value of this resource could change XvicNcolormapPolicy
+to or away from XvicFULL_COLOR, with possible corresponding effects on other
+resources.
+
+XvicNbwVisualType	XvicCVisualType	unsigned char	XvicUSE_DEFAULT	CSG
+XvicNcolorVisualType	XvicCVisualType	unsigned char	XvicUSE_DEFAULT	CSG
+XvicNpseudoVisualType	XvicCVisualType	unsigned char	XvicUSE_DEFAULT	CSG
+	XvicUSE_DEFAULT, XvicUSE_8BIT, XvicUSE_24BIT
+Saved settings for XvicNvisualType for each display mode.  See "General
+Info" above for details.
+
+XvicNenableDirectColor	XvicCEnableDirectColor Boolean	True		CSG
+If True, then the DirectColor visual type (24-bits with hardware colormap)
+is preferred for 24-bit color.  If False, then DirectColor is not used, and
+TrueColor (no hardware colormap) is used instead.  This setting is useful
+on e.g. Sun UltraSPARC workstations, where there is only one colormap total,
+so using DirectColor takes away the default (root) colormap, producing
+undesirable and annoying colormap flashing.  In TrueColor mode, however,
+hardware stretches are not available (stretchPolicy is quietly reset to
+USE_SW if TrueColor is used).  Note that setting this resource does not ensure
+TrueColor will be used, only that it will be used if a 24-bit display is
+needed.  See also visualType, which can force the widget into 24-bit mode.
+
+XvicNworkProcPolicy	XvicCWorkProcPolicy unsigned char XvicALL	CSG
+	XvicNONE, XvicREAD, XvicALL
+Specifies the policy for using a work procedure for handling expose events.
+A work procedure is a function that is called whenever there are no events
+to process.  It is designed for functions that take a large amount of time,
+so the user interface does not hang.  Expose events may be handled inside
+a work proc by the widget, which allows the interface to be active while the
+image is being repainted.  If the user does something (pan, etc.), then the
+action is immediately processed and the repaints are deferred until after
+the action is handled.  The value XvicNONE means that the work proc is
+never used, and all exposes are handled in-line.  This option should be
+avoided.  The value XvicREAD means that normal exposes are handled in-line,
+but exposes that require an application callback (exposeCallback) are handled
+in a work proc.  The value XvicALL means that all exposes are handled
+in the work proc.  XvicALL allows the best overall performance, but the
+way the screen is updated during pans could be objectionable to some people.
+
+XvicNdataSavePolicy	XvicCDataSavePolicy unsigned char XvicRAW	CSG
+	XvicNONE, XvicRAW, XvicXIMAGE, XvicPIXMAP
+Specifies at what level the data needed to handle expose should be saved.
+The widget normally maintains as much data as possible internally (constrained
+by memory limits).  The level of data chosen affects the performance of
+various features.  XvicNONE means that the widget does not save any data,
+so the exposeCallback is always called.  This option is not recommended.
+If XvicNONE is used, then XvicImageWrite() must always be called with
+full tiles; partial tiles are not allowed.  XvicRAW means that the
+original data from the application is saved.  This provides the best
+performance for changing zooms or software stretches, but causes pans to
+take longer.  At highly subsampled zooms, much data may be saved that is
+not needed, since the data is saved before the subsampling step.  XvicXIMAGE
+saves the XImage structures right before the data is sent to the X server.
+The data has already been zoomed, software stretched, and dithered.  This
+provides better pan performance, but significantly slows the changing of
+zoom or software stretch, as the raw data must be obtained from the
+application again.  The memory requirements are much less for highly
+subsampled zooms, however, since the data is saved after subsampling
+(conversely, memory requirements are of course higher for replication zooms).
+XvicPIXMAP saves the Pixmap structure on the X server.  This provides the
+absolute best pan performance, especially when the X connection is over a
+network.  However, many X servers do not release pixmap memory back to the
+system, so the memory taken by the X server cannot be reused until the server
+is re-started.  It can be used for more pixmaps, but not for anything else.
+Also, some X terminals are memory-limited, and may not have enough memory for
+the pixmaps.  Pixmap memory is counted in the maximumMemory limit.
+
+XvicNconstrainPan	XvicCConstrainPan unsigned char dynamic		CSG
+	XvicNONE, XvicX_ONLY, XvicY_ONLY, XvicBOTH
+Specifies whether or not the image is constrained to fit in the view during
+a pan operation.  Constraining the pan means the value must be between 0 and
+the (zoomed) image size minus the view size.  Thus, if the view size is
+smaller than the (zoomed) image size, there will never be empty space around
+the image.  If the view size is larger than the (zoomed) image size, then
+the pan value is forced to 0 and there is extra space at the bottom or right.
+An unconstrained pan may shift the image so there is empty space (off the edge
+of the image) in either direction, or the image may be panned completely off
+the view.  The value XvicX_ONLY constrains the X direction only, XvicY_ONLY
+constrains the Y direction only, XvicBOTH constrains both, and XvicNONE
+doesn't constrain either direction.  The default value for this resource
+is XvicNONE for BasicImage, and is XvicBOTH for Image.  The reason is that
+scrollbars require a constrained pan to work properly.  If scrollbars are
+enabled in Image, this resource be XvicBOTH, although this is not enforced
+by the widget (you may get warnings from ScrollBar or unexpected results if
+this is set wrong).
+
+------------------------------------------------------------------------------
+		BasicImage Resources - Sizes
+------------------------------------------------------------------------------
+
+XvicNimageHeight	XtCHeight	int		n/a		CSG
+XvicNimageWidth		XtCWidth	int		n/a		CSG
+Sets actual height and width of the image, independent of how it is viewed
+(i.e. size in image space not in display space).
+
+XvicNtileHeight		XtCHeight	int		dynamic		CSG
+XvicNtileWidth		XtCWidth	int		dynamic		CSG
+Sets height and width of the tiles the application wishes to use.  All data
+from the application will be requested in multiples of this size.  These
+sizes default to imageHeight and imageWidth.  These sizes are in image
+coordinates, so they are not affected by the prezoom factor.  As a result of
+this, the physical tile buffer may be different than this size if a prezoom
+is in effect.  See the section on prezoomed data, below, for details.
+
+XvicNviewHeight		XtCHeight	Dimension	dynamic		CSG
+XvicNviewWidth		XtCWidth	Dimension	dynamic		CSG
+Sets the height and width of the display in pixels.  The size is expressed
+in screen pixels, not image pixels, so the size is unaffected by a zoom.
+This size does not include the scrollbar (from Image) or border, if present.
+Note that specifying the Core resources height or width will override these
+resources.  The Core resources specify the entire width or height, including
+the border and scrollbars, if present.  These resources specify the size of
+the actual image display area itself.  Either set of resources may be retrieved
+no matter which is used to set the size.  If neither the view nor the core
+size is set at initialization time, the size is determined from the image size
+and zoom factor, up to a maximum of the screen size.  Please note that the
+data type of these resources is "Dimension", since it is an X dimension, rather
+than "int" (like the image and tile sizes, which could be bigger than a
+Dimension can hold).  The distinction is very important in a GetValues call.
+
+------------------------------------------------------------------------------
+		BasicImage Resources - Miscellaneous
+------------------------------------------------------------------------------
+
+XvicNxPan		XvicCPan	int		0		CSG
+XvicNyPan		XvicCPan	int		0		CSG
+Sets the pan value.  The specified pixel (in image coordinates) is the pixel
+that appears at the upper-left hand corner of the view.  If the pan is
+negative, then the absolute value of the pan specifies how many blank pixels
+there are between the edge of the view and the beginning of the image (i.e.
+a pan of -2 means that the image is shifted down/right by 2 pixels so there
+are 2 pixels of background around the image).  For subsampled images, a change
+in pan value may have no visible effect, since several image pixels make up
+one screen pixel.  The subsample grid is never changed by setting the pan.
+The requested pan value may be modified if the pan is constrained; see
+XvicNconstrainPan for details.
+
+XvicNxSubpixelPan	XvicCSubpixelPan int		0		CSG
+XvicNySubpixelPan	XvicCSubpixelPan int		0		CSG
+Sets the subpixel pan value.  This value is normally 0 and should only be
+changed in unusual circumstances.  Setting this value has two distinct effects,
+depending on the zoom.  When zooming up by an integer amount (*ZoomOut is 1),
+the subpixel pan value pans by fractions of a pixel.  So, instead of the entire
+leftmost pixel being displayed, only a part of it (ZoomIn - subpixel pan) is
+displayed).  This allows fine control over the positioning of large, zoomed-in
+pixels.  When zooming down by an integer amount (*ZoomIn is 1), the subpixel
+pan value controls how the subsampling grid is laid over the image.  Normally,
+the subsampling grid is fixed so that screen pixel 0 gets image pixel 0, and
+pan values do not change the relationship (so pans don't have to re-subsample
+the entire image).  A subsample pan changes this relationship so that screen
+pixel 0 gets image pixel *SubsamplePan.  For example, if *ZoomOut is 3 and
+*ZoomIn is 1, with no subsample pan, the image pixels that get displayed are
+always (0,3,6,9,12,...).  With a subsample pan of 1, the image pixels that
+get displayed are always (1,4,7,10,13,...).  Changing the subsample pan
+forces a redisplay of the entire image, since the subsample grid has changed.
+When both *ZoomIn and *ZoomOut are greater than 1 (non-integral zooms), the
+effect of a subpixel pan is a complex combination of the two effects, which
+is almost impossible to describe (you must determine the effect via
+experimentation).  The value of the subpixel pan is not checked, but should
+normally range between 0 and *ZoomIn * *ZoomOut.
+
+XvicNxZoomIn		XvicCZoomNumer	int		1		CSG
+XvicNxZoomOut		XvicCZoomDenom	int		1		CSG
+XvicNyZoomIn		XvicCZoomNumer	int		1		CSG
+XvicNyZoomOut		XvicCZoomDenom	int		1		CSG
+Specifies the components of the zoom factor in the X and Y directions.  The
+zoom factor is expressed as a rational number equal to ZoomIn / ZoomOut.
+So, a ZoomIn of 1 and a ZoomOut of 3 would result in a zoom factor of 1/3,
+or a zoom of -3.  Non-integral zooms are allowed; for example zoom factors of
+4/3 or 631/1000 are acceptable.  A way to visualize the zoom factor is to
+first take the original image, and zoom in by ZoomIn, so you get many more
+pixels and a much larger image.  This zooming in is done by simple pixel
+replication.  Then, take this intermediate result, and zoom out by ZoomOut to
+get the final displayed pixels.  This zooming is done by simple subsampling of
+the intermediate image.  No interpolation or averaging is performed.  The
+subsampling grid is fixed so that the image will not be re-subsampled when
+the pan changes (see *SubpixelPan for more details).  All zoom components must
+always be strictly positive (zero is not allowed).  There is no hard limit on
+how big the zoom components may get; however, the product of the ZoomIn value
+and the image size in that dimension must fit into an integer (with some
+margin).  These resources control the actual zoom factor; xZoom, yZoom, and
+imageZoom are merely convenient ways of setting these resources.  The zoom
+factor is always expressed relative to the original image data, regardless
+of any prezoom that may be in effect.  The fraction represented by the given
+zoom factors is reduced to eliminate common factors, so the values obtained via
+XtGetValues may not be the same as set via XtSetValues, although the ratio will
+always be the same.
+
+XvicNxZoom		XvicCZoom	int		special		CS
+XvicNyZoom		XvicCZoom	int		special		CS
+XvicNimageZoom		XvicCZoom	int		special		CS
+Specifies an integral zoom factor in the X and Y directions (xZoom, yZoom),
+or for both directions at once (imageZoom).  All three of these resources are
+merely convenient ways of setting *ZoomIn and *ZoomOut.  As such, these
+resources cannot be read, only set (this is because the zoom factor may not be
+integral, in which case it cannot be represented by these resources).  Read
+the *ZoomIn and *ZoomOut resources directly if you need to get the zoom factor.
+If set, xZoom and yZoom override the settings for *ZoomIn and *ZoomOut, while
+imageZoom overrides all zoom settings.  For all three resource, positive zooms
+are magnifications, which set *ZoomOut to 1 and *ZoomIn to the given value,
+while negative zooms are reductions, which set *ZoomIn to 1 and *ZoomOut to the
+absolute value of the given value.  Zooms of -1 are the same as zooms of 1,
+while zooms of 0 are ignored (and do not override the other settings).
+
+XvicNxPreZoomIn		XvicCZoomNumer	int		1		CSG
+XvicNxPreZoomOut	XvicCZoomDenom	int		1		CSG
+XvicNyPreZoomIn		XvicCZoomNumer	int		1		CSG
+XvicNyPreZoomOut	XvicCZoomDenom	int		1		CSG
+XvicNxPreSubpixelPan	XvicCSubpixelPan int		0		CSG
+XvicNyPreSubpixelPan	XvicCSubpixelPan int		0		CSG
+Specifies the parameters for providing prezoomed data.  See the section on
+prezoomed data, below, for a complete description.  The application provides
+data that has already been zoomed using these resources (which are interpreted
+in the same way as the corresponding non-pre resources).  It is then further
+zoomed (if necessary) to meet the *ZoomIn and *ZoomOut values, using an
+"effective" zoom computed using the ratio between the normal zooms and prezooms,
+and *SubpixelPan.  The existence of *PreSubpixelPan implies that there are
+actually two subsample grids involved in handling zoomed data.  While this is
+true, *PreSubpixelPan should be used even less frequently than *SubpixelPan,
+which is itself used only rarely.  The *PreSubpixelPan is included mainly for
+orthogonality between the two zoom operations.  If the application changes any
+of these resources, then any data the widget is saving will be invalidated,
+and the entire image will be re-exposed.  There are no convenience resources
+like xZoom, yZoom, or imageZoom to set the prezoom factors.
+
+XvicNmaximumMemory	XvicCMemory	int		0		CSG
+This value specifies the maximum amount of memory in bytes the widget is allowed
+to allocate.  Normally, the widget maintains more memory than it is currently
+using, because it caches tiles (see dataSavePolicy).  This allows for much
+more efficient operation, but can be wasteful of memory for large images.
+maximumMemory allows the application to set a limit, balancing speed of
+updates vs. memory usage.  If the widget tries to allocate memory that exceeds
+this limit, it frees up cached tiles in Least-Recently-Used order (and any
+other cached memory it may have) until the memory usage falls below the limit.
+If the widget is already using the absolute minimum amount of memory
+(approximately one zoomed XImage plus a tile if dataSavePolicy is XvicRAW or
+a zoomed Pixmap if it is XvicPIXMAP), then the allocation is performed anyway
+and maximumMemory is exceeded, on the theory that it's better to exceed the
+memory limits than to crash.  If an allocation actually fails, the widget will
+also free cached memory and try again.  If at the minimum, and the allocation
+still fails, a fatal error occurs and the widget aborts (it may be possible in
+the future to call back the application before this happens to allow it a
+chance to free memory, but since there are so many ways X can crash when
+memory is exhausted that can't be easily caught, a callback is not considered
+worthwhile).  If maximumMemory is 0, then there is no memory limit.
+
+XvicNgrayLevels		XvicCCmapCells	int		16		CSG
+XvicNredLevels		XvicCCmapCells	int		16		CSG
+XvicNgreenLevels	XvicCCmapCells	int		16		CSG
+XvicNblueLevels		XvicCCmapCells	int		13		CSG
+Specifies the number of intensity levels to use in the colormap for dither
+patterns when colormapPolicy is DITHER or ALLOC.  grayLevels specifies the
+number of gray-scale levels for BW dithers, while redLevels, greenLevels, and
+blueLevels specify the number of intensity levels for red, green, and blue
+for Kagels color dithering.  There is a limit on the number of cells in
+the colormap (normally 256 for 8-bit displays).  The value (grayLevels +
+greenLevels + (redLevels * blueLevels)) must be less than or equal to this
+limit.  If not, *Levels are quietly reset to their default values.  The number
+of cells should generally be less than the limit by several cells to allow
+some system colors in the colormap (the default settings allow for 16 system
+colors).  Note that when colormapPolicy is ALLOC, only grayLevels or the
+triplet redLevels, greenLevels, blueLevels are used, depending on the setting
+of other resources; the unused values are ignored (so they don't affect the
+limit calculation).  See colormapPolicy for more details.  A case could be
+made for separating these into bwGrayLevels, colorGrayLevels, pseudoGrayLevels,
+etc., as is done with the other display options (see General Info above), but
+it was decided not to do that in this case because it would be of very limited
+utility.
+
+XvicNrawDataMin		XvicCDataRange	double		special		CSG
+XvicNrawDataMax		XvicCDataRange	double		special		CSG
+Specifies the minimum and maximum data values for non-byte data (or byte
+data if the 16-bit LUT is in use).  Any pixels outside this range are set to
+the min or max value.  See the section on "Data Type Transformation" below for
+details on the algorithm used to convert non-byte data to bytes for display.
+The values of these resources are double precision regardless of the data
+type of the pixels.  For integral data types, XvicNrawDataMax is the maximum
+pixel value (for example, 255 for byte data).  For non-integral types, 
+XvicNrawDataMax is just above the maximum pixel value.  The defaults for
+these resources are the maximum range of data for integral types (e.g.
+-32768..32767 for HALF, 0..4294967295 for UFULL, etc.) and 0 to 1.0 for
+REAL and DOUBLE.  These values are reset to their defaults any time
+XvicNdataType is changed, unless one or both are also changed in the same
+Xt(Va)SetValues call.  Setting their initial values via a resource file is
+allowed.  rawDataMax must be greater than rawDataMin.  NOTE:  Because these
+are doubles, they must be passed to SetValues (or a VarArgs routine) via the
+XvicDOUBLE_ARG macro, e.g. XtVaSetValues(w,XvicNrawDataMin,XvicDOUBLE_ARG(min),
+NULL);.  The macro argument must be a simple variable for which &arg is valid,
+and must be a double, not a float.  This macro compensates for different
+calling mechanisms on machines with 64-bit pointers.
+
+XvicNscaledDataMax	XvicCDataRange	int		65535		CSG
+Specifies the maximum value after the first linear scaling of non-byte
+data.  Data will range between 0 and this value (inclusive) after the linear
+scaling and before the 16-bit LUT.  This value also determines the size of the
+16-bit lookup table.  It must be less than or equal to 65535, and greater than
+0.  It does not normally need to be changed, but could be useful for e.g. 12
+bit data, in which case it could be set to 4095 in order to use a smaller LUT.
+See the section on "Data Type Transformation" below for details on the
+algorithm used to convert non-byte data to bytes for display.
+
+XvicNoutputDataMax	XvicCDataRange	int		65535		CSG
+Specifies the maximum value to be output from the 16-bit LUT.  If the 16-bit
+LUT is not in use, this value must equal XvicNscaledDataMax or unpredictable
+results will occur.  This maximum value is used in a second linear scaling to
+convert the output of the 16-bit LUT to 8-bit data in the range 0..255.
+If the LUT outputs anything higher than this value, unpredictable results
+will occur.  This value must be less than or equal to 65535, and greater than
+0.  It does not normally need to be changed, but could be useful for e.g. 12
+bit data, in which case it could be set to 4095 in order to have 12-bit output
+from the LUT.  See the setion on "Data Type Transformation" below for details
+on the algorithm used to convert non-byte data to bytes for display.
+
+------------------------------------------------------------------------------
+		BasicImage Resources - Callbacks
+------------------------------------------------------------------------------
+
+XvicNvisibleAreaCallback XtCCallback	XtCallbackList	NULL		CS
+This callback is called when certain resources are modified that affect what
+area of the image is displayed on the screen, or how it is displayed.  The
+resources affecting the area displayed are: XvicNimageHeight, XvicNimageWidth,
+XvicNxSubpixelPan, XvicNySubpixelPan, XvicNxPan, XvicNyPan, XvicNxZoomIn,
+XvicNxZoomOut, XvicNyZoomIn, and XvicNyZoomOut.  The resources affecting how
+the image is displayed are: XvicNimageMode, XvicNdataType, XvicNlutType,
+XvicNlut16Type, XvicNditherMode, XvicNstretchPolicy, XvicNcolormapPolicy,
+XvicNgrayLevels, XvicNredLevels, XvicNgreenLevels, XvicNblueLevels,
+XvicNrawDataMin, XvicNrawDataMax, XvicNscaledDataMax, XvicNoutputDataMax,
+(this callback is triggered by current resource changes, not by inactive
+saved resource changes).  Note that for pans, the callback will be called
+only if the resources are directly modified.  Any pan changes covered by
+Image's XvicNpanCallback will not trigger this callback (i.e. between the
+two callbacks, all possible pans will be covered once and only once).
+This callback is intended mainly for two purposes.  First, to notify
+applications that try to track what is being displayed, such as a panner
+or browser, so they can update their own display to indicate what area
+of the image is being shown.  Note that this callback is not in itself
+sufficient for the first use - XvicNpanCallback and XvicNresizeCallback must
+also be used to fully track the displayed area.  Second, the callback allows
+another image widget to use the same display modes in order to share a colormap
+to prevent flashing.  The only item returned in the callback structure
+(besides the reason) is a set of flags, which indicate which class(es) of
+resources changed to trigger this callback.  The actual resources are not
+returned.  The application should use Xt(Va)GetValues() or
+XvicImageDisplayBounds() to get the information it needs.  Note that this
+callback is called from within the widget's SetValues() routine, so you
+should be careful about calling Xt(Va)SetValues again on this widget from
+within the callback function.  Specifically, changing one of the trigger
+resources could cause an infinite recursive loop.
+
+XvicNexposeCallback	XtCCallback	XtCallbackList	NULL		CS
+This callback is called when the widget needs data from the application.
+The widget tries to maintain the image in memory, but if this is not possible
+(due to memory constraints or the first display of an area), then it will
+ask the application to provide the data.  The requested data will always be
+a single tile (defined by the tile size).  The application is expected to
+call XvicImageWrite() (usually once but may be several times) to provide the
+requested data.  Any requested data that is not supplied via XvicImageWrite()
+will cause undefined results, including possible display of uninitialized
+memory.  If XvicImageWrite() is not called at all, the data may be requested
+over and over again (depending on the other resource settings), causing a
+CPU-burning loop as the callback is called repeatedly.  If no exposeCallback
+is registered, then the application is not expected to respond to exposes and
+the widget will attempt to maintain the entire image in memory.  dataSavePolicy
+must be XvicRAW in this case, and the application must not change any resources
+that will affect the raw data, such as image mode, image or tile size, or
+prezoom factors (unless it subsequently calls XvicImageWrite() on the entire
+image).  The application must call XvicImageWrite() to provide the initial
+data.  This approach is not recommended; an exposeCallback should almost
+always be registered.
+
+XvicNresizeCallback	XtCCallback	XtCallbackList	NULL		CS
+This callback is called whenever the view size (viewHeight, viewWidth) of the
+widget changes due to user or application action.  It is called even when
+the size changes due to an application request (by changing viewHeight or
+viewWidth), since the request may or may not have been granted by the window
+manager.  NOTE:  If this widget is actually an Image widget, with
+XvicNscrollBarDisplayPolicy set to XvicAS_NEEDED, then you must be careful
+what you do in the resize callback.  Due to recursion problems with the
+ScrolledWindow parent, you must not change anything that would affect whether
+or not the scrollbars are displayed.  Most of the time this involves the zoom
+factor, but it could also involve the image size and view size (changing the
+view size from within the resize callback is not a good idea in any case!).
+This is most often an issue with a Zoom-to-Fit model, where the zoom factor is
+adjusted to based on the view size so the entire image is always displayed.
+In this case, set the scrollbar display policy to XvicNEVER.  If you find you
+need to use XvicAS_NEEDED and you must change something from the Resize
+callback, then register a timer proc with a time of 0 and do the SetValues call
+from there.  That way, the affected values are changed outside of the Resize
+code, and the scrollbars will be updated properly.
+
+XvicNworkProcActiveCallback XtCCallback	XtCallbackList	NULL		CS
+This callback is called once when the widget's WorkProc (used for repainting
+the image) is activated, and again when the WorkProc is complete (i.e. no
+more repaints are queued up).  The flags field of the callback structure is
+set to True (non-0) when the WorkProc is active, and False (0) when it is not.
+This callback could be used to post a "busy" cursor or some such, although this
+is not recommended (since the widget is capable of doing other things during
+repaints, it is not a good idea to block out those other things).  The main
+use for this is so an application can determine when the WorkProc is active
+so it can set a "priority" on its own WorkProcs.  For example, if the
+application uses a WorkProc to fill in a histogram, that might be considered
+less important than repainting the image.  Since Xt does not support priorities
+for WorkProcs, the application could simulate them by monitoring this callback
+and posting its own WorkProc only when the widget's is inactive.  Note that
+this callback will not be called at all if XvicNworkProcPolicy is XvicNONE, and
+it is not guaranteed that this callback will be called for any given expose
+event (since the server may restore it from backing store).  All that is
+guaranteed is that one and only one False (inactive) callback will be generated
+for each True (active) callback, and they will be in order (i.e. it will not
+generate two True's or two False's in a row).
+
+==============================================================================
+		BasicImage Structures and Functions
+==============================================================================
+------------------------------------------------------------------------------
+		BasicImage Callback Structure
+------------------------------------------------------------------------------
+typedef struct
+{
+	int	reason;
+	XEvent	*event;
+	int	x, y;
+	int	height, width;
+	int	prezoom_x, prezoom_y;
+	int	prezoom_height, prezoom_width;
+	int	new_view_width;
+	int	new_view_height;
+	unsigned int	flags;
+	String	*input_params;
+	Cardinal input_num_params;
+	int	x_pan;
+	int	y_pan;
+	Boolean	on_screen;
+	double	x_fp, y_fp;
+} XvicImageCallbackStruct;
+
+Note:  This is called XvicImageCallbackStruct rather than
+XvicBasicImageCallbackStruct because the Image widget uses the same
+callback structure, and most clients will instantiate Image rather than
+BasicImage.
+
+int	reason;
+Defines the reason for the callback.  The valid reasons, and the fields that
+are relevant for each, are listed below.  Fields not relevant for a given
+callback may be uninitialized.
+XvicCR_EXPOSE - Set for exposeCallback.  Valid fields are:
+	x, y, width, height, prezoom_x, prezoom_y, prezoom_height,
+	prezoom_width.  Note that event is not valid.
+XvicCR_RESIZE - Set for resizeCallback.  Valid fields are:
+	new_view_width, new_view_height.  Note that event is not valid.
+XvicCR_VISIBLE_AREA - Set for visibleAreaCallback.  Valid fields are:
+	flags.  Note that event is not valid.
+XvicCR_WORK_PROC_ACTIVE - Set for workProcActiveCallback.  Valid fields are:
+	flags.  Note that event is not valid.
+
+XEvent	*event;
+The event that (possibly indirectly) caused the callback.  It is present
+to comply with the Motif calling standard; it should not be needed
+in any of the BasicImage callbacks and may be NULL.  It is used in Image,
+however.
+
+int	x, y, width, height;
+Defines the area needing to be exposed for XvicCR_EXPOSE.  The application may
+increase the size if desired (although that just means extra work for the
+widget), but the application must return the data requested by calling
+XvicImageWrite().  The area requested is in image coordinates, and is always
+a multiple of, and aligned with, the size of a tile.  These fields are
+valid only for XvicCR_EXPOSE.  The x and y fields are also used by Image.
+
+int	prezoom_x, prezoom_y, prezoom_width, prezoom_height;
+Defines the area needing to be exposed for XvicCR_EXPOSE in terms of prezoomed
+pixels.  See the section on prezoomed data, below, for a complete description.
+These values are calculated from x, y, width, height, using the formulas in
+that section, and are provided merely as a convenience.  These fields are
+valid only for XvicCR_EXPOSE.
+
+int	new_view_width;
+int	new_view_height;
+Supplies the new height and width (in screen coordinates) of the view window
+after a resize.  These fields are valid only for XvicCR_RESIZE.
+
+unsigned int	flags;
+Specifies which set of resources changed to trigger the visibleAreaCallback,
+or the state of the workProcActiveCallback.  For visibleAreaCallback, the
+flags are intended to allow the application to more easily decide how to
+handle the callback, so that for example fast pan changes don't continually
+update a zoom display.  The value is a logical-OR of one or more of the
+following values:
+	XvicPAN_CHANGED		XvicNxPan or XvicNyPan
+	XvicSUBPIXEL_CHANGED	XvicNxSubpixelPan or XvicNySubpixelPan
+	XvicSIZE_CHANGED	XvicNimageWidth or XvicNimageHeight
+	XvicZOOM_CHANGED	XvicN(x|y)ZoomIn or XvicN(x|y)ZoomOut
+	XvicMODE_CHANGED	XvicNimageMode, XvicNdataType
+	XvicDITHER_CHANGED	XvicNditherMode, XvicNstretchPolicy,
+				XvicNcolormapPolicy, XvicNlutType,
+				XvicNlut16Type, XvicN(gray|red|green|blue)Levels
+	XvicRANGE_CHANGED	XvicNrawDataMin, XvicNrawDataMax,
+				XvicNscaledDataMax, XvicNoutputDataMax
+For workProcActiveCallback, this field is a simple True (non-0) or False (0)
+value indicating whether or not the WorkProc is active.  This field is valid
+only for XvicCR_VISIBLE_AREA and XvicCR_WORK_PROC_ACTIVE.
+
+String *input_params;
+Cardinal input_num_params;
+int x_pan;
+int y_pan;
+Boolean on_screen;
+double	x_fp, y_fp;
+Only used by Image (see Image docs for details).
+
+------------------------------------------------------------------------------
+		BasicImage Public Structures
+------------------------------------------------------------------------------
+
+#define XvicMEMORY_APPLIC	0
+#define XvicMEMORY_WIDGET	1
+#define XvicMEMORY_SHARED	2
+
+typedef struct {
+	unsigned char	*bw_pixels;
+	unsigned char	*red_pixels;
+	unsigned char	*grn_pixels;
+	unsigned char	*blu_pixels;
+	int		x;
+	int		y;
+	int		width;
+	int		height;
+	int		memory_control;
+	int		line_width;
+	int		start_offset;
+
+} XvicImageData;
+
+The XvicImageData structure is used to supply data to the widget via
+XvicImageWrite().
+
+Data Format
+-----------
+There is one function that uses the XvicImageData structure: XvicImageWrite().
+The format of the pixel data is described below.  The format is the same for
+each of the bw, red, green, and blue pixel pointers.
+
+The simplest case for the data is when line_width == width * sizeof(pixel type)
+and start_offset == 0, and no prezoom.  In this case, the data must be a packed
+array of pixels, with "height" lines, each line of length "width" pixels, with
+no padding bytes.  Subsequent lines must immediately follow the prior ones in
+memory.
+
+The data for XvicImageWrite() may be more complex.  In the general case, the
+data is still an array of pixels, with "height" lines (this may be modified
+by a Y zoom factor with prezoomed data, see below).  Each line is offset from
+the previous one by "line_width" bytes (note: not pixels!), allowing lines in
+memory to be larger than what the widget requires.  The pixel data for each
+line starts at "start_offset" bytes (not pixels) into the line.  Note that
+with prezoomed data, line_width and start_offset are in terms of bytes, while
+x, y, width, and height are in terms of un-zoomed pixel (image) coordinates.
+
+Prezoomed Data
+--------------
+The application program has the option of supplying prezoomed data.  This
+means that the application does the zooming (or part of it) itself, and
+supplies only the results to the widget.  For example, if a postage-stamp file
+or a set or pyramid files existed, the application could supply this prezoomed
+data rather than the entire image, resulting in a substantial time and memory
+savings for highly subsampled zooms.  Or, the application may want to use
+zoom algorithms other than pixel replication and subsampling, such as
+interpolation or averaging.  Only the zoomed results need be supplied to the
+widget.
+
+It is important to note that prezoomed data is not a requirement.  Simple
+applications can always supply the original (unzoomed) image data, and
+may safely ignore this entire section.  The capability is present, however,
+for more advanced applications.
+
+The prezoom factor does not have to match the zoom factor; the widget will
+do any additional zooms necessary to convert the prezoomed data to the desired
+zoom factor (*ZoomIn, *ZoomOut).  For example, the application may have pyramid
+files available at full size, 1/4, and 1/16 scale.  In that case, it may wish
+to use the full-size image for zooms > 1/4, use the 1/4 scale for zooms between
+1/4 and 1/16, and use the 1/16 scale for zooms < 1/16.
+
+If the prezoom factor and the actual zoom factor are not simply related to
+one another (i.e. if the additional zoom the widget must do is not n/1 or 1/n),
+then the pixels chosen for the screen may be different than the ones chosen if
+there were no prezoom.  There will be no discontinuities in the image, but the
+image pixels actually displayed may be shifted a little with respect to an
+image of the same zoom factor with no prezoom.  This is a necessary result of
+the math involved for multiple non-integral zooms, and should not normally be
+a problem.  If it is, don't use prezooms, or use prezooms that are simply
+related to the actual zoom.
+
+If the prezoom factor changes (via the application setting the *PreZoom* or
+*PreSubpixelPan resources), then any data the widget is saving will be
+invalidated, and the entire image will be re-exposed.
+
+In order to provide prezoomed data, the data must correspond to a specific
+format.  If it doesn't, the pixel replications and subsample grids will not
+match, creating discontinuities in the image.  The formulas for creating
+this data format are described below.  Note that the formulas reduce to the
+simple case described in Data Format above if there is no prezoom.
+
+All calculations in this entire section must be performed using integer math.
+Also, division must be done such that the result is always rounded down.  This
+is not normally the case in C if the numerator is negative (the denominators
+will always be positive in these formulas), so care must be used with the
+division.  A useful macro for this is:
+
+/* Integer division that truncates downwards always.  Assumes y > 0 */
+#define IDIV(x,y) ((x)>=0 ? (x)/(y) : ((x)-(y)+1)/(y))
+
+Also note that all calculations in this section deal with pixel coordinates
+only, not bytes.  If you have non-byte data, the position coordinates for a
+buffer must be multiplied by the pixel size in order to get a byte offset into
+the buffer.
+
+The basic formulas for converting coordinates are:
+
+zoomed_coord = (unzoomed_coord * zoom_in - subpixel_pan) / zoom_out
+unzoomed_coord = (zoomed_coord * zoom_out + subpixel_pan) / zoom_in
+
+Note that these two formulas are not invertible (converting an unzoomed
+coordinate to a zoomed one and back again may not give you the same unzoomed
+coordinate).
+
+When prezoomed data is supplied, two independent zooms actually take place.
+The first is performed by the application, using *PreZoomIn, *PreZoomOut, and
+*PreSubpixelPan.  The unzoomed coordinates are the original image coordinates,
+and the zoomed coordinates are relative to the prezoomed image.  The second
+zoom is performed by the widget, using *SubpixelPan and the "effective" zoom
+factors.  The effective zooms are computed by:
+
+effective_zoom_in = ZoomIn * PreZoomOut
+effective_zoom_out = ZoomOut * PreZoomIn
+
+Common integer factors are then eliminated from the effective zoom values.
+The effective zoom represents the difference between the actual zoom factor
+(*ZoomIn, *ZoomOut), and the supplied prezoomed data (*PreZoomIn, *PreZoomOut),
+and is 1:1 if the prezoom matches the actual zoom.
+
+In the following discussion, the x (sample) coordinate is used.  The exact same
+formulas apply to the y (line) coordinate as well, by simply substituting y
+for x, and height for width.
+
+The prezoom coordinates of the first sample in the buffer is calculated
+using the formula:
+
+x_start = (x * xPreZoomIn - xPreSubpixelPan + xPreZoomOut - 1) / xPreZoomOut
+
+The prezoomed coordinates of the last sample in the buffer is calculated by:
+
+x_end = ((x+width) * xPreZoomIn - xPreSubpixelPan - 1) / xPreZoomOut
+
+The buffer is thus of size (x_end-x_start+1).  Note that the "x+width" factor
+is actually the end coordinate + 1 (normally, an end coordinate is computed by
+start + width - 1).  These formulas differ from the basic zoom formulas above
+in order to compensate for roundoff, which is needed to make sure that the
+start and end of adjacent tiles are completely covered by prezoomed pixels.
+They basically use the left-hand edge of the pixel for the start coordinate,
+and the right-hand edge of the pixel for the end coordinate.
+
+These values are provided for you in the callback structure as prezoom_x and
+prezoom_width, so you can derive x_start and x_end by:
+
+x_start = prezoom_x
+x_end = prezoom_x + prezoom_width - 1
+
+The x_start and x_end coordinates may be used directly to read a prezoomed
+file of the appropriate zoom factor, or the data may be obtained from the
+unzoomed image on the fly.  The widget itself zooms by using the same formulas
+to compute the zoomed coordinates (from the prezoomed coordinates, the
+effective zoom factors, and xSubpixelPan).  It then loops between the zoomed
+x_start and x_end, using the coordinate conversion formulas above (actually,
+incremental forms of them) to convert from zoomed coordinates to prezoomed
+coordinates, taking the pixel at the given prezoomed coordinates, and putting
+it in the buffer.  The application could do the same thing, looping between
+the prezoomed x_start and x_end, and converting from prezoomed to image
+coordinates, and taking the pixel at the given image coordinates.
+
+Different zoom algorithms may be used (such as averaging or interpolation)
+based on the given formulas, but the x_start and x_end coordinates must be
+calculated *exactly* as shown here.  The widget's subsampling algorithm
+(taking the upper-left pixel of the area covered by the larger pixel)
+guarantees that only image data within the bounds of (x, y, x+width-1,
+y+height-1) will be used to generate the prezoomed data (x_start, y_start,
+x_end, y_end).  However, other zoom algorithms may need data outside the image
+bounding box.  If this is the case, do not modify x, y, width, or height.
+They must relate to x_start, y_start, x_end, and y_end using the given
+formulas, and x_start et al defines the region of data that needs to be sent
+to the widget.  If you need to read extra image data, go ahead, but this fact
+is not reflected in the fields of this structure.
+
+Implied in the above discussion is the fact that, with a prezoom in effect,
+the actual size of the data in a tile supplied to the widget is potentially
+different from the tileWidth and tileHeight specified in the resources.
+tileWidth and tileHeight are defined in image (unzoomed) coordinates, while
+the buffer has a prezoom.  So, the actual amount of data in the buffer is
+computed using the x_start, x_end formulas above.  These must be recomputed
+for every tile, as the actual buffer size depends on the coordinates of the
+tile.  For example, at a prezoom of 1/3, every third tile will be one pixel
+longer than the rest (e.g. if the tile size is 100, the first tile will be
+be 34 pixels and the next two will be 33).  If you wish to allocate a buffer
+once for a tile, the following formula may be used to calculate the maximum
+size of any tile.  In the preceding example, 34 would be returned, although
+most of the tiles are actually only 33 pixels wide.  You could allocate a
+buffer of width 34 and use it for all tiles (being careful of the actual
+size for each tile, of course).
+
+x_max_tile_width = ((tileWidth + 1) * xPreZoomIn - 1) / xPreZoomOut
+
+Note that the subpixel pan has no effect on the maximum size.
+
+Data Type Transformation
+------------------------
+Non-byte data must be transformed to 8-bit data for display, since all current
+display technologies supported by X are 8 bits (per color channel).  Each pixel
+goes through this transformation independently, although the widget optimizes
+this as much as possible via look-up tables.  Byte data may also go through
+the same transformation, but does not normally do so for efficiency.
+
+Summary
+
+In short, the raw pixel is first linearly scaled to a 16-bit unsigned value.
+This value goes through a 16-bit lookup table, producing another 16-bit
+unsigned value.  This value is linearly scaled to an 8-bit unsigned value,
+which is sent through the normal 8-bit lookup table and then dithered or
+otherwise manipulated for display (as with any byte data).  Each of these
+steps is controllable.
+
+Transformation Detail
+
+The first step is a linear scale to a 16-bit unsigned value.  The resources
+XvicNrawDataMin and XvicNrawDataMax specify the minimum and maximum values
+that the raw data will have (any data outside these ranges are set to the
+min or max value).  The min value will be translated to 0, and the max
+value will be translated to XvicNscaledDataMax (which is normally 65535, and
+must be less than or equal to that value).
+
+The next step is to pass the data through a 16-bit lookup table if
+XvicNlut16Type is set to anything other than XvicNONE.  Stretch,
+pseudocolor, or both LUT's may be applied, as with 8-bit data (pseudocolor
+only applies to XvicBW data).  However, if pseudocolor is applied via the
+16-bit LUT, then it may not be applied via the 8-bit LUT; from the 8-bit LUT's
+point of view, the data is already color.  The 16-bit LUT must be filled
+up to XvicNscaledDataMax (normally 65535).  The output values must range
+between 0 and XvicNoutputDataMax (normally 65535).  If not, unexpected results
+may occur.  If the 16-bit LUT is not enabled, then XvicNscaledDataMax must
+equal XvicNoutputDataMax, or unexpected results may occur.
+
+The output of the 16-bit LUT is then in the range 0 to XvicNoutputDataMax
+(normally 65535).  This data is linearly scaled to the range 0 to 255
+to generate byte data for display.  This byte data is then treated like any
+other byte data, going through the 8-bit LUTs if XvicNlutType specifies,
+and getting zoomed, dithered, and otherwise prepared for display.
+
+Note that zooming and dithering happen only on the 8-bit data.
+
+Usage
+
+Applications at a minimum need to set XvicNrawDataMin and XvicNrawDataMax
+in order to handle non-byte data.  Often, that's all that is needed, or
+perhaps using a 16-bit LUT as well.  The XvicNscaledDataMax and
+XvicNoutputDataMax will rarely be needed.  Where they might come in handy,
+however, is if you were for example dealing with 12-bit data.  In that
+case, you could set both of these to 4095 and treat the 16-bit LUT as a
+true 12-bit one, setting only 4096 values and outputting 12-bit data as
+well.
+
+Note that byte data does not go through any of this transformation unless
+XvicNlut16Type is set to something other than XvicNONE.  In other words,
+if a 16-bit LUT is in use, the byte data is scaled up to 16-bits, goes through
+the LUT, and is scaled back down.  If a 16-bit LUT is not in use, then no
+scaling is done (even if XvicNrawDataMin/Max are set).  This behavior is
+slightly different than other data types and applications should be aware
+of it.
+
+Formulas
+
+Linear scaling is done via a binning process.  The output range is treated
+as a series of equal-sized "bins" which are mapped to the input range.
+The minimum input value specifies the bottom of a bin, while the maximum
+input value specifies the top of a bin.  Anything outside of the min or max
+data value is saturated to the min or max output bin.  The range for integral
+data is inclusive, meaning that the max value can actually appear in the
+input data.  The range for non-integral data is exclusive, meaning that the
+values go just up to the max, but shouldn't actually reach tha max.  This is
+not really an issue since data equalling the max will be saturated to the
+max bin anyway, but mathematically the max is outside the range for non-
+integral data.
+
+The formula for scaling non-integral data to the 16-bit range is:
+
+16bit = floor((value - rawDataMin) * ((scaledDataMax+1) /
+					(rawDataMax - rawDataMin)))
+
+All calculations are performed using doubles.
+
+The formula for scaling integral data to the 16-bit range is:
+
+16bit = floor((value - rawDataMin) * ((scaledDataMax+1) /
+					(rawDataMax - rawDataMin + 1)))
+
+The only difference is the +1 in the rawDataMax-Min calculation (which
+compensates for the inclusive instead of exclusive range).  All calculations
+are performed using doubles.
+
+In both cases the floor() function is in the standard math library and
+rounds the value towards negative infinity.
+
+The formula for scaling 16-bit data to the 8-bit range is:
+
+8bit = 16bit * 256 / (outputDataMax+1)
+
+The floor() function is not needed since all values are positive, and integer
+math should be used.
+
+Field Descriptions
+------------------
+unsigned char	*bw_pixels;
+unsigned char	*red_pixels;
+unsigned char	*grn_pixels;
+unsigned char	*blu_pixels;
+These elements are pointers to buffers used to hold the data.  If imageMode
+is XvicCOLOR, then red_pixels, grn_pixel, and blu_pixels are used.  If imageMode
+is XvicBW, then bw_pixels is used.  The unused pointers are ignored and may
+be uninitialized.  Even though these are declared as unsigned char pointers,
+the actual data must be of the type specified by XvicNdataType.
+
+int x, y, width, height;
+These fields define the location of the data being supplied, in image
+coordinates.  The widget will operate much more efficiently if these match
+the size and position of the image tiles.  However, this is not a requirement;
+the data being sent may be anything from a single pixel to the entire image.
+
+int memory_control;
+Defines who maintains control of the memory pointed at by the pixel pointers.
+The widget maintains a copy of the data when possible in order to handle
+expose events without bothering the application.  Normally, the data is
+copied into a private memory area (XvicMEMORY_APPLIC).  However, in some
+circumstances, the extra copy may be avoided for efficiency.  This field only
+applies if dataSavePolicy is XvicRAW; for any other setting, memory_control
+is assumed to be XvicMEMORY_APPLIC (take note of this in your application, so
+you don't leak memory!).  The allowed values are:
+
+XvicMEMORY_APPLIC:  The application retains control of the memory.  The widget
+makes a copy of the data into its own allocated buffers.  Once the
+XvicImageWrite() call is complete, the application may free or re-use
+the memory as it wishes.  This is the appropriate value to use if a single
+buffer is used over and over again for each XvicImageWrite() call.  This is
+the only valid setting if dataSavePolicy is not XvicRAW.
+
+XvicMEMORY_WIDGET:  The widget gets control of the memory.  The widget can
+use the provided buffer directly, without copying it.  The widget will free
+the memory using free() when it is done using it.  If the application calls
+malloc() to get the buffer for each XvicImageWrite() call, it should set
+memory_control to XvicMEMORY_WIDGET for efficiency.  The application must
+not touch the memory after the XvicImageWrite() call, as it could be
+deallocated at any time (including during the call itself).  This memory
+counts against the maximumMemory limit, and may cause the widget to free
+something else.  This setting is valid only if dataSavePolicy is XvicRAW.
+Note that only a single full tile should be provided to XvicImageWrite()
+in this mode.  Any partial tiles, or full tiles past the first one, will be
+copied into widget-allocated memory (and the provided buffer freed), which
+defeats the whole purpose of XvicMEMORY_WIDGET.  Worse yet, if you provide
+more than one tile, only one tile will use your memory area (the others use
+their own memory), but the entire area is still allocated, which can
+significantly raise the memory usage.
+
+XvicMEMORY_SHARED:  The widget and application share the memory.  After the
+XvicImageWrite() call, the widget may not modify the memory.  The
+application should not modify it either, although it can if the modification
+is immediately followed by another XvicImageWrite() call, with new_data set
+to True.  The widget will never free the memory; the application may not do
+so until the widget is destroyed or until another buffer is supplied for the
+exact same area of the image via another call to XvicImageWrite().  This
+mode is mainly intended for displaying a read-only Array I/O file (i.e. a file
+that is mapped into memory, using mmap() on Unix or the VMS equivalent).  This
+memory does not count against the maximumMemory limit.  This setting is valid
+only if dataSavePolicy is XvicRAW.  Note that only full tiles should be
+provided to XvicImageWrite() in this mode (although you can provide
+more than one tile in a single call with no memory waste).  Any partial tiles
+will be copied into widget memory (thus not sharing the buffer), which defeats
+the whole purpose of XvicMEMORY_SHARED.
+
+int line_width;
+Defines the length, in *bytes* (not pixels), of each image line.  The address
+of the next line is determined by adding line_width to the address of the
+previous one.
+
+int start_offset;
+Defines the offset, in *bytes* (not pixels), from the start of each image line
+to the start of the valid data.  This allows the data to start in the middle
+of a line.  This field, and line_width, are most useful when you have a large
+buffer containing the entire image (such as a memory-mapped file), and you wish
+to provide a small chunk of the image for the display.
+
+------------------------------------------------------------------------------
+		BasicImage Public Functions
+------------------------------------------------------------------------------
+Widget XvicCreateBasicImage(parent, name, args, argCount)
+	Widget		parent;
+	char		*name;
+	ArgList		args;
+	Cardinal	argCount;
+Creates a basic image widget using the standard Motif creation style.  This
+form is rarely used; XtVaCreateManagedWidget is usually used instead.
+
+void XvicImageWrite(widget, image, new_data)
+	Widget		widget;
+	XvicImageData	*image;
+	Boolean		new_data;
+Sends image data to the widget.  This function is normally called in response
+to an exposeCallback to supply the requested data to the widget.  The image
+data structure is described under Public Structures.  The new_data flag
+should be True if this data is new or has been changed by the application,
+and False if the data is unchanged.  This flag is used to determine how much
+is to be displayed.  The widget always requests whole tiles of data (defined
+by tileWidth and tileHeight), even if only a portion of the tile needs
+updating.  If new_data is False, the widget will display only the portions
+needed for the expose event.  If new_data is True, the widget will re-display
+all the data supplied, even if not called for by an expose event (this would
+be used when displaying a different image, for example).  The response to
+the initial expose events (which display the data for the first time) may
+have new_data set to False.  This is because the initial expose will cover
+the entire display window, so there is no need to force any repaints.
+Most applications will set new_data to False permanently.  Any unsolicited
+calls to XvicImageWrite (calls not triggered by an exposeCallback) should set
+new_data to True for them to have much effect, since unsolicited calls are
+only needed to supply new data.  Note that the data supplied to XvicImageWrite
+does not have to be the size of a tile (unless dataSavePolicy is XvicNONE),
+but the widget will operate more efficiently if it is.  Sending data that is
+not a multiple of the tile size may have implications for memory usage; see
+the memory_control field of XvicImageData for details.
+
+void XvicImageSetColorLUT(widget, red_lut, green_lut, blue_lut)
+	Widget		widget;
+	int		*red_lut;
+	int		*green_lut;
+	int		*blue_lut;
+Sets the color or psuedocolor lookup tables for the widget.  The lut arguments
+are arrays of 256 integers, where the values are all in the range 0 to 255.
+If any of the lut arguments is NULL, the corresponding lookup table is
+not modified.  Note that when lutType is XvicPSEUDO, both the pseudocolor
+LUTs and the mono LUT are used.  The lookup tables default to straight
+linear ramps.
+
+void XvicImageGetColorLUT(widget, red_lut, green_lut, blue_lut)
+	Widget		widget;
+	int		*red_lut;
+	int		*green_lut;
+	int		*blue_lut;
+Returns the color or pseudocolor lookup table for the widget.  The lut
+arguments are pointers to arrays of 256 integers.  The arrays must be
+allocated by the caller; this routine does not allocate storage.
+The returned values are all in the range of 0 to 255.  If any of the
+lut arguments is NULL, the corresponding lookup table is not returned.
+
+void XvicImageSetMonoLUT(widget, lut)
+	Widget		widget;
+	int		*lut;
+Sets the monochrome (single-band) lookup table for the widget.  The lut
+argument is an array of 256 integers, where the values are all in the
+range 0 to 255.  If the lut argument is NULL, the function is essentially
+a no-op.  Note that when lutType is XvicPSEUDO, both the mono LUT and
+the pseudocolor LUTs are used.  The lookup table defaults to a straight
+linear ramp.  The mono LUT is ignored if imageMode is COLOR.
+
+void XvicImageGetMonoLUT(widget, lut)
+	Widget		widget;
+	int		*lut;
+Returns the monochrome (single-band) lookup table for the widget.  The lut
+argument is a pointer to an array of 256 integers.  The array must be
+allocated by the caller; this routine does not allocate storage.  The
+returned values are all in the range of 0 to 255.  If the lut argument
+is NULL, the function is essentially a no-op.  The mono LUT is ignored
+if imageMode is COLOR.
+
+void XvicImageSetColorLUT16(widget, red_lut, green_lut, blue_lut, lut_size)
+	Widget		widget;
+	int		*red_lut;
+	int		*green_lut;
+	int		*blue_lut;
+	int		lut_size;
+Sets the color or psuedocolor 16-bit lookup tables for the widget.  The lut
+arguments are arrays of lut_size integers, where the values are all in the
+range 0 to XvicNoutputDataMax.  lut_size should normally equal
+XvicNscaledDataMax.  If any of the lut arguments is NULL, the corresponding
+lookup table is not modified.  Note that when lut16Type is XvicPSEUDO, both the
+pseudocolor LUTs and the mono LUT are used.  The lookup tables default to
+straight linear ramps.
+
+void XvicImageGetColorLUT16(widget, red_lut, green_lut, blue_lut, lut_size)
+	Widget		widget;
+	int		*red_lut;
+	int		*green_lut;
+	int		*blue_lut;
+	int		lut_size
+Returns the color or pseudocolor 16-bit lookup table for the widget.  The lut
+arguments are pointers to arrays of lut_size integers.  The arrays must be
+allocated by the caller; this routine does not allocate storage.
+The returned values should all be in the range of 0 to XvicNoutputDataMax.
+lut_size should normally equal XvicNscaledDataMax.  If any of the lut
+arguments is NULL, the corresponding lookup table is not returned.
+
+void XvicImageSetMonoLUT16(widget, lut, lut_size)
+	Widget		widget;
+	int		*lut;
+	int		lut_size;
+Sets the monochrome (single-band) 16-bit lookup table for the widget.  The lut
+argument is an array of lut_size integers, where the values are all in the
+range 0 to XvicNoutputDataMax.  lut_size should normally equal
+XvicNscaledDataMax.  If the lut argument is NULL, the function is essentially
+a no-op.  Note that when lut16Type is XvicPSEUDO, both the mono LUT and
+the pseudocolor LUTs are used.  The lookup table defaults to a straight
+linear ramp.  The mono LUT is ignored if imageMode is COLOR.
+
+void XvicImageGetMonoLUT16(widget, lut, lut_size)
+	Widget		widget;
+	int		*lut;
+	int		lut_size;
+Returns the monochrome (single-band) 16-bit lookup table for the widget.  The
+lut argument is a pointer to an array of lut_size integers.  The array must be
+allocated by the caller; this routine does not allocate storage.  The
+returned values should all be in the range of 0 to XvicNoutputDataMax.
+lut_size should normally equal XvicNscaledDataMax.  If the lut argument
+is NULL, the function is essentially a no-op.  The mono LUT is ignored
+if imageMode is COLOR.
+
+void XvicImageClear(widget)
+	Widget		widget;
+Invalidates all saved data and clears the window, causing expose events
+to occur for the entire displayed area.  This function is normally used
+to change the image being displayed.  One option is to call XvicImageWrite
+on the new data with new_data set to True, but this is not always practical,
+and the application has to figure out what is being displayed so it doesn't
+send too much data.  Usually, it is easier to tell the widget to invalidate
+all its data and allow the normal Expose callback to repaint the screen.
+This function accomplishes that task.
+
+void XvicImageDisplayBounds(widget, x1, y1, x2, y2)
+	Widget		widget;
+	int		*x1;
+	int		*y1;
+	int		*x2;
+	int		*y2;
+Returns the Image coordinates of the edges of the displayed window.  The
+coordinates may be off the edge of the image if the window is bigger than
+the image.  This is just a convenience routine; the application could get
+XvicNviewWidth and XvicNviewHeight and figure it out for itself.  Note that
+at some zooms, the returned coordinates may be slightly larger than the window,
+but they will never be smaller.
+
+==============================================================================
+		BasicImage Actions
+==============================================================================
+
+None.
+
+##############################################################################
+		Image
+##############################################################################
+==============================================================================
+		Image Resources
+==============================================================================
+------------------------------------------------------------------------------
+		Image Resources - Modes and Policies
+------------------------------------------------------------------------------
+
+XvicNcursor		XvicCCursor	String		"crosshair"	CS(G)
+Sets the shape of the cursor, a la XmuCvtStringToCursor.  The value for this
+may be queried via GetValues.  However, if the cursor shape is explicitly set
+using one of the XvicImageSet...Cursor() routines, the queried value will be
+NULL (there is no way to query the cursor shape if those routines are used).
+The three valid forms for the cursor name are:
+1) Standard cursor name (from cursorfont.h), e.g. "arrow"
+2) Font name and glyph index of the form
+   "FONT fontname index [[fontname] index]", where the first pair is the
+   cursor shape and the second is the mask.  For example, "FONT cursor 0"
+   or "FONT cursor 0 1" or "FONT cursor 0 cursor 1" all use the font named
+   "cursor".
+3) Bitmap file name.  This may be an absolute name, or relative to the global
+   resource bitmapFilePath, class BitmapFilePath.  If the resource is not
+   defined, the default value is the Xmu build symbol BITMAPDIR.  The mask,
+   if present, has the same name but with "Mask" or "msk" appended.
+If the widget is compiled without Xmu support (i.e. NO_XMU is defined on the
+compile line for the widget), then only form #2 is allowed (or the default
+value of "crosshair").  This resource must not be set to NULL.
+
+XvicNcursorBackground	XvicCCursorBackground
+					String		"white"		CSG
+XvicNcursorForeground	XvicCCursorForeground
+					String		"black"		CSG
+Defines the foreground and background colors of the cursor.  These resources
+must be set, rather than using XRecolorCursor() directly, so the cursor
+planting routines can use the right color.  The colors are Strings rather
+than Pixels because potentially several different colormaps and visual types
+may be involved.  Any standard X color string specifier may be used.
+
+XvicNcursorMode		XvicCCursorMode	unsigned char	XvicFLOATING	CSG
+	XvicFLOATING, XvicPLANTED
+Defines how the image cursor behaves.  XvicFLOATING means that the image cursor
+floats free and moves with the mouse pointer.  This is the default case.
+XvicPLANTED means that the image cursor is "planted" into a spot on the image.
+The image cursor is separate from the mouse cursor, and stays planted until
+explicitly moved (which can happen via an action or other method).  The
+shape of the mouse cursor is inherited from the parent window in this case.
+
+XvicNcursorX		XvicCCursorLoc	int		dynamic		CSG
+XvicNcursorY		XvicCCursorLoc	int		dynamic		CSG
+These two resources set or return the image cursor location in image
+coordinates.  These resources are most useful when cursorMode is XvicPLANTED,
+in which case they are the only way to move the image cursor (some of the
+actions move the cursor via these resources).  When the cursorMode is
+XvicFLOATING, the position may be read from these resources, but it could
+change immediately.  An application that needs the floating cursor
+position is much better off using events or actions.  If the position is
+set while cursorMode is XvicFLOATING, then the actual mouse pointer is warped
+to the given position, which is generally considered very bad style in Motif.
+However, this is useful when switching from planted to floating cursor.
+The default values depend on the location of the cursor.  Note that for
+XvicFLOATING, the returned coordinates may be off the edge of the image if
+the cursor is not over the widget's window (i.e. they may be negative or
+greater than the image size).  Also, if the cursor is not on the same screen
+as the widget, the upper-left corner of the displayed image is returned.
+
+XvicNcursorXfp		XvicCCursorLocFp double		dynamic		CSG
+XvicNcursorYfp		XvicCCursorLocFp double		dynamic		CSG
+These two resources set or return the image cursor location in floating-point
+image coordinates.  This allows for the cursor to be set to fractional-pixel
+locations (which is only of any use with high zoom factors).  Otherwise, they
+are identical to cursorX and cursorY above.  The integral values are defined
+to be the center of a pixel, so the range of locations for pixel 10 is actually
+9.5 to 10.4999..., not 10.0 to 10.9999....  If both cursorX/Y and cursorX/Yfp
+are set, the fp versions take precedence.  NOTE:  Because these are doubles,
+they must be passed to SetValues (or a VarArgs routine) via the XvicDOUBLE_ARG
+macro, e.g. XtVaSetValues(w,XvicNcursorXfp,XvicDOUBLE_ARG(xpos),NULL);.  The
+macro argument must be a simple variable for which &arg is valid, and must be
+a double, not a float.  This macro compensates for different calling
+mechanisms on machines with 64-bit pointers.
+
+XvicNenableHWOverlay	XvicCEnableHWOverlay Boolean	True		CG
+Enables or disables the use of the hardware overlay plane.  If no hardware
+overlay is available, this resource is ignored (implicitly set to False,
+although it does not read back that way).  Note that this resource cannot be
+read to determine whether a hardware overlay is actually in use; a value of
+True only means that it will be used if the hardware supports it.  The overlay
+plane should normally be enabled but can be disabled if the widget has trouble
+using it (since there is very little standardization in how overlays work,
+this is quite possible on hardware that the widget has not been tested on).
+This resource can only be set at widget creation time; changes to it after
+the widget has been created will be quietly ignored.
+
+XvicNscrollBarDisplayPolicy	XvicCScrollBarDisplayPolicy
+					unsigned char	XvicAS_NEEDED	CSG
+	XvicSTATIC, XvicAS_NEEDED, XvicNEVER
+Specifies when scrollbars should be added to the image.  XvicSTATIC means that
+scrollbars are always present.  XvicAS_NEEDED means that scrollbars are present
+only if needed, i.e. if the view size is less than the (zoomed) image size
+in either direction.  This may cause the scrollbars to be displayed in one
+direction but not the other.  XvicNEVER means that scrollbars are never
+displayed.  Scrollbars, if displayed, are normally on the bottom and left of
+the image (but this can be modified via the XmNscrollBarPlacement resource
+of the parent XmScrolledWindow widget).  Note that the use of scrollbars
+(XvicSTATIC or XvicAS_NEEDED) will set the XvicNconstrainPan resource of
+BasicImage to XvicBOTH.  If you want unconstrained pans, you must disable the
+scrollbars by setting this resource to XvicNEVER.  If the parent widget of
+Image is not XmScrolledWindow (in APPLICATION_DEFINED mode), scrollbars will
+never be used and this resource is set to XvicNEVER.  The convenience creation
+routines will create the XmScrolledWindow for you.  If this resource is set
+to XvicAS_NEEDED, the view/core sizes of the image area may not be what you
+expect around the boundary conditions (they may shrink or expand to make room
+for or take up space left by the scrollbars as they appear and disappear).
+Also, using XvicAS_NEEDED has some implications for what the application can
+do from within the Resize callback.  See XvicNresizeCallback for details.
+
+XvicNtrackFloatingCursor	XvicCTrackFloatingCursor
+					Boolean		False		CSG
+Specifies whether the cursorCallback is called on pointer motion when
+XvicNcursorMode is XvicFLOATING.  This is generally set to True if a
+cursorCallback is registered and False otherwise.  Setting this to False
+allows the widget to remove the mouse motion event handler that tracks the
+floating cursor.  This should improve performance when the cursor location
+is not needed, since motion events will not be selected.
+
+------------------------------------------------------------------------------
+		Image Resources - Callbacks
+------------------------------------------------------------------------------
+
+XvicNcursorCallback	XtCCallback	XtCallbackList	NULL		CS
+This callback is called when the image cursor moves.  The image cursor
+is the mouse pointer when cursorMode is XvicFLOATING, and is independent
+(and moved via actions and/or XvicNcursorX/Y or XvicNcursorX/Yfp) when
+cursorMode is XvicPLANTED.  This callback allows the application to track the
+image cursor regardless of the mode it is in.  When cursorMode is XvicPLANTED,
+the callback is called any time the cursor is moved (whether via actions or
+setting the XvicNcursorX/Y(fp) resources).  However, when cursorMode
+isXvicFLOATING, whether the callback is called depends on the setting of
+XvicNtrackFloatingCursor for performance reasons.  If this resource is True,
+the callback is called for any cursor motion.  If it is False, the callback
+is not called.  Generally, when a cursorCallback is registered, the application
+should also set XvicNtrackFloatingCursor to True.  If the callback is removed,
+set it to False.
+
+XvicNinputCallback	XtCCallback	XtCallbackList	NULL		CS
+This callback is called from the Input() action routine.  It allows
+application-specific behavior on keypresses or mouse events, without having
+to register an event handler.  The event causing the action, the action
+argument, and the event location in image coordinates (for certain types of
+events)  are available in the callback structure.  The x, y, x_fp, y_fp, and
+on_screen fields of the callback structure are set to the image coordinates of
+the event for the following event types:  ButtonPress, ButtonRelease,
+EnterNotify, LeaveNotify, KeyPress, KeyRelease, MotionNotify.  For other event
+types, x, y, x_fp, y_fp, and on_screen are all 0.  Note that if translations
+are specified with "*translations" instead of ".translations", then the
+translations will be set on the hardware overlay widget as well (if present).
+If this happens, the event will be for the window associated with *that*
+widget, not the XvicImage widget.  So, be careful using the event x and y
+coordinates.  The callback structure x and y (and x_fp, y_fp) coordinates
+don't have this problem; they are corrected for this effect.
+
+XvicNpanCallback	XtCCallback	XtCallbackList	NULL		CS
+This callback is called whenever the widget changes the pan value.  It is
+not called if the pan changes due to the application setting xPan or yPan
+(but XvicNvisibleAreaCallback will be, so every possible pan operation will
+cause one and only one of these two callbacks to be triggered).  This is
+normally called due to the scrollbars being moved, or due to one of the
+various pan action routines (usually mouse or keyboard-controlled panning).
+
+XtNunrealizeCallback	XtCCallback	XtCallbackList	NULL		CS
+This callback is called when the widget is unrealized.  It is for internal
+implementation use only, and should not be used by application code.
+
+==============================================================================
+		Image Structures and Functions
+==============================================================================
+------------------------------------------------------------------------------
+		Image Callback Structure
+------------------------------------------------------------------------------
+
+The same structure, XvicImageCallbackStruct, is used for both the BasicImage
+and the Image callbacks.  See BasicImage for the full structure definition.
+Only the additions for Image are listed below.
+
+int	reason;
+Defines the reason for the callback.  The valid reasons added by Image,
+and the fields that are relevant for each, are listed below.
+
+XvicCR_CURSOR - Set for cursorCallback.  Valid fields are:
+	x, y, on_screen, x_fp, y_fp.
+XvicCR_INPUT - Set for inputCallback.  Valid fields are:
+	event, input_params, input_num_params, x, y, on_screen, x_fp, y_fp.
+XvicCR_PAN - Set for panCallback.  Valid fields are:
+	x_pan, y_pan.  Note that event is not valid.
+
+XEvent	*event;
+The event that (possibly indirectly) caused the callback.  It is present
+in most callbacks, but only really used for XvicCR_INPUT.  The application can
+find out what event triggered the input by examining the event, or
+alternatively it can use input_params.  For the Input callback, note that if
+translations are specified with "*translations" instead of ".translations",
+then the translations will be set on the hardware overlay widget as well (if
+present).  If this happens, the event will be for the window associated with
+*that* widget, not the XvicImage widget.  So, be careful using the event x
+and y coordinates.  The callback structure x and y (and x_fp, y_fp) coordinates
+don't have this problem; they are corrected for this effect.
+
+int x, y;
+The location, in image coordinates, of the image cursor (for XvicCR_CURSOR)
+or the event (for XvicCR_INPUT).  These fields are valid only for
+XvicCR_CURSOR and XvicCR_INPUT.  The cursor location may also be retrieved
+via Xt(Va)GetValues, but if the cursor is free-floating the location may
+have changed since the event was generated (or pans might have changed the
+mapping between screen and image coordinates).  These fields should generally
+be used instead of GetValues because of how the event queue works.  The
+cursor or event location is reported whether or not it is actually visible
+in the image (see on_screen).  For XvicCR_INPUT, the coordinates are
+set for ButtonPress, ButtonRelease, EnterNotify, LeaveNotify, KeyPress,
+KeyRelease, and MotionNotify events.  For other event types, these fields
+are 0.
+
+String *input_params;
+Cardinal input_num_params;
+A string array, and number of elements, representing the argument(s) passed to
+the action routine Input() from the translation table.  It is intended to
+allow the application to easily determine what action to take based on user
+input, without having to examine the event directly (thus violating the
+translation-action model).  These fields are exactly the same as the
+corresponding fields in the action routine.  The application may of course
+register its own action routines, but this facility should be easier to use.
+This field is valid only for XvicCR_INPUT.  The strings may be deallocated
+upon return from the callback, so if they need to be saved for later use, the
+application must copy them, not just save pointers to them.
+
+int x_pan, y_pan;
+The new pan value, in image coordinates.  These values could be obtained
+via GetValues on the widget, but are provided in the callback structure as
+a convenience.  This field is valid only for XvicCR_PAN.
+
+Boolean on_screen;
+Indicates whether the cursor (for XvicCR_CURSOR) or event location (for
+XvicCR_INPUT) is in the visible area of the image or not.  This field is
+valid only for XvicCR_CURSOR and XvicCR_INPUT.  If this value is True,
+the location is within the current view area.  If it is False, the
+location is either off the window, or possibly in the window border.  Note
+that this value may be False even if the coordinates indicate that it
+should be on-screen, because a LeaveNotify event may report the last
+cursor/event position (which was probably on screen), but this flag will be
+set to False because the position is no longer on the screen.  This flag may
+be used to blank out coordinate displays when the cursor is off the image,
+or to implement automatic panning if something is dragged off the visible area.
+Note that on_screen is valid only at the time the callback is issued.  For
+example, if a subsequent pan causes the cursor to go off the screen without
+actually moving it, a cursorCallback will not be generated even though
+on_screen might have changed.  For XvicCR_INPUT, this field is set for
+ButtonPress, ButtonRelease, EnterNotify, LeaveNotify, KeyPress, KeyRelease,
+and MotionNotify events.  For other event types, this field is set to False.
+
+double x_fp, y_fp;
+Identical to x, y above in all respects, except that the coordinates are in
+floating-point image coordinates rather than integers.  This allows for the
+cursor or event location to be read to fractional-pixel accuracy (which is
+only of any use with high zoom factors).  The integral values are defined to
+be the center of a pixel, so the range of locations for pixel 10 is actually
+9.5 to 10.4999..., not 10.0 to 10.9999....
+
+------------------------------------------------------------------------------
+		Image Public Structures
+------------------------------------------------------------------------------
+
+typedef struct {
+	double	x;
+	double	y;
+	double	width;
+	double	height;
+	int	angle1;
+	int	angle2;
+} XvicArc;
+
+XvicArc is used in XvicImageDrawArcs() and XvicImageFillArcs() to specify
+arrays of arcs.  This structure is exactly like XArc, except that the
+coordinates in XvicArc are doubles instead of shorts (since Image coordinates
+can be larger than a short, and fractional pixels are supported).  See
+"Important note on height/width", under "Overlay Drawing Routines", below.
+
+typedef struct {
+	double	x;
+	double	y;
+} XvicPoint;
+
+XvicPoint is used in XvicImageDrawLines(), XvicImageDrawPoints(),
+XvicImageFillPolygon() to specify arrays of coordinates.  This structure
+is exactly like XPoint, except that the coordinates in XvicPoint are doubles
+instead of shorts (since Image coordinates can be larger than a short, and
+fractional pixels are supported).
+
+typedef struct {
+	double	x;
+	double	y;
+	double	width;
+	double	height;
+} XvicRectangle;
+
+XvicRectangle is used in XvicImageDrawRectangles() and XvicImageFillRectangles()
+to specify arrays of rectangles.  This structure is exactly like XRectangle,
+except that the coordinates in XvicRectangle are doubles instead of shorts
+(since Image coordinates can be larger than a short, and fractional pixels are
+supported).  See "Important note on height/width", under "Overlay Drawing
+Routines", below.
+
+typedef struct {
+	double	x1;
+	double	y1;
+	double	x2;
+	double	y2;
+} XvicSegment;
+
+XvicSegment is used in XvicImageDrawSegments() to specify arrays of line
+segments.  This structure is exactly like XSegment, except that the coordinates
+in XvicSegment are doubles instead of shorts (since Image coordinates can be
+larger than a short, and fractional pixels are supported).
+
+------------------------------------------------------------------------------
+		Image Public Functions
+------------------------------------------------------------------------------
+
+XvicCreateImage(parent, name, args, argCount)
+	Widget		parent;
+	char		*name;
+	ArgList		args;
+	Cardinal	argCount;
+Creates an image widget using the standard Motif creation style.  This
+routine also creates a ScrolledWindow parent widget, so scrollbars can
+work properly.  For this reason, this routine should normally be used
+instead of Xt(Va)Create(Managed)Widget.  Resources for the ScrolledWindow
+can be set in args as well as Image resources.  Note that the Image widget is
+NOT managed by this routine (to be consistent with Motif); you must manage
+the widget yourself (the automatically created ScrolledWindow widget is
+managed automatically).  If you want to use the VarArgs interface for creation,
+you can do what this routine does yourself.  Create a ScrolledWindow with
+XmNscrollingPolicy = XmAPPLICATION_DEFINED, XmNvisualPolicy = XmVARIABLE, and
+XmNscrollBarDisplayPolicy = XmSTATIC.  Then, use XtVaCreate(Managed)Widget to
+create the Image widget as a child of the ScrolledWindow.
+
+Overlay Color Routines
+----------------------
+These routines must be called to get a color to use before any graphics
+drawing can be done.  The colors are not set directly in the GC in order to
+cut down on the number of GC's needed.  You must use these routines instead
+of allocating colors manually so that the colors will stay "correct" (as close
+as possible) when the visual type or dither type changes.  Graphics colors are
+dithered if needed in order to get the closest possible color to the request.
+
+XvicColor XvicImageGetGrColor(iw, xcolor)
+	Widget		iw;
+	XColor		*xcolor;
+Returns a color index to use for graphics or cursor calls.  The color is
+specified by the red, green, and blue components of the xcolor structure
+(which are unsigned short ints, meaning the values range from 0 to 0xFFFF, not
+0 to 255).  Other elements of xcolor are ignored.  The xcolor struct may
+be created directly, or it may be returned by a function such as XParseColor()
+if you wish to specify the color using string names.  Note that the String
+to Pixel resource converter is not sufficient for returning XvicColor indices,
+so you must get the value as a string, pass it through XParseColor() (or
+equivalent), and then call this routine, if you want to specify graphics
+colors in a resource file (or you could write your own converter).  The
+returned value can be used for any overlay call requiring a color.  There
+is no guarantee you will receive the color requested; however, the widget
+will do the best it can.  Colors are preserved (and may get better) when
+display modes are changed.
+
+XvicColor XvicImageGetGrColorRGB(iw, red, green, blue)
+	Widget		iw;
+	int		red;
+	int		green;
+	int		blue;
+Same as XvicImageGetGrColor(), except the color components are specified as
+separate arguments in the range 0 to 255.
+
+Overlay GC Routines
+-------------------
+These routines allow you to allocate, change, and free graphics contexts
+for use with the graphics overlay routines.  You must use these routines
+instead of getting GC's directly because the widget manages the GC's and will
+replace them if the visual type or depth changes (so it is transparent to
+the user).  You may pass NULL for the XvicGC argument to the overlay routines
+to get a default GC.
+
+The settable items in the GC are:
+   arc_mode, cap_style, dashes, dash_offset, fill_rule, font, function,
+   join_style, line_style, line_width, plane_mask
+Note that setting "function" or "plane_mask" may produce unpredictable results
+depending on the type of overlay visual used.  Also, line_width should not be
+set to 0; such so-called "fast" lines will not be dithered correctly.  Use a
+line_width of at least 1.  Finally, for the text-related routines, the font
+must be set; there is no way to default it (largely because there appears to
+be no way to get the font ID of the default font back from the X server!).
+If you don't set the font, no text will be displayed.
+
+The following are reserved for use by the widget (in order to render the
+graphics correctly); any settings for these will be ignored or will have no
+effect:
+   background, clip_mask, clip_(x|y)_origin, fill_style, foreground,
+   graphics_exposures, tile, stipple, subwindow_mode, ts_(x|y)_origin
+
+void XvicImageChangeGC(iw, gc, valuemask, values)
+	Widget		iw;
+	XvicGC		gc;
+	unsigned long	valuemask;
+	XGCValues	*values;
+Modifies the (already created) GC.  The given GC must be an XvicGC id returned
+by XvicImageCreateGC(); it cannot be a standard X GC.  See the description
+above for details on what fields are valid.  Any existing graphics that
+use this GC will be redisplayed with the new GC.
+
+XvicGC XvicImageCreateGC(iw, valuemask, values)
+	Widget		iw;
+	unsigned long	valuemask;
+	XGCValues	*values;
+Creates a GC for use with the graphics routines and returns a handle to it.
+The returned handle should be used with all graphics routines.  The GC can
+be modified with XvicImageChangeGC() or XvicImageSetDashes(), and can be
+freed with XvicImageFreeGC().  See the description above for details on what
+fields are valid.
+
+XvicGC XvicImageCreateRubberGC(iw, valuemask, values)
+	Widget		iw;
+	unsigned long	valuemask;
+	XGCValues	*values;
+Creates a GC like XvicImageCreateGC, except that the GC will be set up for
+rubber-banding operations.  Graphics drawn using the rubber-band mode can be
+erased much faster than normal graphics, because the image does not have to
+be redrawn.  However, you have no control over the color of the rubber band.
+Erasing the rubber band should be done via XvicImageEraseObject(), *not* by
+drawing the object again in the same place.
+
+void XvicImageFreeGC(iw, gc)
+	Widget		iw;
+	XvicGC		gc;
+Frees the specified XvicGC.  If it has not been allocated, this call is
+quietly ignored.  Any graphics objects using a GC must be erased before
+freeing the GC.
+
+void XvicImageSetDashes(iw, gc, dash_offset, dash_list, n)
+	Widget		iw;
+	XvicGC		gc;
+	int		dash_offset;
+	char		dash_list[];
+	int		n;
+Just like XSetDashes(), this routine will set the dashes for an XvicGC.
+This routine is needed because the full dash functionality cannot be set
+via a XGCValues struct.  The dash_list is copied, so it may be freed when
+this call returns.  Setting n to 0 will disable setting the dash list, which
+will cause whatever settings may be in the XGCValues struct to take effect.
+
+Overlay Drawing Routines
+------------------------
+The graphics drawing routines closely mirror the X drawing primitives.
+However, once drawn, the widget keeps track of all objects and redraws
+them as appropriate without application intervention.  Floating-point Image
+coordinates are used, so that the graphics are attached to certain locations
+in the image to subpixel accuracy.  If the image is panned or zoomed, the
+graphics will be moved or resized to match.  Fractional coordinates only
+really matter for zooms > 1.  The integral values are defined to be the centers
+of the image pixels, so the range of locations for pixel 10 is actually 9.5 to
+10.4999..., not 10.0 to 10.9999....
+
+Important note on height/width:  Several of the drawing routines (e.g.
+arc and rectangle) take a floating-point height and width either in arguments
+or in the structure passed in.  These fields behave oddly.  The X drawing
+routines define height and width to be the number of pixels that are covered
+by an object.  So if an object covers coordinates 3 though 6, the width is 4
+(the same applies to height of course).  The formula is width = end - start + 1.
+This works and makes sense for integer coordinates.  However, it breaks down
+for floating-point coordinates.  Since integral coordinates are defined to be
+the centers of the pixels, the true width of the 3.0 through 6.0 rectangle is
+really 3.0, not 4.  So the natural formula is width = end - start.  However,
+this usage is inconsistent with the X drawing routines which the widget is
+emulating.  Since most drawing will be done with integral coordinates, the
+width in these routines is defined in the integer sense to match X, i.e.
+end - start + 1.  This means that when dealing with floating-point coordinates,
+you have to add an artificial 1.0 to the width you would expect, and the
+minimum width is 1.0 (values less than 1.0 are quietly reset to 1.0).  So an
+object starting at 3.4 with a specified width of 2.3 would end at 4.7, not
+5.7 as you would expect.
+
+Each object in the overlay is assigned an ID.  This ID can be used to move
+or erase the object at a later time.  More than one primitive can share the
+same ID, in which case they are treated as a single object.  For example,
+two lines in a "+" shape, together with a text number, might be a single
+object representing a tiepoint location.  This object can be moved or
+erased as a unit, but it cannot be split back into its component parts.
+
+Each drawing routine accepts an ID as an argument, and returns an ID as the
+function return.  If the argument is specified as 0, the item being drawn
+becomes a new object, and its ID is returned.  It the argument is non-0, the
+item being drawn is added to the specified object (which must already exist),
+and that ID is returned.  The returned ID can be discarded if you never want
+to manipulate the object; the widget will take care of redisplays.  In
+case of error (which normally is only an invalid GC, Color, or ID), the
+returned object ID is 0.
+
+Each drawing routine also requires XvicGC and XvicColor arguments in order
+to specify how to draw the object, and what color to use.  These must be
+created using widget functions; see "Overlay GC Routines" and "Overlay Color
+Routines" above.  Standard X GC's and colors cannot be used with the widget.
+
+If the X server has a hardware overlay, it will be used for all graphics
+functions (including the planted cursor).  If not, the overlay will be
+emulated in software, which means that parts of the image itself must be
+redrawn whenever a graphics object is moved or erased.  For this reason,
+interactive "rubber-banding" effects should be done using a special Rubber GC
+(using XvicImageCreateRubberGC()) for efficiency.  Rubber-banding may be
+performed without using a rubber GC but the animation will not be as smooth.
+
+Graphics objects are always stacked with the oldest on the bottom.  So, newer
+objects will sit on top of older ones.  There is no way to change this
+stacking order.  Note that objects sharing a common ID may be at different
+places in the stacking order, allowing a simultaneous "over-under" effect if
+the objects are moved by other objects in between the components in the
+stacking order.
+
+All graphics are clipped to the size of the image.  However, coordinates are
+maintained, so that if the image is expanded, or the object moved into the
+image area, it will still look correct.
+
+The widget does not provide any capability for matching a coordinate to
+the "closest" graphic object (in other words, picking an object off the
+screen).  This is the responsibility of the application.
+
+XvicID XvicImageDrawArc(iw, id, gc, color, x, y, width, height, angle1, angle2)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	double		x, y;
+	double		width, height;
+	int		angle1, angle2;
+Draws an arc inside the box specified by (x,y,width,height).  Similar to
+XDrawArc().  The angle1 and angle2 parameters are as specified in XDrawArc().
+See "Important note on height/width", under "Overlay Drawing Routines", above.
+
+XvicID XvicImageDrawArcs(iw, id, gc, color, arcs, narcs)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	XvicArc		*arcs;
+	int		narcs;
+Draws multiple arcs.  Similar to XDrawArcs().  Note that a sequence of
+XvicImageDrawArc() calls may be more efficient in some cases than
+XvicImageDrawArcs(), because in order to erase or move a graphics primitive,
+the widget uses the bounding box of the entire primitive.  Separate Arc's may
+have a smaller overall bounding box than one set of Rectangles.  They will
+not join correctly, though, if you are depending on line joins where the
+arcs meet.  On the other hand, it takes more server commands to draw the arcs
+separately.  Generally, if the arcs are together in a small area, use
+Arcs.  If they are spread out over the image, use separate Arc's.  See
+"Important note on height/width", under "Overlay Drawing Routines", above.
+
+
+XvicID XvicImageDrawBitmap(iw, id, gc, color, x, y, bitmap, width, height,
+			   hot_x, hot_y)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	double		x, y;
+	Pixmap		bitmap;
+	unsigned int	width, height;
+	int		hot_x, hot_y;
+Draws a bitmap.  The given Pixmap must be of depth 1 and should use the same
+root as the widget.  The hot_x and hot_y parameters are offsets into the bitmap
+(in Screen coordinates) which define the "hotspot".  The bitmap will be drawn
+with this hotspot at the given (x,y) coordinates (in Image coordinates).  For
+example, if hot_x and hot_y are 0, then the upper left corner of the bitmap
+will be at (x,y).  If hot_x and hot_y are (width/2, height/2), the center of
+the bitmap will be drawn at (x,y).  The hotspot should be used rather than
+offsetting (x,y) so that the correct point is still at the given coordinates
+regardless of the zoom factor.  If you wish to have a border ("mask") around
+the shape, like for a cursor, you should first draw the mask bitmap in the
+background color, then draw the shape bitmap in the foreground color using
+the same ID.  The same technique can be used to build up multicolored icons,
+by drawing each color as a separate bitmap and overlaying them using the same
+ID.  The given Pixmap is not copied by the widget, so you must not free it
+until after erasing all graphic objects that use it.  Similarly, erasing
+the object does not free the Pixmap; it is the application's responsibility.
+Some simple animation may be achieved by changing the pixmap, then moving the
+object with a delta of (0,0).  This will cause the object to be redrawn using
+the new shape.  The size and hotspot cannot be changed, however.  Note that
+the height and width are in Screen coordinates, and the size of the drawn
+bitmap does not change with zoom factors (only the hotspot location is
+"attached" to the image during zooms).
+
+XvicID XvicImageDrawImageString(iw, id, gc, fg, bg, x, y, string, length,
+				justify)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	fg;
+	XvicColor	bg;
+	double		x, y;
+	char		*string;
+	int		length;
+	int		justify;
+Draws a string, filling the bounding box with the specified background first.
+Similar to XDrawImageString().  The string ends up with an opaque background.
+Unlike XDrawImageString(), tiling will be used if necessary to dither the
+colors.  The justify parameter specifies where in the text the (x,y) location
+is.  XvicJUST_LEFT specifies the left side of the baseline, which is how
+XDrawImageString works.  XvicJUST_RIGHT specifies the right side of the
+baseline, while XvicJUST_CENTER specifies the center of the baseline.  Note
+that text is not resized when the zoom changes.
+
+XvicID XvicImageDrawImageString16(iw, id, gc, fg, bg, x, y, string, length,
+				  justify)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	fg;
+	XvicColor	bg;
+	double		x, y;
+	XChar2b		*string;
+	int		length;
+	int		justify;
+Draws a string using 16-bit characters, filling the bounding box with the
+specified background first.  Similar to XDrawImageString16().  The string ends
+up with an opaque background.  Unlike XDrawImageString16(), tiling will be
+used if necessary to dither the colors.  The justify parameter specifies where
+in the text the (x,y) location is.  XvicJUST_LEFT specifies the left side of
+the baseline, which is how XDrawImageString16 works.  XvicJUST_RIGHT specifies
+the right side of the baseline, while XvicJUST_CENTER specifies the center of
+the baseline.  Note that text is not resized when the zoom changes.
+
+XvicID XvicImageDrawLine(iw, id, gc, color, x1, y1, x2, y2)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	double		x1, y1;
+	double		x2, y2;
+Draws a line from (x1,y1) to (x2,y2).  Similar to XDrawLine().
+
+XvicID XvicImageDrawLines(iw, id, gc, color, points, npoints, mode)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	XvicPoint	*points;
+	int		npoints;
+	int		mode;
+Draws a series of lines joined end-to-end, joining them as specified in
+the XvicGC.  Similar to XDrawLines().  If the last point matches the first,
+the first and last lines will join correctly.  If mode is CoordModeOrigin,
+all points are in absolute Image coordinates.  If mode is CoordModePrevious,
+all points after the first are relative to the previous point (they are still
+in Image coordinates but specify an offset instead of an absolute location).
+The first point is always in absolute Image coordinates.
+
+XvicID XvicImageDrawPoint(iw, id, gc, color, x, y)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	double		x, y;
+Draws a point at (x,y).  Similar to XDrawPoint().  Note, however, that
+XDrawPoint() is not actually used since it does not pay attention to
+the tiling patterns used for dither.  Instead, XFillRectangle() is used
+with a width and height of 1.  Also, single points may or may not be visible if
+dithering is in effect, depending on how they hit the dither pattern.  They
+most likely won't be the right color in any case.
+
+XvicID XvicImageDrawPoints(iw, id, gc, color, points, npoints, mode)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	XvicPoint	*points;
+	int		npoints;
+	int		mode;
+Draws a series of points.  Similar to XDrawPoints().  If mode is
+CoordModeOrigin, all points are in absolute Image coordinates.  If mode is
+CoordModePrevious, all points after the first are relative to the previous
+point (they are still in Image coordinates but specify an offset instead of
+an absolute location).  The first point is always in absolute Image coordinates.
+Note that XDrawPoints() is not actually used since it does not pay attention to
+the tiling patterns used for dither.  Instead, XFillRectangles() is used
+with a width and height of 1.  Also, single points may or may not be visible if
+dithering is in effect, depending on how they hit the dither pattern.  They
+most likely won't be the right color in any case.
+
+XvicID XvicImageDrawRectangle(iw, id, gc, color, x, y, width, height)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	double		x, y;
+	double		width, height;
+Draws a rectangle with upper-left corner at (x,y) and the specified width
+and height.  Similar to XDrawRectangle().  NOTE:  Unlike XDrawRectangle(),
+the specified width and height are used exactly.  XDrawRectangle() actually
+uses a width and height one greater than what is specified.
+XvicImageDrawRectangle, on the other hand, uses the supplied width and
+height without adding one, so it draws a rectangle the same size as
+XvicImageFillRectangle() does.  This was done because the coordinates are
+not really pixel coordinates, they are Image coordinates (which are not
+constant pixels, if the zoom changes), so adding one screen pixel to the
+size did not make much sense.  Note also that when a rectangle is moved
+or erased, the entire bounding box is redrawn.  For software overlay, this
+means re-exposing the entire image area covered by the rectangle.  For this
+reason, it may be more efficient for large rectangles to use four separate
+XvicImageDrawLine() calls (attaching them all to the same ID) so that only
+the lines themselves are redrawn, not the area in the center.
+(XvicImageDrawLines() can't be used becuase it has the same bounding-box
+problem).  See "Important note on height/width", under "Overlay Drawing
+Routines", above.  Both the height/width adjustments above, and in the
+Important Note, apply.  Think in terms of ending pixel coordinate - starting
+pixel coordinate + 1.0.
+
+XvicID XvicImageDrawRectangles(iw, id, gc, color, rectangles, nrectangles)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	XvicRectangle	*rectangle;
+	int		nrectangles;
+Draws multiple rectangles.  Similar to XDrawRectangles().  Note that a
+sequence of XvicImageDrawRectangle() calls may be more efficient in some
+cases than XvicImageDrawRectangles(), because in order to erase or move a
+graphics primitive, the widget uses the bounding box of the entire primitive.
+Separate Rectangle's may have a smaller overall bounding box than one set of
+Rectangles.  On the other hand, it takes more server commands to draw the rects
+separately.  Generally, if the rectangles are together in a small area, use
+Rectangles.  If they are spread out over the image, use separate Rectangle's.
+XvicImageDrawRectangles() uses the same width and height conventions as
+XvicImageDrawRectangle() (which is different from XDrawRectangles()).  Also
+see "Important note on height/width", under "Overlay Drawing Routines", above.
+
+XvicID XvicImageDrawSegments(iw, id, gc, color, segments, nsegments)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	XvicSegment	*segments;
+	int		nsegments;
+Draws multiple disjoint line segments.  Similar to XDrawSegments().  Note
+that a sequence of XvicImageDrawLine() calls may be more efficient in some
+cases than XvicImageDrawSegments(), because in order to erase or move a
+graphics primitive, the widget uses the bounding box of the entire primitive.
+Separate Line's may have a smaller overall bounding box than one set of
+Segments.  On the other hand, it takes more server commands to draw the lines
+separately.  Generally, if the lines are together in a small area, use
+Segments.  If they are spread out over the image, use separate Line's.
+
+XvicID XvicImageDrawString(iw, id, gc, color, x, y, string, length, justify)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	double		x, y;
+	char		*string;
+	int		length;
+	int		justify;
+Draws a string, but does not fill the bounding box.  Similar to XDrawString().
+The string ends up with a transparent background.  The justify parameter
+specifies where in the text the (x,y) location is.  XvicJUST_LEFT specifies
+the left side of the baseline, which is how XDrawString works.  XvicJUST_RIGHT
+specifies the right side of the baseline, while XvicJUST_CENTER specifies the
+center of the baseline.  Note that text is not resized when the zoom
+changes.
+
+XvicID XvicImageDrawString16(iw, id, gc, color, x, y, string, length, justify)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	double		x, y;
+	XChar2b		*string;
+	int		length;
+	int		justify;
+Draws a string using 16-bit characters, but does not fill the bounding box.
+Similar to XDrawString16().  The string ends up with a transparent background.
+The justify parameter specifies where in the text the (x,y) location is.
+XvicJUST_LEFT specifies the left side of the baseline, which is how
+XDrawString16 works.  XvicJUST_RIGHT specifies the right side of the
+baseline, while XvicJUST_CENTER specifies the center of the baseline.  Note
+that text is not resized when the zoom changes.
+
+XvicID XvicImageDrawText(iw, id, gc, color, x, y, items, nitems, justify)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	double		x, y;
+	XTextItem	*items;
+	int		nitems;
+	int		justify;
+Draws multiple strings on the same horizontal line, possibly changing fonts
+between each.  Similar to XDrawText().  The strings are specified exactly
+as in XDrawText().  The justify parameter specifies where in the text line
+the (x,y) location is.  XvicJUST_LEFT specifies the left side of the baseline,
+which is how XDrawText works.  XvicJUST_RIGHT specifies the right side of the
+baseline, while XvicJUST_CENTER specifies the center of the baseline.  Note
+that text is not resized when the zoom changes.
+
+XvicID XvicImageDrawText16(iw, id, gc, color, x, y, items, nitems, justify)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	double		x, y;
+	XTextItem16	*items;
+	int		nitems;
+	int		justify;
+Draws multiple 16-bit strings on the same horizontal line, possibly changing
+fonts between each.  Similar to XDrawText16().  The strings are specified
+exactly as in XDrawText16().  The justify parameter specifies where in the text
+line the (x,y) location is.  XvicJUST_LEFT specifies the left side of the
+baseline, which is how XDrawText works.  XvicJUST_RIGHT specifies the right
+side of the baseline, while XvicJUST_CENTER specifies the center of the
+baseline.  Note that text is not resized when the zoom changes.
+
+XvicID XvicImageFillArc(iw, id, gc, color, x, y, width, height, angle1, angle2)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	double		x, y;
+	double		width, height;
+	int		angle1, angle2;
+Draws a filled arc inside the box specified by (x,y,width,height).  Similar to
+XFillArc().  The angle1 and angle2 parameters are as specified in XFillArc().
+See "Important note on height/width", under "Overlay Drawing Routines", above.
+
+XvicID XvicImageFillArcs(iw, id, gc, color, arcs, narcs)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	XvicArc		*arcs;
+	int		narcs;
+Draws multiple filled arcs.  Similar to XFillArcs().  Note that a sequence of
+XvicImageFillArc() calls may be more efficient in some cases than
+XvicImageFillArcs(), because in order to erase or move a graphics primitive,
+the widget uses the bounding box of the entire primitive.  Separate Arc's may
+have a smaller overall bounding box than one set of Rectangles.  On the
+other hand, it takes more server commands to draw the arcs separately.
+Generally, if the arcs are together in a small area, use Arcs.  If they
+are spread out over the image, use separate Arc's.  See "Important note on
+height/width", under "Overlay Drawing Routines", above.
+
+XvicID XvicImageFillPolygon(iw, id, gc, color, points, npoints, shape, mode)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	XvicPoint	*points;
+	int		npoints;
+	int		shape;
+	int		mode;
+Draws a filled polygon.  Similar to XFillPolygon().  If the first and last
+point don't coincide, the path is closed automatically.  If mode is
+CoordModeOrigin, all points are in absolute Image coordinates.  If mode
+is CoordModePrevious, all points after the first are relative to the previous
+point (they are still in Image coordinates but specify an offset instead of
+an absolute location).  The first point is always in absolute Image coordinates.
+The shape argument is one of Complex, Nonconvex, or Convex.  See XFillPolygon() 
+for the meaning of these values.  If in doubt, use Complex.
+
+XvicID XvicImageFillRectangle(iw, id, gc, color, x, y, width, height)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	double		x, y;
+	double		width, height;
+Draws a filled rectangle with upper-left corner at (x,y) and the specified
+width and height.  Similar to XFillRectangle().  See "Important note on
+height/width", under "Overlay Drawing Routines", above.
+
+XvicID XvicImageFillRectangles(iw, id, gc, color, rectangles, nrectangles)
+	Widget		iw;
+	XvicID		id;
+	XvicGC		gc;
+	XvicColor	color;
+	XvicRectangle	*rectangle;
+	int		nrectangles;
+Draws multiple filled rectangles.  Similar to XFillRectangles().  Note that a
+sequence of XvicImageFillRectangle() calls may be more efficient in some
+cases than XvicImageFillRectangles(), because in order to erase or move a
+graphics primitive, the widget uses the bounding box of the entire primitive.
+Separate Rectangle's may have a smaller overall bounding box than one set of
+Rectangles.  On the other hand, it takes more server commands to fill the rects
+separately.  Generally, if the rectangles are together in a small area, use
+Rectangles.  If they are spread out over the image, use separate Rectangle's.
+See "Important note on height/width", under "Overlay Drawing Routines", above.
+
+Overlay Object Manipulation Routines
+------------------------------------
+These functions operate on graphics objects specified by an ID, which is
+returned by the drawing primitives.  All objects sharing the same ID will
+be affected by these routines (there is no way to split an object into its
+component parts).
+
+void XvicImageEraseObject(iw, id)
+	Widget		iw;
+	XvicID		id;
+Erases all graphics objects using the given id.  Rubber objects are simply
+undrawn (using an XOR), while normal objects are erased and everything else
+is redrawn under them (which may be somewhat expensive).  Note that if you
+draw a non-rubber object on top of a rubber object, then erase the rubber
+object, the results will be undefined until the next time the area is
+redisplayed.
+
+void XvicImageEraseOverlay(iw)
+	Widget		iw;
+Erases all overlay objects in the widget.  Does not erase XvicColor's or
+XvicGC's.
+
+void XvicImageMoveObject(iw, id, delta_x, delta_y)
+	Widget		iw;
+	XvicID		id;
+	double		delta_x;
+	double		delta_y;
+Moves all graphics objects using the given id.  Rubber objects are undrawn
+and redrawn, while normal objects are erased (causing everything else to be
+redrawn under them) and then redrawn, which may be somewhat expensive.  Note
+that if you move a non-rubber object on top of a rubber object, then move the
+rubber object, the results will be undefined until the next time the area is
+redisplayed.
+
+Cursor Shape Routines
+---------------------
+The cursor setting routines are needed because of a deficiency in the
+X protocol where the shape of a given cursor cannot be determined.
+The shape is needed in order for the cursor to be planted, which means
+it is drawn directly onto the image in order to mark a place while the real
+cursor is elsewhere.  So, these routines must be used instead of the X
+equivalents to set the cursor shape.
+
+XvicImageSetFontCursor(widget, shape)
+	Widget		widget;
+	unsigned int	shape;
+Sets the cursor to the specified shape from the standard cursor font.
+This routine must be used instead of XCreateFontCursor() so the cursor
+planting routines can get the right shape.  See XCreateFontCursor() for
+an explanation of the shape parameter.  Setting the cursor via this function
+will cause any queries of XvicNcursor to return NULL.
+
+XvicImageSetGlyphCursor(widget, source_font, mask_font, source_char, mask_char)
+	Widget		widget;
+	Font		source_font, mask_font;
+	unsigned int	source_char, mask_char;
+Similar to XvicImageSetFontCursor, but the source and mask bitmaps are obtained
+from separate font characters, possibly in separate fonts.  This routine
+must be used instead of XCreateGlyphCursor() so the cursor planting routines
+can get the right shape.  See XCreateGlyphCursor() for an explanation of the
+parameters.  Setting the cursor via this function will cause any queries of
+XvicNcursor to return NULL.  Currently, multibyte fonts are not supported.
+
+XvicImageSetPixmapCursor(widget, source, mask, x, y)
+	Widget		widget;
+	Pixmap		source, mask;
+	unsigned int	x, y;
+Sets the cursor to the shape specified by the given pixmap and mask.  This
+routine must be used instead of XCreatePixmapCursor() so the cursor planting
+routines can get the right shape.  See XCreatePixmapCursor() for an explanation
+of the parameters.  Setting the cursor via this function will cause any queries
+of XvicNcursor to return NULL.
+
+==============================================================================
+		Image Actions
+==============================================================================
+------------------------------------------------------------------------------
+		Image Actions - Sample Translations
+------------------------------------------------------------------------------
+
+	<Btn1Down>:		MousePanStart() \n\
+	<Btn1Motion>:		MousePan() \n\
+	Shift<Key>Left:		PanOne(left) \n\
+	Shift<Key>Right:	PanOne(right) \n\
+	Shift<Key>Up:		PanOne(up) \n\
+	Shift<Key>Down:		PanOne(down) \n\
+	Ctrl<Key>Left:		PanHalfView(left) \n\
+	Ctrl<Key>Right:		PanHalfView(right) \n\
+	Ctrl<Key>Up:		PanHalfView(up)	\n\
+	Ctrl<Key>Down:		PanHalfView(down) \n\
+	Shift Ctrl<Key>Left:	PanEdge(left) \n\
+	Shift Ctrl<Key>Right:	PanEdge(right) \n\
+	Shift Ctrl<Key>Up:	PanEdge(up)	\n\
+	Shift Ctrl<Key>Down:	PanEdge(down) \n\
+	<Key>Esc:		CursorMode(toggle) \n\
+	<Btn3Down>:		Input(mark_point) \n\
+
+These are only samples; applications may choose different events.
+There are some interactions with Motif to be aware of when using keyboard
+events.  Apparently, keyboard traversal must be on in order to get the
+keypresses, but that means that the user must traverse (tab) to the imaging
+widget in order to use the keys.  Also, the traversal mechanism seems to
+swallow unmodified arrows, but this may be resolved in the future.
+
+------------------------------------------------------------------------------
+		Image Action Routines
+------------------------------------------------------------------------------
+
+CursorMode(mode,warp)
+Sets the cursor planting mode, corresponding to the cursorMode resource.
+The "mode" argument is one of the strings "plant", "float", or "toggle".
+The default if mode is not given is "toggle".  The "warp" argument is either
+"true" or "false", and applies only when going into floating mode.  True
+causes the mouse pointer to be warped (explicitly moved) to the last location
+of the planted cursor (assuming the cursor was planted before).  This can
+be jarring to a user so should be used with discretion.  False (the default)
+leaves the pointer alone.
+
+Input(arg...)
+Calls the inputCallback routine.  The "arg..." argument is 0 or more strings
+that are passed to the callback routine.  This action routine is intended to
+allow application-specific behavior on keypresses or mouse events, without
+having to register an event handler or their own action routine.  The event
+causing the action and callback is available in the callback structure.
+
+MousePanStart()
+Sets the starting point for a mouse pan operation.  This action may be
+triggered by any event with an (x,y) position, which includes ButtonPress,
+ButtonRelease, EnterNotify, LeaveNotify, KeyPress, KeyRelease, and MotionNotify.
+
+MousePan()
+Implements mouse-based panning.  The mouse appears to the user to be stuck to
+the image, and the image pans as the mouse moves.  Therefore, pushing the mouse
+up actually pans down, exposing areas below what was previously displayed.
+This action may be triggered by any event with an (x,y) position (see
+MousePanStart), and must be preceded by a MousePanStart() action.  There is
+no termination action.  The event is typically a button motion event, but
+there is nothing in the implementation requiring a button to be held down,
+as long as a MousePanStart() action can be generated first.
+
+MoveCursor(direction)
+Moves the planted cursor one Image pixel in the indicated direction.  The
+"direction" argument is one of the strings "left", "right", "up", or "down".
+If the cursor is free floating, this action has no effect.  This is usually
+used to move the cursor based on arrow keys.  Note that at zooms < 1, the
+cursor might not actually move if the Image coordinate is changed.  This
+allows for finer control over position than can be achieved via MoveCursorMouse.
+See MoveCursorScreen for a slightly different method.
+
+MoveCursorMouse()
+Moves the planted cursor based on an event that includes an (x,y) position,
+which include ButtonPress, ButtonRelease, EnterNotify, LeaveNotify, KeyPress,
+KeyRelease, and MotionNotify.  If the cursor is free floating, this action
+has no effect.  This allows a translation to specify something like
+<Btn1Motion> to move the cursor, since you really don't want to change
+the cursor location if it is floating (the cursor is already attached to
+the mouse).
+
+MoveCursorScreen(direction)
+Moves the planted cursor one Screen pixel in the indicated direction.  The
+"direction" argument is one of the strings "left", "right", "up", or "down".
+If the cursor is free floating, this action has no effect.  This is usually
+used to move the cursor based on arrow keys.  At zooms > 1, this moves the
+cursor by a fraction of an Image pixel.  At zooms < 1, the cursor still moves
+by one Screen pixel, which may be more than one Image pixel.
+
+PanEdge(direction)
+Pans to the edge of the image in the indicated direction.  The "direction"
+argument is one of the strings "left", "right", "up", or "down", corresponding
+to panning to the left side, right side, top, or bottom of the image,
+respectively.
+
+PanHalfView(direction)
+Pans in the indicated direction by half the view size.  The "direction"
+argument is one of the strings "left", "right", "up", or "down".  See PanOne().
+
+PanOne(direction)
+Pans one pixel in the indicated direction.  The "direction" argument is one of
+the strings "left", "right", "up", or "down".  Case does not matter, and only
+the first character is significant.  An invalid character, or no argument,
+will cause the action to be quietly ignored.  The direction is interpreted by
+thinking about moving a scrollbar in the same direction.  The data is shifted
+in the opposite direction, and new data appears on the indicated side.
+
+##############################################################################
+		ImageOverlay
+##############################################################################
+
+ImageOverlay is completely controlled by Image, and has no public interface.
+All it does is create a window with the requested visual and colormap, and
+then funnels Expose events to its parent.  ImageOverlay should never be
+instantiated from anything except the Image widget.
+
+==============================================================================
+		ImageOverlay Resources
+==============================================================================
+
+XvicNvisual		XvicCVisual	Visual *	none		C
+Defines the visual type to use for the overlay window.
+
+XtNcolormap		XtCColormap	Colormap	none		C
+Defines the colormap to use for the overlay window.  This is actually a Core
+resource.
+

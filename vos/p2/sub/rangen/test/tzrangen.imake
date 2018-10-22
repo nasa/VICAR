@@ -1,0 +1,26 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR TEST PROGRAM tzrangen
+
+   To Create the build file give the command:
+
+	$ vimake tzrangen                     (VMS)
+   or
+	% vimake tzrangen                     (Unix)
+
+*************************************************************************/
+
+#define PROGRAM tzrangen
+
+#define MODULE_LIST tzrangen.c
+
+#define MAIN_LANG_C
+#define TEST
+
+#define USES_ANSI_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/* #define LIB_LOCAL FOR TESTING WITH GET_SECONDS ONLY DISABLE DURING DELIVER. */
+

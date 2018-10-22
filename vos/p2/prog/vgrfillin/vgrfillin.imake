@@ -1,0 +1,14 @@
+#define  PROGRAM vgrfillin
+
+#define MODULE_LIST vgrfillin.f
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB 
+
+#define FTNINC_LIST fortport
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB

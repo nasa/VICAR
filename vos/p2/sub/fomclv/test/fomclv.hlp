@@ -1,0 +1,42 @@
+1 FOMCLV
+
+        Subroutine which sets up array for and calls FOMCAV.
+
+2 USAGE
+
+  Calling Sequence:  call fomclv(ind,npoint,aa,b,om,rs,cl,cs)
+
+  Arguments:  IND     (i*4,return)  0 for normal return, 1 and 3 for error return
+              NPOINT  (i*4,entry)  number of sets of line, sample,
+                                   lat, long in buffer AA
+              AA(100) (r*4,entry)  buffer of points
+              B(6)    (r*4,entry)  buffer of constants defined below
+                   B(1) = camera focal length, pixels
+                   B(2) = planet radius at equator - radius at pole, km
+                   B(3) = distance planet center to spacecraft, km
+                   B(4) = latitude of sub spacecraft point, degrees
+                   B(5) = longitude of sub spacecraft point, degrees west
+                   B(6) = equatorial radius, km
+              OM(9)   (r*8,return)  OMMATRIX
+              RS(3)   (r*8,return)  RSVECTOR
+              CL      (r*4,entry)  Optical axis line, object space pixels
+              CS      (r*4,entry)  Optical axis sample, object space pixels
+
+2 HISTORY
+
+  Original Programmer:  J. J. Lorre, 16 June 1977
+  Current Cognizant Programmer: ...
+  Source Language: Fortran
+
+  Ported for UNIX Conversion:  W.P. Lee,  Jan-15-1993 
+
+2 OPERATION
+
+	AA contains NPOINT entries of
+           AA(1,J) LINE VALUE OF JTH RETICLE
+           AA(2,J) SAMPLE VALUE
+           AA(3,J) LATITUDE
+           AA(4,J) LONGITUDE
+ 	The reticle descriptive array A is set up from 
+	values in AA and B(3) and FOMCAV is called.
+

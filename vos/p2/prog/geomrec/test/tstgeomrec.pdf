@@ -1,0 +1,44 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let _onfail="continue"
+let $echo="yes"
+let $autousage = "none"
+
+!
+!  THIS IS A TEST OF PROGRAM GEOMREC
+!
+gen a 10 10  linc=20
+list a
+!
+!  default case
+!
+geomrec a d
+list d
+!
+geomrec a b SIZE=(3,2,7,8)
+list b
+!
+geomrec a b RSSPACE=30
+list b
+!
+geomrec a b HEIGHT=40
+list b
+!
+geomrec a b ASSPACE=40
+list b
+!
+geomrec a b RSCALE=.2
+list b
+!
+geomrec a b ASCALE=.25
+! Should get 0 differences
+difpic (b d)
+!
+geomrec a b ASCALE=.5
+list b
+!
+geomrec a b THETA=20
+list b
+end-proc

@@ -1,0 +1,203 @@
+procedure
+refgbl $autousage
+body
+
+let $autousage="none"
+
+tibis2-new oldibis nc=20 nr=100 'ibis1 'column
+
+let _onfail="continue"
+
+! Check bad parameters (FR#83084)
+write "*********************************************"
+write "************ Error Checking Tests       *****"
+write "*********************************************"
+write "**** All of these tests should safely abend *"
+write "**** with an [IBIS-KEYWORD] explanation   ***"
+write "*********************************************"
+ tibis2-recread oldibis cols=(1000) srow=1 nrow=4 'full
+ tibis2-recread oldibis cols=(1) srow=1000 nrow=4 'full
+ tibis2-recread oldibis cols=(1) srow=99 nrow=4 'full
+ tibis2-new oldibis nc=200 nr=100 'ibis1 'column
+ tibis2-new temp nc=5000 nr=100 'ibis2 'column
+ tibis2-new temp  nr=30 form=("BYTE","HALF","BAD")
+
+let _onfail="return"
+
+write "*********************************************"
+write "************ IBIS-1 COLUMNS (INTERFACE) *****"
+write "*********************************************"
+
+ ! With 2 columns and 10 rows and make sure that it works
+ ! even though the file type is IMAGE (FR#85008). The file will 
+ ! have the local host listed in label, which should be ignored.
+ gen a ns=512 nl=3
+  !This little hack generates a VAX byte-order FULL integer 10:
+ f2 a oldibis fun="10*(samp==1)*(line==1)"
+ write "This file should list as IBIS-1, ORG=COLUMN 10 rows and 2 columns"
+ tibis2-list oldibis
+
+ tibis2-new oldibis nc=20 nr=100 'ibis1 'column
+ tibis2-list oldibis
+
+ tibis2-coldelete oldibis col=2 ncol=2
+ tibis2-list oldibis
+ tibis2-colinsert oldibis col=3 ncol=4
+ tibis2-list oldibis
+ tibis2-coldelete oldibis col=3 ncol=4
+ tibis2-list oldibis
+
+ tibis2-rowinsert oldibis row=2 nrow=2
+ tibis2-list oldibis
+ tibis2-rowdelete oldibis row=3 nrow=2
+ tibis2-list oldibis
+ tibis2-rowclear oldibis row=4 nrow=1
+ tibis2-list oldibis
+
+ tibis2-recread oldibis cols=(1,3,5,7,5,3) srow=1 nrow=4 'full
+ tibis2-recwrite oldibis cols=(1,3,5) inrow=1 outrow=6 nrow=6 rec=3 'full
+ tibis2-list oldibis nr=15
+ tibis2-reczero oldibis cols=(1,3,5) srow=2 nrow=2 'full
+ tibis2-list oldibis
+
+write "*********************************************"
+write "************ IBIS-1 ROW (GRAPHICS) **********"
+write "*********************************************"
+
+ !Build an artificial VAX/VMS organized GRAPHICS-1 file
+ ! even though the file type is IMAGE (FR#85787). The file will 
+ ! have the local host listed in label, which should be ignored.
+ gen a ns=512 nl=1 'BYTE  ival=0 linc=0 sinc=0
+ write "This file should list as IBIS-1, ORG=ROW 64 rows and 2 columns"
+ write "The values should be all 0 "
+ tibis2-list a gr1=2 nc=10
+
+ !Build an artificial VAX/VMS organized IBIS-1 file
+
+ tibis2-new oldibis nc=20 nr=100 'ibis1 'row
+ tibis2-list oldibis gr1_nc=20
+
+ tibis2-coldelete oldibis col=2 ncol=2 gr1_nc=20
+ tibis2-list oldibis gr1_nc=18
+ tibis2-colinsert oldibis col=3 ncol=4 gr1_nc=18
+ tibis2-list oldibis gr1_nc=22
+ tibis2-coldelete oldibis col=3 ncol=4 gr1_nc=22
+ tibis2-list oldibis gr1_nc=18
+
+ tibis2-rowinsert oldibis row=2 nrow=2 gr1_nc=18
+ tibis2-list oldibis gr1_nc=18
+ tibis2-rowdelete oldibis row=3 nrow=2 gr1_nc=18
+ tibis2-list oldibis gr1_nc=18
+ tibis2-rowclear oldibis row=4 nrow=1 gr1_nc=18
+ tibis2-list oldibis gr1_nc=18
+
+ tibis2-recread oldibis cols=(1,3,5,7,5,3) srow=1 nrow=4 'full gr1_nc=18
+ tibis2-recwrite oldibis cols=(1,3,5) inrow=1 outrow=6 nrow=6 rec=3 'full gr1_nc=18
+ tibis2-list oldibis nr=15 gr1_nc=18
+ tibis2-reczero oldibis cols=(1,3,5) srow=2 nrow=2 'full  gr1_nc=18
+ tibis2-list oldibis gr1_nc=18
+
+write "*********************************************"
+write "************ IBIS-2 COLUMNS *****************"
+write "*********************************************"
+
+ tibis2-new temp nc=20 nr=100 'column
+ tibis2-list temp
+
+ tibis2-coldelete temp col=2 ncol=2
+ tibis2-list temp
+ tibis2-colinsert temp col=3 ncol=4
+ tibis2-list temp
+ tibis2-coldelete temp col=3 ncol=4
+ tibis2-list temp
+
+ tibis2-rowinsert temp row=2 nrow=2
+ tibis2-list temp
+ tibis2-rowdelete temp row=3 nrow=2
+ tibis2-list temp
+ tibis2-rowclear temp row=4 nrow=1
+ tibis2-list temp
+
+ tibis2-recread temp cols=(1,3,5,7,5,3) srow=1 nrow=4 'full
+ tibis2-recwrite temp cols=(1,3,5) inrow=1 outrow=6 nrow=6 rec=3 'full
+ tibis2-list temp nr=15
+ tibis2-reczero temp cols=(1,3,5) srow=2 nrow=2 'full
+ tibis2-list temp
+
+write "*********************************************"
+write "************ IBIS-2 ROWS ********************"
+write "*********************************************"
+
+ tibis2-new temp nc=20 nr=100 'row
+ tibis2-list temp
+
+ tibis2-coldelete temp col=2 ncol=2
+ tibis2-list temp
+ tibis2-colinsert temp col=3 ncol=4
+ tibis2-list temp
+ tibis2-coldelete temp col=3 ncol=4
+ tibis2-list temp
+
+ tibis2-rowinsert temp row=2 nrow=2
+ tibis2-list temp
+ tibis2-rowdelete temp row=3 nrow=2
+ tibis2-list temp
+ tibis2-rowclear temp row=4 nrow=1
+ tibis2-list temp
+
+ tibis2-recread temp cols=(1,3,5,7,5,3) srow=1 nrow=4 'full
+ tibis2-recwrite temp cols=(1,3,5) inrow=1 outrow=6 nrow=6 rec=3 'full
+ tibis2-list temp nr=15
+ tibis2-reczero temp cols=(1,3,5) srow=2 nrow=2 'full
+ tibis2-list temp
+
+
+write "*********************************************"
+write "************ IBIS-2 GROUP TESTS *************"
+write "*********************************************"
+
+! Test out group computations
+ tibis2-new temp  nr=30 +
+   form=("BYTE","HALF","FULL","REAL","DOUB", "FULL","HALF","HALF")
+ tibis2-list temp
+ tibis2-grpdefine temp  grpname="Evens" cols=(2,4,6,8) 'group
+ tibis2-grpdefine temp  grpname="Odds" cols=(1,3,5,7) 'group
+ tibis2-grpdefine temp  grpname="My Bytes" expr="format:byte" 'group
+ tibis2-grpdefine temp +
+   grpname="kg*m/sec^2" expr="format:half | real" 'unit
+ tibis2-grpdefine temp +
+   grpname="Even Newtons" expr="[kg*m/sec^2] * Evens" 'group
+ tibis2-list temp
+
+!
+!Test IBISLabelRemove routine - zaps IBIS-2 labels (FR #85696)
+!The label-list should yield no IBIS property
+!
+ tibis2-zaplabel temp
+ label-list temp
+
+
+write "*********************************************"
+write "************ FORTRAN BRIDGE TESTS ***********"
+write "*********************************************"
+
+write "These two files should be equal:"
+
+ tibis2-new temp  nr=30 form=("BYTE","A10","A100","FULL","REAL")
+ tibis2-list temp
+ tibis2-fortran temp temp1
+ tibis2-list temp1
+ tibis2-new temp  nr=3 nc=1 form="A4" 'ibis1 'column
+ tibis2-fortran temp 'a4test
+
+write "*********************************************"
+write "************ ERROR SIGNALS TEST   ***********"
+write "*********************************************"
+ 
+! Test out the Error signals
+
+ let _onfail="continue"
+
+ tibis2-signal
+
+end-proc

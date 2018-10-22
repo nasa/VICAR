@@ -1,0 +1,10 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+!let $echo="yes"
+WRITE "THIS IS A TEST OF MODULE PBNAME"
+
+TPBNAME
+
+end-proc

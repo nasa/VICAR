@@ -1,0 +1,41 @@
+PROCEDURE           !The Xterm "Log to File" feature was used to make log file.
+refgbl $syschar
+LOCAL DIR    TYPE=STRING 
+LOCAL INPIC   TYPE=STRING
+refgbl $echo
+BODY
+let $echo="yes"
+let _onfail="continue"
+if ($syschar(1) = "UNIX")
+   LET DIR   ="/project/test_work/testdata/cassini/iss/"
+   defcmd-replace typeit "ush cat"
+else 
+   LET DIR   ="WMS_TEST_WORK:[TESTDATA.CASSINI.ISS]"
+   defcmd-replace typeit "dcl type"
+end-if
+!BYTE - DEFAULT RANGE 0 255
+gen a 10 10
+aschist a a.tbl 
+typeit a.tbl
+!HALF
+gen b 100 100 'HALF
+aschist b b.tbl RANGE=(50,100) 'NOHEADER
+typeit b.tbl
+!Eliminate the DN column
+aschist b c.tbl RANGE=(50,100) 'NOHEADER 'NODN
+typeit c.tbl
+!REAL WORLD - COMPARE TO HIST PRINTOUT
+LET INPIC = "&DIR"//"sum2.15"      
+aschist &INPIC d.tbl RANGE=(0,150)
+typeit d.tbl
+hist &INPIC
+!Try on a PICSUM'd image
+LET INPIC = "&DIR"//"pcsm.4"      
+label-l &INPIC
+hist &INPIC
+!The ASCHIST output should combine levels of the HIST output.
+!e.g., because of the PICSCALE of 4, HIST levels 0,1,2,3 will 
+!be equivalent to ASCHIST level 1.
+aschist &INPIC e.tbl range=(0,200)
+typeit e.tbl
+END-PROC

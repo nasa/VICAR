@@ -1,0 +1,16 @@
+!****************************************************************************
+! TSTLLSQ.PDF, unit test procedure for subroutine LLSQ.F
+!****************************************************************************
+procedure help=*
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+write "Test subroutine LLSQ"
+TLLSQ
+end-proc
+.title TSTLLSQ.PDF - unit test for subroutine LLSQ
+.help
+This unit test creates no files and uses little CPU. Just run it in batch,
+with no parameters, and verify the output.
+.end

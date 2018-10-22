@@ -1,0 +1,15 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+ringorbs  ORBS
+label-list ORBS
+list  ORBS  (1,2,4,4)
+list  ORBS  (1,6,4,7)
+list  ORBS  (1,13,4,7)
+list  ORBS  (1,20,4,7)
+list  ORBS  (1,27,4,7)
+end-proc

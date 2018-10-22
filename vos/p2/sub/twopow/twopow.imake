@@ -1,0 +1,12 @@
+/* Imake file for VICAR subroutine TWOPOW */
+
+#define SUBROUTINE twopow
+
+#define MODULE_LIST twopow.f ztwopow.c
+
+#define P2_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+

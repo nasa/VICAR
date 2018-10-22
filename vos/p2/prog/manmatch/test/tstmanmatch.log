@@ -1,0 +1,174 @@
+ush $VRDILIB/usedisp a xwc0
+
+tstmanmatch
+  Local CASDir Type=String
+  Local GLLDir Type=String
+  Local VGRDir Type=String
+  Local SysPath Type=String
+  let $echo="no"
+===For Galileo, Full Frame
+===Please interactively select tie points with the mouse
+ MANMATCH inp=(/project/test_work/testdata/gll/moon.sedr+
+, /project/test_work/testdata/gll/moon.over)            out=moon.tiep 'OBJECT project=GLL file=unix_moon.list
+Beginning VICAR task MANMATCH
+ MANMATCH Version Nov 10 2002
+# images in FILENAME file=          3
+Treating images as OBJECT space images
+# images in SEDR file=          3
+# image pairs in over file=          2
+displaying image pair #          1
+Opening filename: /project/test_work/testdata/gll/7500.spk
+Opening filename: /project/test_work/testdata/gll/8000.spk
+
+corr=32
+
+New pair number=          2
+Opening filename: /project/test_work/testdata/gll/8000.spk
+Opening filename: /project/test_work/testdata/gll/8500.spk
+redisplaying images
+corr=(32,32)
+
+corr=(128,128)
+
+'next
+No more image pairs !, EXIT to get out
+corr=(64,64)
+
+ left  right  left(line,samp) right(line,samp) left_dn  right_dn
+    2.   3.    204.0   512.0     185.2    68.8     90.00  128.00
+ left  right  left(line,samp) right(line,samp) left_dn  right_dn
+    2.   3.    294.0   522.0     276.0    78.1    117.00  169.00
+
+ left  right  left(line,samp) right(line,samp) left_dn  right_dn
+    2.   3.    376.0   570.0     358.9   126.0    117.00  172.00
+ left  right  left(line,samp) right(line,samp) left_dn  right_dn
+    2.   3.    390.0   500.0     373.0    54.1    178.00  262.00
+ Pass#2 FFT area not within picture
+
+ left  right  left(line,samp) right(line,samp) left_dn  right_dn
+    2.   3.     74.0   500.0      54.0    56.0     84.00  117.00
+No more image pairs !, EXIT to get out
+'exit
+ number of correlations:   11
+ number of tiepoints:    5
+ IBIS-LIST moon.tiep
+Beginning VICAR task IBIS
+ 
+Number of Rows:5  Number of Columns: 12      
+File Version:IBIS-2  Organization:ROW  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5         C:6
++-----------+-----------+-----------+-----------+-----------+-----------
+        2.00        3.00      204.00      512.00      185.16       68.81
+        2.00        3.00      294.00      522.00      276.01       78.13
+        2.00        3.00      376.00      570.00      358.94      125.96
+        2.00        3.00      390.00      500.00      372.99       54.12
+        2.00        3.00       74.00      500.00       53.98       56.04
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------+-----------+-----------
+         C:7         C:8         C:9        C:10        C:11        C:12
++-----------+-----------+-----------+-----------+-----------+-----------
+       90.00      128.00        1.00        0.00        0.00        0.00
+      117.00      169.00        1.00        0.00        0.00        0.00
+      117.00      172.00        1.00        0.00        0.00        0.00
+      178.00      262.00        1.00        0.00        0.00        0.00
+       84.00      117.00        1.00        0.00        0.00        0.00
+  let $echo="no"
+===For Voyager 2
+===Please interactively select tie pointes with the mouse
+ MANMATCH inp=(/project/test_work/testdata/vgr/red.sedr, /project/test_work/+
+testdata/vgr/red.over) project=VGR-2 'object                 out=red.tiep 'sedr file=unix_red.list
+Beginning VICAR task MANMATCH
+ MANMATCH Version Nov 10 2002
+# images in FILENAME file=          6
+Treating images as OBJECT space images
+# images in SEDR file=          6
+# image pairs in over file=          9
+displaying image pair #          1
+Opening filename: /project/test_work/testdata/vgr/2063121.geom
+Opening filename: /project/test_work/testdata/vgr/2063105.geom
+
+ left  right  left(line,samp) right(line,samp) left_dn  right_dn
+    1.   3.     94.0   642.0     838.1   150.1   3542.00 3545.00
+ left  right  left(line,samp) right(line,samp) left_dn  right_dn
+    1.   3.    102.0   940.0     846.0   439.0   3197.00 3127.00
+'exit
+ number of correlations:    4
+ number of tiepoints:    2
+ IBIS-LIST red.tiep
+Beginning VICAR task IBIS
+ 
+Number of Rows:2  Number of Columns: 12      
+File Version:IBIS-2  Organization:ROW  SubType:NONE
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5         C:6
++-----------+-----------+-----------+-----------+-----------+-----------
+        1.00        3.00       94.00      642.00      838.11      150.13
+        1.00        3.00      102.00      940.00      846.00      439.03
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------+-----------+-----------
+         C:7         C:8         C:9        C:10        C:11        C:12
++-----------+-----------+-----------+-----------+-----------+-----------
+     3542.00     3545.00        1.00        0.00        0.00        0.00
+     3197.00     3127.00        1.00        0.00        0.00        0.00
+  let $echo="no"
+===For Cassini
+===Please interactively select tie pointes with the mouse
+ MANMATCH inp=(/project/test_work/testdata/cassini/casIss/ca+
+ssedr.int, /project/test_work/testdata/cassini/casIss/casover.int)            out=casmatch.int 'OBJECT project=cassi file=casimglis+
+t.unix
+Beginning VICAR task MANMATCH
+ MANMATCH Version Nov 10 2002
+# images in FILENAME file=          4
+Treating images as OBJECT space images
+# images in SEDR file=          4
+# image pairs in over file=          6
+displaying image pair #          1
+Opening filename: /project/test_work/testdata/cassini/casIss/n1355064875.1
+Opening filename: /project/test_work/testdata/cassini/casIss/n1355065283.1
+
+ left  right  left(line,samp) right(line,samp) left_dn  right_dn
+    1.   2.    785.0   737.0      60.0   770.9    137.00  141.00
+ left  right  left(line,samp) right(line,samp) left_dn  right_dn
+    1.   2.    773.0   935.0      48.0   968.9    140.00  143.00
+'exit
+ number of correlations:    4
+ number of tiepoints:    2
+ IBIS-LIST casmatch.int
+Beginning VICAR task IBIS
+ 
+Number of Rows:2  Number of Columns: 12      
+File Version:IBIS-2  Organization:ROW  SubType:NONE
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5         C:6
++-----------+-----------+-----------+-----------+-----------+-----------
+        1.00        2.00      785.00      737.00       59.99      770.93
+        1.00        2.00      773.00      935.00       48.00      968.95
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------+-----------+-----------
+         C:7         C:8         C:9        C:10        C:11        C:12
++-----------+-----------+-----------+-----------+-----------+-----------
+      137.00      141.00        1.00        0.00        0.00        0.00
+      140.00      143.00        1.00        0.00        0.00        0.00
+end-proc
+exit
+slogoff
+if ($RUNTYPE = "INTERACTIVE")
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+else
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+end-if
+ulogoff
+END-PROC
+END-PROC

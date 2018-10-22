@@ -1,0 +1,732 @@
+
+			NAV PROGRAMMER'S GUIDE
+
+This document contains information useful to the programmer responsible
+for maintaining and modifying the program NAV.
+
+The NAV program is based on handwritten notes supplied by Andy Ingersoll,
+3/19/85 (fundamental algorithms) and 1/2/86 (eccentric ring geometry), and
+by Carolyn Porco, 1/12/87 (stellar navigation and Neptune's rings).
+Frequent references are made in the program comments to these notes.
+The equations originally derived by Ingersoll assumed an oblate spheroid
+(ellipse of revolution) target-body model.  These equations have been
+generalized for the tri-axial ellipsoid model (Sept 87).  Documentation
+for the updated equations is currently being prepared for circulation.
+
+NAV uses an east-longitude, planetocentric latitude convention in its
+internal calculations.  All angles are input by the user or SEDR in
+degrees, and output to the user in degrees.  All angles are maintained
+internally in radians.
+
+Note that most angle computations are performed in double precision.
+This is necessary to maintain accuracy to 0.01 degree or pixel.
+
+
+FACILITY DEPENDENT CODE
+-----------------------
+
+The subroutine VGRBLEMS contains a table of file specifications for the
+blemish files for each Voyager camera, for both image and object space.
+Also, in the PDF, the parameter SAO has a default file specification for
+the SAO catalog.   These file specifications should be changed to point
+to the correct locations of the corresponding files.
+
+
+GLOBAL VARIABLES
+----------------
+
+All global variables are maintained in common areas:
+
+<Note on ported version:  due to alignment constraints on the Alpha,
+ many of these COMMONs were broken up into separate parts containing
+ 4-byte and 8-byte variables.>
+
+MISCELLANEOUS USER SPECIFIABLE PARAMETERS:
+      COMMON/CP/IBUG,NLW,NSW,NSEARCH,IFIT
+      COMMON/CPAR/PAR(20),PAR2(20)
+      REAL*4 PAR,PAR2
+      INTEGER*4 IPAR(20)
+      EQUIVALENCE (PAR,IPAR)
+
+  IBUG = debug mode flag.  If IBUG=1, then various diagnostic messages
+	are printed out.  Else IBUG=0.
+  NLW,NSW = line and sample dimensions of NLWxNSW correlation window used
+	in searching for high-contrast limb or ring points.
+  NSEARCH = search radius (in pixels).
+  IFIT = 2 for CHI2, =3 for CHI3
+  PAR,PAR2 = temporary work areas for processing parameters.
+
+
+IMAGE DATA AREAS:
+      COMMON/C1/PIC(1200,1200)
+      LOGICAL*1 PIC
+
+  PIC = input image stored as a byte array.
+
+  If the input image is in byte data format, then the image is read
+  directly into PIC.  The contents of PIC are never altered and
+  always contain an exact copy of the image.
+
+  If the input image is in halfword data format, then VICAR array I/O
+  is used to map the image on disk into virtual memory.  The address of
+  the start of the file is stored in the pointer HPIC.
+
+  Subroutines which require access to the image data reference pixels as
+  PIC(samp,line) or HPIC(samp,line), where line and samp are the image
+  coordinates of the pixel.  These arrays are passed to the subroutines as:
+	LOGICAL*1 PIC(NS,NL)
+        INTEGER*2 HPIC(NS,NL)
+  where NL and NS are the line and sample dimensions of the image.
+  If the input image is byte, PIC is always accessed.  If the input image
+  is halfword, HPIC is accessed, except for subroutines which handle
+  the image display.
+
+  Halfword image data must be converted to byte format before it can be
+  written to the display device.  Since it may be necessary to re-display
+  the image frequently, the following strategy is used to minimize the
+  number of times this data conversion is performed:  The halfword image
+  is initially read into HPIC.  The image is then converted to byte format
+  and stored in PIC.  The data conversion uses a histogram ends-in algorithm
+  (identical to program FIT) to determine the dynamic range of the input DN
+  values (see subroutines READIMAGE, HSUB2, ASTRC2, and HWTOBYTE).  The
+  contents of PIC are then written to the display device (see subroutine
+  DPIC).  The contents PIC are only altered if it is necessary to change
+  the dynamic range of the DNs as a result of a STRETCH or ASTR command
+  (see subroutine HSTRETCH).
+
+
+CAMERA RESEAU AND BLEMISHES:
+      COMMON/CRES/RES(2,202),BLEM(4,1000),NBLEM
+      REAL*4 RES,BLEM
+
+  RES = VGR reseau locations stored as (line,sample) pairs.
+  BLEM = VGR blemish locations stored as (N,DL,DS,R) 
+        where N is the reseau mark number, (DL,DS) are the line-sample
+	offsets from the reseau mark, and R is the pixel radius of the
+	blemish (see DRAWBLEM routine).
+  NBLEMS = number of blemishes in BLEM.
+
+TEMPORARY WORK BUFFERS:
+
+  WORK1,WORK2,WORK3 = temporary work areas.  WORK1 and WORK2 are used
+  whenever the picture is displayed.  WORK3 is used whenever a limbtrace
+  or ringtrace is done.  HIST is used to compute a halfword histogram
+  and convert the halfword data to byte.
+
+
+LIMB DATA AREA
+      COMMON/CLIMB/ISL,ISS,INL,INS
+      COMMON/CLIMB/NPTS,LPTS(2,3000),ALPTS(2,3000)
+      REAL*4 LPTS,ALPTS
+
+  ISL,ISS,INL,INS = image size field.  When specified, the limb scan will
+	be limited to an INLxINS area of the image.  The upper-left
+        corner of the area is at (starting-line,starting-sample)=(ISL,ISS).
+  NPTS = total number of points in array LPTS (and ALPTS).
+  LPTS,ALPTS = locations of computed and actual limb points, stored as
+	(line,sample) coordinates.  Obscured points are flagged as
+        (-line,-sample) and bad points are flagged as (-99.0,-99.0).
+
+
+RING DATA AREA:
+      COMMON/CRINGI/JSL,JSS,JNL,JNS,NRPTS,ETYPE
+      COMMON/CRINGI/NRF,RINGID(10),EDGE(10),PLANE(10)
+      COMMON/CRING/RPTS(2,20000),ARPTS(2,20000),RADII(10),RWIDTH(10)
+      COMMON/CRINGC/ RINGS
+      REAL*4 RPTS,ARPTS,RADII,RWIDTH
+      INTEGER*4 ETYPE,RINGID,EDGE,PLANE
+      CHARACTER*1 RINGS(15)
+
+  JSL,JSS,JNL,JNS = image size field.  When specified, the ring scan will
+	be limited to an JNLxJNS area of the image.  The upper-left
+        corner of the area is at (starting-line,starting-sample)=(JSL,JSS).
+  ETYPE = 1 for the outer edge of the ring, 2 for the inner edge,
+	and 3 for a thin ring.
+  RINGS = ASCII names of up to 15 rings.
+  NRPTS = total number of points in array RPTS (and ARPTS).
+  RPTS,ARPTS = locations of computed and actual ring points, stored as
+	(line,sample) coordinates.
+  NRF = Number of rings used in fit (up to 10)
+  RINGID,EDGE,PLANE,RADII,RWIDTH = Ring, Edge type, plane, radii and width
+        of the NRF number of rings for fit.
+
+STAR DATA AREA:
+      COMMON/CSTAR/NSTARS,STARS(3,2000),SPTS(2,2000),LOMAG,HIMAG
+      COMMON/CSTAR1/ISAO,SAOFILE
+      COMMON/CSTAR2/STARNAME,STARTYPE
+      REAL*4 STARS,SPTS
+      INTEGER*4 HIMAG,LOMAG
+      CHARACTER*72 SAOFILE
+      CHARACTER*13 STARNAME(2000)
+      CHARACTER*3 STARTYPE(2000)
+
+  NSTARS = number of stars in array STARS and SPTS.
+  STARS = (right-ascension,declination,visual-magnitude) of each star.
+  SPTS = (line,sample) coordinates of each star.
+  LOMAG = lowest magnitude star in display.
+  HIMAG = highest magnitude star in display.
+  SAOFILE = file specification for SAO catalog.
+  STARNAME = name of each star in display (if available)
+  STARTYPE = type (usually spectral) of each star in display (if available)
+
+
+DISPLAY DEVICE CONTROL DATA:
+      COMMON/DEV/IDEV,VID,G,TB,NLDS,NSDS,ZOOM,IZOOM,STBL(256)
+      INTEGER*4 VID,G,TB,STBL
+      REAL*4 ZOOM
+
+  IDEV = logical unit number of display device
+  VID  = logical unit number of video plane
+  G    = logical unit number of graphics plane
+  TB   = logical unit number of (trackball driven) cursor
+  NLDS,NSDS = hardware display format, specified as an NLDSxNSDS area.
+
+  IZOOM = displayed-picture scale factor.  If IZOOM is greater than 1,
+        then the image is magnified to IZOOM times normal resolution.
+	If IZOOM is less than 1, then the image is reduced by IZOOM
+	times normal resolution.  Note that image magnification or
+	reduction is restricted to an integral factor.
+
+  ZOOM = display picture-scale (displayed pixel per image pixel).  E.g.
+	if ZOOM=2.0, then the image will be displayed at twice normal
+	resolution.  ZOOM and IZOOM are related as follows:
+
+		IF (IZOOM.GT.0) ZOOM=IZOOM
+                IF (IZOOM.LT.0) ZOOM=-1/IZOOM
+
+  ILOW,IHIGH = low and high (linear) stretch limits.
+  STBL = stretch table:  output_dn = STBL(input_dn+1)
+
+HISTOGRAM DATA AREA:
+      COMMON/CHIST/HIS(256),HFLG,HBEG,HINC,NSPIKES,LHPER(2)
+      INTEGER HIS,HFLG,HBEG,HINC
+      REAL*4 LHPER
+
+  HIS = Histogram of displayed image area.
+  HFLG = Histogram flag=1 if histogram for displayed area exists.
+         HFLG=0 whenever new image area is displayed.
+  HBEG,HINC = beginning DN and DN increment when histogram represents
+        compressed version of halfword data.
+  NSPIKES = specifies that nth largest frequency is to be set to maximum
+        scale on histogram display.
+  LHPER = low and high percentages used to saturate data during
+	an ends-in stretch.
+
+INPUT IMAGE CONTROL DATA:
+      COMMON/IPIC/IMG,SL,SS,NLX,NSX,ICODE
+      INTEGER*4 SL,SS
+
+  IMG = logical unit number for input image
+  SL,SS = (line,sample) coordinates of upper left corner of display.
+  NLX,NSX = total number of lines and samples in the image.
+  ICODE = image data format code (=1 for byte, =2 for halfword).
+
+IMAGE IDENTIFIERS:
+      COMMON/CPIC/IPROJ,ICAM,FRAME_ID,PLANET_ID
+      COMMON/CPIC/TARGET_ID,IDATE,ITIME
+      COMMON/CPICX/T0,T
+      INTEGER*4 IPROJ,ICAM,FRAME_ID,TARGET_ID
+
+  IPROJ=1 for Mariner 9, 2 for Mariner 10, 3 for Viking Orbiter,
+	4 for Voyager, 5 for Galileo and 6 for Cassini.  Currently,
+        only Voyager, Galileo and Cassini are supported.
+
+  ICAM = camera serial number.  The valid VGR camera serial
+	numbers are:
+
+	4 = VGR-2 WA		6 = VGR-1 WA
+	5 = VGR-2 NA		7 = VGR-1 NA
+
+  	For Galileo, the camera serial number=1.
+
+        Valid Cassini camera serial numbers are:
+        1=NAC  21=NAC 2x2 summation mode  41=NAC 4x4 summation mode
+        2=WAC  22=WAC 2x2 summation mode  42=WAC 4x4 summation mode
+
+
+  FRAME_ID = frame number of the input image.  For VGR, this is the
+	FDS count stored as XXXXXYY where XXXXX is the Mod16 count
+	and YY is the Mod60 count.  For Cassini, frame number is
+        the SCLK, a 10-digit number.
+
+  PLANET_ID = 1 (Mercury), 2 (Venus), 3 (Earth),...
+
+  TARGET_ID = SPICE target ID.  First digit=planet (Earth=3),
+        next two digits=satellite or 99 for planet (see PLANET_ID).
+
+  IDATE = year-of-century and day-of-year stored as YYDDD.
+  ITIME = time of day stored as HHMMSSMMM.
+  T0 = time of Epoch for ring co-ordinate system.  For Uranus, 20:00 UT,
+       March 10, 1977, expressed in days from EME50 (Jan 1, 1950)
+  T = SCET expressed in days from EME50.
+  T and T0 should probably be expressed as Julian dates.  The useful
+  quantity is actually T-T0.
+
+
+IMAGE GEOMETRY DATA:
+      COMMON/SEDR/SEDR(200),LBUF(80),ISYSTEM,P_SOURCE
+      CHARACTER*4 P_SOURCE
+      REAL*4 SEDR
+      INTEGER LBUF
+
+      COMMON/CMAP/MODEL,IGEO,MRING,NRINGS
+      COMMON/CMAP/ALPHAp,DELTAp,THETA,ZETAZ,PHIp
+      COMMON/CMAP/FL,OAL,OAS,PSCALE,ZSCALE
+      COMMON/CMAP/ROT,RA,RB,RC,RLORA,RMIN,RMAX,ASDSUN
+      COMMON/CMAP/CM(3,3),PSC(3),PSUN(3),PSAT(3),RSC,RSUN
+      COMMON/CMAP/ME(3,3),OM(3,3),ANGLN,ANGLA,ANGLB
+      COMMON/CMAP/PSC3(3),SCLAT,SCLON
+      COMMON/CMAP/PSUN3(3),SUNLAT,SUNLON
+      COMMON/CMAP/SMAA,ECC,INCL,OMEGAZ,PIZERO,dOMEGA_dt,dw_dt
+      REAL*8 ME,INCL
+
+      COMMON/PCONST/AI2,BI2,CI2,AI2XS,BI2YS,CI2ZS,CTERM
+      COMMON/PCONST/A0,B0,B1,B2,C0,C1,C2
+
+  SEDR = SEDR buffer returned by GETSPICE containing image geometry info.
+  LBUF = Data buffer returned by GETLABCON containing picture label info.
+  ISYSTEM=1 for J2000, =2 for EME50.  EME50 is used for all missions up to
+	and including Voyager.  J2000 is used beginning with Galileo.  
+  P_SOURCE = C-matrix source (Mert Davies, FARENC, etc).
+
+  MODEL = target model.  1=sphere, 2=oblate spheroid, 3=ellipsoid, and
+	4=ring plane.  Note that only the ellipsoid and ring plane geometry
+	are implemented.  The sphere and oblate spheroid are special cases
+	of the ellipsoid and are covered with this model.
+         
+  IGEO = 0 if user latitudes are planetocentric, =1 if planetographic
+        NAVIGATE treats all latitudes internally as planetocentric.  If
+        GEOFLAG=1, then all latitudes input to the user are converted
+        from planetographic to planetocentric, and all latitudes output to
+        the user are converted from planetocentric to planetographic.
+
+  MRING = master ring ID.  Specifies reference frame in which ring
+        measurements are to be made (see C command).
+  NRINGS = number of ring reference planes supported (planet's equatorial
+	plane plus the eccentric ring planes for Uranus).
+
+  FL = camera focal length (in mm).
+  OAL,OAS = (line,sample) coordinates of the optical axis intercept.
+  PSCALE = picture scale (pixels/mm at the focal plane).
+  ZSCALE = camera constant = FL*PSCALE.
+
+  ROT = planet's rotation period (in days).
+  RA,RB,RC = planet's major equatorial, minor equatorial and polar radii (km).
+  RLORA = longitude of the major equatorial radius (RA).
+
+  RMIN,RMAX = minimum and maximum ring radii (in km).  These values are
+	only used in the limb-fit algorithm to avoid limb areas obscured by
+	the ring plane.
+  ASDSUN = azimuthal diameter of sun (unimplemented for now...)
+
+  ALPHAp,DELTAp = right ascension and declination of Uranus' pole
+      (assumed constant).
+  THETA,ZETAZ = angles defining orientation of Earth's pole at time T0.
+  PHIp = Longitude of French's 1977 reference meridian, measured in the
+    equatorial plane eastward from the prime meridian (node of Uranus
+    equator on EME1950.
+
+  CM = Transformation matrix from camera to celestial coordinates.
+  PSC = Unit vector from target center to spacecraft in celestial coordinates.
+  PSUN = Unit vector from target center to sun in celestial coordinates.
+  PSAT = Unit vector from planet center to satellite in celestial coordinates.
+  RSC = Distance from spacecraft to target center (km).
+  RSUN = Distance from sun to target center (km).
+
+  ME = Transformation matrix from target reference plane to celestial
+       coordinates.  The target may be the planet (or satellite), the
+       planet's ring (equatorial) plane, or the inclined plane of an
+       eccentric ring.
+
+  OM = Transformation matrix from camera's (x0,y0,z0) to planet's
+	(x3,y3,z3) coordinates.  Note that this differs from the
+	traditional definition of the OM-matrix.
+
+  ANGLN,ANGLA,ANGLB = components of OM-matrix.  ANGLN is the angle
+	of the planet's projected spin axis, measured counterclock-
+	wise from the x0-axis.
+
+  PSC3 = Vector from planet center to spacecraft in (x3,y3,z3) coordinates.
+  SCLAT,SCLON = Spacecraft position (lat,lon).
+	Note that:  PSC3(1) = RSC*DCOS(SCLAT)
+		    PSC3(2) = 0
+		    PSC3(3) = RSC*DSIN(SCLAT)
+
+  PSUN3 = Vector from planet center to sun in (x3,y3,z3) coordinates.
+  SUNLAT,SUNLON = Solar position (lat,lon).
+	Note that: PSUN3(1) = RSUN*DCOS(SUNLAT)*DCOS(SUNLON-SCLON)
+		   PSUN3(2) = RSUN*DCOS(SUNLAT)*DSIN(SUNLON-SCLON)
+		   PSUN3(3) = RSUN*DSIN(SUNLAT)
+
+  SMAA = semi-major axis (km) of ring
+  ECC = eccentricity of ring
+  INCL = inclination angle of ring plane
+  OMEGAZ = longitude of ascending node measured at epoch (1977)
+  PIZERO = longitude of periapse measured at epoch (1977)
+  dOMEGA_dt = nodal precession rate (radians/day)
+  dw_dt = apsidal precession rate (radians/day)
+
+  AI2,BI2,CI2,et.al. = constants used by projection and limbfit routines
+	(see PLANET, PLAINV, LIMBPT, GETLIMB).  These are all functions
+	of RA, RB, RC, and PSC3 and are computed by GETPC.
+
+NAVIGATION DATA SAVE AREAS:
+      COMMON/CURR/CUR(71),PCCUR(13)
+      COMMON/LAST/LAS(71),PCLAS(13)
+      COMMON/ORIG/ORG(71),PCORG(13)
+      COMMON/RSAV/RSAVE(38,15)
+      REAL*8 LAS
+
+  CURR contains the current version of the data. 
+  LAST contains the last saved version of the data.
+  ORIG contains the original data from the SEDR.
+
+  Each of these three save areas contain all the navigation data for the
+  planet and each of the rings.  The buffers in the each save area
+  corresponds to the following data areas in COMMON/CMAP/ and /PC/:
+
+  CUR,LAS,ORG = FL to dw_dt (this data is common to both planet and rings)
+  RSAV = ME to dw_dt for each ring coordinate system
+  PC = corresponds to COMMON/PC/
+
+  COMMON/CMAP/ contains either the planet geometry, or one of the ring
+  geometries, and is the buffer which all the navigation routines use.
+
+  GETNAV moves the planet geometry from CURR to CMAP (inverse is PUTNAV)
+  GETRING moves a ring geometry from RSAV to CMAP (inverse is PUTRING)
+  GETLAST moves LAST to CURR (inverse is SAVELAST).  GETNAV is then called.
+  GETSEDR moves ORIG to CURR (inverse is SAVESEDR).  GETNAV is then called.
+
+
+CONVERSION CONSTANTS:
+      COMMON/CONST/PI,DEGRAD,RADDEG
+
+  PI = 3.141592653589793D0
+  DEGRAD = degrees-to-radians = PI/180.D0
+  RADDEG = radians-to-degrees = 180.D0/PI
+
+NAV SUBROUTINES
+---------------
+
+The following are brief descriptions of the subroutines comprising the
+NAV program:
+
+Parameter processing routines:
+  FRAMEID	Get frame and camera ID from image label
+  RPARAM	Edit processing parameters
+  PARMTST	Checks for existence of parameter and returns integer value
+  DPARMTST	Checks for existence of parameter and returns real*8 value
+  RPARMTST	Checks for existence of parameter and returns real*4 value
+  PARMTST1	Check for existence of parameter
+  UPRCASE       Converts lowercase letters to uppercase and numbers to spaces
+
+Reading and converting the input image:
+  READIMAGE	Reads byte image into PIC or halfword image into HPIC
+  HWTOBYTE	Converts halfword image (HPIC) to byte image (PIC).
+
+SPICE interface:
+  SPICESUB	Get SPICE data for input frame
+  NOSPICE       Handle case where SPICE is not available
+  GETSCET       Get Spacecraft Event Time and target ID
+  GETPC		Compute projection constants
+  UPDTSEDR      Update Voyager SEDR for input frame
+  DOT           Returns dot product of two vectors
+  ROTATE1	Multiplies 3x3 matrix by a rotation matrix
+  ORTHOT	Tests a rotation matrix for orthogonality
+  PRINTMTX      Print a 3x3 matrix
+
+Geometric camera distortion routines:
+  MAPLABEL	Returns image type (7=image-space, 8=object-space)
+  GETRESLOC	Retrieves reseau locations
+  GETGEOPAR	Computes camera distortion parameters
+  VGRBLEMS	Retrieve camera blemish locations
+
+Limb-fit routines:
+  LIMBFIT	Controlling routine
+  LIMBSCAN	Limb-scan algorithm
+  LIMBTRACE	Limb-trace algorithm
+  LIMBPT	Generate computed limb (LPTS)
+  GETLIMB	Given LAT, find limb point (x,y,z)
+  GETLS		Find (line,sample) coordinates for limb point
+  MOVELIMB	Manual registration of graphics limb
+  SEARCH	Search for high-contrast points
+
+Ring-fit routines
+  RINGFIT	Controlling routine
+  RINGSCAN	Ring-scan algorithm
+  RINGTRACE	Ring-trace algorithm
+  PREDICT	Predict position of object in frame from pos in another frm
+  PHASPROF	Compute constant-phase profile of a ring sector
+  PROFILE	Compute radial or longitude profile of a ring sector
+  RINGIDS	Get ring ID and ring data
+  RINGPTS	Compute ring points for a system of rings
+  RINGPT	Compute points at a constant radius
+  RINGPT2	Compute points btwn starting and ending longitudes
+  MOVERING	Enable user to manually register ring
+  RSEARCH	Search for high-contrast ring points
+  TRACECRV	Enable user to trace a curve via cursor
+  FINDPT	Find the closest (acquired) point to cursor.
+  SRCHINV	Given high-contrast points, find points on computed curve
+
+Starfit routines
+  STARFIT	Controlling routine
+  GETSTARS	Retrieve stars from the SAO catalog
+  STARHIST	Compute and print histogram of visual magnitudes
+  MOVESTAR	Manually register the starmap to the star background
+  STARPTS	Acquire star tiepoints for MOVESTAR.
+  UPDATESTAR	Update star map based on current nav information
+  FINDSTAR	Find the closest star (in starmap) to cursor.
+  VGRCLEAR	Flags points that are near reseau marks.
+  TIESTAR	Estimates C-matrix using positions of two stars.
+  HMSTORAD	Hours-min-sec to radians
+    DMSTORAD	Degrees-min-sec to radians
+  RADTOHMS	Radians to hours-min-sec
+    RADTODMS	Radians to degrees-min-sec
+  FROMORTO_STAR	Convert (ra,dec) between NAV ref system and catalog ref system
+  FROMORTOSAO   Convert (ra,dec) between NAV ref system and SAO ref system
+  FROMORTOGSC   Convert (ra,dec) between NAV ref system and GSC ref system
+
+Eccentric ring geometry
+  T1950		Compute time since 1950 in days
+  GETEPOCH	Compute longitude and time of standard epoch
+  ERING0        Initialize nav data for eccentric rings
+  RINGIN	Read ring orbital elements from file
+  RINGOUT	Write ring orbital elements to file
+  ME0CALC       Compute ME matrix for equatorial plane in unrotated system
+  MECALC        Compute ME matrix for an eccentric ring
+  ERING         Edit orbital data for eccentric rings
+  RSTATUS       List orbital data for eccentric ring
+
+Deleting bad points on curve
+  CAREA		User specifies image area to limit scan
+  CLEANPTS	Enable user to manually delete bad points
+  CLEANPT1	Delete isolated points
+  CLEANVGR	Delete points near VGR reseau marks
+
+Camera pointing routines
+  GETANGLES	Compute ANGLN,ANGLA,ANGLB (of OM-matrix)
+  GETANGLES2	Compute THETA_N,THETA_A,THETA_B (of C-matrix)
+  COMPCM	Compute 3 Euler angles from C-matrix
+  OMMATRIX	Compute OM-matrix from ANGLN,ANGLA, and ANGLB
+  CMATRIX       Compute C-matrix from ME and OM' matrices
+  FROMEME	Computes lat-lon from unit vector in EME50 coordinates
+  TOEME		Computes unit vector in EME50 coordinates from lat-lon
+  VECTOR3	Computes vector in planet coordinates from lat-lon and range
+  CHISQ2	Compute offsets DL,DS which minimize diffs between curves
+  COVMT2        Print CHISQ2 covariance matrix
+  CHISQ3        Compute DL,DS, and DT which minimize diffs between curves
+  COVMT3        Print CHISQ3 covariance matrix
+  FIT2		Compute offsets DL,DS which minimize diffs between tiepoints
+  FIT3		Compute DL,DS, and DT which minimize diffs between tiepoints 
+  MOVE1		Given (DL,DS), updates ANGLA and ANGLB (or THETA_A,THETA_B)
+  MOVE2         Alternate algorithm for MOVE
+  UPDATENAV     Update C-matrix and all OM matrices
+  UPDTRING	Updata all ring coordinate systems: OM,PSC3,PSUN3,et.al.
+  GETNAV/PUTNAV Get/put current navigation data in planet reference system
+    GETRING/    Get/put current nav data in ring-plane reference system
+      PUTRING
+    GETLAST/	Get/save last navigation data
+      SAVELAST
+    GETSEDR/    Get/save original navigation data from SEDR
+      SAVESEDR
+
+Projection routines
+  PLANET	Transforms from (line,sample) to (lat,lon) on the planet
+  PLAINV	Transforms from (lat,lon) to (line,sample)
+  RING		Transforms from (line,sample) to (radius,lon) on the ring
+  RINV		Transforms from (radius,lon) to (line,sample)
+  STAR		Transforms from (line,sample) to (ra,dec) on the cel. sphere.
+  STARINV	Transforms from (ra,dec) to (line,sample)
+  LATLON	Calls either PLANET, RING, or STAR depending on MODEL
+    LINSAM      Calls either PLAINV, RINV, or STARINV depending on MODEL
+  PHASE		Computes phase angle
+  GEOCEN        Converts from planetographic to planetocentric latitudes
+  GEODET        Converts from planetocentric to planetographic latitudes
+  IMG2OBJ       Converts from image line,sample to camera unit vec
+    OBJ2IMG       inverse of obj2img
+  ROTVEC        Rotate one vector around an axis represented by a unit vector
+  ROTVECS2IMG   Rotate a camera vector around an axis, convert to image space, 
+                  update array of image space line,samp, count how many are 
+                  within image space limits
+
+
+Edit navigation data
+  EDITNAV	Edit navigation data
+  EDITCM	Edit the C-matrix via Euler angles input by user.
+  EDITME	Edit the ME-matrix via Euler angles input by user.
+  EDITPSC	Edit the spacecraft vector via components in celestial coord.
+  BUILDCM	Computes C or ME matrix from Euler angles.
+  FARENC	Given (line,sample) of PC, comutes ANGLA,ANGLB,OM
+  PNAV		Prints summary of navigation data
+
+Display routines
+  DISPLAY	Controlling routine for general display capabilities
+  PDISPLAY      Controlling routine for planet display
+  RDISPLAY      Controlling routine for ring display
+  SDISPLAY      Controlling routine for star display
+  PRDISPLAY     Graphics plot of ring profile 
+  DRAWCURVE	Draw the curve (limb or ring) in graphics
+  DRAWBLEMS	Draw the blemishes in graphics
+  DRAWSTARS	Draw the starmap in graphics
+  DRAWDOT       Draw a dot in the graphics plane
+  OVERLAY1	Draw latitude-longitude grid in graphics plane
+    OVERLAT     Draw a parallel at specified latitude in graphics
+    OVERLON     Draw a meridian at specified longitude in graphics
+  HOME		Display the entire image (at possibly reduced resolution)
+  DPIC		Display an image area (controlling routine)
+  MAGLD		Magnify image vertically
+  MAGS		Magnify the image horizontally
+  HISTGEN1	Compute a histogram of the displayed image area (byte)
+  HISTGEN2	Compute a histogram of the displayed image area (halfword)
+  HSUB2		Accumulates a histogram of halfword data.
+  HDISPLAY      Display a histogram in graphics plane
+  STRECH	Compute linear stretch table
+  HSTRETCH	Converts halfword stretch limits to byte limits.
+  ASTRC2	Determines low and high DN limits of an ends-in stretch.
+  CURSOR	Read the cursor position
+  DEVICE        Opens display device and obtains device characteristics
+  AVLINE        Writes one or more lines to image display
+  LUTWRITE      Writes look-up table to display device
+
+
+MIPL LIBRARY SUBROUTINES
+------------------------
+
+Calls to the following subroutines occur quite frequently in MIPL programs
+and should be installed on your system if you plan to import a significant
+amount of MIPL software:
+
+Copying arrays from memory to memory:
+  MVL		Moves an array of bytes
+  MVE		Moves an array of bytes, INTEGER*2, etc.
+
+Miscellaneous routines:
+  ITLA		Fills a logical array with an integer constant.
+  ZIA		Zeroes out in integer array.
+  SUM		Computes the sum of an array.
+  INTRPA	Fills an array, interpolating between the two end-points.
+  CMPR		Compares two strings.
+  HSUB		Accumulates a histogram
+  TRITRA	Convert (line,sample) coords from image-space to object-space.
+  INSIDE	Determine if point is inside a quadrilateral
+  INTERG	???
+  TRIAG		???
+  SIMQ		Solves system of simultaneous linear equations.
+  ARGQ		Returns number of arguments passed to calling subroutine.
+  NARGS		Same as ARGQ.
+  CHKSTAT	Check I/O return status
+  ABEND		Terminates program with abnormal end message.
+
+Planet constants:
+  PBNAME/PBID   Correspondence between SEDR target body ID and target name.
+  PBDATA        Returns planet radii, rotation rate, etc for a given target.
+
+Image navigation routines:
+  MOMATI	Computes the OM matrix, given the planet center.
+  BUILDC	Compute C-matrix from the 3 Euler angles.
+  TOJ2000	Converts from EME50 to J2000 reference
+
+Voyager specific routines:
+  VGRCAM	Returns camera focal length, picture scale, and optical axis
+		intercept point.
+  VGROS		Get Voyager reseau locations
+  MWATNA	Transforms from WA (line,sample) to NA (line,sample).
+  ABLE77V2	Reads VICAR picture label and extracts image info.
+  CMSOURCE	Determine source of camera pointing data (C-matrix, etc.)
+  GEOMAV	Compute geometric camera distortion parameters.
+
+
+NAV SUBROUTINE DEPENDENCE (routines called in parenthesis)
+----------------------------------------------------------
+NAV(readimage,frameid,maplabel,vgrblems,getresloc,getgeopar)
+    limbfit,ringfit,starfit,
+    spicesub,getnav,putnav,getangles,ommatrix,
+    updtsedr,savesedr,savelast,pnav,
+    device,home,devoff)
+READIMAGE(hsub2,astrc2,hwtobyte)
+
+SPICESUB(nospice,nonflightspice,getscet,vector3,getpc,toeme,fromeme,
+         printmtx,orthot)
+NOSPICE(me0calc),GETSCET,GETPC,UPDTSEDR(plainv,ommatrix,vector3)
+NONFLIGHTSPICE(toeme,vector3,getpc,getangles,ommatrix,pnav)
+
+LIMBFIT(limbscan,limbtrace,rsearch2,cleanvgr,cleanpt1,
+        getnav,editnav,rparam,display,pdisplay,drawcurve)
+LIMBSCAN(limbpt,movelimb,carea,search,cleanvgr,cleanpts,cleanpt1,
+         chisq2,chisq3,move1,rotate1,getangles,ommatrix,plainv,updatenav,
+         display,pdisplay,drawcurve,rparmtst)
+LIMBTRACE(limbpt,tracecrv,srchinv,
+         chisq2,chisq3,move1,rotate1,getangles,ommatrix,plainv,updatenav)
+LIMBPT(getlimb,getls)
+MOVELIMB(limbpt,move1,ommatrix,cursor,drawcurve)
+
+RINGFIT(ringscan,ringtrace,ringpt,rsearch2,cleanvgr,
+        getnav,getring,getsedr,ringin,getepoch,t1950,ering0,
+        predict,editnav,updatenav,
+        display,rdisplay,drawcurve,uprcase)
+RINGSCAN(ringids,ringpts,movering,carea,rsearch,cleanpts,cleanpt1,cleanvgr,
+         chisq2,chisq3,rotate1,getangles,move1,getnav,updatenav,
+         display,drawcurve)
+RINGTRACE(ringids,getring,ringpt,srchinv,
+         chisq2,chisq3,rotate1,getangles,move2,getnav,updatenav,drawcurve)
+PREDICT(getring,latlon,linsam,cursor)
+RINGIDS(getring,ringpt,tracecrv,drawcurve,ringpts)
+RINGPT2(rinv)
+MOVERING(getring,ringpt,move2,getnav,updatenav,cursor,drawcurve)
+TRACECRV(findpt,display,cursor,drawdot,drawcurve)
+FINDPT(cursor)
+
+PHASPROF(getring,editnav,img2obj,rotvecs2img,rotvec,rotvecs2img,
+         display,rdisplay,prdisplay,drawcurve,cursor)
+PROFILE(getring,ringpt2,linsam,rinv,display,rdisplay,prdisplay,drawcurve)
+
+STARFIT(getstars,starhist,drawstars,movestar,tiestar,
+        getnav,editnav,updatestar,display,sdisplay)
+GETSTARS(fromorto_star,compcm,radrec,seagsc,updatestar)
+MOVESTAR(starpts,getangles2,fit2,fit3,move1,ommatrix,
+         starinv,updatenav, updatestar)
+STARPTS(findstar,vgrclear,display,drawdot,drawcurve,drawstars,cursor)
+UPDATESTAR(starinv)
+FINDSTAR(cursor)
+TIESTAR(hmstorad,dmstorad,ommatrix,getangles,updatenav,drawdot,cursor)
+FROMORTO_STAR(fromortogsc,fromortosao)
+FROMORTOSAO(radrec,recrad)
+FROMORTOGSC(radrec,recrad)
+
+ERING0(me0calc,mecalc,fromeme,vector3,getangles,ommatrix,getring,putring)
+RINGOUT(getring)
+ERING(ringpt,me0calc,fromeme,vector3,getangles,ommatrix,getepoch,ering0,
+      rstatus,getring,putring,uprcase)
+
+CMATRIX(ommatrix)
+CHISQ2(covmt2)
+CHISQ3(covmt3)
+MOVE2(plainv,getangles)
+UPDATENAV(getnav,putnav,getring,putring,getangles,ommatrix,cmatrix,plainv)
+UPDTRING(getnav,putnav,getring,putring,getangles,ommatrix,fromeme,vector3)
+
+LATLON(planet,ring,star)
+LINSAM(plainv,rinv,starinv)
+
+EDITNAV(spicesub,getangles,ommatrix,cmatrix,vector3,geocen,farenc,toeme,
+        editcm,editme,editpsc,t1950,ering0,
+        getnav,putnav,pnav,getpc,getsedr,savesedr,getlast,savelast,updtring,
+        display,pdisplay,rdisplay)
+EDITCM(buildcm,getangles,ommatrix)
+EDITME(buildcm,fromeme,vector3,getpc,getangles,ommatrix)
+EDITPSC(fromeme,vector3,getpc,getangles,ommatrix)
+FARENC(getangles,ommatrix)
+PNAV(geodet,plainv)
+
+DISPLAY(home,dpic,histgen1,histgen2,astrch,astrc2,strech,hstretch,hdisplay,
+        lutwrite,drawcurve,drawblems,cursor)
+PDISPLAY(overlat,overlon,linsam,latlon,phase,geodet,drawdot,cursor)
+RDISPLAY(profile,phasprof,getring,linsam,latlon,phase,drawdot,cursor)
+SDISPLAY(fromorto_star,radtohms,radtodms,linsam,latlon,drawdot,cursor)
+OVERLAY1(plainv,drawdot,drawcurve)
+OVERLAT(plainv,drawdot,drawcurve)
+OVERLON(plainv,drawdot)
+HOME(dpic)
+DPIC(avline,magld,mags)
+HISTGEN2(hsub2)
+HSTRETCH(hwtobyte,dpic)

@@ -1,0 +1,130 @@
+1 MIPS SUBROUTINE mpll2xy 
+
+Purpose				
+
+The function mpll2xy projects points from planet surface
+latitude and longitude to line and sample for a specified
+map projection.
+
+2 OPERATION
+
+This function uses one of three target body models - sphere,
+oblate spheroid, triaxial ellipsoid - to perform the necessary
+map transformations. Spherical and auxiliary conformal and
+authalic latitude formulae are based on formulae from the USGS
+Bulletin 1395. Auxiliary conformal latitude and longitude 
+formulae for the triaxial ellipsoid are coded from formulae in
+John Snyder's paper "Conformal Mapping of the Triaxial 
+Ellipsoid" from the journal Survey Review of July 1985, v. 28.
+
+Supported map projections are ...
+
+		ALBERS 
+		CYLINDRICAL EQUAL-AREA
+		EQUIDISTANT CYLINDRICAL
+		LAMBERT AZIMUTHAL EQUAL-AREA
+		LAMBERT CONFORMAL CONIC
+		MERCATOR (includes Transverse Mercator)
+		MOLLWEIDE (homalographic)
+		ORTHOGRAPHIC
+		SINUSOIDAL
+		STEREOGRAPHIC
+
+Libraries and subroutines required to run this
+routine: mp_routines suite
+
+
+CALLING SEQUENCE
+
+from C:		status = mpll2xy( MP mp, double *line, 
+			double *sample, double latitude, 
+			double longitude, int ll_type );
+from FORTRAN:	call mp_ll2xy( mp, line, sample, latitude,
+			longitude, ll_type, status )
+
+Necessary include files
+from calling routine 
+or program:			mp_routines.h 
+				(or mp_for_defs.fin for 
+				FORTRAN applications)
+
+ARGUMENTS
+
+INPUT
+
+mp 		(MP type)
+
+A pointer to the MP data structure as returned by mpInit.
+In FORTRAN, this variable is of type REAL*8. MP type is 
+defined in the include file mp_routines.h.
+
+latitude	(double)
+
+Latitude value of point on a target body in one of three
+coordinate systems as specified by the user in the 
+argument ll_type.
+
+longitude	(double)
+
+Longitude value of point on a target body in one of three
+coordinate systems as specified by the user in the 
+argument ll_type.
+
+ll_type		(integer)
+
+Type of latitude and longitude input:
+
+	1 - Planetocentric
+	2 - Planetodetic
+	3 - Snyder-defined for triaxial ellipsoid
+
+
+OUTPUT
+
+line		(double)
+
+Address of the y position of the map projected point in an image.
+
+sample		(double)
+
+Address of the x position of the map projected point in an image.
+
+
+RETURN
+
+status 		(integer)
+
+This is an indicator of the success or failure of
+retrieving various values for the VICAR pdf file
+and initializing the map projection data object.
+
+	0  - successful call to mpll2xy
+
+	-1 - invalid latitude value or failure in 
+	     conversion of latitude, longitude values
+
+	-2 - invalid ll_type argument
+
+3 ENVIRONMENT and LANGUAGE
+
+Software Platform:	VICAR 11.0 (VMS/UNIX)
+Hardware Platforms:	No particular hardware required; 
+			tested on DEC Alpha, DEC VAX-VMS,
+			Sun Sparcstation (Solaris and SunOS),
+			Silicon Graphics (SGI), and HP 700.
+Programming Language:	ANSI C
+
+3 BACKGROUND
+
+Author:			Justin McNeill, JPL
+Cognizant Engineer:	Justin McNeill (jfm059@ipl.jpl.nasa.gov)
+Written:		October 1993
+Revision history:	Original
+Background and References:	
+
+1. Map Projection Software Set Software Specification Document,
+	JPL, April 28, 1993;
+2. "Conformal Mapping of the Triaxial Ellipsoid," Survey Review,
+	vol. 28, July 1985.
+3. MIPS Map Projection Software Users' Guide, D-11810, version 1.0,
+	May 1994.

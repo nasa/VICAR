@@ -1,0 +1,9 @@
+
+#define SUBROUTINE intibm
+
+#define MODULE_LIST intibm.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

@@ -1,0 +1,74 @@
+process help=*
+PARM INP    TYPE=STRING
+PARM OUT    TYPE=STRING
+END-PROC
+.title
+VICAR PROGRAM VGRFILLIN
+.help
+PURPOSE:
+
+VGRFILLIN will fill in all missing lines, partial lines, or truncated
+lines for Voyager images stored as disk EDRs.  Disk EDRs are created by
+the Voyager Real-Time Subsystem or via program VEDR.
+
+.PAGE
+EXECUTION:
+
+	vgrfillin  IN  OUT
+where
+  IN is the input Voyager disk EDR.
+  OUT is the output image.
+
+The output image will be in standard VICAR format (with all binary header
+information discarded).
+
+.page
+OPERATION:
+
+  Data gaps are detected by examining data presence indicators in each
+line header of the disk EDR.  The fill performed is an interpolation between
+good lines.  If the gap is larger than 20 lines wide, or if it occurs at the
+beginning or the end of the frame, it will not be filled.
+
+In addition, VGRFILLIN will fill in lines truncated prior to transmission by
+the data compressor on-board the spacecraft.  The compressor truncates pixels
+on the right side of odd-numbered lines and on the left side of even-numbered
+lines.  Truncated pixels are filled via interpolation using the nearest
+available data above and below the line.  Sometimes the line truncation is
+so severe as to leave a vertical gap down the middle of the image (called a
+"gore"), where no data is available in either odd or even lines.  These
+gores are filled via interpolation using the nearest available pixels to
+the left and right of the gore.
+
+Timing for VAX 780:
+	4.7 cpu sec  filling 9 lines
+	5.1          filling 40 lines
+	5.8          filling 60 lines
+	10           filling 800 lines truncated by about 200 samples
+.page
+PROGRAM HISTORY:
+
+Written by: Gary Yagi     12/1/84
+Current cognizant programmer: Gary Yagi
+Revisions:
+   1 MAR 85  L. Kamp   ...write line fill count to label
+                       ...fill in truncated lines for data compression modes
+   1 FEB 86  L. Kamp   ...Skip processing after line 480 for IMQ
+  22 JAN 89  G. Yagi   ...Implement formats for Neptune encounter
+  15 Feb 89  G. Yagi   ...Documented 20-line gap limitation i help file.
+   2 Jun 89  G. Yagi   ...Check for valid input DEDR
+   6 Mar 95  R. Schenk (CRI) ...Ported for use on UNIX
+.LEVEL1
+.VARI INP
+STRING - input VGR disk EDR
+.VARI OUT
+STRING - output image 
+.LEVEL2
+.VARI INP
+The input to VGRFILLIN must be a VGR disk EDR which is the output from the
+Real-Time Subsystem.  The binary labels must be present.
+Therefore, no program can be run on the data between IMBUILD and VGRFILLIN.
+.VARI OUT
+The output is a normal Vicar2 image (i.e. it no longer has binary labels,
+but still has VGR labels.
+.end

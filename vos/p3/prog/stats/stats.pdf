@@ -1,0 +1,578 @@
+process help=*
+PARM INP      TYPE=STRING   COUNT=(1:12)
+PARM OUT      TYPE=STRING   COUNT=(1:2)
+PARM SIZE     TYPE=INTEGER  COUNT=4	      DEFAULT=(1,1,0,0)
+PARM MSS      TYPE=INTEGER		      DEFAULT=0
+PARM BAND     TYPE=INTEGER  COUNT=(1:12)    DEFAULT=0
+PARM SCRIBE   TYPE=INTEGER		      DEFAULT=0
+PARM DN       TYPE=INTEGER  COUNT=(0:1)     DEFAULT=--
+PARM HIST     TYPE=INTEGER  COUNT=(1:12)    DEFAULT=-1
+PARM SPEC     TYPE=INTEGER  COUNT=(1:12)    DEFAULT=-1
+PARM SPLOT    TYPE=INTEGER  COUNT=(1:12)    DEFAULT=-1
+PARM EXCLUDE  TYPE=INTEGER  COUNT=(0:10)    DEFAULT=--
+PARM NOPRINT  TYPE=KEYWORD  COUNT=(0:1) VALID="NOPRINT" DEFAULT=--
+PARM VERT     TYPE=INTEGER  COUNT=(1:50)    DEFAULT=(0,0)
+PARM CLASS1   TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS2   TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS3   TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS4   TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS5   TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS6   TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS7   TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS8   TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS9   TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS10  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS11  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS12  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS13  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS14  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS15  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS16  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS17  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS18  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS19  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS20  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS21  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS22  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS23  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS24  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS25  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS26  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS27  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS28  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS29  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS30  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS31  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS32  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS33  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS34  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS35  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS36  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS37  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS38  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS39  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS40  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS41  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS42  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS43  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS44  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS45  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS46  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS47  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS48  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS49  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASS50  TYPE=INTEGER  COUNT=(2:200)   DEFAULT=(0,0)
+PARM CLASSx   TYPE=INTEGER                  DEFAULT=0
+END-PROC
+.TITLE
+   Program stats
+.HELP
+PURPOSE:  stats computes the statistics of specified training areas on
+ multi-spectral data.  The output consists of page printer output, a
+ statistics data set compatible with the multispectral classifier
+ FASTCLAS, and (optionally) an image containing the scribed training
+ areas.  Input multispectral data must be in separate VICAR data sets or
+ in MSS format.  Refer to the help for program MSS.
+EXECUTION:
+The following is the execution statement format for stats:
+	stats INP OUT PARAMS
+where INP, OUT, PARAMS are parameters discussed in their respective
+parameter sections.
+ The training areas for the classes may be specified either in rectangular
+or vertices format.  stats no longer allows some training fields in a given
+training area to be in vertices format and some to be in rectangular
+format.  Rectangular format is the default and is thus not 
+specified explicitly.   The RECT parameter (which was present in the IBM
+version of stats), for expliciltly specifying rectangular format, is no
+longer used.  The VERT parameter is used to list any and every class using the
+vertices format. 
+  The training area for the class is composed of one or more training fields.
+Each training field is a closed region of the image.  The format must be 
+the same for all fields within a class.  In rectangular format the training 
+fields are defined by starting line, starting sample, number of lines,
+and number of samples.
+  In vertices format, only the vertices (line number and sample number) of an
+irregular area need be stated.  
+.page
+EXAMPLES
+
+1.    stats INP=(A, B, C, D)   OUT=ST  HIST=0 SPEC=0 EXCLUDE=0 VERT=2 +
+            CLASS1=( 50,60,20,20  85,100,10,15 )                      +
+            CLASS2=( 125,50  140,60  150,40  130,30  125,50 )
+
+In this example four spectral bands are input in separate VICAR images.
+Histograms and spectral plots of all four bands and both classes are
+produced.  Any pixel with a DN of 0 is excluded from the statistics.
+The class 1 statistics come from two rectangular training fields.  The 
+class 2 statistics come from an irregular training field.
+.page
+
+2.    stats INP=MS OUT=(ST,SC) MSS=5  SPEC=0 'NOPRINT SCRIBE=2 VERT=1     +
+            CLASS1=( 25,20  35,30  40,50  55,30  30,15  25,20             +
+                     85,40 100,55  70,55  85,40 )                         +
+            CLASS2=( 200,100,20,30 )                                      +
+            CLASS3=( 150,140,5,10 )
+
+In this example five spectral bands are input in MSS format (in one file).
+Statistics are computed on all five bands.  Spectral plots of all five bands 
+and all three classes are produced, but all other printer (terminal) output is
+suppressed.  The second spectral band (in this case, extracted from the MSS
+format input) is copied to the second output file and scribed with the training
+areas.  Class 1 statistics are gathered from two irregular training fields.
+Classes 2 and three both have one rectangular training field.
+.page
+3.  The last example is the test procedure for stats.  This is
+    a complete example that could be run by the user and that 
+    demonstrates uses of the possible parameters.
+
+     gen gen1 nl=128 ns=128
+     gen gen2 nl=128 ns=128 sinc=2 linc=2
+     gen gen3 nl=128 ns=128 sinc=4 linc=4
+     !
+     !  First tests will check standard image format files
+     !
+     ! Copy first band and scribe training areas on this image
+     stats (gen1,gen2,gen3) (stat1,stat2) 'noprint +
+     class1=(1,1,32,32) class2=(96,1,32,32) class3=(96,96,32,32) +
+     class4=(1,96,32,32)
+     ! Print Histograms for the DN values in each training area
+     stats (gen1,gen2,gen3) stat1 hist=0 +
+     class1=(1,1,32,32) class2=(96,1,32,32) class3=(96,96,32,32) +
+     class4=(1,96,32,32)
+     ! Print Spectral Plot for all bands and classes
+     stats (gen1,gen2,gen3) stat1 spec=0 +
+     class1=(1,1,32,32) class2=(96,1,32,32) class3=(96,96,32,32) +
+     class4=(1,96,32,32)
+     ! Try out Vertice format
+     stats (gen1,gen2,gen3) stat1 hist=0 vert=5 +
+     class1=(1,1,32,32) class2=(96,1,32,32) class3=(96,96,32,32) +
+     class4=(1,96,32,32) class5=(48,48,48,70,70,48,48,48)
+     !
+     !  Now check MSS format images
+     !
+     al mss 128 384
+     mss (gen1,gen2,gen3) mss (1,1,128,128)
+     ! Copy second band and scribe training areas on this image
+     stats mss (stat1,stat2) mss=3 scribe=2 +
+     class1=(1,1,32,32) class2=(96,1,32,32) class3=(96,96,32,32) +
+     class4=(1,96,32,32)
+     ! Gather stats for first and third bands
+     stats mss stat1 mss=3 band=(1,3) hist=0 'noprint +
+     class1=(1,1,32,32) class2=(96,1,32,32) class3=(96,96,32,32) +
+     class4=(1,96,32,32)
+     ! Print spectral plots for second and third band for first and fourth class
+     stats mss stat1 mss=3 splot=(1,4) spec=(2,3) +
+     class1=(1,1,32,32) class2=(96,1,32,32) class3=(96,96,32,32) +
+     class4=(1,96,32,32)
+     ! Try out Vertice format
+     stats mss (stat1,stat2) mss=3 vert=5 +
+     class1=(1,1,32,32) class2=(96,1,32,32) class3=(96,96,32,32) +
+     class4=(1,96,32,32) class5=(48,48,48,70,70,48,48,48)
+.page
+OPERATION:  If the scribe option is requested, stats begins by copying
+ the specified input picture to the secondary output data set.  Then the first
+ training area parameters are the processed and the training area is
+ read from all input bands.  Statistics on this area are compiled and the
+ area is scribed on the scribed picture.  After compiling statistics for
+ all training fields for a given class, the statistics are written on the
+ output statistics data set.  The record number on which they were written is
+ the class number of that class.  The record contains the
+ means, the number of pixels, and the covariance matrix for that class.  The
+ record length is a function of the number of spectral bands used.  The
+ maximum record length is 372 bytes which corresponds to 12 spectral bands.
+ Maximum number of records is 50 since class numbers must range from 1 to
+ 50.  If desired, histograms of each training class in each band are
+ printed.   Spectral plots of the spectral signatures
+ can also be printed.  The 'EXCLUDE' option allows the user to specify
+ certain DNs for which statistics are ignored.  This is useful, for
+ instance, if the training areas lie at the edge of a skewed picture.  To
+ prevent statistics from including pixels in the background skew,
+ 'EXCLUDE,0' could be specified.
+      Page printer output includes the training areas for the class,
+ means, and standard deviations for each band, and the covariance matrix.
+ The covariance matrix is simply the covariance taken between all combina-
+ tions of spectral band pairs.  The keyword NOPRINT supresses the page
+ printer option.
+RESTRICTIONS:  stats can handle up to 12 spectral bands in MSS format or
+ in separate data set format, and compute statistics on 50 training
+ classes.  The maximum size for any training field is 600 lines by 600
+ samples.  The input files must have byte data format.
+      Histograms and scribing must be performed in separate executions.
+ If both are specified then the histograms will be deleted.
+.page
+WRITTEN BY: J. D. Addington               30 September 1974
+
+CONVERTED TO VAX BY:  A. J. Runkle	  22 Dec. 1983
+
+CURRENT COGNIZANT PROGRAMMER: Steve Pohorsky
+
+MADE PORTABLE FOR UNIX: CRI               31 OCT 1994
+
+
+TIMING:  Execution time depends on the number and size of the training
+ areas and the number of spectral bands.  Typical running time is between
+ 1 and 2 minutes.
+.LEVEL1
+.VARIABLE INP
+STRING - Contains the input data
+set name(s)
+.VARIABLE OUT
+STRING - Contains output data   
+set name(s)
+.VARIABLE SIZE
+Standard Vicar size field 
+(Not used - can be defaulted).
+.VARIABLE MSS
+Specifies the number of spectral
+bands in MSS format.
+.VARIABLE BAND
+Denotes that bands in MSS format
+to be used as input.
+.VARIABLE SCRIBE
+Denotes which input band is to
+be copied to output  data set.
+.VARIABLE DN
+Specifies the outline DN value.
+.VARIABLE HIST
+Denotes the bands for which
+histograms will be printed.
+.VARIABLE SPEC
+Denotes which spectral plots are
+to be printed.
+.VARIABLE SPLOT
+Specifies the limits  of 
+spectral plots for classes.
+.VARIABLE EXCLUDE
+Ignore pixels with given DN
+values.
+.VARIABLE NOPRINT
+Specifies whether training area
+information is to be printed.
+.VARIABLE VERT
+Specifies the training
+areas that are in vertex format.
+.VARIABLE CLASS
+Dummy argument do NOT use.
+.VARIABLE CLASSx
+Dummy arguement do NOT use.
+.VARIABLE CLASS1
+Training area coordinates.
+.VARIABLE CLASS2
+Training area coordinates.
+.VARIABLE CLASS3
+Training area coordinates.
+.VARIABLE CLASS4
+Training area coordinates.
+.VARIABLE CLASS5
+Training area coordinates.
+.VARIABLE CLASS6
+Training area coordinates.
+.VARIABLE CLASS7
+Training area coordinates.
+.VARIABLE CLASS8
+Training area coordinates.
+.VARIABLE CLASS9
+Training area coordinates.
+.VARIABLE CLASS10
+Training area coordinates.
+.VARIABLE CLASS11
+Training area coordinates.
+.VARIABLE CLASS12
+Training area coordinates.
+.VARIABLE CLASS13
+Training area coordinates.
+.VARIABLE CLASS14
+Training area coordinates.
+.VARIABLE CLASS15
+Training area coordinates.
+.VARIABLE CLASS16
+Training area coordinates.
+.VARIABLE CLASS17
+Training area coordinates.
+.VARIABLE CLASS18
+Training area coordinates.
+.VARIABLE CLASS19
+Training area coordinates.
+.VARIABLE CLASS20
+Training area coordinates.
+.VARIABLE CLASS21
+Training area coordinates.
+.VARIABLE CLASS23
+Training area coordinates.
+.VARIABLE CLASS24
+Training area coordinates.
+.VARIABLE CLASS25
+Training area coordinates.
+.VARIABLE CLASS26
+Training area coordinates.
+.VARIABLE CLASS27
+Training area coordinates.
+.VARIABLE CLASS28
+Training area coordinates.
+.VARIABLE CLASS29
+Training area coordinates.
+.VARIABLE CLASS30
+Training area coordinates.
+.VARIABLE CLASS31
+Training area coordinates.
+.VARIABLE CLASS32
+Training area coordinates.
+.VARIABLE CLASS33
+Training area coordinates.
+.VARIABLE CLASS34
+Training area coordinates.
+.VARIABLE CLASS35
+Training area coordinates.
+.VARIABLE CLASS36
+Training area coordinates.
+.VARIABLE CLASS37
+Training area coordinates.
+.VARIABLE CLASS38
+Training area coordinates.
+.VARIABLE CLASS39
+Training area coordinates.
+.VARIABLE CLASS40
+Training area coordinates.
+.VARIABLE CLASS41
+Training area coordinates.
+.VARIABLE CLASS42
+Training area coordinates.
+.VARIABLE CLASS43
+Training area coordinates.
+.VARIABLE CLASS44
+Training area coordinates.
+.VARIABLE CLASS45
+Training area coordinates.
+.VARIABLE CLASS46
+Training area coordinates.
+.VARIABLE CLASS47
+Training area coordinates.
+.VARIABLE CLASS48
+Training area coordinates.
+.VARIABLE CLASS49
+Training area coordinates.
+.VARIABLE CLASS50
+Training area coordinates.
+.LEVEL2
+.VARIABLE INP
+STRING - Input data sets used by stats.  If input data is in MSS format
+then only one data set is required.  Otherwise there must be one data set
+per spectral band examined.
+.VARIABLE OUT
+STRING - Output data sets used by STATS.  First data set will contain the
+statistics output.  The second output data set (optional) will contain
+the input picture with training areas scribed.  (If scribing is requested
+and their is only one output file, the output file is assumed to be the
+scribed image, and no statistics output file is generated.)
+
+The statistics output file is a classification statistics file (statistics
+data set).  Each record (excluding labels) in a classification statistics file
+contains statistics for a particular class of pixels.  The statistics are
+derived from the multispectral (multi-channel) data.  The size of records in
+the file is based on the number of channels (bands).  If 'N' is used to denote
+the number of channels, then each record contains the following data in the
+order shown. 
+
+   *  2 words (8 bytes) of class name in character (ASCII) format.  This
+      takes the form 'CLASSnnn' where nnn is the class number.
+      (nnn is left-justified with trailing blanks.)
+
+   *  N words for mean values for this class for each of the N channels.
+      Each mean value is stored in REAL*4 format.
+
+   *  1 word, stored in INTEGER*4 format, containing the number of pixels 
+      in this class.
+
+   *  N*(N+1)/2 words containing the variances and covariances for the N
+      channels for this class.  Each variance and covariance is stored in
+      REAL*4 format.
+
+The VICAR system label contains the number of records in the number of lines
+field and the number of bytes per record in the number of samples field.
+.VARIABLE SIZE
+INTEGER - Standard Vicar size field (Not used - can be defaulted).
+.VARIABLE MSS
+INTEGER - Denotes that input data is in MSS format and contains the
+supplied number of spectral bands.
+.VARIABLE BAND
+INTEGER - Specifies which MSS format bands are to be used as input (The
+default is for all bands specified by the MSS parameter).
+Syntax is:   BAND = (b1,...)   where b1,... is a list of bands.
+.VARIABLE DN
+INTEGER - Denotes that the outline will be the given DN in scribing the
+training areas.  The default is to use 0 or 255 depending on which contrasts
+better with the image.
+.VARIABLE SCRIBE - Denotes which input band is going to be copied with
+the training classes scribed on the image.
+.VARIABLE HIST
+INTEGER - Denotes that histograms of the training classes from the
+specified bands are to be printed on the line printer.  If the value of
+0 is used, histograms for all bands are printed.
+Syntax is:   HIST = (b1,...)   where b1,... is a list of bands.
+
+The histogram output uses vertical bars to show the number of pixels in the
+DN bins.  The bars are made of a column of  * symbols with a number (or other
+symbol) on top.  The number of pixels represented by each * is shown at the
+top of the histogram.  The number on top of a column is an additional number of
+pixels in the bin beyond those represented by *s.  The letters A through Z are
+used to represent the values 10 through 35, respectively.  The $ symbol
+represents a value greater than 35. 
+.VARIABLE SPEC
+INTEGER - Denotes that a spectral plot of training classes from the given
+bands is to be printed.  If the value of 0 is used, all the bands are 
+included.
+Syntax is:   SPEC = (b1,...)   where b1,... is a list of bands.
+.VARIABLE SPLOT
+INTEGER - Limits spectral plots to the specified classes (default is that
+all classes are included).
+Syntax is:   SPLOT = (c1,...)   where c1,... is a list of classes.
+.VARIABLE EXCLUDE
+INTEGER - Ignore any pixel which has the same DN value as one specified.
+There is a maximum of 10 DN values that can be specified.
+Syntax is:   EXCLUDE = (d1,...)   where d1,... is a list of DNs.
+.VARIABLE NOPRINT
+KEYWORD - Controls the printing of means, standard deviations, covariance
+matrices, and training area coordinates on the line printer (default is
+to PRINT this information).
+.VARIABLE VERT
+INTEGER - Specifies which  training areas defined by the CLASSx keyword
+are to be read in the vertices format.
+ The training areas for the classes may be specified either in rectangular
+or vertices format.  stats no longer allows some training fields in a given
+training area to be in vertices format and some to be in rectangular
+format.  Rectangular format is the default and is thus not 
+specified explicitly.   The RECT parameter (which was present in the IBM
+version of stats), for expliciltly specifying rectangular format, is no
+longer used.  The VERT parameter is used to list any and every class using the
+vertices format. 
+.VARIABLE CLASS
+Actual keyword is of the form CLASSx where x is a number from 1 to 50.
+The number defines which class number this training set belongs.
+e.g.  CLASS69 SL,SS,NL,NS    or    CLASS32  L1,S1,L2,S2,...
+See CLASSx for a more complete definition.
+.VARIABLE CLASSx
+INTEGER - Denotes the training area information in either rectangular or
+vertices formats (default is rectangular).  Rectangular coordinates are
+of the form: SL,SS,NL,NS   SL,SS,NL,NS ...  (the standard Vicar size field) 
+while vertices format is of the form: L1,S1,L2,S2,... etc.  The range of values
+for 'x' is from 1 to 50 such that the valid keywords would be of the form:
+CLASS1, ... CLASS50. 
+  The training area for the class is composed of one or more training fields.
+Each training field is a closed region of the image.  The format must be 
+the same for all fields within a class.  In rectangular format the training 
+fields are defined by starting line, starting sample, number of lines,
+and number of samples.
+  In vertices format, only the vertices (line number and sample number) of an
+irregular area need be stated.  The program interpolates between each vertex to
+determine the perimeter of the training field.  Several rules must be adhered
+to in using the vertices format:
+
+1)  The first vertex entered must be the topmost point of the area; that is, 
+    the lowest line number.
+2)  The vertices must follw in a clockwise order. 
+3)  The last vertex must be the same as the first; that is, close the area
+    for each training field.
+
+  The maximum size for any training field, whether rectangular or vertices,
+is 600 lines by 600 samples.
+.VARIABLE CLASS1
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS2
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS3
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS4
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS5
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS6
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS7
+CINTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS8
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS9
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS10
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS11
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS12
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS13
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS14
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS15
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS16
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS17
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS18
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS19
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS20
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS21
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS22
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS23
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS24
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS25
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS26
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS27
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS28
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS29
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS30
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS31
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS32
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS33
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS34
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS35
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS36
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS37
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS38
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS39
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS40
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS41
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS42
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS43
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS44
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS45
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS46
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS47
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS48
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS49
+INTEGER - See CLASSx for a proper definition.
+.VARIABLE CLASS50
+INTEGER - See CLASSx for a proper definition.
+.END

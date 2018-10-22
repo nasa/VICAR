@@ -1,0 +1,99 @@
+process help=*
+PARM OUT TYPE=STRING COUNT=6
+PARM PLANET     TYPE=(STRING,12) COUNT=1 +
+ VALID=("phobos","deimos","gaspra") DEFAULT="phobos"
+PARM PATH    TYPE=(STRING,80) COUNT=(0:1) +
+   DEFAULT=/project/test_work/testdata/general
+PARM MODE TYPE=KEYWORD COUNT=1 VALID=(north,south)
+PARM TRIAXIAL TYPE=REAL COUNT=(0,3) DEFAULT=--
+END-PROC
+
+.TITLE
+VICAR program AREAISO
+
+.HELP
+PURPOSE:
+To create maps of auxiliary latitude & longitude for equal area projections
+of irregularly shaped objects. 
+Only good for polar coordinates.
+The planet models must conform to a standard grid and reside in a directory 
+pointed to by the PATH keyword.
+Based upon Dr Yang Cheng's solution.
+
+EXECUTION:
+areaiso out=(lat,lon,area,angle,dlat,dlon) planet=phobos 'north
+
+.PAGE
+METHOD:
+First the program reads the planet model file located in PATH.
+This is an ascii table with west longitude, latitude, radius each 5 degrees.
+All angles are planetocentric.
+
+The program then solves the Cauchy equations for an equal area projection
+of the ISO on a polar coordinate grid, either 'north or ' south.
+
+The auxiliary coordinates are only useable for a polar coordinate grid.
+
+HISTORY:
+9-1-98  J Lorre. 
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+.LEVEL1
+
+.VARI OUT
+Output images
+latitude,
+longitude,
+area,
+angle,
+delta latitude,
+delta longitude
+
+.VARI PLANET
+Planet name
+
+.VARI PATH
+Directory path for
+planet models
+
+.VARI MODE
+Specify hemisphere.
+mode=north or
+mode=south
+
+.VARI TRIAXIAL
+Three radii: a,b,c
+Overrides planet
+model.
+
+.LEVEL2
+
+.VARI OUT
+Output images.
+1. latitude which comes from the initial grid latitude in degrees.
+2. longitude which comes from the initial grid longitude in degrees.
+3. The area constraint ratio.
+4. The angle deformation in degrees.
+5. latitude shift (latitude - grid location) in degrees.
+6. longitude shift (longitude - grid location) in degrees.
+
+All outputs are in REAL format.
+
+.VARI PLANET
+The planet or object name for whom auxiliary maps are to be generated..
+
+.VARI PATH
+The directory name where the planet models reside.
+
+.VARI MODE
+Specify the hemisphere.
+mode=north for a north polar projection.
+mode=south for a south polar projection.
+NOTE: Mapaux must have the same keyword.
+
+.VARI TRIAXIAL
+Three triaxial ellipsoid radii: a, b, and c. a > b > c.
+This optional keyword will cause the radii in the planet model to be
+replaced by a triaxial ellipsoid of radii a b c (in km). Use the program
+as one would ordinarily.
+

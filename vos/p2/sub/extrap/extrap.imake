@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine EXTRAP */
+
+#define SUBROUTINE extrap
+
+#define MODULE_LIST extrap.f
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

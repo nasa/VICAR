@@ -1,0 +1,104 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+!
+!  THIS IS A TEST OF PROGRAM flot
+!
+!      byte image - first test defaults.
+!
+gen FLOTA NL=10 NS=12
+flot INP=FLOTA OUT=FLOTAO 
+list FLOTAO 
+!
+!    try SL and SS not equal to 1 with 'HORIZ.
+!
+flot INP=FLOTA OUT=FLOTAO2 SIZE=(2,3,8,7) 'HORIZ
+list FLOTAO2
+!
+!    try other modes
+!
+flot FLOTA FLOTAO3 'COUNTER
+list FLOTAO3
+!
+flot FLOTA FLOTAO4 'VERT
+list FLOTAO4
+!
+flot FLOTA FLOTAO5 'ROT180
+list FLOTAO5
+!
+!      halfword image - first test defaults.
+!
+gen FLOTB NL=10 NS=12 'HALF
+flot INP=FLOTB OUT=FLOTBO 
+list FLOTBO 
+!
+!    try SL and SS not equal to 1 with 'VERT.
+!
+flot INP=FLOTB OUT=FLOTBO2 SIZE=(2,3,8,7) 'VERT
+list FLOTBO2
+!
+!    try other modes
+!
+flot FLOTB FLOTBO3 'CLOCK
+list FLOTBO3
+!
+flot FLOTB FLOTBO4 'TRANS
+list FLOTBO4
+!
+!      fullword image - first test defaults.
+!
+gen FLOTC NL=10 NS=12 'FULL
+flot INP=FLOTC OUT=FLOTCO 
+list FLOTCO 
+!
+!    try SL and SS not equal to 1 with 'CLOCK.
+!
+flot INP=FLOTC OUT=FLOTCO2 SIZE=(2,3,8,7) 'CLOCK
+list FLOTCO2
+!
+!    try other modes
+!
+flot FLOTC FLOTCO3 'COUNTER
+list FLOTCO3
+!
+flot FLOTC FLOTCO4 'VERT
+list FLOTCO4
+!
+!      REAL*4 image - first test defaults.
+!
+gen FLOTD NL=10 NS=12 'REAL4
+flot INP=FLOTD OUT=FLOTDO 
+list FLOTDO 
+!
+!    try SL and SS not equal to 1 with 'HORIZ.
+!
+flot INP=FLOTD OUT=FLOTDO2 SIZE=(2,3,8,7) 'HORIZ
+list FLOTDO2
+!
+!    try other modes
+!
+flot FLOTD FLOTDO3 'COUNTER
+list FLOTDO3
+!
+flot FLOTD FLOTDO4 'TRANS
+list FLOTDO4
+!
+!    try multi-band input
+!
+gen FLOTRED NL=10 NS=12 IVAL=1
+gen FLOTGRN NL=10 NS=12 IVAL=101
+gen FLOTBLU NL=10 NS=12 IVAL=201
+viccub (FLOTRED,FLOTGRN,FLOTBLU) FLOTCOLOR
+flot FLOTCOLOR FLOTCOLORROT
+list FLOTCOLORROT
+flot FLOTCOLOR FLOTCOLORROT BAND=2
+list FLOTCOLORROT
+!
+!    clean up
+!
+ush rm FLOTA* FLOTB* FLOTC* FLOTD* FLOTG* FLOTR*
+END-PROC

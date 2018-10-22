@@ -1,0 +1,1337 @@
+process help=*
+SUBCMD-DEFAULT MAIN
+PARM 	INP	TYPE=STRING	COUNT=(2:3)
+PARM	OUT	TYPE=STRING	COUNT=(1:2)
+PARM	SIZE	TYPE=INTEGER	COUNT=4	DEFAULT=(1,1,0,0)
+PARM	SL	TYPE=INTEGER		DEFAULT=1
+PARM	SS	TYPE=INTEGER		DEFAULT=1
+PARM	NL	TYPE=INTEGER		DEFAULT=0
+PARM	NS	TYPE=INTEGER		DEFAULT=0
+PARM	U	TYPE=INTEGER		DEFAULT=0
+PARM	D	TYPE=INTEGER		DEFAULT=0
+PARM	L	TYPE=INTEGER		DEFAULT=0
+PARM	R	TYPE=INTEGER		DEFAULT=0
+PARM 	U1	TYPE=INTEGER		DEFAULT=0
+PARM	U2	TYPE=INTEGER		DEFAULT=0
+PARM	D1	TYPE=INTEGER		DEFAULT=0
+PARM	D2	TYPE=INTEGER		DEFAULT=0
+PARM	L1	TYPE=INTEGER		DEFAULT=0
+PARM	L2	TYPE=INTEGER		DEFAULT=0
+PARM	R1	TYPE=INTEGER		DEFAULT=0
+PARM	R2	TYPE=INTEGER		DEFAULT=0
+PARM	NHOR    TYPE=INTEGER		DEFAULT=20
+PARM	NVER	TYPE=INTEGER		DEFAULT=20
+PARM	REDO	TYPE=INTEGER		DEFAULT=0
+PARM	DELETE	TYPE=INTEGER			COUNT=2		DEFAULT=(0,0)
+PARM	AREA	TYPE=INTEGER		DEFAULT=20
+PARM	CONV	TYPE=KEYWORD	VALID=(MIN,MAX)	COUNT=(0:1)	DEFAULT=MIN
+PARM	POWER	TYPE=INTEGER		DEFAULT=0
+PARM	MODE	TYPE=KEYWORD	VALID=(CORR,POINT) COUNT=(0:1) DEFAULT=POINT
+PARM	HIPASS	TYPE=KEYWORD	VALID=(HPF,NOHPF)   		DEFAULT=HPF
+PARM	PHASE	KEYWORD		VALID=(PHASE,NOPHASE)		DEFAULT=NOPHASE
+PARM	FIT	TYPE=INTEGER	VALID=1:7	DEFAULT=1
+PARM	TPFORM	TYPE=INTEGER	VALID=1:9	DEFAULT=1
+PARM	USE	TYPE=INTEGER	VALID=4:10 	DEFAULT=4
+PARM	INTERP  TYPE=KEYWORD	VALID=(INTE,NOIN)   COUNT=(0:1) DEFAULT=NOIN
+PARM	TEXTSIZE     INTEGER	VALID=1:99          COUNT=(0:1) DEFAULT=--
+PARM	ZOOM	TYPE=INTEGER		DEFAULT=1
+PARM	Z1	TYPE=INTEGER		DEFAULT=1
+PARM	Z2	TYPE=INTEGER		DEFAULT=1
+PARM	STRETCH	TYPE=INTEGER		COUNT=2			DEFAULT=(0,255)
+PARM	LINEAR	TYPE=INTEGER		COUNT=2			DEFAULT=(0,255)
+PARM	SL1	TYPE=INTEGER		DEFAULT=1
+PARM	SS1	TYPE=INTEGER		DEFAULT=1
+PARM	SL2	TYPE=INTEGER		DEFAULT=1
+PARM	SS2	TYPE=INTEGER		DEFAULT=1
+PARM	MINL	TYPE=INTEGER		DEFAULT=1
+PARM	MINS	TYPE=INTEGER		DEFAULT=1
+PARM	MAXL	TYPE=INTEGER		DEFAULT=1
+PARM	MAXS	TYPE=INTEGER		DEFAULT=1
+PARM 	HOME	TYPE=KEYWORD	VALID=HOME	COUNT=(0:1)	DEFAULT=--
+PARM	PRINT	TYPE=KEYWORD  VALID=(PRINT,NOPRINT) COUNT=(0:1) DEFAULT=NOPRINT
+PARM	DSTAT	TYPE=KEYWORD	VALID=DSTAT	COUNT=(0:1)	DEFAULT=--
+PARM	LOCATE	TYPE=INTEGER		DEFAULT=1
+PARM	SHOW	TYPE=KEYWORD	VALID=SHOW	COUNT=(0:1)	DEFAULT=--
+PARM 	CURSOR	TYPE=INTEGER	VALID=(1:8)	DEFAULT=1
+PARM 	NOTRACK	TYPE=KEYWORD	VALID=NOTRACK	COUNT=(0:1)	DEFAULT=--
+END-SUBCMD
+SUBCMD IPARAM
+PARM	EXIT	TYPE=KEYWORD	VALID=EXIT	COUNT=(0:1)	DEFAULT=--
+PARM	U	TYPE=INTEGER		DEFAULT=0
+PARM	D	TYPE=INTEGER		DEFAULT=0
+PARM	L	TYPE=INTEGER		DEFAULT=0
+PARM	R	TYPE=INTEGER		DEFAULT=0
+PARM 	U1	TYPE=INTEGER		DEFAULT=0
+PARM	U2	TYPE=INTEGER		DEFAULT=0
+PARM	D1	TYPE=INTEGER		DEFAULT=0
+PARM	D2	TYPE=INTEGER		DEFAULT=0
+PARM	L1	TYPE=INTEGER		DEFAULT=0
+PARM	L2	TYPE=INTEGER		DEFAULT=0
+PARM	R1	TYPE=INTEGER		DEFAULT=0
+PARM	R2	TYPE=INTEGER		DEFAULT=0
+PARM	NHOR    TYPE=INTEGER		DEFAULT=20
+PARM	NVER	TYPE=INTEGER		DEFAULT=20
+PARM	REDO	TYPE=INTEGER		DEFAULT=0
+PARM	DELETE	TYPE=INTEGER			COUNT=2		DEFAULT=(0,0)
+PARM	AREA	TYPE=INTEGER		DEFAULT=20
+PARM	CONV	TYPE=KEYWORD	VALID=(MIN,MAX)	COUNT=(0:1)	DEFAULT=MIN
+PARM	POWER	TYPE=INTEGER		DEFAULT=0
+PARM	MODE	TYPE=KEYWORD	VALID=(CORR,POINT) COUNT=(0:1) DEFAULT=POINT
+PARM	HIPASS	TYPE=KEYWORD	VALID=(HPF,NOHPF)   		DEFAULT=HPF
+PARM	PHASE	KEYWORD		VALID=(PHASE,NOPHASE)		DEFAULT=NOPHASE
+PARM	FIT	TYPE=INTEGER	VALID=1:7	DEFAULT=1
+PARM	TPFORM	TYPE=INTEGER	VALID=1:9	DEFAULT=1
+PARM	USE	TYPE=INTEGER	VALID=4:10 	DEFAULT=4
+PARM	INTERP  TYPE=KEYWORD	VALID=(INTE,NOIN)   COUNT=(0:1) DEFAULT=NOIN
+PARM	TEXTSIZE     INTEGER	VALID=1:99          COUNT=(0:1) DEFAULT=--
+PARM	ZOOM	TYPE=INTEGER		DEFAULT=1
+PARM	Z1	TYPE=INTEGER		DEFAULT=1
+PARM	Z2	TYPE=INTEGER		DEFAULT=1
+PARM	STRETCH	TYPE=INTEGER		COUNT=2			DEFAULT=(0,255)
+PARM	LINEAR	TYPE=INTEGER		COUNT=2			DEFAULT=(0,255)
+PARM	SL1	TYPE=INTEGER		DEFAULT=1
+PARM	SS1	TYPE=INTEGER		DEFAULT=1
+PARM	SL2	TYPE=INTEGER		DEFAULT=1
+PARM	SS2	TYPE=INTEGER		DEFAULT=1
+PARM	MINL	TYPE=INTEGER		DEFAULT=1
+PARM	MINS	TYPE=INTEGER		DEFAULT=1
+PARM	MAXL	TYPE=INTEGER		DEFAULT=1
+PARM	MAXS	TYPE=INTEGER		DEFAULT=1
+PARM 	HOME	TYPE=KEYWORD	VALID=HOME	COUNT=(0:1)	DEFAULT=--
+PARM	PRINT	TYPE=KEYWORD  VALID=(PRINT,NOPRINT) COUNT=(0:1) DEFAULT=NOPRINT
+PARM	DSTAT	TYPE=KEYWORD	VALID=DSTAT	COUNT=(0:1)	DEFAULT=--
+PARM	LOCATE	TYPE=INTEGER		DEFAULT=1
+PARM	SHOW	TYPE=KEYWORD	VALID=SHOW	COUNT=(0:1)	DEFAULT=--
+PARM 	CURSOR	TYPE=INTEGER	VALID=(1:8)	DEFAULT=1
+PARM POSITION	TYPE=INTEGER  COUNT=2       DEFAULT=(1,1)    VALID=(1:99999)
+END-SUBCMD
+SUBCMD READY ! TO ALLOW USER TO MOVE CURSOR AND HIT RETURN.
+PARM POSITION	TYPE=INTEGER  COUNT=2       DEFAULT=(1,1)    VALID=(1:99999)
+END-SUBCMD
+SUBCMD GEOM
+PARM	PGM    TYPE=KEYWORD VALID=(GEOMA,LGEOM,MGEOM) COUNT=1 DEFAULT=GEOMA
+END-SUBCMD
+END-PROC
+.TITLE
+ PICREG
+.HELP
+ Purpose:
+
+ PICREG is an interactive program designed to allow the user to select
+ tiepoints (matching points) in two images.  It displays both images in a
+ split-screen fashion and collects tiepoints as they are cursored by the user.
+ The tiepoints can then be formatted for use with TIECONM, GEOMA, LGEOM,
+ or MGEOM to perform image registration (warping or mapping the first image to
+ the geometry of the second image.)  (Note to testers: PICREG is used only in
+ interactive mode.)
+.page
+TABLE OF CONTENTS / LIST OF SECTIONS IN HELP.
+1.0  MOST RECENT CHANGES  
+2.0  INVOCATION OF PICREG:
+3.0  OVERVIEW OF PARAMETERS
+4.0  GUIDELINES FOR SELECTING PARAMETERS
+5.0  POSSIBLE APPLICATIONS OF PICREG  
+6.0  RELATIONSHIP TO OTHER PROGRAMS
+7.0  ADVANTAGES AND DISADVANTAGES OF PICREG VERSUS ALTERNATE METHODS
+8.0  MODES OF SELECTING TIEPOINTS
+9.0  GUIDELINES FOR COLLECTING TIEPOINTS
+10.0  HOW TO USE CORRELATION
+11.0  GUIDE FOR USING THE TPFORM PARAMETER
+12.0  RESTRICTIONS
+13.0  EXAMPLES
+14.0  OPERATION
+15.0  REFERENCES
+16.0  REVISION HISTORY
+17.0  PRECISION
+.page
+
+1.0 MOST RECENT CHANGES  (See REVISION HISTORY for details.)
+
+a) The prompt for the number of trackballs has been removed.  The default is
+   for there to be one trackball or mouse. 
+b) The tiepoint numbering is now left justified and thus will be closer to
+   the tiepoint.  Also the TEXTSIZE parameter has been added to allow the user
+   to select a comfortable size for the device being used.
+c) PICREG has been modified to work on the IVAS and on X Window System devices
+   with four image memory planes.  X displays with 8 bits per pixel are not
+   yet supported.
+d) Example 3 has been added to show an end-to-end mosaicking example.
+.page
+2.0  INVOCATION OF PICREG:
+
+PICREG allows tiepoints to be selected in one sitting (one execution of PICREG)
+ OR to be accumulated using multiple executions of PICREG.
+
+The following TAE command line formats show the most common usages:
+      picreg INP=(a1,a2)       OUT=newtp          optional parameters
+      picreg INP=(a1,a2)       OUT=(newtp,parout) optional parameters
+      picreg INP=(a1,a2,oldtp) OUT=newtp          optional parameters
+      picreg INP=(a1,a2,oldtp) OUT=(newtp,parout) optional parameters
+
+       Here 'a1' represents the to-be-registered input image file name,
+       'a2' represents the reference image file name, the file whose
+            geometry is taken as the reference,
+       'newtp' represents the output file containing the tiepoints selected
+               by the user,  which may be used in a subsequent run of PICREG
+               if the selection of more tiepoints is to be continued,
+       'parout' represents the output file containing a set of tiepoints
+                derived from the points in newtp according to the TPFORM
+                parameter.  (See under GUIDE FOR USING THE TPFORM PARAMETER
+                and the level 2 help for TPFORM.)
+                This file is in a form to be used by TIECONM, LGEOM, MGEOM,
+                or GEOMA.
+       'oldtp'  represents an optional input file  of previously collected
+                tiepoints from a prior run of PICREG.  (This may the file
+                that was specified as the newtp in the prior run of PICREG,
+                or it may be a similar file of tiepoints from another source.
+                See under RELATIONSHIP TO OTHER PROGRAMS for possible other
+                sources.)
+.page
+3.0  OVERVIEW OF PARAMETERS
+
+ PICREG has numerous parameters.  Most of these are interactive parameters
+ that can be entered at the interactive prompt which says 'Enter parameters:'.
+ Most of the interactive parameters can be entered on the PICREG command line
+ where applicable.
+
+ The interactive parameters can be categorized under the following headings:
+   Controlling the Display  
+   Setting the Tiepoint-Gathering Mode
+   Editing the Set of Tiepoints
+   Obtaining Numeric Information from the Program
+   Generating the Output Tiepoint File
+
+3.1 Controlling the Display (first image = left side; second image = right side)
+   U,D,L, or R      - to move Up, Down, Left, or Right in both images
+   U1,D1,L1, or R1  - to move Up, Down, Left, or Right in the first (left) image
+   U2,D2,L2, or R2  - to move Up, Down, Left, or Right in the second image
+   TEXTSIZE         - to set the height of tiepoint numbers on the display.
+   ZOOM             - to zoom (magnify or reduce) both images by a scale factor
+   Z1 or Z2         - to zoom the first image or the second image, respectively
+   SL1 or SL2       - to display starting at the specified line in the first 
+                      image or the second image, respectively
+   SS1 or SS2       - to display starting at the specified sample in the first 
+                      image or the second image, respectively
+   'HOME            - to display starting at line 1, sample 1 in both images
+   LOCATE           - to center both sides about a previously-obtained tiepoint
+   'SHOW            - to show tiepoint displacement vectors
+   CURSOR           - to change the shape (style) of the cursor on the display
+
+(For X devices, if the images do not appear at the beginning, try clicking
+ the mouse in the display window.  There are some new features available
+ in the VRDI for X.  See Bob Deen for details.)
+
+.page
+3.2  Setting the Tiepoint-Gathering Mode
+
+   'CORR, 'POINT, AREA - to set one of three modes. 'CORR turns on the
+                         assistance from the computer in finding the right-side
+                         tiepoint location using FFT cross-correlation.
+                         The AREA parameter turns on the assistance from the 
+                         computer in finding the tiepoint locations
+                         using the AREA correlation.  (The AREA mode has limited
+                         application.)   'POINT turns off any assistance from 
+                         the computer in finding the right-side tiepoint 
+                         location.  This is the default mode, where both sides
+                         are cursored manually.
+   POWER               - The POWER parameter implies 'CORR and sets the size 
+                         of the correlation window to 2**power.  
+   'HPF, 'NOHPF        - 'HPF applies a high-pass filter to the image data
+                         for the computation of the right-side tiepoint location
+                         to prevent results being thrown off by low frequency
+                         image information.  'HPF is the default.  'NOHPF keeps
+                         the high pass filter from being applied.
+   'PHASE, 'NOPHASE    - 'PHASE often prevents the FFT correlation from going 
+                         astray in the computation of the right-side tiepoint 
+                         location.  'NOPHASE is the default.  
+   'INTE, 'NOIN        - With FFT correlation these parameters affect 
+                         the computation of the right-side tiepoint 
+                         location.  With 'NOIN, the location is determined to
+                         the nearest pixel.  With 'INTE, the location is
+                         determined to sub-pixel accuracy.  
+   'MIN, 'MAX          - 'MIN causes PICREG to search for a local minimum
+                         to use as a tiepoint location in the AREA mode.
+                         'MAX searches for a local maximum.
+.page
+3.2  Editing the Set of Tiepoints
+   (no parameter)      - If no parameters are entered at the interactive prompt,
+                         PICREG begins the sequence to add a tiepoint pair to
+                         the set.
+   REDO                - REDO is used to change the location of the specified
+                         tiepoint pair.
+   DELETE              - DELETE is used to delete the specified range of
+                         tiepoint pairs.
+   EXIT or 'EXIT       - This concludes the edit session and exits the program.
+
+3.3  Obtaining Numeric Information from the Program (displayed on terminal)
+   'DSTAT              - to print the sl, ss, and zoom factor for each image.
+   FIT                 - to print how well the current set of tiepoints fits
+                         the specified transformation type.  (See HELP FIT.)
+   'PRINT              - to print all raw tiepoint locations upon exit and to
+                         print least squares fit information when the FIT is
+   'NOPRINT              specified. 'NOPRINT turns off this printing.
+.page
+3.4  Generating the Output Tiepoint File (See also How to Use TPFORM Parameter.)
+   TPFORM              - to generate the output tiepoint file from the raw
+                         (user-selected) tiepoints according to the specified
+                         transformation type.  (See HELP TPFORM.)  For most
+                         transformation types, one or more of the other
+                         parameters in this group are utilized.  These are
+                         often defaulted; however non-default values may be 
+                         specified at the same time or prior to when the TPFORM
+                         value is entered.
+   NHOR                - to specify the number of columns of tiepoints in the 
+                         output grid, for the case of TPFORM = 6, 7, or 8.  
+   NVER                - to specify the number of rows of tiepoints in the 
+                         output grid, for the case of TPFORM = 6, 7, or 8.  
+   MINL                - minimum line number of the output grid tiepoints. 
+   MAXL                - maximum line number of the output grid tiepoints. 
+   MINS                - minimum sample number of the output grid tiepoints. 
+   MAXS                - maximum sample number of the output grid tiepoints. 
+   USE                 - the number of tiepoints used to determine each output
+                         tiepoint location, for the case of tpform=8 only.
+.page
+4.0  GUIDELINES FOR SELECTING PARAMETERS
+
+The following are suggestions.
+
+a) Try the STRETCH (or (LINEAR) parameter to contrast enhance the images 
+   initially or to adjust the brightness occasionally to help you see the
+   details in the image.
+b) Line up the left and right images on the display using U1,U2,D1,D2,
+   etc. so the same features appear on both the left and right side of the
+   display.
+c) Note the size of the input images and the screen size.  If the images
+   do not fit entirely on the screen, plan a sequence for traversing the
+   overlap area of the input images.  Try R= a value slightly less than half
+   the window size.  Try D= a value slightly less than the window size.  You
+   may like to use SL1,SS1, SL2, and SS2 especially if you want to display the
+   bottom and right edges of the images so that the edges of the image line up
+   with the edge of the screen.  (Otherwise there may be left-overs between the
+   edge of the image and the edge of the screen.)
+d) Use the DSTAT parameter to help keep track of where you are in the image.
+   You can abbreviate - just type 'D or 'd for 'DSTAT.
+e) Try starting with 'CORR 'INTE 'PHASE.  (You can build your own PDF that
+   calls PICREG with your favorite starting parameters on the PICREG command
+   line.   You could also build one to copy and rename tiepoint files to help
+   keep the names of tiepoint files organized.)
+f) Select a cursor form that works well for you.  I suggest CURSOR=3 for
+   the DeAnza or X devices.  For the IVAS, CURSOR=7 gives a nice cursor
+   where the upper left point of the bar is the cursor location.
+g) Select a tiepoint pair.  Use TEXTSIZE if the default tiepoint numbering is
+   not suitable.  You can set TEXTSIZE=1 when you want the numbering to go away
+   for a while and then set it back to what it was.
+h) Select first some tiepoints at prominent or distinctive features to give 
+   PICREG some data that you have high confidence in.  If you are not planning
+   to use TPFORM=9, this will make finding any erroneous tiepoints easier.
+   Try to get an initial set of tiepoints that give small residuals for FIT.
+i) As you collect tiepoints, use the FIT parameter to check that there are
+   no erroneous tiepoints.  (See the GUIDE TO USING THE TPFORM PARAMETER for 
+   details on FIT.  If FIT indicates an error, the tiepoint with the largest
+   residual is not always the problem.  Enter 'PRINT and enter 'FIT again.
+   This time FIT will give you the residuals for all of the tiepoint pairs
+   both horizontally (x values) and vertically (y values).  Look for the 
+   values listed following 'RESIDUALS OBSERVED - COMPUTED' for both x and y.
+   They will be listed in the order of the tiepoint numbering.  Check all 
+   tiepoints with a significant x or y residual.
+   Another way to locate a bad tiepoint is with the SHOW parameter.  Look for 
+   an offset vector that is much different from the neighboring offset vectors.
+j) If you want to find a tiepoint that is not on the screen, use the LOCATE
+   parameter.  If you want to eventually come back to what is on the display
+   before you do the LOCATE,  then type 'D, note your position, and then use
+   SL1, SS1, SL2, and SS2 when it is time to come back.
+.page
+5.0 POSSIBLE APPLICATIONS OF PICREG  
+
+PICREG is a versatile program with many possible applications.  The main 
+application is the gathering of tiepoints as a first step in image 
+registration.  (Image registration is important for such tasks as the
+generation of color pictures by registering the red, green, and blue images,
+for generating mosaics by registering the component images to be used in the
+mosaic and finding their relative offsets, for registering elevation data to
+image data, and for production of time-lapse sequences or movies.)
+
+In image registration one image is chosen to be the reference image (either
+arbitrarily or because of prior processing), and the other is geometrically
+corrected (transformed) to the geometry of the reference image.  PICREG is 
+used to measure the first input image against the geometry (spatial 
+characteristics) of the second input (reference) image.  The measurement
+is done by finding the locations (coordinates) of user-selected features or
+locations in both images.  PICREG uses these measurements to compute (via the
+TPFORM parameter) the geometric transformation that will transform the first
+image to the geometry of the second.  The image registration is commpleted by
+using one of the Geom programs to apply the transformation to the first image.
+The user may choose to use program TIECONM as a middle step in the image
+registration.  (See under Guide for using the TPFORM parameter.)
+
+Another use for PICREG is visual validation and editing of tiepoints produced
+by another source, such as program R or PICMATCH, which generate tiepoints
+automatically.  In such a case the tiepoints from the other source would be
+specified as the third input file for PICREG.  The FIT parameter can be used to 
+aid in finding incorrect tiepoints, or they might be found by visual inspection.
+The REDO parameter can be used to correct a tiepoint pair.  The DELETE parameter
+can be used to delete incorrect tiepoints.  The TPFORM parameter can be used
+to generate a regular tiepoint grid from the edited tiepoints.
+
+Another application of PICREG is the measurement of change between two pictures
+of a scene taken at different times.  For example, someone might want to
+measure the changes in the shape and position of clouds, the deformation of a
+material caused by some process, changes in a contour plot, or changes in 
+images produced in the scientific visualization of data.  For such cases, the 
+value of TPFORM is critical.  A value of 3 for TPFORM will cause PICREG to
+produce a first order approximation (or average) of the changes measured at the
+tiepoints.  In many cases the user may want to study the exact changes at each
+tiepoint. In these cases, a value of 9 should be specified for parameter TPFORM.
+Then, after exiting PICREG, the user can display and study the tiepoints (in the
+second output file) with program TIEPLOT or can process the tiepoints further
+using IBIS progams such as MF or IBISSTAT. If a regular tiepoint grid is 
+desired, the second output file from PICREG can be processed using program
+TIECONM.
+
+6.0  RELATIONSHIP TO OTHER PROGRAMS
+In some cases it would be appropriate to do some preprocessing of one or both
+input images prior to running PICREG.  If the input images are not BYTE data,
+program CFORM may be used to convert them to BYTE.  If the images are quite
+different in brightness, programs HISTGEN and STRETCH can be used on one of the
+images so that its histogram matches the histogram of the other image.  
+(Parameter LINEAR can be used in PICREG to stretch both images together, but
+PICREG does not support stretching each side independently.)
+
+If the two images have different rotation, procedure ROTATE or program FLOT
+may be used to rotate one so that the input images have roughly the same
+rotation.  This is important if the 'CORR parameter is to be used.
+
+In some cases it would be appropriate to run program MAP3 on both of the input 
+images before trying to register them.  For example, when trying to register
+frames for a time-lapse sequence of an atmospheric feature on Jupiter, it would
+be appropriate to perform a map projection to compensate for the fact that
+Jupiter may rotate on its axis considerably during the course of the sequence.
+
+When using PICREG as part of the image registration process, PICREG is followed 
+by using one of the Geom programs to apply the transformation to the first 
+image. (See the help file for program GEOMA for a discussion of the differences
+between the different Geom programs.) The user may choose to use program
+TIECONM as a middle step in the image registration.  (See under GUIDE FOR USING
+THE TPFORM PARAMETER.) 
+
+When using PICREG for visual validation and editing of tiepoints produced
+by another source, such as program R or PICMATCH, the tiepoints from the other
+source would be specified as the third input file for PICREG. The second output
+file would reflect any changes made in PICREG.   (See under GUIDE FOR USING
+THE TPFORM PARAMETER.) 
+.page
+7.0  ADVANTAGES AND DISADVANTAGES OF PICREG VERSUS ALTERNATE METHODS
+
+The purpose of this section is to give the user some information for
+deciding when to use PICREG and when to use some alternate methods.  
+First I will describe some aspects of PICREG.  Then I will give an overview
+of some similar programs.
+
+PICREG is an interactive program (requires user interaction) for selecting
+tiepoints.  Thus PICREG is not suitable for systematic or batch processing.
+PICREG takes advantage of the user's ability to recognize similar features
+in the two input images and thus can be used to find tiepoints even when
+there is very little spatial overlap between the two input images.  PICREG 
+gives the user full control over where and how many tiepoints are collected,
+whether a given tiepoint pair is accepted or thrown out, and what post-
+processing is performed on the raw tiepoints.  PICREG thus has an advantage
+of being a What-You-See-Is-What-You-Get program.
+
+PICREG offers both manual and semi-automatic (see Example 2) tiepoint
+collection.  Although semi-automatic tiepoint collection cannot be used in
+every case, it allows subpixel accuracy (see 'INTE parameter) and is much
+faster to use than manual tiepoint collection.
+
+AUTOMATCH - a program which automatically acquires tiepoints from
+            sets of images for the purpose of producing mosaics.  AUTOMATCH
+            uses spacecraft navigation and thus is for spacecraft imagery only.
+            Automatch is designed to generate tiepoints from sets of images 
+            which have been generated in a "burst" of frames where the scale 
+            & rotation do not differ much between images. 
+C130RECT  - removes panorama distortion for certain types of data, such
+            as imagery obtained from aircraft.
+LOCUS     - compares sets of input coordinates and displays the differences.
+INTERLOC  - special purpose program for finding locations for a camera grid 
+            target.
+MANMATCH  - MANMATCH is a program which acquires manual tiepoints from
+            sets of images for the purpose of producing mosaics.  MANMATCH
+            is like AUTOMATCH excepty that tiepoint selection is manual.
+PICMATCH  - an automated program for tiepoint gathering.  Requires three
+            tiepoint pairs to give it a starting orientation, although these
+            can be approximate.  PICMATCH can handle significant rotation
+            or scale differences.  PICMATCH can get lost if there are changes 
+            in shapes of features such as clouds or if the data is 'bumpy',
+            as is some imagery obtained from aircraft.
+R         - a fully automated program for tiepoint gathering.  Sometimes
+            can get lost if there is not good overlap between the two input
+            images or if there are changes in shapes of features such as
+            clouds.  R will fail if there are significant rotation or scale
+            differences.
+RESLOC    - locates reseau marks in Voyager images. Can be used in geometric
+            correction (i.e. removing geometric distortion caused by camera).
+TRACKER   - an automatic program for finding a dense grid of tiepoints for
+            two images that differ geometrically in minor ways.  TRACKER
+            is more effective than PICREG for dealing with stereo pairs
+            and for measuring atmospheric motion, such as on gaseous planets
+            such as Jupiter.  TRACKER uses a correlation algorithm that
+            appears to be more effective than the one used in PICREG.
+TRACKER2  - similar to TRACKER but has an image size restriction.  TRACKER2
+            can be used to follow features through a sequence of images.
+8.0  MODES OF SELECTING TIEPOINTS
+
+PICREG will display both images in a split-screen manner, the first
+input on the left and the second input on the right.  The user positions
+the cursor(s) over identical features in each image and enters these
+tiepoints by hitting <cr>.  Tiepoint positions can be obtained directly
+from the cursored location (unassisted mode) or can be optimized from this
+initial position with two methods. 
+
+First, the AREA parameter invokes a method  using the extreme positions of
+histograms computed from the sums of rows  and columns of pixels.  The AREA
+mode is not generally recommended, though  it may prove useful when dealing
+with images of stars, where the brightest  point is in the center of the
+feature. 
+
+Second, a FFT cross-correlation technique can be invoked with the CORR or 
+POWER parameters.  This is recommended because it is easier to use in many
+cases and can produce more precise tiepoint locations if 'INTE is also used.
+(See HOW TO USE CORRELATION.)
+.page
+9.0 GUIDELINES FOR COLLECTING TIEPOINTS
+
+Whether the two input images overlap completely or just partially, the user
+should span the overlap area with tiepoints.  The minimum number of tiepoint
+pairs necessary to select depends on the nature of the data and the TPFORM
+value to be used. (See GUIDE FOR USING THE TPFORM PARAMETER.)
+
+Here is a tip from one of the users.  For first order fits try selecting
+two tiepoints in each corner and one tiepoint in the middle of the overlap 
+area.  If the geometry is not very consistent throughout the image, it is best 
+to use more tiepoints, perhaps 15 or 20 (pairs).  If FIT=3 gives a large 
+residual, then then worst tiepoint should be checked.  If it is inaccurate,
+handle it with the REDO or DELETE parameter.  If it seems accurate, a higher
+order fit is probably needed and additional tiepoints should be added until
+the typical residual goes down.
+
+For imagery taken from an airplane, 100 to 200 tiepoint pairs is common as is
+the use of TPFORM=9.  For such data Ron Alley suggests having a tiepoint about
+every 100 pixels and extra tiepoints where there are large elevation changes,
+such as in Death Valley.
+
+It is best if possible to select tiepoints at the corners or bends in the edges
+of recognizable features.  This allows visual inspection for correctness as well
+as effective use of correlation.  (See HOW TO USE CORRELATION.) Points along
+a straight feature generally don't work well unless they are near some
+irregularity.  Margie Power wrote that the following are good sites for
+tiepoints, especially if correlation is used:  "tiny craters, small hummocks
+(knolls), channel or stream intersections, albedo marks (if the two images
+are contemporaneous), irregular markings similar in both images, even if quite
+faint.  In general, any feature that is two-dimensional in the image plane
+and similarly shaped in both images should work well.  Bad sites include:
+anywhere on a linear feature, areas of nearly constant DN with only random
+variations, and features distorted badly in one of the images due to a 
+projection error."
+
+10.0  HOW TO USE CORRELATION
+Using correlation is using PICREG in an assisted mode where the program uses
+cross-correlation to obtain the exact location of the right-side tiepoint.
+It is the same thing that I have labelled 'semi-automatic' tiepoint gathering.
+When correlation is used, the program uses a small window (square subset of
+the image) centered around the cursor location on the left-hand side.  The 
+program essentially searches around the expected location on the right side
+for the window there that best matches the pixels in the window on the left-hand
+side.  The size of the window is determined by the POWER parameter.  (See help
+for the POWER parameter.)  Power=6 selects correlation mode using an area 
+64 pixels square.  
+
+This mode generally works well where the scale and the rotation of the two
+images to be registered is the same. This mode makes PICREG easier to use,
+since the user only needs to be a little accurate on selecting the very first
+tiepoint and then can quickly select subsequent left-side tiepoints with
+little accuracy and let the program determine the right-side tiepoint with
+FFT cross correlation.
+
+'INTE is recommended for precision.  Even if correlation does not work for
+all prospective tiepoints, it generally can save you some time if you apply
+it to the most prominent or distinct features first (for which correlation
+is most likely to work well.)  Then if correlation goes astray for less distinct
+features, you may have to turn it off for remaining tiepoints.  If correlation 
+goes astray, i suggest you switch between 'NOPHASE and 'PHASE and try adjusting
+the power parameter before giving up on correlation.  Frequently 'PHASE works
+better then 'NOPHASE (which is the default).  The size of the correlation window
+determines how far PICREG will search from the expected location on the right
+hand side in looking for the best match to the left side correlation window.
+(The expected location is determined by the offset between the previous left
+and right tiepoints.) The size of the correlation window also determines how
+many pixels of the image are used in comparing the left side and the right
+side.   Generally users start with POWER=6, the default.  But having power
+too large can increase the chances of the correlation going astray in looking
+for the right side tiepoint.  If the feature you are using as a tiepoint is much
+smaller than the size of the correlation window (default is 64 pixels square)
+and correlation is going astray, try setting POWER so that the correlation
+window is about the same size as the feature.  Otherwise the effect of the
+background may outweigh the effect of the feature in the computation.  It may
+be a good idea to keep POWER around 4 if there is a lot of rotational or scale
+differences between the two images.
+
+When correlation is used, PICREG displays the correlation matrix at the top
+center of the display monitor screen (window).  The center of the correlation
+matrix corresponds to the right tiepoint position before the correlation
+optimization takes place.  The brightest spot in the matrix display corresponds
+to the point chosen by the optimization.  If the matrix display does not
+clearly show that one location is the brightest, the final right tiepoint
+position should be checked.  If it does not look correct, it may be best to not
+use that location for a tiepoint. 
+.page
+11.0  GUIDE FOR USING THE TPFORM PARAMETER
+The TPFORM parameter is used to produce the second output file (the file
+passed to TIECONM or one of the Geom programs.  The value of the TPFORM
+parameter determines the post processing performed on the (raw) tiepoints
+collected in PICREG.  The post processing is generally necessary because the
+Geom programs require a grid of tiepoints (NVER rows of tiepoints with NHOR
+tiepoints per row).  
+
+For the case of TPFORM less than 9,
+PICREG uses a least-squares polynomial fit to generate the grid from the raw
+tiepoints.  The value of the TPFROM parameter specifies the type of polynomial
+to use.  (See Help for the TPFORM parameter for a table that relates TPFORM
+values to the type of geometric transformation which various polynomial types
+will produce.)  The least squares fit generates a smooth transformation 
+for the Geom program.  That way slight inaccuracies in some of the raw tiepoints
+do not produce 'bumpy' or jagged distortions in the output from the Geom 
+program.  This smoothing is generally desirable when trying to register 
+spacecraft or satellite data.  Thus, except for the case of TPFORM=9, the raw
+tiepoints selected in PICREG are not passed on to subsequent programs.
+
+For appplications where the user wants the raw tiepoints to be passed on to
+subsequent programs, TPFORM=9 should be specified.  Program TIECONM may then
+be used to generate a fine grid of tiepoints that defines a transformation
+which maps the raw tiepoints exactly the way they were specified in PICREG.
+TPFORM=9 is recommended for registering imagery taken from airborne scanners.
+(See Example 2 for a usage of TPFORM=9.)  TPFORM=9 was also found useful in
+registering some spacecraft data with complex distortion, namely the IDA mosaic
+images.
+
+When users wish to produce a smooth transformation in registering the data,
+the FIT parameter can be used to aid in selecting the TPFORM value.  (See
+help for parameter FIT.)  The user may try various values of FIT and see
+what (least-squares) residuals arise from trying to use various polynomial
+types to fit the raw tiepoint data.  One goal in this process is to find a
+value for FIT that gives a small residual.  This is a sign of a transformation
+that fits the raw tiepoint data well.  (FIT reports the typical residual
+and the tiepoint with the largest residual.  For your reference I will give
+you Charlie Avis's answer to approximately what residual FIT=3 will
+give (when there are no erroneous tiepoint pairs) as a signal that TPFORM=3
+is a satisfactory transformation.  It is a typical residual of 0.5 pixels
+and a largest residual of less than 2 or 3 pixels.  You may wish to adjust this
+depending on the resolution and nature (source) of the data.)  Part of this
+process is finding erroneous or dubious tiepoint pairs and either DELETE-ing
+them or REDO-ing them.  The tiepoint pair with the largest residual is a good
+one to re-examine.  If you are confident of the accuracy of this tiepoint
+pair and want to give it even priority, look for other tiepoint pairs to
+DELETE or REDO or try a different value of FIT.  
+
+The SHOW keyword may be useful if the image geometry is uniform throughout
+the image.  It keys off of tiepoint pair 1, so you may want to consider using
+REDO to make a different tiepoint pair  be the first if the initial results
+are not satisfactory.
+
+Another goal is to use what you know about how the images were acquired to 
+choose an appropriate FIT and TPFORM value.  For example, in a color 
+registration application you may know that the two images were taken from
+a spacecraft at almost the same time.  In this case you would expect the scale
+to be the same and may expect that the geometric mapping between the images is
+just an offset combined perhaps with a small rotation.  In this case as long as
+FIT=1 gives a reasonably small residual, it makes sense to use TPFORM=1 even if
+the residual from FIT=3 is smaller, figuring that any scale difference derived 
+from the raw tiepoints is due to inaccuracies in the tiepoint selections.
+
+In general, the residual will decrease as the constraints on the fit decrease.
+For example, every transformation that is just a rotation plus an offset is a
+particular type of first order fit.  Thus FIT=1 should nevver give a smaller
+residual than FIT=3.  Also, every first order fit can be considered to be
+a second order fit with the coefficients of the second order terms of the
+polynomial being 0. Thus FIT=3 should never give a residual smaller than FIT=6.
+
+Second and third order fits (FIT=6 and FIT=7) may give small residuals, but the
+second and third order terms usually become larger near the edge of the images,
+and the corresponding transformation might cause undesired distortions near the 
+edge of the image.  Consequently, another goal in selecting the TPFORM value
+is to use as low order a fit as will give a reasonable residual.
+
+Here is at tip from Ron Alley.  Try FIT=3 and then FIT=6.  If they both say that
+the same tiepoint pair is the worst and you are convinced that pair is OK, then
+your set of tiepoints is probably fine.  If one of the edge pixels is the worst
+for FIT=3 but is not the worst for FIT=6, then you probably need a second or
+third order fit.
+
+In typical usage, different values of FIT are tried and any tiepoint
+DELETEing or REDOing is done until as FIT value is found that gives an 
+acceptable residual.  Then this value is used as the TPFORM value.
+The program then asks which Geom program you will use.  If you select GEOMA,
+you are selecting a slower program, but GEOMA will give a geometric 
+transformation that is continuous at the grid cell boundaries, which MGEOM
+or LGEOM might not give in the case of complex distortions.  Currently
+PICREG will do the same thing if you specify MGEOM or LGEOM.  PICREG will
+generate the second output file and then produce the interactive prompt.
+At this point the user typically exits from the program.
+
+
+12.0  RESTRICTIONS
+   1) Both input images must be in BYTE format.
+   2) X displays with 8 bits per pixel are not yet supported.
+.PAGE
+13.0  EXAMPLES:
+
+ 1.     picreg inp=(in,ref) out=(newtp,par)
+          .
+        ( collect tiepoints interactively )
+          .
+        tpform=3
+        'geoma
+        exit
+        geoma inp=in out=x parms=par
+
+  This example shows 'in' being registered (geometricaly transformed) to the
+  geometry of 'ref'.  'tpform=3' instructs PICREG to use a first-order-
+  unconstrained least squares fit to generate (in file 'par') a rectangularly-
+  lined-up grid of tiepoints from the tiepoints selected by the user.  This
+  is done because the Geom programs, LGEOM, MGEOM, and GEOMA, require a grid
+  of tiepoints.  This grid must contain multiple rows of tiepoints, with each
+  row containing the same number of tiepoints.
+.page
+ 2.     picreg inp=(in,ref) out=(newtp,par)
+        cursor=3 power=6
+        'inte  'phase
+          .
+        ( collect tiepoints interactively )
+          .
+        tpform=9
+        'LGEOM
+        exit
+        tieconm out=parlgeom parms=par 'LGEOM NAH=30 NAV=30
+        LGEOM INP=in out=y parms=parlgeom
+   
+  This example shows some precision tiepointing methods.  Cursor=3 facilitates
+  both coarse and fine positioning by giving the cursor a square outline 
+  with a dot in the center.  Power=6 selects correlation mode using
+  an area 64 pixels square.  This mode generally works well where
+  the scale and the rotation of the two images to be registered is the same.
+  This mode makes PICREG easier to use, since the user only needs to be
+  a little accurate on selecting the very first tiepoint and then can quickly 
+  select subsequent left-side tiepoints with little accuracy and let the 
+  program determine the right-side tiepoint with FFT cross correlation. (This
+  could be called semi-automatic tiepoint gathering because the program does
+  much of the work in obtaining the accurate results.) 'INTE causes the 
+  program to do subpixel interpolation to an accuracy of about 1/10 of a 
+  pixel. 'PHASE often prevents the FFT correlation from going astray.
+  When tpform=9 is specified, the exact tiepoints selected are passed on
+  for TIECONM.  (Other TPFORM values cause PICREG to do a least-squares fit
+  on your tiepoints and to generate an evenly spaced grid based on
+  the fit to the Geom program.)  
+  The result is an output file 'y' from LGEOM which is registered to file 'ref'.
+.page
+ 3.     gen b1 nl=256 ns=240
+        gen b2 nl=256 ns=10 ival=239
+        picreg (b2 b1) (t p)
+        linear=(0,400)
+
+    ...( Tell picreg that the left edge of b2 (left-hand side of screen) matches
+        the right edge of b1 (right-hand side of screen) by selecting upper-left
+        corner of b2 (left side) and upper-right corner of b1 (right side).
+        Then select three more tiepoint pairs vertically beneath the first
+        tiepoint pair on different lines.)...
+
+        fit=5
+        tpform=5
+        'lgeom
+        exit
+        lgeom b2 b2mos size=(1,240,256,10) PARMS=p
+        fastmos in=(b1 b2mos) out=bmos  size=(1,1,256,249)  OFF2=(1,240) 
+        !
+        gen b 256 249
+        difpic (b bmos)
+        write "Should get 0 differences."
+
+This example shows a case used in the test procedure to demonstrate the
+correct functionality of PICREG when used with LGEOM and FASTMOS to produce
+a mosaic.  Although this is a fairly simple application that could be performed
+in fewer steps, it is used to illustrate a general mosaicking method that can
+be used on more difficult cases involving non-trivial image registration.
+This example assumes that we want to mosaic images b1 and b2 in such a way that
+b2 is appended to the right side of b1, with one pixel overlap in each line.
+Because the IVAL of b2 is chosen appropriately, the final result should be
+exactly the same as image b, which is GENed at the end.  In general mosaicking
+has to proceed from left to right or top to bottom because the Geom programs
+do not handle negative line and sample coordinates.  Thus in PICREG, image b1
+is chosen as the reference since it is the image on the left in the mosaic.
+The initial stretch prevents any part of the image from being too bright to
+see the cursor.  Then tiepoints are chosen to tell PICREG that the left edge of
+b2 (left-hand side of screen) matches the right edge of b1 (right-hand side of 
+screen).  PICREG needs at least four tiepoints to work with. (They cannot
+all have the same sample coordinate (they cannot all lie precisely on a straight
+line or else PICREG has problems doing the least squares fit.)  In this case
+we do not want to change the scale or rotation of b2 in the mosaic, so we 
+specify TPFORM=5 to indicate that b2 is merely offset from b1.   In a case
+where there was some nontrivial registration to do, TPFORM=3 would be a more
+likely choice.  In LGEOM, the SIZE field is used to generate b2mos without
+wasting disk space on zero-padding b2mos on the left.  The OFF2 parameter
+sets the position for b2mos accordingly.  The SIZE field in FASTMOS needs to
+be entered to tell FASTMOS the desired output size.
+.PAGE
+14.0  OPERATION
+
+ PICREG will display both images in a split-screen manner, the first
+ input on the left and the second input on the right.  The user positions
+ the cursor(s) over identical features in each image and enters these
+ tiepoints by hitting <cr>.  Tiepoint positions can be obtained directly
+ from the cursored location or can be optimized from this initial 
+ position with two methods.  First, the AREA parameter invokes a method
+ using the extreme positions of histograms computed from the sums of rows
+ and columns of pixels.  Second, a FFT cross-correlation technique can
+ be invoked with the CORR or POWER parameters.  
+.PAGE 
+ The FFT expression is:
+               -1         *
+	cc = ff   [ ft(p1) x ft(p2) ]
+ 
+ where cc is the correlation map, ft is Fourier Transform, p1 and p2 are
+ the in and ref picture areas, and * is complex conjugate.  The location
+ of the peak of cc determines the final tiepoint position.  
+.PAGE
+ When correlation is used, PICREG displays the correlation matrix at the top
+ center of the display monitor screen.  The center of the correlation matrix
+ corresponds to the right tiepoint position before the correlation optimization
+ takes place.  The brightest spot in the matrix display corresponds to the
+ point chosen by the optimization.  If the matrix display does not clearly
+ show that one location is the brightest, the final right tiepoint position
+ should be checked.  If it does not look correct, it may be best to not use
+ that location for a tiepoint.
+.PAGE
+ PICREG writes the locations of these raw tiepoints to the first output
+ file, updating the file for each new point.  PICREG will draw a cross 
+ in the graphic plane) at each tiepoint location visible in the displayed 
+ image and label the cross with the correspoinding tiepoint number.  The 
+ raw tiepoints may be edited using the DELETE or REDO keywords.  
+.PAGE
+ The LINEAR keyword may be used to stretch (contrast enhance) the image data 
+ displayed on the  screen.  Currently there is no provision for stretching the
+ left and right  sides independently.  If the two input images require separate
+ stretches,  the stretches must be performed prior to entering PICREG. 
+ The FIT keyword allows the user to fit various surfaces to the raw 
+ tiepoints.
+ The TPFORM keyword will re-format the points and write them 
+ to the second  output file.  
+ PICREG will print the message "Enter parameters:" whenever it is ready to 
+ accept new keywords or a new tiepoint location.
+.PAGE
+ PICREG is currently designed to operate on any display device that has
+ four Image Memory Planes available.  This includes workstations running
+ the X window system as well as display devices such as the DeAnza and IVAS.
+ This device must be allocated to the
+ user prior to the invocation of PICREG.  The nominal mode of cursoring
+ locations is to have one trackball or nmouse at your user station.
+.page
+ However, a  zero-trackball mode may be selected by specifying 'NOTRACK
+ on the PICREG command line.  Thereafter,
+ <cr> will not pick a point (as in the nominal mode).  It will instead
+ initiate a loop within which the user moves the cursor via the keyboard.
+ Considering the H key as home (current location), the following keys are
+ used:                    Y (UP)
+
+                 G (LEFT)   H    J (RIGHT)
+
+                         N (DOWN)
+
+ If the H is keyed, the step size of the movement is changed by a factor of
+ 10.  The step size cycles from 100 to 10 to 1 to 10 and then back to 100 again.
+.PAGE
+15.0  REFERENCES
+
+   1) Yagi, Gary M., "MIPL Image Registration and Design Study, Preliminary
+      Report", 1987.
+   2) LaVoie, Susan, et al.  "VICAR User's Guide", Version 2, June 1989.
+      (Sections 6.2.1 and 7.1.1.5 have information on obtaining help using 
+      <ESC><ESC> when the user is at the "Enter parameters:" prompt.  Note that
+      Wyse terminals need to be set to VT100 mode in the terminal setup to
+      generate <ESC>.  The user can find an overview of VICAR programs in
+      Appendices 10.2 and 10.3)
+   3) Power, M. A., "Stereophotogrammetry using STERGEN and STERMAP, JPL, 1976.
+.page
+16.0  REVISION HISTORY:
+12/94 The prompt for the number of trackballs has been removed.  The default is
+   for there to be one trackball or mouse.  If there is none, you can select
+   the zero-trackball mode by entering 'NOTRACK on the PICREG command line.
+   The tiepoint numbering is now left justified and thus will be closer to
+   the tiepoint.  Also the TEXTSIZE parameter has been added to allow the user
+   to select a comfortable size for the device being used.  By setting
+   TEXTSIZE to 1, you can effectively suppress the numbering if it gets in the
+   way for a while.
+
+ PICREG Originally Written by:  J.J.Lorre, 28 Apr. 1978
+ Current Cognizant Programmer:  Steve Pohorsky
+ Ported to UNIX:                Steve Pohorsky  8-6-93
+
+.PAGE
+17.0 PRECISION: 
+  When correlation is used with 'INTE, tiepoint locations are precise to 0.1
+  pixels unless the correlation fails.  When 'PRINT is specified, FIT displays a
+  number of values from the least-squares calculation.  The RESIDUALS displayed
+  are precise to 0.1 pixels, since they are derived from the tiepoint locations.
+  The values of MEAN ERROR OF THE UNIT WEIGHT that can be expected on different
+  MIPS-supported machines shall not differ by more than 1 in five significant
+  digits. 
+.LEVEL1
+.VARIABLE INP
+ INPUT FILES - (IN,REF,OLDTP)
+.VARIABLE OUT
+ OUTPUT FILES - (NEWTP,PARMS)
+.VARIABLE SIZE
+ VICAR SIZE FIELD - IGNORED
+.VARIABLE SL
+ STARTING LINE - IGNORED
+.VARIABLE SS
+ STARTING SAMP - IGNORED
+.VARIABLE NL
+ NUMBER OF LINES - IGNORED
+.VARIABLE NS
+ NUMBER OF SAMPS - IGNORED
+.VARIABLE EXIT
+ KEYWORD-TERMINATES PROGRAM
+.VARIABLE PGM
+ GEOM PROGRAM TO BE USED
+.VARIABLE NOTRACK
+ SELECTS ZERO-TRACKBALL MODE
+.VARIABLE U
+ MOVE BOTH WINDOWS UP
+.VARIABLE D
+ MOVE BOTH WINDOWS DOWN
+.VARIABLE L
+ MOVE BOTH WINDOWS LEFT
+.VARIABLE R
+ MOVE BOTH WINDOWS RIGHT
+.VARIABLE U1
+ MOVE LEFT WINDOW UP
+.VARIABLE U2
+ MOVE RIGHT WINDOW UP
+.VARIABLE D1
+ MOVE LEFT WINDOW DOWN
+.VARIABLE D2
+ MOVE RIGHT WINDOW DOWN
+.VARIABLE L1
+ MOVE LEFT WINDOW LEFT
+.VARIABLE L2
+ MOVE RIGHT WINDOW LEFT
+.VARIABLE R1
+ MOVE LEFT WINDOW RIGHT
+.VARIABLE R2
+ MOVE RIGHT WINDOW RIGHT
+.VARIABLE NHOR
+ # COLUMNS IN OUTPUT GRID
+.VARIABLE NVER
+ # ROWS IN OUTPUT GRID
+.VARIABLE REDO
+ TIEPOINT # TO REDO
+.VARIABLE DELETE
+ RANGE OF TIEPOINTS TO DELETE
+.VARIABLE AREA
+ AREA MODE BOX SIZE
+.VARIABLE CONV
+ MIN OR MAX OF AREA SOUGHT,
+ FOR 'AREA' MODE
+.VARIABLE POWER
+ CORRELATION SIZE = 2**POWER
+.VARIABLE MODE
+ KEYWORD: CORR OR POINT:
+ CORRELATE OR ACCEPT POINT
+.VARIABLE HIPASS
+ USE HIGH PASS FILTER
+ IN 'CORR' MODE?
+.VARI PHASE
+ USE PHASE CORRELATION?
+.VARIABLE FIT
+ SURFACE TO FIT TO TIEPOINTS
+.VARIABLE TPFORM
+ FIT AND FORMAT TIEPOINTS
+.VARIABLE USE
+ # TIEPOINTS FOR TPFORM=8
+.VARIABLE INTERP
+ INTERPOLATE IN 'CORR' MODE?
+.VARIABLE TEXTSIZE
+ HEIGHT OF TIEPOINT NUMBERS
+.VARIABLE ZOOM
+ ZOOM BOTH PIX.
+.VARIABLE Z1
+ ZOOM LEFT PIC
+.VARIABLE Z2
+ ZOOM RIGHT PIC
+.VARIABLE STRETCH
+ LINEAR CONTRAST STRETCH LIMITS
+.VARI LINEAR
+ SYNONYM FOR 'STRETCH'
+.VARIABLE SL1
+ SET START LINE OF DISP(LEFT)
+.VARIABLE SS1
+ SET START SAMP OF DISP(LEFT)
+.VARIABLE SL2
+ SET START LINE OF DISP(RIGHT)
+.VARIABLE SS2
+ SET START SAMP OF DISP(RIGHT)
+.VARIABLE MINL
+ MIN LINE OF OUTPUT GRID
+.VARIABLE MINS
+ MIN SAMP OF OUTPUT GRID
+.VARIABLE MAXL
+ MAX LINE OF OUTPUT GRID
+.VARIABLE MAXS
+ MAX SAMP OF OUTPUT GRID
+.VARIABLE HOME
+ DISP UPPER LEFT CORNERS
+.VARIABLE PRINT
+ PRINT LEAST SQUARES INFO
+.VARIABLE DSTAT
+ PRINT DISPLAY STATS
+.VARIABLE LOCATE
+ TIEPOINT # TO DISPLAY ABOUT
+.VARIABLE SHOW
+ DISPLAY TIEPOINT OFFSET VECTORS
+.VARIABLE CURSOR
+ SELECTS CURSOR SHAPE
+.VARIABLE POSITION
+POSITION=(ld,sd)
+Use (ld,sd) as (image) line 
+and sample cursor coordinates.
+.LEVEL2
+.VARIABLE INP
+ Vicar labelled input files (IN,REF,OLDTP)
+	IN - the image to be registered..byte format 
+	REF - the image used as reference..byte format
+ 	OLDTP - optional file containing the raw tiepoints from a
+ 		previous unfinished run of PICREG.  See the
+		format of NEWTP below.
+.variable OUT
+ Vicar labelled output files (NEWTP,PAR):
+
+  NEWTP - file containing the raw tiepoint values which is
+          updated for each tiepoint collected.  Up to 10
+          records, each of 3200 bytes of real*4 data. The order of the
+          tiepoints is  Lref,Sref,Lin,Sin.
+          The purpose of this file is to save tiepoints for
+          possible future runs of PICREG.  This file is NOT
+          used as an interface to any other program!
+
+          WARNING: immediately upon startup, PICREG initializes  
+          this dataset to contain 0 tiepoints.  Therefore, the   
+          user should be careful not to re-enter a previous NEWTP
+          file in this position, or the accumulated tiepoints will
+          be lost!
+
+  PAR -   optional file to receive the formatted parameter file
+          for the chosen Geom program.  It will be a Vicar2
+          parameter file in XVPOUT format.
+
+.variable SIZE
+ Vicar SIZE field - ignored by PICREG
+ default = (1,1,0,0)
+
+.variable SL
+ Starting line of  size field
+ default = 1
+
+.variable SS
+ Starting samp of size field
+ default = 1
+
+.variable NL
+ Number of lines of size field
+ default = 0
+
+.variable NS
+ Number of samps of size field
+ default = 0
+
+.variable EXIT
+ Interactive keyword which terminates the program.  Note that the apostrophe
+ can be ommitted.  Both 'EXIT and EXIT are valid.
+
+.variable PGM
+ Interactive parameter which specifies, in response to a prompt,
+ the Geom program which will be run on the output parameters.
+ Valid = GEOMA, LGEOM, MGEOM.
+ Default=GEOMA
+ 
+.variable U
+ Specifies that the display window for both images move up by the
+ indicated number of pixels.
+ Default=0.
+
+.variable D
+ Specifies that the display window for both images move down by the
+ indicated number of pixels.
+ Default=0.
+
+.variable L
+ Specifies that the display window for both images move left by the
+ indicated number of pixels.
+ Default=0.
+
+.variable R
+ Specifies that the display window for both images move right by the
+ indicated number of pixels.
+ Default=0.
+
+.variable u1
+ specifies that the display window for the left image move up by the
+ indicated number of pixels. default=0.
+.variable u2
+ specifies that the display window for the right image move up by the
+ indicated number of pixels. default=0.
+.variable d1
+ specifies that the display window for the left image move down by the
+ indicated number of pixels. default=0.
+.variable d2
+ specifies that the display window for the right image move down by the
+ indicated number of pixels. default=0.
+.variable l1
+ specifies that the display window for the left image move left by the
+ indicated number of pixels. default=0.
+.variable l2
+ specifies that the display window for the right image move left by the
+ indicated number of pixels. default=0.
+.variable r1
+ specifies that the display window for the left image move right by the
+ indicated number of pixels. default=0.
+.variable r2
+ specifies that the display window for the right image move right by the
+ indicated number of pixels. default=0.
+.variable sl1
+ specifies that the display window for the left image begin at the
+ indicated pixel. default=1.
+.variable sl2
+ specifies that the display window for the right image begin at the
+ indicated pixel. default=1.
+.variable ss1
+ specifies that the display window for the left image begin at the
+ indicated pixel. default=1.
+.variable ss2
+ specifies that the display window for the right image begin at the
+ indicated pixel. default=1.
+.variable home
+ specifies that both display windows are to begin at (1,1).
+.variable locate
+ will move both windows so that the tiepoint indicated is located in
+ the center of each window.  This is true unless the tiepoint is located near 
+ the left edge, or near the top edge of the image.  In this case, the image 
+ will be displayed starting at sample 1, or line 1, and the tiepoint will
+ be at the corresponding sample or line. default=1
+.VARIABLE TEXTSIZE
+ Height (in pixels) of tiepoint numbers on screen.  The program starts with
+ a value of 18 if the screen size is bigger than 512 by 512 or a value of 12
+ if the screen size does not exceed 512 by 512.  1<= textsize<=99.  The user
+ can effectively turn off the  numbering by setting TEXTSIZE to 1 as long as
+ desired. 
+.variable zoom
+ Indicates an integer which specifies the magnification or reduction 
+ applied to both images.  If the value is >0, the pic is entlarged by that
+ factor.  If it is <0, the pic is reduced by the factor 1/value.  
+ Compressions can facilitate fewer window movements, give a better idea
+ of where the user is in the file , and display the tiepoint in a more global
+ sense.   zoom=0 is interpreted as no zoom, the same as zoom=1.
+ The maximum value for zoom is 8.  There is no minimum value for zoom other
+ than the limit of -2**31 for valid integers.  This means the compression
+ may be as large as is useful.  The default for zoom is 1.
+.variable z1
+ the left image will be zoomed by this factor.  default=1
+.variable z2  
+ the right image will be zoomed by this factor.  default=1
+.variable stretch
+ stretch=(lo,hi)
+ specifies that both images will have a linear contrast stretch applied.
+ lo goes to 0 dn,  hi goes to 255 dn.  default=(0,255).
+ (There is no restriction keeping hi from being greater than 255, but this is
+ generally not done since it makes the image display darker.  It would not
+ allow the image files to contain DNs outside the range 0 to 255 since the
+ images must have byte format.)
+ Currently there is no provision for stretching the left and right
+ sides independently.  If the two input images require separate stretches,
+ the stretches must be performed prior to entering PICREG.
+.variable linear 
+ linear=(lo,hi)
+ specifies that both images will have a linear contrast stretch applied.
+ lo goes to 0 dn,  hi goes to 255 dn.  default=(0,255).
+ (There is no restriction keeping hi from being greater than 255, but this is
+ generally not done since it makes the image display darker.  It would not
+ allow the image files to contain DNs outside the range 0 to 255 since the
+ images must have byte format.)
+ Currently there is no provision for stretching the left and right
+ sides independently.  If the two input images require separate stretches,
+ the stretches must be performed prior to entering PICREG.
+.variable dstat
+ will cause the sl, ss, and zoom factor to be printed for each image.
+.variable mode
+ valid=(corr,point)
+ determines whether PICREG will accept the user cursor locations as the
+ final tiepoint values (point) or try to optimize the locations using a
+ fft cross-correlation technique.  default=point.
+ If MODE=CORR is selected, POWER defaults (is set) to 6.
+.variable power
+ Tells PICREG to use fft correlation.  The value indicates the 
+ the size of the correlation window.  size= 2**power.  The default is 0,
+ which means to not use fft correlation, unless MODE=CORR (or 'CORR) is 
+ selected.  If MODE=CORR is selected, POWER defaults (is set) to 6.
+ Thus, when fft correlation is selected, the correlation window size is
+ 64 by 64 (pixels) unless explicitly changed using the POWER parameter.
+.vari HIPASS
+ VALID=(HPF,NHPF)
+ determines whether, in the fft correlation, the vertical and horizontal
+ frequencies which lie on axes passing through the DC term are zeroed 
+ out (hpf) or not (nohpf).  default=hpf.
+.vari PHASE
+ This keyword determines whether or not phase correlation is used when
+ correlating tiepoints.  In phase correlation, the complex fourier
+ transform coefficients are divided by their amplitudes before computing
+ the correlation function.
+.variable interp
+ valid=(inte,noin)
+ determines whether, in the fft correlation, the centroid of the cor-
+ relation peak is determined to nearest-pixel (noin) or sub-pixel
+ (inte) accuracy.  If 'inte is specified, PICREG tries to repeat
+ the correlation until it converges to within .1 pixels.
+ If 'noin is specified, PICREG tries to repeat
+ the correlation until it converges to within 1.1 pixels.
+ default=noin.  (See also Example 2 in the main HELP for PICREG.)
+.variable area
+ invokes the area mode of correlation and supplies the size of the box
+ used. In this mode, PICREG will compute two buffers containing the sums
+ of rows and of columns of dn's in an area about the tiepoint location.  The 
+ final positions will be set to the minimum or maximum positions of
+ each buffer.  default=20.
+.variable conv
+ valid=(min,max)
+ indicates whether, in the area mode, to pick the maximum or the minimum
+ positions of the buffers.  default=min.
+.variable redo
+ specifies which tiepoint number is to be deleted and redone.  default=0
+.variable delete
+ Specifies a range of tiepoint numbers to be deleted.  default=(0,0).
+ Note that any following tiepoints will be renumbered. 
+.variable show
+ results in a display on the left image graphics plane of tiepoint displacements
+ from their location in the left image relative to their location in the 
+ right image.  This is done relative to the first tiepoint ( it will always show
+ no displacement) and is only done for those tiepoint presently displayed.
+.variable fit
+ picks a type of least squares surface, and fits it to the current set of
+ tiepoints.  The meanings of the values are:
+	1. rotation + offset
+ 	2. rotation + offset + scale
+	3. first order unconstrained
+	4. scale + offset
+	5. offset
+	6. second order unconstrained
+	7. third order unconstrained
+ PICREG will print the mean error and the number and error of the worst
+ fitting point. 
+ This keyword is used to check for tiepoint location errors and to test how well
+ a specifc surface fits prior to using that surface to generate an output
+ grid of regularly spaced tiepoints for use with a Geom program.
+ 1<= fit <= 7.   default = 1
+.variable tpform
+ This keyword formats the second output file for later use with TIECONM,
+ GEOMA, LGEOM, or MGEOM.  Value values and their meanings are:
+	1-7. The corresponding surface as described under the fit parameter
+	     (also below) is used to generate a nhor by nver grid of
+ 	     regularly spaced tiepoints in GEOMA, LGEOM, or MGEOM format.
+	     These tiepoints, along with all necessary parameters are then
+	     written to the second output file.
+		 The meanings of the TPFORM values in the range 1 to 7 are:
+			1. rotation + offset
+		 	2. rotation + offset + scale
+			3. first order unconstrained
+			4. scale + offset
+			5. offset
+			6. second order unconstrained
+			7. third order unconstrained
+	8.   The region of the reference picture which is encompassed
+	     by the output tiepoint network will be samlpled in a nhor by
+	     nver grid.  At each grid intersection, a transformation will
+	     be computed by least squares using the relations:
+			y1 = ax + by + c
+			x1 = dx + ey + f
+	     between the reference pic (x,y) and the input picture (x1,y1)
+	     using the n closest tiepoints to that grid location. (n is set
+	     using the USE parameter.)  
+	9.   This invokes the TIECONM option.  No re-sampling is done in
+ 	     this case.  Instead, the raw tiepoints and all necessary TIECONM
+	     parameters are written to the second output.  This parameter
+	     file can then be used with TIECONM which will in turn format
+	     the tiepoints for use with GEOMA, LGEOM or MGEOM.  The TIECONM
+	     triangulation method for surface fitting is useful in cases
+	     where an image has areas of significant distortion.
+ In any case, the user will be prompted for which Geom program he plans to
+ use.  If GEOMA is specified, the output grid will be transformed into
+ triangles.  Applicable keywords (nhor,nver,minl,mins,maxl,maxs,use) should
+ be specified prior to or on the same line as the tpform keyword.
+.variable nhor
+Specifies the number of columns of tiepoints in the output grid, for the case
+of TPFORM = 6, 7, or 8.  This is the number of tiepoints in a horizontal line
+of the output tiepoint grid. 
+
+If TPFORM <= 5 is chosen, then this parameter is ignored, and NHOR=2 is
+used (since 4 points suffice to determine a first-order transformation).
+
+Note that if GEOMA format is chosen for the tiepoints, then the value
+of NHOR is almost doubled (NHOR = 2*NHOR-1) in order to make triangular
+tiepoint areas.
+
+Default=20.
+.variable nver
+ Specifies the number of rows of tiepoints in the output grid, for the case
+ of TPFORM = 6, 7, or 8.  This is the number of tiepoints in a vertical line
+ of the output tiepoint grid. 
+
+ If TPFORM <= 5 is chosen, then this parameter is ignored, and 
+NVER=2 is
+ used (since 4 points suffice to determine a first-order transformation).
+
+ Default=20.
+.variable minl
+ minimum line number of the output grid tiepoints. default is based on raw 
+ tiepoints.
+.variable mins
+ minimum samp number of the output grid tiepoints. default is based on raw 
+ tiepoints.
+.variable maxl
+ maximum line number of the output grid tiepoints. default is based on raw 
+ tiepoints.
+.variable maxs
+ maximum samp number of the output grid tiepoints. default is based on raw
+ tiepoints.
+.variable print
+ valid=(print,noprint)
+ enables the printing of least squares fit information when the fit is
+ specified and results in a printout of all raw tiepoint locations upon exit
+ default=noprint.
+.variable use
+ the number of tiepoints used to determine each output tiepoint location. 
+ Applies to tpform=8 only.  4<= use <= 10  . default=4
+.variable cursor
+ selects the shape of the cursor by specifying its number.  The number
+ scheme is installation or display-type dependent, and may be changing.  
+ At present, the following are available on the DeAnza:
+
+	        .                |               -----
+	1 =   . . .       2 = ---|---       3 = |  .  | 
+                .                |              |_____|
+
+                                                               ______
+            ||                                \  /            |      |
+    4 =   ==  ==     5 = complement       6 =  \/        7 =  |------|
+            ||             of 4                /\             |______|    
+                                              /  \                       
+ The cursor shapes for values 1 to 6 are also valid under the X Window System.
+.VARIABLE POSITION
+POSITION values are used instead of the trackball cursor position.
+POSITION values are in terms of image line and sample coordinates.
+This parameter is useful in testing PICREG since it bypasses the trackball
+and allows testing to be repeatable.

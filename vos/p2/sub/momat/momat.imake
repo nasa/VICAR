@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine MOMAT  */
+
+#define SUBROUTINE  momat
+
+#define MODULE_LIST  momat.f  
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

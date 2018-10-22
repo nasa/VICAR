@@ -1,0 +1,22 @@
+1 GET_RAN
+
+  Return a random number with a value between 0.0 and 1.0.  This subroutine
+  was developed to replace the VAX/VMS Fortran function, RAN.  This subroutine
+  is callable only from Fortran.
+
+  FORTRAN Calling Sequence:  CALL GET_RAN( SEED, RANDOUT)
+
+  Arguments: INTEGER*2 SEED is used for a new sequence of random numbers. 
+             REAL RANDOUT a random number between 0.0 and 1.0. 
+
+2 Operation
+
+  GET_RAN calls the C srand function to intialize the C rand function with 
+  its seed value and then generate a random number.
+
+2 History
+
+  Original Programmer: Damon D. Knight (Dec 1, 1993)
+  Current Cognizant Programmer: Damon D. Knight (Dec 1, 1993)
+  Source Language: C
+

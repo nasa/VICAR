@@ -1,0 +1,154 @@
+process help=*
+PARM INP 	TYPE=STRING	    COUNT=2
+PARM OUT	TYPE=STRING     COUNT=1
+PARM SIZE   TYPE=INTEGER	COUNT=4		DEFAULT=(1,1,0,0)
+PARM SL		TYPE=INTEGER			DEFAULT=1
+PARM SS		TYPE=INTEGER			DEFAULT=1
+PARM NL		TYPE=INTEGER			DEFAULT=0
+PARM NS		TYPE=INTEGER			DEFAULT=0
+PARM INSECT	TYPE=INTEGER	COUNT=6	
+END-PROC
+
+ 
+.TITLE
+	Vicar Program "insect"
+.HELP
+PURPOSE:
+
+"insect" is a VICAR applications program which combines two pictures
+of unequal size into one composite picture.  "insect" may be used to
+mosaic two pictures or to replace a portion of one picture with a 
+portion of another. 
+
+"insect" creates an output picture with its size given by the NL and 
+NS.   The section of the primary input given by the SL and SS 
+parameters is placed in the top left-hand section of the output
+picture.  The desired portion of the second input is placed in the 
+location given by the parameter INSECT.
+
+If an output pixel corresponds to pixels from both inputs, it is 
+assigned the DN of the pixel from the secondary input.  All pixels 
+of the output not corresponding to any pixel in either input will 
+be assigned the DN of 0.  
+
+The maximum length of an output line is 60000 bytes. 
+
+Supports BYTE, HALF, FULL and REAL format data.
+.PAGE
+EXECUTION:
+
+NOTE: There are no optional parameters for this program.  All values
+must be input.
+
+
+insect INP=(A.DAT,B.DAT) OUT=C.DAT SL=1 SS=1 NL=40 NS=500 +
+ insect=(50,150,150,150,250,350)
+
+If A.DAT is a 300 line by 400 sample picture and B.dat is a 200 line
+by 400 sample picture, then, the above statement will mosaic the two 
+pictures replacing the last 150 lines and 50 samples of A.DAT by the
+last 150 lines and middle 150 samples of B.DAT. (see following example)
+
+
+.PAGE
+
+
+		400                           150     300
+   	    ____________________            ____________________
+       |                    |          |                    |
+       |                    |          |      _______       | 50
+       |                    |    200   |     |       |      |
+       |    A.DAT           |          |     | B.DAT |      |
+ 300   |                    |          |     |       |      |
+       |                    |          |     |       |      |
+       |                    |           --------------------
+       |                ----|250		400
+       |                |   |
+        --------------------
+		     350
+		For output picture C.DAT see the next page.
+.PAGE
+
+
+				   500
+                 _________________________
+                |                  |      |
+                |                  |      |
+                |   A.DAT          |  0   |
+            400 |                  |      |
+                |                  |      |
+                |		          --------|
+                |________________|        |
+                |                | B.DAT  |
+                |              0 |        |
+                 -------------------------
+			           C.DAT
+.page
+WRITTEN BY:  H. J. Frieden,  30 Aug. 1968
+
+    1984-03-01 S. J. Rueff - Converted to VAX
+    1984-11-19 B. Gokhman - Converted to VICAR2
+    1994-05-02 Alan Scop (CRI) - Made portable for UNIX
+    2013-01-07 RJB - Internals updated - NS increased to 60,000
+
+CURRENT COGNIZANT PROGRAMMER:  R. J. Bambery
+.LEVEL1
+.VARIABLE INP
+Two input Image data sets.
+.VARIABLE OUT
+The output image data set.
+.VARIABLE SIZE
+The Vicar Size Field.
+.VARIABLE SL
+INTEGER - Starting Line of the Primary input
+.VARIABLE SS
+INTEGER - Starting Sample of the Primary input
+.VARIABLE NL
+INTEGER _ Number of Lines in output data set
+.VARIABLE NS
+INTEGER - Number of Samples in output data set 
+.VARIABLE INSECT
+INTEGER - Six values defining insertion of segment.
+.LEVEL2
+.VARIABLE INP
+The 2 input image datasets to be inserted into the output file.
+The first file specified will be the Primary Input Picture.
+The second file specified is the Secondary Input Picture. The Primary 
+input picture is located beginning at the upper left of the output
+picture, while the Secondary file will be placed according to the 
+parameters specified.
+.VARIABLE OUT
+The output image data set.
+.VARIABLE SIZE
+The Vicar size field. The first two integers refere to the Starting 
+Line number of the first line and the Starting Sample number of the 
+first sample  to be transfered to the output data set from the Primary 
+input data set.  The second two integers specify the dimensions of the 
+output data set in Number of Lines  and Number of Samples.
+.VARIABLE SL
+The Starting Line number of the Primary input image location which will
+be mapped to location (1,1) in the output picture.
+.VARIABLE SS
+The Starting Sample number of the Primary input image location which
+will be mapped to location (1,1) in the output picture.
+.VARIABLE NL
+The number of lines in the output picture. NL determines the vertical 
+size of the output picture.
+.VARIABLE NS
+The number of samples in the output picture.  NS determines the 
+horizontal size of the output picture.
+.VARIABLE INSECT
+A six value parameter:
+value 1: The Starting Line in the Section of the Secondary input picture
+         to be inserted into the output picture.
+value 2: The Starting Sample in the Section of the Secondary input picture
+         to be inserted into the output picture.
+value 3: The Number of Lines in the Section of the Secondary input picture
+	 to be inserted into the output picture.
+value 4: The Number of Samples in the Section of the Secondary input picture
+	 to be inserted into the output picture.
+value 5: The Starting Line in the Output Picture which is to correspond to the
+ 	 upper left of the secondary section to be inserted.
+value 6: The Starting Sample of the Output Picture which is to correspond to 
+	 the upper left of the secondary section to be inserted.
+.END

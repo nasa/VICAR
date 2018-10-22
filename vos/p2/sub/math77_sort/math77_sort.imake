@@ -1,0 +1,5 @@
+/* Imake file for VICAR subroutine math77_sort */
+#define SUBROUTINE math77_sort
+#define MODULE_LIST math77_sort.c
+#define P2_SUBLIB
+#define USES_C

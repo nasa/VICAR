@@ -1,0 +1,150 @@
+procedure
+parm    mode    type=string count=(0:1) valid=(batch,nobatch,inter) default=batch
+local   afidsroot   type=string count=1
+local   aftestdata  type=string count=1
+
+LOCAL   INPIC       TYPE=STRING count=1
+! Aug 23, 2013 - RJB
+! TEST SCRIPT FOR PSF
+! tests BYTE, HALF, FULL and REAL images
+!
+! Vicar Programs:
+!       translog, label-list list spot maxmin f2 cform
+!       qplot2
+! 
+! External programs
+!       gnuplot 4.6.x
+!
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no display but creates .eps files
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!
+!   In batch mode it produces files testx.eps by calling gnuplot
+!       to create the encapsulated postscript file which can be
+!       later viewed with ghostscript or gimp
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
+!
+!
+! Requires external test data: 
+!   cartlab or mipl dependent pointers
+!
+!   Cartlab defines env var $AFIDS_ROOT, mipl doesn't
+!   The test data in cartlab is on /raid1/test_data 
+!   but in other facilities it might be somewhere else. 
+!   
+!   To facilitate this test you can define an
+!   environment variable $AFIDS_TESTDATA to point to
+!   that data. The cartlab system does not. In the git archive
+!   on pistol there is softlink to the test data in vdev that
+!   allows this test to pass 
+
+refgbl $echo
+refgbl $autousage
+!PARM DIR TYPE=STRING DEFAULT="MIPL:[MIPL.VGR]"
+!LOCAL INPIC TYPE=STRING
+body
+let $autousage="none"
+let _onfail="stop"
+let $echo="yes"
+!check to see if mipl or cartlab for certain programs
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
+if (afidsroot = "")
+!MIPL        
+    ush ln -s /project/test_work/testdata/mipl/vgr vg
+else
+!CARTLAB     
+    if (aftestdata = "")
+        ush ln -s ../test_data/vicar_test_images/testdata/mipl/vgr vg
+    else
+        ush ln -s $AFIDS_TESTDATA/vicar_test_images/testdata/mipl/vgr vg
+    end-if
+end-if
+let $echo="no"
+let _onfail="goto rm"
+write "This is a test file for program PSF"
+write "A single star image from voyager ISS"
+let $echo="yes"
+
+enable-log
+
+let INPIC= "vg/star.img"
+
+! TEST 1 - Star from the Voyager Spacecraft camera
+
+label-li &INPIC
+maxmin &inpic
+psf inp=&INPIC out=vgrpsf.vic size=(1,1,50,50) AREA=(10,10,30,30) SHIFT=SHIFT
+list vgrpsf.vic (1,1,20,20)
+
+! TEST 2 - PSF from BYTE IMAGE
+ 
+spot   psf1.vic size=(1,1,50,50) shape=gaussian sigmax=5 sigmay=5 dnmax=50
+psf  psf1.vic psf1.out size=(1,1,50,50) AREA=(17,17,33,33) shift=shift
+
+
+! TEST 3 - PSF from HALF IMAGE
+
+cform psf1.vic psfh1.vic oform=half
+psf  psfh1.vic psf1h.out size=(1,1,50,50) AREA=(17,17,33,33) shift=shift
+list  psf1h.out (1,1,1,20)
+
+! TEST 4 - PSF from FULL IMAGE
+
+spot   psf2.vic size=(1,1,50,50) shape=gaussian sigmax=10 sigmay=10 dnmax=120
+cform psf2.vic psff2.vic oform=full
+f2 psff2.vic psff2a.vic func=(in1+5000)
+psf psff2a.vic psff2a.out size=(1,1,50,50) AREA=(17,17,33,33) shift=shift
+list psff2a.out (1,1,1,20)
+
+! TEST 5 - PSF from increased area
+
+psf psff2a.vic psff2b.out size=(1,1,50,50) AREA=(6,6,44,44) shift=shift
+list psff2b.out (1,1,1,20)
+
+qplot2 psff2b.out proc=(1,1,1,1,25, 1,1,1,25,1) +
+      title="PSF Test - Line1: Horiz PSF   Line2: Vertical PSF" +
+      plotout=psff2b  
+
+if (mode = "nobatch" or mode = "inter") 
+    ush gnuplot psff2b.gpi
+end-if
+
+
+! TEST 6 - PSF from REAL IMAGE
+
+cform psf2.vic psfr2.vic oform=real
+f2 psfr2.vic psfr2a.vic func=(in1+5000)
+psf psfr2a.vic psfr2a.out size=(1,1,50,50) AREA=(17,17,33,33) shift=shift
+list psfr2a.out (1,1,1,20)
+
+! TEST 7 - OFFSET PSF
+
+spot   psf3.vic size=(1,1,50,50) shape=gaussian sigmax=5 sigmay=5 dnmax=120 x0=10 y0=10  
+psf   psf3.vic psf3.out size=(1,1,50,50) area=(1,1,19,19) shift=shift
+
+! TEST 8 - UNSYMMETRICAL PSF
+
+spot psf4.vic size=(1,1,50,50) shape=gaussian sigmax=10 sigmay=12 dnmax=120
+psf psf4.vic psf4.out size=(1,1,50,50) AREA=(6,6,44,44) shift=shift
+
+qplot2 psf4.out proc=(1,1,1,1,25, 1,1,1,25,1) +
+    title="PSF Test - Line1: Horiz PSF   Line2: Vertical PSF" +
+    plotout=psf4
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot psf4.gpi
+end-if
+
+rm>
+let  $echo="no" 
+ush rm vg
+
+disable-log
+
+end-proc

@@ -1,0 +1,28 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM adespike
+
+   To Create the build file give the command:
+
+		$ vimake adespike			(VMS)
+   or
+		% vimake adespike			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	adespike
+#define R2LIB
+
+#define MODULE_LIST adespike.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_MATH77
+/*    #define lib_local       remove for delivery      /*
+/************************* End of Imake file ***************************/

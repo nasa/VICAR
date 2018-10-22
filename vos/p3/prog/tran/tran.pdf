@@ -1,0 +1,105 @@
+process help=*
+PARM INP    TYPE=STRING  COUNT=(1:50)
+PARM OUT    TYPE=STRING  COUNT=(1:50)
+PARM OUTORG TYPE=KEYWORD COUNT=0:1  DEFAULT=BSQ VALID=(BIL,BIP,BSQ,MSS)
+PARM NBANDS TYPE=INTEGER COUNT=0:1  DEFAULT=--
+PARM BANDS  TYPE=INTEGER COUNT=0:50 DEFAULT=--
+END-PROC
+.TITLE
+VICAR Program TRAN
+.HELP
+PURPOSE:
+
+TRAN converts images from one organization to another. It can also split a
+single multichannel input into single channel files, or combine multiple
+files into a single multichannel file. 
+
+For a single input, the possible output organizations are BSQ, BIL, BIP, and
+MSS. The input image must have a VICAR label and can be any format. For 
+multiple inputs, each input may have one or multiple bands, and the output 
+may be BSQ or BIL. For multiple inputs of multiple band files, the inputs may
+be BSQ, BIL, or a mixture of the two, but not BIP or MSS.
+
+The parameter OUTORG is the output organization.  The default for OUTORG
+is BSQ.  For input MSS images, the VICAR label is BSQ with 1 band, and the
+parameter NBANDS must be given so that the number of bands is known and
+the number of samples per band can be determined.
+
+The parameter BANDS is used to output specific bands into separate BSQ
+files.  Up to 50 bands can be specified with each band being output to
+a separate BSQ file.
+.page
+Examples:
+
+  TRAN INP.BSQ OUT.BIL OUTORG=BIL
+
+This will convert the BSQ file into a BIL file.  The format, number of lines,
+number of samples, and number of bands remain the same.
+
+
+  TRAN INP.MSS OUT.BIP 'BIP NBANDS=3
+
+This will convert the MSS file into a BIP file.  NBANDS is needed so that the
+number of bands is known for the input file and the number of samples can be
+determined for the output.  
+.page
+  TRAN INP.BSQ OUT.MSS 'MSS
+
+This will convert the BSQ file into a MSS file.  Be aware that the VICAR
+label of the MSS file will say BSQ, with the number of samples being the
+number of samples of one band of the BSQ input file times the number of
+bands.
+
+
+  TRAN INP.BIP OUT.BSQ 'BSQ BANDS=(2,4,5)
+
+This will convert the bands 2, 4, and 5 of the BIP file into 3 separate BSQ
+files.
+
+  TRAN (INP.1,INP.2,INP.3) OUT.BIL 'BIL
+
+This will combine three inputs into a 3 band BIL format file.
+.page
+WRITTEN BY:  J. R. Heyada
+COGNIZANT PROGRAMMER:  J. R. Heyada
+MODIFIED FOR MULTIPLE INPUTS: Ron Alley
+DATE:  November 15, 1988
+MODIFIED FOR MULTIPLE MULTICHANNEL INPUTS: Ron Alley
+DATE:  November 6, 2003
+.LEVEL1
+.VARIABLE INP
+Input image file(s)
+.VARIABLE OUT
+Output image file(s)
+.VARIABLE OUTORG
+Output organization.
+The choices are BSQ,
+BIL, BIP, and MSS.
+The default is BSQ.
+.VARIABLE NBANDS
+The number of bands
+that the MSS input
+image has.
+.VARIABLE BANDS
+A list of bands, up
+to 50, which will be
+output into separate
+BSQ files.
+.LEVEL2
+.VARIABLE INP
+The input image can be any format. The organization can be BSQ, BIL,
+BIP, or MSS for a single input, but must be BSQ or BIL when combining
+multiple inputs into a single output.  
+.VARIABLE OUT
+The output image(s) will be the same format as the input.  If the parameter
+BANDS is specified, up to 50 BSQ files can be output.
+.VARIABLE OUTORG
+This is the output organization.  The choices are BSQ, BIL, BIP, or MSS.
+Be aware that the VICAR label of an MSS image is BSQ.
+.VARIABLE NBANDS
+If the input is MSS, then NBANDS must be given so that the number of bands
+can be determined.
+.VARIABLE BANDS
+OUTORG must be BSQ.  The number of output files must equal the number of
+bands listed.
+.END

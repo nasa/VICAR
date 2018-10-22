@@ -1,0 +1,160 @@
+process help=*
+!  Input and output file names
+!
+PARM INP     TYPE=(STRING,60)   COUNT=1
+PARM OUT     TYPE=(STRING,60)   COUNT=2
+!
+!  Input parameters
+!
+PARM SIZE    TYPE=INTEGER  COUNT=4       DEFAULT=(1,1,0,0)
+!
+PARM LSCALE  TYPE=REAL     COUNT=1       DEFAULT=1.0
+PARM SSCALE  TYPE=REAL     COUNT=1       DEFAULT=1.0
+PARM AALT    TYPE=REAL     COUNT=1       DEFAULT=1.0
+PARM ADIP    TYPE=REAL     COUNT=1       DEFAULT=2.8333
+PARM BDIP    TYPE=REAL     COUNT=1       DEFAULT=0.0
+PARM AAZ     TYPE=REAL     COUNT=1       DEFAULT=0.7111
+PARM BAZ     TYPE=REAL     COUNT=1       DEFAULT=0.0
+PARM NORTH   TYPE=REAL     COUNT=1       DEFAULT=0.0
+END-PROC
+.TITLE
+VICAR2 Program PIXGRAD
+.HELP
+PURPOSE
+-------
+
+PIXGRAD calculates the magnitude (slope) and direction (azimuth)
+of the gradient at each pixel within an image.  The image of slope
+values is saved in the first output dataset, and the azimuth image
+is sent to the second output.
+
+The gradients are computed by examining the four adjacent pixels 
+(left, right, above, below) to the point being evaluated.  From these
+pairs of points, a line-direction and a sample-direction gradient is
+computed. The composite slope and azimuth are computed by a
+trigonometric summation of these two gradients.
+
+Prior to rescaling, the slope is computed as degrees from horizontal,
+while the azimuth is degrees East of North.  The default rescaling
+maps the slope values to 0 DN for horizontal and 255 DN for vertical.
+The default azimuth rescaling places North at 0 DN, East at 64 DN,
+South at 128 DN, and West at 192 DN.
+
+EXECUTION
+---------
+Execution is initiated by:
+
+pixgrad INP (OUT1,OUT2) PARAMETERS
+
+
+LIMITATIONS
+-----------
+
+Input image must be no more than 10,000 samples wide.
+.LEVEL1
+.VARIABLE INP
+Input filename.
+.VARIABLE OUT
+Output filenames.
+(1) dip image
+(2) azimuth image
+.VARIABLE SIZE
+Vicar size field.
+.VARIABLE NORTH
+Direction of North in
+degrees clockwise from up.
+.VARIABLE ADIP
+Scale factor for slope.
+.VARIABLE BDIP
+Offset factor for slope.
+.VARIABLE AAZ
+Scale factor for azimuth.
+.VARIABLE BAZ
+Offset factor for azimuth.
+.VARIABLE LSCALE
+Line scale in 
+meters per line.
+.VARIABLE SSCALE
+Sample scale in
+meters per sample.
+.VARIABLE AALT
+Altitude scale in meters
+per DN of input.
+.LEVEL2
+.VARIABLE INP
+Filename of the input elevation dataset.
+.VARIABLE OUT
+Filenames of the output datasets. The first dataset will contain the 
+gradient magnitude (aka dip, or slope) image.  The second dataset will 
+contain the gradient azimuth (aka slope azimuth, or slope direction) image.
+.VARIABLE SIZE
+             Vicar size field.
+             -----------------
+             Starting line          default - input image
+             Starting sample
+             Number of lines
+             Number of samples
+.VARIABLE NORTH
+Direction of North in degrees clockwise from top of image.
+             Default = 0.0
+.VARIABLE ADIP
+             Scale factor for slope.
+
+             DN(DIP) = (ADIP * DIP) + BDIP
+             where
+             adip - scale factor
+             dip  - computed dip in degrees
+             bdip - offset factor
+
+             Default ADIP = 255./90.
+                     BDIP = 0.0
+.VARIABLE BDIP
+             Offset factor for slope.
+
+             DN(DIP) = (ADIP * DIP) + BDIP
+             where
+             adip - scale factor
+             dip  - computed dip in degrees
+             bdip - offset factor
+
+             Default ADIP = 255./90.
+                     BDIP = 0.0
+.VARIABLE AAZ
+             Scale factor for azimuth.
+ 
+             DN(AZIM) = (AAZ * AZIMUTH) + BAZ
+             where
+             aaz      - scale factor 
+             azimuth  - computed azimuth in degrees from North
+             baz      - offset factor
+
+             Default AAZ = 256./360.
+                     BAZ = 0.0
+.VARIABLE BAZ
+             Offset factor for azimuth.
+
+             DN(AZIM) = (AAZ * AZIMUTH) + BAZ
+             where
+             aaz      - scale factor 
+             azimuth  - computed azimuth in degrees from North
+             baz      - offset factor
+
+             Default AAZ = 256./360.
+                     BAZ = 0.0
+.VARIABLE LSCALE
+             Line scale in meters per line.
+
+             Default = 1.0
+.VARIABLE SSCALE
+             Sample scale in meters per sample.
+
+             Default = 1.0
+.VARIABLE AALT
+             Altitude scale in meters per dn of input.
+
+             Default = 1.0 meter/dn
+2  HISTORY
+
+  Made Portable for UNIX  RNR(CRI)  05-SEP-94
+  Changed default values and modified I/O REA 08-NOV-94
+

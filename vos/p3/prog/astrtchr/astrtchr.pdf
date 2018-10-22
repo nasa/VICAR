@@ -1,0 +1,340 @@
+process help=*
+!  FILE NAMES      
+!
+PARM INP     TYPE=STRING   COUNT=1
+PARM OUT     TYPE=STRING   COUNT=1
+!
+PARM SIZE    TYPE=INTEGER  COUNT=4       DEFAULT=(1,1,0,0)
+!
+PARM AREA    TYPE=INTEGER  COUNT=4       DEFAULT=(1,1,0,0)
+!
+PARM IFORMAT TYPE=KEYWORD  COUNT=1       DEFAULT=REAL     VALID=(FULL,REAL)
+PARM OFORMAT TYPE=KEYWORD  COUNT=1       DEFAULT=BYTE     VALID=(BYTE,HALF)
+!
+PARM LIMITS  TYPE=INTEGER  COUNT=2       DEFAULT=(0,0)    VALID=(-32768:32767)
+PARM NOCLIP  TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=--       VALID=NOCLIP
+!
+PARM PERCENT  TYPE=REAL    COUNT=1       DEFAULT=0        VALID=(0.0:100.0)
+PARM HPERCENT TYPE=REAL    COUNT=1       DEFAULT=0        VALID=(0.0:100.0)
+PARM LPERCENT TYPE=REAL    COUNT=1       DEFAULT=0        VALID=(0.0:100.0)
+!
+PARM SORT     TYPE=INTEGER COUNT=1       DEFAULT=10000    VALID=(1:999999)
+!
+PARM SINC     TYPE=INTEGER COUNT=1       DEFAULT=1        VALID=(1:999999)
+PARM LINC     TYPE=INTEGER COUNT=1       DEFAULT=1        VALID=(1:999999)
+PARM EXCL     TYPE=REAL    COUNT=(2:600) DEFAULT=(0.0,0.0)
+!  Current TAE limit for COUNT is 600.
+PARM STREXCL  TYPE=KEYWORD COUNT=(0:1)   DEFAULT=--       VALID=STREXCL
+PARM REPLACE  TYPE=REAL    COUNT=1       DEFAULT=0
+!
+PARM PRINT   TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=--       VALID=PRINT
+!
+END-PROC
+.TITLE
+""astrtchr""
+.HELP
+ PURPOSE:
+
+"astrtchr" is a general purpose VICAR applications program which performs 
+automatic linear stretches on floating point and fullword integer pictures.
+"astrtchr" can also be used to make pictures of GALGEN light transfer
+calibration files.
+.PAGE
+ EXECUTION:
+
+The input image may either be fullword floating point or fullword integer
+data.  The SIZE parameter specifies the portion of the image that will be 
+stretched and then written to the output file. The AREA parameter specifies 
+the portion of the input image to use in determining the stretch limits. 
+The default for both the AREA and SIZE parameters is to use the full input 
+image.  Both AREA and SIZE give the starting pixel number and number of 
+pixels per line instead of values measured in bytes. 
+
+The output image may either be byte or halfword data.  The size of the output
+image is determined by the SIZE parameter. 
+
+Program "astrtchr" uses dynamic memory allocation (using subroutine STACKA)
+to avoid imposing restrictions on the image size.
+.PAGE
+TAE COMMAND LINE FORMAT
+      The following command line formats show the major allowable forms:
+      "astrtchr" INP=a OUT=b optional parameters
+      "astrtchr" a b optional parameters
+
+       Here 'a' represents the input image file name, and
+       'b' represents the output image file name.
+.PAGE
+EXAMPLE
+
+      "astrtchr" INP=A OUT=B  PERCENT=2 EXCL=(1000 1.0E10)
+
+      In this example the output file B is a byte data image derived
+      from the input image A.  The data format of A is obtained from the
+      VICAR label for A.  The image is stretched to the default limits of 
+      0 to 255. The linear stretch is defined to produce 1 percent saturation
+      at each end of the output DN range.  The EXCL parameter effectively
+      excludes input DNs greater than or equal to 1000 in the determination
+      of the linear function used for stretching.  If the STREXCL keyword
+      is specified, then the values supplied in the EXCL parameter are
+      also excluded from the actual stretch operation, and are instead set
+      to the REPLACE value.
+
+.PAGE
+RESTRICTIONS
+
+1. The input image must be floating point (REAL*4) or fullword
+   integer (INTEGER*4) data.
+2. The output image must be byte or halfword data.
+
+ OPERATION:
+
+"astrtchr" is called an automatic linear stretch program because the user
+does not have to specify the range of DNs in the input image to use in
+defining the linear function used for the stretch.  Program "astrtchr" follows
+a two step process.  The first step determines the linear function (stretch)
+to use based on the contents of the input image file and options specified
+by the user.  The second step applies the linear function to the DNs of
+the input image and writes the result to the output file.  The net effect
+is that the image is stretched to the specified limits without requiring
+the user to know the range of DNs in the input image.
+
+The way in which the linear function is determined depends on several
+parameters. The AREA parameter specifies the portion of the input image
+to examine in determining (perhaps approximately) the range of input DNs
+for the linear function.  The range is determined as follows.  From the
+portion of the image determined by the AREA parameter, the program selects
+N evenly spaced pixels, where N is the value of the SORT parameter.  The
+DNs for these pixels are examined and any DNs excluded by the EXCL parameter
+are removed from the list of sample DNs.  This list is then sorted to produce
+a sort of histogram.  The PERCENT parameter ( or the LPERCENT and HPERCENT
+parameters) are then applied to the sorted list to determine the range of
+DNs to use for the linear function.  If the PERCENT parameter is 0 or is
+defaulted, then the minimum and maximum DNs in the list are used as the range.
+Otherwise, the range is obtained by skipping the specified percentage of
+DNs at the ends of the sorted list.
+
+For example, suppose the AREA parameter specified a full 1000 by 1000 image,
+the SORT parameter was 10000, no EXCL parameter was entered, and PERCENT=2
+was specified.  The program would sample DNs at 10000 pixels spaced 10 lines
+and 10 pixels apart.  The program would then select the 101st and 9900th DNs
+in the sorted list as the range of DNs for the linear function.
+
+Once the range of input DNs is determined, the linear function that maps
+the range to the stretch limits (specified through the LIMITS parameter)
+can be determined algebraicly.  This function is then applied to the input
+DNs in the region specified by the SIZE parameter to produce the output
+image.  Since the range of input DNs used to determine the linear function
+is not necessarily the minimum and maximum DNs in the input image, output
+DNs outside of the range of the stretch limits are possible.   (See the
+NOCLIP parameter.)  The output data format may restrict the output DN values,
+however.  For byte data output files, output DN values less than 0 are changed
+to 0 and output DN values greater than 255 are set to 255. For halfword data
+output files, output DN values less than -32768 are changed to -32768 and
+output DN values greater than 32767 are set to 32767. 
+
+"astrtchr" writes a history label for the output file to show what linear
+function (stretch) was used to produce the output file. VICAR keywords
+STRETCH_MINIMUM and STRETCH_MAXIMUM correspond to the limits of the 
+input data and the output DN values to which they map. For example,
+if input image DN values ranged from -1,204 to 32,431 in halfword format,
+and the output limits were specified as (0,255), then the values of 
+STRETCH_MINIMUM would be (-1204,0) and the values of STRETCH_MAXIMUM would
+be (32431,255). These keywords are also PDS Data Dictionary keywords and 
+their VICAR/PDS definitions are as follows:
+
+STRETCH_MINIMUM
+The stretch_minimum element provides a sequence of values, the first value 
+representing the lowest sample value in an input image to be mapped to the
+lower output limit and the second value representing the lowest output
+sample value in the output image (first value in the LIMITS parameter.) 
+Sample values between stretch_minimum and stretch_maximum are interpolated 
+over the range of DNs as specified by other parameters of "astrtchr".
+
+STRETCH_MAXIMUM
+The stretch_maximum element provides a sequence of values, the first value 
+representing the highest sample value in an input image to be mapped to the
+upper output limit and the second value representing the highest output
+sample value in the output image (second value in the LIMITS parameter.) 
+Sample values between stretch_minimum and stretch_maximum are interpolated 
+over the range of DNs as specified by other parameters of "astrtchr".
+
+.PAGE
+ WRITTEN BY:             Steve Pohorsky              11 Jan 1984
+ COGNIZANT PROGRAMMER:   Steve Pohorsky              11 Jan 1984
+
+ MIPS TRACEABILITY:	 MIPS FRD D-4419 Rev. C, Req. 4.1.2.3 <205>
+
+ REVISION:               6                           13 Apr 1987
+
+ January 17, 1994	JFM	Added to VICAR history label the PDS standard
+				keywords STRETCH_MINIMUM and STRETCH_MAXIMUM
+				as an alternate way of expressing input and
+				output stretch limits. (FR 82901 for GLL NIMS)
+ April 4, 1994          CRI     Ported to UNIX 
+.LEVEL1
+.VARIABLE INP
+Input file name
+.VARIABLE OUT
+Output file name
+.VARIABLE SIZE
+standard VICAR size field
+SIZE in terms of fullword
+pixels for performing stretch.
+.VARIABLE AREA    
+SIZE field in terms of fullword
+pixels for sampling pixels to
+determine range of input DNs.
+.VARIABLE IFORMAT
+The input data format -- 
+REAL or FULL.
+.VARIABLE OFORMAT 
+The output data format -- 
+BYTE or HALF. 
+.VARIABLE LIMITS  
+Lower and upper stretch limits
+(output DNs).
+.VARIABLE NOCLIP 
+Causes the range of output DNs 
+to be limited by output format
+instead of LIMITS parameter.
+.VARIABLE PERCENT  
+Percentage of sampled pixels to
+be stretched to or beyond the
+stretch limits.
+.VARIABLE HPERCENT 
+Percentage of sampled pixels to
+be stretched to or beyond the
+upper stretch limit.
+.VARIABLE LPERCENT 
+Percentage of sampled pixels to
+be stretched to or beyond the
+lower stretch limit.
+.VARIABLE SORT
+The maximum number of pixels
+which will be sampled in the
+area specified for AREA.
+.VARIABLE SINC
+If SINC=n, then output file will
+contain just every nth pixel in
+each line.
+.VARIABLE LINC     
+If LINC=n, then output file will
+contain just every nth line.
+.VARIABLE EXCL
+Intervals of input DNs to be
+excluded from the list of
+sampled pixels.
+.VARI STREXCL 
+Exclude EXCL DNs from the stretch
+operation itself
+.vari REPLACE
+Replaces excluded DNs if STREXCL
+.VARIABLE PRINT
+Enter PRINT=PRINT to print the
+sorted list of DNs of sampled
+pixels.
+.LEVEL2
+.VARIABLE SIZE
+Four integer values are entered for SIZE. These determine the position
+and size of the portion (of the image) that will be stretched and then written
+to the output file.  The default is to stretch the full input image.  The first
+two values for the SIZE parameter are the starting line and starting pixel
+number within the line.  The last two values for the SIZE parameter are the
+number of lines and number of pixels per line.  The second and fourth values 
+are specified in terms of fullword pixels instead of in terms of bytes.
+Although the SIZE and AREA values are often the same in practice, they
+are seen as mutually independent by the program.
+.VARIABLE AREA    
+Four integer values are entered for AREA.  These determine the position and
+size of the portion (of the image) that will be used for sampling pixels to
+determine the range of input DNs. The default is to use the full input image. 
+The first two values for the AREA parameter are the starting line and starting
+pixel number within the line.  The last two values for the AREA parameter are
+the number of lines and number of pixels per line.  The AREA parameter differs
+from the standard VICAR SIZE parameter in that the second and fourth values are
+specified in terms of fullword pixels instead of in terms of bytes. Although
+the SIZE and AREA values are often the same in practice, they are seen as
+mutually independent by the program.  Thus the AREA parameter does not affect
+the size of the output file. 
+.VARIABLE IFORMAT
+If INFMT is not specified, the format is obtained from the input image label. 
+If the format is not in the label, real data is assumed.   In TAE command 
+mode the user should enter 'FULL or 'REAL as stand-alone keywords.
+.VARIABLE OFORMAT
+The default format is byte data.  If HALF is specified, the output pixels
+may have any valid halfword value.  In TAE command mode the user should 
+enter 'BYTE or 'HALF as stand-alone keywords.
+.VARIABLE LIMITS  
+This parameter is entered in the form  LIMITS=(l,u) where l is the lower
+stretch limit and u is the upper stretch limit.  The linear function for the
+stretch is determined so that lower and upper percent values from the
+sorted list of sampled pixels are mapped respectively to the lower and
+upper stretch limits.  For byte output data, the default limits are 0 and 255.
+For halfword output data, the default limits are 0 and 10000.  l and u must 
+be valid values for the output data format.  For either data format, output
+DNs are allowed outside of the range from l to u as long as they are valid for
+the output data type and if NOCLIP is specified.  The image may be 'inverted' by
+specifying l greater than u and specifying NOCLIP. 
+.VARIABLE NOCLIP 
+The NOCLIP parameter causes the range of output DNs to be limited by the 
+output data format instead of by the LIMITS parameter.
+.VARIABLE PERCENT  
+The PERCENT parameter (or the LPERCENT and HPERCENT parameters) determines
+which input DN gets mapped to the lower stretch limit and which input DN gets
+mapped to the upper stretch limit.  Each of these parameters is refers 
+to a percentage of the elements in the sorted list of sampled pixels.
+Each of these parameters is a real number in the range from 0.0 to 100.0.  
+PERCENT=p is equivalent to LPERCENT=p/2 and HPERCENT=p/2.  If LPERCENT=l,
+then the input DN which gets mapped to the lower stretch limit is the element
+in the sorted list l percent from the beginning of the list.  If HPERCENT=h,
+then the input DN which gets mapped to the upper stretch limit is the element
+in the sorted list h percent from the end of the list.  The default for these
+parameters is 0 percent.  If the percent parameters are 0 or are
+defaulted, then the minimum and maximum DNs in the list are used.
+
+For example, suppose the AREA parameter specified a full 1000 by 1000 image,
+the SORT parameter was 10000, no EXCL parameter was entered, and PERCENT=2
+was specified.  The program would sample DNs at 10000 pixels spaced 10 lines
+and 10 pixels apart.  The program would then select the 101st and 9900th DNs
+in the sorted list as the range of DNs for the linear function.
+.VARIABLE HPERCENT
+(See under PERCENT.)
+.VARIABLE LPERCENT 
+(See under PERCENT.)
+.VARIABLE SORT
+The SORT parameter tells the program how much space to allocate for the list
+of sampled pixels.  The number of pixels sampled is the minimum of the SORT
+value and the number of pixels in the AREA area.  The default for SORT is 
+10000.
+.VARIABLE SINC     
+The default for SINC is 1.  SINC is of use in generating pictures of GALGEN
+calibration files. If SINC=N, then for a given line in the SIZE area the
+program processes the starting pixel and every Nth pixel thereafter. Thus the
+number of pixels per output line is smaller than the number of pixels per line
+in the SIZE area by a factor of N.  Also, if SINC=N, the sampling is
+restricted in a given line (in the AREA area) to the starting pixel and every 
+Nth pixel thereafter.  This restriction is important for GALGEN files to assure
+that the sorted list contains only pertinent DNs. 
+.VARIABLE LINC
+The default for LINC is 1.  If LINC=N, then the program processes the starting
+line and every Nth line thereafter in the SIZE area.  Thus the number of 
+output lines is smaller than the number of lines in the SIZE area by a 
+factor of N.
+.VARIABLE EXCL
+One or more pairs of numbers can be entered for the EXCL parameter.  Each
+pair specifies a range of input DNs from the first value in the pair to the
+second value in the pair.  Any DNs of sampled pixels that lie in one of the
+EXCL ranges are removed from the list of sample pixels.  The values can be 
+entered as real numbers or integers to match the input file data format.
+.VARI STREXCL 
+Specifying this keyword causes DN values that are in the range(s) specified
+by the EXCL parameter to be excluded from the stretch operation itself, not
+just from the computation of the stretch parameters.  These DNs are set to
+the value specified by the REPLACE parameter.
+.vari REPLACE
+This parameter is only used if keyword STREXCL is specified, and it supplies
+the replacement value to be used for DNs excluded from the stretch operation.
+.VARIABLE PRINT
+This can yield a lot of numbers.  The default is to not print the numbers.
+In TAE command mode the user should enter 'PRINT as a stand-alone keyword.
+.END

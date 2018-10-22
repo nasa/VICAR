@@ -1,0 +1,65 @@
+1 MIPS SUBROUTINE mpInit
+
+PURPOSE
+The function mpInit allocates memory for a map
+projection (MP) data object to be used for subsequent
+processing with other MP functions.
+
+2 OPERATION
+
+This function allocates memory for a specified 
+MP data object using the C function malloc()
+and initializes certain control variables and other
+values in the data object. This function must be
+called prior to the use of any other MP functions.
+
+CALLING SEQUENCE:		
+
+from C		status = mpInit( MP *mp );
+from FORTRAN	call mp_init( mp,status ) 
+
+Necessary include files
+from calling routine 
+or program:			mp_routines.h
+
+INPUT
+
+mp 		(MP type)
+
+A pointer to the MP data structure as returned by mpInit. 
+In FORTRAN, this variable is of type REAL*8.  MP type is 
+defined in the include file mp_routines.h
+
+RETURN
+
+status		(integer)
+
+Indicator of success or failure of the routine. Zero indicates
+success and -1 failure. From FORTRAN, status is returned as an
+argument of the function.
+
+
+3 ENVIRONMENT and LANGUAGE
+
+Software Platform:	Vicar 11.0
+Hardware Platforms:	No particular hardware required; tested on 
+			DEC Alpha, DEC VAX-VMS, Sun Sparcstation
+			(Solaris and SunOS), Silicon Graphics (SGI),
+			and HP 700.
+Programming Language:	ANSI C
+
+3 BACKGROUND
+
+Author:			Justin McNeill, JPL
+Cognizant Engineer:	Justin McNeill (jfm059@ipl.jpl.nasa.gov)
+Written:		October 1993
+Revision history:	Original
+Background and References:	
+
+1. Map Projection Software Set Software Specification Document,
+	JPL, April 28, 1993;
+2. "Conformal Mapping of the Triaxial Ellipsoid," Survey Review,
+	vol. 28, July 1985.
+3. MIPS Map Projection Software Users' Guide, D-11810, version 1.0,
+	May 1994.
+

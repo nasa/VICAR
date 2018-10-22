@@ -1,0 +1,38 @@
+process help=*
+PARM LEAP_KERNEL 	STRING	COUNT=1		DEFAULT="LEAPSECONDS.KER"
+PARM SCLK_KERNEL 	STRING	COUNT=1		DEFAULT="SCLK.KER"
+PARM PC_KERNEL 		STRING	COUNT=1		DEFAULT="P_CONSTANTS.KER"
+PARM ET_INPUTS		REAL	COUNT=1:20
+PARM SCLK_INPUTS	STRING	COUNT=1:20
+PARM SPACECRAFT_CODE	INTEGER COUNT=1:20
+PARM FORMAT		STRING  COUNT=1:20
+PARM PRECISION		INTEGER COUNT=1:20
+end-proc
+.TITLE
+VICAR program TSPBRI2
+.HELP
+PURPOSE:
+This program is a simple test program for the C bridges for
+a subset of NAIF SPICE toolkit functions. The C bridges
+ZLDPOOL, ZET2UTC, XET2UTC, ZSCS2E, and XSCS2E are tested by this
+program.
+.LEVEL1
+.VARI LEAP_KERNEL
+Leapseconds kernel file name.
+.VARI PC_KERNEL
+Planetary constants kernel file name.
+.VARI SCLK_KERNEL
+Spacecraft clock  kernel file name.
+.VARI ET_INPUTS
+Ephemeris time inputs.
+.VARI SCLK_INPUTS
+Spacecraft clock inputs.
+.VARI UTC_INPUTS
+UTC time inputs.
+.VARI SPACECRAFT_CODES
+NAIF standard spacecraft ID codes
+.VARI FORMAT
+Formats for printing of UTCs
+.VARI PRECISION
+Precision specifications for UTCs
+.END

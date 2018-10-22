@@ -1,0 +1,26 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM rgbtoxyy
+
+   To Create the build file give the command:
+
+		$ vimake rgbtoxyy			(VMS)
+   or
+		% vimake rgbtoxyy			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	rgbtoxyy
+#define R2LIB
+
+#define MODULE_LIST rgbtoxyy.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_MATH77
+/************************* End of Imake file ***************************/

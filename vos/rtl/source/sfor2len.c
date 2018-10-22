@@ -106,7 +106,13 @@ int v2_sfor2len(
 /* are longwords, which is justified since Fortran passes everything by	*/
 /* reference, and a pointer is a longword.				*/
 
+/* GFORTRAN (thus GCC) 7 defines the length as size_t rather than int */
+
+#if defined(__GNUC__) && (__GNUC__ > 6)
+   return *(((size_t *)argptr)+nargs+strno-1);
+#else
    return *(((int *)argptr)+nargs+strno-1);
+#endif
 
 #endif /* FORSTR_METHOD_B */
 

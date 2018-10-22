@@ -1,0 +1,17 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+
+write " "
+write " TEST PROGRAM FOR GPDS_GET_COLUMN_VALUE"
+write " "
+
+write " Be sure that files listed as parameter values of program"
+write " are in your local directory before executing this proc."
+write " Files available on arsia workstation, directory /mo1/test/tables"
+
+tgpdsgcvalue 	LABEL="items_test.lbl" +
+		TABLE="items_test.tab"
+end-proc

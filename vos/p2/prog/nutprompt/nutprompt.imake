@@ -1,0 +1,11 @@
+#define PROGRAM nutprompt
+#define MODULE_LIST nutprompt.c  
+
+#define MAIN_LANG_C
+#define R2LIB
+
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+

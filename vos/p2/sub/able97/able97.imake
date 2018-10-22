@@ -1,0 +1,16 @@
+/* Imake file for VICAR subroutine able97 */
+
+#define SUBROUTINE able97
+#define P2_SUBLIB
+
+#define MODULE_LIST able97.f zable97.c
+
+#define FTNINC_LIST cas_isslab
+
+#define USES_FORTRAN
+#define USES_C
+
+#define FTN_STRING
+
+/*#define LIB_LOCAL	/* remove on delivery */
+/*#define DEBUG		/* remove on delivery */

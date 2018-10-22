@@ -1,0 +1,8 @@
+procedure
+refgbl $echo
+body
+write "Results will vary depending on what system you are using"
+let _onfail="continue"
+let $echo="yes"
+tget_ran
+end-proc

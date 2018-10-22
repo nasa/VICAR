@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine dfft */
+
+#define SUBROUTINE dfft
+
+#define MODULE_LIST dfft.f
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

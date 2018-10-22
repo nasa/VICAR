@@ -1,0 +1,205 @@
+process help=*
+PARM INP      TYPE=STRING                              DEFAULT=""
+PARM OUT      TYPE=STRING                              DEFAULT=""
+PARM NULL     TYPE=REAL      			       DEF=0.0
+PARM DATACOL  TYPE=INTEGER                             DEFAULT=0
+PARM INDEXCOL TYPE=INTEGER                             DEFAULT=0
+PARM VALUES   TYPE=INTEGER    COUNT=1:20               DEFAULT=(0)
+PARM TOCOL    TYPE=INTEGER    COUNT=1:20               DEFAULT=(0)
+PARM FROMCOL  TYPE=INTEGER    COUNT=1:20               DEFAULT=(0)
+PARM NCOL     TYPE=INTEGER                             DEFAULT=0
+END-PROC
+.TITLE
+"transcol"
+.HELP
+PURPOSE:
+
+"transcol" performs two functions, depending on the options specified.
+
+The first of these is to convert long, vertically-aligned columns
+of data in an IBIS-format file into smaller vertical columns based 
+on a list of values supplied by the user.  Anytime one of these values
+is found in a user-specified index column, the value in a corresponding
+data column is transferred to a specified output column.  This operation
+may be followed by AGGRG2 to obtain a more compact file.
+
+The second function "transcol" performs is the inverse of the first.
+If the relevant options are specified, "transcol" will convert short
+vertically-aligned columns of data to a longer column.
+
+.PAGE
+EXECUTION:
+
+    Note that if the options specified don't fully and uniquely
+specify one of the two modes, an error message will be generated.
+Options are listed with their relevant function numbers in 
+parentheses in the parameter description section.  All parameters
+for a given mode must be specified.
+
+.PAGE
+Example 1
+
+transcol INP=A OUT=B INDEX=1 DATA=3 VALUES=(1,2) TOCOL=(5,6)
+
+This TAE command will look for the values 1 and 2 in index column 1
+of IBIS file A, and transfer the corresponding data values from data
+column 3 to columns 5 and 6.  The modified file is given the name B.
+Note that parameters are only checked to four characters.  This is
+an example of "transcol's" first mode.  Note, too, that all of the
+parameters specified above are required; omitting any of them will
+cause an error.  Finally, unused spaces in columns 5 and 6 are 
+filled with zeroes.
+
+.PAGE
+Example 2
+
+	INDEXCOL    1
+	DATACOL	    2
+	VALUES      1 2 3
+        TOCOL    4 6 8
+
+      Col 1   Col 2    Col 4  Col 6   Col 8
+
+	1	47	47.0	0.0	0.0
+	2	29	 0.0   29.0	0.0
+	3	32	 0.0	0.0    32.0
+	1	27	27.0	0.0	0.0
+	2	62 	 0.0   62.0	0.0
+	3	66	 0.0	0.0    66.0
+
+.PAGE
+Example 3	
+
+transcol INP=B OUT=C FROMCOL=(5,6) DATACOL=7 NCOL=7
+
+This command will cause "transcol" to operate in its second mode, 
+taking data from columns 5 and 6 of IBIS-file B and putting the
+data in column 7 as illustrated in the next example.  Note that
+all of the parameters specified are required, and that mixing any
+of these (with the exception of DATACOL) with any of the parameters 
+of the first mode will generate an error.  Finally, if NCOL is 
+less than DATACOL, DATACOL columns will be processed.
+
+.PAGE
+Example 4
+
+	FROMCOL	1 2 3
+	DATACOL	6
+	NCOL	6
+
+Input file    Col 1   Col 2   Col 3   Col 4   Col 5   Col 6
+		1	2	3	0	0	0
+		4	5	6	0	0	0
+		7	8	9	0	0	0
+.PAGE
+Output file   Col 1   Col 2   Col 3   Col 4   Col 5   Col 6
+		1	2	3	0	0	1
+		1	2	3	0	0	2	
+		1	2	3	0	0	3
+		4	5	6	0	0	4
+		4	5	6	0	0	5
+		4	5	6	0	0	6
+		7	8	9	0	0	7
+		7	8	9	0	0	8
+		7	8	9	0	0	9
+
+Note that all of the columns of the output file, up to the column
+MAX( DATACOL, NCOL) are "stretched" to correspond to the new data 
+column.
+.PAGE
+
+
+Restrictions:
+The only restrictions are the conventional
+restrictions on the size of IBIS interface files.
+
+Maximum column length is 250,000.
+
+
+WRITTEN BY:  A.L. Zobrist (first mode)     1 December 1976 
+	     B. Gokhman  (second mode)     9 October 1980
+             L. Bynum (written for VICAR2) 30 April 1985   
+
+COGNIZANT PROGRAMMER:  Niles Ritter
+
+REVISION:  
+	8-94 - Meredith Cox (CRI) - Made portable for UNIX
+
+.LEVEL1
+.VARIABLE INP
+STRING - IBIS input 
+         file (1,2)
+.VARIABLE OUT
+STRING - IBIS output 
+         file (1,2)
+.VARIABLE DATACOL
+INTEGER - Destination/source
+          column (1,2)
+.VARIABLE INDEXCOL
+INTEGER - Indexing 
+          column (1)
+.VARI NULL
+REAL - VALUE OF NULLIFIED ENTRIES
+
+.VARIABLE VALUES
+INTEGER - List of values to 
+          match (1)
+.VARIABLE TOCOL
+INTEGER - List of output 
+          cols (1)
+.VARIABLE FROMCOL
+INTEGER - list of short 
+          cols (2)
+.VARIABLE NCOL
+INTEGER - # of short 
+          cols (2)
+.LEVEL2
+.VARIABLE INP
+                    Input IBIS Interface file
+
+.VARIABLE OUT 
+                    Output IBIS Interface file
+.VARIABLE DATACOL
+          Integer DATACOL is applicable to both modes. 
+          
+          In the first, it indicates the column number 
+          from which the data values to be moved come 
+          from.  
+
+          In the second mode, DATACOL indicates the 
+          destination column to which the short col-
+          umns will be sent.
+.VARIABLE INDEXCOL
+          INDEXCOL specifies, for mode 1, which column 
+          will be used as an index to match the values 
+          specified through the VALUES parameter.
+.VARI NULL
+	  SPECIFYS THE VALUE OF OTHERWISE ZEROED OUT ENTRIES.
+.VARIABLE VALUES
+          VALUES is a list of values to match against 
+          the index column in mode 1. Each time one of 
+          these user-specified values is found in the 
+          index column, the data element corresponding 
+          to the index column entry is moved to the
+          the column specified by TOCOL which corresponds 
+          to the value number.
+.VARIABLE TOCOL
+          TOCOL is the list of columns to which data will
+          be sent in mode 1. Whenever the index value for 
+          a data element matches one of the values specified 
+          by the user through the VALUES parameter, that piece
+          of data is moved to a column corresponding to the
+          value matched.
+
+          TOCOL, then, must have the same number of entries 
+          as VALUES.
+.VARIABLE FROMCOL
+          FROMCOL is relevant to mode 2 only, and indicates 
+          which short columns contain data to be moved to the
+          column specified by DATACOL.
+.VARIABLE NCOL
+          NCOL is the number of short columns to be processed, 
+          and so is only applicable in the second mode.  If 
+          NCOL is less than integer DATACOL, DATACOL columns 
+          will be processed.
+.END

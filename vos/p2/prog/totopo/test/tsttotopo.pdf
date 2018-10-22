@@ -1,0 +1,53 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!
+! The following is included to clarify and to provide someone
+! the means of restoring the SPICE Farenc navigation in case
+! it goes away.
+! Optical disk SITOD1 required...
+!
+!FARENC INP=moon2.img OUT=g2.img +
+! 'update below=10 dnth=10 activi=35 GEOM=3 +
+!  area=(3,2,790,790) cluster=(30,10)
+!FARENC INP=moon1.img OUT=g1.img +
+! 'update below=10 dnth=10 activi=45 GEOM=3 +
+!  area=(3,2,790,790)
+!map3 INP=moon2.img OUT=moon2.map +
+!  'MERC nl=512 ns=512 sedrsrc=FARE scale=10. +
+!   line=256 samp=256 lat=0 long=70.
+!map3 INP=moon1.img OUT=moon1.map +
+!  'MERC nl=512 ns=512 sedrsrc=FARE scale=10. +
+!   line=256 samp=256 lat=0 long=70.
+!
+!genthis out=mark.img nl=1 ns=20 format=real +
+!      dn=(272.,262.,272.,262. +
+!      200.,200.,200.,200., 200.,300.,200.,300., +
+!      300.,200.,300.,200., 300.,300.,300.,300.)
+! create topomap
+tracker3 inp=( +
+  /project/test_work/testdata/sitod1/test_data/images/moon1.map, +
+  /project/test_work/testdata/sitod1/test_data/images/moon2.map) +
+  out=mark.img nlw=31 nsw=31 nlarea=37 nsarea=37 quality=.5 +
+  'zero grid=3
+LSTOXYZ inp=( +
+  /project/test_work/testdata/sitod1/test_data/images/moon1.map, +
+  /project/test_work/testdata/sitod1/test_data/images/moon2.map, +
+  mark.img) out=xyz.img +
+  sourcel=FARE sourcer=FARE
+! create topo map
+totopo inp=( +
+  /project/test_work/testdata/sitod1/test_data/images/moon1.map, +
+  /project/test_work/testdata/sitod1/test_data/images/moon2.map, +
+  mark.img,xyz.img) out=topo.img mode=TOPO
+xvd topo.img
+! create left orthonormal view
+totopo inp=(+
+  /project/test_work/testdata/sitod1/test_data/images/moon1.map, +
+  /project/test_work/testdata/sitod1/test_data/images/moon2.map, +
+  mark.img,xyz.img) out=ortho.img mode=ORTHL
+xvd ortho.img
+!
+end-proc

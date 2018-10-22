@@ -1,0 +1,9 @@
+
+#define SUBROUTINE zlow7
+
+#define MODULE_LIST zlow7.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

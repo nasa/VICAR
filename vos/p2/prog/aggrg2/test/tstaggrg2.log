@@ -1,0 +1,140 @@
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+ibis-gen xxxagg1 nc=5 nr=5 datacol=(1,2,3,4,5)  +
+    data=(1,2,3,4,5,1,12,13,7,4,1,5,4,3,15,2,8,4,6,15,2,2,17,9,5)
+Beginning VICAR task ibis
+aggrg2 xxxagg1 xxxaggo1 AGCOL=1
+Beginning VICAR task aggrg2
+aggrg2 version Thu Jan  3 2008
+5 records in, 2 records out
+ibis-list xxxagg1
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 5       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5
++-----------+-----------+-----------+-----------+-----------
+        1.00        2.00        3.00        4.00        5.00
+        1.00       12.00       13.00        7.00        4.00
+        1.00        5.00        4.00        3.00       15.00
+        2.00        8.00        4.00        6.00       15.00
+        2.00        2.00       17.00        9.00        5.00
+ibis-list xxxaggo1
+Beginning VICAR task ibis
+ 
+Number of Rows:2  Number of Columns: 5       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5
++-----------+-----------+-----------+-----------+-----------
+        1.00       12.00       13.00        7.00       15.00
+        2.00        8.00       17.00        9.00       15.00
+ibis-gen xxxagg2 nc=5 nr=5 datacol=(1,2,3,4,5)  +
+    format=("REAL","DOUB","DOUB","DOUB","DOUB")  +
+    data=(1,2,3,4,5,1,12,13,7,4,1,5,4,3,15,2,8,4,6,15,2,2,17,9,5)
+Beginning VICAR task ibis
+aggrg2 xxxagg2 xxxaggo2 AGCOL=1 AREA=4 BYAR=(2,3) SUMCOL=(5)
+Beginning VICAR task aggrg2
+aggrg2 version Thu Jan  3 2008
+5 records in, 2 records out
+ibis-list xxxagg2
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 5       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5
++-----------+-----------+-----------+-----------+-----------
+        1.00        2.00        3.00        4.00        5.00
+        1.00       12.00       13.00        7.00        4.00
+        1.00        5.00        4.00        3.00       15.00
+        2.00        8.00        4.00        6.00       15.00
+        2.00        2.00       17.00        9.00        5.00
+ibis-list xxxaggo2
+Beginning VICAR task ibis
+ 
+Number of Rows:2  Number of Columns: 5       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5
++-----------+-----------+-----------+-----------+-----------
+        1.00       12.00       13.00        7.00       24.00
+        2.00        2.00       17.00        9.00       20.00
+ibis-gen xxxa nc=2 nr=1 format=("A5","A5","A5","A5","A5","DOUB")
+Beginning VICAR task ibis
+acopin (ct/aggrg2.dat,xxxa) cols=(1,2,3,4,5,6) lead_rm=2
+Beginning VICAR task acopin
+acopin Fri Dec  5 2014 - wlb
+Number of input cols = 6
+    Col 1 is ASCII width = 6
+    Col 2 is ASCII width = 6
+    Col 3 is ASCII width = 6
+    Col 4 is ASCII width = 6
+    Col 5 is ASCII width = 6
+Output length is 5 records
+
+
+aggrg2 xxxa xxxa2 AGCOL=1 AREA=4 BYAR=(2,3) SUMCOL=6
+Beginning VICAR task aggrg2
+aggrg2 version Thu Jan  3 2008
+5 records in, 2 records out
+ibis-list xxxa 'format
+Beginning VICAR task ibis
+ 
+Number of Rows:5  Number of Columns: 6       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:5
++-----------+-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5         C:6
+          A5          A5          A5          A5          A5        DOUB
++-----------+-----------+-----------+-----------+-----------+-----------
+       aaaaa       bbbbb       ccccc       ddddd       eeeee        5.00
+       aaaaa       lllll       mmmmm       ggggg       ddddd        4.00
+       aaaaa       eeeee       ddddd       ccccc       ooooo       15.00
+       bbbbb       hhhhh       ddddd       fffff       ooooo       15.00
+       bbbbb       bbbbb       qqqqq       iiiii       eeeee        5.00
+ibis-list xxxa2 'format
+Beginning VICAR task ibis
+ 
+Number of Rows:2  Number of Columns: 6       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:2
++-----------+-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5         C:6
+          A5          A5          A5          A5          A5        DOUB
++-----------+-----------+-----------+-----------+-----------+-----------
+       aaaaa       lllll       mmmmm       ggggg       ooooo       24.00
+       bbbbb       bbbbb       qqqqq       iiiii       ooooo       20.00
+let $echo="no"

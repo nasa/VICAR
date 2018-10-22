@@ -1,0 +1,828 @@
+process help=*
+LOCAL OBJS TYPE=INTEGER COUNT=1
+PARM INP  TYPE=STRING  COUNT=(0:1) DEFAULT=--
+PARM OUT  TYPE=STRING  COUNT=(0:3) DEFAULT=--
+PARM SL   TYPE=INTEGER DEFAULT=1
+PARM SS   TYPE=INTEGER DEFAULT=1
+PARM NL   TYPE=INTEGER DEFAULT=0
+PARM NS   TYPE=INTEGER DEFAULT=0
+PARM SIZE TYPE=INTEGER COUNT=4     DEFAULT=(1,1,0,0)
+PARM LIST TYPE=KEYWORD COUNT=(0:1) VALID=(LIST,LIST1,NOLIST) DEFAULT=--
+PARM BACK TYPE=INTEGER COUNT=(0:1) DEFAULT=0
+PARM THRE TYPE=INTEGER COUNT=(0:1) DEFAULT=--
+PARM MAXD TYPE=INTEGER COUNT=(0:1) DEFAULT=255
+PARM SPIKE TYPE=INTEGER COUNT=(0:1) DEFAULT=--
+PARM LOVAL TYPE=INTEGER COUNT=(0:1) DEFAULT=--
+PARM MINI TYPE=REAL COUNT=(0:1) DEFAULT=--
+PARM MAXI TYPE=REAL COUNT=(0:1) DEFAULT=1.0E38
+PARM MINP TYPE=INTEGER COUNT=(0:1) DEFAULT=4
+PARM MAXP TYPE=INTEGER COUNT=(0:1) DEFAULT=--
+PARM MINS TYPE=INTEGER COUNT=(0:1) DEFAULT=2
+PARM MAXS TYPE=INTEGER COUNT=(0:1) DEFAULT=--
+PARM MINL TYPE=INTEGER COUNT=(0:1) DEFAULT=2
+PARM MAXL TYPE=INTEGER COUNT=(0:1) DEFAULT=--
+PARM OBJECTS TYPE=NAME DEFAULT=OBJS
+PARM AUTO TYPE=KEYWORD COUNT=(0:1) VALID=(AUTO,NOAUTO) DEFAULT=--
+PARM SENS TYPE=REAL COUNT=(0:1) DEFAULT=1.0
+PARM ASTEROID TYPE=KEYWORD VALID=(ASTEROID,NOAST) DEFAULT=NOAST 
+PARM SAOMINP TYPE=INTEGER DEFAULT=400
+PARM ASTMINP TYPE=INTEGER DEFAULT=35
+PARM SAORATIO TYPE=REAL   DEFAULT=0.7
+PARM ASTRATIO TYPE=REAL   DEFAULT=0.27
+PARM ASTMAXW TYPE=REAL   DEFAULT=1.6
+PARM ASTMAXL TYPE=REAL   DEFAULT=35.
+END-PROC
+.TITLE
+VICAR*2 PROGRAM STARCAT3
+.HELP
+PURPOSE
+  STARCAT3 is a VICAR*2 applications program which locates and integrates
+  features consisting of contiguous pixels above a given threshold in 
+  an image and places the results into a catalog file.
+
+
+OPERATION
+
+  STARCAT3 locates and associates all contiguous pixels above a user
+  specified threshold into single objects.
+  
+  STARCAT3 uses the first moment of the marginal distribution with a static
+  threshold to detect objects. The marginal distribution is the algorthim
+  described in Auer and Altena (Reference 1) with the modification described
+  by Stone (Reference 2).
+
+
+DATA FILES
+
+  The input image is a starfield. It may be from any type of sensor such
+  as a CCD, vidicon, or digitized photogrpahic plate or film..
+  Valid formats are BYTE, HALF and FULL.
+
+  The primary output is a 21 column IBIS-2 tabular file catalog described 
+  in detail below. This catalog format is not compatible with the
+  catalogs produced by STARCAT and STARCAT2. Those catalogs were based
+  on a non-transportable format to UNIX systems (because it equivalenced
+  real and integer variables). The catalog produced by STARCAT and STARCAT2
+  is described below for illustrative purposes.
+  
+  An optional second output data set can be produced where located
+  features are highlighted. This data set will have the same dimensions
+  as the original data set but will always be of BYTE data type. The data
+  set will have only two values, 0 and 255, where detected features are
+  at DN=255 (white) with all data below the threshhold as DN=0 (black).
+  
+  An optional third output is a halfword data set having the object numbers
+  found on each line as they are found before rejection criteria are applied
+  This is the so-called the flag buffer output.
+
+
+PROGRAM PARAMETERS
+
+  Parameters are provided to manage program flow and to provide object 
+  rejection criteria. The use of the rejection parameters can be highly
+  subjective and depends heavily on the scene content. For this reason
+  the second and third output files provide the user a visual examination
+  of the effectiveness of STARCAT3.
+
+  STARCAT3 is normally used to detect stars in an astronomical observation.
+  The sensors used have been vidicons, CCDs and digitized photographic 
+  negatives. Vidicon and CCD data sets are normally radiometrically 
+  corrected before using STARCAT3 by subtracting darks, biases and dividing
+  by flat fields.
+
+  Optimal results requires the image to have as flat a background in the data
+  set as possible since only one threshhold value is allowed for STARCAT3 --
+  You do not want detect objects which are really only do to subtle variations
+  in the background noise.
+
+  Alternatively, should the user have no dark file, flatfield to correct
+  the data, the user can subtract a constant background value with the
+  parameter BACK. BACK is a value corresponding to the median dn value
+  of the histogram of the image. BACK is important for the summation of the
+  dn values within the object to make magnitude estimations.
+
+  Photographic negatives which have been digitized for this operation
+  typically do not have background data sets. If you have a
+  particularly noisy, grainy or spotty photographic negative, the
+  user can generate a pseudo background by one of two methods: 
+  1) Run VICAR program MEDIAN on the original data set with a very large
+  kernel - something on the order of 300 x 300 which will remove high
+  frequency data (the stars) or with a kernel 4 to 5 times the size of the
+  largest real object. Then subtract the pseudo background from the
+  orginal data (either with F2 or by inlcuding it as the 2nd input data set).
+  VICAR program MEDIAN is not too swift since it is a sorting algorithm
+  and can take many minutes to run on a large (2K x 2K is large in this sense)
+  data set.
+  2) Run VICAR program SIZE with the interpolate option on the original
+  data down to between 4 to 64 times smaller than the original data set and
+  and then expand the data set with program SIZE back up to its original size
+  with the interpolate option.
+
+  BACK PARAMETER
+
+  BACK specifies the true zero intensity level in DNs of the input image.
+  It is usually the median value of the histogram of the corrected image data. 
+  VICAR programs HIST or ORDSTAT provides the mean
+  as a returnable parameter in a PDF. Note that HIST returns the mean as
+  a real variable and ORDSTAT returns it as an integer. Since starcat3
+  expects integer values for BACK then if HIST is used to provide an input
+  to STARCAT3 it should be converted float to integer within the pdf.
+
+  Object intensities are computed after background subtraction as:
+
+  			I=SUM(DN    -BACK)
+                   ij    INij
+
+  Default; BACK=0.
+
+  PARAMETERS THRE, AUTO, SENS
+
+  The selection of a good threshold is the key to successful STARCAT3
+  execution. If you only wish to see the brightest objects then the
+  threshold can be somewhat arbitrary, but if you wish to detect fainter
+  objects then care must be taken and it becomes more and more important
+  to have a flattened background.
+
+  Internally the program sets this value to be the lowest value allowed
+  by the data set format, 0 for BYTE, -32768 for HALF, and -2,147,483,547
+  for FULL data sets. Thus, it will find 1 large object (the entire data
+  set) if no value is entered.
+
+  A good place to start is some multiple of the standard deviation from
+  the histogram of the image. A reasonable value to start with is about
+  3 sigma above the mean.
+
+  Alternatively, the user can display the image and select a DN value
+  that lies somewhat above background and start from there.
+
+  If KEYWORD "AUTO" is specified then the program computes a local
+  threshold based upon the average DN in the image plus the standard 
+  deviation (sigma).  The sensitivity factor, SENS, is the number of
+  sigma to multiply by according to the equation 
+
+	autothreshold = mean + sensitivity*std_deviation
+
+  If you start with the AUTO option then choose SENS=3.0. Default is 1.0
+  though.
+
+
+  MAXD PARAMETER
+
+  MAXD is the saturation value in the image. By default in STARCAT3
+  a BYTE input data, MAXD is set to 255, a HALF data set it is set to 32767
+  and a FULL data set it is to 2,147,483,647. However, not all sensors
+  have dynamic ranges this high for a given data format. MAXD gives the
+  user the ability to set the correct saturation value for the sensor.
+
+  Internally MAXD is the highest value that STARCAT3 will accept for a
+  valid object. Note that SPIKE (below) indicates that if a pixel of SPIKE
+  or higher is detected within an object boundary then that object is to be
+  ignored in generating the starcat catalog.  Internally STARCAT3 sets a
+  value for SPIKE to be 1 DN above the saturation value unless the saturation
+  value is the highest integer value for the data type. For example, if the
+  image format is 'BYTE' and the saturation value. MAXD, is 255 then any
+  value entered for SPIKE will be ignored.
+
+  The same thing holds true if the data format is 'HALF' and the saturation
+  value is 32767 or if the data format is 'FULL' and the saturation value
+  is 65535. However, if the user enters a MAXD value less than the highest
+  value for the data format and less than the SPIKE value then
+  the program will reset the MAXD value to 1 less than the SPIKE value.
+  (It assumes that the value the user gives for SPIKE is correct).
+
+  The check for saturation is applied before background subtraction
+  since saturation is independent of background.
+
+  STARCAT3 will report the number of pixels within an object that have 
+  reached the saturated value in column 21. 
+
+  SPIKE AND LOVAL PARAMETERS (OBJECT REJECTION CRITERIA)
+
+  These two values are not exactly complementary as are the four pairs
+  below. So read and understand the following.
+
+  SPIKE is the value which, if a DN value is detected which is greater or
+  equal to SPIKE is found within the boundary of an object, it will cause
+  the object to be rejected as a valid object. Note the SPIKE value
+  comparison is applied before background subtraction. 
+
+  LOVAL is the value which, if a DN value is detected which is lower than
+  LOVAL within the boundary of an object, it will cause the DN value to be
+  replaced by THRE in the summation of the DNs within the object. This will
+  prevent an artificially low DN value (such as a bad pixel value) from being
+  subtracted from the value to be stored in column 2 of the catalog.
+
+
+  OBJECT REJECTION CRITERIA
+  
+  The other parameters associated with the rejection of objects are
+  complementary:
+  MINI, MAXI - Intensities of objects, minimum and maximum
+  MINP, MAXP - Number of Pixels (Area), minimum and maximum
+  MINL, MAXL - Number of Lines of object, minimum and maximum
+  MINS, MAXS - Number of Samples of object, minimum and maximum
+
+  If the value is greater than the maximum the object is rejected. If the
+  value is less than the minimum the object is also rejected.
+ 
+  LIST PARAMETER
+
+  The optional KEYWORD "LIST" allows the catalog to be printed to
+  the screen or session log as the catalog is being created.
+  LIST1 prints other messages to screen. NOLIST prints no messages.
+
+  OBJECTS PARAMETER
+ 
+  The program will return the number of objects found in this parameter
+
+
+  ASTEROID PARAMETERS
+
+  The KEYWORD "ASTEROID" causes the following 6 keywords to be activated:
+  SAOMINP,ASTMINP,SAORATIO,ASTRATIO,ASTMAXW,ASTMAXL
+
+  The ASTEROID parameter was designed for streak detection on old Palomar
+  48-inch plates. Those plates were exposed long enough such that asteroids
+  would show up as long streaks and these parameters allow automated tentative
+  identification.  When the ASTEROID option is activated the catalog will
+  add "asteroid" or "star" in column 20 (classification) and "starcat3"
+  for column 14 (catalog).
+
+ALGORITHM
+
+  Objects are associated together by maintaining a flag buffer (one line) 
+  which contains zeroes except where 'an above threshold event' has occured.
+  Event pixels are set to a unique ID value or flag. Internally the program
+  allows up to 2000 objects to be active for two lines. This value is
+  maxobjs and is a parameter in subrouine centfind. When the next image
+  line is processed and a section through an object is located, each
+  pixel in that section is compared with the three closest values in
+  the flag buffer for the preceeding line. If the flag has been set
+  to a non-zero ID, that ID is propagated downward and the object
+  section is integrated in with that ID. If the section spans more
+  than an ID, the IDs are concatenated. Sections which have no
+  flagged values in the preceeding line are considered new objects
+  and flagged values which are not propagated downwards are considered
+  complete. Catalog entries are made only after an object is completed.
+  Parameters are provided to restrict the areas, intensities, and 
+  dimensions of objects which are placed into the catalog. 
+
+
+STARCAT CATALOG
+  
+  Information about each object is entered into a catalog which
+  contains 21 descriptors for each entry. Each entry is stored in the
+  order as they were completed. The catalog is organized  as follows:
+
+
+  The starcat catalog is an IBIS-2 tabular file which has the following format.
+
+
+	***************************************************************
+    	descriptor	description		        format		    units
+	    ----------	-----------		        ------		    -----
+     1	entry		catalog entry number	 full(1)		<none>		
+     2	DN-bkg  	sum of DNs - background	 real(1)		counts
+     3	sumpix  	number of pixels 	     full(2)		<none>
+     4	sl      	starting line		     full(3)		<none>
+     5	ss		    starting sample          full(4)		<none>
+     6	nl		    number of lines		     full(5)		<none>
+     7	ns		    number of samples        full(6)		<none>
+     8	centsamp	centroid sample          real(2)		<none>
+     9	centline	centroid line            real(3)		<none>
+    10	maj axis	major axis length        real(4)		<none>
+    11	min axis	minor axis length        real(5)		<none>
+    12	ratio     	ratio minor/major axis	 real(6)		<none>
+    13	rotangle  	rotation angle of ellip	 real(7)		degrees
+    14	catalog   	source catalog           ascii(1)-'A16'	<none>
+    15	ID		    catalog ID               ascii(2)-'A20'	<none>
+    16	RA		    right ascension          real(8)		hours
+    17	dec		    declination              real(9)		degrees
+    18	mag calc	calculated magnitude     real(10)      	<none>
+    19	mag ref   	catalog magnitude        real(11)      	<none>
+    20	class     	classification           ascii(3)-'A8'	<none>
+    21  satpix    	number of saturated pix  full(7)       	<none>
+	***************************************************************
+
+  Prior to Jan 21, 1995, STARCAT3 produced STARCAT catalogs of TYPE 1
+  which had only the first 20 columns. However, the addition of column
+  21 allows better analysis of starfield for use in other VICAR Astometry
+  and photometry programs.
+  
+
+  STARCAT3 fills in columns 1 to 13 and 21 for each object it detects.
+  If the ASTEROID parameter is active it will fill in columns 14 and 20.
+  Column 14 (catalog) will contain "starcat3" and column 20 (class)
+  will contain either "asteroid" or "star".
+ 
+    Prior to Oct 6, 2009 the catalog stored sl, ss, centline, centsamp
+    with respect to the window if the size or sl,ss,nl,ns parmeters were
+    used. This can cause problems with further uses of the starcat catalog
+    that is produced since most users want the objects in the original\
+    image.  Now if you want the catalog to refer to a window, then
+    you should extract the smaller image out of the larger and then
+    run starcat3.
+
+OLDER STARCAT and STARCAT2 catalogs
+
+  The format of the catalogs created by STARCAT and STARCAT2 are as follows:
+  One record is 48 bytes. These programs use an unportable equivalencing
+  of fortran real*4 and integer*4 data types.
+
+  WORD #  CONTENTS        	TYPE	COMMENTS
+
+    1     SUM of DN - BKG      I*4  represents total intensity of object
+    2     SUM pixels      	I*4	area covered by object
+    3     SL area         	I*4	with respect to size field
+    4     SS area         	I*4	with respect to size field
+    5     NL area         	I*4	with respect to size field
+    6     NS area         	I*4	with respect to size field
+    7     Centroid sample 	R*4	center of object in sample
+    8     Centroid line   	R*4	center of object in line
+    9     major axis length  	R*4	major axis length - right ascension
+   10     minor axis length  	R*4	minor axis length - declination
+   11     Used for ASTEROID     R*4     1.0= SAO star, 2.0= asteroid
+   12     rotation angle	R*4	about major axis, degrees
+
+There is no program to interconvert the catalogs at this time.
+
+LIMITATIONS:
+
+  1. Maximum of 2000 objects for the flag buffer.
+  2. Input data files are limited to BYTE, HALF and FULL
+
+
+TIMIMG
+   Exact timings are not yet available for the VAX: IBM time
+   for a 1300 x 1300 image with 400 objects was 40 seconds.
+
+
+REFERENCES
+
+  1. L.H. Auer and W.F. van Altena, The Astronomical Journal, Vol83, 531 (1978)
+  2. Ronald C. Stone, The Astronomical Journal, Vol 97, 1227 (1989)
+
+
+ERROR MESSAGES
+
+??E XVunit error on 1st input file
+??E XVopen error on 1st input file
+??E XVopen error on output catalog file
+??E XVunit error on 2nd output image
+??E XVopen error on 2nd output image
+??E XVunit error on 3rd output image
+??E XVopen error on 3rd output image
+
+1) ??E Format XXXXXX not supported by STARCAT3
+	- program does not support REAL, DOUB or COMP images
+
+2) ??E **SUBROUTINE FIND - All 2000 bins filled
+	- exceeded maximum number of objects per line (2000) - the only
+	  way to change this limit is to change parameter maxobjs in the
+	  main routine, recompile and relink the program..
+
+3) ??E **SUBROUTINE AUTOT -  All values zero in minimum search
+
+4) Catalog of type ',a16,' not starcat catalog
+	- Cannot be fixed
+
+PROGRAM HISTORY:
+
+  1977-09-12 J.J.LORRE   Initial release
+  1978-01-17 J.J.LORRE   Revisions and documentation
+  1978-11-10 J.J.LORRE   Accomodate VICAR-77 label
+  1982-08-23 R.D.TOAZ    Increased efficiency of dupe rejection
+  1982-10-13 J.J.LORRE   New keywords: MAXP,MINI,MAXI,MINL,MAXL,MAXS,LINE,OVER,UNDER
+  1984-08-23 M.E.MORRILL Conversion to VAX VICAR*1
+  1984-09-25 M.E.MORRILL Conversion to VAX VICAR*2
+  1985-02-06 M.E.MORRILL Now extracts VICAR1 and VICAR2 labels
+  1988-07-01 J.J.LORRE   Added 4 fields into catalog: major,minor,angle values.
+                         Background file.
+  1990-08-15 R.J.BAMBERY Add AUTO and SENS parameters	
+  1992-12-28 R.J.BAMBERY Modified to run under UNIX
+  1993-02-09 R.J.Bambery Fixed bug that didn't give correct NL to catalog
+  1994-01-31 R.J.Bambery Made portable using new IBIS-2 format for catalog
+  1994-03-28 R.J.Bambery Completed port
+  1994-07-05 R.J.Bambery Fixed bug in output byte file from half files for rmindn
+  1994-08-26 R.J.Bambery Added ability to process FULL data sets
+  1994-11-02 R.J.Bambery No longer outlines objects in output image. Makes detected
+                         objects white on black bkg
+  1994-12-19 R.J.Bambery remove error messages on UNIX systems
+  1995-01-05 R.J.Bambery parameterize maxobjs and set nbin to 2000
+  1995-01-21 R.J.Bambery Changed catalogs to TYPE 2 by adding column 21 (# of 
+                         saturated pixels). Improved flow by better defining MAXD, 
+                         MINI & MAXI
+  1995-02-06 R.J.Bambery Added SPIKE and LOVAL parameters - changed PRINT to LIST to 
+                         conform to other programs in this series
+  1995-02-22 R.J.Bambery Removed optional background data set as second input -- it 
+                         caused too many coding problems
+  1996-02-20 R.J.Bambery Added OBJECTS return value
+  2004-09-05 R.J.Bambery Added LIST1 parameter to LIST`
+  2009-10-06 R.J.Bambery got rid of old xvparm calls (changed to xvp) added extra 
+                         parameters to chkstat calls, redefined output sl and ss to 
+                         be with respect to full image when only windowing with size 
+                         into the image
+  2009-10-17 R.J.Bambery Fix catalog windowing offset error (offset - 1)
+  2010-01-30 R.J.Bambery Made compatible with 64-bit afids Build 793 Linux, MacOSX 
+                         (both Intel/PowerPC)
+  2011-06-20 R.J.Bambery Removed all warning messages generated from gcc 4.4.4 Build 
+                         1069. Removed variables from several misaligned subroutince 
+                         calls
+  2012-06-06 R.J.Bambery Removed unnecessary parameters in calls, fixed
+                         misaligned arrays, changed all dimension (1)
+                         values to (*) in subroutines to avoid
+                         "Fortran runtime error: Index '2' of dimension 1 of array 'id' 
+                         above upper bound of 1" in gfortran 4.6.3
+  2012-06-25 R.J.Bambery Change include 'errdefs.fin' to include 'errdefs'
+  2012-07-03 R.J.Bambery Removed <tab> in front of continuation
+                         lines to make backward compatible with
+                         32-bit Linux gfortran 4.2.1, otherwise
+                         compatible 64-bit Linux gfortran 4.6.3
+  2013-09-13 R.J.Bambery Removed last vestiges of debug statements
+  2013-09-15 R.J.Bambery Initialized arrays for ibis output. Found call mve
+                         is a problem for double arrays (call mve(8,nbin,0,cenx,0,1)) fails
+  2016-03-07 W.L.Bunch   Added ithr rounding; changed MAXI default from 4.0E9 to 1.0E38 to 
+                         better allow for saturation in fullword images (from SP circa 1997).
+                         Replaced xqout with xvqout for shell vicar's benefit.
+                         Migrated to mipl.
+
+EXECUTION:
+  
+  starcat3 INP=SP.IMG OUT=SP.CAT PARAMS
+
+  starcat3 INP=SP.IMG OUT=(SP.CAT,SP.OUT) PARAMS
+
+  starcat3 INP=SP.IMG OUT=(SP.CAT,SP.OUT,SP.FLAG) PARAMS
+
+  starcat3 INP=SP.IMG OUT=(SP.CAT,SP.OUT,SP.FLAG) PARAMS
+
+Parameters are defined in the TUTOR mode. SIZE is optional and
+can be used to restrict the search area in the input image within
+which objects are to be located.
+
+
+.LEVEL1
+.VARIABLE INP
+ An input image.
+
+.VARIABLE OUT
+ Output 1 = CATALOG
+ Output 2 = BYTE image of
+ size equal to the input
+ (all objects set to DN=255).
+ Output 3 = "flag" image
+ SEE HELP FOR CAT FORMAT.
+
+.VARIABLE SIZE
+ The standard Vicar size field.
+ Restricts the search area
+
+.VARIABLE SL
+ Starting line of search area
+
+.VARIABLE SS
+ Starting sample of search area
+
+.VARIABLE NL
+ Number of lines in search area
+
+.VARIABLE NS
+ Number of samples in search area
+
+.VARIABLE LIST
+ KEYWORD-OPTIONAL
+ Print catalog to session
+ log/terminal. LIST1 prints
+ minimal other messages
+
+.VARIABLE BACK
+ INTEGER-OPTIONAL
+ Background DN level. 
+ Default; BACK=0.
+
+.VARIABLE MAXD
+ INTEGER-OPTIONAL
+ Maximum DN for an object
+ (Saturation)
+ Defaults:
+ MAXD=255 for BYTE images
+ MAXD=32767 for BYTE images
+ MAXD=2147483647 for FULL images
+
+.VARIABLE SPIKE
+ INTEGER-OPTIONAL
+ Reject object if DN value
+ greater or equal to
+ SPIKE found in object
+
+.VARIABLE LOVAL
+ INTEGER-OPTIONAL
+ If this DN value found in
+ object replace it with 
+ THRE value.
+
+.VARIABLE AUTO
+ KEYWORD-OPTIONAL
+ Compute a global threshold for
+ the objects
+ If AUTO=AUTO then THRE is
+ ignored.
+
+.VARIABLE SENS
+ REAL-OPTIONAL
+ Number of sigma to add to the
+ autothreshold if AUTO=AUTO
+ Ignored if AUTO=NOAUTO
+ Default; SENS=1.0
+
+.VARIABLE THRE
+ INTEGER-OPTIONAL
+ Threshold DN for real objects.
+ Lowest value in image format
+ After background subtraction
+ Default: THRE=--
+
+.VARIABLE MINI
+ REAL-OPTIONAL
+ Ignore objects whose sums of 
+ DNs are less than this value
+ Default; MINI=-2,147,483,648
+
+.VARIABLE MAXI
+ REAL-OPTIONAL
+ Ignore objects whose sums of
+ DNs are greater than this
+ value.
+ Default; MAXI=MAXD+1
+
+.VARIABLE MINP
+ INTEGER-OPTIONAL
+ Object minimum area in pixels.
+ Default; MINP=4.
+
+.VARIABLE MAXP
+ INTEGER-OPTIONAL
+ Object maximum area in pixels.
+ Default; MAXP=Infinity.
+ (+2,147,483,647)
+
+.VARIABLE MINL
+ INTEGER-OPTIONAL
+ Minimum lines in object.
+ Default; MINL=2.
+
+.VARIABLE MINS
+ INTEGER-OPTIONAL
+ Minimum samples in object
+ Default; MINS=2.
+
+.VARIABLE MAXL
+ INTEGER-OPTIONAL
+ Maximum lines in object.
+ Default; MAXL=1000000
+
+.VARIABLE MAXS
+ INTEGER-OPTIONAL
+ Maximum samples in object
+ Default; MAXS=1000000
+
+.VARIABLE OBJECTS
+ NAME
+ Return of number of
+ objects found to
+ script
+
+.VARIABLE ASTEROID
+ KEYWORD-OPTIONAL
+ The Asteroid keyword
+ causes the following 
+ 6 keywords to be activated.
+ These are:
+ SAOMINP,ASTMINP,SAORATIO,
+ ASTRATIO,ASTMAXW,ASTMAXL
+
+ VALID=(ASTEROID,NOAST)
+ DEFAULT; NOAST 
+
+.VARIABLE SAOMINP
+ INTEGER-OPTIONAL
+ Candidate STARCAT SAO stars
+ must have at least SAOMINP
+ pixels.
+ DEFAULT; SAOMINP=400
+
+.VARIABLE ASTMINP
+ INTEGER-OPTIONAL
+ Candidate STARCAT asteroids
+ must have at least ASTMINP
+ pixels.  
+ DEFAULT; ASTMINP=35
+
+.VARIABLE SAORATIO
+ REAL-OPTIONAL
+ Candidate STARCAT SAO stars
+ must have at least a narrow
+ axis to wide axis ratio of
+ SAORATIO.
+ DEFAULT; SAORATIO=0.7
+
+.VARIABLE ASTRATIO
+ REAL-OPTIONAL
+ Candidate STARCAT asteroids
+ must have less than a narrow
+ axis to wide axis ratio of
+ ASTRATIO.
+ DEFAULT; ASTRATIO=0.27
+
+.VARIABLE ASTMAXW
+ REAL-OPTIONAL
+ The maximum allowed width for
+ an object to be considered an
+ asteroid candidate in the
+ STARCAT catalogue.
+ DEFAULT; ASTMAXW=1.6
+
+.VARIABLE ASTMAXL
+ REAL-OPTIONAL
+ The maximum allowed length for
+ an object to be considered an
+ asteroid candidate in the
+ STARCAT catalogue.
+ DEFAULT; ASTMAXL=35.
+
+.LEVEL2
+.VARIABLE INP
+ An input image data set
+
+.VARIABLE OUT
+ Primary output is a CATALOG data set described in help.
+
+ Secondary output is an image of size equal to the input with
+ a DN=255 area for each object found.
+
+ Third output is the flag buffer containing the object IDs of all objects
+ found during its search before rejection criteria are applied. Thus, it
+ contains real and suspected objects.
+
+.VARIABLE SIZE
+ The standard Vicar size field.
+ Restricts the search area.
+ Default; (1,1,0,0) - Full size of input image.
+
+.VARIABLE SL
+ Starting line of search area.
+ Default;  1   
+
+.VARIABLE SS
+ Starting sample of search area.
+ Default;  1
+
+.VARIABLE NL
+ Number of lines of search area.
+ Default;  NL of input image
+
+.VARIABLE NS
+ Number of samples of search area.
+ Default;  NS of input image
+
+.VARIABLE LIST
+ KEYWORD-OPTIONAL
+ Prints out catalog information for each object found on the terminal
+ and the session log.
+
+.VARIABLE MAXD
+ INTEGER-OPTIONAL
+ Specifies maximum input DN in the input image. The saturation value.
+ 32,767 for halfword images.
+ 2,147,483,647 for fullword images.
+ Default; MAXD=255.
+
+.VARIABLE SPIKE
+ INTEGER-OPTIONAL
+
+.VARIABLE LOVAL
+ INTEGER-OPTIONAL
+
+.VARIABLE AUTO
+ KEYWORD-OPTIONAL
+ Computes a global threshold value. If set to AUTO=AUTO, ignores THRE and
+ uses SENS parameter. 
+
+.VARIABLE SENS
+ REAL-OPTIONAL
+ Number of sigma to add to the mean to get the autothreshold
+ Ignored if AUTO=NOAUTO.
+ Default; SENS=1.0 
+
+.VARIABLE THRE
+ INTEGER-OPTIONAL
+ Specifies the DN in input image at and above which pixels are
+ considered real events. All DNs below THRE are ignored.
+ By default this will be  the lowest integer value for the data format
+ type, 0 for BYTE image, -32768 for HALF image, and -2,147,483,648 for
+ FULL image. Note: THRE is compared to data after either the BACK
+ Ignored if AUTO=AUTO.
+ Default: THRE=--
+
+.VARIABLE BACK
+ INTEGER-OPTIONAL
+ Specifies the true zero intensity level in DNs of the
+ input image. BACK is subtracted from each object DN.
+ Object intensities are
+
+ computed as:   I=SUM(DN   -BACK )
+                   ij   INij
+
+ Default; BACK=0.
+
+.VARIABLE MINP
+ INTEGER-OPTIONAL
+ Specifies the least number of pixels which an object can 
+ contain and still be considered a real object. All objects
+ with less than MINP pixels are marked in optional output
+ data set but are not entered in the Catalog.
+ Default; MINP=4.
+
+.VARIABLE MAXP
+ INTEGER-OPTIONAL
+ Specifies the maximum number of pixels that an object may
+ contain and still be placed in the catalog.
+ Default; MAXP=Infinity (2,147,483,647).
+
+.VARIABLE MINI
+ REAL-OPTIONAL
+ Ignore objects whose sums of  DNs are less than this value
+ Default; MINI=-Infinity.
+ (-2,147,483,648)
+
+.VARIABLE MAXI
+ REAL-OPTIONAL
+ Ignore objects whose sums of DNs are greater than this value.
+ Default; MAXI=Infinity (2,147,483,647).
+
+.VARIABLE MINL
+ INTEGER-OPTIONAL
+ Specifies the minimun number of lines that an object may span
+ and be placed in the catalog.
+ Default; MINL=2.
+
+.VARIABLE MAXL
+ INTEGER-OPTIONAL
+ Specifies the maximum number of lines that an object may span
+ and be placed in the catalog.
+ Default; MAXL=Infinity (1,000,000).
+
+.VARIABLE MINS
+ INTEGER-OPTIONAL
+ Specifies the minimun number of samples that an object may span
+ and be placed in the catalog.
+ Default; MINS=2.
+
+.VARIABLE MAXS
+ INTEGER-OPTIONAL
+ Specifies the maximum number of samples that an object may span
+ and be placed in the catalog.
+ Default; MAXS=Infinity (1,000,000).
+
+.VARIABLE ASTEROID
+ KEYWORD-OPTIONAL
+ The Asteroid keyword causes the following 
+ 6 keywords to be activated. These are:
+ SAOMINP,ASTMINP,SAORATIO,ASTRATIO,ASTMAXW,ASTMAXL
+ VALID=(ASTEROID,NOAST)
+ DEFAULT; NOAST
+
+.VARIABLE SAOMINP
+ INTEGER-OPTIONAL
+ Candidate STARCAT SAO stars must have
+ at least SAOMINP pixels.  
+
+.VARIABLE ASTMINP
+ INTEGER-OPTIONAL
+ Candidate STARCAT asteroids must have
+ at least ASTMINP pixels.  
+
+.VARIABLE SAORATIO
+ REAL-OPTIONAL
+ Candidate STARCAT SAO stars must have
+ at least a narrow axis to wide axis
+ ratio of SAORATIO.
+
+.VARIABLE ASTRATIO
+ REAL-OPTIONAL
+ Candidate STARCAT asteroids must have
+ less than a narrow axis to wide axis
+ ratio of ASTRATIO.
+
+.VARIABLE ASTMAXW
+ REAL-OPTIONAL
+ The maximum allowed width for an object
+ to be considered an asteroid candidate
+ in the STARCAT catalogue.
+
+.VARIABLE ASTMAXL
+ REAL-OPTIONAL 
+ The maximum allowed length for an object
+ to be considered an asteroid candidate
+ in the STARCAT catalogue.
+.END

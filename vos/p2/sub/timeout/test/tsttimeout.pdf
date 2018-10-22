@@ -1,0 +1,23 @@
+procedure  help=*
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="no"
+Write " "
+Write " The Test Data can be modified to suit the test. "
+Write " To Change the test data, simply modify the"
+Write " Default parameters in the ttimeout.pdf file"
+Write " "
+Write " "
+Write " *************TEST ON TIMEOUT ROUTINE************"
+Write " "
+
+ttimeout date=(2000,121,10,20,30,40)
+ttimeout date=(12,121,10,20,30,40)
+ttimeout date=(1980,198,35,42,16,53)
+ttimeout date=(80,198,35,42,16,53)
+
+Write " "
+Write " *************TEST COMPLETED************"
+
+end-proc

@@ -1,0 +1,175 @@
+!this is a script file to test the program PICREG
+!must have allocated a display device which has a trackball or mouse
+!tablet before running this.
+! To make this test repeatable and verifiable, the POSITION parameter
+! is used to override the position of the trackball position.
+! The two images used are identical.  Thus the tiepoint coordinates
+! should be the same from both images.
+
+picreg (&INPIC1,&INPIC2) t
+d=50 r=100
+l=50 u=30
+r1=100 r2=50 d1=50 d2=70
+l1=80 l2=40 u1=40 u2=50
+'home
+sl1=50 ss1=50 sl2=100 ss2=100
+'home
+z1=3 z2=-2
+zoom=1
+linear=(50,110)
+stretch=(40,120)
+'dstat
+'point
+POSITION=( 185, 61)
+POSITION=( 185, 61)
+'hpf 'corr 'noin power=5
+POSITION=( 100, 56)
+POSITION=( 100, 56)
+'nohpf 'inte
+POSITION=( 156, 54)
+POSITION=( 156, 54)
+'min area=20
+POSITION=( 80,40 )
+POSITION=( 80, 40)
+'max CURSOR=4
+POSITION=( 81, 235)
+POSITION=( 81, 235)
+'point redo=2 CURSOR=1
+POSITION=( 168, 117)
+POSITION=( 168, 117)
+delete=(1,3)
+POSITION=( 140, 136)
+POSITION=( 140, 136)
+POSITION=( 57, 221)
+POSITION=( 57, 221)
+POSITION=( 91, 198)
+POSITION=( 91, 198)
+POSITION=( 181, 242)
+POSITION=( 181, 242)
+POSITION=( 168, 112)
+POSITION=( 168, 112)
+POSITION=( 168, 100)
+POSITION=( 168, 100)
+POSITION=( 168, 88)
+POSITION=( 168, 88)
+POSITION=( 168, 76)
+POSITION=( 168, 76)
+POSITION=( 156, 54)
+POSITION=( 156, 54)
+'show
+locate=3
+fit=1
+fit=2
+fit=3
+fit=4
+fit=5
+fit=6
+fit=7
+'exit
+!USAGE
+!verify tiepoint file 
+list t (1,1,1,96)
+!enter PICREG with old tiepoint file and geom parameter file output
+! Add a new tiepoint that is slightly wrong to make fit=3 info not infintessimal
+picreg (&INPIC1,&INPIC2,t) (t2,g)
+nhor=10 nver=10 minl=50 mins=50 maxl=350 maxs=300 use=4 TEXTSIZE=21
+POSITION=( 185,161)
+POSITION=( 186,162)
+TEXTSIZE=1
+TEXTSIZE=7
+TEXTSIZE=12
+'print fit=3
+'noprint TPFORM=1
+'mgeom
+TPFORM=2
+'lgeom
+TPFORM=3
+'geoma
+'exit
+!  a new test to demonstrate PICREG working together with LGEOM and FASTMOS.
+!  See example 3.
+gen b1 nl=256 ns=240
+gen b2 nl=256 ns=10 ival=239
+!
+! ( Tell picreg that the left edge of b2 (left-hand side of screen) matches
+!   the right edge of b1 (right-hand side of screen) by selecting upper-left
+!   corner of b2 (left side) and upper-right corner of b1 (right side).
+!   Then select three more tiepoint pairs vertically beneath the first
+!   tiepoint pair on different lines.
+!
+picreg (b2 b1) (t p)
+linear=(0,400)
+POSITION=(   1,   1)
+POSITION=(   1, 240)
+POSITION=( 256,   1)
+POSITION=( 256, 240)
+POSITION=( 100,   1)
+POSITION=( 100, 240)
+POSITION=( 200,   2)
+POSITION=( 200, 241)
+fit=5
+tpform=5
+'lgeom
+exit
+lgeom b2 b2mos size=(1,240,256,10) PARMS=p
+fastmos in=(b1 b2mos) out=bmos  size=(1,1,256,249)  OFF2=(1,240) 
+!
+gen b 256 249
+difpic (b bmos)
+write "Should get 0 differences."
+!
+gen b1 nl=256 ns=240
+gen b2 nl=256 ns=10 ival=239
+!
+! ( Tell picreg that the left edge of b2 (left-hand side of screen) matches
+!   the right edge of b1 (right-hand side of screen) by selecting upper-left
+!   corner of b2 (left side) and upper-right corner of b1 (right side).
+!   Then select three more tiepoint pairs vertically beneath the first
+!   tiepoint pair on different lines.  Then some bogus tiepoints to
+!   test FIT=6 and 7 with 'PRINT for FR 89205.
+!
+picreg (b2 b1) (t p)
+linear=(0,400)
+'print
+POSITION=(   1,   1)
+POSITION=(   1, 240)
+POSITION=( 256,   1)
+POSITION=( 256, 240)
+POSITION=( 100,   1)
+POSITION=( 100, 240)
+POSITION=( 200,   2)
+POSITION=( 200, 241)
+POSITION=( 256,  11)
+POSITION=( 256, 240)
+POSITION=( 100,  11)
+POSITION=( 100, 240)
+POSITION=( 200,  12)
+POSITION=( 200, 241)
+POSITION=( 256,  11)
+POSITION=( 256, 240)
+POSITION=( 100,  21)
+POSITION=( 100, 240)
+POSITION=( 200,  22)
+POSITION=( 200, 241)
+POSITION=( 201,  12)
+POSITION=( 200, 241)
+fit=6
+tpform=6
+'lgeom
+fit=7
+tpform=7
+'lgeom
+tpform=9
+'lgeom
+exit
+
+! lwk - 28apr2010
+! removed these from last test as they caused pgm to crash:
+!POSITION=( 257,  11)
+!POSITION=( 256, 240)
+!POSITION=( 101,  21)
+!POSITION=( 100, 240)
+!POSITION=( 201,  22)
+!POSITION=( 200, 241)
+
+!end

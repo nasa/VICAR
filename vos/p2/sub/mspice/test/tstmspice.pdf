@@ -1,0 +1,31 @@
+procedure
+refgbl $echo
+refgbl $syschar
+refgbl $autousage
+
+body
+local dir string
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+
+if ($syschar(1)="UNIX")
+   let dir = "/project/test_work/testdata/mipl/gll/"
+else
+   let dir = "wms_test_work:[testdata.mipl.gll]"
+end-if
+
+ibisupdate inp=&"dir"e17_regmap.sedr target=europa project=gll +
+   'object 'update
+
+let $echo="no"
+write "The above case only tested the remove SPICE client, because not all  "
+write "platforms have local SPICE kernels.  If you are on Solaris, HP, or   "
+write "VMS, please add the following case to the test pdf:                  "
+write " "
+write "    ibisupdate inp=&"dir"e17_regmap.sedr target=europa project=gll + "
+write "        'object 'update 'local                                       "
+write " "
+
+end-proc
+

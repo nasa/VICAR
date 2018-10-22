@@ -21,9 +21,10 @@
 #define SystemV           YES
 
 #define HaveTerminalLibrary no
-#define AnsiCCmd gcc44
-#define CcCmd gcc44
-#define FortranCmd gfortran44 -fno-second-underscore -std=legacy -ffixed-line-length-none -fPIC
+/* For Red Hat 5, use gcc44/gfortran44 on the next 3 lines */
+#define AnsiCCmd gcc
+#define CcCmd gcc
+#define FortranCmd gfortran -fno-second-underscore -std=legacy -ffixed-line-length-none -fPIC
 #define ExtraCFlags -fPIC
 
 #define InstallCmd install

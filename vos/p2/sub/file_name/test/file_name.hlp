@@ -1,0 +1,132 @@
+FILE_NAME
+
+	This module contains a set of C anf fortran callable routines whichs
+are used to convert valid file specfication between the UNIX and VMS syntax.
+There are a total of 9 routines in this package, two convert the pathname or
+directory, two convert the entire file specification and the remaining are
+used to convert a filespec for use with the MIPS catalog and Working Mission
+Storage, and to convert a file spec into the current host's syntax.
+
+	All of the routines are case sensitive and return a pointer to the
+converted specification.  All of the C routines have one input parameter which
+is a pointer to specification which needs to be converted.  The input data is
+not modified.  The maximum length of the returned string is 256 bytes.  If
+there is an error in converting the specification, a NULL pointer is returned.
+
+	The following text shows the routine protoypes.  These prototype
+declarations are defined in the file: "file_name.h"
+
+	char	*filename_for_catalog( char * );
+	char	*filename_for_host ( char * );
+	char	*vms_path( char * );
+	char	*unix_path( char * );
+	char	*vms_file_spec( char * );
+	char	*unix_file_spec( char * );
+	char	*expand_unix_path( char * );
+
+	Additionally, the two fortran routines programs mimic the C versions,
+but only convert full filenames, the capability to convert just the path is
+not available.  The routines, and calling sequences are:
+
+	file_for_catalog( character, character, integer)
+	file_for_host( character, character, integer)
+
+The first parameter is the input file specification, the second is the
+output file specification, the third parameter is the return status.  A value
+of 0 means the conversion was accomplished correctly, a non-zero value
+indicates a failure.  The same character variable can be used for both
+parameters.  The routines are truely subroutines so the "call" statement
+must be used.
+
+	There are some restricitions to the specifications which can be
+correctly translated.  These routines do not perform a complete syntax
+check for full complience, but are fairly simple translaters.  Be advised
+that some valid UNIX file specifications are invalid in the VMS realm
+(i.e., a space or multiple periods in the filename).
+
+	There are additional capabilities to correct for the VMS and UNIX
+system use of the WMS.  The WMS is a UNIX based file server and the directory
+structure could not be correctly mounted from a VMS client.  To compensate
+for this, a naming convention has been implement to convert between UNIX
+and VMS path names.  A UNIX host would reference a file in the path:
+		/project/gll/ssi/
+while a VMS host would reference the file in the directory:
+		WMS_GLL:[SSI]
+Whenever a UNIX path begins with "/project/" or a VMS path begins with "WMS_",
+these routines will make the correct conversion.  To further complicate
+matters,  VMS is not a case-sensitive system.  The WMS has been set-up, by
+convention, to ony contain lowercase file specification.  Anytime a conversion
+is run through the filename or path conversion routines, the string will
+be converted to lowercase if the first level directory is "project".  This
+will occur for UNIX to UNIX conversions as well as VMS to UNIX conversions.
+
+
+	The following lists typical valid syntax and the invalid syntax
+which is trapped for the 6 routines.
+
+filename_for_catalog
+	Input File Specification	Converted File Specification
+	DISK:[FULL.NAME]FILE.EXT	/DISK/FULL/NAME/FILE.EXT
+	DISK_ONLY:FILE.NAME		/DISK_ONLY/FILE.NAME
+	/unix/specs/are.ok		/unix/specs/are.ok
+	/PROJECT/not/WMS		/PROJECT/not/WMS
+	/project/WMS/CaseConverted	/project/wms/caseconverted
+
+	Invalid File specifications:
+	[NEED.DISK]FILE.EXT		NULL Pointer
+	[.SUBDIRECTORY]NOT_OKEY.DOKEY	NULL Pointer
+	Just_FileName.NOT_Okay		NULL Pointer
+
+filename_for_host	Calls vms_file_spec or unix_file_spec depending upon
+			the host type.
+
+vms_path
+	Input File Specification	Converted File Specification
+	/full/paths/are/okay/		full:[paths.are.okay]
+	/missing/slash/okay		missing:[slash.okay]
+	sub/directory/okay/		[.sub.directory.okay]
+	/disk_only/			disk_only:
+	/disk_only			disk_only:
+	subdirectory			[.subdirectory]
+	VMS:[SYNTAX.OKAY]		VMS:[SYNTAX.OKAY]
+	NO:[VMS.CHECKING		NO:[VMS.CHECKING
+
+	Invalid File specifications:
+	~no/usr/path/allowed		NULL Pointer
+	/project/			wms_:
+
+unix_path
+	Input Path Specification	Converted Path Specification
+	Disk:[Full.Path]		/Disk/Full/Path/
+	[.Sub.Directory.only]		sub/directory/only/
+	[.missing.bracket.okay		missing/bracket/okay/
+	DiskOnly:			/DiskOnly/
+	No_colon_okay			/No_colon_okay/
+	unix/okay/too			unix/okay/too/
+
+	Invalid Path specifications:
+	Need:[.Full Path]		NULL Pointer
+	~no/usr/paths/though		NULL Pointer
+	WMS_:				/project/
+
+vms_file_spec
+	Input Path Specification	Converted Path Specification
+	/DISK_NAME/PATH/NAME/FILE.DAT	DISK_NAME:[PATH.NAME]FILE.DAT
+	SUBDIRECTORY/FILE.NAME		[.SUBDIRECTORY]FILE.NAME
+	[VMS.NAME]OKAY.TOO		[VMS.NAME]OKAY.TOO
+	DISK:VMS_NAME.GOOD		DISK:VMS_NAME.GOOD
+
+	Invalid Path specifications:
+	~no/user/paths/allowed.period	NULL Pointer
+
+unix_file_spec
+	Input Path Specification	Converted Path Specification
+	DISK:[FULL.NAME]FILE.EXT	/DISK/FULL/NAME/FILE.EXT
+	[.SUBDIRECTORY]OKEY.DOKEY	SUBDIRECTORY/OKEY.DOKEY
+	DISK_ONLY:FILE.NAME		/DISK_ONLY/FILE.NAME
+	/unix/specs/are.ok		/unix/specs/are.ok
+	Just_FileName.Okay		Just_FileName.Okay
+
+	Invalid Path specifications:
+	[NEED.DISK]FILE.EXT		NULL Pointer
+	~no/usr/paths/allowed.got_it	NULL Pointer

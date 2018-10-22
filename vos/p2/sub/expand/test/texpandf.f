@@ -1,0 +1,44 @@
+C FORTRAN ROUTINE TO TEST FORTRAN BRIDGE TO SUBROUTINE EXPAND
+      SUBROUTINE TEXPANDF()
+      LOGICAL*1 BUF(200)
+      DATA BUF /0,255,0,5*255,5*0,37*255,150*0/
+      NSI=100
+      INC=2
+      CALL XVMESSAGE('Testing EXPAND subroutine FORTRAN interface', ' ')
+      CALL XVMESSAGE(' ', ' ')
+      CALL XVMESSAGE('Original buffer:', ' ')
+      CALL XVMESSAGE(' ', ' ')
+      CALL PRINT_FBUFFER(BUF,100)
+      CALL EXPAND(BUF,NSI,INC)
+      CALL XVMESSAGE('Expanded buffer:', ' ')
+      CALL XVMESSAGE(' ', ' ')
+      CALL PRINT_FBUFFER(BUF,200)
+      RETURN
+      END
+
+      SUBROUTINE PRINT_FBUFFER(BUF,NSI)
+      IMPLICIT INTEGER(A-Z)
+      LOGICAL*1 BUF(1)
+      CHARACTER MSG*80
+      INTEGER*2 INTBUF(200)
+      INTEGER   TRBUF(12)
+
+      CALL XVTRANS_SET(TRBUF, 'BYTE', 'HALF', STATUS)
+      IF (STATUS .EQ. 1) THEN
+         CALL XVTRANS(TRBUF, BUF, INTBUF, NSI)
+      ELSE
+         DO 10 I=1,NSI
+   10       INTBUF(I) = BUF(I)
+      ENDIF
+      DO 20 I=1,NSI,18
+         IF ((I+17).LE.NSI) THEN
+            WRITE(MSG, 100) (INTBUF(J), J=I,I+17)
+         ELSE
+            WRITE(MSG, 100) (INTBUF(J), J=I,NSI)
+         ENDIF
+         CALL XVMESSAGE(MSG, ' ')
+   20 CONTINUE
+      CALL XVMESSAGE(' ', ' ')
+      RETURN
+  100 FORMAT(X,18(I3,X))
+      END

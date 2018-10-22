@@ -1,0 +1,21 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body 
+let _onfail="continue"
+let $echo="yes"
+let $autousage="none"
+!
+gen out=a.img nl=1 ns=12
+toibis inp=a.img out=b.ibis 'graphics ndim=3
+!For Porting to UNIX
+!REPLACED: grlist inp=b.ibis dim=3
+!  with:
+ibis-list inp=b.ibis nc=3 nr=4 gr1dim=3
+toibis inp=a.img out=b.ibis 'byte 'interface ncol=3
+!For Porting to UNIX
+!REPLACED: qrep inp=b.ibis
+!  with:
+ibis-list inp=b.ibis
+!
+end-proc

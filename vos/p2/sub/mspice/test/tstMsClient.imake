@@ -1,0 +1,19 @@
+#define  PROGRAM   tstMsClient
+#define  MAIN_LANG_C
+#define  USES_ANSI_C
+
+#define MODULE_LIST tstMsClient.c
+
+#define FTN_STRING
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_FORTRAN
+#define LIB_P2SUB
+#define LIB_SPICE
+#define LIB_MATH77
+#define LIB_NETWORK
+
+
+/* #define DEBUG */ /* Remove before delivery. */
+/* #define LIB_LOCAL */ /* Remove before delivery. */
+

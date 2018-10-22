@@ -1,0 +1,15 @@
+!****************************************************************************
+! TSTRFT2.PDF, unit test procedure for subroutine RFT2.F
+!****************************************************************************
+procedure help=*
+refgbl $echo
+refgbl $syschar
+parm inp string count=0:1 default=--
+body
+let _onfail="continue"
+let $echo="yes"
+
+if ($count(inp)=0) let inp = "a"
+gen out=&inp nl=18 ns=16 format=real
+trft2 inp=&inp
+end-proc

@@ -1,0 +1,268 @@
+      INCLUDE 'VICMAIN_FOR'
+      SUBROUTINE MAIN44     !TEXTAD
+C
+C     10 MAY 91    ...REA...  CONVERT TO UNIX/VICAR
+C     11 NOV 88    ...CCM...  HANDLED NCHAR=0 CASE (I.E. DO NOTHING!)
+C     26 JULY 85   ...JHR...  CONVERTED TO VICAR2
+C     10 NOV 83    ...JAM...  CONVERTED TO VAX
+C     22 JULY 81   ...JAM...  ADD KEYWORDS 'ADD' AND 'MODULATE'
+C     18 JUNE 80   ...JAM...  INCREASE BUFFER SIZE TO 10000
+C     18 OCT 79    ...JDA...  INITIAL RELEASE
+C
+      IMPLICIT INTEGER (A-Z)
+      INTEGER*4 OUNIT,STAT,IPARM(1000),BACKDN,DN
+      INTEGER*4 SL(100),SS(100),EL(100),ES(100)
+      INTEGER*2 HBUF(20000)
+      LOGICAL*4 XVPTST
+      LOGICAL*1 LBUF(40000),CBUF(4000),BBUF(100)
+      CHARACTER*80 PRT
+      CHARACTER*100 STRING(100)
+C
+C        INITIALIZE AND SET DEFAULTS
+      SIZKEY=1
+      SIZE=6
+      DN=255
+      MODU=0
+      MODE=1
+      IBACK=0
+      NTEXT=0
+
+C          OPEN INPUT DATA SET
+      CALL XVUNIT(IUNIT,'INP',1,STAT,' ')
+      CALL XVOPEN(IUNIT,STAT,'OPEN_ACT','SA','IO_ACT','SA',' ')
+C
+C        GET SIZE INFORMATION AND CHECK
+      CALL XVGET(IUNIT,STAT,'PIX_SIZE',NBPP,' ')
+      IF(NBPP .NE. 1) CALL MYABORT(' TEXTAD accepts byte data only')
+      CALL XVSIZE(SLO,SSO,NLO,NSO,NLI,NSI)
+      IF(SLO+NLO-1 .GT. NLI) CALL MYABORT(
+     +			' NUMBER OF LINES REQUESTED EXCEEDS INPUT SIZE')
+      IF(SSO+NSO-1 .GT. NSI) CALL MYABORT(
+     +		      ' NUMBER OF SAMPLES REQUESTED EXCEEDS INPUT SIZE')
+      IF(NSO.GT.20000) CALL MYABORT(
+     +			       ' NUMBER OF SAMPLES EXCEEDS BUFFER SIZE')
+C
+C        OPEN OUTPUT DATA SET
+      CALL XVUNIT(OUNIT,'OUT',1,STAT,' ')
+      CALL XVOPEN(OUNIT,STAT,'OPEN_ACT','SA','IO_ACT','SA','OP','WRITE',
+     +		  'U_NL',NLO,'U_NS',NSO,' ')
+C
+C        COPY INPUT AREA TO OUTPUT
+      ELO=SLO+NLO-1
+      DO LINE=SLO,ELO
+        CALL XVREAD(IUNIT,LBUF,STAT,'LINE',LINE,'SAMP',SSO,
+     +		    'NSAMPS',NSO,' ')
+        CALL XVWRIT(OUNIT,LBUF,STAT,'NSAMPS',NSO,' ')
+      ENDDO
+C
+C        RE-OPEN OUTPUT FOR UPDATE AND WITH HALFWORD BUFFER
+      CALL XVCLOSE(OUNIT,STAT,' ')
+      CALL XVOPEN(OUNIT,STAT,'OP','UPDATE','U_FORMAT','HALF',
+     +		  'OPEN_ACT','SA','IO_ACT','SA',' ')
+C
+C        PROCESS PARAMETERS
+C     NOTE ... PARAMS ARE RELATIVE TO INPUT IMAGE
+C
+C        'LARGE'
+      IF(XVPTST('LARGE')) THEN
+         SIZE=12
+         SIZKEY=2
+      END IF
+C        'WHITE'
+      IF(XVPTST('WHITE')) THEN
+         MODE=1
+         DN=255
+      END IF
+C        'BLACK'
+      IF(XVPTST('BLACK')) THEN
+         MODE=1
+         DN=0
+      END IF
+C        'ADD'
+      CALL XVPARM('ADD',IPARM,ICOUNT,IDEF,1)
+      IF(ICOUNT.EQ.1) THEN
+         MODE=2
+         DN=IPARM(1)
+      END IF
+C        'BACKGROUND'
+      CALL XVPARM('BACKGRND',IPARM,ICOUNT,IDEF,1)
+      IF(ICOUNT.EQ.1) THEN
+         IBACK=1
+         BACKDN=IPARM(1)
+      END IF
+C        'MODULATE'
+      IF(XVPTST('MODULATE')) MODU=1
+
+C        'TEXT' AND 'STRING'
+      CALL XVPARM('TEXT',IPARM,ICOUNT,IDEF,200)
+      IF(ICOUNT.NE.0) THEN
+         NTEXT=ICOUNT/2
+         IF(2*NTEXT.NE.ICOUNT) CALL MYABORT(
+     +				  ' INVALID COUNT FOR PARAMETER "TEXT"')
+C           PUT LINE/SAMP COORDINATES IN TERMS OF OUTPUT IMAGE
+         DO I=1,NTEXT
+            SL(I)=IPARM(2*(I-1)+1)-SLO+1
+            SS(I)=IPARM(2*(I-1)+2)-SSO+1
+         END DO
+      END IF
+      CALL XVPARM('STRING',STRING,ICOUNT,IDEF,100)
+      IF(ICOUNT.NE.NTEXT) CALL MYABORT(
+     +			' INCONSISTENT TEXT/STRING COUNTS')
+C        GET LENGTH OF STRING
+      DO 300 I=1,NTEXT
+         CALL ADD0(STRING(I),100,NCHAR)
+	 IF(NCHAR.EQ.0)  GO TO 300
+C           CHECK THAT TEXT FITS INSIDE IMAGE AREA
+         NLSTR=7*SIZKEY
+         IF(IBACK.EQ.1) NLSTR=9*SIZKEY
+         IF(SL(I).LT.1 .OR. SL(I)+NLSTR-1.GT.NLO) THEN 
+	    WRITE (PRT,100) SL(I)
+  100	    FORMAT(' ***STRING TOO TALL TO BE LOCATED AT LINE',I5)
+	    CALL MYABORT(PRT)
+         END IF
+         NSSTR=NCHAR*SIZE
+         IF(IBACK.EQ.1) NSSTR=NSSTR+2*SIZKEY
+         IF(SS(I).LT.1 .OR. SS(I)+NSSTR-1.GT.NSO) THEN
+	    WRITE (PRT,150) SS(I)
+  150	    FORMAT(' ***STRING TOO WIDE TO BE LOCATED AT SAMPLE',I5)
+	    CALL MYABORT(PRT)
+         END IF
+C           IMPLEMENT MODULATE IF SPECIFIED
+         IF(MODU .NE. 0) THEN
+            NUM=0
+            ITOT=0
+            REC=SL(I)
+            IF(IBACK.EQ.1) REC=SL(I)+SIZKEY
+            SAMP=SS(I)
+            IF(IBACK.EQ.1) SAMP=SS(I)+SIZKEY
+            ESAMP=SAMP+NCHAR*SIZE-1
+            DO IL1=1,7
+               DO IL2=1,SIZKEY
+                  CALL XVREAD(OUNIT,HBUF,STAT,'LINE',REC,' ')
+                  DO IS=SAMP,ESAMP
+                     ITOT=ITOT+HBUF(IS)
+                     NUM=NUM+1
+                  ENDDO
+                  REC=REC+1
+               ENDDO
+            ENDDO
+            AVE=ITOT/NUM
+            DN=255
+            IF(AVE.GT.128)  DN=0
+         END IF
+C
+         REC=SL(I)
+C           SET LINE(S) ABOVE TEXT TO BACKGROUND DN
+         IF(IBACK.EQ.1) THEN
+            DO IL2=1,SIZKEY
+               CALL XVREAD(OUNIT,HBUF,STAT,'LINE',REC,'NSAMPS',NSO,' ')
+               CALL MVE(-6,NSSTR,BACKDN,HBUF(SS(I)),0,1)
+               CALL XVWRIT(OUNIT,HBUF,STAT,'LINE',REC,'NSAMPS',NSO,' ')
+               REC=REC+1
+            END DO
+         END IF            
+C           PROCESS TEXT LINES
+         SSTEXT=SS(I)
+         IF(IBACK.EQ.1) SSTEXT=SS(I)+SIZKEY
+	 CALL MVL(STRING(I),BBUF,NCHAR)
+         DO IL1=1,7
+            CALL TEXT(BBUF,NCHAR,IL1-1,CBUF,SIZE,255)
+            DO IL2=1,SIZKEY
+               CALL XVREAD(OUNIT,HBUF,STAT,'LINE',REC,'NSAMPS',NSO,' ')
+               IF(IBACK.EQ.1) THEN
+                  CALL MVE(-6,NSSTR,BACKDN,HBUF(SS(I)),0,1)
+               END IF
+               CALL DNADD(HBUF,CBUF,SSTEXT,NCHAR,SIZE,MODE,DN)
+               CALL XVWRIT(OUNIT,HBUF,STAT,'LINE',REC,'NSAMPS',NSO,' ')
+               REC=REC+1
+            END DO
+         END DO
+C           SET LINE(S) BELOW TEXT TO BACKGROUND DN
+         IF(IBACK.EQ.1) THEN
+            DO IL2=1,SIZKEY
+               CALL XVREAD(OUNIT,HBUF,STAT,'LINE',REC,'NSAMPS',NSO,' ')
+               CALL MVE(-6,NSSTR,BACKDN,HBUF(SS(I)),0,1)
+               CALL XVWRIT(OUNIT,HBUF,STAT,'LINE',REC,'NSAMPS',NSO,' ')
+               REC=REC+1
+            END DO
+         END IF            
+  300 CONTINUE
+C
+C        'AREA'
+      CALL XVPARM('AREA',IPARM,ICOUNT,IDEF,400)
+      IF(ICOUNT.NE.0) THEN
+         NRECT=ICOUNT/4
+         IF(4*NRECT.NE.ICOUNT) CALL MYABORT(
+     +				  ' INVALID COUNT FOR PARAMETER "AREA"')
+C           PUT COORDINATES IN TERMS OF OUTPUT IMAGE 
+         DO I=1,NRECT
+            SL(I)=IPARM(4*(I-1)+1)-SLO+1
+            SS(I)=IPARM(4*(I-1)+2)-SSO+1
+            EL(I)=IPARM(4*(I-1)+3)-SLO+1
+            ES(I)=IPARM(4*(I-1)+4)-SSO+1
+         END DO
+      END IF
+      DO I=1,NRECT
+         NL=EL(I)-SL(I)+1
+         NS=ES(I)-SS(I)+1
+         IF (SL(I).LT.1.OR.EL(I).GT.NLO) CALL MYABORT(
+     +				' RECTANGLE EXCEEDS IMAGE SIZE (LINES)')
+         IF (SS(I).LT.1.OR.ES(I).GT.NSO) CALL MYABORT(
+     +			      ' RECTANGLE EXCEEDS IMAGE SIZE (SAMPLES)')
+         CALL ITLA(255,CBUF,NS)
+C           DRAW TOP OF RECTANGLE
+         CALL XVREAD(OUNIT,HBUF,STAT,'LINE',SL(I),'NSAMPS',NSO,' ')
+         CALL DNADD(HBUF,CBUF,SS(I),NS,1,MODE,DN)
+         CALL XVWRIT(OUNIT,HBUF,STAT,'LINE',SL(I),'NSAMPS',NSO,' ')
+C           DRAW BOTTOM OF RECTANGLE
+         CALL XVREAD(OUNIT,HBUF,STAT,'LINE',EL(I),'NSAMPS',NSO,' ')
+         CALL DNADD(HBUF,CBUF,SS(I),NS,1,MODE,DN)
+         CALL XVWRIT(OUNIT,HBUF,STAT,'LINE',EL(I),'NSAMPS',NSO,' ')
+C           DRAW SIDES OF RECTANGLE
+         CALL ITLA(0,CBUF(2),NS-2)
+         REC=SL(I)+1
+         NL=NL-2
+         DO IL=1,NL
+            CALL XVREAD(OUNIT,HBUF,STAT,'LINE',REC,'NSAMPS',NSO,' ')
+            CALL DNADD(HBUF,CBUF,SS(I),NS,1,MODE,DN)
+            CALL XVWRIT(OUNIT,HBUF,STAT,'LINE',REC,'NSAMPS',NSO,' ')
+            REC=REC+1
+         ENDDO
+      END DO
+C
+C        CLOSE DATA SETS
+      CALL XVCLOSE(IUNIT,STAT,' ')
+      CALL XVCLOSE(OUNIT,STAT,' ')
+C
+      RETURN
+      END
+C******************************************************************************
+      SUBROUTINE DNADD(HBUF,CBUF,SS,NCHAR,SIZE,MODE,DN)
+C
+      IMPLICIT INTEGER (A-Z)
+      INTEGER*2 HBUF(10000)
+      LOGICAL*1 CBUF(4000)
+C
+      N=SIZE*NCHAR
+      LP=SS-1
+C
+      IF (MODE .EQ. 1) THEN				!  SET LETTERS TO DN
+	  DO I=1,N
+	      IF (IV(CBUF(I)).GT.0) HBUF(LP+I)=DN
+	  END DO
+      ELSE						!  ADD DN TO LETTERS
+	  DO I=1,N
+	      IF (IV(CBUF(I)).GT.0) HBUF(LP+I)=HBUF(LP+I)+DN
+	  END DO
+      END IF
+      RETURN
+      END
+
+C*************************************************************************
+        subroutine MYABORT(msg)
+        character*(*) msg
+        call xvmessage(msg, ' ')
+        call abend
+        return
+        end
+

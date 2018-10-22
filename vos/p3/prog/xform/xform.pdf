@@ -1,0 +1,242 @@
+process help=*
+PARM INP       TYPE=STRING     COUNT=(1:30)
+PARM OUT       TYPE=STRING     COUNT=(1:30)
+PARM SIZE      TYPE=INTEGER    COUNT=4                DEFAULT=(1,1,0,0)
+PARM SL	       TYPE=INTEGER			      DEFAULT=1
+PARM SS	       TYPE=INTEGER			      DEFAULT=1
+PARM NL	       TYPE=INTEGER			      DEFAULT=0
+PARM NS	       TYPE=INTEGER			      DEFAULT=0
+PARM MATRIX    TYPE=REAL       COUNT=(0,1:200)        DEFAULT=--
+PARM FORMAT    TYPE=KEYWORD    COUNT=(0:1)  VALID=(BYTE,HALF,FULL,REAL) +
+		DEFAULT=--
+PARM MSS       TYPE=INTEGER    COUNT=(0:1)  VALID=(0:32)     DEFAULT=--
+PARM USEBANDS  TYPE=INTEGER    COUNT=(0:31) VALID=(1:32)     DEFAULT=--
+PARM PRESET    TYPE=KEYWORD    COUNT=(0:1)  VALID="PRESET"   DEFAULT=--
+PARM GAIN      TYPE=REAL       COUNT=(0:32)           DEFAULT=--
+PARM OFFSET    TYPE=REAL       COUNT=(0:32)           DEFAULT=--
+PARM AREA      TYPE=INTEGER    COUNT=(0:200)          DEFAULT=--
+PARM INC       TYPE=INTEGER    			      DEFAULT=1
+PARM LINC      TYPE=INTEGER    COUNT=(0,1)            DEFAULT=--
+PARM SINC      TYPE=INTEGER    COUNT=(0,1)	      DEFAULT=--
+PARM PERCENT   TYPE=REAL                              DEFAULT=1.0
+PARM LPERCENT  TYPE=REAL       COUNT=(0,1)            DEFAULT=--
+PARM HPERCENT  TYPE=REAL       COUNT=(0,1)            DEFAULT=--
+PARM SPREAD    TYPE=REAL       COUNT=(0,1)            DEFAULT=--
+PARM FIRM      TYPE=KEYWORD    COUNT=(0:1)  VALID="FIRM"   DEFAULT=--
+PARM CENTER    TYPE=REAL       COUNT=(0,1)            DEFAULT=--
+PARM EXCLUDE   TYPE=REAL       COUNT=(0,1)            DEFAULT=--
+PARM HISTSIZE  TYPE=INTEGER			      DEFAULT=50001
+PARM RANGE     TYPE=REAL       COUNT=(0,2)	DEFAULT=(-25000.0,25000.0)
+PARM PARMS     TYPE=STRING     COUNT=(0,1)	      DEFAULT=--
+END-PROC
+.TITLE
+ XFORM
+.HELP
+ "XFORM" will perform a linear transformation on the input data.
+ The transformation is specified  by a matrix input as a 
+ parameter. If desired, XFORM will scale the output to a user
+ specified range, which defaults to the full range of the data 
+ type. (XFORM will now accept a parameter dataset as input)
+
+ EXECUTION:
+
+ XFORM (INP1,INP2,...) (OUT1,OUT2,...) SIZE PARAMS          or
+ XFORM  INP            (OUT1,OUT2,...) SIZE PARAMS          or
+ XFORM (INP1,INP2,...)  OUT            SIZE PARAMS          or
+ XFORM  INP             OUT            SIZE PARAMS          or
+
+ OPERATION:
+
+ Let each corresponding pixel from the input data sets be
+ represented by a vector x[T] = (x1,x2,...xm)[T], where [T}
+ denotes Transpose. Let A be the parameter matrix (n * m).
+ Then XFORM computes the product:
+
+ AX = V
+
+ A gain and offset are then applied to each component before
+ it is written to the output data set:
+
+ V'(i) = P(i)  + Q(i).V(i)
+
+ Auto-scale mode is the default condition if gains and offsets
+ are not specified using preset or gain/offset.
+ In auto-scale mode, the gains and offsets for each band are
+ calculated by fitting the output histogram to user - specified
+ parameters. This calculation requires a separate pass, which 
+ can double the computation time.
+
+ RESTRICTIONS:
+
+ Currently, the program limits NI and NO to 32 because the relevant
+ arrays are dimensioned to that size.
+
+.PAGE
+ XFORM WRITTEN BY:  J.D.Addington,  Jan. 1977
+
+ XFORM CONVERTED TO VAX BY:  F.F.Moss, Jan. 1984
+
+ XFORM WRITTEN BY:  L.W.Kamp,  Sept. 1984
+
+ CONVERTED TO VICAR2 BY:  J.H.Reimer, July 1985
+
+ REWRITTEN IGNORING AP COMPATIBILITY: Ron Alley, June 1986
+
+ CURRENT COGNIZANT PROGRAMMER:  Ron Alley
+.LEVEL1 
+.VARIABLE INP
+ Input file name(s)
+.VARIABLE OUT
+ Output file name(s)
+.VARIABLE SIZE
+ Standard VICAR size field
+.VARIABLE MATRIX
+ The input matrix
+.VARIABLE FORMAT
+ Output data format.
+ Valid: BYTE, HALF, FULL, REAL.
+.VARIABLE MSS
+ Number of bands in MSS input
+.VARIABLE USEBANDS
+ Use only these bands of the
+ multichannel input
+.VARIABLE PRESET
+ Non auto-scale mode
+.VARIABLE GAIN
+ Specify the gains for all
+ outputs
+.VARIABLE OFFSET
+ Specify the offsets for all
+ outputs
+.VARIABLE AREA
+ (PARM FOR AUTO-SCALE MODE)
+ Specify the certain area
+ to be sampled
+.VARIABLE INC
+ (PARM FOR AUTO-SCALE MODE)
+ Line and sample increments
+.VARIABLE LINC
+ (PARM FOR AUTO-SCALE MODE)
+ Line increments
+.VARIABLE SINC
+ (PARM FOR AUTO-SCALE MODE)
+ Sample increments
+.VARIABLE PERCENT
+ (PARM FOR AUTO-SCALE MODE)
+ Percent saturation in
+ output histogram
+.VARIABLE LPERCENT
+ (PARM FOR AUTO-SCALE MODE)
+ Percent saturation at the
+ lower end in output histogram
+.VARIABLE HPERCENT
+ (PARM FOR AUTO-SCALE MODE)
+ Percent saturation at the
+ higher end in output histogram
+.VARIABLE SPREAD
+ (PARM FOR AUTO-SCALE MODE)
+ Specify the spread in output
+ histogram
+.VARIABLE FIRM
+ Causes output to be firmly
+ clipped to range specified
+ by SPREAD and CENTER
+.VARIABLE CENTER
+ (PARM FOR AUTO-SCALE MODE)
+ Specify the center in output
+ histogram
+.VARIABLE EXCLUDE
+ (PARM FOR AUTO-SCALE MODE)
+ Ignore this input DN
+.VARIABLE HISTSIZE
+(PARM FOR AUTO-SCALE MODE)
+Number of histogram bins per
+output band
+.VARIABLE RANGE
+(PARM FOR AUTO-SCALE MODE)
+Value of first and last
+histogram bins.
+.LEVEL2
+.VARIABLE INP
+ Input file names (can be byte, halfword, I*4, or R*4)
+.VARIABLE OUT
+ Output file names (can be byte, halfword, I*4, or R*4)
+.VARIABLE SIZE
+ The standard VICAR size field: starting line, starting sample,
+ number of lines, and number of samples
+ (if MSS is specified, the size field refers to one band, not to the
+ entire image.)
+.VARIABLE MATRIX
+ MATRIX = (M11,M12...)   The matrix values are real numbers and are 
+ entered in row order. The column number is the number of input data
+ sets or bands, the row number is the number of output data sets or bands
+.VARIABLE FORMAT
+ Valid keyword values: BYTE, HALF, FULL, REAL.
+ This specifies the output data format. 
+.VARIABLE MSS
+ MSS=NI            Denotes that the input data set is in MSS format with
+ NI interleaved inputs.  limit: NI <= 32
+.VARIABLE USEBANDS
+ If the input is a single file of multichannel data, the USEBANDS parameter
+ is used to specify which bands are to be used as input, and the order that
+ must be used to be consistent with the MATRIX parameter.  The default is to
+ use all bands, in ascending order.
+.VARIABLE PRESET
+ Offset  = 0 and gain = 1 for all output bands.
+.VARIABLE GAIN
+    GAIN=Q                   For all output bands, 
+ or GAIN=(Q1,Q2,Q3,...)      The nth output band is scaled by  gain Qn. 
+.VARIABLE OFFSET
+    OFFSET=P                 For all output bands,
+ or OFFSET=(P1,P2,P3,...)    The nth output band is scaled by offset Pn.
+.VARIABLE AREA
+ AREA=(SL,SS,NL,NS)     Indicates area to be sampled for auto-scaling.
+.VARIABLE INC
+ INC=N		For auto-scaling, every Nth sample of every Nth line is used.
+.VARIABLE LINC
+ LINC=N		For auto-scaling, every Nth line is used.
+.VARIABLE SINC
+ SINC=N		For auto-scaling, every Nth sample is used.
+.VARIABLE PERCENT
+ PERC=P       P percent saturation is to be allowed in output histograms,
+ one-half at each end. (default=1)
+.VARIABLE LPERCENT
+ LPER=L      L percent saturation is to be allowed in output histograms
+ at the low end. (default=0.5)
+.VARIABLE HPERCENT
+ HPER=H      H percent saturation is to be allowed in output histograms
+ at the high end. (default=0.5)
+.VARIABLE SPREAD
+ SPREAD=S      Output histograms are to have a spread of s. (default=full
+ range of data type)  See also parameter FIRM.
+.VARIABLE FIRM
+ Specify FIRM to cause the output to be clipped so that SPREAD and CENTER
+ apply firmly.  Otherwise (the default) SPREAD and CENTER apply approximately.
+.VARIABLE CENTER
+ CENTER=C      Output histogram is to be centered about c. (default=SPREAD/2
+ for byte data, =0 otherwise.)
+.VARIABLE EXCLUDE
+ EXCLUDE=E     This keyword instructs the program to ignore input pixels of 
+ value e when determining saturation points.  The algorithm used simply 
+ zeros the histogram bin which results from each input DN level e.
+ However, other combinations of input DNs will in general also contribute
+ to this bin and will be erroneously ignored. Therefore, this keyword should 
+ only be used if a large contribution from spurious value (e.g., zero)
+ is expected.
+.VARIABLE HISTSIZE
+In the auto-scale mode, a histogram is first formed to determine the range
+of the output data without rescaling. This parameter allows the user to 
+specify the number of bins used to form the histogram of each output band.
+While this feature is rarely needed for byte data, the user may want to
+adjust this (and the related RANGE parameter) for other data types, if the
+unscaled output range is uncertain.
+.VARIABLE RANGE
+In the auto-scale mode, a histogram is first formed to determine the range
+of the output data without rescaling. This parameter allows the user to 
+specify the range of the bins used to form the histogram of each output band.
+While this feature is rarely needed for byte data, the user may want to
+adjust this (and the related HISTSIZE parameter) for other data types. The
+auto-scaling algorithm works best when the histogram bins span only the
+actual range of the data. Therefore, if it is known that the transformation
+will produce values only within a certain range, that range should be 
+specified here. 

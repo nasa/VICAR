@@ -1,0 +1,12 @@
+#define SUBROUTINE  	mp_labels
+
+#define MODULE_LIST 	mplabelread.c mplabelwrite.c \
+			mpbuf2mpo.c
+
+#define P1_SUBLIB
+
+#define USES_ANSI_C
+
+#define LIB_LOCAL	/* for development, remove on delivery */
+#define DEBUG		/* for development, remove on delivery */
+

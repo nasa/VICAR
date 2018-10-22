@@ -1,0 +1,24 @@
+PROCESS HELP=*
+ PARM INPUT	TYPE=(STRING,72)
+ PARM OUT	TYPE=(STRING,72)
+END-PROC
+.TITLE
+VICAR Program ASCII2GR
+.HELP
+PURPOSE
+ASCII2GR is a program that converts a 3 column ASCII file into an
+IBIS 3-D Graphics file.
+.LEVEL1
+.VARIABLE INPUT
+The input ASCII file
+.VARIABLE OUT
+The output graphics file
+.LEVEL2
+.VARIABLE INPUT
+The input ASCII file.  The file should consist of three columns of
+numbers.  Additional columns are ignored. Rows that do not have
+three columns of numbers, or have text, produce a warning message and
+are then ignored.
+.VARIABLE OUT
+The output IBIS 3-D graphics file.
+.END

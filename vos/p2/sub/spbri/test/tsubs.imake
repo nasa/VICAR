@@ -1,0 +1,18 @@
+#define PROGRAM   tsubs
+
+#define MODULE_LIST tsubs.c
+
+#define MAIN_LANG_C
+#define R2LIB
+
+#define USES_ANSI_C
+
+#define LIB_SPICE
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_FORTRAN
+#define LIB_P2SUB
+#define LIB_NETWORK
+
+#define DEBUG		/* for local testing */
+#define LIB_LOCAL	/* for local testing */

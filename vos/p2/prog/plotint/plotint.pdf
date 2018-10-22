@@ -1,0 +1,401 @@
+PROCESS      HELP=*
+PARM INP        TYPE=(STRING)
+PARM PLOTOUT    TYPE=(STRING,60)           DEFAULT="plotint"
+PARM PLOTFMT    TYPE=STRING     COUNT=(0:1) VALID=(GNUPLOT,EPS) DEFAULT=GNUPLOT
+PARM XCOL       TYPE=INTEGER    COUNT=1
+PARM YCOL       TYPE=INTEGER    COUNT=(1:20)
+PARM CONTROL    TYPE=INTEGER    COUNT=1     DEFAULT=0
+PARM XLEN       TYPE=REAL       COUNT=1     DEFAULT=9.0
+PARM YLEN       TYPE=REAL       COUNT=1     DEFAULT=7.0
+PARM YCOLSTR    TYPE=(STRING,20) COUNT=(0:20) DEFAULT=--
+PARM XLABEL     TYPE=(STRING,100) COUNT=1    DEFAULT=""
+PARM YLABEL     TYPE=(STRING,60) COUNT=1    DEFAULT=""
+PARM TITLE      TYPE=(STRING,100) COUNT=1    DEFAULT=""
+PARM LABELSIZ   TYPE=INTEGER    COUNT=1   DEFAULT=10
+PARM FREQ       TYPE=INTEGER    COUNT=(0:20)  DEFAULT=(1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1)
+PARM SYMTYPE    TYPE=INTEGER    COUNT=(0:20) DEFAULT=1  VALID=1:3
+PARM XRANGE     TYPE=REAL       COUNT=(0:2) DEFAULT=(0.0,5.0)
+PARM YRANGE     TYPE=REAL       COUNT=(0:2) DEFAULT=(0.0,5.0)
+PARM COMMENT1   TYPE=(STRING,60) DEFAULT=""
+PARM COMMENT2   TYPE=(STRING,60) DEFAULT=""
+PARM COMMENT3   TYPE=(STRING,60) DEFAULT=""
+
+END-PROC
+.TITLE
+VICAR/IBIS Program PLOTINT
+.HELP
+PURPOSE
+
+     PLOTINT plots data contained in columns of an IBIS interface file
+    using the gnuplot plotting package.
+
+.PAGE
+OPERATION
+    
+    PLOTINT allows columns of an IBIS interface to be plotted. Either lines
+or symbols may be plotted, along with annotations using the gnuplot plotting
+package. Plots may be displayed on the desktop or as an encapsulated
+postscript file.
+
+
+PARAMETERS
+
+    INPUT is the name of the ibis interface (tabular) File containing the
+    columns to be plotted.
+
+    PLOTOUT is the name of the output plot 
+
+    The column number of independent data is XCOL and the column(s) of dependent
+    data are in YCOL. Up to 20 dependent columns are allowed.    
+
+    YCOLSTR are the names of the dependent columns. Up to 20.
+
+    The parameter CONTROL points to a column used to identify a specific line in the
+    IBIS file. If the number in the column is only 1 then all columns are the same
+    line. 1's, 2's, 3's etc. refer to different lines.  Must have the
+    same entry for all of the rows that are to be on one plot.
+
+    XLEN and YLEN are the axes lengths in inches.
+
+    XLABEL and YLABEL are the labels for their respective axes.
+
+    TITLE is the Title to be placed on the graph.
+
+    LABELSIZ is the font size for the text on the plot in points. Default=10
+  
+    FREQ specifies the frequency of the points to be plotted. If 2 then
+    every other point is plotted. You do not have to enter a freq value
+    for each line. If you have 3 lines and enter freq=2, then it is understood
+    that the other two lines will have a freq of 1. 
+    Default is to plot each point (1). 
+
+    The SYMTYPE parameter specifies what type of plotting is done for 
+    each dependent variable:  
+    1 for symbols only, 
+    2 for both symbols and points,
+    3 for lines only.  
+
+    XRANGE and YRANGE are the max and min values to plot on their respective
+    axes.
+    
+    Up to 3 comments (COMMENT1,COMMENT2,COMMENT3) can be placed on graph. They
+    will be on right side of graph.
+.PAGE
+PLOT OUTPUTS
+
+    The other type of output come from the PLOTOUT and PLOTFMT parameters.
+PLOTOUT allows the user to display data from 5 areas on the CCD on an x,y
+plot using the gnuplot package after exiting the program. PLOT produces
+a file of gnuplot commands contained in a file having a .gpi file extension.
+Another file with an .asc extension is create containing columns of data
+that are displayed by the gpi file.
+
+   The PLOTFMT parameter allows the user to generate a postscript file of
+the output for use in documentation by choosing PLOTFMT=EPS. The default
+is to generate a gnuplot interactive display.
+
+.PAGE
+
+  PLOT NAMING CONVENTIONS
+
+  The user should enter only the parent file name without an extension
+  for the PLOTOUT parameter.  The program will supply the extensions.
+
+  For example, if the user has an input file of indata.dat and  PLOTOUT=outplot
+  then for the interactive plot the following files are produced:
+
+     outplot.gpi
+     outplot.asc
+
+  The first file is the gnuplot instruction file and the second is the
+  data file used by gnuplot. 
+
+  If the user wanted an encapsulate postscript file with PLOTFMT=eps
+  then the following files are produced:
+
+     outplot.eps.gpi
+     outplot.asc
+
+  Remember entering the following command gives the eps file, outplot.eps
+
+  ush gnuplot outplot.eps.gpi
+
+  If you move the gpi file to another directory, you must also move the
+  input data file, indata.dat.asc to the same directory.
+
+  Note that the gpi file produced by this program has the name of the
+  input file embedded in the plot command inside the gpi file, e.g..
+
+  plot  'outplot.asc' u  1: 9 t .......
+
+
+
+.PAGE
+USING GNUPLOT
+
+
+  INTERACTIVE:
+
+    This program uses the gnuplot package for its plots. Gnuplot is a
+  separate package from Vicar and is not actually invoked inside this
+  program.  Instead this program creates a template of gnuplot commands
+  which are written out as a separate file. The plot is then viewed after
+  exiting this program. The file has the extension .gpi. You view
+  the plot by issuing the following command in the vicar shell.
+
+  ush gnuplot output.gpi
+
+  or external to vicar as
+
+  gnuplot output.gpi
+
+    After viewing the data, you close the plot by clicking the mouse anywhere
+  except on the top bar of the plot. Clicking on the top bar allows you
+  to move the plot to any convenient place on the terminal screen.  (While
+  the plot is displayed you cannot enter any commands to the vicar shell).
+
+  The data to be plotted by gnuplot is read from a separate file, created
+  by this program, which contains columns of data in ascii text.
+  File naming conventions are discussed in the OUTPUT section, but in this
+  case that file extension will be .asc.
+
+  It is possible to keep the plot alive for comparison purposes by issuing
+  the following command.
+
+  ush gnuplot --persist output.gpi
+
+  (You will be able to enter commamds to the vicar shell after clicking on
+  the mouse on the plot).
+
+  Note: This program creates 5 output plots per run. You bring up each plot
+  panel sequentially. You close each plot by clicking the mouse on any
+  portion of the plot.
+
+
+  HARDCOPY:
+
+  This program also allows you to create a hardcopy encapsulated postscript
+  plot suitable for publications. This file can be viewed with ghostscript
+  or gimp. The encapsulated postscript file is not created by this program
+  by by the gnuplot program from a gpi file made especially for this purpose.
+  this file has the extension, eps.gpi. You create the hardcopy plot via
+  the following command
+
+  ush gnuplot output.eps.gpi
+
+  This creates the eps file output.eps. You can view this file by
+
+  ush gimp output.eps
+
+.PAGE
+    DEVELOPER Note:
+
+    This program used to link to the XRT plot library -lxrt. Calls to
+  that library were mitigated through a Calcomp conversion library,
+  xrtps located in the p2 subroutine library. With the conversion to
+  gnuplot, neither of these packages are used.
+
+.PAGE
+EXAMPLES 
+
+
+     PLOTINT INP=TRANS.INT XCOL=1 YCOL=(3,4) CONTROL=6  +
+	YCOLSTR = ("AVERAGE POPULATION X1000","AIRLINE FLIGHTS") +
+	XLABEL = "DISTANCE BETWEEN CITIES"  YLABEL = "THOUSANDS"  +
+	TITLE = "GRAVITY TRANSPORTATION MODELS"   +
+        XLEN=9.0 YLEN=7.5  SYMTYP=(1,1) 
+
+     PLOTINT INP=FUNCTION.INT XCOL=2 YCOL=3 CONTROL=1 +
+	XLABEL = "X-AXIS"  YLABEL = "Y-AXIS"  TITLE = "HYPERBOLA" +
+	XLEN=6.0 YLEN=3.0 FREQ=4 SYMTYPE=2  +
+	XRANGE=(-7.5,7.5) YRANGE=(0,100)  
+
+    INP specifies the input interface file that contains the data to be 
+plotted.  The column number of independent data is XCOL and the column(s)
+of dependent data are in YCOL.  The control column (CONTROL) must have the
+same entry for all of the rows that are to be on one plot.  The axis lengths
+XLEN and YLEN are in inches.  
+
+
+.PAGE
+RESTRICTIONS
+
+     The  control column must not specify more than 400 sets 
+     (each set plotted on a different page).  Maximum number 
+     of columns is 20.  All plotted texts must be shorter
+     than 60 characters.
+
+.PAGE
+WRITTEN BY:                     B. Gokhman    25AUG1981
+COGNIZANT PROGRAMMER:           R. Bambery
+REVISIONS:
+  1985-11    Frank Evans for F77 CALCOMP, general modernization
+  1987-09    EJB for multiple plots as per control column on specified output devices
+  1995-12    BAM mstp porting
+  1997-01    PXA converted calcomp calls to xrtps calls and rewrote plot procedures
+  2006-08    LWK fixed bug (Linux only) when YCOLSTR defaulted;
+                 added NODISP and PLOTOUT parameters to support
+                 output to file instead of display (no code needed
+                 for NODISP as it is parsed by xrtps routines)
+  2011-06-20 R. Bambery - Modified to use freeware gnuplot plotting package
+  2011-09-20 R. Bambery - Fixed buf that overwrote clen in subroutine FINDCO
+  2011-09-21 R. Bambery - Set yrange up to f9.2 from f7.2 and xrange from f9.2 from f7.2
+  2012-07-03 R. Bambery - renamed to plotint2 for delivery to MIPL
+                which still uses XRT/Graph package, removed debug
+                statements, Removed <tab> in front of continuation
+                lines to make backward compatible with
+                32-bit Linux gfortran 4.2.1, otherwise
+                compatible 64-bit Linux gfortran 4.6.3
+  2012-10-21 R. Bambery - renamed back to plotint. in agreement
+                with Lucas Kamp of mipl. The XRT graph package
+                is to be removed from mipl. XRT was never used by
+                cartlab.
+  2012-12-09 R. Bambery - removed bad statement, and properly
+                initialized some variables
+  2013-02-12 R. Bambery - fixed PLOTFMT logic, documentation, test
+  2013-07-10 R. Bambery - change .asc filename to plotout
+                fix format when large plots created. test script
+  2013-07-12 R. Bambery - Create ascii file for .gpi file.
+                Previously used ibis2asc to create the data for gnuplot
+  2013-08-13 R. Bambery - Adjusted eps format to more readable fonts
+                Remove vestiges of debug statements
+  2013-09-05 R. Bambery - Fixed code that did not set xrange properly
+                when writing out eps gpi files. Fixed freq array so
+                values will never be 0. Fixed logic for plot ranges
+                that are defaulted vs. inputs
+  2013-09-06 R. Bambery - Added COMMENT1, COMMENT2, COMMENT3 parameters
+  2015-08-19 W. Bunch - Fixed end of line encoding so linux and sun
+                will yield same output.
+      
+.LEVEL1
+.VARIABLE INP
+Input interface file
+.vari plotout
+Name of output files 
+.VARIABLE XCOL
+Column of independent variable
+.VARIABLE YCOL
+Columns of dependent variables
+.VARIABLE CONTROL
+Control column
+.VARIABLE XLEN
+Length of X-axis in inches
+.VARIABLE YLEN
+Length of Y-axis in inches
+.VARIABLE YCOLSTR
+Names of dependent variables
+.VARIABLE XLABEL
+String for X-axis
+.VARIABLE YLABEL
+String for Y-axis
+.VARIABLE TITLE
+String of text of the title
+.VARIABLE FREQ
+Frequency of plotted symbol
+.VARIABLE SYMTYPE
+Type of data line:
+  (lines,symbols and lines)
+.VARIABLE XRANGE
+Range for X-variable
+.VARIABLE YRANGE
+Range for Y-variable
+.VARIABLE COMMENT1
+Up to 60 chars, on right
+.VARIABLE COMMENT2
+Up to 60 chars, on right
+.VARIABLE COMMENT3
+Up to 60 chars, on right
+
+.LEVEL2
+.VARIABLE INP
+     INP=int             Input    IBIS    interface    file, 
+                         containing data . Each 
+                         variable contained in a column.  If 
+                         multiple  sets  are to  be  plotted 
+                         from  the  same file they  must  be 
+                         designated  by the identical  entry 
+                         in the control column.
+.vari plotout
+    The name of the output .gpi and .asc files
+
+.VARIABLE XCOL
+     XCOL=I              Integer  I  specifies  the   column 
+                         containing independent variable.
+.VARIABLE YCOL
+     YCOL=(J1,...,JN)    Integer  J1,...,JN specify  columns 
+                         containing   dependent   variables.  
+                         The   maximum  number  of   columns 
+                         allowed is N=20.
+.VARIABLE CONTROL
+     CONTROL=K           Integer  K  specifies  the  control 
+                         column.   All data to be plotted on 
+                         a  page  must have the  same  entry 
+                         (number  or alpha) in  the  control 
+                         column.   A  change of entry in the 
+                         control  column will  indicate  the 
+                         beginning  of  a  new  dataset  and 
+                         cause initiation of a new plot.
+
+.VARIABLE XLEN
+     XLEN=X              X  specifies  the length of the 
+			 X-axis in inches.   
+.VARIABLE YLEN
+     YLEN=Y              Y  specifies  the length of the  
+			 Y-axis in inches.   
+.VARIABLE YCOLSTR
+     YCOLSTR=("STRING1","STRING2",...)
+                         Strings "STRING1",...,"STRINGN" are 
+                         optional.   They will be written on 
+                         the   plot  next  to   the   symbol 
+                         designating    the    corresponding 
+                         variable.
+.VARIABLE XLABEL
+     XLABEL="STRING"      "STRING"  will be written along the 
+                         X-axis (up to 60 characters).
+.VARIABLE YLABEL
+     YLABEL="STRING"      "STRING" will be written along  the 
+                         Y-axis (up to 60 characters).
+.VARIABLE TITLE
+     TITLE="STRING"       String of charaters "STRING" (up to 
+                         60  characters)  will  be   written 
+                         under the plot.
+.VARIABLE LABELSIZ
+     LABELSIZ=H            Real H  specifies the size  of the
+                         title lettering in inches. 
+			 Default: Letters are 0.15 inch tall.
+.VARIABLE FREQ
+     FREQ=M              Integer  M specifies  frequency  of 
+                         plotted  symbol (datapoint/symbol).  
+                         M=1 - symbol for every data  point, 
+                         M=2  symbol  for every second  data 
+                         point, etc. Default:  M=1.
+.VARIABLE SYMTYPE
+     SYMTYPE=(M1,...,MN) Allows  to select the type of  data 
+                         line for each dependent variable.
+
+                         M=1   - only   lines  plotted   for 
+                         corresponding variable.
+
+                         M=2   - both  lines   and   symbols 
+                         plotted for corresponding variable.
+
+                         M=3   - lines only
+			 Default is M=1
+.VARIABLE XRANGE
+     XRANGE=(X1,X2)      The  lower and upper limits of  the 
+                         X-axis   values .      Default:  
+                         automatic scaling of X-axis.
+
+.VARIABLE YRANGE
+     YRANGE=(Y1,Y2)      The  lower and upper limits of  the 
+                         Y-axis values. 
+                         Default:   automatic scaling of the 
+                         Y-axis.
+
+.VARIABLE COMMENT1
+Up to 60 chars, on right
+.VARIABLE COMMENT2
+Up to 60 chars, on right
+.VARIABLE COMMENT3
+Up to 60 chars, on right
+END                         

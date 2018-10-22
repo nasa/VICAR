@@ -1,0 +1,7 @@
+#define SUBROUTINE mpi_fake
+
+#define MODULE_LIST mpi_fake.c
+
+#define P2_SUBLIB
+#define USES_ANSI_C
+

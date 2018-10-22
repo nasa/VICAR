@@ -1,0 +1,90 @@
+Procedure HELP=*
+REFGBL $VIDSFLG
+parm range integer count=2 default=(0,4095)
+parm input string 
+parm scale keyword valid=(NORMAL,NONE,FULL,NOSCALE) COUNT=0:1 default=--
+body
+local (s,n,f,Return) string
+local (i,t,x,r1,r2) integer
+IF ($VIDSFLG <> "READY")
+	WRITE "---VIDS MUST BE RUNNING FOR THIS PROC TO WORK"
+	GOTO ERR
+END-IF
+let r1=range(1)
+let r2=range(2)
+let s="FIT"
+let Return=""
+if ($count(scale) = 1) let s ="NONE"
+flag-add nomessage
+WRITE " "
+WRITE "---SET YOUR STRETCH BEFORE ENTERING THIS PROC (EG, JSTRETCH-LINEAR 0 40)"
+WRITE "---FOR HALFWORD DATA, DON'T FORGET RANGE PARAMETER (EG, QB (0,7000) )"
+WRITE " "
+WRITE "TO QUIT, ENTER QUIT"
+WRITE " "
+!RESET &INPUT
+jset-range &r1 &r2
+loop
+	nxt &input n i t x
+	if ( n = "END_OF_FILE") BREAK
+	jdisp &n scale=&s
+        write "[7mFOR NEXT IMAGE[0m"
+	getpar Return 
+	if ( Return = "quit" ) Break
+end-loop
+ERR>
+end-proc
+.TITLE
+    QB	(QUICK BROWSE) VICAR/VIDS PROCEDURE TO BROWSE FILES FROM A LIST
+.HELP
+Qb will sequentially display (using VIDS) files listed in an input text file.
+Qb pauses after each display until the user enters a CR.  If QUIT is entered,
+the proc will terminate.  It works for byte or halfword images.  It will 
+zoom the image down to fit the screen or show as much as the screen can hold.
+
+The input list is in SRCH format.  That is, the first record says :
+NEXT FILE=0001.   Each subsequent record is a file spec.  However, SRCH 
+need not be run to create the file.  A DCL DIRE/NOHEAD/NOTRAIL  file_spec
+will make the list of file specs, but the first record must be added by 
+editor.
+
+Qb should be given its RANGE parameter if the data is halfword.  It will 
+default to RANGE=(0,4095).
+
+Example:
+
+	qb input=A.LIS 
+		images from text file A.LIS will be displayed zoomed to fit
+                screen if necessary.
+
+	qb input=A.LIS 'FULL
+		no zooming done
+
+	qb range=(0,4000) input=A.LIS 
+		halfword images from file A.LIS will be compressed from
+		0 to 4000 into 0 to 255 and zoomed if necessary.
+
+REVISIONS:
+
+	7-97  ...RRD... Ported to UNIX.
+.level1
+.vari range
+halfword compression limits
+.vari input
+text file of file names
+.vari scale
+fit on screen or not
+.level2
+.vari range
+integer
+For halfword data, this is the range of dn values that will displayed as
+0 to 255.  default= (0,4095).   No effect for byte data.
+.vari input
+String
+Name of text file in SRCH format which contains the file specs of the images
+to be displayed.
+.vari scale
+keyword
+Any valid entry for scale will display images at full resolution.  
+Default is to zoom to fit the entire image on the display screen.
+VALID: NONE, FULL, NORMAL, NOSCALE.

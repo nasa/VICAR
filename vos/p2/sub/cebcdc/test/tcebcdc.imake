@@ -1,0 +1,15 @@
+/* Imake file for Test of VICAR subroutine cebcdc */
+
+#define PROGRAM tcebcdc
+
+#define MODULE_LIST tcebcdc.f tzcebcdc.c
+
+#define MAIN_LANG_FORTRAN
+
+#define USES_FORTRAN
+#define USES_ANSI_C
+/*#define LIB_LOCAL*/
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB

@@ -1,0 +1,7 @@
+#define SUBROUTINE cuserid_p2
+
+#define MODULE_LIST cuserid_p2.c
+
+#define P2_SUBLIB
+
+#define USES_C

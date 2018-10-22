@@ -1,0 +1,71 @@
+process help=*
+PARM INP TYPE=(STRING,60) COUNT=1
+PARM OUT TYPE=(STRING,60) COUNT=1
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL TYPE=INTEGER COUNT=1 DEFAULT=1
+PARM SS TYPE=INTEGER COUNT=1 DEFAULT=1
+PARM NL TYPE=INTEGER COUNT=1 DEFAULT=0
+PARM NS TYPE=INTEGER COUNT=1 DEFAULT=0
+PARM WAVE TYPE=REAL COUNT=(0:20) DEFAULT=--
+END-PROC
+.TITLE
+AMER version 21-Jan-96 
+.HELP
+AMER performs the Average MMD Emissivity Residuals transformation on an 
+input dataset. MMD is the Min-Max Difference. 
+The input dataset must be in units of radiance as output by TIMSCAL2 
+in order for this program to work correctly. These are mW/m*m/um/sr.
+
+The output has one more band than the input. This extra band contains
+the alpha temperature, the other bands contain the alpha emissivity.
+
+The empirical calibration curve used to obtain the amer mean is
+-0.790683 * mmd^0.723098
+where MMD is the min-max difference of the alpha residual an ^ raises
+to the power
+
+Testing
+This program was tested on an artificial 2x2x6 band radiance dataset. 
+
+RESTRICTIONS;
+1. Input data must be in halfword. This is a simple check since its
+unlikely the input is not in radiance units if its in byte.
+2. Maximum size of one band of the input is 10,000 values.
+3. Maximum number of bands in the input is 20.
+
+HISTORY
+Written by Simon J. Hook in FORTRAN.
+
+.LEVEL1
+.VARIABLE INP
+Input radiance dataset 
+(Halfword) in radiance 
+(mW/m*m/um/sr)
+.VARIABLE OUT
+Output AMER emissivity dataset 
+plus an extra band including the
+AMER temperature. 
+All output data in Halfword. 
+AMER emissivity data in 
+emissivity*1.0e4. Temperature 
+in degrees*100.
+.VARIABLE SIZE
+standard VICAR size field
+.VARIABLE SL
+starting line
+.VARIABLE SS
+starting sample
+.VARIABLE NL
+number of lines
+.VARIABLE NS
+number of samples
+.VARIABLE WAVE
+the central wavelength for the 
+input channels, in micrometers.
+(1 value per channel)
+.LEVEL2
+.VARIABLE WAVE
+The centroid wavelength value for each channel in micrometers. This can be 
+calculated for a TIMS image using TIMSRESP (The central wavelength values are
+dumped to the screen after the program runs).
+.END

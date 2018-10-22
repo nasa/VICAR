@@ -1,0 +1,187 @@
+PROCESS HELP=*
+  LOCAL DUMREAL TYPE=REAL
+  LOCAL DUMINT  TYPE=INTEGER
+  PARM INP      TYPE=(STRING,80)
+  PARM V1	TYPE=NAME DEFAULT=DUMREAL
+  PARM V2	TYPE=NAME DEFAULT=DUMREAL
+  PARM V3	TYPE=NAME DEFAULT=DUMREAL
+  PARM V4	TYPE=NAME DEFAULT=DUMREAL
+  PARM V5	TYPE=NAME DEFAULT=DUMREAL
+  PARM V6	TYPE=NAME DEFAULT=DUMREAL
+  PARM V7	TYPE=NAME DEFAULT=DUMREAL
+  PARM V8	TYPE=NAME DEFAULT=DUMREAL
+  PARM V9	TYPE=NAME DEFAULT=DUMREAL
+  PARM V10	TYPE=NAME DEFAULT=DUMREAL
+  PARM V11	TYPE=NAME DEFAULT=DUMREAL
+  PARM V12	TYPE=NAME DEFAULT=DUMREAL
+  PARM V13	TYPE=NAME DEFAULT=DUMREAL
+  PARM V14	TYPE=NAME DEFAULT=DUMREAL
+  PARM V15	TYPE=NAME DEFAULT=DUMREAL
+  PARM V16	TYPE=NAME DEFAULT=DUMREAL
+  PARM V17	TYPE=NAME DEFAULT=DUMREAL
+  PARM V18	TYPE=NAME DEFAULT=DUMREAL
+  PARM V19	TYPE=NAME DEFAULT=DUMREAL
+  PARM V20	TYPE=NAME DEFAULT=DUMREAL
+  PARM V21	TYPE=NAME DEFAULT=DUMREAL
+  PARM V22	TYPE=NAME DEFAULT=DUMREAL
+  PARM V23	TYPE=NAME DEFAULT=DUMREAL
+  PARM V24	TYPE=NAME DEFAULT=DUMREAL
+  PARM V25	TYPE=NAME DEFAULT=DUMREAL
+  PARM IBISLOC  TYPE=INTEGER  COUNT=0:400 DEFAULT=(1,1)
+  PARM VARCNT	TYPE=INTEGER  DEFAULT=0
+  PARM VARTYPE	TYPE=INTEGER  COUNT=0:200 DEFAULT=0 VALID=-1:3
+  PARM VNCOL    TYPE=NAME DEFAULT=DUMINT
+  PARM VCLEN    TYPE=NAME DEFAULT=DUMINT
+END-PROC
+.TITLE
+VICAR/IBIS Program "ibis2tcl"
+.HELP
+PURPOSE
+
+     "IBIS2TCL" transfers particular values specified by row and
+column from an IBIS interface file to TCL variables.   The values
+may be transfered in double, real, integer, or character (string) format.
+The number of columns and column length may also be transfered 
+to TCL variables.  Whereas the IBIS-1 strings were four characters
+long, IBIS-2 character strings are allowed to be up to eighty (80)
+characters long.
+
+
+EXECUTION
+
+  ibis2tcl  FILE.INT  V1=LAT V2=LONG V3=LABEL V4=COUNT   +
+			IBISLOC=(1,1, 4,3, 2,2, 4,5)  VARTYPE=(0,0,2,1)
+
+In this example, the input interface file is FILE.INT.  The real values at
+(row 1 , col 1) and (row 4 , col 3) in the interface file are put into the
+real TCL variables LAT and LONG, respectively.  The character data at (2,2)
+is transfered to the LABEL string variable, and the integer format data
+at (4,5) is transfered to the COUNT integer variable.
+The TCL variable names are entered with the name parameters V1, V2, ... , V25.  
+The variable names can also be entered positionally and real data types
+assumed:
+
+  ibis2tcl  FILE.INT  LAT LONG   IBISLOC=(5,6,2,1)
+
+
+IBISLOC can be defaulted in which case the assumed locations start with the
+first row and column and continue with all the elements in each row for as
+many rows as required to get VARCNT elements:
+
+  ibis2tcl  FILE.INT  A B C D E F  VARCNT=6
+
+The number of values put in TCL variables is equal to the number of locations
+specified by IBISLOC or is specified by VARCNT if IBISLOC is defaulted;
+there should be enough variables listed to accommodate that many.  If the
+locations are defaulted then VARCNT must be specified.
+
+
+The number of columns and/or the length of the columns in the interface
+file can be transfered to TCL integer variables.  Values in the interface
+file can be transfered as well.
+
+  ibis2tcl FILE.INT  LABEL  IBISLOC=(6,1) VARTYPE=2  VNCOL=NCOL  VCLEN=CLEN
+  ibis2tcl FILE.INT  VCLEN=CLEN
+
+
+
+
+The following procedure is an example of its use:
+
+PROCEDURE
+  LOCAL LAT   TYPE=REAL
+  LOCAL LONG  TYPE=REAL
+  LOCAL LABEL TYPE=(STRING,4)  !4 for IBIS-1, up to 80 for IBIS-2
+  LOCAL CLEN  TYPE=INTEGER
+BODY
+  ibis2tcl  FILE.INT  LAT LONG LABEL    IBISLOC=(1,1,4,3,2,2)    +
+					VARTYPE=(0,0,2)  VCLEN=CLEN
+  write "LAT = &LAT    LONG = &LONG "
+  write "LABEL = &LABEL"
+  write "COLUMN LENGTH = &CLEN"
+END-PROC
+
+
+
+
+
+RESTRICTIONS
+
+The TCL variable types must match the type specified with the
+    VARTYPE parameter.
+The TCL variables for the number of columns and the column length 
+    must be of integer type.
+The maximum number of TCL variables allowed per execution is 25.
+The interface file cannot have more than 1,000,000 rows or 200 columns.
+
+
+
+ WRITTEN BY:		K.F. Evans	June 1985
+
+ COGNIZANT PROGRAMMER:  B.A. McGuffie
+
+ REVISION:	3		April 1986
+                4 AMS  (CRI)    Jan.  1995  Made portable for UNIX
+                                            and added IBIS-2 capabilities
+                5 BAM           June  1998  Increased columns; corrected pdf.
+                6 BAM           Dec.  1998  Allowed for double precision.
+
+.LEVEL1
+.VARIABLE INP
+ Input interface file
+.VARIABLE V1
+The first TCL variable name, etc
+.VARIABLE IBISLOC
+The IBIS rows and columns 
+.VARIABLE VARCNT
+The number of variables
+.VARIABLE VARTYPE
+The type for each variable
+-1 for double precision,
+0 for real, 
+1 for integer,
+2 for character string,
+3 for real to integer conversion
+.VARIABLE VNCOL
+The TCL variable name
+to get the number of columns
+.VARIABLE VCLEN
+The TCL variable name
+to get the column length
+
+.LEVEL2
+.VARIABLE INP
+   INP specifies the IBIS interface (tabular) file that has the data to
+be transfered.
+.VARIABLE V1
+   The Vn parameters are TCL NAME parameters that contain the names of
+the TCL variables to receive the data, e.g.  V1=LATITUDE  V2=LABEL .
+The variables must have been declared in TCL before running this program,
+and must have types corresponding to those specified with the VARTYPE
+parameter.  The maximum number of variables that can be specified is
+25, i.e. V25 is the last one.
+.VARIABLE IBISLOC
+    IBISLOC specifies the (row,column) locations in the interface file
+of the data to be transfered.  The first pair of numbers are the row and 
+column of the first value to be transfered, the second pair are for the
+second value, etc.  If this parameter is defaulted then the VARCNT parameter
+is used and the default locations are used (see help).
+.VARIABLE VARCNT
+    VARCNT is only used if IBISLOC is not specified so the default locations
+are used.  VARCNT specifies the number of values to be transfered.
+.VARIABLE VARTYPE
+    The VARTYPE parameter specifies the data type of each value to be
+transfered:  -1 for double precision, 
+              0 for real, 
+              1 for integer, 
+              2 for character string,
+              3 for real value to be rounded for output to an integer.
+
+If VARTYPE is defaulted then all real types will be assumed.
+.VARIABLE VNCOL
+    VNCOL is the TCL name parameter that specifies the TCL variable
+to receive the number of columns in the IBIS interface file.
+.VARIABLE VCLEN
+    VCLEN is the TCL name parameter that specifies the TCL variable
+to receive the column length of the IBIS interface file.
+.END

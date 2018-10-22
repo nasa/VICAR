@@ -1,0 +1,17 @@
+/* Imake file for Test of VICAR subroutine CONVEV */
+
+#define PROGRAM tconvev
+
+#define MODULE_LIST tconvev.f tzconvev.c
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_MATH77
+#define LIB_LOCAL

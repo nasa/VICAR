@@ -1,0 +1,185 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $echo="no"
+let $autousage="none"
+
+enable-log
+
+! Test general capabilities, 1 to many and many to 1
+
+Write "Test general capabilities, 1 to many and many to 1"
+   ibis-gen a nc=2 nr=5 index=2 datacol=1 +
+     data=(1,1,2,3,4)
+   ibis-gen b nc=2 nr=5 index=2 datacol=1 +
+     data=(1,3,4,4,5)
+   
+   mf3 a f="c2=c2+50"
+   mf3 b f="c2=c2+80"
+   
+   ibis-list a
+   ibis-list b
+
+   zipcol2 inp=(a,b) incol=(1) outcol=(2) +
+          file=(1,2) null=(789)
+
+   ibis-list a
+  
+  ! Test general capabilities
+
+Write " Test general capabilities"
+   ibis-gen a nc=5 nr=10 index=1 datacol=2 +
+     data=(2,4,6,8,1,3,5,7,9,0)
+   ibis-copy a b 
+   mf b fun=("c2=c2*(index%2)","c3=index+2","c4=index+3","c5=index+4")
+   
+   mf3 a f="c3=30+@index$c4=40+@index$c5=50+@index"
+   
+   ibis-list a
+   ibis-list b
+
+! If cols (1,2) of A match (1,2) of B then put
+! columns (3,4,5) of B into (3,4,5) of A, and
+! if they don't match put (123, 456,789) into (3,4,5) of A
+!
+
+   zipcol2 inp=(a,b) incol=(1,2) outcol=(3,4,5) +
+          file=(1,2,3,4,5) null=(123,456,789)
+
+   ibis-list a
+ 
+   
+! Test general capabilities, with the new nonull keyword
+
+Write " Test general capabilities, with the new nonull keyword"
+   ibis-gen a nc=5 nr=10 index=1 datacol=2 +
+     data=(2,4,6,8,1,3,5,7,9,0)
+   ibis-copy a b 
+   mf b fun=("c2=c2*(index%2)","c3=index+2","c4=index+3","c5=index+4")
+   mf3 a f="c3=30+@index$c4=40+@index$c5=50+@index"
+   
+   ibis-list a
+   ibis-list b
+
+! If cols (1,2) of A match (1,2) of B then put
+! columns (3,4,5) of B into (3,4,5) of A, and
+! if they don't match leave the data alone
+!
+
+   zipcol2 inp=(a,b) incol=(1,2) outcol=(3,4,5) +
+          file=(1,2,3,4,5) null=(123,456,789) 'nonull
+
+   ibis-list a
+
+! numeric keys, alpha data
+
+Write "  Test numeric keys, alpha data"
+
+   ibis-gen a nc=4 nr=5 index=2 datacol=1 +
+     data=(1,1,2,3,4) 'ibis-2 format=(FULL,FULL,A12,A12) +
+     strcol=(3,4) +
+     string=(aaaaaa1,bbbbbb1,aaaaaa2,bbbbbb2,aaaaaa3, +
+      bbbbbb3,aaaaaa4,bbbbbb4,aaaaaa5,bbbbbb5)
+   ibis-gen b nc=4 nr=5 index=2 datacol=1 +
+     data=(1,3,4,4,5) 'ibis-2 format=(FULL,FULL,A12,A12) +
+     strcol=(3,4) +
+     string=(xxxxxx1,yyyyyy1,xxxxxx2,yyyyyy2,xxxxxx3, +
+       yyyyyy3,xxxxxx4,yyyyyy4,xxxxxx5,yyyyyy5)
+  
+   mf3 a f="c2=c2+50"
+   mf3 b f="c2=c2+80"
+   
+   ibis-list a
+   ibis-list b
+
+   zipcol2 inp=(a,b) incol=(1) outcol=(2,3,4) +
+          file=(1,2,3,4) null=(789) nulstr=("nulla")
+
+   ibis-list a
+
+ 
+! alpha keys, alpha data
+
+Write "  Test alpha keys, alpha data"
+
+   ibis-gen a nc=4 nr=5 index=2 datacol=1 +
+     data=(1,1,2,3,4) 'ibis-2 format=(FULL,FULL,A12,A12) +
+     strcol=(3,4) +
+     string=(aaaaaa1,bbbbbb1,aaaaaa2,bbbbbb2,aaaaaa3, +
+      bbbbbb3,aaaaaa4,bbbbbb4,aaaaaa5,bbbbbb5)
+   ibis-gen b nc=4 nr=5 index=2 datacol=1 +
+     data=(1,3,4,4,5) 'ibis-2 format=(FULL,FULL,A12,A12) +
+     strcol=(3,4) +
+     string=(aaaaaa1,yyyyyy1,aaaaaa4,yyyyyy2,aaaaaa5, +
+       yyyyyy3,aaaaaa5,yyyyyy4,aaaaaa6,yyyyyy5)
+   
+   mf3 a f="c2=c2+50"
+   mf3 b f="c2=c2+80"
+   
+   ibis-list a
+   ibis-list b
+
+   zipcol2 inp=(a,b) incol=(1,3) outcol=(2,4) +
+          file=(1,3,2,4) null=(789) nulstr=("nulla")
+
+   ibis-list a
+
+! numeric keys, alpha data, 'nonull kwd
+
+Write "  Test numeric keys, alpha data, 'nonull kwd"
+
+   ibis-gen a nc=4 nr=5 index=2 datacol=1 +
+     data=(1,1,2,3,4) 'ibis-2 format=(FULL,FULL,A12,A12) +
+     strcol=(3,4) +
+     string=(aaaaaa1,bbbbbb1,aaaaaa2,bbbbbb2,aaaaaa3, +
+      bbbbbb3,aaaaaa4,bbbbbb4,aaaaaa5,bbbbbb5)
+   ibis-gen b nc=4 nr=5 index=2 datacol=1 +
+     data=(1,3,4,4,5) 'ibis-2 format=(FULL,FULL,A12,A12) +
+     strcol=(3,4) +
+     string=(xxxxxx1,yyyyyy1,xxxxxx2,yyyyyy2,xxxxxx3, +
+       yyyyyy3,xxxxxx4,yyyyyy4,xxxxxx5,yyyyyy5)
+   
+   mf3 a f="c2=c2+50"
+   mf3 b f="c2=c2+80"
+   
+   ibis-list a
+   ibis-list b
+
+   zipcol2 inp=(a,b) incol=(1) outcol=(2,3,4) +
+          file=(1,2,3,4) null=(789) nulstr=("nulla") 'nonull
+
+   ibis-list a
+
+ 
+! alpha keys, alpha data, 'nonull kwd
+
+Write "  Test alpha keys, alpha data, 'nonull kwd"
+
+   ibis-gen a nc=4 nr=5 index=2 datacol=1 +
+     data=(1,1,2,3,4) 'ibis-2 format=(FULL,FULL,A12,A12) +
+     strcol=(3,4) +
+     string=(aaaaaa1,bbbbbb1,aaaaaa2,bbbbbb2,aaaaaa3, +
+      bbbbbb3,aaaaaa4,bbbbbb4,aaaaaa5,bbbbbb5)
+   ibis-gen b nc=4 nr=5 index=2 datacol=1 +
+     data=(1,3,4,4,5) 'ibis-2 format=(FULL,FULL,A12,A12) +
+     strcol=(3,4) +
+     string=(aaaaaa1,yyyyyy1,aaaaaa4,yyyyyy2,aaaaaa5, +
+       yyyyyy3,aaaaaa5,yyyyyy4,aaaaaa6,yyyyyy5)
+   
+   mf3 a f="c2=c2+50"
+   mf3 b f="c2=c2+80"
+   
+   ibis-list a
+   ibis-list b
+
+   zipcol2 inp=(a,b) incol=(1,3) outcol=(2,4) +
+          file=(1,3,2,4) null=(789) nulstr=("nulla") 'nonull
+
+   ibis-list a
+
+theend>
+
+disable-log
+
+end-proc

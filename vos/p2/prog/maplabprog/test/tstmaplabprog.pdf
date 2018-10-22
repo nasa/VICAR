@@ -1,0 +1,112 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+
+! create map labels for various projections:
+
+! RECTANGULAR 
+maplabprog out=a nl=10 ns=10 line=1. samp=1. lati=50. long=360. scal=100. +
+	'io 'rect
+label-list a
+
+! MERCATOR
+maplabprog out=a nl=10 ns=10 line=1. samp=1. lati=50. long=360. scal=100. +
+	'io 'MERCAT
+label-list a
+
+! TRANSVERSE MERCATOR
+maplabprog out=a nl=10 ns=10 line=1. samp=1. lati=50. long=360. scal=100. +
+	'io 'TMERC
+label-list a
+
+! CYLINDRICAL
+maplabprog out=a nl=10 ns=10 line=1. samp=1. lati=50. long=360. scal=100. +
+	'io 'CYLIN
+label-list a
+
+! OBLIQUE CYLINDRICAL  --- omit for now, due to MP bug
+!maplabprog out=a nl=10 ns=10 line=1. samp=1. lati=50. long=360. scal=100. +
+!	par1=40 'io 'OBCYL
+!label-list a
+
+! SINUSOIDAL
+maplabprog out=a nl=10 ns=10 line=1. samp=1. lati=50. long=360. scal=100. +
+	'io 'SINUS
+label-list a
+
+! OBLIQUE SINUSOIDAL 
+maplabprog out=a nl=10 ns=10 line=1. samp=1. lati=50. long=360. scal=100. +
+	par1=40 'io 'OBSINU
+label-list a
+
+! LAMBERT
+maplabprog out=a nl=10 ns=10 line=1. samp=1. lati=50. long=360. scal=100. +
+	par1=30 par2=60 'io 'LAMB
+label-list a
+
+! MOLLWEIDE
+maplabprog out=a nl=10 ns=10 line=1. samp=1. lati=50. long=360. scal=100. +
+	'io 'MOLL
+label-list a
+
+! ORTHOGRAPHIC
+maplabprog out=a nl=10 ns=10 'half radius=1738.09 lati=10. long=20. +
+	north=180. scal=2. line=3. samp=4. 'orth 
+label-list a
+
+! POLAR ORTHOGRAPHIC
+maplabprog out=a nl=10 ns=10 'half radius=1738.09 lati=10. long=20. +
+	north=180. scal=2. line=3. samp=4. 'orth 'POLE
+label-list a
+
+! STEREOGRAPHIC
+maplabprog out=a nl=10 ns=10 'half radius=1738.09 lati=10. long=20. +
+	north=180. scal=2. line=3. samp=4. 'STEREO
+label-list a
+
+! POLAR STEREOGRAPHIC
+maplabprog out=a nl=10 ns=10 'half radius=1738.09 lati=10. long=20. +
+	north=180. scal=2. line=3. samp=4. 'STEREO 'POLE
+label-list a
+
+! PERSPECTIVE
+gen c nl=10 ns=10 
+maplabprog c d 'obj nl=10 ns=10 Req=2439. rpol=2439. sscp=(10,20) nora=30. +
+	rmag=123456. focl=1500. pscal=84. slat=40. slon=50. laxis=400. +
+	saxis=500. 
+label-list d
+list c
+list d
+
+! check response to some errors ...
+
+! no input or SIZE spec:
+maplabprog out=a line=1. samp=1. lati=50. long=360. scal=100. 'io 'rect
+
+!  zero size param.
+maplabprog out=a size=(1 1 0 100) line=1. samp=1. lati=50. long=360. scal=100. +
+ 'io 'rect
+maplabprog out=a ns=0 nl=100 line=1. samp=1. lati=50. long=360. scal=100. +
+ 'io 'rect
+
+! NS exceeds pgm buffer:
+maplabprog out=a size=(1 1 100 100000) line=1. samp=1. lati=50. long=360. +
+ scal=100. 'io 'rect
+
+! insufficient inputs for Perspective mode ...
+maplabprog c d 'obj nl=10 ns=10 Req=2439. rpol=2439. sscp=(10,20) nora=30. +
+	rmag=123456. pscal=84. slat=40. slon=50. laxis=400. saxis=500. 
+
+! try halfword image
+maplabprog out=a nl=10 ns=10 line=1. samp=1. lati=50. long=360. scal=100. +
+	'io 'rect 'half
+label-list a
+gen c nl=10 ns=10 'half
+maplabprog c a nl=10 ns=10 line=1. samp=1. lati=50. long=360. scal=100. +
+	'io 'rect
+label-list a
+list a
+
+end-proc

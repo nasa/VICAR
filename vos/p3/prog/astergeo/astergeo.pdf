@@ -1,0 +1,130 @@
+Process help=*
+parm  INP     (string,40) count=0:2 default=--
+parm  OUT     (string,40)
+parm  MODE    keyword     valid=(VNIR,SWIR,TIR)
+parm  CONVERT keyword valid=(NOCONVERT,GEODETIC,GEOCENTRIC) default=NOCONVERT
+parm  UL      real        count=0:2 default=--
+parm  UR      real        count=0:2 default=--
+parm  LL      real        count=0:2 default=--
+parm  LR      real        count=0:2 default=--
+End-proc
+
+.TITLE
+TAE PROCESS ASTERGEO
+.HELP
+PURPOSE:
+ASTER images have, in their files in hdf format, two sources of information
+to enable geolocation of the image pixels.  First, the corner points of the
+image are stored in the metadata ("productmetadata.0", mastergroup 
+ASTERGENERICMETADATA, group SCENEINFORMATION, subgroup SCENEFOURCORNERS, 
+objects UPPERLEFT, UPPERRIGHT, LOWERLEFT, LOWERRIGHT).  Second, there is an 
+11 by 11 pixel image array of latitudes, and a similar array for longitude.
+This program will generate full scale pixel by pixel maps of the latitudes 
+and longitudes from either of these two sources.  That is, the output file will
+contain two bands, with the first band containing the latitude corresponding to
+each ASTER pixel, with the second band containing the longitude at each pixel.
+
+If the corner points are used as input, they will be entered manually as
+VICAR parameters.  If the 11x11 latitude and longitude arrays are used, they
+are entered as either one or two input images, with the appropriate VICAR 
+labels previously applied.
+
+If requested, this program will also convert between geocentric and geodetic
+coordinate systems.  The default is that no coordinate conversion is performed.
+.LEVEL1
+.VARI INP
+11x11 latitude and longitude
+arrays (with VICAR labels)
+Either 1 file with 2 bands,
+or latitude file, then
+   longitude file
+.VARI OUT
+Output image file
+.VARI MODE
+Spectral Range
+Valid:  VNIR, SWIR, TIR
+.VARI CONVERT
+Convert coordinates to:
+Valid: GEODETIC, GEOCENTRIC,
+       or NOCONVERT (for
+       no change)
+.VARI UL
+Latitude and longitude of
+upper left corner
+.VARI UR
+Latitude and longitude of
+upper right corner
+.VARI LL
+Latitude and longitude of
+lower left corner
+.VARI LR
+Latitude and longitude of
+lower right corner
+.LEVEL2
+.VARI INP
+INP is used to specify the names of 0, 1, or 2 files.  If no file name is
+given, then the user must enter the corner coordinates via the parameters
+UL, UR, LL, and LR.  If one file is input, it must be a VICAR file with
+two bands, 11 lines, 11 samples.  The first band shall contain the latitudes,
+and the second band shall contain the longitudes.  If two files are input,
+the first file shall contain the latitudes, the second shall contain the
+longitudes.
+.VARI OUT
+The value of OUT is the name of the output file, which will contain two bands
+(first latitude, then longitude) in double precision format, and having the
+same size as the image data for the spectral region specified by the MODE
+parameter.
+.VARI MODE
+This parameter is used to specify the required size of the output image. The
+output sizes are:
+
+       MODE       LINES     SAMPLES
+       ----       -----     -------
+       VNIR        4200      4980
+       SWIR        2100      2490
+        TIR         700       830
+.VARI CONVERT
+The corner points listed in the hdf metadata are in geodetic coordinates,
+while the 11x11 image arrays are in geocentric coordinates for Level 1 data
+products and early Level 2 products, and in geodetic coordinates for more
+recent Level 2 products.  The user may convert from one coordinate system to
+the other, by using the CONVERT paramter, giving it the name of the desired
+result (either GEODETIC or GEOCENTRIC).  If defaulted, no conversion is
+performed.
+.VARI UL
+This is the latitude (positive North) and longitude (positive East) for the
+upper left corner of the ASTER scene.  These values may be found in the
+metadata, in "productmetadata.0", mastergroup ASTERGENERICMETADATA, group
+SCENEINFORMATION, subgroup SCENEFOURCORNERS, object UPPERLEFT.
+
+For example,
+      UL=(19.447252,-155.613547)
+for 19.447252 North, 155.613547 West
+.VARI UR
+This is the latitude (positive North) and longitude (positive East) for the
+upper right corner of the ASTER scene.  These values may be found in the
+metadata, in "productmetadata.0", mastergroup ASTERGENERICMETADATA, group
+SCENEINFORMATION, subgroup SCENEFOURCORNERS, object UPPERRIGHT.
+
+For example,
+      UR=(19.447252,-155.613547)
+for 19.447252 North, 155.613547 West
+.VARI LL
+This is the latitude (positive North) and longitude (positive East) for the
+lower left corner of the ASTER scene.  These values may be found in the
+metadata, in "productmetadata.0", mastergroup ASTERGENERICMETADATA, group
+SCENEINFORMATION, subgroup SCENEFOURCORNERS, object LOWERLEFT.
+
+For example,
+      LL=(19.447252,-155.613547)
+for 19.447252 North, 155.613547 West
+.VARI LR
+This is the latitude (positive North) and longitude (positive East) for the
+lower right corner of the ASTER scene.  These values may be found in the
+metadata, in "productmetadata.0", mastergroup ASTERGENERICMETADATA, group
+SCENEINFORMATION, subgroup SCENEFOURCORNERS, object LOWERRIGHT.
+
+For example,
+      LR=(19.447252,-155.613547)
+for 19.447252 North, 155.613547 West
+.END

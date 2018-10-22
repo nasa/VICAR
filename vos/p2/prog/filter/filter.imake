@@ -1,0 +1,28 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM filter
+
+   To Create the build file give the command:
+
+		$ vimake filter			(VMS)
+   or
+		% vimake filter			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	filter
+#define R2LIB
+
+#define MODULE_LIST filter.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define FTNINC_LIST fortport
+/************************* End of Imake file ***************************/
+

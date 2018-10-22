@@ -1,0 +1,9 @@
+#define SUBROUTINE gpdslabel
+#define MODULE_LIST gpdslabel.c 
+
+#define P2SUB
+#define P2_SUBLIB
+
+#define USES_ANSI_C
+
+

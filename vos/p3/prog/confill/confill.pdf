@@ -1,0 +1,76 @@
+process help=*
+ PARM INP         TYPE=(STRING,60)
+ PARM OUT         TYPE=(STRING,60)     COUNT=(1:2)
+ PARM SIZE        TYPE=INTEGER         COUNT=4          DEFAULT=(1,1,0,0)
+ PARM SL          TYPE=INTEGER         COUNT=1          DEFAULT=1
+ PARM SS          TYPE=INTEGER         COUNT=1          DEFAULT=1
+ PARM NL          TYPE=INTEGER         COUNT=1          DEFAULT=0
+ PARM NS          TYPE=INTEGER         COUNT=1          DEFAULT=0
+ PARM BACKGRND    TYPE=REAL				DEFAULT=0.0
+ PARM MODE	  TYPE=KEYWORD	VALID=(LINEAR,SPLINE)	DEFAULT=SPLINE
+ END-PROC
+.TITLE
+ CONFILL --  CONtour line image FILL-in program
+.HELP
+      CONFILL is a VICAR program that fills by interpolation an image of
+ contour lines.  The input image must consist of contour lines, each of whose
+ DN is equal to the value of the contour.  The background pixels must all have
+ a single DN value.  Interpolation is performed in the horizontal direction,
+ and the user may choose either a linear or cubic spline interpolation.  The
+ values of the outermost contours are extended to the edges of the image.
+.PAGE
+ ORIGINAL PROGRAMMER:  Ron Alley    6 March 1992
+ 
+ CURRENT COGNIZANT PROGRAMMER: Ron Alley
+.LEVEL1
+.VARIABLE INP
+ input contour image
+.VARIABLE OUT
+ (1) output filled image
+ (2) [optional] image of
+     horizontal distance to
+     nearest contour, in 
+     pixels. HALFword format
+.VARIABLE SIZE
+ output image window
+ (SL,SS,NL,NS)
+.VARIABLE SL
+ starting line
+.VARIABLE SS
+ starting sample
+.VARIABLE NL
+ number of lines
+.VARIABLE NS
+ number of samples
+.VARIABLE BACKGRND
+ DN value of background pixels
+.VARIABLE MODE
+ interpoloation mode
+ Valid: LINEAR, SPLINE
+.LEVEL2
+.VARIABLE INP
+ input data set
+.VARIABLE OUT
+ Either 1 or 2 output datasets may be specified.  The first dataset will
+ contain the filled in image that has been generated from the contour image.
+ The second (optional) dataset will contain a map of the distance (in pixels)
+ to the nearest contour line used for filling that pixel in the first output.
+ .VARIABLE SIZE
+ image size (SL,SS,NL,NS)
+.VARIABLE SL
+ The first line of the input image to be output.
+.VARIABLE SS
+ The first pixel of each input line to be output.
+.VARIABLE NL
+ The number of lines to be output.
+.VARIABLE NS
+ The number of pixels to be output for each line.
+.VARIABLE BACKGRND
+ CONFILL expects all background pixels to be of a single DN value, specified
+ by this parameter (Default value is 0).  All pixels with different values
+ are assumed to be part of a contour line.
+.VARIABLE MODE
+ Two interpolation modes are currently available in CONFILL: linear and cubic
+ spline.  Extrapolation, when needed, is done by extension of the outermost
+ contour. The valid keywords are: LINEAR, and SPLINE. SPLINE is the default.
+.END

@@ -1,0 +1,160 @@
+!  This is the original EDIMAGE test script, written by Frank Evans.
+!  It contains a number of interactive steps, which make it unsuitable for
+!  the standard I&T test procedures.  Therefore a stripped-down version of
+!  it, tstedimage1.scr, was created for use in tstedimage.pdf.
+!  This version is retained for completeness.  (LWK - Mar.2010)
+
+gen EDIMA 512 512  LINC=.3 SINC=.3
+!
+! TRY THE SIMPLEST CASES FIRST: EDIMAGE FOR COPYING AN IMAGE, WITH
+! AND WITHOUT SIZE FIELD.   SHOULD GET 0 DIFFERENCES IN DIFPIC.
+edimage EDIMA EDIMAO 'TEST
+exit
+!
+difpic (EDIMA EDIMAO)
+!
+edimage EDIMA EDIMAO SIZE=(40,50,300,400) 'TEST
+exit
+!
+copy EDIMA EDIMAO2 SIZE=(40,50,300,400) 
+difpic (EDIMAO2 EDIMAO)
+label-list EDIMAO
+!
+! NOW TRY SOME STANDARD EDIMAGE COMMANDS IN B/W MODE.
+!
+edimage EDIMA EDIMAO 'TEST
+"COMMENT   The next command should display the GENed image."
+disp
+"COMMENT   Should display gray-scale type of palette"
+palette
+"COMMENT   Should draw a square box"
+"POLYGON BOX SIZE 100 100 50 50"
+"COMMENT   Should compute statistics.  Move cursor anywhere inside"
+"COMMENT   box and press trackball SW1 twice.  Should get 2500"
+"COMMENT   points in polygon with AVE = 73.604, STDEV = 6.171,  "
+"COMMENT   MAX = 88, MIN = 59."
+statist
+"COMMENT   Leave cursor in box, and press SW1 twice.  Then move cursor"
+"COMMENT   about two inches below box and press SW1 once and then"
+"COMMENT   SW2 once.  Should copy contents of first box to the cursor"
+"COMMENT   location."
+copy
+"COMMENT   Select color."
+"COLOR DN 128"
+"COMMENT   Move cursor back inside the first box and press SW1 twice."
+"COMMENT   Should fill box with DN 128 throughout."
+fill
+"COMMENT   Should erase palette"
+"PALETTE OFF"
+"COMMENT   Should exit EDIMAGE, writing the modified image to the"
+"COMMENT   output file."
+exit
+!  IF THE BOX WAS COPIED AND THEN FILLED, THEN DIFPIC SHOULD SHOW 
+!  5000 DIFFERENCES
+difpic (EDIMA EDIMAO)
+! NOW TRY SOME MORE COMMANDS AND THE QUIT COMMAND TO FINISH WITHOUT 
+! STORING THE RESULTS.
+!
+edimage EDIMA (EDIMAO TAB) 'TEST
+"COMMENT   The next command should display the GENed image."
+disp
+"COMMENT   Should draw a square box"
+"POLYGON BOX SIZE 100 100 50 50"
+"COMMENT   Move cursor anywhere inside"
+"COMMENT   box, and press SW1 twice.  Then move cursor"
+"COMMENT   about two inches below box and press SW1 once and then"
+"COMMENT   SW2 once.  Should copy contents of first box to the cursor"
+"COMMENT   location."
+copy
+"COMMENT   Enter pseudo-color mode.  Should get a rainbow of diagonal"
+"COMMENT   stripes."
+"PSEUDO TABLE DN"
+"COMMENT   Write pseudo color table to disk"
+"TABLE SAVE"
+"COMMENT   Stretch red,green, and blue.  Stripes should become"
+"COMMENT   narrower.  Then stretch each color back one at a time to"
+"COMMENT   bring display back to original rainbow"
+"STRETCH 100 150"
+"STRETCH RED 0 255"
+"STRETCH BLUE 0 255"
+"STRETCH GREEN 0 255"
+"COMMENT  Display palette."
+palette
+"COMMENT  Set first palette color to deep pink."
+"COLOR 1 RGB 240 50 200"
+"COMMENT   Set brush type and size."
+"BRUSH SIZE 30 TYPE DISK"
+"COMMENT   Paint image by moving cursor with switch 1 down."
+"COMMENT   SW2 should change paint color to color at cursor location."
+"COMMENT   Exit with SW3."
+"PAINT 1"
+"COMMENT   Should zoom (magnify) picture by a factor of 2."
+"HZOOM 2"
+"COMMENT   Puts program in pan mode.  Steer through image with"
+"COMMENT   trackball.  Exit with SW1."
+pan
+"COMMENT   Should return to zoom 1."
+"HZOOM 1"
+"COMMENT   Reset from PAN by pressing SW1."
+pan
+"COMMENT   Draw box.  Use cursor to select upper-left and lower-"
+"COMMENT   right corners of box."
+"DRAW BOX"
+"COMMENT   Should display gray-scale type of palette"
+"COMMENT   Exit without changing output file."
+quit
+!  DIFPIC SHOULD SHOW 0 DIFFERENCES
+difpic (EDIMA EDIMAO)
+!
+!  PRINT TABLE SIZE. SHOULD BE 1 BY 1024.
+!
+label-list TAB
+!
+! NOW TRY SOME MORE STANDARD EDIMAGE COMMANDS IN B/W MODE.
+!
+edimage EDIMA EDIMAO 'TEST 'NOCL
+"COMMENT   The next command should display the GENed image."
+disp
+"COMMENT   Should draw two square boxes"
+"POLY    BOX SIZE 100 30 50 50"
+"POLYGON BOX SIZE 200 30 50 50"
+"COMMENT   Move cursor inside lower box near lower left corner."
+"COMMENT   Press switches to put text into image."
+"TEXT SIZE 30 FONT 5 left string ""FONT Standard 2"" "
+"COMMENT   Select the top box for texturing.  Use the bottom box"
+"COMMENT   for color and for texture sample.  Should put random"
+"COMMENT   texture into top box."
+texture
+"COMMENT   Should exit EDIMAGE, writing the modified image to the"
+"COMMENT   output file."
+exit
+!  DIFPIC SHOULD SHOW ROUGHLY 3000 TO 4000 DIFFERENCES
+difpic (EDIMA EDIMAO)
+!
+! NOW TRY EDIMAGE COMMANDS IN COLOR MODE.
+!
+edimage (EDIMA,EDIMA,EDIMA)  (EDIMAOR,EDIMAOG,EDIMAOB) 'TEST 'COLOR
+"COMMENT   The next command should display the white GENed image."
+disp
+"COMMENT   Stretch individual colors.  Should get colors and"
+"COMMENT   end up with white."
+"STRETCH RED 50 150"
+"STRETCH BLUE 50 150"
+"STRETCH GREEN 50 150"
+"COMMENT   Should draw a square box"
+"POLYGON BOX SIZE 100 100 50 50"
+"COMMENT   Select color - DEEP PINK"
+"COLOR 1 RGB 240 50 200"
+"COMMENT   Move cursor back inside the first box and press SW1 twice."
+"COMMENT   Should fill box with deep pink throughout."
+fill
+exit
+!
+!  COMPARE THE EDIMAGE OUTPUT WITH THE INPUT.
+!  SHOULD GET 2500 DIFFERENCES each.
+
+difpic (EDIMA EDIMAOR)
+difpic (EDIMA EDIMAOG)
+difpic (EDIMA EDIMAOB)
+!
+ush rm EDIMA*

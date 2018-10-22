@@ -1,0 +1,77 @@
+PROCESS help=*
+  PARM INP    TYPE=(STRING,72)  COUNT=1
+  PARM OUT    TYPE=(STRING,72)  COUNT=1
+  PARM NL     TYPE=INTEGER
+  PARM NS     TYPE=INTEGER
+  PARM FORMAT TYPE=KEYWORD   VALID=(BYTE,HALF,FULL,REAL,DOUB) +
+           DEFAULT=BYTE
+END-PROC
+.TITLE
+VICAR/IBIS Program XYZPIC2
+.help
+PURPOSE
+
+    XYZPIC2 is a C version of XYZPIC Fortran program.
+
+    XYZPIC2 takes an IBIS-2 file of (line, sample, DN value)
+triplets and creates an image of all zero value 
+pixels except for those pixels indicated in the graphics 
+file.  Any coordinates off of the image are ignored.
+The DN values are clipped to fit within the DN range of the format
+of the output pixels.  The points in the graphics file may be
+in any order (sorting is performed by the program).  The line, sample
+position of the points is rounded to the nearest pixel, while
+the DN value is truncated for integer output formats.
+
+
+EXECUTION
+
+XYZPIC2 INP=POINTS.GRA  OUT=FILE.IMG  NL=3000 NS=5000 FORMAT=HALF
+
+RESTRICTIONS
+
+Will not process IBIS Graphics-1 file.  Input file must be an
+IBIS Graphics-2 file.
+
+The maximum output line length is 64,000 samples *(no longer
+applies after convertion to C).
+
+Original Programmer:  Peter Kim        Jan 2008
+
+Cognizant Programmer: Peter Kim
+
+REVISIONS
+  2008-01    Peter Kim - Initial version.
+  2016-06-09 Walt Bunch - Migrated to MIPL.
+
+.LEVEL1
+.VARIABLE INP
+IBIS graphics file (input).
+containing (line,sample,DN value)
+triplets
+.VARIABLE OUT
+VICAR image (output).
+.VARIABLE NL
+Number of lines 
+in the output.
+.VARIABLE NS
+Number of samples
+in the output.
+.VARIABLE FORMAT
+Type of pixel to be output.
+
+.LEVEL2
+.VARIABLE INP
+IBIS graphics file (input).
+containing (line,sample,DN value)
+triplets
+.VARIABLE OUT
+VICAR image (output).
+.VARIABLE NL
+Number of lines in the output.
+.VARIABLE NS
+Number of samples in the output.
+.VARIABLE FORMAT
+Format of pixel to be output.
+
+.end

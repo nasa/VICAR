@@ -112,11 +112,11 @@ if ($?SPICEROOT != 0) then
    copy_one_platform_external.csh $SRC $DST $PLAT $SPICEROOT/fortran/
 endif
 
-if ($?ACE_ROOT != 0) then
+if ($?ACE_TAO_INSTALL_PREFIX != 0) then
    echo "######"
    echo "# ACE Wrappers"
    echo "######"
-   copy_one_platform_external.csh $SRC $DST $PLAT $ACE_ROOT
+   copy_one_platform_external.csh $SRC $DST $PLAT $ACE_TAO_INSTALL_PREFIX
 endif
 
 if ($?XERCES_C_ROOT != 0) then

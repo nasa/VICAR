@@ -1,0 +1,115 @@
+process
+
+subcmd fortran
+	parm inp string count=1
+	parm out string count=0:1 def=--
+	parm org keyword valid=(row,column) def=column
+	parm mode keyword valid=(a4test,copytest) def=copytest
+end-sub
+
+subcmd new
+	parm out string count=1
+	parm gr1_nc integer default=0
+	parm org keyword valid=(row,column) default=column
+	parm nr integer def=10
+	parm nc integer def=10
+	parm format (string,4) string count=0:20 default=--
+	parm version keyword valid=(ibis1,ibis2) def=ibis2
+end-sub
+
+subcmd list
+	parm inp string count=1
+	parm gr1_nc integer default=0
+	parm sr integer def=1
+	parm sc integer def=1
+	parm nr integer def=5
+	parm nc integer def=10
+end-sub
+
+subcmd coldelete
+	parm inp string count=1
+	parm gr1_nc integer default=0
+	parm col integer count=1
+	parm ncol integer count=1
+end-sub
+
+subcmd colinsert
+	parm inp string count=1
+	parm gr1_nc integer default=0
+	parm col integer count=1
+	parm ncol integer count=1
+	parm format  keyword valid=(BYTE,HALF,FULL,REAL,DOUB,COMP,A8) +
+		 count=1 def=REAL
+end-sub
+
+subcmd signal
+end-sub
+
+subcmd rowdelete
+	parm inp string count=1
+	parm gr1_nc integer default=0
+	parm row integer count=1
+	parm nrow integer count=1
+end-sub
+
+subcmd rowinsert
+	parm inp string count=1
+	parm gr1_nc integer default=0
+	parm row integer count=1
+	parm nrow integer count=1
+end-sub
+
+subcmd rowclear
+	parm inp string count=1
+	parm gr1_nc integer default=0
+	parm row integer count=1
+	parm nrow integer count=1
+end-sub
+
+subcmd recread
+	parm inp string count=1
+	parm gr1_nc integer default=0
+	parm cols integer count=1:20
+	parm srow integer count=1
+	parm nrow integer count=1
+	parm format keyword valid=(BYTE,HALF,FULL,REAL,DOUB,COMP,A8) +
+		 count=1 def=REAL
+end-sub
+
+subcmd recwrite
+	parm inp string count=1
+	parm gr1_nc integer default=0
+	parm cols integer count=1:20
+	parm inrow integer count=1
+	parm outrow integer count=1
+	parm nrows integer count=1
+	parm recrows integer count=1
+	parm format keyword valid=(BYTE,HALF,FULL,REAL,DOUB,COMP,A8) +
+		 count=1 def=REAL
+end-sub
+
+subcmd reczero
+	parm inp string count=1
+	parm gr1_nc integer default=0
+	parm cols integer count=1:20
+	parm srow integer count=1
+	parm nrow integer count=1
+	parm format keyword valid=(BYTE,HALF,FULL,REAL,DOUB,COMP,A8) +
+		 count=1 def=REAL
+end-sub
+
+subcmd grpdefine
+	parm inp string count=1
+	parm gr1_nc integer default=0
+	parm type keyword valid=(format,unit,group) def=group
+	parm grpname string count=1
+	parm cols integer count=0:20 def=--
+	parm expr string count=0:1 def=--
+end-sub
+
+subcmd zaplabel
+	parm inp string count=1
+end-sub
+
+end-proc
+

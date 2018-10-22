@@ -1,0 +1,29 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM sargonb
+
+   To Create the build file give the command:
+
+		$ vimake sargonb			(VMS)
+   or
+		% vimake sargonb			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	sargonb
+#define R2LIB
+
+#define MODULE_LIST sargonb.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_P3SUB
+/* #define LIB_LOCAL */
+/************************* End of Imake file ***************************/

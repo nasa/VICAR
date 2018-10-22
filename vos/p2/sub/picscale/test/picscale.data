@@ -1,0 +1,58 @@
+delete from ssiraw where sclkstrtcnt=394449168
+go
+delete from ssioverview where sclkstrtcnt=394449168
+go
+insert into ssiraw(ert,tml,tpl,gaps,note,maxcml,rawnum,ccdtemp,coneang,fileIdx,
+maxssnr,minssnr,ertmilli,exposdur,filename,filepath,filtname,framedur,mergenum,
+modified,piccount,averagedn,expostype,telemmode,dsnstation,filestatus,
+gainmodeid,obstructid,telemfmtid,bestversion,maxhufratio,maxictratio,
+minhufratio,minictratio,producttype,rearopttemp,sclkstrtcnt,blemprotflag,
+encodingtype,meanhufratio,meanictratio,stopgapline1,stopgapline2,stopgapline3,
+invclckstflag,litefldstflag,meantruncbits,meantruncsamp,rotorposition,
+sclkpartition,startgapline1,startgapline2,
+startgapline3)
+  values("May 21 1997  8:46:00:000PM",8,NULL,1,
+"GLLTELEMPROC v2.0.0",8,1,119,94.1158599853516,25618055,0,0,393,
+395.833312988281,"s0394449168.1","/project/gll/ssi/udr/g08/","CLEAR",4,NULL,
+"May 21 1997  3:05:26:103PM",111,36,"EXT","PB","43",1,"40K","N","HIS",0,0,
+46.718807220459,0,5.64282512664795,NULL,51,394449168,"OFF","ICT",0,
+23.6806907653809,120,0,0,"NOR","ON",0,0,282.337799072266,1,113,0,0)
+go
+insert into ssiraw(ert,tml,tpl,gaps,note,maxcml,rawnum,ccdtemp,coneang,fileIdx,
+maxssnr,minssnr,ertmilli,exposdur,filename,filepath,filtname,framedur,mergenum,
+modified,piccount,averagedn,expostype,telemmode,dsnstation,filestatus,
+gainmodeid,obstructid,telemfmtid,bestversion,maxhufratio,maxictratio,
+minhufratio,minictratio,producttype,rearopttemp,sclkstrtcnt,blemprotflag,
+encodingtype,meanhufratio,meanictratio,stopgapline1,stopgapline2,stopgapline3,
+invclckstflag,litefldstflag,meantruncbits,meantruncsamp,rotorposition,
+sclkpartition,startgapline1,startgapline2,
+startgapline3)
+  values("May 21 1997  8:46:00:000PM",8,NULL,1,"SSIMERGE2",8,2,
+119,94.1158599853516,26732679,NULL,NULL,393,395.833312988281,"s0394449168.m2",
+"/project/gll/ssi/udr/merge/g08/","CLEAR",4,1,"Apr  3 1998 11:44:01:086AM",111,
+36,"EXT","PB","43",1,"40K","N","HIS",1,0,46.718807220459,0,5.64282512664795,"M",
+51,394449168,"OFF","ICT",0,23.6806907653809,120,0,0,"NOR","ON",0,0,
+282.337799072266,1,113,0,0)
+go
+insert into ssioverview(ra,note,scaz,smaz,noraz,obsid,sunaz,twist,maxlat,maxlon,
+minlat,minlon,phsang,edrdone,imageid,soldist,sysdone,cspiceid,emissang,espiceid,
+incidang,ispiceid,modified,pspiceid,redrdone,smearmag,sspiceid,subsclat,
+subsclon,targname,centerlat,centerlon,edrcddone,ictseqnum,imagetime,mergedone,
+opnavflag,slantdist,subscline,subsollat,subsollon,ctrbdydist,galsosdone,
+orbnumchar,redrcddone,resolution,ringradius,subscrange,timeclsapr,angsemidiam,
+declination,edrfilldone,readoutmode,sclkstopcnt,sclkstrtcnt,subscsample,
+targctrdist,edrspikedone,localhourang,onchipmosaic,predexposdur,predfiltname,
+predframedur,redrblemdone,redrfilldone,redrspikedone,sattimeclsapr,
+sclkpartition,imagetimemilli,predgainmodeid,predtelemfmtid,
+prtsclkstrtcnt)
+  values(221.753799438477,NULL,175.347702026367,NULL,
+88.6500778198242,"G8SSADRAST01",179.054748535156,73.2079925537109,NULL,NULL,
+NULL,NULL,80.5533981323242,0,"G8S0001",761976000,0,"N094",0.084196001291275,
+"E032",80.5528717041016,NULL,"Apr 28 1998 11:26:50:443AM","N126",0,
+0.100000001490116,"N126",-0.586521983146667,136.935455322266,"SMALL_SAT",
+-0.586521983146667,136.935455322266,0,0,"May  7 1997  1:16:13:000AM",1,0,
+1435774.125,-54.4647560119629,-0.458534985780716,56.3834075927734,1507172.75,0,
+"G8",0,29.0562782287598,NULL,1435774.25,-1102550,2.71862888336182,
+-17.4079170227051,0,NULL,394449190,394449168,3326.98779296875,1507265.625,0,
+99.4479522705078,0,395.833312988281,"CLEAR",4,0,0,0,-1102550,1,424,"40K","HIS",0)
+go

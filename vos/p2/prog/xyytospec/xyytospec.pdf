@@ -1,0 +1,156 @@
+process help=*
+PARM INP TYPE=STRING COUNT=(0:3) DEFAULT=--
+PARM OUT TYPE=STRING COUNT=3
+PARM PATH  TYPE=STRING COUNT=1 +
+   DEFAULT="/usr/local/share/calibration/"
+!/home/cib/
+PARM DEVICE  TYPE=STRING COUNT=1 +
+  VALID=("mda","fujix","alps","temblor","wasatch","kodak168", +
+  "kodak230","asutek","codonics","csi_1","ntsc","hdtv","octane", +
+  "none") DEFAULT="none"
+PARM MONITOR  TYPE=STRING COUNT=1 +
+  VALID=("left","right","none") DEFAULT="none"
+PARM NEAREST TYPE=INTEGER COUNT=(0:1) VALID=(5:30) DEFAULT=--
+PARM MACBETH TYPE=KEYWORD VALID=("MACBETH","NOMAC") DEFAULT="NOMAC"
+END-PROC
+
+.TITLE
+VICAR program XYYTOSPEC
+
+.HELP
+PURPOSE:
+To convert color images from xyY to RGB coordinates for a specific output
+device.
+This is the same function performed by program XYYTORGB but without Candella.
+
+EXECUTION:
+typically:
+xyytospec inp=(x,y,Y) out=(r,g,b) device=...
+or:
+xyytospec out=(r,g,b) device=... 'macbeth
+
+.PAGE
+
+METHOD:
+   xyytospec accepts images in device independent coordinates. These are
+x and y chromaticity coordinates and Y tristimulus value. The program reads 
+color calibration files for the device you specify and converts the xyY 
+input values into RGB intensity DN values for that specific device. This
+assures that your eyes will respond with the correct color response
+for the true scene when they observe the images upon that device. No other 
+device can be trusted.
+
+   The program reads in a calibration file for the specified device. This is 
+an ascii file with data in records like this:
+STEP#                Yn      x       y       R-DN    G-DN    B-DN
+1               0.122616  0.278170  0.298730   0.0   0.0   0.0
+2               1.267030  0.595390  0.329050  64.0   0.0   0.0
+3               5.354223  0.627000  0.332000  128.0   0.0   0.0
+4               12.874659  0.632610  0.333000  192.0   0.0   0.0
+
+The first 3 records are skipped by the program so the first record read is:
+1               0.122616  0.278170  0.298730   0.0   0.0   0.0
+
+These correspond to a calibration giving the xyY values for a data cube of
+all combinations of rgb dn values in some coarse interval like 32 or 64
+dn steps. The file must end with a .2
+
+   The method used is to create a 40 by 40 by 40 cube in Luv coordinates
+spanning the range of xyY values in the calibration file. Each input pixel
+in xyY is converted to Luv space and compared with the cube to see if
+a mapping polynomial exists there. If it exists then the Luv value is
+converted to rgb using the polynomial.
+r=AL+Bu+Cv+D
+g=EL+Fu+Gv+H
+b=IL+Ju+Kv+M
+If no polynomial exists it is computed and stored into the cube.
+Equations (as above) are solved by least squares using the 8 nearest Luv
+points (in the cube, one in each octant) to the cube coordinate.
+
+Note:
+   There is no such thing as RGB unless we specify the
+device it is intended for. If you are given three RGB images by someone,
+there is no color information in them even if they are in radiance units.
+This is because the eye responds to the spectral distribution of the 
+scene and this has been lost. Program spectoxyy can write xyY images
+from radiance or reflectance images. xyY images retain the human color
+response and are device independent.
+
+HISTORY:
+6-30-96  J Lorre. 
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+.LEVEL1
+.VARI INP
+3 input images
+
+.VARI OUT
+3 Output images
+
+.VARI DEVICE
+Output device name
+
+.VARI PATH
+Path name for 
+calibration files.
+
+.VARI MONITOR
+Whether the monitor is
+left or right.
+
+.VARI NEAREST
+Nearest # points
+for fitting
+
+.VARI MACBETH
+Print macbeth dn
+values.
+Optional output files.
+
+.LEVEL2
+.VARI INP
+Three input images in the order:
+1. Chromaticity coordinate x.
+2. Chromaticity coordinate y.
+3. Tristimulus coordinate Y.
+These images are in device independent coordinates.
+
+.VARI OUT
+Three Output RGB images in the order:
+1. Red dn value in BYTE format.
+2. Green dn value in BYTE format.
+3. Blue dn value in BYTE format.
+These images are in DEVICE calibrated coordinates.
+
+.VARI DEVICE
+Target device name upon which the output RGB images are to be 
+displayed.
+  VALID=("mda","fujix","alps","temblor","wasatch","kodak168", +
+  "kodak230","asutek","codonics","csi_1","ntsc","hdtv","octane", +
+  "none") DEFAULT="none"
+Defaults to none.
+
+.VARI PATH
+Path name for the location of color calibration files for the DEVICE.
+Defaults to /usr/local/share/calibration/
+Note the ending slash !
+
+.VARI MONITOR
+Whether the monitor is the left or the right one.
+Specify left or right. Defaults to none.
+Only used if the device is a TV monitor.
+  VALID=("left","right","none") DEFAULT="none"
+
+.VARI NEAREST
+The nearest number of points in the color space to use for each least
+squares fit mapping rgb dn values to Luv color coordinates. Defaults to
+an internal table which is device dependent.
+At the moment all devices use 8 points.
+More points produces steadier colors but they are less accurate.
+
+.VARI MACBETH
+Print the Macbeth dn values for this device.
+No input files are needed.
+The output r g b files will contain a tiny picture six
+samples by four lines containing the Macbeth color chart where each
+patch is a single pixel. You can zoom it up to see it.

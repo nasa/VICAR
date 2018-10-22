@@ -1,0 +1,371 @@
+1  IBISGR
+    These are the standard IBIS subroutines that perform buffered I/O with
+IBIS graphics-1 files:
+
+	z/rdgr/_unit to open a file for reading
+	z/wrgr/_unit to open a file for writing
+	z/updategr to open a file-unit for update
+	z/getgr	   to get a coordinate set (pair or triplet) from the file
+	z/nextgr   to get the beginning coordinate set of the next line string
+	z/putgr	   to put a coordinate set into the file
+	z/endgr	   to put an end-of-polygon terminator (0,0,0..) into the file
+	z/setgr	   to specify the next coordinate set to be read by getgr
+	z/clgr	   to close (and flush, for writing) the file
+	z/signalgr to check the error status of the last i/o call.
+
+The opening routines set up a structure that contains all of the
+necessary information about the files.  The I/O routines only perform
+serial I/O, although the position in pre-existing files (read/update)
+can be modified by setgr.  There can be at most 40 graphics
+files open at a time. The graphics files can have any number of
+dimensions (the number of real coordinates per set) from 1 to 1024. 
+
+
+2  CALLING SEQUENCES
+
+  FORTRAN:
+	status = rdgr (instance, num, dimension)
+	status = wrgr (instance, num, dimension)
+	status = rdgr_unit (unit, num, dimension)
+	status = wrgr_unit (unit, num, dimension)
+	status = updategr (unit, num, dimension)
+	status = getgr ( num, zero, eof, first_c, second_c, third_c)
+	status = nextgr (num, eof, first_c, second_c, third_c)
+	status = putgr (num, first_c, second_c, third_c)
+	status = endgr (num)
+	status = setgr (num, coord)
+	status = clgr (num)
+	call signalgr (num,signal,abortflag)
+
+  C:
+	status = zrdgr (instance, num, dimension);
+	status = zwrgr (instance, num, dimension);
+	status = zrdgr_unit (unit, num, dimension)
+	status = zwrgr_unit (unit, num, dimension)
+	status = zupdategr (unit, num, dimension);
+	status = zgetgr ( num, &zero, &eof, &first_c, &second_c, &third_c);
+	status = znextgr (num, &eof, &first_c, &second_c, &third_c);
+	status = zputgr (num, first_c, second_c, &third_c);
+	status = endgr (num);
+	status = zsetgr (num, coord);
+	status = zclgr (num);
+	(void) zsignalgr (num,signal,abortflag);
+
+    The num parameter is the internal file number that these set of
+routines use to reference the graphics files;  thus the number that
+was used to open the file (with rdgr updategr or wrgr) must be used in
+subsequent calls for that file.
+
+    If the file is opened with only one or two dimensions then the
+unnecessary coordinate parameters (second_c, third_c ) can be passed
+null pointers (in C) or zeroes (FORTRAN). There are no variable arguments
+in these routines, and so portable programs must not omit these parameters.
+
+If the dimension is four or greater than the third_c parameter is
+actually a real array containing the appropriate number of elements (n-2).
+In any case for C routines it is always passed by reference, even
+though first_c and second_c may be passed by value.
+
+The routines all return an integer "status" value, which =1 if successful.
+If not, the status refers to a graphics error status which may be passed to
+z/signalgr(). To access the status value in FORTRAN the routines must be
+declared as INTEGER functions in the calling program.
+
+2  rdgr
+
+	status = rdgr (instance, num, dimension)
+	status = zrdgr (instance, num, dimension);
+	status = rdgr_unit (unit, num, dimension)
+	status = zrdgr_unit (unit, num, dimension);
+
+		rdgr opens an IBIS graphics file for reading
+		    and prepares the common block. rdgr_unit operates
+		    similarly, but takes a VICAR unit (from xvunit).
+
+	    Parameters:
+		instance    integer	input	  which Vicar input file
+		unit        integer	input	  which Vicar file unit
+		num	    integer	input	  which IBIS graphics file
+		dimension   integer     input	  number of coords per set
+
+2  wrgr
+
+	status = wrgr (instance, num, dimension)
+	status = zwrgr (instance, num, dimension);
+	status = wrgr_unit (unit, num, dimension)
+	status = zwrgr_unit (unit, num, dimension);
+
+		wrgr creates an IBIS graphics file for writing
+		    and prepares the common block. wrgr_unit operates
+		    similarly, but takes a VICAR unit (from xvunit).
+
+	    Parameters:
+		instance    integer	input	  which Vicar output file
+		unit        integer	input	  which Vicar file unit
+		num	    integer	input	  which IBIS graphics file
+		dimension   integer     input	  number of coords per set
+
+
+2  updategr
+
+	status = updategr (unit, num, dimension)
+	status = zupdategr (unit, num, dimension);
+
+		updategr opens an existing IBIS graphics file for reading
+		    and/or writing, and prepares the common block
+
+	    Parameters:
+		unit	    integer	input	  VICAR unit from z/xvunit
+		num	    integer	input	  which IBIS graphics file
+		dimension   integer     input	  number of coords per set
+
+2  getgr
+
+	status = getgr ( num, zero, eof, first_c, second_c, third_c)
+	status = zgetgr ( num, &zero, &eof, &first_c, &second_c, &third_c);
+
+		getgr gets a coordinate set from a graphics file
+
+	    Parameters:
+		num	 integer   input	which IBIS graphics file
+		zero	 logical   output	true if all coords are zero
+		eof	 logical   output	true if at the end of file
+		first_c  real	   output	the first coordinate got
+		second_c real	   output	the second coordinate got
+		third_c  real arr. output	the rest of the coordinates
+
+	    If eof is true then the coordinates are garbage.
+
+2  nextgr
+
+	status = nextgr (num, eof, first_c, second_c, third_c)
+	status = znextgr (num, &eof, &first_c, &second_c, &third_c);
+
+		nextgr reads coordinate sets from the graphics file
+		    until coming to a non zero
+
+	    Parameters:
+		num	 integer   input	which IBIS graphics file
+		eof	 logical   output	true if at the end of file
+		first_c  real	   output	the first coordinate to get
+		second_c real	   output	the second coordinate to get
+		third_c  real arr. output	the rest of the coordinates
+
+	    If eof is true then the coordinates are garbage.
+
+2  putgr
+
+	status = putgr (num, first_c, second_c, third_c)
+	status = zputgr (num, first_c, second_c, &third_c);
+
+		putgr puts a coordinate set out in the 
+			graphics file
+
+	    Parameters:
+		num	 integer   input	which IBIS graphics file
+		first_c  real	   input	the first coordinate to be put
+		second_c real	   input	the second coordinate to be put
+		third_c  real arr. input	the rest of the coordinates
+
+
+2  endgr
+
+	status = endgr (num)
+	status = zendgr (num);
+
+		putgr puts an end-of-polygon delimiter into the 
+			graphics file
+
+	    Parameters:
+		num	 integer   input	which IBIS graphics file
+
+2  setgr
+
+	status = setgr (num, coord)
+	status = zsetgr (num, coord);
+
+		setgr specifies the next coordinate set (row) to be read 
+		by getgr/putgr. This only has an effect for files opened
+		with either z/rdgr or z/updategr.
+
+	    Parameters:
+		num	 integer   input	which IBIS graphics file
+		coord	 integer   input	next coordinate set in
+						graphics file
+
+2  clgr
+
+	status = clgr (num)
+	status = zclgr (num);
+
+		clgr closes the graphics file
+		    if the file is an output/update file then it flushes 
+		    the buffer and updates the IBIS label
+
+	    Parameters:
+		num	integer	   input	which IBIS graphics file
+
+2  signalgr
+
+	call signalgr (num,status,abendflag)
+	(void) zsignalgr (num,status,abendflag);
+
+		signalgr reports an informative error message if any, and
+		   if abendflag is nonzero, will abort program.
+
+	    Parameters:
+		num         integer	   input	which IBIS graphics file
+		status      integer	   input	error status
+		abendflag   integer	   input	abort if non-zero.
+
+
+
+2  OPERATION
+
+    This set of IBIS graphics I/O routines uses a static structure
+that keeps track of the IBIS-2 records and file control information for
+up to forty open graphics files.  The routines that open the files (rdgr/_unit
+wrgr/_unit and updategr) set up the structure.  
+
+
+2 FILE FORMAT
+
+   The graphics-1 file format is a list of coordinates defining the vertices
+of polygons.  For two-dimensional (2-D) files each coordinate consists of 
+a pair of real numbers, with the polygon terminator currently being a set of 
+zeros.
+
+For 3-D files each coordinate consists of a triplet of real numbers, with
+the terminator being a triplet of zeros.  Usually the coordinate pairs
+are in (line,sample) format, and the coordinate triplets in (line,sample,
+elevation) format, although they could refer to any coordinate space.  A 
+greater number of dimensions are allowed, up to 1024, to enable nominal data
+to be carried along with the coordinate data. The file may contain extra 
+terminators (pairs or  triplets of zeros) that must be skipped over when 
+reading through the file.
+
+Note: For future compatibility it is suggested that the IBISGR 
+routines be used (via the 'zero' indicator) to determine when a polygon 
+delimiter is encountered, rather than relying on this specific "all-zero"
+implementation. Use 'endgr' to guarantee that a valid delimiter is
+inserted into the file, instead of using 'putgr' to place zero valued
+coordinates into file.
+
+The graphics files are stored on disk in a IBIS-2 compatible file. Formerly
+there were specific implementations in terms of number of bytes per record,
+etc., but this is no longer the case. Any IBIS-2 file with numerical values
+in the "columns" may be used as a GRAPHICS file. For future compatibility
+if the IBISGR routines find that the groups "C_POSITION" and "C_ROOT" have
+been defined (e.g. by the ICL routines), then it will use ONLY those
+columns which belong to both of those groups. Otherwise it will use all of
+the columns which contain numerical values.
+
+
+2  EXAMPLES
+
+3   FORTRAN
+
+
+The following is a sample Fortran program using these calls:
+
+	INCLUDE 'VICMAIN_FOR'
+	SUBROUTINE MAIN44
+
+C	This program converts the input IBIS graphics-1 file in (x,y) format
+C	into a (line,sample) format for output.  
+C	For 2-D files.
+
+	INTEGER	NL, COUNT
+	REAL	X, Y
+	LOGICAL zero, eof
+	INTEGER status, rdgr,wrgr,nextgr,putgr,getgr,clgr
+
+	call XVP ('NL', NL, COUNT)
+	status = rdgr (1, 1, 2)
+	if (status.ne.1) call signalgr(1,status,1)
+	status =  wrgr (1, 2, 2)
+	if (status.ne.1) call signalgr(2,status,1)
+
+	eof = .FALSE.
+	DO WHILE (.NOT. eof)
+	    status = nextgr (1, eof, X, Y, 0)     ! get the start of the poly
+	    if (status.ne.1) call signalgr(1,status,1)
+	    zero = .FALSE.
+	    DO WHILE (.NOT. zero .AND. .NOT. eof) ! read until end of poly
+		status = putgr (2, NL-Y, X, 0)
+	        if (status.ne.1) call signalgr(2,status,1)
+		status = getgr (1, zero, eof, X, Y, 0)
+	        if (status.ne.1) call signalgr(1,status,1)
+	    ENDDO
+	    ! In place of 'call putgr(2,0,0,0)' call the following:
+	    call endgr (2) !  End-of-polygon
+	ENDDO
+
+	status = clgr (1)
+	if (status.ne.1) call signalgr(1,status,1)
+	status = clgr (2)
+	if (status.ne.1) call signalgr(2,status,1)
+
+	RETURN
+	END
+
+3  C
+
+  Here is an example of a portable C program to update a graphics file
+  by adding "1" to the y coordinate:
+  
+   
+   #include "vicmain_c"
+
+   main44()
+   {
+	float x, y, extra_coords[8];
+	int zero, eof;
+	int status,count,unit;
+	int num_dimen;
+	
+ 	status = zvp ("DIMEN", &num_dimen, &count);
+	status = zvunit(&unit,"INP",1,0);
+  	status = zupdategr (unit, 1, num_dimen);
+	if (status != 1) zsignalgr(1,status,1);
+
+   /*     Update the coordinate sets */
+	eof = 0;
+	while (!eof)
+	{
+	    status = znextgr (1, &eof, &x, &y, extra_coords);
+	    if (status != 1) zsignalgr(1,status,1);
+	    zero = 0; /* false */
+	    while (!zero && !eof) 
+	    {
+		status = zputgr (1, x, y+1.0,extra_coords);
+	 	if (status != 1) zsignalgr(1,status,1);
+		status = zgetgr (1, &zero, &eof, &x, &y,extra_coords);
+	 	if (status != 1) zsignalgr(1,status,1);
+	    }
+	    if (zero) status = zendgr (1);
+	    if (status != 1) zsignalgr(1,status,1);
+	}
+
+	status = zclgr (1);
+	if (status != 1) zsignalgr(1,status,1);
+	
+	return;
+   }
+
+
+
+
+2  RESTRICTIONS
+
+	There can be at most 40 graphics files open at a time.
+	The number of dimensions must be between 1 and 1024 inclusive.
+     
+2  HISTORY
+
+     IBISGR
+     Original Programmer:     Frank Evans       February 1986
+     Cognizant Programmer:    Niles Ritter      October 1994
+     Documentation Author:    Frank Evans and Niles Ritter
+     Revision:          5     February 1995      NDR
+

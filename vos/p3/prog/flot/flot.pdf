@@ -1,0 +1,105 @@
+process help=*
+!  PDF FILE FOR FLOT
+!
+PARM INP     TYPE=STRING   COUNT=1
+PARM OUT     TYPE=STRING   COUNT=1
+!
+PARM SIZE    TYPE=INTEGER  COUNT=(0:4)   DEFAULT=--
+PARM SL      TYPE=INTEGER  COUNT=0:1     DEFAULT=--
+PARM SS      TYPE=INTEGER  COUNT=0:1     DEFAULT=--
+PARM NL      TYPE=INTEGER  COUNT=0:1     DEFAULT=--
+PARM NS      TYPE=INTEGER  COUNT=0:1     DEFAULT=--
+!
+PARM MODE    TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=CLOCK    +
+             VALID=(CLOCK,COUNTER,VERT,HORIZ,TRANS,ROT180)
+!
+END-PROC
+.TITLE
+FLOT
+.HELP
+ PURPOSE:
+
+Program FLOT is a VICAR applications program which is used to flip or rotate 
+an image.  The MODE parameter is used to select the operation that will be
+performed on the image.  The six operations available are:
+   1) horizontal flip (reflection through vertical axis).
+   2) vertical flip (reflection through horizontal axiz).
+   3) 90 degrees clockwise rotation.
+   4) 90 degrees counterclockwise rotation.
+   5) transpose (in the matrix sense).
+   6) 180 degrees rotation.
+.PAGE
+ EXECUTION:
+
+The input image may have any valid data format (byte, halfword, ...),
+and either BSQ or BIL data organization.  The data format is obtained from
+the label of the input file, and the output image organization is always BSQ.
+The output image has the same data format  (byte or halfword) as the input 
+image.  No size restrictions are imposed on the input image.
+.PAGE
+TAE COMMAND LINE FORMAT
+      The following command line formats show the major allowable forms:
+      FLOT INP=a OUT=b SIZE=(sl,ss,nl,ns) optional parameters
+      FLOT INP=a OUT=b  SL=sl SS=ss NL=nl NS=ns optional parameters
+      FLOT a b (sl,ss,nl,ns) optional parameters
+      FLOT a b optional parameters
+
+       Here 'a' represents the input image file name, and
+       'b' represents the output image file name.
+.PAGE
+EXAMPLE
+
+      FLOT INP=A OUT=B 'CLOCK
+
+      In this example the output file B is produced by rotating the input
+      image A 90 degrees in the clockwise direction.
+.PAGE
+RESTRICTIONS
+1. The input file should not be on magnetic tape unless a horizontal flip
+   is being performed.
+2. BIP input file organization is not supported.  Output file organization
+   is BSQ regardless of input.
+
+ WRITTEN BY:             Steve Pohorsky              19 Sep 1984
+
+ COGNIZANT PROGRAMMER:   Ron Alley                    4 Feb 1998
+
+ REVISION:               2                           19 Sep 1984
+.LEVEL1
+.VARIABLE INP
+Input file name
+.VARIABLE OUT
+Output file name
+.VARIABLE SIZE
+Vicar size field for input:
+Same as  (SL,SS,NL,NS)
+By default, the entire input
+image is used if these
+parameters are not entered.
+.VARIABLE SL
+Starting line of input
+.VARIABLE SS
+Starting sample of input
+.VARIABLE NL
+Number of lines from input
+.VARIABLE NS
+Number of samples from input
+.VARIABLE MODE
+Operation performed on image:
+CLOCK,COUNTER,VERT,HORIZ,TRANS,
+ROT180
+.LEVEL2
+.VARIABLE SIZE
+   This is the standard VICAR size field with the following exception: the
+location refers to the input image, not the output.
+.VARIABLE MODE
+The MODE parameter is used to select the operation that will be
+performed on the image.  The six operations available are:
+   1) horizontal flip (reflection through vertical axis).
+   2) vertical flip (reflection through horizontal axiz).
+   3) 90 degrees clockwise rotation.
+   4) 90 degrees counterclockwise rotation.
+   5) transpose (in the matrix sense).
+   6) 180 degrees rotation.
+The default mode is a 90 degrees clockwise rotation.
+.END

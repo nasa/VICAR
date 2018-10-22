@@ -1,0 +1,46 @@
+/*
+ * CHANGE LOG
+ * 10-dec-93	Pulled necessary stuff from IVconfig/sun.cf; distinguished
+ *		between SunOS 4.X and Solaris...dag
+ * 16-dec-93	PR2474: Removed SOL_DEF stuff...rt
+ * 22-dec-93	Solaris port: Added necessary defines and libraries...dag;
+ *		PR2301: Set HaveTerminalLibrary to 'no' for Solaris...rt
+ * 23-dec-93	Solaris port: ifdefs needed to be moved around...rt
+ * 29-dec-93	PR2548: Added -R option to XtaeLibPath...dag/rt
+ * 30-dec-93	PR2552: Defined StandardAnsiCFlags for SunOS4 and Solaris;
+ *		added -Xs to StandardCFlags...dag
+ * 07-nov-2001  Converted to Mac OS X from x86_linux.cf base...rgd
+ * 13-jan-2017  Converted to mac 64 os x from x86_macosx.cf bas... rgd
+ */
+
+/* From the now defunct IVconfig/sun.cf */
+#define SunOSPlatform     NO           /* set to NO if not running SunOS */
+/* SunOS 4.X setup */
+#define OSName            Darwin
+#define OSMajorVersion    10
+#define OSMinorVersion    0
+#define SystemV           NO
+
+#define HaveTerminalLibrary no
+#define AnsiCCmd gcc
+#define CcCmd gcc
+#define FortranCmd gfortran -m64 -fno-second-underscore
+
+#define InstallCmd install
+
+/* Special Fortran binding target, needed in taelib.  Overrides the one */
+/* in TAErules.def.  The only change is to add -traditional to the gcc  */
+/* line.  Nice of them to NOT put that particular thing in a macro! :-( */
+
+#define SpecialFortBindTarget(file)                                       @@\
+file.o: file.c                                                            @@\
+	-@if test $(CLFORT) = yes; then \                                 @@\
+		(set -x; \                                                @@\
+			$(CC) -traditional -E $(CFLAGS) -DFORTRAN -I$(TINC) file.c | \ @@\
+				awk '$$1 != "#"' >tmp.f; \                @@\
+			$(FORT) -c tmp.f; mv tmp$(FORTOBJEXT) file.o; \   @@\
+			$(RM) tmp.f); \                                   @@\
+	else \                                                            @@\
+		(set -x; $(CC) $(CFLAGS) -c -I$(TINC) file.c); \          @@\
+	fi
+

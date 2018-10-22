@@ -1,0 +1,176 @@
+process help=*
+LOCAL (DUM1)    TYPE=REAL
+PARM INP 	TYPE=STRING  COUNT=1
+PARM OUT 	TYPE=STRING  COUNT=1 DEFAULT="srchedge0.img"
+PARM SKIPNS 	TYPE=INTEGER COUNT=1 DEFAULT=10
+PARM SKIPNL 	TYPE=INTEGER COUNT=1 DEFAULT=10
+PARM DARKSKIP 	TYPE=INTEGER COUNT=1 DEFAULT=10
+PARM SMALL	TYPE=STRING  COUNT=1 DEFAULT="normal" +
+		VALID=("normal", "small")
+PARM SMALLSIZE	TYPE=INTEGER COUNT=4 DEFAULT=(400,400,250,250)
+PARM CUT	TYPE=INTEGER COUNT=1 DEFAULT=100
+PARM ANGLE	TYPE=NAME    DEFAULT=DUM1
+END-PROC
+
+
+.TITLE
+VICAR program srchedge
+
+
+.HELP
+PURPOSE:
+	To find the angle in degrees of the transition edge of an input image.  
+	The transition edge is the line at which a vast difference in DN
+	values is found.
+
+EXECUTION:
+        
+	srchedge inp=in.img out=out.img angle=angle [optional-parameters]
+
+.PAGE
+
+METHOD:
+
+        INPUT IMAGE:
+
+        Only black and white halfword VICAR images are valid.	The input
+	image has only dark and light DN values with one side of the image
+	dark and the other light.  A distinctive straight line created by
+	the transition edge from dark to light or light to dark separates
+	the two values.
+
+
+        ddddddddddddddddddddddddll
+        dddddddddddddddddddddlllll
+        ddddddddddddddddddllllllll
+        dddddddddddddddlllllllllll
+        ddddddddddddllllllllllllll      d=dark DN value
+        ddddddddllllllllllllllllll
+        ddddllllllllllllllllllllll      l=light DN value
+        dlllllllllllllllllllllllll
+        lllllllllllllllllllllllll|
+        llllllllllllllllllllllllll
+        llllllllllllllllllllllllll
+        llllllllllllllllllllllllll
+
+.PAGE
+
+        PROCESSING:
+
+        Srchedge does the following:
+
+                1) Finds the transition edge where the dark DN value
+                   and the light DN value come together.
+                2) Creates an output image file that is the same as the
+		   input file except the transition edge is marked with DN
+		   values of 20,000.
+                3) Does a least squares fit on the points making up the
+	           transition edge.
+                4) Gets the angle of the line created by the least squares
+		   fit and returns it in parameter angle.
+
+	The angle is measured as follows:
+
+		1) Preliminary angle A is obtained such that -90.0< A <=90.0
+		2) Then there are 6 cases:
+			A. Dark side on left  and A>0   =>  angle = 360.0 - A
+			B. Dark side on right and A>0   =>  angle = 180.0 - A
+			C. Dark side on left  and A<0   =>  angle = 180.0 - A
+			D. Dark side on right and A<0   =>  angle = -A
+			E. Horizontal w/ dark on top    =>  angle = 180.0
+			F. Horizontal w/ dark on bottom =>  angle = 0.0
+
+	Note:  A local variable of type real for parameter angle must be
+	       declared by the user.
+
+HISTORY:
+Oct 24, 1997	RRD	Improved help section.  Fixed bug on Solaris by
+			changing variable cut from unsigned int to int.
+			Commented out line in fitpts that calculates sigma
+			because it generates DOMAIN error. 
+Jul 22, 1997	RRD	Ported to UNIX.
+Mar 28, 1996  Y Kwon	Wrote original version.
+
+COGNIZANT PROGRAMMER:  Young Kwon
+
+.LEVEL1
+.VARI INP
+1 input VICAR image.
+
+.VARI OUT
+1 output VICAR image.
+
+.VARI SKIPNS
+Number of samples to skip in
+searching for transition edge.
+
+.VARI SKIPNL
+Number of lines to skip in 
+searching for transition edge.
+
+.VARI DARKSKIP
+Number of lines and samples to 
+skip in calculating the average
+DN of the image.
+
+.VARI SMALL
+Indicates whether the entire 
+image will be searched.
+
+.VARI SMALLSIZE
+Indicates the portion of the 
+image which will be searched.
+
+.VARI CUT
+Shortens the search area of 
+the image.
+
+.VARI ANGLE
+Output angle in degrees of 
+transition edge.  Parameter
+is of type real.
+
+.LEVEL2
+.VARI INP
+The input VICAR halfword image must be black and white and have a darker and
+a lighter side.
+
+.VARI OUT
+The output image will the same as the input image except that the
+transition edge points will be highlighted with a DN of 20,000.
+
+.VARI SKIPNS
+This variable designates the number of samples to skip while incrementing
+through each input image line to find the transition point form dark to
+light or light to dark.
+
+.VARI SKIPNL
+This variable designates the number of lines to skip while incrementing
+through each input image column to find the transition point form dark to
+light or light to dark.
+
+.VARI DARKSKIP
+This variable designates the number of lines and samples to skip while
+incrementing through the input image to calculate its average DN value.
+
+.VARI SMALL
+Indicates whether the entire image or a portion of the image
+(indicated by SMALLSIZE) will be searched.  When SMALL is set to 
+'SMALL', SMALLSIZE is used.  When SMALL is set to 'NORMAL', 
+SMALLSIZE is ignored.
+
+.VARI SMALLSIZE
+Indicates the portion of the image which will be searched.
+SMALLSIZE must be smaller than the input image size.
+
+.VARI CUT
+Another means to shorten the search area of the image.  For example, when
+CUT is set to 100 the top-most and bottom-most 100 lines, as well as the
+left-most and right-most 100 samples, are ignored in the search for the
+transition edge.
+
+.VARI ANGLE
+The angle in degrees of the transition edge is output to this parameter.
+The user must declare a variable of type real to receive this value.
+
+.END

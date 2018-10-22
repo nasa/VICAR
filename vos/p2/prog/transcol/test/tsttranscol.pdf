@@ -1,0 +1,19 @@
+procedure
+refgbl $autousage
+body
+
+let $autousage="none"
+
+! We don't test IBIS-1 with ROW because those
+! are graphics files, which won't be supported in
+! transcol unless an upgrade is requested. Support
+! for IBIS-2 graphics is transparent, but we test it
+! here just to make sure.
+
+!Note: non-ported TRANSCOL will only work with "IBIS-1"
+
+testtranscol "IBIS-1" "COLUMN"
+testtranscol "IBIS-2" "COLUMN"
+testtranscol "IBIS-2" "ROW" 
+
+end-proc

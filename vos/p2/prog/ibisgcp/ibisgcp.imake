@@ -1,0 +1,14 @@
+#define PROGRAM ibisgcp
+#define R2LIB
+
+#define MODULE_LIST ibisgcp.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_SPICE
+#define LIB_TAE
+#define LIB_MATH77
+#define LIB_RTL
+#define LIB_P2SUB
+#define LIB_NETWORK

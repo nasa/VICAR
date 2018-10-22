@@ -1,0 +1,116 @@
+process help=*
+PARM CAMERA1 TYPE=REAL COUNT=9
+PARM CAMERA2 TYPE=REAL COUNT=9
+PARM COORDS TYPE=REAL COUNT=4
+PARM NL TYPE=INTEGER COUNT=1
+PARM NS TYPE=INTEGER COUNT=1
+END-PROC
+
+.TITLE
+VICAR2 program stereocam
+
+.HELP
+Converts tiepoint locations to xyz coordinates for a stereo camera pair.
+
+The coordinate system is cartesian and right handed. The uncommanded camera
+points down the -Z axis. +X is to the right, +Y is up. The order of rotation
+is:
+First rotation about y (azimuth) positive to the left.
+Second rotation about x (elevation) positive is up.
+Third rotation about z (twist about optical axis) positive is counterclockwise.
+
+Parameters permit you to position the camera in the unrotated initial
+cartesian space and to rotate it about that point.
+
+HISTORY
+Written By: J Lorre			jan 2002
+Cognizant Programmer: J Lorre
+
+.LEVEL1
+
+.VARI INP
+Two inputs:
+#1 is the left image
+#2 is the right image
+
+.VARI CAMERA1
+9 real numbers:
+1=focal length in pixels
+2=camera x location
+3=camera y location
+4=camera z location
+5=first rotation, degrees
+6=second rotation, degrees
+7=third rotation, degrees
+8=sample of optical axis
+9=line of optical axis
+
+.VARI CAMERA2
+9 real numbers:
+1=focal length in pixels
+2=camera x location
+3=camera y location
+4=camera z location
+5=first rotation, degrees
+6=second rotation, degrees
+7=third rotation, degrees
+8=sample of optical axis
+9=line of optical axis
+
+.VARI COORDS
+4 real numbersrepresenting image tiepoint locations:
+1=left eye sample
+2=left eye line
+3=right eye sample
+4=right eye line
+
+.VARI NL
+Number of picture lines
+
+.VARI NS
+Number of picture samples
+
+.LEVEL2
+
+.VARI INP
+Two inputs:
+#1 is the left image
+#2 is the right image
+
+.VARI CAMERA1
+9 real numbers:
+1=focal length in pixels
+2=camera x location
+3=camera y location
+4=camera z location
+5=first rotation, degrees
+6=second rotation, degrees
+7=third rotation, degrees
+8=sample of optical axis
+9=line of optical axis
+
+.VARI CAMERA2
+9 real numbers:
+1=focal length in pixels
+2=camera x location
+3=camera y location
+4=camera z location
+5=first rotation, degrees
+6=second rotation, degrees
+7=third rotation, degrees
+8=sample of optical axis
+9=line of optical axis
+
+.VARI COORDS
+4 real numbersrepresenting image tiepoint locations:
+1=left eye sample
+2=left eye line
+3=right eye sample
+4=right eye line
+
+.VARI NL
+Number of picture lines
+
+.VARI NS
+Number of picture samples
+

@@ -1,0 +1,23 @@
+#define PROGRAM gen
+
+#define MODULE_LIST gen.c
+
+#define MAIN_LANG_C
+#define R2LIB
+
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+
+/* There is a bug in the C compiler optimizer on the HP.  Optimization	*/
+/* level 2 (the default) failes, but 1 succeeds.  To demonstrate the	*/
+/* problem (to see if it has been fixed), issue the command		*/
+/* gen a 3 3 'doub							*/
+/* Then "list a".  The first pixel (line 1, sample 1) should be 0; if	*/
+/* this bug occurs it shows up as 1.					*/
+
+#if HP700_ARCH
+#define C_OPTIONS +O1
+#endif
+

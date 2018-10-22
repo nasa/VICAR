@@ -1,0 +1,28 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM picmatch
+
+   To Create the build file give the command:
+
+		$ vimake picmatch 			(VMS)
+   or
+		% vimake picmatch	       		(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	picmatch
+#define R2LIB
+
+#define MODULE_LIST picmatch.f 
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_MATH77  
+/************************* End of Imake file ***************************/

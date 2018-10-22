@@ -1,0 +1,19 @@
+/* Imake file for test of VICAR subroutine tbl */
+
+#define PROGRAM ttbl
+
+#define MODULE_LIST tztbl.c ttbl.f
+
+#define MAIN_LANG_C
+#define TEST
+
+#define FTNINC_LIST fortport
+
+#define USES_C
+#define USES_FORTRAN
+
+#define LIB_FORTRAN
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+

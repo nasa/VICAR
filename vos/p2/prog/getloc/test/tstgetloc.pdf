@@ -1,0 +1,21 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+!
+!  THIS IS A TEST OF PROGRAM GETLOC
+!
+!      byte image - first test defaults.
+!
+gen GETLOCA NL=1 NS=1458 'REAL4
+getloc INP=GETLOCA OUT=GETLOCAO SR=1 SC=1 NR=27 NC=27
+list GETLOCAO 
+!
+!    try SR not equal to 1.
+!
+getloc INP=GETLOCA OUT=GETLOCAO2 SR=3 SC=5 NR=12 NC=4
+list GETLOCAO2
+END-PROC

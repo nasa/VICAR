@@ -1,0 +1,182 @@
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+parm testfile string default="SITOD1:[TEST_DATA.GLL]n0018044737.pds"
+body
+let _onfail="continue"
+let $echo="yes"
+let $autousage="none"
+write "		Test for program LABEL"
+write ""
+write "Make sure file &testfile is available"
+write "You may need to mount an optical disk on a VAX"
+if ($syschar(1) = "UNIX")
+  write "Make sure you have specified a Unix-style pathname (default is VMS)"
+end-if
+!
+write ""
+write "Generate a file with some labels first"
+gen t1 10 10  
+insert t1 t2
+stretch t2 t3
+insert t3 t4
+write "Now list out the labels"
+label-list t4
+!
+write "	-ADD -- add some label items to the existing file (nocopy)"
+label-add t4 items="slope=5.6, time=45 name='No name' mv=(1.2,3.5, 4.6,7.8,9)"
+label-add t4 items="dslope=5.00000012" 
+label-list t4 'hist
+label-add t4 items="comment='straight data copy' comment(2)='second comment'" task=insert inst=1
+label-list t4
+label-add t4 items="proj=mercator center=(45,12.7) line=5 samp=5" property=tstmap
+label-add t4 items="scale=10.0" prop=tstmap
+label-list t4 'prop
+label-add t4 items="red=(1,2,3) green=(4,5,6) blue=(7,8,9)" prop=tstlut
+label-list t4
+write " Now add items using data copy"
+label-add t4 t5 items="action=('LABEL-ADD', '-- copy option used') long=(1,4,5,6,7,8,9,10)"
+label-list t5 'dump
+label-add t5 items="long(2)=(2,3)"
+label-add t5 items="red(4)=4 green(4)=7 blue(4)=10" prop=tstlut
+label-list t5 'dump 'pack
+!
+write " -DELETE -- Delete different items"
+label-delete t5 task=insert key=mv element=3 nelement=2
+label-list t5 'hist 'pack
+label-delete t5 task=insert
+label-list t5 'hist
+label-delete t5 task=gen key=/ALL
+label-list t5
+label-delete t5 key=(red,green,blue) prop=tstlut element=1 nelement=1
+label-list t5 'prop
+label-delete t5 t6 key=/all prop=tstmap
+label-list t6 'prop
+label-delete t6 'property
+label-list t6
+!
+write " -REPLACE -- Replace specific label items"
+label-repla t4 item="nl=5" 'sys
+label-list t4
+label-repla t3 t4 "ival=9999" task=gen inst=1
+label-list t4
+label-repla t5 item="long(5)=(50,60)"
+label-repla t5 item="red(2)=30 green(2)=60" prop=tstlut
+label-repla t5 item="blue(2)=(90,100)" prop=tstlut
+label-list t5 'pack
+!
+write " Now make everything single-valued by deleting elements > 1"
+label-delete t5 t6 key=/ALL element=2 nelement=-1 'hist
+label-delete t6 key=/ALL element=2 nelement=-1 'prop
+label-list t6
+copy t4 t7
+label-create t7 t4 NLB=5 NBB=64 'BINARY
+label-list t4
+write " -REMOVE -- Remove the binary header" 
+label-remove t4 t1 'NOBINHEAD
+write "	attempt to list should be successful" 
+label-list t1
+write " -REMOVE -- Remove the binary prefix" 
+label-remove t4 t1 'NOBINPREF
+write "	attempt to list should be successful" 
+label-list t1
+write " -REMOVE -- Remove the binary header and prefix" 
+label-remove t4 t1
+write "	attempt to list should cause an error"
+label-list t1
+write " -CREATE -- add a label then list it out"
+label-create t1 t6 nl=10 ns=10 comment="What a slick image"
+label-list t6
+!
+write " -SWITCH -- gen a different size file then switch the labels"
+gen t1 5 5 linc=10 
+list t1
+label-switch (t5,t1) t2
+list t2
+label-list t2
+!
+write ""
+write "Generate a 3-D file with some labels first"
+gen t1 10 10 3 'BIL
+copy t1 t7
+label-create t7 t1 NLB=5 NBB=64 'BINARY
+label-list t1
+write " -REMOVE -- Remove the binary header" 
+label-remove t1 t2 'NOBINHEAD
+write "	attempt to list should be successful" 
+label-list t2
+write " -REMOVE -- Remove the binary prefix" 
+label-remove t1 t2 'NOBINPREF
+write "	attempt to list should be successful" 
+label-list t2
+write " -REMOVE -- Remove the binary header and prefix" 
+label-remove t1 t2
+write "	attempt to list should cause an error"
+label-list t2
+write " -CREATE -- add a label"
+label-create t2 t3 ns=10 nl=10 nb=3 org=BIL
+label-list t3
+write " -CREATE -- different host formats"
+label-create t2 t3 ns=10 nl=10 nb=3 org=BIL host=VAX-VMS
+label-list t3 'sys
+label-list t3 'dump
+label-create t2 t3 ns=10 nl=10 nb=3 org=BIL host=SUN-4
+label-list t3 'sys
+label-list t3 'dump
+write " test handling long records. " 
+gen t1 10 200000 
+label-add t1 t4 items="slope=5.6"
+label-list t4
+!
+if ($syschar(1) = "UNIX")
+  ush rm t1 t2 t3 t4 t5 t6
+else
+  dcl delete t1.z*;
+  dcl delete t2.z*;
+  dcl delete t3.z*;
+  dcl delete t4.z*;
+  dcl delete t5.z*;
+  dcl delete t6.z*;
+end-if
+!
+label-list "&testfile"
+label-remove "&testfile" test.nolabel 'BINARY
+write " attempt to list should cause error "
+label-list test.nolabel
+label-create test.nolabel test.vpds NL=1309 NS=960 NLB=5 NBB=64 'BINARY
+label-list test.vpds
+difpic ("&testfile",test.vpds)
+label-create test.nolabel test.binary nl=1309 ns=960 nlb=5 nbb=64 'bin +
+	bhost=vax-vms bltype="tstpds"
+label-list test.binary 'sys
+label-list test.binary 'dump
+label-create test.nolabel test.binary nl=1309 ns=960 nlb=5 nbb=64 'bin +
+	bhost=sgi brealfmt=vax bltype="tstpds"
+label-list test.binary
+label-list test.binary 'dump
+write "The following commands test the new binary features of LABEL"
+label-add test.vpds test.added items="LIST=(1,2)"
+label-add test.added items="test=binary" prop=tstprop
+label-list test.added
+difpic (test.vpds,test.added)
+label-del test.added test.deleted keys="LIST" tasks="LABEL"
+label-del test.deleted keys="TEST" prop=tstprop
+label-list test.deleted
+difpic (test.vpds,test.deleted)
+label-switch (test.added,test.deleted) test.switch
+label-list test.switch
+difpic (test.vpds,test.switch)
+!
+if ($syschar(1) = "UNIX")
+  ush rm test.nolabel test.vpds test.binary test.added test.deleted test.switch
+else
+  dcl delete test.nolabel;
+  dcl delete test.vpds;
+  dcl delete test.binary;
+  dcl delete test.added;
+  dcl delete test.deleted;
+  dcl delete test.switch;
+end-if
+!
+end-proc

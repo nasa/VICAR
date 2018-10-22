@@ -1,0 +1,27 @@
+1 CMPR
+  For the port to UNIX, calls to CMPR will mostly, if not always, be replaced
+  with (expression1 .EQ. expression2) where the expressions may be character
+  variables, character constants, character substrings, or other character
+  expressions.  It is being ported in case any programs really need to
+  compare BYTE arrays.
+
+  The function subprogram CMPR compares two byte arrays,
+  X and Y, of length N.  It returns .TRUE. if they are
+  identical, and .FALSE. if they are not equal.
+
+ From C, use ANSI C routine memcmp, or use strcmp or strncmp for strings.
+
+
+  Usage:  L = CMPR(X,Y,N)
+
+  X and Y are the starting addresses of the two BYTE
+  arrays to be compared.  N is the number of 
+  bytes to be compared.  N must be an INTEGER*4 variable.
+
+2 History
+
+  Original Programmer: Joel A. Mosher   3/31/83
+  Source Language: Fortran
+  Ported for UNIX by:  S. Pohorsky   12/12/92
+  Current Cog Progr:   S. Pohorsky
+

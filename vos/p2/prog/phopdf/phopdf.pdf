@@ -1,0 +1,10 @@
+procedure
+body
+write " "
+write "**********************************************************************"
+write " "
+write " This procedure is only a dummy and does nothing. "
+write " It helps to install the phopdf's into the VICAR. "
+write " "
+write "**********************************************************************"
+end-proc  

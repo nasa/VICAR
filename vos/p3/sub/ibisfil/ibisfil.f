@@ -1,0 +1,127 @@
+	SUBROUTINE RDFIL (UNIT,INST,CLEN,NCOL,NOFILE)
+C
+	IMPLICIT INTEGER(A-Z)
+	LOGICAL NOFILE
+	DIMENSION BUF(128)
+C
+	CALL XVUNIT (UNIT,'INP',INST,STATUS,' ')
+	NOFILE = STATUS.NE.1
+	IF (.NOT.NOFILE) THEN
+	  CALL XVOPEN (UNIT,STATUS,'OP','UPDATE',
+     +				'OPEN_ACT','SA', 'IO_ACT','SA',' ')
+	  CALL XVREAD (UNIT,BUF,STATUS,' ')
+	  CLEN = BUF(1)
+	  CALL XVGET (UNIT,STATUS,'NL',NBLK,' ')
+	  NRCOL = (CLEN+127)/128
+	  NCOL = (NBLK-1)/MAX(NRCOL,1)
+	ENDIF
+	RETURN
+	END
+C*******************************************************************************
+	SUBROUTINE WRFIL (UNIT,INST,CLEN,NCOL,NOFILE)
+C
+	IMPLICIT INTEGER(A-Z)
+	LOGICAL NOFILE
+	DIMENSION BUF(128)
+C
+	NLO = 1+NCOL*((CLEN+127)/128)
+	CALL XVUNIT (UNIT,'OUT',INST,STATUS,' ')
+	NOFILE = STATUS.NE.1
+	IF (.NOT.NOFILE) THEN
+	  CALL XVOPEN (UNIT,STATUS,'OP','WRITE','U_NL',NLO,
+     *         'U_NS',512,'O_FORMAT','BYTE','U_FORMAT','BYTE',
+     *         'OPEN_ACT','SA', 'IO_ACT','SA', ' ')
+	  BUF(1) = CLEN
+	  DO I=2,128
+	    BUF(I) = 0
+	  ENDDO
+	  CALL XVWRIT (UNIT,BUF,STATUS,' ')
+          BUF(1)=0
+          DO I=2,NLO
+             CALL XVWRIT(UNIT,BUF,STATUS,' ')
+          ENDDO
+          CALL XVCLOSE(UNIT,STATUS,' ')
+          CALL XVOPEN(UNIT,STATUS,'OP','UPDATE',
+     +			'OPEN_ACT','SA', 'IO_ACT','SA',' ')
+       	ENDIF
+	RETURN
+	END
+C*******************************************************************************
+	SUBROUTINE GETCOL (UNIT,ICOL,CLEN,COL)
+	IMPLICIT INTEGER(A-Z)
+	REAL*4 COL(*)
+C
+	NREC = (CLEN+127)/128
+	REC = 2+(ICOL-1)*NREC
+	PTR = 1
+	DO I=1,NREC
+	  CALL XVREAD (UNIT,COL(PTR),STATUS,'LINE',REC,' ')
+	  REC = REC+1
+	  PTR = PTR+128
+	ENDDO
+	RETURN
+	END
+C*******************************************************************************
+	SUBROUTINE PUTCOL(UNIT,ICOL,CLEN,COL)
+	IMPLICIT INTEGER(A-Z)
+	REAL*4 COL(*)
+C
+	NREC = (CLEN+127)/128
+	REC = 2+(ICOL-1)*NREC
+	PTR = 1
+	DO I=1,NREC
+	  CALL XVWRIT (UNIT,COL(PTR),STATUS,'LINE',REC,' ')
+	  REC = REC+1
+	  PTR = PTR+128
+	ENDDO
+	RETURN
+	END
+C*******************************************************************************
+	SUBROUTINE GETREC (UNIT,DCOL,COLS,DATA,REC,CLEN,A)
+C SERIAL READ ONLY
+	IMPLICIT INTEGER(A-Z)
+	DIMENSION COLS(*),DATA(*),A(128,*)
+C
+	PTR = MOD(REC-1,128)+1
+	IF (PTR.EQ.1) THEN
+	  OFFSET = (REC+127)/128
+	  NRCOL = (CLEN+127)/128
+	  DO IX=1,DCOL
+	    R = NRCOL*(COLS(IX)-1)+OFFSET+1
+	    CALL XVREAD (UNIT,A(1,IX),STATUS,'LINE',R,' ')
+	  ENDDO
+	ENDIF
+	DO I=1,DCOL
+	  DATA(I) = A(PTR,I)
+	ENDDO
+	RETURN
+	END
+C*******************************************************************************
+	SUBROUTINE PUTREC (UNIT,DCOL,COLS,DATA,REC,CLEN,A)
+C SERIAL WRITE ONLY
+	IMPLICIT INTEGER(A-Z)
+	DIMENSION COLS(*),DATA(*),A(128,*)
+C
+	PTR = MOD(REC-1,128)+1
+	DO I=1,DCOL
+	  A(PTR,I) = DATA(I)
+	ENDDO
+	IF (PTR.EQ.128.OR.REC.EQ.CLEN) THEN
+C	  IF  (PTR.EQ.128.OR.REC.NE.CLEN) THEN
+	  IF  (PTR.NE.128.AND.REC.EQ.CLEN) THEN
+	    PTR1 = PTR+1
+	    DO IX=1,DCOL
+	      DO I=PTR1,128
+		A(I,IX) = 0
+	      ENDDO
+	    ENDDO
+	  ENDIF
+	  OFFSET = (REC+127)/128
+	  NRCOL = (CLEN+127)/128
+	  DO IX=1,DCOL
+	    R = NRCOL*(COLS(IX)-1)+OFFSET+1
+	    CALL XVWRIT (UNIT,A(1,IX),STATUS,'LINE',R,' ')
+	  ENDDO
+	ENDIF
+	RETURN
+	END

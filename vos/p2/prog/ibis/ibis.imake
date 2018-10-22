@@ -1,0 +1,20 @@
+
+#define PROGRAM ibis
+
+#define R2LIB
+
+#define MODULE_LIST \
+	ibis_main.c \
+	ibis_gen.c \
+	ibis_list.c \
+	ibis_copy.c \
+	ibis_catenate.c \
+	ibis_groups.c
+#define INCLUDE_LIST ibis_local.h
+#define MAIN_LANG_C
+#define USES_C
+
+#define LIB_P2SUB
+#define LIB_TAE
+#define LIB_RTL
+

@@ -1,0 +1,110 @@
+procedure
+refgbl $autousage
+body
+let $autousage="none"
+!
+! Generate a new IBIS-2 file (and throw in some ASCII)
+!
+ibis-gen a nr=10 nc=4 format=(FULL,FULL,REAL,A8)
+mf a fun=("C1=INDEX","C2=2*C1")
+ibis-list a
+!
+! Test Delete option
+rowop a b key=1 range=(2,3) 'delete
+ibis-list b
+rowop a b key=(1,2) range=(2,3,6,7) 'delete
+ibis-list b
+!
+! Test Select option
+rowop a b key=1 range=(2,3) 'select
+ibis-list b
+rowop a b key=(1,2) range=(2,3,6,7) 'select
+ibis-list b
+!
+! Test Pick option
+rowop a b key=1 range=(2,3) 'pick
+ibis-list b
+rowop a b key=(1,2) range=(2,3,6,7) 'pick
+ibis-list b
+
+!
+! Generate an old IBIS-1 file 
+!
+ibis-gen a nr=10 nc=4 'IBIS-1
+mf a fun=("C1=INDEX","C2=2*C1")
+ibis-list a
+!
+! Test Delete option
+rowop a b key=1 range=(2,3) 'delete
+ibis-list b
+rowop a b key=(1,2) range=(2,3,6,7) 'delete
+ibis-list b
+!
+! Test Select option
+rowop a b key=1 range=(2,3) 'select
+ibis-list b
+rowop a b key=(1,2) range=(2,3,6,7) 'select
+ibis-list b
+!
+! Test Pick option
+rowop a b key=1 range=(2,3) 'pick
+ibis-list b
+rowop a b key=(1,2) range=(2,3,6,7) 'pick
+ibis-list b
+
+!
+! Generate an old GRAPHICS-1 file; test GR1DIM
+!
+ibis-gen a nr=10 nc=4 'IBIS-1 'ROW
+mf a fun=("C1=INDEX","C2=2*C1")  GR1DIM=4
+ibis-list a GR1DIM=4
+!
+! Test Delete option
+rowop a b key=1 range=(2,3) 'delete GR1DIM=4
+ibis-list b GR1DIM=4
+rowop a b key=(1,2) range=(2,3,6,7) 'delete GR1DIM=4
+ibis-list b GR1DIM=4
+!
+! Test Select option
+rowop a b key=1 range=(2,3) 'select GR1DIM=4
+ibis-list b GR1DIM=4
+rowop a b key=(1,2) range=(2,3,6,7) 'select GR1DIM=4
+ibis-list b GR1DIM=4
+!
+! Test Pick option
+rowop a b key=1 range=(2,3) 'pick GR1DIM=4
+ibis-list b GR1DIM=4
+rowop a b key=(1,2) range=(2,3,6,7) 'pick GR1DIM=4
+ibis-list b GR1DIM=4
+!
+!
+! and now for the double precision
+!
+!
+ibis-gen a nr=10 nc=4 format=(DOUB,DOUB,DOUB,A8)
+!mf a fun=("C1=INDEX","C2=2*C1")
+mfd a 'index outcols=1
+mfd a 'set outcols=2 value=2
+mfd a 'mult incols=(1,2) outcols=2
+mfd a 'int incols=2 outcols=2
+ibis-list a 'format
+!
+! Test Delete option
+rowop a b key=1 range=(2,3) 'delete
+ibis-list b  'format
+rowop a b key=(1,2) range=(2,3,6,7) 'delete
+ibis-list b  'format
+!
+! Test Select option
+rowop a b key=1 range=(2,3) 'select
+ibis-list b  'format
+rowop a b key=(1,2) range=(2,3,6,7) 'select
+ibis-list b  'format
+!
+! Test Pick option
+rowop a b key=1 range=(2,3) 'pick
+ibis-list b  'format
+rowop a b key=(1,2) range=(2,3,6,7) 'pick
+ibis-list b  'format
+
+end-proc

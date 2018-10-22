@@ -1,0 +1,13 @@
+/* Imake file for VICAR subroutine MOMATI*/
+
+#define SUBROUTINE  momati
+
+#define MODULE_LIST momati.f zmomati.c momati_c.c  
+
+#define P1_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+
+#define LIB_LOCAL	/* for development, remove on delivery */ 
+#define DEBUG		/* for development, remove on delivery */ 

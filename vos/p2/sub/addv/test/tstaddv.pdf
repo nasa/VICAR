@@ -1,0 +1,14 @@
+procedure
+refgbl $autousage
+refgbl $echo
+body
+let _onfail="continue"
+let $autousage="none"
+let $echo="yes"
+! This is a test of the subroutine ADDV which adds 
+! together two arrays which may be of different types
+! (byte, halfword, fullword, real, or double
+! precision). The sum of each index point of the 
+! two arrays is placed in the second array at that point.
+taddv
+end-proc

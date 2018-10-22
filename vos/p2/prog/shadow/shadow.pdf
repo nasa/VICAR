@@ -1,0 +1,220 @@
+process help=*
+PARM INP TYPE=STRING COUNT=1
+PARM OUT TYPE=STRING COUNT=1
+PARM SIGMA TYPE=REAL COUNT=1 DEFAULT=1.0
+PARM KSIZE TYPE=INTEGER COUNT=1 DEFAULT=3
+PARM GAMMA TYPE=REAL COUNT=(0:1) DEFAULT=--
+PARM BAND TYPE=INTEGER COUNT=(0:1) DEFAULT=--
+PARM OUT_ILLUM TYPE=STRING COUNT=(0:1) DEFAULT=-- 
+PARM OUT_REFLECT TYPE=STRING COUNT=(0:1) DEFAULT=--
+END-PROC
+
+.TITLE
+VICAR program SHADOW 
+
+.HELP
+PURPOSE:
+
+Shadow enhancement for non-uniform illumination images. The program
+will brighten the shadows, and preserve details of the image. The program
+is implemented based on retinex theory. For detailed algorithm, please 
+see METHOD section. 
+
+The program currently supports only grayscale format. The input images
+to the program must be 1-band in HALF format.
+
+EXECUTION:
+The program provides adaptive or global gamma brightness correction modes.
+Adaptive gamma brightness correction mode will brighten shadows automatically
+based on input image statistics. Global gamma brightness correction mode
+uses a constant gamma value. Depending on the constant gamma value, global
+gamma correction may brighten shadow more, but it may also over brighten
+the non-shadow areas.
+
+  1) SHADOW INP=input.img OUT=output.img
+The above command will enable adaptive gamma brightness correction mode.
+The program will brighten shadows more than it will brighten non-shadow 
+areas.
+
+  2) SHADOW INP=input.img OUT=output.img GAMMA=0.5
+The above command will enable global gamma brightness correciton mode. 
+In general cases, gamma needs to be in range of 0 to 1 (exclude 0 and 1).
+Using global gamma correction mode, the non-shadow areas may be over
+brightened. 
+
+.page
+METHOD:
+The SHADOW program consists of the following steps:
+  
+  1) Decompose input image into illumination image and reflectance image
+     based on retinex theory.
+  2) Gamma brightness correction on illumination image.
+  3) Contrast enhancement on illumination image using probability density 
+     function.
+  4) Combine illumination image and reflectance image to generate the 
+     final output.
+
+Retinex theory in short indicates that scenes presented to a digital camera
+or human eye can be decomposed into illumination and reflectance components.
+In this program, the illumination image is estimated using Gaussian kernel 
+convolves with the input image. 
+
+Estimate illumination image using Gaussian kernel sometimes causes 
+problems including halo artifacts around big edges. In order to suppress
+the halo artifacts, a weighted map is computed based on the following
+equations:
+
+    high_freq_image(x,y) = |input_image(x,y) - illumination_image(x,y)|
+    weight_map(x,y) = convolution(high_freq_image(x,y), gaussian_kernel(x,y))
+    
+x and y are line and samp in the images respectively. Next, the weight map 
+is used as in the equation below to compute the modified illumination image. 
+The halo atrifacts in the original illumination image will be removed from 
+this step.
+
+    mod_illu_image(x,y) = weight_map(x,y) * input_image(x,y) + (1 - weight_map(x,y)) * illumination_image(x,y)
+
+x and y are line and samp in the images respectively, and weight_map(x,y) 
+was normalized to [0, 1]. The reflectance image is then decomposed using 
+the modified illumination image based on the equation below.
+
+    reflectance_image(x,y) = input_image(x,y) / mod_illu_image(x,y)
+
+The reflectance image contains high frequency information, which in other 
+words, it contains detailed information of the input image.
+    
+Apply gamma correction to the modified illumination image. The program
+provides two modes of gamma correction: (1) global gamma correction, 
+(2) adaptive gamma correction. Gamma correction is defined by the equation
+below:
+
+    result(x,y) = input(x,y)^gamma(x,y).
+
+input(x,y) should be normalized to [0, 1] prior to the computation. If 
+gamma(x,y) is smaller than 1, then result(x,y) will be brighter than
+input(x,y). If gamma(x,y) is larger than 1, then result(x,y) will be
+darker than input(x,y).
+
+In global gamma correction mode, gamma(x,y) will be set to a user defined
+constant value. In order to brighten the image, gamma value needs to be
+in range of 0 to 1 (exculde 0 and 1). The smaller the gamma value, the 
+brighter the result will be. 
+
+In adaptive gamma correction mode, gamma(x,y) will be a function defined
+by the equation below:
+
+                  2 * mod_illu_image(x,y) + 1
+    gamma(x,y) = -----------------------------
+                    2 + mod_illu_image(x,y)
+
+The adaptive gamma correction mode will brighten the dark areas more than
+it brightens the areas that are already bright enough to see the details.
+Adaptive gamma correction mode is enabled by default. If the parameter
+GAMMA is defined, the program will switch to global gamma correction mode.
+
+Note that in the following steps, histogram will be modified for the purpose 
+of enhancing contrast, so the brightness of the result from this step won't 
+be directly reflected in the final resultant image. 
+
+Gamma correction usually decreases the contrast of the image, so at this 
+step a probablity density function based adjustment will be performed to
+enhance the contrast of the image. Firstly, the histogram of modified 
+illumination image is computed, then the histogram is used to compute the 
+probability density function. Secondly, in order to remove the spikes of the 
+computed probability density function, the moving average of the probability 
+density function is computed. Next, the final cumulative density function
+(CDF) is computed based on the despiked probability density function. Finally,
+the contrast enhancement mapping curve is defined by the equation below:
+
+     mapping_curve(l) = round_off(l_max * CDF(l) + 0.5)
+
+where l_max is the maximum intensity value in the input image, and l belongs
+to the range of [0, l_max - 1]. Once the mapping_curve is obtained, it is
+used to generate final illumination image.
+
+    final_illu_image(x,y) = mapping_curve(gamma_illu_image(x,y))
+
+Where gamma_illu_image is the illumination image after gamma correction. The
+final illumination image reflects the enhancement both in brightness and 
+contrast, and it preserves the naturalness of the input image because the
+shape of the new histogram is similar with the original histogram.
+
+The final step of this program is to combine the final illumination image
+with the reflectance image.
+
+    final_image(x,y) = reflectance_image(x,y) * final_illu_image(x,y)
+
+
+REFERENCE:
+1. Efficient naturalness restoration for non-uniform illumination images.
+   Authors: Yonghun Shin, Soowoong Jeong, Sangkeun Lee.
+2. A Histogram Modification Framework and Its Application for Image
+   Contrast Enhancement.
+   Authors: Tarik Arici, Salih Dikbas, Yucel Altunbasak.
+
+.PAGE:
+HISTORY:
+2016-05-04 Steven Lu Initial gammacorrection by Steven Lu.
+COGNIZANT PROGRAMMER: Steven Lu
+
+.LEVEL1
+.VARI INP
+Input image. 
+ 
+.VARI OUT
+Output image.
+
+.VARI SIGMA
+Gaussian kernel standard deviation.
+
+.VARI KSIZE
+Gaussian kernel size.
+
+.VARI GAMMA
+Gamma value for performing global gamma correction.
+
+.VARI OUT_ILLUFNL
+Optional output for final illumination image.
+
+.VARI OUT_REFLECTANCE
+Optional output for reflectance image.
+
+.LEVEL2
+.VARI INP
+A single 1-band grayscale input image. The input image must be in 
+HALF format.
+  
+.VARI OUT
+A single 1-band grayscale output image. The output image is in HALF
+format.
+ 
+.VARI SIGMA
+Gaussian kernel standard deviation. Gaussian kernel is used to estimate
+illumation image in the program. Standard deviation defines the blurriness
+of the estimated illumination image. Increase standard deviation, the
+estimated illumination image will be more blurry. Decrease standard 
+deviation, the estimated illumination image will be less blurry.
+ 
+.VARI KSIZE
+Gaussian kernel size. The kernel size must be an odd integer. The smallest 
+kernel size allowed in the program is 3x3. There is no hard restrictions 
+for the upper bound of the kernel size, but in general, 7x7 should be 
+enough. The larger the kernel size, the more blurry the image will be.
+ 
+.VARI GAMMA
+Gamma value for performing global gamma correction. In order to brighten
+the image, gamma value needs to be in range of 0 to 1 (exclude 0 and 1). 
+This parameter is also a switch for the program to perform either 
+adpative gamma correction or global gamma correciton. If this parameter 
+is defined, the program will perform global gamma correciton. If not 
+defined, the program will perform adaptive gamma correction.
+ 
+.VARI OUT_ILLUFNL
+Optional output for final illumination image. The final illumination
+image contains low frequency information, and it reflects the 
+enhancement in both brightness and contrast. 
+ 
+.VARI OUT_REFLECTANCE
+Optional output for reflectance image. The reflectance image contains
+high frequency information.
+

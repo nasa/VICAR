@@ -1,0 +1,74 @@
+1  XORV
+
+2  PURPOSE
+
+	General routine for "xor"-ing arrays.
+
+2  CALLING SEQUENCE
+
+ Fortran calling sequence:  CALL XORV(DCODE, N, A, B, INCA, INCB)
+ C Calling Sequence:        zxorv(dcode, n, a, b, inca, incb);
+ 
+  INCA and INCB are REQUIRED arguments. (dcode, n, inca, and incb are
+  passed by value for zxorv.)
+
+
+  Arguments:
+
+    DCODE  (input, integer)           data format code (See below.)
+    N      (input, integer)           number of elements
+    A      (input, DCODE data type)   first input array
+    B      (in/out, DCODE data type)  second input array and output array
+             On output B(i) = XOR(B(i),A(i))   [i=1,..,N] for case of 
+                                                          INCA=1=INCB.
+    INCA   (input, integer)           A array index increment
+    INCB   (input, integer)           B array index increment
+
+	DCODE      Data types
+
+                   ..INPUT..         ..OUTPUT..
+
+                   =1,   A is byte         B is byte
+                   =2,   A is halfword     B is halfword
+                   =3,   A is byte         B is halfword
+                   =4,   A is fullword     B is fullword
+                   =5,   A is byte         B is fullword
+                   =6,   A is halfword     B is fullword
+                   negative values -1 to -6 reverse of above
+
+2  HISTORY
+
+        Original Programmer: Lucas Kamp, 83-7-4
+        Current Cognizant Programmer: Steve Pohorsky
+        Source Language: C
+        Ported to UNIX:       Steve Pohorsky 3-30-93
+
+ REVISION HISTORY:                                          
+   3-30-93  ..SP....  Made portable for UNIX - Adapted from mulv.
+                      Added zxorv for calls from C.  Changed name from
+                      xor to xorv (added v for most of the vector routines).
+                      ELIMINATED OPTIONAL PARAMETERS FOR PORTABILITY.
+                      Replaced test program for portability.
+2 OPERATION
+
+        Array B is replaced with XOR(A,B). A and B can be of 
+        different data types as indicated.
+
+  The calling sequence:
+
+       CALL XORV(DCODE, N, A, B, INCA, INCB)
+
+  Is equivalent to the following code:
+
+
+       I = 1
+       J = 1
+       DO K=1,N
+          B(J) = ieor( B(J),A(I))
+          I    = I + INCA
+          J    = J + INCB
+       ENDDO
+
+  Where all arguments are INTEGER, except for the arrays whose
+  data types are controlled by the data code DCODE.
+

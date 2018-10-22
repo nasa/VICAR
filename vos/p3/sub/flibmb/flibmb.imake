@@ -1,0 +1,9 @@
+
+#define SUBROUTINE flibmb
+
+#define MODULE_LIST flibmb.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

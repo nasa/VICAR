@@ -1,0 +1,18 @@
+procedure
+Refgbl $SYSCHAR
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+WRITE "This is a test of subroutine HISCALE"
+
+Local PATH STRING
+if ($SYSCHAR(1)="VAX_VMS")
+    let PATH="WMS_TEST_WORK:[TESTDATA.MIPL.VGR]"
+else
+    let PATH="/project/test_work/testdata/vgr/"
+end-if
+
+WRITE "Test on Voyager halfword flight image"
+thiscale "&PATH"f1636832.fic  'IOF 
+end-proc

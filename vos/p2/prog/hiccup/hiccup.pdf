@@ -1,0 +1,199 @@
+process help=*
+PARM INP      TYPE=STRING  COUNT=1:3
+PARM OUT      TYPE=STRING  COUNT=1:3
+PARM SIZE     TYPE=INTEGER COUNT=4     			DEFAULT=(1,1,0,0)
+PARM SL       TYPE=INTEGER COUNT=1				DEFAULT=1
+PARM SS       TYPE=INTEGER COUNT=1				DEFAULT=1
+PARM NL       TYPE=INTEGER COUNT=1				DEFAULT=0
+PARM NS       TYPE=INTEGER COUNT=1				DEFAULT=0
+PARM PHIST    TYPE=KEYWORD COUNT=(0:1)  VALID=PHIST		DEFAULT=--
+PARM SPIKES   TYPE=INTEGER COUNT=1      VALID=(1:9)		DEFAULT=2
+PARM ZEROES   TYPE=KEYWORD COUNT=(0:1)  VALID=ZEROES		DEFAULT=--
+PARM INCLUDE  TYPE=KEYWORD COUNT=(0:1)  VALID=INCLUDE		DEFAULT=--
+PARM INSTANCE TYPE=(STRING,32) DEFAULT="GLL/SSI SYSTEMATIC HISTOGRAM"
+PARM SCALE    TYPE=KEYWORD COUNT=(0:1)  VALID=(NONE,IOF,RADIANCE) DEFAULT=NONE
+PARM USECOW   TYPE=KEYWORD COUNT=(0:1)  VALID=USECOW		DEFAULT=--
+
+!# annot function="Image Display"
+!# annot keywords=(histogram,compute,compress,print,"mean value",+
+!# "standard deviation")
+
+END-PROC
+.TITLE
+Creates histogram file for halfword image
+.HELP
+PURPOSE:
+
+"hiccup" (HIstogram Computation, Compression, and Printing) computes the
+histogram, mean value, and standard deviation of one to three images and
+outputs these values to one to three IBIS-2 format histogram files.  The
+output histogram files are suitable for input to program GLLMASK.  The
+histograms may also be printed.  See also programs "histgen" and "hist".
+
+EXECUTION:
+
+         hiccup  INP=PIC  OUT=HIS  user-parameters...
+where
+
+  PIC is the input images.
+  HIS is the output histogram files.
+
+PIC may be a byte image of up to 65536 samples in width or a halfword image
+of up to 32768 samples in width.
+
+HIS is in 32-bit integer data format and contains one line of 266 samples
+(256 grey-level histogram + 10 statistical values).  See below for
+documentation of the histogram file format.
+
+.page
+OPERATION:
+
+The histogram is computed from the input image.  If the input image is in
+halfword data format, the following processing steps are performed:
+
+  1) A histogram containing 64K grey-levels (ranging from -32768 to +32767 DN)
+     is first computed.  In computing this histogram, all input pixels at
+     -32768 DN are ignored (for some missions, this value is a flag which
+     indicates missing or invalid data).  The 'INCLUDE keyword may be used
+     to include -32768 DN in the histogram.
+
+  2) The resulting histogram is compressed so that it contains 256 grey-levels.
+
+The histogram compression is accomplished via one of three types of scales:
+
+  1) If the keyword 'scale' is IOF, the histogram is scaled to units of
+     IOF times a computed scale factor, chosen so that:
+	(a) the maximum input DN value is scaled to a value that is greater
+            than 128 but less than 256.
+        (b) 256 on the output scale is some convenient IOF unit (one of the
+            digits 1,2,4, or 5 multiplied by a power of 10).
+
+  2) If the keyword 'scale' is RADIANCE, the histogram is scaled to units
+     of nanowatts/cm**2/steradian/nanometer times some convenient scale
+     chosen as in IOF above.
+
+  3) If neither IOF or RADIANCE are specified, the input DNs are divided
+     by some power of 2, chosen so that the maximum input DN value is scaled
+     to a value that is greater than 128 but less than 256.
+
+In each of these three methods of scaling, all negative DNs are set equal
+to 0 DN.
+
+If IOF or RADIANCE is specified, the input image must be a Voyager ISS or
+Galileo SSI image that has been radiometrically corrected, and on which no
+subsequent filters or stretches have been applied to alter the scale of the
+radiometric units.  The radiometric scale of the input image is retrieved by
+reading the input flight label.
+
+The keyword 'PHIST causes the output histogram to be printed.  The SPIKES
+and 'ZEROES parameters control this printout.
+
+.page
+OUTPUT HISTOGRAM FILE FORMAT:
+
+The output histogram consists of a single-column IBIS-2 file (the column
+group named 'HISTOGRAM').  In addition, the following statistical data is 
+computed and stored in the STATISTICS property label:
+
+   SCALE_TYPE='IOF'   (or 'RADIANCE' or 'NONE')
+   OUTPUT_HISTOGRAM_SCALE=0.00390625
+   PERCENT_SATURATION_AT_LOW_VALUE=5.7684
+   PERCENT_SATURATION_AT_HIGH_VALUE=0.0
+   MAXIMUM_FREQUENCY=43603
+   NUMBER_OF_PIXELS_IN_HISTOGRAM=640000
+   NUMBER_OF_LEVELS_IN_HISTOGRAM=256
+   MEAN_VALUE=0.0246134
+   STANDARD_DEVIATION_VALUE=0.0988648
+
+If the SCALE_TYPE is 'IOF' and the OUTPUT_HISTOGRAM_SCALE is 0.00390625, then
+the increment between histogram levels is 0.00390625 IOF.  Note that
+256*0.00390625 = 1.0 IOF.
+
+If IOF or RADIANCE are specified, the mean and standard deviation are in
+units of IOF or radiance.  Otherwise, they are in units of DN in the input
+image.
+
+The maximum frequency reported excludes the low and high DN values.
+
+.page
+PROGRAM HISTORY:
+
+Written by: Gary Yagi		January 1, 1990
+Cognizant programmer: Gary Yagi
+Revisions:
+  10 APR 90  GMY   Correct LSAT and HSAT for byte inputs.
+  27 APR 92  GMY   Change EDR test file to VENUS1.IMG, add PCA
+   5 SEP 94  AMS(CRI) Made portable for UNIX, and changed to IBIS-2 output.
+  18 NOV 96  JRY   Changed the number of outputs to equal the number of inputs,
+		   putting each histogram in a separate file.
+  03 FEB 97  JRY   Fixed the vicar label of the output files to be the same
+		   as it's corresponding input file.
+  03 Feb 98  GMY   Fixed simultaneous scaling of 3 histograms.  Fixed error
+                   in reporting the scaling (Package=HICCUP_COLOR).  Added
+                   'USECOW keyword.
+  11 Feb 98  GMY   Fix 'USECOW on UNIX.
+
+.LEVEL1
+.VARI INP
+Input image(s)
+.VARI OUT
+Output histogram file(s)
+.VARI SIZE
+Optional image size field
+.VARI SL
+Optional starting line
+.VARI SS
+Optional starting sample
+.VARI NL
+Optional number of lines
+.VARI NS
+Optional number of samples
+.VARI IOF
+Optional keyword
+.VARI RADIANCE
+Optional keyword
+Specifies radiance output scale
+.VARI PHIST
+Optional keyword
+Causes histogram to be printed
+.VARI SPIKES
+Optional integer
+Specifies number of spikes in
+printed histogram (see PHIST).
+.VARI ZEROES
+Optional keyword
+Causes zero frequency levels to
+be printed (see PHIST).
+.VARI INCLUDE
+Optional keyword
+Causes -32768 DN to be included
+in the 64K grey-level histogram.
+.VARI INSTANCE
+Instance of HISTOGRAM class
+.VARI SCALE
+Specifies IOF, RADIANCE or
+neither output scale
+.VARI USECOW
+Optional keyword
+Restrict to COW
+.LEVEL2
+.VARI INP
+Input image(s) in byte or 16-bit integer (halfword) data format.  Maximum
+line length is 65536 samples for byte inputs and 32768 samples for
+halfword inputs.
+.VARI OUT
+IBIS-2 output histogram file(s) with statistics.
+.VARI INSTANCE
+To allow more than one HISTOGRAM in a single IBIS file, this
+parameter allows the definition of an INSTANCE name, by which
+each set may be referenced.
+.VARI SCALE
+The possible values are none, iof and radiance.
+For IOF, the output histogram scale will be IOF times some convenient scale 
+factor. For RADIANCE, it will be nanowatts/cm**2/steradian/nanometer times
+some convenient scale.
+The input image must be a radiometrically corrected Voyager or Galileo image.
+.VARI USECOW
+The optional keyword 'USECOW causes the histogram computation to be restricted
+to the cutout window area (Galileo).
+.END

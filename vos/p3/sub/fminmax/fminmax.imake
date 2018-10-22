@@ -1,0 +1,9 @@
+
+#define SUBROUTINE fminmax
+
+#define MODULE_LIST fminmax.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

@@ -1,0 +1,216 @@
+PROCESS        HELP=*
+! MF PDF - VICAR/IBIS SOFTWARE
+PARM INP TYPE=STRING
+PARM FUNCTION TYPE=(STRING,200),COUNT=(1:50)
+PARM GR1DIM TYPE=INTEGER COUNT=1 DEFAULT=0
+PARM ZEROES  TYPE=KEYWORD VALID=(SKIP,INCLUDE) DEF=INCLUDE
+PARM CODE  TYPE=INTEGER COUNT=1 DEF=0
+END-PROC
+.TITLE
+VICAR/IBIS Program MF
+.HELP
+PURPOSE
+
+     MF   allows   the  user  to  create  FORTRAN or C -like 
+     expressions to perform general mathematical operations on 
+     one  or more IBIS/graphics file columns.   The  expressions 
+     are  written as a parameter string.   The parameter  is 
+     interpreted  to determine the input and output  columns 
+     and   operations  to  be  performed.    The   variables 
+     representing  a data column are written as keywords  to 
+     allow  the user flexibility in writing the  expression.  
+     The functions available are:  SQRT, ALOG, ALOG10, AINT, 
+     SIN,  COS TAN,  ASIN,  ACOS,  ATAN,  ATAN2, ABS, MIN or 
+     AMIN1,  MAX  or  AMAX1,  and MOD or  AMOD,  along  with 
+     standard binary operations +,  -,  *,  /, **, and logic 
+     operations,   .AND.,   .OR.,   .XOR.,  and  .NOT.   All 
+     operations operate as in FORTRAN IV and C.   A  special 
+     feature   allows   for   the  calculation   of   column 
+     statistics.
+
+TAE COMMAND LINE FORMAT
+
+     MF INP=int PARAMS
+
+     where
+
+     int                 is a random access file.  Since it
+                         is used for both input and  output, 
+                         no output file is specified.
+
+     PARAMS              is   a  standard  VICAR   parameter 
+                         field.
+
+    The GR1DIM specifies the (Graphics-1) Dimension.
+
+    The ZEROES parameters specifies whether to process rows
+    with all zeroes. The permitted options are: SKIP and
+    INCLUDE. INCLUDE is the default.
+
+    The CODE parameter will show the pseudo instructions for
+    math and logic functions. The nmenomics are the same
+    as for the CODE parameter for mf but have different
+    operands. No pseudo instructions are generated for
+    column opearations.
+
+.PAGE
+METHOD
+
+     MF performs arithmetic operations on an interface file.  
+     The  program  uses  two  library  routines KNUTH  and 
+     XKNUTH,   to   compile  and  interpret   FORTRAN or C  like 
+     expressions  entered by the parameters in an expression 
+     such as:
+
+                     C35 = (100*C34)/C4
+
+     In this expression,  C34 and C4 are the input  columns.  
+     KNUTH    compiles   the   expression   into    machine 
+     instructions.   The  expression is applied to the input 
+     column in XKNUTH to produce the output column, C35. For
+     compatibility with program GF, the variable names X5,
+     etc, may be used in place of C5, etc.
+
+
+RESTRICTIONS
+
+     Maximum number of columns in one execution is 50.
+.PAGE
+EXAMPLE
+
+     MF INP=FILE.INT FUNCTION=("C5 = C2/C3+100+SQRT(C2)")
+
+     In this example,  C2 is divided by C3 and added to  100 
+     plus the square root of C2.   The results are placed in 
+     C5.  Further examples of allowable functions follow:
+
+                FUNCTION=("C5 = !(C3  || C2)")
+
+     logical   operations  are  performed  bitwise  on   the 
+     operands. The  logical values T and F are converted to 1.  and 0. 
+     for storage in column C5
+
+                FUNCTION=("X5 = X3.LE.INDEX")
+
+     Column 5 is 1.0 if column 3 has a value < its row value (INDEX).
+     
+                FUNCTION=("X5 = POLY * 2")
+
+     the operator POLY returns the current polygon number,
+     where polygons are delimited by rows of all zero values.
+
+                FUNCTION=("C5 = #MEAN(C3)")
+
+     In this example, the mean of column 3 is calculated and 
+     that  value is placed in every row entry in  column  5.  
+     This  operation  is different than the  arithmetic  and 
+     logic operations given earlier because it operates on a 
+     vertical  column instead of horizontally across a  row.  
+     These  operations  cannot  be  used  in  an  arithmetic 
+     expression  such as C5 = #MEAN(C3)*10.   The  allowable 
+     column operations are:
+
+                       C2 = #MEAN(C4)
+                       C2 = #SIGMA(C4)
+                       C2 = #MIN(C4)
+                       C2 = #MAX(C4)
+                       C2 = #FIRST(C4)
+                       C2 = #SUM(C4)
+                       C2 = #RSUM(C4) (running sum)
+                       C2 = #RDIFF(C4) (running diff)
+					   
+	See the FUNCTION help for more examples.
+
+Original Programmer:  A. L. Zobrist, 15 December 1976
+
+Cognizant Programmer:  N. D. Ritter
+
+Revision:  3,        
+        05 January 1987 - E.J. Barragy  -  fixed bug in sci. not. conversion that
+                      mistook '.E'  for a '.EQ.' logical operation
+        06 June 1987  - E.J. Barragy  - fixed to convert to upper case before
+                      parsing and compiling the functions
+                      also changed CVSCIN to do Sci. Not. conversion
+                      for a more general case
+        05 January 1994 - N. D. Ritter - Ported to Unix, with IBIS-2 library calls.    
+        13 November 1994 N. D. Ritter - Graphics Functions
+        18 October 2007 - R. J. Bambery - Add CODE parameter
+                        to show symbolic dump like mf3 and f2.
+        28 Feb 2008 - R. J. Bambery - - Fixes for ANSI_C compiler 
+                        in Linux 
+        24 Mar 2008 - R. J. Bambery - fixed error in arg 3 in IBISColumnWrite
+                        call
+        28 Mar 2008 - R. J. Bambery - fixed xknuth call (prototype in 
+                        cartoVicarProtos.h was wrong),  added check for
+                        columns and rows in input file. added check for
+                        function columns exceeding those in input file
+                        (required some reorganization of logical flow)
+
+        02 Dec 2009 - R. J. Bambery - made compatible with 64-bit linux
+                        removed cartoVicarProtos.h (Makefile.mf)
+
+        28 Jan 2010 - R. J. Bambery - Made compatible with 64-bit afids Build 793
+                            Linux, MacOSX (both Intel/PowerPC)
+        12 Aug 2010 - R. J. Bambery - got rid of warning:
+                /usr/local/afids/include/vicmain_c:63: warning: function declaration isn't a prototype
+                #include "vicmain_c" to #include "vicmain_c.h"
+        05 May 2011 - R. J. Bambery - Removed all warning messages generated from gcc 4.4.4
+                                    Build 1009
+        15 Nov 2012 - L.W.Kamp - added data types to function declarations for compatibilty
+                                 with ANSI C on Solaris.
+
+.LEVEL1
+.VARIABLE INP
+Input IBIS interface file
+.VARIABLE FUNCTION
+Specifies function and columns
+.VARIABLE GR1DIM
+Dimension (Graphics-1 only)
+.VARIABLE ZEROES
+Process rows with all zeroes?
+.VARIABLE CODE
+Set 1 to see pseudo code
+
+.LEVEL2
+.VARIABLE INP
+            Specifies IBIS interface file. There
+            is no output file. Results of MF are
+            written in INP. Graphics-1 files may
+			also be processed, using the "GR1DIM"
+			parameter.
+.VARIABLE FUNCTION
+     FUNCTION            
+	 
+	 this keyword specifies the function to be applied,  and the columns  to 
+	 which  it applies.   Functions  are delimited  by  double  quotes.  "C" 
+	 followed  by a number indicates the  columns  used as input  or  output.  
+	 Up  to nineteen columns can be used  as  input.   The term INDEX can  be 
+	 used  in the arithmetic  expression to  introduce row number  into  the 
+	 calculation   (see  examples).    A   special notation is used for column 
+	 statistics   (see  examples).    By using   ","   separator,    several 
+	 functions can be placed in one call (i.e. FUNC=("C1=INDEX","C2=C1*C1").
+	 Maximum number of columns in one execution is 50. 
+	 
+	 Also, to support GRAPHICS "GF" capabilities, the "POLY" operator may
+	 also be used. This function returns the polygon number of the
+	 current row (which starts at 1), or a zero if end-of-polygon. To
+	 further support MF as a replacement for GF, the columns may be
+	 referenced by "Xnnn" rather than "Cnnn" to indicate coordinate value.
+	 
+.VARIABLE GR1DIM
+GRAPHICS-1 files do not have any explicit dimensions in the
+file label. This allows the user to properly dimension a
+graphics file so that it may be used by this program.
+IBIS-2 format graphics files do not need or use this.
+.VARIABLE ZEROES
+This keyword indicates whether to SKIP or INCLUDE rows in which all
+values are zero. This is primarily used for GRAPHICS files,
+in which an all-zero row signals "pen-up" or next polygon.
+NOTE: the #MEAN type column operators do not honor this keyword,
+and will write a value in every row. The POLY function
+always skips zeroes, while the INDEX function honors this
+keyword.
+.VARIABLE CODE
+Set 1 to see pseudo code
+
+.END

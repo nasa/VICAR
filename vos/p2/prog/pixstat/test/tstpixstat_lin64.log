@@ -1,0 +1,176 @@
+copy gl/7500.spk a (105,495,5,5)
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+pixstat a mean nlw=5 nsw=5 'mean 'real
+Beginning VICAR task pixstat
+pixstat - Sep 17, 2013 (64-bit) - RJB
+NLW=5 NSW=5
+pixstat a mom  nlw=5 nsw=5 'mom  'real
+Beginning VICAR task pixstat
+pixstat - Sep 17, 2013 (64-bit) - RJB
+NLW=5 NSW=5
+pixstat a var  nlw=5 nsw=5 'vari 'real
+Beginning VICAR task pixstat
+pixstat - Sep 17, 2013 (64-bit) - RJB
+NLW=5 NSW=5
+pixstat a sdev nlw=5 nsw=5 'sdev 'real
+Beginning VICAR task pixstat
+pixstat - Sep 17, 2013 (64-bit) - RJB
+NLW=5 NSW=5
+list mean
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:CATLABEL  User:HBM320    Date_Time:Thu Jul  8 16:28:56 1993
+ Task:PIXSTAT   User:wlb       Date_Time:Thu Mar 23 13:43:09 2017
+     Samp             1           2           3           4           5
+   Line
+      1       2.784E+02   2.822E+02   3.044E+02   3.201E+02   3.415E+02
+      2       2.696E+02   2.769E+02   2.995E+02   3.127E+02   3.310E+02
+      3       2.511E+02   2.644E+02   2.890E+02   2.964E+02   3.086E+02
+      4       2.139E+02   2.336E+02   2.664E+02   2.739E+02   2.879E+02
+      5       2.023E+02   2.242E+02   2.593E+02   2.659E+02   2.802E+02
+list mom
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:CATLABEL  User:HBM320    Date_Time:Thu Jul  8 16:28:56 1993
+ Task:PIXSTAT   User:wlb       Date_Time:Thu Mar 23 13:43:09 2017
+     Samp             1           2           3           4           5
+   Line
+      1       8.324E+04   8.555E+04   9.679E+04   1.063E+05   1.174E+05
+      2       7.969E+04   8.345E+04   9.460E+04   1.027E+05   1.121E+05
+      3       7.120E+04   7.767E+04   8.945E+04   9.397E+04   1.001E+05
+      4       5.152E+04   6.130E+04   7.690E+04   8.143E+04   8.785E+04
+      5       4.564E+04   5.686E+04   7.310E+04   7.706E+04   8.285E+04
+list var
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:CATLABEL  User:HBM320    Date_Time:Thu Jul  8 16:28:56 1993
+ Task:PIXSTAT   User:wlb       Date_Time:Thu Mar 23 13:43:09 2017
+     Samp             1           2           3           4           5
+   Line
+      1       5.713E+03   5.892E+03   4.127E+03   3.896E+03   7.540E+02
+      2       6.983E+03   6.792E+03   4.909E+03   4.915E+03   2.516E+03
+      3       8.159E+03   7.741E+03   5.927E+03   6.118E+03   4.799E+03
+      4       3.169E+04   3.907E+04   4.895E+04   5.150E+04   5.453E+04
+      5       4.416E+04   5.487E+04   7.049E+04   7.461E+04   8.050E+04
+list sdev
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:CATLABEL  User:HBM320    Date_Time:Thu Jul  8 16:28:56 1993
+ Task:PIXSTAT   User:wlb       Date_Time:Thu Mar 23 13:43:09 2017
+     Samp             1           2           3           4           5
+   Line
+      1       7.558E+01   7.676E+01   6.425E+01   6.242E+01   2.746E+01
+      2       8.357E+01   8.241E+01   7.006E+01   7.010E+01   5.015E+01
+      3       9.033E+01   8.798E+01   7.698E+01   7.822E+01   6.928E+01
+      4       1.780E+02   1.977E+02   2.213E+02   2.269E+02   2.335E+02
+      5       2.102E+02   2.343E+02   2.655E+02   2.732E+02   2.837E+02
+f2 (mom,mean) var2 func="in1-in2*in2"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 25 TIMES
+f2 (var,var2) diff func="in1-in2"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 calculating every pixel
+FUNCTION EVALUATED 25 TIMES
+list diff
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:CATLABEL  User:HBM320    Date_Time:Thu Jul  8 16:28:56 1993
+ Task:F2        User:wlb       Date_Time:Thu Mar 23 13:43:09 2017
+     Samp             1           2           3           4           5
+   Line
+      1       1.465E-03   2.930E-03   2.930E-03   7.324E-04  -1.892E-03
+      2      -1.562E-02   1.465E-03  -1.611E-02  -4.883E-04  -3.418E-03
+      3      -1.465E-03   1.465E-03  -4.883E-04   2.930E-03  -1.953E-02
+      4       2.594E+04   3.233E+04   4.301E+04   4.508E+04   4.956E+04
+      5       3.944E+04   4.828E+04   6.464E+04   6.827E+04   7.618E+04
+pixstat a mean nlw=5 nsw=5 'mean 'byte
+Beginning VICAR task pixstat
+pixstat - Sep 17, 2013 (64-bit) - RJB
+NLW=5 NSW=5
+list mean
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:CATLABEL  User:HBM320    Date_Time:Thu Jul  8 16:28:56 1993
+ Task:PIXSTAT   User:wlb       Date_Time:Thu Mar 23 13:43:09 2017
+     Samp     1       3       5
+   Line
+      1     255 255 255 255 255
+      2     255 255 255 255 255
+      3     251 255 255 255 255
+      4     214 234 255 255 255
+      5     202 224 255 255 255
+pixstat a mean nlw=5 nsw=5 'mean 'half
+Beginning VICAR task pixstat
+pixstat - Sep 17, 2013 (64-bit) - RJB
+NLW=5 NSW=5
+list mean
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:CATLABEL  User:HBM320    Date_Time:Thu Jul  8 16:28:56 1993
+ Task:PIXSTAT   User:wlb       Date_Time:Thu Mar 23 13:43:09 2017
+     Samp       1     2     3     4     5
+   Line
+      1       278   282   304   320   342
+      2       270   277   299   313   331
+      3       251   264   289   296   309
+      4       214   234   266   274   288
+      5       202   224   259   266   280
+pixstat a mean nlw=5 nsw=5 'mean 'full
+Beginning VICAR task pixstat
+pixstat - Sep 17, 2013 (64-bit) - RJB
+NLW=5 NSW=5
+list mean
+Beginning VICAR task list
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:CATLABEL  User:HBM320    Date_Time:Thu Jul  8 16:28:56 1993
+ Task:PIXSTAT   User:wlb       Date_Time:Thu Mar 23 13:43:09 2017
+     Samp            1          2          3          4          5
+   Line
+      1            278        282        304        320        342
+      2            270        277        299        313        331
+      3            251        264        289        296        309
+      4            214        234        266        274        288
+      5            202        224        259        266        280
+fit gl/7500.spk a perc=.1 'byte
+Beginning VICAR task fit
+
+FIT version 5 August, 2003
+
+     RAW HISTOGRAM STATISTICS...
+AVERAGE GRAY LEVEL=    -2.062 STANDARD DEVIATION=  1284.967 NUMBER OF ELEMENTS=  640000
+
+EXCLUDED HISTOGRAM STATISTICS...
+AVERAGE GRAY LEVEL=    47.982 STANDARD DEVIATION=   106.799 NUMBER OF ELEMENTS=  639024
+
+MINIMUM DN OF     -2   SCALED TO     0
+
+MAXIMUM DN OF    536   SCALED TO   255
+FIT task completed
+pixstat a b nlw=5 nsw=5 'mean
+Beginning VICAR task pixstat
+pixstat - Sep 17, 2013 (64-bit) - RJB
+NLW=5 NSW=5
+filter a c nlw=5 nsw=5 weights=(1,1,1,1,1,1,1,1,1)
+Beginning VICAR task filter
+** Filter 13-Aug-2010 (64-bit) - RJB
+difpic (b,c)
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ NUMBER OF DIFFERENT PIXELS =   0
+let $echo="no"
+*************************************
+ There should be NO differences
+*************************************
+ 

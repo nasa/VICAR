@@ -1,0 +1,42 @@
+ibis-gen test.int nc=3 nr=6 format=("DOUB","DOUB","DOUB")  +
+    datacols=(1,2)  +
+    data=(10,11,12,13,14,15,110,111,112,113,114,115)
+Beginning VICAR task ibis
+ibis-l test.int
+Beginning VICAR task ibis
+ 
+Number of Rows:6  Number of Columns: 3       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:6
++-----------+-----------+-----------
+         C:1         C:2         C:3
++-----------+-----------+-----------
+       10.00       11.00        0.00
+       12.00       13.00        0.00
+       14.00       15.00        0.00
+      110.00      111.00        0.00
+      112.00      113.00        0.00
+      114.00      115.00        0.00
+ibisclst2 test.int 10.0 1 2 3
+Beginning VICAR task ibisclst2
+ibisclst2 version 2016-06-16
+6 rows input
+2 clusters found
+ibis-list test.int
+Beginning VICAR task ibis
+ 
+Number of Rows:6  Number of Columns: 3       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:6
++-----------+-----------+-----------
+         C:1         C:2         C:3
++-----------+-----------+-----------
+       10.00       11.00        1.00
+       12.00       13.00        1.00
+       14.00       15.00        1.00
+      110.00      111.00        2.00
+      112.00      113.00        2.00
+      114.00      115.00        2.00
+end-proc

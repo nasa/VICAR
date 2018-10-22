@@ -1,0 +1,93 @@
+PROCESS		HELP=*
+!
+! CONTOUR PDF - Create a graphics file of contours or "isolines"
+!
+PARM INP TYPE=(STRING,72)
+PARM OUT TYPE=(STRING,72)
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM DIM TYPE=INTEGER VALID=2:3 DEFAULT=3
+PARM ZSTART TYPE=INTEGER DEFAULT=0
+PARM ZEND TYPE=INTEGER DEFAULT=255
+PARM CONTINT TYPE=INTEGER DEFAULT=10
+PARM NUMPTS TYPE=INTEGER VALID=2:10 DEFAULT=2
+PARM ZERO TYPE=(STRING,4) VALID=("INCL","OMIT") DEFAULT="OMIT"
+END-PROC
+.HELP
+
+PURPOSE
+
+	Create a graphics file of isolines.
+
+TAE COMMAND LINE FORMAT
+
+	contour INP=ELEVATION.IMG OUT=ELVLEVELS.CTR ZSTART=100 +
+		ZEND=500 CONTINT=25 NUMPTS=3
+.PAGE
+EXAMPLES
+
+	contour INP=SURFACE.IMG OUT=SURFACE.CTR CONTINT=5 +
+		ZSTART=100 ZEND=200 NUMPTS=5
+
+	In this example, contours will be generated starting at
+100 and continuing through 200, at an interval of 5 units. Each
+cell of 4 pixels (2 by 2) used to calculate the contours will be
+devided into 5 small increments. This will increase the appearance
+of a smooth contour line.
+
+.PAGE
+OPERATION
+
+	The output graphics file coordinates will be in "pixel-space"
+units. This means that a subwindow of a surface image contoured will
+not start with values of 1,1 but in the approximate range of the
+starting line, starting sample used in the SIZE parameter (assuming
+there were pixels in the correct Z value range).
+
+.PAGE
+RESTRICTIONS
+
+	Sized down surface images should be contoured as apposed to
+contouring at the original resolution. Since the algorithm moves
+accross and down the surface image there are a lot of pen ups, change
+Z values, and pen downs. Typically a 1/5 scale image is sufficient
+to generate a believable contour map of the surface.
+
+NOTE
+
+	The program MOD3DCTR can be run on the output of CONTOUR. This
+process will sort the output of CONTOUR in Z order as well as allow
+for scaling and offsets to the 3D graphics file. (Sorting is important
+if a CALCOMP plot of the contours is needed. This allows for plotting
+one entire Z value contour without the constant changes of pens, as would
+be the case without the postprocess MOD3DCTR).
+
+.PAGE
+REVISIONS
+	1-95   Meredith Cox  (CRI) - Made portable for UNIX
+.LEVEL1
+.VARIABLE INP
+A VICAR image
+(A surface image)
+.VARIABLE OUT
+IBIS graphics file
+.VARIABLE SIZE
+Normal VICAR size field
+.VARIABLE DIM
+Output graphics type
+(2=2D, 3=3D)
+.VARIABLE ZSTART
+Starting "elevation"
+for isolines
+.VARIABLE ZEND
+Ending "elevation"
+.VARIABLE CONTINT
+Contour interval
+.VARIABLE NUMPTS
+Number of increments
+per pixel (smoothing)
+.VARIABLE ZERO
+Switch to include
+contouring next
+to ZERO valued
+pixels
+.END

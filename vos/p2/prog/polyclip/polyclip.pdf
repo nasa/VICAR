@@ -1,0 +1,82 @@
+process help=*
+parm INP	type=string 
+parm OUT	type=string 
+parm MINLINE	type=real 
+parm MAXLINE	type=real 
+parm MINSAMP	type=real 
+parm MAXSAMP	type=real 
+parm REORIGIN   type=keyword count=0:1 valid=(reorigin,--) default=--
+parm SKIP	type=integer valid=(0:38) default=0
+end-proc
+.TITLE
+VICAR/IBIS Program "polyclip"
+.HELP
+PURPOSE
+
+"polyclip" takes an IBIS graphics-1 file as input and clips the graphics
+elements with a specified window. The new clipped data is output into
+another graphics file.
+
+
+EXECUTION
+
+polyclip INPUT.GRA OUTPUT.GRA   MINLINE=901.5 MINSAMP=100.0 +
+				MAXLINE=1000.0 MAXSAMP=333.3
+
+The IBIS graphics-1 file INPUT.GRA is clipped according to the window
+coordinates (MINLINE,MAXLINE,MINSAMP,MAXSAMP) and output to OUTPUT.GRA .
+
+
+polyclip INPUT.GRA OUTPUT.GRA   MINLINE=901.5 MINSAMP=100.0 +
+				MAXLINE=1000.0 MAXSAMP=333.3  'REORIGIN
+
+In this example the output graphics file is reoriginated so that the
+output origin is (line,sample)=(1,1) , i.e. (MINLINE-1,MINSAMP-1) is 
+subtracted from all of the coordinate.
+
+
+polyclip INPUT.GRA OUTPUT.GRA   SKIP=3 MINLINE=1 MINSAMP=1 +
+				MAXLINE=1056 MAXSAMP=1204
+
+In this example, the input IBIS graphics-1 file has five "columns" of
+which the first two are the coordinate values and the last three
+are skipped.  The skipped data is just carried along and does not effect
+the clipping on the other two coordinates.  This is used for carrying
+along identification information so it can be determined which polygons
+were clipped.
+
+
+
+Original Programmer:  Leo Bynum		December 1985
+
+Cognizant Programmer:  Frank Evans	April 1986
+
+Revisions
+Made portable for UNIX   A. Scop (CRI)  January 1995
+
+.LEVEL1
+.VARIABLE INP
+IBIS graphics-1 file to
+be clipped ( input ).
+.VARIABLE OUT
+IBIS graphics-1 file to
+be created.
+.VARIABLE MINLINE
+Minimum line coordinate.
+Defines the top of the window.
+.VARIABLE MAXLINE
+Maximum line coordinate.
+Defines the bottom of the window.
+.VARIABLE MINSAMP
+Minimum sample coordinate.
+Defines the left side of the window.
+.VARIABLE MAXSAMP
+Maximum sample coordinate.
+Defines the right side of the window.
+.VARIABLE REORIGIN
+Keyword to reorigin the
+output data
+.VARIABLE SKIP
+The number of nominal data
+values to skip over.
+.END

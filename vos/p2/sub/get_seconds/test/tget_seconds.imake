@@ -1,0 +1,25 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR TEST PROGRAM tget_seconds
+
+   To Create the build file give the command:
+
+	$ vimake tget_seconds                     (VMS)
+   or
+	% vimake tget_seconds                     (Unix)
+
+*************************************************************************/
+
+#define PROGRAM tget_seconds
+
+#define MODULE_LIST tget_seconds.f
+
+#define TEST
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+#define USES_FORTRAN
+#define MAIN_LANG_FORTRAN
+/* #define LIB_LOCAL DISABLE DURING DELIVERY. ONLY FOR Y2K TEST PURPOSE */

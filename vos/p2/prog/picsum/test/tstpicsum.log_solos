@@ -1,0 +1,789 @@
+tstpicsum
+local dir string
+gen out=pic1.img nl=10 ns=10 ival=10 linc=4 sinc=6
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list pic1.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:21 2011
+     Samp     1       3       5       7       9
+   Line
+      1      10  16  22  28  34  40  46  52  58  64
+      2      14  20  26  32  38  44  50  56  62  68
+      3      18  24  30  36  42  48  54  60  66  72
+      4      22  28  34  40  46  52  58  64  70  76
+      5      26  32  38  44  50  56  62  68  74  80
+      6      30  36  42  48  54  60  66  72  78  84
+      7      34  40  46  52  58  64  70  76  82  88
+      8      38  44  50  56  62  68  74  80  86  92
+      9      42  48  54  60  66  72  78  84  90  96
+     10      46  52  58  64  70  76  82  88  94 100
+gen out=pic2.img nl=10 ns=10 ival=10 linc=6 sinc=4
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list pic2.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:21 2011
+     Samp     1       3       5       7       9
+   Line
+      1      10  14  18  22  26  30  34  38  42  46
+      2      16  20  24  28  32  36  40  44  48  52
+      3      22  26  30  34  38  42  46  50  54  58
+      4      28  32  36  40  44  48  52  56  60  64
+      5      34  38  42  46  50  54  58  62  66  70
+      6      40  44  48  52  56  60  64  68  72  76
+      7      46  50  54  58  62  66  70  74  78  82
+      8      52  56  60  64  68  72  76  80  84  88
+      9      58  62  66  70  74  78  82  86  90  94
+     10      64  68  72  76  80  84  88  92  96 100
+picsum inp=(pic1.img,pic2.img) out=sum.img
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GETPROJ: unrecognizable project
+PICSUM task completed
+list sum.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:21 2011
+ Task:PICSUM    User:lwk       Date_Time:Mon Feb 14 18:11:21 2011
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1        20    30    40    50    60    70    80    90   100   110
+      2        30    40    50    60    70    80    90   100   110   120
+      3        40    50    60    70    80    90   100   110   120   130
+      4        50    60    70    80    90   100   110   120   130   140
+      5        60    70    80    90   100   110   120   130   140   150
+      6        70    80    90   100   110   120   130   140   150   160
+      7        80    90   100   110   120   130   140   150   160   170
+      8        90   100   110   120   130   140   150   160   170   180
+      9       100   110   120   130   140   150   160   170   180   190
+     10       110   120   130   140   150   160   170   180   190   200
+picsum inp=(pic1.img,pic2.img) out=sum.img tscale=(1.,1.)
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GETPROJ: unrecognizable project
+MINT=          3
+Number of bad pixels=         42
+PICSUM task completed
+list sum.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:21 2011
+ Task:PICSUM    User:lwk       Date_Time:Mon Feb 14 18:11:22 2011
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1        20    30    40    44    52    60    68    76    84    92
+      2        30    40    50    60    64    72    80    88    96   104
+      3        40    50    60    70    80    90    92   100   108   116
+      4        44    60    70    80    90   100   110   112   120   128
+      5        52    64    80    90   100   110   120   130   140   140
+      6        60    72    90   100   110   120   130   140   150   160
+      7        68    80    92   110   120   130   140   150   160   170
+      8        76    88   100   112   130   140   150   160   170   180
+      9        84    96   108   120   140   150   160   170   180   190
+     10        92   104   116   128   140   160   170   180   190   200
+picsum inp=(pic1.img,pic2.img) out=sum.img 'ascale
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GETPROJ: unrecognizable project
+PICSUM task completed
+list sum.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:21 2011
+ Task:PICSUM    User:lwk       Date_Time:Mon Feb 14 18:11:22 2011
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1      1280  1920  2560  3200  3840  4480  5120  5760  6400  7040
+      2      1920  2560  3200  3840  4480  5120  5760  6400  7040  7680
+      3      2560  3200  3840  4480  5120  5760  6400  7040  7680  8320
+      4      3200  3840  4480  5120  5760  6400  7040  7680  8320  8960
+      5      3840  4480  5120  5760  6400  7040  7680  8320  8960  9600
+      6      4480  5120  5760  6400  7040  7680  8320  8960  9600 10240
+      7      5120  5760  6400  7040  7680  8320  8960  9600 10240 10880
+      8      5760  6400  7040  7680  8320  8960  9600 10240 10880 11520
+      9      6400  7040  7680  8320  8960  9600 10240 10880 11520 12160
+     10      7040  7680  8320  8960  9600 10240 10880 11520 12160 12800
+picsum inp=(pic1.img,pic2.img) out=sum.img 'median
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GETPROJ: unrecognizable project
+PICSUM task completed
+list sum.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:21 2011
+ Task:PICSUM    User:lwk       Date_Time:Mon Feb 14 18:11:22 2011
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1        10    14    18    22    26    30    34    38    42    46
+      2        14    20    24    28    32    36    40    44    48    52
+      3        18    24    30    34    38    42    46    50    54    58
+      4        22    28    34    40    44    48    52    56    60    64
+      5        26    32    38    44    50    54    58    62    66    70
+      6        30    36    42    48    54    60    64    68    72    76
+      7        34    40    46    52    58    64    70    74    78    82
+      8        38    44    50    56    62    68    74    80    84    88
+      9        42    48    54    60    66    72    78    84    90    94
+     10        46    52    58    64    70    76    82    88    94   100
+gen out=pic3.img nl=10 ns=10 ival=10 linc=8 sinc=2
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list pic3.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:22 2011
+     Samp     1       3       5       7       9
+   Line
+      1      10  12  14  16  18  20  22  24  26  28
+      2      18  20  22  24  26  28  30  32  34  36
+      3      26  28  30  32  34  36  38  40  42  44
+      4      34  36  38  40  42  44  46  48  50  52
+      5      42  44  46  48  50  52  54  56  58  60
+      6      50  52  54  56  58  60  62  64  66  68
+      7      58  60  62  64  66  68  70  72  74  76
+      8      66  68  70  72  74  76  78  80  82  84
+      9      74  76  78  80  82  84  86  88  90  92
+     10      82  84  86  88  90  92  94  96  98 100
+gen out=pic4.img nl=10 ns=10 ival=10 linc=1 sinc=5
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list pic4.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:22 2011
+     Samp     1       3       5       7       9
+   Line
+      1      10  15  20  25  30  35  40  45  50  55
+      2      11  16  21  26  31  36  41  46  51  56
+      3      12  17  22  27  32  37  42  47  52  57
+      4      13  18  23  28  33  38  43  48  53  58
+      5      14  19  24  29  34  39  44  49  54  59
+      6      15  20  25  30  35  40  45  50  55  60
+      7      16  21  26  31  36  41  46  51  56  61
+      8      17  22  27  32  37  42  47  52  57  62
+      9      18  23  28  33  38  43  48  53  58  63
+     10      19  24  29  34  39  44  49  54  59  64
+gen out=pic5.img nl=10 ns=10 ival=10 linc=9 sinc=7
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list pic5.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:23 2011
+     Samp     1       3       5       7       9
+   Line
+      1      10  17  24  31  38  45  52  59  66  73
+      2      19  26  33  40  47  54  61  68  75  82
+      3      28  35  42  49  56  63  70  77  84  91
+      4      37  44  51  58  65  72  79  86  93 100
+      5      46  53  60  67  74  81  88  95 102 109
+      6      55  62  69  76  83  90  97 104 111 118
+      7      64  71  78  85  92  99 106 113 120 127
+      8      73  80  87  94 101 108 115 122 129 136
+      9      82  89  96 103 110 117 124 131 138 145
+     10      91  98 105 112 119 126 133 140 147 154
+picsum inp=(pic1.img,pic2.img,pic3.img,pic4.img,pic5.img) out=sum.img 'median
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GETPROJ: unrecognizable project
+PICSUM task completed
+list sum.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:21 2011
+ Task:PICSUM    User:lwk       Date_Time:Mon Feb 14 18:11:23 2011
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1        10    15    20    25    30    35    40    45    50    55
+      2        16    20    24    28    32    36    41    46    51    56
+      3        22    26    30    34    38    42    46    50    54    58
+      4        28    32    36    40    44    48    52    56    60    64
+      5        34    38    42    46    50    54    58    62    66    70
+      6        40    44    48    52    56    60    64    68    72    76
+      7        46    50    54    58    62    66    70    74    78    82
+      8        52    56    60    64    68    72    76    80    84    88
+      9        58    62    66    70    74    78    82    86    90    94
+     10        64    68    72    76    80    84    88    92    96   100
+gen out=pic1.img nl=10 ns=10 ival=32764 'half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list pic1.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:23 2011
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1     32764 32765 32766 32767-32768-32767-32766-32765-32764-32763
+      2     32765 32766 32767-32768-32767-32766-32765-32764-32763-32762
+      3     32766 32767-32768-32767-32766-32765-32764-32763-32762-32761
+      4     32767-32768-32767-32766-32765-32764-32763-32762-32761-32760
+      5    -32768-32767-32766-32765-32764-32763-32762-32761-32760-32759
+      6    -32767-32766-32765-32764-32763-32762-32761-32760-32759-32758
+      7    -32766-32765-32764-32763-32762-32761-32760-32759-32758-32757
+      8    -32765-32764-32763-32762-32761-32760-32759-32758-32757-32756
+      9    -32764-32763-32762-32761-32760-32759-32758-32757-32756-32755
+     10    -32763-32762-32761-32760-32759-32758-32757-32756-32755-32754
+gen out=pic2.img nl=10 ns=10 'half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list pic2.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:23 2011
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1         0     1     2     3     4     5     6     7     8     9
+      2         1     2     3     4     5     6     7     8     9    10
+      3         2     3     4     5     6     7     8     9    10    11
+      4         3     4     5     6     7     8     9    10    11    12
+      5         4     5     6     7     8     9    10    11    12    13
+      6         5     6     7     8     9    10    11    12    13    14
+      7         6     7     8     9    10    11    12    13    14    15
+      8         7     8     9    10    11    12    13    14    15    16
+      9         8     9    10    11    12    13    14    15    16    17
+     10         9    10    11    12    13    14    15    16    17    18
+picsum inp=(pic1.img, pic2.img) out=picx.img
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GETPROJ: unrecognizable project
+PICSUM task completed
+list picx.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:23 2011
+ Task:PICSUM    User:lwk       Date_Time:Mon Feb 14 18:11:23 2011
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1     32764 32766 32767 32767-32764-32762-32760-32758-32756-32754
+      2     32766 32767 32767-32764-32762-32760-32758-32756-32754-32752
+      3     32767 32767-32764-32762-32760-32758-32756-32754-32752-32750
+      4     32767-32764-32762-32760-32758-32756-32754-32752-32750-32748
+      5    -32764-32762-32760-32758-32756-32754-32752-32750-32748-32746
+      6    -32762-32760-32758-32756-32754-32752-32750-32748-32746-32744
+      7    -32760-32758-32756-32754-32752-32750-32748-32746-32744-32742
+      8    -32758-32756-32754-32752-32750-32748-32746-32744-32742-32740
+      9    -32756-32754-32752-32750-32748-32746-32744-32742-32740-32738
+     10    -32754-32752-32750-32748-32746-32744-32742-32740-32738-32736
+gen out=pic1.img nl=10 ns=10 ival=32764 'half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list pic1.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:23 2011
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1     32764 32765 32766 32767-32768-32767-32766-32765-32764-32763
+      2     32765 32766 32767-32768-32767-32766-32765-32764-32763-32762
+      3     32766 32767-32768-32767-32766-32765-32764-32763-32762-32761
+      4     32767-32768-32767-32766-32765-32764-32763-32762-32761-32760
+      5    -32768-32767-32766-32765-32764-32763-32762-32761-32760-32759
+      6    -32767-32766-32765-32764-32763-32762-32761-32760-32759-32758
+      7    -32766-32765-32764-32763-32762-32761-32760-32759-32758-32757
+      8    -32765-32764-32763-32762-32761-32760-32759-32758-32757-32756
+      9    -32764-32763-32762-32761-32760-32759-32758-32757-32756-32755
+     10    -32763-32762-32761-32760-32759-32758-32757-32756-32755-32754
+gen out=pic2.img nl=10 ns=10
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list pic2.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:24 2011
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       1   2   3   4   5   6   7   8   9  10
+      3       2   3   4   5   6   7   8   9  10  11
+      4       3   4   5   6   7   8   9  10  11  12
+      5       4   5   6   7   8   9  10  11  12  13
+      6       5   6   7   8   9  10  11  12  13  14
+      7       6   7   8   9  10  11  12  13  14  15
+      8       7   8   9  10  11  12  13  14  15  16
+      9       8   9  10  11  12  13  14  15  16  17
+     10       9  10  11  12  13  14  15  16  17  18
+picsum inp=(pic1.img, pic2.img) out=picx.img
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GETPROJ: unrecognizable project
+PICSUM task completed
+picsum inp=(pic2.img, pic1.img) out=picz.img
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GETPROJ: unrecognizable project
+PICSUM task completed
+difpic (picx.img, picz.img)
+Beginning VICAR task difpic
+DIFPIC version 05jul10
+ NUMBER OF DIFFERENCES =   0
+list picx.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Mon Feb 14 18:11:23 2011
+ Task:PICSUM    User:lwk       Date_Time:Mon Feb 14 18:11:24 2011
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1     32764 32766 32767 32767-32764-32762-32760-32758-32756-32754
+      2     32766 32767 32767-32764-32762-32760-32758-32756-32754-32752
+      3     32767 32767-32764-32762-32760-32758-32756-32754-32752-32750
+      4     32767-32764-32762-32760-32758-32756-32754-32752-32750-32748
+      5    -32764-32762-32760-32758-32756-32754-32752-32750-32748-32746
+      6    -32762-32760-32758-32756-32754-32752-32750-32748-32746-32744
+      7    -32760-32758-32756-32754-32752-32750-32748-32746-32744-32742
+      8    -32758-32756-32754-32752-32750-32748-32746-32744-32742-32740
+      9    -32756-32754-32752-32750-32748-32746-32744-32742-32740-32738
+     10    -32754-32752-32750-32748-32746-32744-32742-32740-32738-32736
+if ($syschar(1)="UNIX")
+   let dir = "/project/test_work/testdata/cassini/iss/"
+   ush cp /project/test_work/testdata/cassini/iss/sum2.1 .
+   ush cp /project/test_work/testdata/cassini/iss/sum2.2 .
+   ush cp /project/test_work/testdata/cassini/iss/sum2.3 .
+else
+end-if
+picsum (/project/test_work/testdata/cassini/iss/sum2.1 /project/test_work/testdata/cassini/iss/sum2.3 /project/test_work/testdata/c+
+assini/iss/sum2.2) out.img
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        1 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        3 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        2 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+PICSUM task completed
+hist out.img 'nohist
+Beginning VICAR task hist
+HIST version 15-NOV-05
+
+
+AVERAGE GRAY LEVEL=51.20888       STANDARD DEVIATION=9.926864       NUMBER ELEMENTS=  262144
+MIN. DN=        22
+MAX. DN=        87
+
+label-l out.img
+Beginning VICAR task label
+LABEL version 15-Nov-2010
+************************************************************
+ 
+        ************  File out.img ************
+                3 dimensional IMAGE file
+                File organization is BSQ
+                Pixels are in HALF format from a SUN-SOLR host
+                1 bands
+                512 lines per band
+                512 samples per line
+                0 lines of binary header
+                0 bytes of binary prefix per line
+---- Property: CASSINI-ISS ----
+MISSION_NAME='CASSINI'
+MISSION_PHASE_TYPE='BENCH'
+INSTRUMENT_ID='ISSNA'
+IMAGE_NUMBER=1
+IMAGE_TIME='1997-128T12:34:56.800'
+SOFTWARE_VERSION_ID='V4'
+INSTRUMENT_MODE_ID='SUM2'
+FILTER1_NAME='RED'
+FILTER2_NAME='CLR'
+GAIN_MODE_ID='100K'
+ENCODING_TYPE='NOTCOMP'
+CONVERSION_TYPE='8LSB'
+DETECTOR_TEMPERATURE=-90.0
+OPTICS_TEMPERATURE=-10.0
+FILTER_TEMPERATURE=-999.0
+LIGHT_FLOOD_STATE_FLAG='OFF'
+ANTIBLOOMING_STATE_FLAG='OFF'
+CALIB_LAMP_STATE_FLAG='OFF'
+COMPRESSION_PARAMETER_VALUE=-1249
+OFFSET=3
+DARK_CURRENT=2
+COMPRESSION_RATIO=-999.0
+TARGET_NAME='FLATFIELD'
+OBSERVATION_ID='LIGHT_XFR'
+ILLUMINANT='TUNGSTEN'
+LUMINANCE=5.1
+EXPOSURE_DURATION=0.0
+RADIANCE=5.1
+---- Task: PICSUM -- User: lwk -- Mon Feb 14 18:11:25 2011 ----
+PICSCALE=3
+NFRAMES=3
+SCLKS=(1, 2, 3)
+ 
+************************************************************
+createfile picsum.srchlist
+refgbl  $syschar
+write "CREATEFILE version 1-3-97"
+CREATEFILE version 1-3-97
+if ($syschar(1) = "VAX_VMS")
+else
+  USH cp /dev/null  picsum.srchlist
+end-if
+END-PROC
+addtofile picsum.srchlist "NEXT FILE=0001"
+refgbl  $syschar
+write "ADDTOFILE version 1-3-97"
+ADDTOFILE version 1-3-97
+if ($syschar(1) = "VAX_VMS")
+else
+  addtofil INPUT=@INPUT STRING1="NEXT FILE=0001"
+Beginning VICAR task addtofil
+end-if
+END-PROC
+addtofile picsum.srchlist "sum2.1"
+refgbl  $syschar
+write "ADDTOFILE version 1-3-97"
+ADDTOFILE version 1-3-97
+if ($syschar(1) = "VAX_VMS")
+else
+  addtofil INPUT=@INPUT STRING1="sum2.1"
+Beginning VICAR task addtofil
+end-if
+END-PROC
+addtofile picsum.srchlist "sum2.3"
+refgbl  $syschar
+write "ADDTOFILE version 1-3-97"
+ADDTOFILE version 1-3-97
+if ($syschar(1) = "VAX_VMS")
+else
+  addtofil INPUT=@INPUT STRING1="sum2.3"
+Beginning VICAR task addtofil
+end-if
+END-PROC
+addtofile picsum.srchlist "sum2.2"
+refgbl  $syschar
+write "ADDTOFILE version 1-3-97"
+ADDTOFILE version 1-3-97
+if ($syschar(1) = "VAX_VMS")
+else
+  addtofil INPUT=@INPUT STRING1="sum2.2"
+Beginning VICAR task addtofil
+end-if
+END-PROC
+picsum /project/test_work/testdata/cassini/iss/sum2.1 out.img list=picsum.srchlist
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        1 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        3 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        2 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+PICSUM task completed
+hist out.img 'nohist
+Beginning VICAR task hist
+HIST version 15-NOV-05
+
+
+AVERAGE GRAY LEVEL=51.20888       STANDARD DEVIATION=9.926864       NUMBER ELEMENTS=  262144
+MIN. DN=        22
+MAX. DN=        87
+
+label-l out.img
+Beginning VICAR task label
+LABEL version 15-Nov-2010
+************************************************************
+ 
+        ************  File out.img ************
+                3 dimensional IMAGE file
+                File organization is BSQ
+                Pixels are in HALF format from a SUN-SOLR host
+                1 bands
+                512 lines per band
+                512 samples per line
+                0 lines of binary header
+                0 bytes of binary prefix per line
+---- Property: CASSINI-ISS ----
+MISSION_NAME='CASSINI'
+MISSION_PHASE_TYPE='BENCH'
+INSTRUMENT_ID='ISSNA'
+IMAGE_NUMBER=1
+IMAGE_TIME='1997-128T12:34:56.800'
+SOFTWARE_VERSION_ID='V4'
+INSTRUMENT_MODE_ID='SUM2'
+FILTER1_NAME='RED'
+FILTER2_NAME='CLR'
+GAIN_MODE_ID='100K'
+ENCODING_TYPE='NOTCOMP'
+CONVERSION_TYPE='8LSB'
+DETECTOR_TEMPERATURE=-90.0
+OPTICS_TEMPERATURE=-10.0
+FILTER_TEMPERATURE=-999.0
+LIGHT_FLOOD_STATE_FLAG='OFF'
+ANTIBLOOMING_STATE_FLAG='OFF'
+CALIB_LAMP_STATE_FLAG='OFF'
+COMPRESSION_PARAMETER_VALUE=-1249
+OFFSET=3
+DARK_CURRENT=2
+COMPRESSION_RATIO=-999.0
+TARGET_NAME='FLATFIELD'
+OBSERVATION_ID='LIGHT_XFR'
+ILLUMINANT='TUNGSTEN'
+LUMINANCE=5.1
+EXPOSURE_DURATION=0.0
+RADIANCE=5.1
+---- Task: PICSUM -- User: lwk -- Mon Feb 14 18:11:28 2011 ----
+PICSCALE=3
+NFRAMES=3
+SCLKS=(1, 2, 3)
+ 
+************************************************************
+if ($syschar(1)="UNIX")
+   ush rm sum2.*
+else
+end-if
+write "The output DN values should be (sum of 3 DNs * 128.0/3.0)."
+The output DN values should be (sum of 3 DNs * 128.0/3.0).
+picsum (/project/test_work/testdata/cassini/iss/sum2.1 /project/test_work/testdata/cassini/iss/sum2.2 /project/test_work/testdata/c+
+assini/iss/sum2.3) out.img 'ascale
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        1 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        2 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        3 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+PICSUM task completed
+list /project/test_work/testdata/cassini/iss/sum2.1 sl=10 ss=10 nl=100 ns=100 linc=10 sinc=10
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+     Samp      10    20    30    40    50    60    70    80    90   100
+   Line
+     10        21    24    21    23    22    20    18    24    18    20
+     20        21    24    21    21    21    23    24    19    17    24
+     30        21    21    20    21    24    19    23    20    19    19
+     40        19    21    19    21    21    24    21    21    21    23
+     50        25    25    24    24    21    21    23    20    19    21
+     60        24    24    21    25    21    21    19    25    20    19
+     70        24    21    21    21    20    20    21    21    21    21
+     80        24    21    22    24    22    21    23    24    21    20
+     90        24    20    20    21    24    17    21    19    19    23
+    100        23    25    21    24    21    21    24    21    21    19
+list /project/test_work/testdata/cassini/iss/sum2.2 sl=10 ss=10 nl=100 ns=100 linc=10 sinc=10
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+     Samp      10    20    30    40    50    60    70    80    90   100
+   Line
+     10        24    25    24    21    19    21    21    22    21    20
+     20        25    21    24    21    20    22    25    19    21    21
+     30        21    21    20    22    18    21    20    21    21    21
+     40        21    25    24    20    24    20    20    25    20    19
+     50        24    21    24    21    21    22    20    24    20    21
+     60        21    21    24    24    21    21    22    24    17    24
+     70        21    21    21    21    21    20    20    21    19    21
+     80        21    24    23    21    19    19    19    21    20    22
+     90        24    24    21    21    19    24    24    21    21    20
+    100        23    21    19    20    22    21    17    21    21    20
+list /project/test_work/testdata/cassini/iss/sum2.3 sl=10 ss=10 nl=100 ns=100 linc=10 sinc=10
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+     Samp      10    20    30    40    50    60    70    80    90   100
+   Line
+     10        21    19    24    25    21    21    19    21    21    25
+     20        24    20    21    21    21    21    19    21    19    21
+     30        24    20    24    24    22    22    19    24    19    24
+     40        21    18    21    24    20    21    20    20    19    21
+     50        21    25    25    21    19    21    21    20    20    21
+     60        21    23    21    19    21    21    20    17    25    24
+     70        21    24    21    21    21    20    19    20    20    19
+     80        21    22    22    21    21    21    21    23    25    24
+     90        24    25    21    23    21    18    20    21    20    21
+    100        24    24    21    24    24    21    24    20    21    21
+list out.img sl=10 ss=10 nl=100 ns=100 linc=10 sinc=10
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:PICSUM    User:lwk       Date_Time:Mon Feb 14 18:11:31 2011
+     Samp      10    20    30    40    50    60    70    80    90   100
+   Line
+     10      2816  2901  2944  2944  2645  2645  2474  2858  2560  2773
+     20      2986  2773  2816  2688  2645  2816  2901  2517  2432  2816
+     30      2816  2645  2730  2858  2730  2645  2645  2773  2517  2730
+     40      2602  2730  2730  2773  2773  2773  2602  2816  2560  2688
+     50      2986  3029  3114  2816  2602  2730  2730  2730  2517  2688
+     60      2816  2901  2816  2901  2688  2688  2602  2816  2645  2858
+     70      2816  2816  2688  2688  2645  2560  2560  2645  2560  2602
+     80      2816  2858  2858  2816  2645  2602  2688  2901  2816  2816
+     90      3072  2944  2645  2773  2730  2517  2773  2602  2560  2730
+    100      2986  2986  2602  2901  2858  2688  2773  2645  2688  2560
+hist out.img 'nohist
+Beginning VICAR task hist
+HIST version 15-NOV-05
+
+
+AVERAGE GRAY LEVEL=2184.599       STANDARD DEVIATION=423.5399       NUMBER ELEMENTS=  262144
+MIN. DN=       938
+MAX. DN=      3712
+
+picsum (/project/test_work/testdata/cassini/iss/sum2.1 /project/test_work/testdata/cassini/iss/sum2.2 /project/test_work/testdata/c+
+assini/iss/sum2.3) out.img tscale=(3.,3.)
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        1 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        2 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        3 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+MINT=          1
+Number of bad pixels=     138487
+PICSUM task completed
+hist out.img 'nohist
+Beginning VICAR task hist
+HIST version 15-NOV-05
+
+
+AVERAGE GRAY LEVEL=51.22421       STANDARD DEVIATION=10.22587       NUMBER ELEMENTS=  262144
+MIN. DN=        24
+MAX. DN=        87
+
+picsum (/project/test_work/testdata/cassini/iss/sum2.1 /project/test_work/testdata/cassini/iss/sum2.2 /project/test_work/testdata/c+
+assini/iss/sum2.3) out.img tscale=(3.,3.) mint=5
+Beginning VICAR task picsum
+PICSUM version 14 Feb 2011
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        1 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        2 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+GROUP_BLOCKS VALUE MISSING
+ALGORITHM VALUE MISSING
+BLOCK_TYPE VALUE MISSING
+QUANTIZATION_FACTOR_INDEX VALUE MISSING
+MISSING_LINES VALUE MISSING
+SCLK=        3 CAM=ISSNA GAIN=100K  MODE=SUM2 EXP=      0 FILT1=RED   FILT2=CLR
+MINT=          5
+Number of bad pixels=       2268
+PICSUM task completed
+hist out.img 'nohist
+Beginning VICAR task hist
+HIST version 15-NOV-05
+
+
+AVERAGE GRAY LEVEL=51.20851       STANDARD DEVIATION=9.945005       NUMBER ELEMENTS=  262144
+MIN. DN=        22
+MAX. DN=        87
+
+end-proc
+exit
+slogoff
+if ($RUNTYPE = "INTERACTIVE")
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+else
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+end-if
+ulogoff
+END-PROC
+END-PROC

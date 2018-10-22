@@ -1,0 +1,131 @@
+PROCESS     HELP=*
+! POLYPNT - VICAR/IBIS SOFTWARE
+! VICAR2/MIPL VERSION
+PARM INP TYPE=(STRING,72)
+PARM OUT TYPE=(STRING,72) COUNT=(1:2)
+PARM SIZE TYPE=INTEGER COUNT=4
+PARM DN  TYPE=INTEGER DEFAULT=255
+PARM BDN TYPE=INTEGER DEFAULT=0
+PARM PDN TYPE=INTEGER DEFAULT=1
+PARM IGNORE  TYPE=REAL COUNT=(0:2) DEFAULT=0.
+PARM RANGE TYPE=INTEGER COUNT=(0:200) DEFAULT=0
+PARM SELECT TYPE=INTEGER COUNT=(0:100) DEFAULT=0
+PARM MODE TYPE=KEYWORD COUNT=(0:6) +
+VALID=(EXCLOSE,OUTSIDE,HALF,PAINT,INTE,GR2) DEFAULT=--
+END-PROC
+.TITLE
+VICAR/IBIS Program POLYPNT 
+.HELP
+PURPOSE
+
+     POLYPNT is used to transform a standard polygon file into an 
+     image  file of polygon borders with each border painted at a 
+     unique DN level.   The input data in coordinate-point format 
+     is used to form a raster image containing polygon  outlines.  
+.PAGE
+TAE COMMAND LINE FORMAT
+     POLYPNT INP=G OUT=PIC SIZE PARAMS
+     where
+     G                        is  the IBIS Graphics polygon data to 
+                              be scribed,
+     PIC                      is  the output raster dataset  onto 
+                              which  the  scribed image  will  be 
+                              written,
+     SIZE                     is  the standard VICAR size  field.  
+                              The  size  field provides a  window 
+                              through which the lines are scribed 
+                              and is required by the program, and
+     PARAMS                   is   a  standard  VICAR   parameter 
+                              field.
+.PAGE
+OPERATION
+     POLYPNT  scribes lines in a holding array which is a  subset 
+     of the window described in the SIZE parameter.  It processes 
+     one  line at a time calculating slope,  beginning and ending 
+     points  to determine which pixels will be filled to  connect 
+     the  points.   It looks for intersections (previously  coded 
+     pixels)  and  outputs notations to  the  optionally  tabular 
+     file.   The completed strip is written to the output dataset 
+     before a new strip is started.
+EXAMPLE
+        POLYPNT INP=G OUT=PIC SIZE=(1,1,512,512) +
+                'PAINT 'INTE
+     In this example, POLYPNT reads the dataset, IN and writes 
+     the scribed image onto the datset PIC. The output image is 
+     512 x 512  and contains lines and intersections with sequential 
+     DN values starting with DN 1.  The background is DN 0.
+.PAGE
+
+WRITTEN BY:            A. L. Zobrist, 27 April 1983
+
+COGNIZANT PROGRAMMER:  B. A, Mc Guffie
+
+REVISION:              New
+.LEVEL1
+.VARIABLE INP
+Input Graphics file to scribe
+.VARIABLE OUT
+PIC - output image file
+.VARIABLE SIZE
+Standard size field (sl,ss,nl,ns)
+.VARIABLE DN
+DN value for the first line
+.VARIABLE BDN
+DN value for background
+.VARIABLE PDN
+DN for the first intersection
+.VARIABLE RANGE
+Range of G2 user codes to paint
+.VARIABLE SELECT
+G2 user codes to paint
+.VARIABLE MODE
+HALF - halfword output
+PAINT- each line with unique DN
+INTE - each intersection new DN
+GR2  - Graphics II input
+.LEVEL2
+.VARIABLE INP
+    INP=G                      is  the Graphics I or  II  polygon 
+                               data to be scribed,
+.VARIABLE OUT
+    OUT=
+     PIC                      is  the output raster dataset  onto 
+                              which  the  scribed image  will  be 
+                              written,
+.VARIABLE DN
+     DN,n                     the  integer  n  specifies  the  DN 
+                              value  to  be  used  on  the  first 
+                              scribed line.  The default is 1.
+.VARIABLE BDN
+     BDN,n                    the  interger  n specifies  the  DN 
+                              value  of  the   background.    The 
+                              default is zero.
+.VARIABLE PDN
+     PDN,n                    the  integer  n  specifies  the  DN 
+                              value  to  be  used  on  the  first 
+                              intersection.
+
+.VARIABLE RANGE
+     RANGE,l,h...             specifies Graphics user codes to 
+                              paint.   Each  pair has a  low  and 
+                              high integer.
+
+.VARIABLE SELECT
+     SELECT,n...              specifies Graphics user codes to 
+                              paint.
+
+.VARIABLE MODE
+     HALF                     specifies halfword output.
+
+     PAINT                    causes  each new line to be encoded 
+                              with a unique DN.
+
+     INTE                     cause  each new intersection to  be 
+                              encoded with a unique DN.
+
+     GR2                      specifies that the input and output 
+                              datasets are in Graphics II format.  
+                              This parameter is not necessary  if 
+                              the  input  dataset is  labeled  as 
+                              being Graphics II.
+

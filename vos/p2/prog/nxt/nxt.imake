@@ -1,0 +1,14 @@
+#define PROGRAM nxt
+
+#define MODULE_LIST nxt.c
+
+#define MAIN_LANG_C
+#define R2LIB
+
+#define USES_ANSI_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+/*#define DEBUG	/* comment out on delivery */

@@ -1,0 +1,7 @@
+/* Imake file for VICAR subroutine TESTOS */
+
+#define SUBROUTINE testos
+#define MODULE_LIST testos.c 
+#define P2_SUBLIB
+
+#define USES_C

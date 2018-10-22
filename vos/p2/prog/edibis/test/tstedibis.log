@@ -1,0 +1,157 @@
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+****************************************************
+EDIBIS is primarily an interactive program requiring
+a vt-100 type terminal interface with a keypad for
+EDT style editing commands. A full test of EDIBIS
+requires testing interactive behaviour and display
+***************************************************
+ 
+BATCH-ONLY tests:
+ 
+ ibis-gen a nc=5 nr=6 index=1 format=(real,real,a8,real,real)
+Beginning VICAR task ibis
+ edibis a command=("(2,2) set 3.103","(2,4) SET 4.567","row 3", +
+ "Insert 3","(1,3) set woof",EXIT)
+Beginning VICAR task edibis
+edibis - version Jan 29, 2015 - WLB
+ ibis-list a
+Beginning VICAR task ibis
+ 
+Number of Rows:9  Number of Columns: 5       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:9
++-----------+-----------+-----------+-----------+-----------
+         C:1         C:2         C:3         C:4         C:5
++-----------+-----------+-----------+-----------+-----------
+        1.00        0.00        woof        0.00        0.00
+        2.00        3.10                    4.57        0.00
+        0.00        0.00                    0.00        0.00
+        0.00        0.00                    0.00        0.00
+        0.00        0.00                    0.00        0.00
+        3.00        0.00                    0.00        0.00
+        4.00        0.00                    0.00        0.00
+        5.00        0.00                    0.00        0.00
+        6.00        0.00                    0.00        0.00
+ edibis a b cols=(1,2,4) command=("(1,3) search 4.567","delete",exit)
+Beginning VICAR task edibis
+edibis - version Jan 29, 2015 - WLB
+ ibis-list b
+Beginning VICAR task ibis
+ 
+Number of Rows:8  Number of Columns: 3       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:8
++-----------+-----------+-----------
+         C:1         C:2         C:3
++-----------+-----------+-----------
+        1.00        0.00        0.00
+        0.00        0.00        0.00
+        0.00        0.00        0.00
+        0.00        0.00        0.00
+        3.00        0.00        0.00
+        4.00        0.00        0.00
+        5.00        0.00        0.00
+        6.00        0.00        0.00
+ edibis a b cols=(1,2,4) command=("(2,3) cut",paste,bottom,paste,  +
+    top,paste,exit)
+Beginning VICAR task edibis
+edibis - version Jan 29, 2015 - WLB
+ ibis-list b
+Beginning VICAR task ibis
+ 
+Number of Rows:9  Number of Columns: 3       
+File Version:IBIS-2  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:9
++-----------+-----------+-----------
+         C:1         C:2         C:3
++-----------+-----------+-----------
+        1.00        0.00        4.57
+        2.00        3.10        4.57
+        0.00        0.00        0.00
+        0.00        0.00        0.00
+        0.00        0.00        0.00
+        3.00        0.00        0.00
+        4.00        0.00        0.00
+        5.00        0.00        0.00
+        6.00        0.00        4.57
+ ibis-gen old nc=3 nr=100 'ibis-1 'column format=(FULL,A4,REAL)  +
+   strcol=2 string=(this,does," ",have,a,blank,space,not) index=1
+Beginning VICAR task ibis
+ ibis-list old a4col=2 intcol=1 nr=8
+Beginning VICAR task ibis
+ 
+Number of Rows:100  Number of Columns: 3       
+File Version:IBIS-1  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:8
++-----------+-----------+-----------
+         C:1         C:2         C:3
++-----------+-----------+-----------
+           1        this        0.00
+           2        does        0.00
+           3                    0.00
+           4        have        0.00
+           5        a           0.00
+           6        blan        0.00
+           7        spac        0.00
+           8        not         0.00
+ edibis old command=("(1,2) format (a4)","search not",  +
+   cut,"(3,0) paste",exit)
+Beginning VICAR task edibis
+edibis - version Jan 29, 2015 - WLB
+ ibis-list old a4col=2 intcol=1 nr=8
+Beginning VICAR task ibis
+ 
+Number of Rows:100  Number of Columns: 3       
+File Version:IBIS-1  Organization:COLUMN  SubType:NONE
+ 
+Rows: 1:8
++-----------+-----------+-----------
+         C:1         C:2         C:3
++-----------+-----------+-----------
+           1        this        0.00
+   538976258        does        0.00
+           3                    0.00
+   538976260        have        0.00
+           5        a           0.00
+   538976262        blan        0.00
+           7        spac        0.00
+   538976264                    0.00
+let _onfail="continue"
+let $echo="no"
+********************
+command should ABEND
+********************
+edibis a command=("junk")
+Beginning VICAR task edibis
+edibis - version Jan 29, 2015 - WLB
+Unknown Command:junk
+??E - BATCH_MODE abend
+ ** ABEND called **
+continue
+let $echo="no"

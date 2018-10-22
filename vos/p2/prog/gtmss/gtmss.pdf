@@ -1,0 +1,146 @@
+process help=*
+PARM INP TYPE=STRING COUNT=2:48
+PARM OUT TYPE=STRING
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL TYPE=INTEGER DEFAULT=1
+PARM SS TYPE=INTEGER DEFAULT=1
+PARM NL TYPE=INTEGER DEFAULT=0
+PARM NS TYPE=INTEGER DEFAULT=0
+PARM TOLER TYPE=REAL DEFAULT=1.0E-3
+PARM MAPCK TYPE=KEYWORD COUNT=(0:1) VALID=(MAPCK,NOMAPCK) +
+     default=MAPCK
+PARM OVERLAP1 TYPE=KEYWORD COUNT=(0:1) VALID=OVERLAP1 default=--
+!# parm inp(3-48) hints=default
+END-PROC
+.TITLE
+gtmss - combine images left to right, check GeoTIFF labels for position
+.HELP
+PURPOSE:
+gtmss combines up to 48 datasets into a single dataset with mss format.
+This is equivalent to concatenating the input images in a left to right
+fashion.  The program works like VICAR routine MSS if there are no
+GeoTIFF labels.  If there are, the GeoTIFF labels of the inputs are read
+for any of several mistakes::
+
+1.  any differences in mapping
+2.  a difference in scale
+3.  a difference in image rotation with respect to North
+4.  an error of offset, the images must butt together geographically
+    exactly as they are concatenated in the image sense.
+    
+If any of these errors occur, the program aborts with an appropriate
+error message.
+
+A correct GeoTIFF label is attached to the output (it will be a copy
+of the first (leftmost) input since its offset is (1,1) in the VICAR
+pixel referencing system.
+
+If a SIZE parameter is used, it applies to all of the input images.
+
+EXECUTION:
+
+Example
+
+gtmss INP=(A,B,C) OUT=D  will put images A, B, and C side-by-side to form D.
+
+OPERATION:
+gtmss combines datasets in the following manner:  
+Each line is made up of the corresponding input lines laid end to end in
+a concatenated manner.  That is, the first pixel of each input is placed
+to the right of the last pixel of the previous input.  The line thus
+formed will have the same number of samples per line as the sum of the
+inputs. (If the SIZE field is used, it will be NS * #-inputs.)
+
+The program uses dynamic allocation of buffers in the C programming
+language, so truly colossal images can be combined (for example, an
+output image of 30 x 10,000,000) would not be a problem.
+
+ TIMING: 
+
+As fast as VICAR can read and write the lines.  
+
+ ORIGINAL PROGRAMMER:    A. Zobrist          29 Oct 1999
+ COGNIZANT PROGRAMMER:   Barbara McGuffie    29 Oct 1999
+ 
+ REVISION HISTORY
+  1999-10-29 AZ  Initial version
+  2008-01-03 WLB Switched to USES_ANSI_C AND LIB_CARTO; misc cleanup  
+  2015-09-10 WLB Fixed headers for MIPL build
+  
+.LEVEL1
+.VARIABLE INP
+STRING - Input image files
+.VARIABLE OUT
+STRING - Output image file
+.VARIABLE SIZE
+INTEGER - Region of input files
+to be concatenated
+.VARIABLE SL
+INTEGER - Starting line
+.VARIABLE SS
+INTEGER - Starting sample
+.VARIABLE NL
+INTEGER - Number of lines
+.VARIABLE NS
+INTEGER - Number of samples
+.VARIABLE TOLER
+REAL - Error allowed in GeoTIFF
+labels (unit is pixels)
+.VARIABLE MAPCK
+MAPCK - Will do GeoTIFF map
+check (default)
+NOMAPCK - Turns off GeoTIFF
+map check
+.VARIABLE OVERLAP1
+Use if images overlap one
+pixel, as in DMA DTED
+.LEVEL2
+.VARIABLE INP
+INP specifies the input data sets.  Up to 48 are allowed.
+.VARIABLE SIZE
+The SIZE parameter may be used when only a sub-region of each image is to
+be concatenated; it has the format SIZE=(SL,SS,NL,NS), where the parameters
+are starting line, starting sample, number of lines, and number of samples,
+respectively.  SIZE=(1,1,10,10), for example, will cause gtmss to only look
+at the first ten samples of each of the first ten lines in each image, when
+performing the concatenation. The default (1,1,0,0) means use the whole image.
+.VARIABLE SL
+INTEGER - Starting line (see SIZE)
+.VARIABLE SS
+INTEGER - Starting sample (see SIZE)
+.VARIABLE NL
+INTEGER - Number of lines (see SIZE)
+.VARIABLE NS
+INTEGER - Number of samples (see SIZE)
+.VARIABLE TOLER
+As each image is butted, the mappings are checked for whether they
+continue smoothly across the seam.  The default tolerance of one
+millionth of a pixel allows for a fair amount of numeric error in
+the calculations, which should always be carried out in double
+precision.
+
+See the main help for other checks on the mapping (coordinate system,
+projection, datum, rotation, scale, etc must all be the same).
+.VARIABLE MAPCK
+The default, MAPCK, will do GeoTIFF map checking (or do nothing if there
+are no GeoTIFF labels).  Using the other option, NOMAPCK, is useful to
+add extra pixels to the bottom of a GeoTIFF image, or to adjoin
+an image that is already known to be mapped correctly but doesn't have
+a GeoTIFF label.  The first, or top, image must have a correct
+GeoTIFF label.
+.VARIABLE OVERLAP1
+Use if images overlap one pixel, as in DMA DTED.  
+
+The program will strip one pixel between each image, from the leftmost
+image of each pair.  The extra pixel in the last image is NOT stripped.
+So two 601 pixel images will concatenate into a 1201 pixel image.
+
+If geotiff labels are present, the location checking will account for
+the overlap pixel.  If the images do not, in fact, have an overlap and
+this keyword is used, an error would be reported if the geotiff labels
+were present, because there would be a missing pixel.
+
+Bottom line for geotiff labels, if there is not a clean butt or an overlap
+of one pixel, you have to use imcopy to cut one of the images or 
+featherv to mosaic the images.
+.END

@@ -1,0 +1,14 @@
+#define  PROGRAM   multovly
+
+#define MODULE_LIST multovly.f
+
+#define FTNINC_LIST fortport
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB 
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB

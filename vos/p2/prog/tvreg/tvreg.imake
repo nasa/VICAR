@@ -1,0 +1,7 @@
+#define PROGRAM tvreg
+#define MODULE_LIST tvreg.cc
+#define LIB_TAE
+#define USES_C_PLUS_PLUS
+#define LIB_P2SUB
+#define LIB_RTL
+#define MAIN_LANG_C_PLUS_PLUS

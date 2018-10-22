@@ -1,0 +1,425 @@
+process help=*
+PARM INP        TYPE=STRING   COUNT=0:1				DEFAULT=--
+PARM SPACECRAFT TYPE=KEYWORD  COUNT=0:1  VALID=(CASSI,GLL,VGR-1,VGR-2) +
+ DEFAULT=GLL
+PARM TARGET     TYPE=(STRING,12) COUNT=0:1			DEFAULT=--
+PARM SCET	TYPE=INTEGER  COUNT=0:6				DEFAULT=--
+PARM CAMERA	TYPE=INTEGER  COUNT=0:1    VALID=1:42		DEFAULT=1
+PARM RING       TYPE=KEYWORD  COUNT=0:1    VALID=RING           DEFAULT=--
+PARM SPICEMODE  TYPE=KEYWORD     COUNT=0:1 VALID=(LOCAL,REMOTE) DEFAULT=--
+PARM CKNAME     TYPE=(STRING,4)  COUNT=1			DEFAULT=DAVI
+PARM CKID       TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM USERID     TYPE=(STRING,3)  COUNT=0:1			DEFAULT=--
+PARM GROUPID    TYPE=(STRING,3)  COUNT=0:1			DEFAULT=--
+PARM INSTITUTE  TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM CDATE      TYPE=(STRING,12) COUNT=1		DEFAULT=000000000000
+PARM REQNUM     TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM PURPOSE    TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM PROGRAM    TYPE=(STRING,6)  COUNT=1			DEFAULT=*NONE*
+PARM SPKID      TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+END-PROC
+
+.TITLE
+VICAR2 program GSPICE
+
+.HELP
+PURPOSE:
+
+GSPICE lists the SPICE data for a specified image.  The program is
+currently restricted to Voyager ISS, Galileo SSI, and Cassini ISS.
+
+EXECUTION:
+
+    GSPICE  INP=inputimage  TARGET=IO
+ or
+    GSPICE  SPACECRAFT=VGR-1  CAMERA=7 	TARGET=IO +
+	SCET=(year,day,hour,minute,second,msec)
+ or
+    GSPICE  SPACECRAFT=GLL  CAMERA=1  TARGET=IO +
+	SCET=(year,day,hour,minute,second,msec)
+ or
+    GSPICE  SPACECRAFT=CASSI  CAMERA=1  TARGET=IO +
+	SCET=(year,day,hour,minute,second,msec)
+where
+    INP is the filename of the image for which SPICE data is to be listed.
+    SPACECRAFT is CASSI, GLL, VGR-1, or VGR-2.
+    SCET is the shutter-centered SpaceCraft Event Time
+
+If INP is specified and the project is GLL or CASSI, the TARGET parameter
+need only be specified if the target name is incorrect in the VICAR label.
+
+If INP is not specified,  SPACECRAFT, CAMERA, TARGET, and SCET must be
+specified.
+
+.page
+OPERATION:
+
+If INP is specified, the spacecraft ID, camera ID, target name, and
+spacecraft event time are retrieved from the VICAR label.  Since the target
+name is not present in the Voyager image label, the TARGET parameter is
+required for Voyager images.
+
+If INP is not specified, this information must be supplied via the SPACECRAAFT,
+CAMERA, TARGET, and SCET parameters.
+
+Planetocentric latitudes and west longitudes are used.  Unless explicitly
+stated otherwise, all distances are in kilometers.
+
+DESCRIPTION OF PRINTED SPICE DATA:
+
+Coordinate system is: B1950
+    The inertial coordinate system used is Earth Mean Equator 1950 for Voyager
+    and J2000 for Galileo and Cassini.
+
+CKNAME=FARE  SPKID=N120 PROGRAM=*NONE* IG.PLT  PLTF 00/00/00
+    The C-matrix source is MIPS_FARENC.CK.
+
+GLL    SCLK=420467122  SCET=(1997,309,17,46,25,395)
+    The spacecraft, SCLK and SCET times used.
+
+Observation=11JSFEATRK03
+    The Observation id from the PA Vicar label keyword for Galileo images.
+
+Camera=2  Focal length= 1501.04 mm  Picture scale=32.8084 pixels/mm
+    Camera information
+
+Target=IO           Radii=( 1830.0, 1818.7, 1815.3)
+    Target long equatorial radius, short equatorial radius, and polar radius.
+
+Solor range=     790940864. (lat,lon)=(  0.555,169.925)
+    The latitude and longitude of the sub-solar point.
+
+Spacecraft range=   806022. (lat,lon)=( -0.096,155.074)
+    The latitude and longitude of the sub-spacecraft point.
+
+ C-Matrix:   0.59451884   0.17499144  -0.78480911
+             0.56678396   0.60112065   0.56339139
+             0.57035369  -0.77976400   0.25819519
+    Transformation from camera coordinates to inertial coordinates. 
+
+ME-Matrix:  -0.44974107  -0.89304841  -0.01405499
+             0.80900592  -0.40064800  -0.43010536
+             0.37847379  -0.20480661   0.90266931
+    Transformation from target fixed coordinates to inertial coordinates.
+
+OM-Matrix:   0.40701598  -0.87482715   0.26270795
+             0.11248909  -0.23741280  -0.96487373
+             0.90646797   0.42227080   0.00177771
+    Transformation from target fixed coordinates to camera coordinates.
+
+RS vector=(   -730945.00,   -339690.13,     -1353.79)
+    Vector from target center to spacecraft in target coordinates.
+
+RA, DEC, TWIST=(       109.06,       -18.49,       314.53)
+    Right Ascension, Declination, Twist Angles of the platform in J2000
+    Galileo uses a different definition of Twist than Voyager and Cassini.
+    For info see the rotation.req SPICE documentation file.
+
+North angle=285.23 deg clockwise from right
+    Orientation of the projected spin axis in the image.
+
+Spacecraft distance from planet=  1199689.
+    Distance from planet center to spacecraft.
+
+Computations at (line,samp)=( 505, 514)
+ (lat,lon)=(    0.68,  156.20)
+ Incidence=  13.73  Emission=   1.37  Phase=  14.87
+ Horizontal scale=   47.306  Vertical scale=   47.300 km/pixel
+ Slant range=   804192.81 km
+ Azimuths: Solar, North, Spacecraft=(      191.60,       92.12,      358.10)
+
+The lighting angles, image resolution, target distance and azimuths are computed
+at some convenient point in the image.  For high-resolution images (where the 
+target covers the entire field-of-view), the center of the image is chosen.  For
+low-resolution images, the target-center is used if it is visible in the image
+or if the size of the target is less than the width of the image.  If not, the
+computations are performed at the point along the picture margin where the
+resolution is highest.
+
+.page
+PARAMETERS FOR RETRIEVING CAMERA POINTING FROM SPICE:
+
+The following parameters permit the user to retrieve a specific instance of
+camera pointing from the SPICE kernels:
+
+SPICEMODE specifies whether SPICE data is retrieved from LOCAL kernels or
+or via the REMOTE SPICE server.  If defaulted, SPICEMODE is set to the value
+of the environmental variable DEFAULTSPICE.
+
+CKNAME and CKID are alternative ways to specify the C kernel to be used.  For
+example, CKNAME=FARE or CKID=M904 specifies that MIPS_FARENC.CK is to be used.
+When specified, the CKID parameter overrides the CKNAME parameter.  If the
+camera pointing data is not found in the requested C kernel, the other C kernels
+are searched.
+
+Within a given C kernel, there may be a number of different versions of camera
+pointing for a given image.  The segment identifier for each version contains
+provenance information identifying the creator of the pointing data.  One or
+more of the following parameters may be used to retrieve a specific instance of
+camera pointing based upon this provenance information:
+
+CDATE specifies the date and time the camera pointing was created.
+REQNUM identifies the request number associated with the camera pointing.
+PURPOSE identifies the purpose for creating the camera pointing.
+PROGRAM identifies the program which created the camera pointing.
+SPKID identifies the SP-kernel used to create the camera pointing.
+USERID identifies the user who created the camera pointing.
+GROUPID identifies the group which created the camera pointing.
+INSTITUTE identifies the facility which created the camera pointing.
+
+Complete lists of CK and SPK IDs are located in the xxx_KDB files listed in
+the ASCII file assigned the logical name (or environmental variable) 
+SPICE_CONFIG_FILE.  These files are project-specific, e.g., GLL_KDB, 
+CAS_KDB, etc.  The value of SPICE_CONFIG_FILE being used is defined
+by the VICAR system in use as selected by the "select X" command (X = O
+for operational system, D for development, T for test, etc.).  The kernels
+for systems other than O are not guaranteed to be correct.  If problems are
+encountered with the kernels used by "select O", please contact the MIPS
+SPICE cognizant engineer.
+
+The above parameters are optional, and if defaulted (or if no data is found for
+the requested version), the program will attempt to locate the "best" data
+available for the given image.  See the level 2 help (via the TAE tutor mode)
+for further details.
+
+Examples:  'LOCAL CKNAME=NAIF specifies that SPICE data be retrieved from
+          local kernels using camera pointing from predicts or AACS telemetry.
+
+           'REMOTE CKNAME=FARE INSTITUTE=MIPS SPKID=N015 USERID=ADC retrieves
+          the camera pointing created by Amy Culver at MIPS using the SP kernel
+          GLL_LONG_2.BSP from file MIPS_FARENC.CK via the SPICE server.  (whew!)
+
+It takes longer to search for SPICE data on the basis of provenance
+information.  If all provenance parameters are specified, for example, the
+program first searches through all the C kernels for an exact match.  If no
+match is found, the search is relaxed by removing the CDATE criteria.  If no
+match is found, the REQNUM criteria is removed.  Etc.
+
+EXAMPLES:
+  gspice inp=a.img
+  gspice spacecraft=gll   target=ganymede  camera=1 +
+	scet=(1996,121,11,10,9,123)
+  gspice spacecraft=vgr-1 target=jupiter  camera=7 +
+	scet=(1996,121,11,10,9,123)
+
+.page
+PROGRAM HISTORY:
+Written By: Gary Yagi, October 1, 1996
+Cognizant Programmer: Gary Yagi
+REVISIONS: 
+
+14 Jul 2006  lwk  Updated discussion of kernel DB in Help text.
+Oct 02, 2002 VRH  Some Cassini fixes, Doc updates.
+Sep 01, 2002 GMY  Update VGR and Cassini test cases.  Fix VGR camera s/n.
+Dec 07, 2001 GMY  Fix .PDF by adding continuation char to PROJECT keyword.
+Nov 28, 2001 GMY  Add Cassini capability.
+Jul 23, 1998 TXH  Assigned initial values to parameters FDS and OBSID.
+                  Removed unuse variables.
+Jun 06, 1998 RRP  Modified call to xvpcnt not to include more then two
+                  parameters to make it work on hp platform.
+Apr 30, 1988 GMY  Modify to work with VGR SPICE files.
+Jan 22, 1998 GMY  Calculate phase, incidence, and emission on ring.
+Jan 12, 1998 HBM  Added the printing of the ra, dec, twist,and azimuth values
+                       and resolved Voyager OBSID RING issue.
+Nov 24, 1997 HBM  Added new picscale routines into GSPICE.  
+                       Still need to resolve OBSID for Voyager and port for SGI
+Dec 30, 1996 OAM  Moved spice2convev and lighting to picscale.com.
+
+.LEVEL1
+.VARI INP
+Optional input image
+.VARI SPACECRAFT
+Optional spacecraft ID
+.LEVEL1
+.VARI CAMERA
+Optional camera serial number
+.VARI TARGET
+Optional 12-char string
+Target name
+.VARI SCET
+Optional SpaceCraft Event Time
+.VARI RING
+Keyword to identify
+the image as a RING image.
+Must be specified if the input
+image is a Voyager RING image.
+.VARI SPICEMODE
+Optional keyword
+Location of SPICE kernels
+(LOCAL or REMOTE)
+.VARI CKNAME
+Optional 4-char string
+C-kernel name
+.VARI CKID
+Optional 4-char string
+C-kernel ID
+.VARI USERID
+Optional 3-char string
+User who created camera pointing
+.VARI GROUPID
+Optional 3-char string
+Group which created camera pointing
+.VARI INSTITUTE
+Optional 4-char string
+Facility which created camera pointing
+.VARI PURPOSE
+Optional 4-char string
+Purpose for camera pointing
+.VARI PROGRAM
+Optional 6-char string
+Program which created camera pointing
+.VARI SPKID
+Optional 4-char string
+SP kernel for created camera pointing
+.VARI REQNUM
+Optional 4-char string
+IPL request number for created camera pointing
+.VARI CDATE
+Optional 12-char string
+Date and time camera pointing was created
+
+.LEVEL2
+.VARI INP
+Ex:  INP=/home/gmy/nicepicture.dat
+
+Input image for which SPICE data is to be printed.
+
+If INP is not specified, the SPACECRAFT, CAMERA, TARGET, and SCET parameters
+must be specified.
+
+.VARI SPACECRAFT
+EX:  SPACECRAFT=GLL
+
+Valid values are VGR-1, VGR-2, GLL and CASSI.  SPACECRAFT is only required if
+INP is not specified.
+
+.VARI TARGET
+Ex: TARGET=GANYMEDE specifies that GANYMEDE is the target in the input image.
+
+The TARGET may be a planet, satellite, or asteroid.  If defaulted, the target
+name is extracted from the VICAR label or determined by other TBD means.
+
+A complete list of valid target names is located in the ASCII file assigned
+the logical name (or environmental variable) BODY_IDS.
+
+.VARI CAMERA
+Camera serial number.
+
+Valid Voyager camera serial numbers are:
+        4 = VGR-2 WA            6 = VGR-1 WA
+        5 = VGR-2 NA            7 = VGR-1 NA
+ 
+For Galileo, the camera serial number is 1 for full-frame images, and 2 for
+summation mode images.
+
+Valid Cassini camera serial numbers are:
+     1=NAC  21=NAC 2x2 summation mode  41=NAC 4x4 summation mode
+     2=WAC  22=WAC 2x2 summation mode  42=WAC 4x4 summation mode
+
+.VARI SCET
+Shutter centered Spacecraft Event Time of the image for which SPICE data is
+to be printed.  SCET is only required if INP is not specified.
+
+.VARI RING
+Identifies the image to be a ring image.  The RING keyword is required if the
+parameter INP is not supplied for a Galileo or Voyager image.  The RING keyword 
+must be supplied if the INP parameter image is a Voyager image and the image is 
+also a ring image.  The program uses the PA keyword value from a Galileo image 
+label to determine if the image is a ring image, but there is not an equivalent 
+for a Voyager image.
+
+.VARI SPICEMODE
+SPICEMODE=LOCAL specifies that SPICE data is to be retrieved from local
+SPICE kernels.  SPICEMODE=REMOTE specifies that SPICE data is to be retrieved
+via the SPICE server.  If SPICEMODE is defaulted, the logical name (or
+environmental variable) DEFAULTSPICE is used to determine whether LOCAL or
+REMOTE is used.  Note that if SPICE data is not found in LOCAL or REMOTE mode,
+the other mode is attempted.
+
+.VARI CKNAME
+CKNAME is a four character string specifying the C-kernel to be used:
+
+  CKNAME	C KERNEL
+  --------      -------------
+  DAVI		MIPS_DAVI.CK
+  NAV		MIPS_NAV.CK
+  FARE		MIPS_FARENC.CK
+  NAV2		MIPS_NAV2.CK
+  NEAR		MIPS_NEAR.CK
+  AMOS		MIPS_AMOS.CK
+  NAIF		the best NAIF kernel is used
+
+If defaulted, the kernels are searched in the above order.
+
+.VARI CKID
+CKID is an alternative way to specify the prefered C-kernel (see CKNAME
+parameter):
+
+  CKID	  CKNAME	C KERNEL
+  ----	  --------      -------------
+  M906	  DAVI		MIPS_DAVI.CK
+  M905	  NAV		MIPS_NAV.CK
+  M904	  FARE		MIPS_FARENC.CK
+  M903	  NAV2		MIPS_NAV2.CK
+  M902	  NEAR		MIPS_NEAR.CK
+  M901	  AMOS		MIPS_AMOS.CK
+  varies  NAIF		there are a large number of these files
+
+Ex:  CKID=M901 specifies the four character ID which uniquely identifies the
+     C-kernel MIPS_AMOS.CK.
+
+A complete list of the C-kernel IDs is located in the ASCII file assigned the
+logical name (or environmental variable) KERNELDB.
+
+If specified, CKID overrides the CKNAME parameter.
+
+.VARI USERID
+USERID is a three character string which identifies the user who created the
+camera pointing.
+
+Ex:  USERID=HBM identifies Helen Mortensen as the creator of the camera
+     pointing.
+
+.VARI GROUPID
+GROUPID is a three character string which identifies the group which created the
+camera pointing.
+
+Ex:  GROUPID=040 identifies group 040 as the creator of the camera pointing.
+
+.VARI INSTITUTE
+INSTITUTE is a four character string identifying the facility which created
+the camera pointing.
+
+Ex:  INSTITUTE=MIPS specifies that MIPS created the camera pointing.
+
+.VARI PURPOSE
+PURPOSE is a four character string identifying the purpose of the observation
+or the purpose of processing.  For example,
+  PURPOSE=MOSA identifies the image as part of a mosaic sequence
+  PURPOSE=COLO identifies the image as part of a color sequence
+
+.VARI PROGRAM
+PROGRAM is the first six characters of the program creating the camera pointing.
+
+Ex:  PROGRAM=FARENC specifies that FARENC created the camera pointing.
+
+.VARI SPKID
+SPKID specifies the four character ID which uniquely identifies the
+SP kernel used to create the camera pointing.  The SP-kernel IDs are located
+in the ASCII file assigned the logical name (or environmental variable)
+KERNELDB.
+
+Ex:  SPKID=N015 specifies the SP kernel GLL_LONG_2.BSP
+
+.VARI REQNUM
+REQUNUM is a four character string identifying the IPL request number for
+which the camera pointing was created.
+
+Ex:  REQNUM=3456 identifies (somewhat) request number R123456
+
+.VARI CDATE
+Date and time the camera pointing was created in the form 'YEARMMDDHHMM'.
+
+Ex:  CDATE=199602291200 specifies that the pointing was created at noon
+     on February 29, 1996.
+.end

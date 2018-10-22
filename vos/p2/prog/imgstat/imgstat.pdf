@@ -1,0 +1,164 @@
+PROCESS help=*
+  PARM INP  TYPE=STRING COUNT=0:3 DEFAULT=--
+  PARM OUT  TYPE=STRING COUNT=0:5 DEFAULT=--
+  PARM SIZE TYPE=INTEGER COUNT=0:4 DEFAULT=--
+  PARM SL   TYPE=INTEGER DEFAULT=1
+  PARM SS   TYPE=INTEGER DEFAULT=1
+  PARM NL   TYPE=INTEGER DEFAULT=0
+  PARM NS   TYPE=INTEGER DEFAULT=0
+  PARM MEAN TYPE=KEYWORD  COUNT=0:1   VALID=(MEAN)  DEFAULT=-- 
+  PARM MIN  TYPE=KEYWORD  COUNT=0:1   VALID=(MIN)   DEFAULT=-- 
+  PARM MAX  TYPE=KEYWORD  COUNT=0:1   VALID=(MAX)   DEFAULT=-- 
+  PARM SD   TYPE=KEYWORD  COUNT=0:1   VALID=(SD)    DEFAULT=-- 
+  PARM MSSD TYPE=KEYWORD  COUNT=0:1   VALID=(MSSD)  DEFAULT=-- 
+  PARM WINDOW TYPE=INTEGER DEF=12 
+END-PROC
+.TITLE 
+VICAR Program IMGSTAT
+.HELP
+PURPOSE
+
+	IMGSTAT is a VICAR applications program for calculating statistical
+	quantities in local areas surrounding each pixel in an input image.
+    It is a sizing down operation producing images zoomed down by the
+    window size.  
+	The local mean, minimum, maximum, standard deviations, and optionally
+        the mean slope devided by the standard deviation are quantities that 
+        are obtained.
+
+.PAGE
+EXECUTION FORMAT
+
+	TAE>IMGSTAT IN,OUT, WINDOW
+
+	where
+
+	IN	is the input data set (VICAR labeled image).
+
+	OUT	is the output image of the selected statistic.
+                Three output files are required; optionally,
+                if four output files are requested, a standard
+                deviations output file is created.
+
+	WINDOW	is the number of lines in the local area window.
+.PAGE
+OPERATION
+
+	IMGSTAT performs a sliding window statistical analysis on an input
+	image. An output pixel's position represents the center position of
+	the window for the input image and its value represents statistics
+	based on data within the window only. The window moves along one sample
+	at a time and one line at a time until each pixel in the input has
+	been at the center of the window. In other words statistics are 
+	compiled for the local area around each and every pixel in the input
+	image.
+
+	The edge conditions are handled as follows. Any window positions that
+	extend beyond the edge of the image are handled by using data from the
+	nearest pixel on the image. This is not a reflection scheme like some
+	sliding window algorithms have.
+
+
+    Byte, half, full and real formats are supported. The output
+    format is the same as whatever is input. The internal calculations
+    are performed in real format. The vicar xv routines handles the
+    output conversion.
+	Input images must have less than 14001 samples. There is no limit 
+    to the number of lines in the input.
+.PAGE
+EQUATIONS
+
+	MIN
+		The min is a smallest value of all DN values in the 
+		window.
+
+	MAX
+		The max is a largest value of all DN values in the 
+		window.
+
+	MEAN
+		The mean is a result of the sum of all DN values in the 
+		window divided by the number of pixels in the window.
+		(the average of the DNs)
+			WINDOWSUM / NPIXWNDO
+
+    STANDARD DEVIAION
+        The standard deviation is the square root of the sum 
+        of all observations minus the mean devided by the 
+        number of observations.     
+
+
+     MEAN SLOPE / STANDARD DEVIAION
+        The mean slope is computed and is then devided by the 
+        standard deviaion for all observations.
+  
+
+Original Programmer:	Barbara McGuffie    February 1995
+Cognizant Programmer:	Ray Bambery     
+
+History:
+        2/95  - B. McGuffie  
+        3/96  - B. McGuffie     Increased samples to 14000
+        10/96 - B. McGuffie
+        1/97  - N. Ritter       Added Slope deviation output options.
+        13-Apr-2001 - R Bambery - Converted to real*4 internals.
+                                Now allow BYTE, HALF, FULL and REAL formats
+
+.LEVEL1
+.VARI INP
+Vicar labeled image file (input)
+Byte, Half, Full or Real
+.VARI OUT
+Vicar labeled image file/s
+.VARI WINDOW
+Number of lines/samples
+in the window
+.VARI NL
+Number of input lines
+.VARI NS
+Number of input samples (Maximum 14000)
+.VARI SL
+Starting line
+.VARI SS
+Starting sample
+.VARI SIZE
+Standard VICAR size field
+.VARI MEAN
+If indicated, specifies that the 
+first output data set will 
+contain mean values
+.VARI MIN
+If indicated, specifies that 
+the next output data set will 
+contain minimum values
+.VARI MAX
+If indicated, specifies that 
+the next output data set will 
+contain maximum values
+.VARI SD
+If indicated, specifies that 
+the next output data set will 
+contain standard deviations
+.VARI MSSD
+If indicated, specifies that
+the next output data set will 
+contain mean slope devided by 
+the standard deviations
+.LEVEL2
+.VARI	IN
+File name to be used as the input
+data set (VICAR labeled image).
+.VARI   OUT
+File names to be used as the output
+data set (VICAR labeled image).
+.VARI 	WINDOW
+The number of lines in the local area window.
+.VARI NL
+Number of input lines
+.VARI NS
+Number of input samples
+.VARI SL
+Starting line
+.VARI SS
+Starting sample
+.END

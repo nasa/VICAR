@@ -1,0 +1,20 @@
+/* Imake file for Test of VICAR subroutine cmul */
+
+#define PROGRAM tcmul
+
+#define MODULE_LIST tcmul.f tzcmul.c
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+
+
+#define LIB_TAE
+/* Reference to LIB_LOCAL commented-out for delivery */
+/* #define LIB_LOCAL */  
+#define LIB_MATH77
+#define LIB_P2SUB

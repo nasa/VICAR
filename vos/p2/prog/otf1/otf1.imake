@@ -1,0 +1,29 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM otf1
+
+   To Create the build file give the command:
+
+		$ vimake otf1			(VMS)
+   or
+		% vimake otf1			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	otf1
+#define R2LIB
+
+#define MODULE_LIST otf1.f
+
+#define FTNINC_LIST gnuplotchar pgminc
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+/************************* End of Imake file ***************************/

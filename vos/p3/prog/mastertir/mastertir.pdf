@@ -1,0 +1,156 @@
+Process help=*
+parm  INP	(string,80)			count=2
+parm  OUT	(string,80)
+parm  SIZE	integer	default=(1,1,0,0)	count=4
+parm  SL	integer	default=1
+parm  SS	integer	default=1
+parm  NL	integer	default=0
+parm  NS	integer	default=0
+parm  MODINP	(string,40)
+parm  MODOUT	(string,40)	count=(0:1)	default=--
+parm  MODTAB	(string,40)	count=(0:1)	default=--
+End-proc
+
+.TITLE
+TAE PROCESS MASTERTIR
+.HELP
+PURPOSE:
+
+   MASTERTIR is a program that accepts as input MASTER TIR radiance at sensor 
+image data and outputs upwelling radiance at surface for the thermal infrared
+channels (Channels 41-50).  Also required as input are a valid MODTRAN input
+file, to define the atmospheric model, and a MASTER TIR spectral response
+file.
+
+
+OPERATION:
+
+   MASTERTIR takes as input the 10 Channels of MASTER TIR radiance at sensor
+data in units of Watts per square meter per steradian per micrometer, and a
+file containing the the MASTER TIR spectral response functions. This second
+file must be a VICAR labelled file consisting of ten lines (one for each TIR
+channel) and 800 samples (one for the spectral response at each wavelength
+from 7.00 to 14.99 micrometers, in 0.01 micrometer increments). The spectral 
+response functions must be normalized, i.e., the sum of all values on each 
+line must be 1.0.
+   The atmospheric model used is defined by a user supplied MODTRAN input
+file.  MASTERTIR uses these parameters to run MODTRAN twice; once with a
+nadir looking geometry, and once for the case of viewing at maximum deflection
+from nadir.  From these two runs, the atmospheric transmittance, path
+radiance, and downwelling sky radiance at surface are calculated for the ten
+MASTER TIR bandpasses.  The downwelling sky radiance values are placed in
+the VICAR label of the output dataset.
+   Values of transmittance and path radiance are calculated for each pixel
+location in the scene by interpolation, where it is assumed that each
+quantity varies linearly with path length.
+   The upwelling radiance at surface is then computed by the following 
+formula:
+
+        Rad(at sensor) = RAD(upwelling)*transmittance + Rad(path)
+
+It should be noted that the output quantity (upwelling radiance) of MASTERTIR
+differs from the output quantity of TIMSCAL2 (surface emitted radiance). It
+it includes both the surface emitted component plus the surface reflected
+component.
+   The output dataset consists of 10 channels of real (32 bit floating
+point) pixels, in units of Watts per square meter per steradian per
+micrometer.  These units are the same as the input units, but different than
+the units produced by this program prior to November, 2004.  The downwelling
+sky irradiance values that are placed in the VICAR label are in units of 
+milliWatts per square meter per micrometer.  To convert to radiance in units 
+consistent with the output images, one must divide by 1000.0*pi.
+
+
+WRITTEN BY:  Ron Alley         August 12, 1998
+
+COGNIZANT PROGRAMMER:  Ron Alley
+
+REVISION: 1.4 Nov 12, 2004
+
+.LEVEL1
+.VARI INP
+(1) MASTER TIR radiance at
+    sensor image
+(2) MASTER TIR spectral
+    response file
+.VARI OUT
+Output data set of the 10 MASTER
+TIR bands, for upwelling
+radiance at surface.
+.VARI SIZE
+The standard  VICAR2 output size
+field.
+.VARI SL
+Starting line
+.VARI SS
+Starting sample
+.VARI NL
+Number of lines
+.VARI NS
+Number of samples
+.VARI MODINP
+Dataset name for the MODTRAN
+input file, containing the
+atmospheric data relevant to
+this image.
+.VARI MODOUT
+Dataset name for MODTRAN
+output report file.
+.VARI MODTAB
+Dataset name for MODTRAN
+output tabular file.
+.LEVEL2
+.VARI INP
+The first file should contain the 10 channels of MASTER TIR image data,
+calibrated as radiance at sensor, in units of Watts per square meter per
+steradian per micrometer.
+
+The second file should be the MASTER TIR spectra response calibration file 
+(in VICAR format) that is in effect for the date of data acquisition.
+These files are typically located in the directory 
+
+          $V2TOP/luts
+
+and have names of the form
+
+         resp.master.tir.YEAR.MON
+
+.VARI OUT
+The output dataset will contain upwelling radiance at surface data for the
+ten MASTER TIR channels (Channels 41 to 50), in units of Watts per
+square meter per steradian per micrometer.  Output pixels are real values
+(32 bit floating point).  The units of the downwelling sky irradiance (values
+placed in the VICAR label of the output) are milliWatts per square meter per
+micrometer (no steradian term).
+.VARI SIZE
+The standard VICAR2 output size field.   Default will process
+the entire data set.
+	Example: SIZE = (1,1,200,716)
+.VARI SL
+Starting line (same as SIZE(1)).
+.VARI SS
+Starting sample (same as SIZE(2)).
+.VARI NL
+Number of lines (same as SIZE(3)).
+.VARI NS
+Number of samples (same as SIZE(4)).
+.VARI MODINP
+   The atmospheric and geometric parameters needed by this program to run
+   MODTRAN are supplied by the user providing a valid MODTRAN input (TAPE5)
+   file.  This file may be generated by the stand alone program "modin",
+   or by any other means convenient to the user.
+.VARI MODOUT
+   As a default, the report file generated by MODTRAN is discarded 
+   at the conclusion of the MODTRAN run.  If a dataset name is given
+   as the parameter value to MODOUT, the report for the nadir looking case
+   of MODTRAN is saved in that dataset.  If a dataset name is not given
+   as a parameter, but one is supplied in the MODTRAN input file, then the
+   report file is saved under that name.
+.VARI MODTAB
+   As a default, the tabular file generated by MODTRAN is discarded 
+   at the conclusion of the MODTRAN run.  If a dataset name is given
+   as the parameter value to MODTAB, the report for the nadir looking case
+   of MODTRAN is saved in that dataset.  If a dataset name is not given
+   as a parameter, but one is supplied in the MODTRAN input file, then the
+   tabular file is saved under that name.
+.END

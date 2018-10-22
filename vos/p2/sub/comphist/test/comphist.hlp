@@ -1,0 +1,43 @@
+1 COMPHIST
+
+  COMPHIST and COMPHIST2 compute the histogram of a byte and halfword image,
+  respectively.
+
+  Calling Sequence:
+
+	CALL COMPHIST(IUNIT,SL,SS,NL,NS,HIS,IBUF)
+	CALL COMPHIST2(IUNIT,SL,SS,NL,NS,HIS2,IBUF2)
+
+  where
+	INTEGER*4 IUNIT		!Logical unit number of image
+	INTEGER*4 SL,SS,NL,NS	!Size field of image area used
+	INTEGER*4 HIS(256)	!Output 256 grey-level histogram
+	INTEGER*4 HIS2(256)	!Output 64K grey-level histogram
+	LOGICAL*1 IBUF(NS)	!Buffer for reading byte image
+	INTEGER*2 IBUF2(NS)	!Buffer for reading halfword image
+
+  IUNIT,SL,SS,NL,NS are input arguments.  HIS,HIS2,IBUF,IBUF2 are outputs.
+  IBUF and IBUF2 must be large enough to hold NS samples of the byte or
+  halfword image, respectively.
+
+2 Operation
+
+  The input image must be opened with U_NS defaulted (i.e. no data
+  conversion is permitted).  COMPHIST will compute the histogram by
+  reading in the specified area of the image.  The histogram of a byte
+  image will contain 256 elements, representing the sample frequency
+  for DN values 0 to 255.  The histogram of a halfword image will
+  contain 64K elements, representing the sample frequency for DN
+  values -32768 to 32767.
+
+  See program HICCUP for an example of usage of these subroutines.
+
+2 History
+
+  Original Programmer: Gary Yagi, Jan 22, 1990
+  Current Cognizant Programmer: Gary Yagi
+  Source Language: FORTRAN
+  Revisions: FFM ...4/21/92... Minor modifications to TEST PDF
+                                (FR 63263)
+  5 JAN 93  FFM   Made portable, revised test program
+  21 Sep 99 GMY   Added ilow,ihigh args to hsub calls for portability.

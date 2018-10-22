@@ -1,0 +1,1694 @@
+  process help=*
+
+ 
+	parm INP	type=(string,32) count=0:20	default=photcat.dat
+
+
+	parm PHO_FUNC type=(string,32) count=1 		+
+			valid = (			+
+				LAMBERT,		+
+				MINNAERT,		+
+				IRVINE,			+
+				VEVERKA,		+
+				BURATTI1,		+
+				BURATTI2,		+
+				BURATTI3,		+
+				MOSHER,			+
+				LUMME_BOWEL_HG1,	+
+				HAPKE_81_LE2,		+
+				HAPKE_81_COOK,		+
+				HAPKE_86_HG1,		+
+				HAPKE_86_HG2,		+
+				HAPKE_86_LE2,		+
+				HAPKE_HG1_DOM,		+
+				REGNER_HAPKE_HG1, 	+
+				ATMO_CORR_REGNER	+
+				) 	default=HAPKE_86_LE2
+
+	PARM CLASS_ID TYPE=INTEGER COUNT=0:1 valid=(0:32767) DEFAULT=--
+
+  	PARM NORM    TYPE=INTEGER COUNT=1 VALID=(0:10000) DEFAULT=500
+  	PARM RERUN   TYPE=INTEGER COUNT=0:1 DEFAULT=--
+  	PARM MAXITER TYPE=INTEGER COUNT=0:1 DEFAULT=--
+  	PARM NUMTEN  TYPE=INTEGER COUNT=0:1 DEFAULT=--
+  	PARM PERCENT TYPE=REAL COUNT=1 VALID=(1.:100.) DEFAULT=90.
+  	PARM TOLERANC TYPE=REAL COUNT=1 VALID=(0.:1.) DEFAULT=.02
+  	PARM METROP  TYPE=INTEGER COUNT=1 VALID=(0:10000) DEFAULT=0
+  	PARM PRINT    TYPE=KEYWORD VALID=(PRINT,NOPRINT) DEFAULT=PRINT
+
+       parm ALBEDO 		real count=0:1 			default=--
+       parm MIN_ALBEDO 		real count=0:1 			default=--
+       parm MAX_ALBEDO 		real count=0:1 			default=--
+       parm T_ALBEDO 		real count=0:1 			default=--
+       parm EXPONENT 		real count=0:1 valid=(0:1)	default=--
+       parm MIN_EXPONENT 	real count=0:1 valid=(0:1)	default=--
+       parm MAX_EXPONENT 	real count=0:1 valid=(0:1)	default=--
+       parm T_EXPONENT 		real count=0:1 valid=(0:1)	default=--
+       parm A_VEVERKA 		real count=0:1 			default=--
+       parm MIN_A_VEVERKA 	real count=0:1 			default=--
+       parm MAX_A_VEVERKA 	real count=0:1 			default=--
+       parm T_A_VEVERKA 	real count=0:1 			default=--
+       parm B_VEVERKA 		real count=0:1 			default=--
+       parm MIN_B_VEVERKA 	real count=0:1 			default=--
+       parm MAX_B_VEVERKA 	real count=0:1 			default=--
+       parm T_B_VEVERKA 	real count=0:1 			default=--
+       parm C_VEVERKA 		real count=0:1 			default=--
+       parm MIN_C_VEVERKA 	real count=0:1 			default=--
+       parm MAX_C_VEVERKA 	real count=0:1 			default=--
+       parm T_C_VEVERKA 	real count=0:1 			default=--
+       parm D_VEVERKA 		real count=0:1 			default=--
+       parm MIN_D_VEVERKA 	real count=0:1 			default=--
+       parm MAX_D_VEVERKA 	real count=0:1 			default=--
+       parm T_D_VEVERKA 	real count=0:1 			default=--
+       parm MO_EXP1 		real count=0:1 			default=--
+       parm MIN_MO_EXP1 	real count=0:1 			default=--
+       parm MAX_MO_EXP1 	real count=0:1 			default=--
+       parm T_MO_EXP1 		real count=0:1 			default=--
+       parm MO_EXP2 		real count=0:1 			default=--
+       parm MIN_MO_EXP2 	real count=0:1 			default=--
+       parm MAX_MO_EXP2 	real count=0:1 			default=--
+       parm T_MO_EXP2 		real count=0:1 			default=--
+       parm E_BURATTI 		real count=0:1 			default=--
+       parm MIN_E_BURATTI 	real count=0:1 			default=--
+       parm MAX_E_BURATTI 	real count=0:1 			default=--
+       parm T_E_BURATTI 	real count=0:1 			default=--
+       parm DEN_SOIL 		real count=0:1 			default=--
+       parm MIN_DEN_SOIL 	real count=0:1 			default=--
+       parm MAX_DEN_SOIL 	real count=0:1 			default=--
+       parm T_DEN_SOIL 		real count=0:1 			default=--
+       parm W_SOIL 		real count=0:1 valid=(0:1)	default=--
+       parm MIN_W_SOIL 		real count=0:1 valid=(0:1)	default=--
+       parm MAX_W_SOIL 		real count=0:1 valid=(0:1)	default=--
+       parm T_W_SOIL 		real count=0:1 valid=(0:1)	default=--
+       parm HG1_SOIL 		real count=0:1 			default=--
+       parm MIN_HG1_SOIL 	real count=0:1 			default=--
+       parm MAX_HG1_SOIL 	real count=0:1 			default=--
+       parm T_HG1_SOIL 		real count=0:1 			default=--
+       parm HG2_SOIL 		real count=0:1 			default=--
+       parm MIN_HG2_SOIL 	real count=0:1 			default=--
+       parm MAX_HG2_SOIL 	real count=0:1 			default=--
+       parm T_HG2_SOIL 		real count=0:1 			default=--
+       parm HG_ASY_SOIL 	real count=0:1 			default=--
+       parm MIN_HG_ASY_SOIL 	real count=0:1 			default=--
+       parm MAX_HG_ASY_SOIL 	real count=0:1 			default=--
+       parm T_HG_ASY_SOIL 	real count=0:1 			default=--
+       parm LE1_SOIL 		real count=0:1 			default=--
+       parm MIN_LE1_SOIL 	real count=0:1 			default=--
+       parm MAX_LE1_SOIL 	real count=0:1 			default=--
+       parm T_LE1_SOIL 		real count=0:1 			default=--
+       parm LE2_SOIL 		real count=0:1 			default=--
+       parm MIN_LE2_SOIL 	real count=0:1 			default=--
+       parm MAX_LE2_SOIL 	real count=0:1 			default=--
+       parm T_LE2_SOIL 		real count=0:1 			default=--
+       parm H_SHOE 		real count=0:1 			default=--
+       parm MIN_H_SHOE 		real count=0:1 			default=--
+       parm MAX_H_SHOE 		real count=0:1 			default=--
+       parm T_H_SHOE 		real count=0:1 			default=--
+       parm B_SHOE 		real count=0:1 			default=--
+       parm MIN_B_SHOE 		real count=0:1 			default=--
+       parm MAX_B_SHOE 		real count=0:1 			default=--
+       parm T_B_SHOE 		real count=0:1 			default=--
+       parm H_CBOE 		real count=0:1 			default=--
+       parm MIN_H_CBOE 		real count=0:1 			default=--
+       parm MAX_H_CBOE 		real count=0:1 			default=--
+       parm T_H_CBOE 		real count=0:1 			default=--
+       parm B_CBOE 		real count=0:1 			default=--
+       parm MIN_B_CBOE 		real count=0:1 			default=--
+       parm MAX_B_CBOE 		real count=0:1 			default=--
+       parm T_B_CBOE 		real count=0:1 			default=--
+       parm THETA 		real count=0:1 			default=--
+       parm MIN_THETA 		real count=0:1 			default=--
+       parm MAX_THETA 		real count=0:1 			default=--
+       parm T_THETA 		real count=0:1 			default=--
+       parm COOK 		real count=0:1 			default=--
+       parm MIN_COOK 		real count=0:1 			default=--
+       parm MAX_COOK 		real count=0:1 			default=--
+       parm T_COOK 		real count=0:1 			default=--
+       parm TAU_ATM 		real count=0:1 			default=--
+       parm MIN_TAU_ATM 	real count=0:1 			default=--
+       parm MAX_TAU_ATM 	real count=0:1 			default=--
+       parm T_TAU_ATM 		real count=0:1 			default=--
+       parm W_ATM 		real count=0:1 valid=(0:1)	default=--
+       parm MIN_W_ATM 		real count=0:1 valid=(0:1)	default=--
+       parm MAX_W_ATM 		real count=0:1 valid=(0:1)	default=--
+       parm T_W_ATM 		real count=0:1 valid=(0:1)	default=--
+       parm HG1_ATM 		real count=0:1 			default=--
+       parm MIN_HG1_ATM 	real count=0:1 			default=--
+       parm MAX_HG1_ATM 	real count=0:1 			default=--
+       parm T_HG1_ATM 		real count=0:1 			default=--
+       parm IRV_EXP1 		real count=0:1 			default=--
+       parm MIN_IRV_EXP1 	real count=0:1 			default=--
+       parm MAX_IRV_EXP1 	real count=0:1 			default=--
+       parm T_IRV_EXP1 		real count=0:1 			default=--
+       parm IRV_EXP2 		real count=0:1 			default=--
+       parm MIN_IRV_EXP2 	real count=0:1 			default=--
+       parm MAX_IRV_EXP2 	real count=0:1 			default=--
+       parm T_IRV_EXP2 		real count=0:1 			default=--
+
+
+  end-proc
+
+.title
+VICAR program PHOTFIT2 determines the coefficients of various photometric 
+functions.
+
+.help
+PURPOSE:	Photfit2 is a VICAR program which determines the coefficients 
+		of various photometric functions.  
+
+	
+FUNCTION:
+
+  PHOTFIT2 reads IBIS1 and IBIS2 files which have been generated by the VICAR 
+programs PHOTOM, HWPHOCAE/D, PHOTTEST2. PHOTOM or HWPHOCAE/D are used to collect photometric data from images (and their navigation). The IBIS files contain all 
+the data required for PHOTFIT2. There is one input IBIS file for each picture. 
+The output of PHOTFIT2 is listed coefficient values on screen [or an IBIS2 
+photometric parameterfile (subtyp=phopar) - not yet implemented].
+
+.page
+
+
+EXECUTION:
+
+  Be very conservative about the amount of data to include in the
+IBIS files. PHOTFIT3 is a slow program. It is the quality of the
+IBIS data points, not their quantity, which matters. You should
+assure as broad a coverage of incidence, emission, and phase
+angles as possible. If you have 10 points/ibis file
+and 6 files (one for each phase angle) that should be sufficient.  
+You might consider restricting points (from PHOTOM, HWPHOCA*) to areas of
+consistent albedo based upon your theories of morphology.
+  The Hapke and Veverka functions are EXTREMELY sensitive to
+data which, because of a lack of broad ranges of incidence, emission,
+and phase angles, or because of inclusion of various albedo's,
+does not truly represent the function being fit. When this 
+problem occurs the coefficients will become distorted in order
+to accomodate erroneous data. Sometimes you can tell when the coefficients
+returned lie up against the limits of their permitted ranges.
+  Accuracy: Rerun PHOTFIT2 at least twice to assure that the function
+has had sufficient time to find a stable minimum. If you cool the
+solution too fast it will 'freeze' on the wall of the error minimum.
+Comparing several answers will give a feeling of the precision of the 
+result. 'Freezing' can be avoided by providing either a higher initial
+'temperature' or more iterations.
+  The percent and tolerance keywords permit a solution that is found to
+consist of a subset of all of the data points. If there are more than
+percent of the points with I/F residuals below tolerance then the
+remainder of the points can be ignored if they exceed tolerance.
+If there are fewer than percent points with residuals below
+tolerance then all of the points will be considered.
+
+.page
+
+USAGE:
+
+  There are sets of four keywords which relate to each function:
+These are the parmeters, T_*, MAX_*, MIN_*. These provide the:
+1.  Initial position guess for the photometric parameters. This is not 
+    important per-se but it assures you that Metropolis will investigate 
+    this point (and remember what it found). 
+2.  Range over which random guesses can be expected to vary at first:
+    PARAM_NEW = T_* * tan( PI * ran_num + PI/2 ).
+    This is the 'temperature' for each variable. As the system cools the range 
+    will constrict gradually (T_NEW_* = T_OLD_* * scale, scale depends of 
+    NUMTEN) until the temperatur is only 10**-MAXITER/NUMTEN times the inital 
+    temperatur of the parameter.
+3/4.Two limits MIN_*, MAX_* outside of which each of the photometric 
+    parameters are stricly prohibited to fall. Each time these limits 
+    are violated the attempted solution is abandoned and a new one is 
+    attempted.  This will happen thousands of times, especially at first 
+    when the temperatures are high.  
+  
+Each of these has defaults but you must not consider these as gospel.
+
+The maxiter parameter proposals are a bit arbitrary. They will depend
+upon experience. You will probably be able to reduce them greatly.
+
+
+.page
+
+METHOD:
+
+  PHOTFIT2 uses the simulated annealing method  to solve for the function 
+coefficients. This is verry inefficient solution method which is good for 
+fitting complicated functions. The solution is arrived at through guessing. 
+Initially guessing is performed over a large region using a random number
+generator. As time progresses the "temperature" is reduced, 
+constricting the range of guesses to an ever decreasing region
+in the N solution space. Decisions are made at every step based upon
+the Boltzmann probability of transitioning from one energy level
+(error due to incorrect solution estimate) to the next. This is
+essentially a chaotic downhill search scheme which mimics the
+cooling history of a thermodynamic system.
+  Because of the technique used there is no way to estimate the 
+accuracy of the coefficients for a single solution. Rerun the program
+several times. Note that the routine Metropolis will take
+a different solution route each attempt (based upon the time of day)
+so you cannot ever repeat yourself (or cheat).
+
+
+.page
+
+ STARTING PROGRAM (in tutor mode):
+
+  There are separate PDFs for each selection point seen in the main menu.  On 
+selection of a particular menu point you will enter the normal tutor mode of 
+this PDF.  
+
+The menu points have the following meanings:
+
+1. Select the first menu point to input the general parameters for the program
+   such as the names of input photometric catalog IBIS file, the type of 
+   photometric funtion, the fit conditions and the kind of outputs. 
+
+2. This point contains all function specific parameters (first guess, upper and 
+   lower limits, first temperatur). The name of this menu point is changing 
+   depending on your input of the parameter PHO_FUNC in the first menu point. 
+
+3. Select this menu point to specify the name of the parameter file which is 
+   generated by the program (the default name in VICAR programs: LAST.PAR).
+   This is useful because in a Menu there is no 'save'-command to save a 
+   parameter file with a user-specified name (e.g. "save photfit2.par").
+
+   EXECUTION :
+
+   USER ACTION				RESULT
+
+   don't call this menu point		last.par
+
+   exit this menu point with 'exit'	last.par
+
+   exit this menu point with 'run'	the user-specified name or the 'name 
+					of the application procedure .par' as 
+					it is given by the parameter 'save_par'
+
+4. This menu point is to be entered to execute the main program.
+
+You can repeat all steps and reenter all menu items except the step that leads 
+to the execution of the program.
+
+If you request help for the selection points in the Menu, you will get the help 
+text contained in the respective sub PDFs.
+
+
+.page
+
+HELPS :
+
+- You will get the common help contained in the ".mdf" file (photfit2.mdf) by 
+  typing "help *" in the menu,
+- but you will get the help text contained in programs main-PDF (photfit2.pdf) 
+  by processing of "help-help" applied to the program (should be verry 
+  similary ones of photfit2.mdf).
+- If you request help for the selection points in the Menu, you will get the 
+  help text contained in the respective sub PDFs.
+
+
+
+.page
+
+TESTING and EXAMPLES:
+
+  You can test PHOTFIT2 with program PHOTTEST2:
+
+  phottest out=phottest_m.dat PHO_FUNC=MINNAERT CLASS_ID=2 +
+  ALBEDO=0.7 EXPONENT=0.6 +
+  START=(10,10,10) DELTA=(30,30,180) SIGMA=0.000001 
+
+  photfit2 inp=(phottest_m.dat,phottest_m.dat) PHO_FUNC=MINNAERT CLASS_ID=2 +
+  ALBEDO=0.6 MIN_ALBEDO=0.0 MAX_ALBEDO=1.0 T_ALBEDO=0.1 +
+  EXPONENT=0.6 MIN_EXPONENT=0.0 MAX_EXPONENT=1.0 T_EXPONENT=0.1 +
+  NORM=25 RERUN=2 MAXITER=100 NUMTEN=25 METRO=20 PERCENT=90 TOLERANC=0.02 'PRINT 
+
+  or, to actually run it you must generate a bunch of photom/hwphoca*
+  files:
+
+  photom INP=pix#1 out=ibis1    ( interactive job )
+  photom INP=(pix#2,ibis1) out=ibis2 'batch   (batch mode)
+  photom INP=(pix#3,ibis1) out=ibis3 'batch   (batch mode)
+  photom INP=(pix#4,ibis1) out=ibis4 'batch   (batch mode)
+  photom INP=(pix#5,ibis1) out=ibis5 'batch   (batch mode)
+  photom INP=(pix#6,ibis1) out=ibis6 'batch   (batch mode)
+  photfit2 INP=(ibis1,ibis2,ibis3,ibis4,ibis5,ibis6) +
+           PHO_FUNC=HAPKE_86_HG1  MAXITER=20000
+
+.page
+
+
+
+INPUT
+
+PHOTFIT2 accepts two types of input files - the old IBIS1 file and a IBIS2 file 
+of the type=phocat.
+
+
+IBIS1 FILE FORMAT:
+
+There are 18 columns in this file. 
+All are not used exept for columns # 11, 12, 13, and 16. 
+These columns contain :
+	column # 11 = incidence angle (degrees),
+	column # 12 = emission angle (degrees),
+	column # 13 = phase angle (degrees)
+	column # 16 = I/F reflectance values.
+
+
+PHOCAT FILE:
+
+The structure of the IBIS2 file of type phocat is desined in such a way that 
+tiepoint files can be extended and containing all collumns of the old IBIS1 
+photometric catalog files. The program PHOTFIT2 used only one IMAGE_* group at 
+time. but tiepoint files using some IMAGE_* groups containing informations 
+relates to the image.
+GENERAL_QLF containes informations relates to the object point (e.g. 
+CLASS_IDentifier). OBJECT_COORDINATES containes only coordinates of the object 
+point (e.g. LATitude, LONGitude or the X,Y,Z-coordinates in planetocentric 
+coordinate system).
+
+The structure of the photometric catalog file is given by: 
+(There are 19 columns in this file.)
+
+abstract groups	      primitive groups    units	      formats  used in PHOTFIT2
+
+IMAGE_1 		line 		  pixels	REAL	 used
+			samp		  pixels	REAL	 used
+			ObjectLine	  pixels	REAL	  --
+			ObjectSamp	  pixels	REAL	  --
+			BoxLines	  pixels	REAL	  --
+			LuminanceLat	  degrees	DOUB	  --
+			LuminanceLong	  degrees	DOUB	  --
+			IncidenceAngle	  degrees	DOUB	 used
+			EmissionAngle	  degrees	DOUB	 used
+			PhaseAngle	  degrees	DOUB	 used
+			DN_BoxMean	  DN		DOUB	  --
+			Radiance	W/cm**2/str/nm	DOUB	  --
+			I/F		  --		DOUB	 used
+			StandDev	  --		DOUB	 used
+
+OBJECT_COORDINATES  	LAT		  degrees	REAL	  --
+			LONG		  degrees	REAL	  --
+
+GENERAL_QLF		--		  --		DOUB	  --
+			CLASS_ID	  --		FULL	 used
+
+The "phocat" file can contain data of different classes (CLASS_ID). The program 
+PHOTFIT2 will using the data of given class only (or all data if class is not 
+given).
+The program uses the value from the column "StandDev" (if given) for weigthing the reflectance value by fitting. 
+
+
+
+.page
+
+
+SUBROUTINES REQUIRED TO RUN PROGRAM:	pho_routines package,
+					PHOPDF package
+
+INCLUDE FILES REQUIRED TO RUN PROGRAM:	pho.h,
+					pho_global.pdf,
+					ibisfile.h, ibisfile.h, 
+					vicmain_c, defines.h, 
+					math.h, time.h 
+
+	
+
+BACKGROUND AND REFERENCES :	Jean J. Lorre, 
+				Function Minimization With Partially Corrected 
+				Data Via Simulated Annealing,
+				J. Soc. Ind. Appl. Math., 43 (1990), 123-127
+
+
+SOFTWARE PLATFORM :		VICAR, TAE
+				(AXP/SUNOS/SOLARIS/SGI)
+
+HARDWARE PLATFORM :		No particular hardware required;
+				tested on AXP/SUNOS/SOLARIS/SGI
+
+PROGRAMMING LANGUAGE :		TCL , C	
+
+HISTORY:			Programmer: J J Lorre,  Jan 10 1988
+				rewritten in C: Friedel Oschuetz, Nov. '95,
+Revisions:
+ 14 Jun 1996  GMY  Removes tabs from IMAKE file (DFR).
+
+ 25 Mar 1998  TXH  Modified to work with new IBIS prototypes (DFR).
+
+  4 Sep 2014  WLB  Corrected several memory allocation bugs.
+
+COGNIZANT PROGRAMMER:		Friedel Oschuetz
+				Institute of Planetary Exploration
+				DLR
+				12484 Berlin (FRG)
+
+
+.LEVEL1
+
+.VARI INP
+A
+photometric catalog
+
+.VARI PHO_FUNC
+photometric function
+
+.VARIABLE CLASS_ID
+Class-id
+
+.VARIABLE NORM
+Causes subroutine Metropolis 
+to renormalize itself.
+
+.VARIABLE RERUN
+Number of rerun of metropolis
+
+.VARIABLE MAXITER
+Specifies the total number of 
+successful iterations.
+
+.VARIABLE NUMTEN
+Number of iterations
+before temperature
+drops by a factor of ten.
+
+.VARIABLE PERCENT
+Minimum acceptable # of points
+with residuals below tolerance.
+
+.VARIABLE TOLERANC
+The I/F residual tolerance.
+
+.VARIABLE PRINT
+Screen output  
+of the IBIS input files.
+
+.VARIABLE METROP
+List the iteration progress.
+
+.VARI ALBEDO
+Surface albedo
+
+.var MIN_ALBEDO
+Minimum of surface albedo
+
+.var MAX_ALBEDO
+Maximum of surface albedo
+
+.var T_ALBEDO
+Temperatur of Surface albedo
+
+.var EXPONENT
+Minnaert exponent
+
+.var MIN_EXPONENT
+Maximum of Minnaert exponent
+
+.var MAX_EXPONENT
+Maximum of Minnaert exponent
+
+.var T_EXPONENT
+Temperatur of Minnaert exponent
+
+.VARI A_VEVERKA 
+Veverka parameter
+
+.VARI MIN_A_VEVERKA 
+Minimum of Veverka parameter
+
+.VARI MAX_A_VEVERKA 
+Maximum of Veverka parameter
+
+.VARI T_A_VEVERKA 
+Temperatur of Veverka parameter
+
+.VARI B_VEVERKA
+Veverka parameter
+
+.VARI MIN_B_VEVERKA
+Minimum of Veverka parameter
+
+.VARI MAX_B_VEVERKA
+Maximum of Veverka parameter
+
+.VARI T_B_VEVERKA
+Temperatur of Veverka parameter
+
+.VARI C_VEVERKA
+Veverka parameter
+
+.VARI MIN_C_VEVERKA
+Minimum of Veverka parameter
+
+.VARI MAX_C_VEVERKA
+Maximum of Veverka parameter
+
+.VARI T_C_VEVERKA
+Temperatur of Veverka parameter
+
+.VARI D_VEVERKA
+Veverka parameter
+
+.VARI MIN_D_VEVERKA
+Minimum of Veverka parameter
+
+.VARI MAX_D_VEVERKA
+Maximum of Veverka parameter
+
+.VARI T_D_VEVERKA
+Temperatur of Veverka parameter
+
+.VARI MO_EXP1
+Mosher's exponent
+
+.VARI MIN_MO_EXP1
+Minimum of Mosher's exponent
+
+.VARI MAX_MO_EXP1
+Maximum of Mosher's exponent
+
+.VARI T_MO_EXP1
+Temperatur of Mosher's exponent
+
+.VARI MO_EXP2
+Mosher's exponent
+
+.VARI MIN_MO_EXP2
+Minimum of Mosher's exponent
+
+.VARI MAX_MO_EXP2
+Maximum of Mosher's exponent
+
+.VARI T_MO_EXP2
+Temperatur of Mosher's exponent
+
+.VARI E_BURATTI
+Buratti's parameter
+
+.VARI MIN_E_BURATTI
+Minimum of Buratti's parameter
+
+.VARI MAX_E_BURATTI
+Maximum of Buratti's parameter
+
+.VARI T_E_BURATTI
+Temperatur of Buratti's parameter
+
+.VARI DEN_SOIL
+Density of the soil
+
+.var MIN_DEN_SOIL
+Minimum of density of the soil
+
+.var MAX_DEN_SOIL
+Maximum of density of the soil
+
+.var T_DEN_SOIL
+Temperatur of density of the soil
+
+.VARI W_SOIL
+Single-scattering albedo
+
+.var MIN_W_SOIL 
+Minimum of single-scattering albedo
+
+.var MAX_W_SOIL 
+Maximum of single-scattering albedo
+
+.var T_W_SOIL 
+Temperatur of tingle-scattering albedo
+
+.VARI HG1_SOIL
+Henyey-Greenstein term
+
+.var HG1_SOIL
+Henyey-Greenstein term
+
+.var MIN_HG1_SOIL
+Minimum of Henyey-Greenstein term
+
+.var MAX_HG1_SOIL
+Maximum of Henyey-Greenstein term
+
+.var T_HG1_SOIL
+Temperatur of Henyey-Greenstein term
+
+.VARI HG2_SOIL
+Henyey-Greenstein term
+
+.var MIN_HG2_SOIL
+Minimum of Henyey-Greenstein term
+
+.var MAX_HG2_SOIL
+Maximum of Henyey-Greenstein term
+
+.VARI T_HG2_SOIL
+Temperatur of Henyey-Greenstein term
+
+.VARI HG_ASY_SOIL
+Asymetry term of
+Henyey-Greenstein
+
+.VARI MIN_HG_ASY_SOIL
+Minimum of asymetry parameter
+
+.VARI MAX_HG_ASY_SOIL
+Maximum of asymetry parameter
+
+.VARI T_HG_ASY_SOIL
+Temperatur of asymetry parameter
+
+.VARI LE1_SOIL
+Hapke parameter
+First Legendre-Polynom
+
+.VARI MIN_LE1_SOIL
+Minimum of 
+first Legendre-Polynom
+
+.VARI MAX_LE1_SOIL
+Maximum of 
+first Legendre-Polynom
+
+.VARI T_LE1_SOIL
+Temperatur of 
+first Legendre-Polynom
+
+.VARI LE2_SOIL
+Second Legendre-Polynom
+
+.VARI MIN_LE2_SOIL
+Minimum of 
+second Legendre-Polynom
+
+.VARI MAX_LE2_SOIL
+Maximum of 
+second Legendre-Polynom
+
+.VARI T_LE2_SOIL
+Temperatur of 
+second Legendre-Polynom
+
+.var H_SHOE
+Width of opposition surge
+
+.var MIN_H_SHOE
+Minimum of width of opposition surge
+
+.var MAX_H_SHOE
+Maximum of width of opposition surge
+
+.var T_H_SHOE
+Temperatur of width of opposition surge
+
+.VARI B_SHOE
+Opposition magnitude
+
+.VARI MIN_B_SHOE
+Minimum of opposition magnitude
+
+.VARI MAX_B_SHOE
+Maximum of opposition magnitude
+
+.VARI T_B_SHOE
+Temperatur of width of opposition magnitude
+
+.VARI H_CBOE
+Width of opposition surge
+due by coherent backscatter
+
+.VARI MIN_H_CBOE
+Minimum of width of opposition surge
+due by coherent backscatter
+
+.VARI MAX_H_CBOE
+Maximum of width of opposition surge
+due by coherent backscatter
+
+.VARI T_H_CBOE
+Temperatur of 
+width of opposition surge
+due by coherent backscatter
+
+.VARI B_CBOE
+Opposition magnitude
+due by coherent backscatter
+
+.VARI MIN_B_CBOE
+Minimum of opposition magnitude
+due by coherent backscatter
+
+.VARI MAX_B_CBOE
+Maximum of opposition magnitude
+due by coherent backscatter
+
+.VARI T_B_CBOE
+Temperatur of 
+opposition magnitude
+due by coherent backscatter
+
+.var THETA
+Topographic slope angle
+
+.var MIN_THETA
+Minimum of topographic slope angle
+
+.var MAX_THETA
+Maximum of topographic slope angle
+
+.var T_THETA
+Temperatur of topographic slope angle
+
+.VARI COOK
+Hapke-Cook parameter
+
+.VARI MIN_COOK
+Minimum of Hapke-Cook parameter
+
+.VARI MAX_COOK
+Maximum of Hapke-Cook parameter
+
+.VARI T_COOK
+Temperatur of Hapke-Cook parameter
+
+.VARI TAU_ATM
+Atmospheric optical depth
+
+.VARI MIN_TAU_ATM
+Minimum of 
+atmospheric optical depth
+
+.VARI MAX_TAU_ATM
+Maximum of 
+atmospheric optical depth
+
+.VARI T_TAU_ATM
+Temperatur of  
+atmospheric optical depth
+
+.VARI W_ATM
+Atmospheric single scattering albedo
+
+.VARI MIN_W_ATM
+Minimum of 
+atmospheric single scattering albedo
+
+.VARI MAX_W_ATM
+Maximum of 
+atmospheric single scattering albedo
+
+.VARI T_W_ATM
+Temperatur of 
+atmospheric ingle scattering albedo
+
+.VARI HG1_ATM
+Atmospheric Henyey-Greenstein term
+
+.VARI MIN_HG1_ATM
+Minimum of 
+atmospheric Henyey-Greenstein term
+
+.VARI MAX_HG1_ATM
+Maximum of 
+atmospheric Henyey-Greenstein term
+
+.VARI T_HG1_ATM
+Temperatur of
+atmospheric Henyey-Greenstein term
+
+.vari IRV_EXP1
+Irvine's first exponent
+
+.vari MIN_IRV_EXP1
+Minimum of Irvine's first exponent
+
+.vari MAX_IRV_EXP1
+Maximum of Irvine's first exponent
+
+.vari T_IRV_EXP1
+Temperatur of Irvine's first exponent
+
+.vari IRV_EXP2
+Irvine's second exponent
+
+.vari MIN_IRV_EXP2
+Minimum of Irvine's second exponent
+
+.vari MAX_IRV_EXP2
+Maximum of Irvine's second exponent
+
+.vari T_IRV_EXP2
+Temperatur of Irvine's second exponent
+
+.VARIABLE CLASS_ID
+Class-id
+
+.VARI SAVE_PAR
+file name for par-file
+
+
+.LEVEL2
+
+.VARI INP
+File names of the input input IBIS photometric catalog files.
+PHOTFIT2 accepts two types of files - the old IBIS1 file and a IBIS2 file of 
+the type=phocat.
+
+IBIS1 FILE FORMAT:
+
+There are 18 columns in this file. 
+All are not used exept for columns # 11, 12, 13, and 16. 
+These columns contain :
+	column # 11 = incidence angle (degrees),
+	column # 12 = emission angle (degrees),
+	column # 13 = phase angle (degrees)
+	column # 16 = I/F reflectance values.
+
+.page
+
+PHOCAT FILE:
+
+The structure of the IBIS2 file of type phocat is desined in such a way that 
+tiepoint files can be extended and containing all collumns of the old IBIS1 
+photometric catalog files. The program PHOTFIT2 used only one IMAGE_* group at 
+time. but tiepoint files using some IMAGE_* groups containing informations 
+relates to the image.
+GENERAL_QLF containes informations relates to the object point (e.g. 
+CLASS_IDentifier). OBJECT_COORDINATES containes only coordinates of the object 
+point (e.g. LATitude, LONGitude or the X,Y,Z-coordinates in planetocentric 
+coordinate system).
+
+The structure of the photometric catalog file is given by: 
+(There are 19 columns in this file.)
+
+abstract groups	      primitive groups    units	      formats  used in PHOTFIT2
+
+IMAGE_1 		line 		  pixels	REAL	 used
+			samp		  pixels	REAL	 used
+			ObjectLine	  pixels	REAL	  --
+			ObjectSamp	  pixels	REAL	  --
+			BoxLines	  pixels	REAL	  --
+			LuminanceLat	  degrees	DOUB	  --
+			LuminanceLong	  degrees	DOUB	  --
+			IncidenceAngle	  degrees	DOUB	 used
+			EmissionAngle	  degrees	DOUB	 used
+			PhaseAngle	  degrees	DOUB	 used
+			DN_BoxMean	  DN		DOUB	  --
+			Radiance	W/cm**2/str/nm	DOUB	  --
+			I/F		  --		DOUB	 used
+			StandDev	  --		DOUB	 used
+
+OBJECT_COORDINATES  	LAT		  degrees	REAL	  --
+			LONG		  degrees	REAL	  --
+
+GENERAL_QLF		--		  --		DOUB	  --
+			CLASS_ID	  --		FULL	 used
+
+The "phocat" file can contain data of different classes (CLASS_ID). The program 
+PHOTFIT2 will using the data of given class only (or all data if class is not 
+given).
+The program uses the value from the column "StandDev" (if given) for weigthing the reflectance value by fitting. 
+
+.VARI PHO_FUNC
+Photometric function :
+
+This parameter of the first menu point selects the menu point for input the 
+photometry task:
+When returning to the highest level of the menu (i.e. the PHOTFIT2.MDF-file) 
+you will see that the third selection point has been changed according to your 
+input of PHO_FUNC in the first menu point.
+
+.VARIABLE CLASS_ID
+The "phocat" file can contain data of different classes. The class_id numerates 
+the photometric functions. For using different photometric functions or 
+parameter sets. The program PHOTFIT2 will using the data of given class only 
+(or all data if CLASS_ID is not given).
+
+.VARIABLE NORM
+Causes subroutine Metropolis to renormalize itself by recomputing the
+Boltzmann coefficient. NORM=n causes renormalization each n successful
+iterations. 
+
+.VARIABLE RERUN
+Number of rerun of metropolis. You can see the stability of the results. But be 
+aware, the mean values and there deviations of the parameters are not real 
+statistical values because every rerun of metropolis starts with the best fit 
+of the run before.  
+Default for RERUN is 1
+
+.VARIABLE MAXITER
+Specifies the number of successful iterations which Metropolis will
+perform before ceasing in it's hunt for the coefficient values.
+Usefully is for MAXITER is:
+for MINNAERT 5000
+for VEVERKA  20000
+for HAPKE_* 20000
+for HAPKE_* 20000 
+
+.VARIABLE NUMTEN
+Specifies the number of successful iterations which must be 
+accumulated before the width of the solution generating  probability
+function drops by a factor of ten. If for example MAXITER/NUMTEN
+is 4.0 then the initial range specified by the temperatur
+parameter (the starting temperature) is reduced by 4.0 orders
+of magnitude (10000:1) by the time the iteration process has
+ceased. 
+Default for NUMTEN is: MAXITER/4
+
+.VARIABLE PERCENT
+The minimum acceptable # of points with residuals below tolerance.
+The percent and tolerance keywords permit a solution that is found to
+consist of a subset of all of the data points. If there are more than
+percent of the points with I/F residuals below tolerance then the
+remainder of the points can be ignored if they exceed tolerance.
+If there are fewer than percent points with residuals below
+tolerance then all of the points will be considered.
+
+.VARIABLE TOLERANC
+The I/F residual tolerance.
+The percent and tolerance keywords permit a solution that is found to
+consist of a subset of all of the data points. If there are more than
+percent of the points with I/F residuals below tolerance then the
+remainder of the points can be ignored if they exceed tolerance.
+If there are fewer than percent points with residuals below
+tolerance then all of the points will be considered.
+
+.VARIABLE PRINT
+Keyword for screen output of the IBIS input files.
+NOPRINT deactivates the sceen output of IBIS input file.
+
+.VARIABLE METROP
+Causes subroutine Metropolis to list the iteration progress as it
+converges upon the solution. METROP=n causes a printout each
+n successful iterations. 
+
+.VARI SAVE_PAR
+This is the name for the TAE-parameter file containing all parameters 
+needed to running the program. The default name is PHOTFIT2.PAR.
+A user-specified name can be given to that file. This is similar to the
+SAVE command in the Tutor Mode.
+
+.VARI ALBEDO
+Albedo -  valid for the Lambert and Minnaert photometric functions.
+This parameter gives the albedo of the surface. 
+
+.var MIN_ALBEDO
+This parameter gives the absolut lower limit of the albedo of the surface. 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var MAX_ALBEDO
+This parameter gives the absolut upper limit of the albedo of the surface. 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_ALBEDO
+This parameter gives temperatur for the albedo of the surface. 
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    ALBEDO_NEW = T_ALBEDO * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_ALBEDO_NEW_* = T_ALBEDO_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI EXPONENT
+Exponent - the geometrical constant k of the Minnaert photometric function.
+
+.VARI MIN_EXPONENT
+This parameter gives the absolut lower limit of the Minnaert exponent - the 
+geometrical constant k of the Minnaert photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_EXPONENT
+This parameter gives the absolut upper limit of the Minnaert exponent - the 
+geometrical constant k of the Minnaert photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_EXPONENT
+This parameter gives temperatur for the Exponent - the geometrical constant k
+of the Minnaert photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    EXPONENT_NEW = T_EXPONENT * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_EXPONENT_NEW_* = T_EXPONENT_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI A_VEVERKA 
+Parameter of the Veverka, Squyres-Veverka and Mosher photometric functions.
+Usually :
+C_VEVERKA=1-A_VEVERKA
+
+.VARI MIN_A_VEVERKA 
+This parameter gives the absolut lower limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_A_VEVERKA 
+This parameter gives the absolut upper limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_A_VEVERKA 
+This parameter gives temperatur for the parameter of the Veverka photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    A_VEVERKA_NEW = T_A_VEVERKA * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_A_VEVERKA_NEW_* = T_A_VEVERKA_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI B_VEVERKA
+Parameter of the Veverka, Mosher, Squyres-Veverka and Buratti 
+photometric functions.
+
+.VARI MIN_B_VEVERKA
+his parameter gives the absolut lower limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_B_VEVERKA
+This parameter gives the absolut upper limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_B_VEVERKA
+This parameter gives temperatur for the parameter of the Veverka photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    B_VEVERKA_NEW = T_B_VEVERKA * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_B_VEVERKA_NEW_* = T_B_VEVERKA_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI C_VEVERKA
+Parameter of the Veverka, Mosher, Squyres-Veverka and Buratti 
+photometric functions.
+Usually :
+C_VEVERKA=1-A_VEVERKA
+
+.VARI MIN_C_VEVERKA
+his parameter gives the absolut lower limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_C_VEVERKA
+This parameter gives the absolut upper limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_C_VEVERKA
+This parameter gives temperatur for the parameter of the Veverka photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    C_VEVERKA_NEW = T_C_VEVERKA * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_C_VEVERKA_NEW_* = T_C_VEVERKA_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI D_VEVERKA
+Parameter of the Veverka, Mosher, Squyres-Veverka and Buratti 
+photometric functions.
+
+.VARI MIN_D_VEVERKA
+This parameter gives the absolut lower limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_D_VEVERKA
+This parameter gives the absolut upper limit of the parameter of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_D_VEVERKA
+This parameter gives temperatur for the parameter of the Veverka photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    D_VEVERKA_NEW = T_D_VEVERKA * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_D_VEVERKA_NEW_* = T_D_VEVERKA_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI MO_EXP1
+Modification of the coefficient k in the Minnaert part 
+of Mosher's photometric function (goes along with MO_EXP2).
+
+.VARI MIN_MO_EXP1
+This parameter gives the absolut lower limit of the modification of the 
+coefficient k in the Minnaert part of Mosher's photometric function (goes along 
+with MO_EXP2).
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_MO_EXP1
+This parameter gives the absolut upper limit of the modification of the 
+coefficient k in the Minnaert part of Mosher's photometric function (goes along 
+with MO_EXP2).
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_MO_EXP1
+This parameter gives temperatur for the modification of the coefficient k in 
+the Minnaert part of Mosher's photometric function (goes along with MO_EXP2).
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    MO_EXP1_NEW = T_MO_EXP1 * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_MO_EXP1_NEW_* = T_MO_EXP1_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI MO_EXP2
+Modification of the coefficient k in the Minnaert part 
+of Mosher's photometric function (goes along with MO_EXP1).
+
+.VARI MIN_MO_EXP2
+This parameter gives the absolut lower limit of the modification of the 
+coefficient k in the Minnaert part of Mosher's photometric function (goes along 
+with MO_EXP1).
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_MO_EXP2
+This parameter gives the absolut upper limit of the modification of the 
+coefficient k in the Minnaert part of Mosher's photometric function (goes along 
+with MO_EXP1).
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_MO_EXP2
+This parameter gives temperatur for the modification of the coefficient k in 
+the Minnaert part of Mosher's photometric function (goes along with MO_EXP1).
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    MO_EXP2_NEW = T_MO_EXP2 * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_MO_EXP2_NEW_* = T_MO_EXP2_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI E_BURATTI
+Buratti's parameter for modification of the Veverka photometric function.
+
+.VARI MIN_E_BURATTI
+This parameter gives the absolut lower limit of the Buratti's parameter for 
+modification of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_E_BURATTI
+This parameter gives the absolut upper limit of the Buratti's parameter for 
+modification of the Veverka photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_E_BURATTI
+This parameter gives temperatur for the Buratti's parameter for modification of 
+the Veverka photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    E_BURATTI_NEW = T_E_BURATTI * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_E_BURATTI_NEW_* = T_E_BURATTI_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI DEN_SOIL
+Specific volume density of the soil.
+
+.var MIN_DEN_SOIL
+This parameter gives the absolut lower limit of the specific volume density of the soil.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var MAX_DEN_SOIL
+This parameter gives the absolut upper limit of the specific volume density of the soil.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_DEN_SOIL
+This parameter gives temperatur for the specific volume density of the soil.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    DEN_SOIL_NEW = T_DEN_SOIL * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_DEN_SOIL_NEW_* = T_DEN_SOIL_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI W_SOIL
+Single-scattering albedo of the soil particles. It characterizes the 
+efficiency of an average particle to scatter and absorb light. 
+One of the classical Hapke parameter.
+
+.var MIN_W_SOIL 
+This parameter gives the absolut lower limit of the single-scattering albedo of the soil particles. It characterizes the efficiency 
+of an average particle to scatter and absorb light. 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var MAX_W_SOIL 
+This parameter gives the absolut upper limit of the single-scattering albedo of the soil particles. It characterizes the efficiency 
+of an average particle to scatter and absorb light. 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_W_SOIL 
+This parameter gives temperatur for the single-scattering albedo of the soil 
+particles. It characterizes the efficiency of an average particle to scatter 
+and absorb light. 
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    W_SOIL_NEW = T_W_SOIL * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_W_SOIL_NEW_* = T_W_SOIL_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI HG1_SOIL
+Parameter of the first term of the Henyey-Greenstein soil particle 
+phase function.
+One of the classical Hapke parameter. 
+
+.var MIN_HG1_SOIL
+This parameter gives the absolut lower limit of the parameter of the first term of the Henyey-Greenstein soil particle 
+phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var MAX_HG1_SOIL
+This parameter gives the absolut upper limit of the parameter of the first term of the Henyey-Greenstein soil particle 
+phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_HG1_SOIL
+This parameter gives temperatur for the parameter of the first term of the 
+Henyey-Greenstein soil particle phase function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    HG1_SOIL_NEW = T_HG1_SOIL * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_HG1_SOIL_NEW_* = T_HG1_SOIL_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI HG2_SOIL
+Parameter of the second term of the Henyey-Greenstein soil particle 
+phase function.
+
+.VARI MIN_HG2_SOIL
+This parameter gives the absolut lower limit of the parameter of the second 
+term of the Henyey-Greenstein soil particle phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_HG2_SOIL
+This parameter gives the absolut upper limit of the parameter of the second 
+term of the Henyey-Greenstein soil particle phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_HG2_SOIL
+This parameter gives temperatur for the parameter of the second term of the 
+Henyey-Greenstein soil particle phase function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    HG2_SOIL_NEW = T_HG2_SOIL * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_HG2_SOIL_NEW_* = T_HG2_SOIL_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI HG_ASY_SOIL
+This parameter gives the asymmetry parameter (weight of the two terms in the 
+Henyey-Greenstein soil phase function).
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+in the Henyey-Greenstein soil phase function).
+
+.VARI MIN_HG_ASY_SOIL
+This parameter gives the absolut lower limit of the asymmetry parameter (weight 
+of the two terms in the Henyey-Greenstein soil phase function).
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+in the Henyey-Greenstein soil phase function).
+
+.VARI MAX_HG_ASY_SOIL
+This parameter gives the absolut upper limit of the asymmetry parameter (weight 
+of the two terms in the Henyey-Greenstein soil phase function).
+in the Henyey-Greenstein soil phase function).
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_HG_ASY_SOIL
+This parameter gives temperatur for the parameter of the asymmetry parameter (weight of the two terms in the Henyey-Greenstein soil phase function).
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    HG_ASY_SOIL_NEW = T_HG_ASY_SOIL * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_HG_ASY_SOIL_NEW_* = T_HG_ASY_SOIL_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI LE1_SOIL
+Parameter of the first term of the Legendre-Polynomial soil particle 
+phase function.
+
+.VARI MIN_LE1_SOIL
+This parameter gives the absolut lower limit of the parameter of the first term 
+of the Legendre-Polynomial soil particle 
+phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_LE1_SOIL
+This parameter gives the absolut upper limit of the parameter of the first term 
+of the Legendre-Polynomial soil particle 
+phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_LE1_SOIL
+This parameter gives temperatur for the parameter of the first term of the 
+Legendre-Polynomial soil particle phase function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    LE1_SOIL_NEW = T_LE1_SOIL * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_LE1_SOIL_NEW_* = T_LE1_SOILE_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI LE2_SOIL
+Parameter of the second term of the Legendre-Polynomial soil particle 
+phase function.
+
+.VARI MIN_LE2_SOIL
+This parameter gives the absolut lower limit of the parameter of the second 
+term of the Legendre-Polynomial soil particle 
+phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_LE2_SOIL
+This parameter gives the absolut upper limit of the parameter of the second 
+term of the Legendre-Polynomial soil particle 
+phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_LE2_SOIL
+This parameter gives temperatur for the parameter of the second term of the 
+Legendre-Polynomial soil particle phase function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    LE2_SOIL_NEW = T_LE2_SOIL * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_LE2_SOIL_NEW_* = T_LE2_SOIL_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI H_SHOE
+One of the classical Hapke parameter.
+Parameter which characterizes the soil structure in the terms of porosity, 
+particle-size distribution, and rate of compaction with depth (angular width 
+of opposition surge due to shadowing). 
+
+.var MIN_H_SHOE
+This parameter gives the absolut lower limit of the parameter which characterizes the soil structure (angular width of the 
+opposition surge due to shadowing). 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var MAX_H_SHOE
+This parameter gives the absolut upper limit of the parameter which characterizes the soil structure (angular width of the 
+opposition surge due to shadowing). 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_H_SHOE
+This parameter gives temperatur for the parameter which characterizes the soil 
+structure (angular width of the opposition surge due to shadowing). 
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    H_SHOE_NEW = T_H_SHOE * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_H_SHOE_NEW_* = T_H_SHOE_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI B_SHOE
+One of the classical Hapke parameter. 
+Opposition magnitude coefficient. The total amplitude of the opposition surge 
+due to shadowing. It is the ratio of the light scattered from near the 
+illuminated surface of the particle to the total amount of light scattered at 
+zero phase : 
+B_SHOE=S(0)/(W_SOIL*p(0))
+with p(0) - soil phase function
+S(0) - opposition surge amplitude term which characterizes the contribution of 
+light scattered from near the front surface of individual particles at zero 
+phase.
+.page
+For a true, shadow-hiding opposition effect, 0<=B_SHOE<=1.
+However, there are several other phenomena that may also cause a surge in 
+brightness at small phase angles. These including the following:
+1) The coherent backscatter or weak photon localisation due to multiply 
+   scattered light.
+2) An single-particle opposition effect caused by complex porous agglomerates 
+   ( soil phase function )
+3) Glory caused by sperical particles ( soil phase function )
+4) Internal reflections of transparent particles ( soil phase function )
+   These various phenomena may be large enough to increase the opposition surge 
+   by more than a factor of 2. This possibility may be taken into account by 
+   allowing B_SHOE to be greater than 1.
+ 
+.VARI MIN_B_SHOE
+This parameter gives the absolut lower limit of the parameter which characterizes the opposition magnitude coefficient.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_B_SHOE
+This parameter gives the absolut upper limit of the parameter which characterizes theopposition magnitude coefficient.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+ 
+.VARI T_B_SHOE
+This parameter gives temperatur for the parameter which characterizes the 
+opposition magnitude coefficient.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    B_SHOE_NEW = T_B_SHOE * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_B_SHOE_NEW_* = T_B_SHOE_OLD_* * scale, 
+scale depends of NUMTEN.
+ 
+.VARI H_CBOE
+Parameter of the coherent backscattering ( angular width of the opposition 
+surge due to multiply scattered light).
+H_CBOE=lambda/(2*pi*L)
+lambda - wavelength
+L - the free path of the phonon in the medium
+
+.VARI MIN_H_CBOE
+This parameter gives the absolut lower limit of the parameter of the coherent backscattering ( width of theopposition surge due 
+to the backscatter ).
+
+.VARI MAX_H_CBOE
+This parameter gives the absolut upper limit of the parameter of the coherent backscattering ( width of theopposition surge due 
+to the backscatter ).
+
+.VARI T_H_CBOE
+This parameter gives temperatur for the parameter of the coherent 
+backscattering ( width of theopposition surge due to the backscatter ).
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    H_CBOE_NEW = T_H_CBOE * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_H_CBOE_NEW_* = T_H_CBOE_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI B_CBOE
+Opposition magnitude coefficient of the coherent backscattering 
+(height of opposition surge due to multiply scattered light). 
+
+.VARI MIN_B_CBOE
+This parameter gives the absolut lower limit of the opposition magnitude coefficient of the coherent backscattering 
+(height of opposition surge due to backscatter). 
+
+.VARI MAX_B_CBOE
+This parameter gives the absolut upper limit of the opposition magnitude coefficient of the coherent backscattering 
+(height of opposition surge due to backscatter). 
+
+.VARI T_B_CBOE
+This parameter gives temperatur for the opposition magnitude coefficient of the 
+coherent backscattering (height of opposition surge due to backscatter). 
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    B_CBOE_NEW = T_B_CBOE * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_B_CBOE_NEW_* = T_B_CBOE_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI THETA
+Average topographic slope angle of surface roughness at subresolution scale.
+One of the classical Hapke parameter. 
+
+.var MIN_THETA
+This parameter gives the absolut lower limit of the average topographic slope angle of surface roughness at subresolution scale.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var MAX_THETA
+This parameter gives the absolut upper limit of the average topographic slope angle of surface roughness at subresolution scale.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_THETA
+This parameter gives temperatur for the average topographic slope angle of 
+surface roughness at subresolution scale.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    THETA_NEW = T_THETA * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_THETA_NEW_* = T_THETA_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI COOK
+ Parameter of the Cook's modification of the old Hapke function.
+
+.VARI MIN_COOK
+This parameter gives the absolut lower limit of the parameter of the Cook's 
+modification of the old Hapke function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_COOK
+This parameter gives the absolut upper limit of the parameter of the Cook's 
+modification of the old Hapke function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_COOK
+This parameter gives temperatur for the parameter of the Cook's modification 
+of the old Hapke function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    COOK_NEW = T_COOK * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_COOK_NEW_* = T_COOK_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI TAU_ATM
+Optical depth of the atmosphere.
+
+.VARI MIN_TAU_ATM
+This parameter gives the absolut lower limit of the optical depth of the 
+atmosphere.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_TAU_ATM
+This parameter gives the absolut upper limit of the optical depth of the 
+atmosphere.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_TAU_ATM
+This parameter gives temperatur for the optical depth of the atmosphere.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    TAU_ATM_NEW = T_TAU_ATM * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_TAU_ATM_NEW_* = T_TAU_ATM_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI W_ATM
+Single scattering albedo of the atmospheric aerosols.
+
+.VARI MIN_W_ATM
+This parameter gives the absolut lower limit of the single scattering albedo of 
+the atmospheric aerosols.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_W_ATM
+This parameter gives the absolut upper limit of the single scattering albedo of 
+the atmospheric aerosols.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_W_ATM
+This parameter gives temperatur for the single scattering albedo of the 
+atmospheric aerosols.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    W_ATM_NEW = T_W_ATM * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_W_ATM_NEW_* = T_W_ATM_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI HG1_ATM
+Parameter of the first term of the Henyey-Greenstein atmospheric phase function.
+
+.VARI MIN_HG1_ATM
+This parameter gives the absolut lower limit of the parameter of the first term 
+of the Henyey-Greenstein atmospheric phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_HG1_ATM
+This parameter gives the absolut upper limit of the parameter of the first term 
+of the Henyey-Greenstein atmospheric phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_HG1_ATM
+This parameter gives temperatur for the parameter of the first term of the 
+Henyey-Greenstein atmospheric phase function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    HG1_ATM_NEW = T_HG1_ATM * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_HG1_ATM_NEW_* = T_HG1_ATM_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.vari IRV_EXP1
+Irvine's first exponent - parameter of the Irvine photometric function.
+
+.vari MIN_IRV_EXP1
+This parameter gives the absolut lower limit of the Irvine's first exponent - 
+parameter of the Irvine photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.vari MAX_IRV_EXP1
+This parameter gives the absolut upper limit of the Irvine's first exponent - 
+parameter of the Irvine photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.vari T_IRV_EXP1
+This parameter gives temperatur for the Irvine's first exponent - parameter 
+of the Irvine photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+   IRV_EXP1_NEW = T_IRV_EXP1 * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_IRV_EXP1_NEW_* = T_IRV_EXP1_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.vari IRV_EXP2
+Irvine's second exponent - parameter of the Irvine photometric function.
+
+.vari MIN_IRV_EXP2
+This parameter gives the absolut lower limit of the Irvine's second exponent - 
+parameter of the Irvine photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.vari MAX_IRV_EXP2
+This parameter gives the absolut upper limit of the Irvine's second exponent - 
+parameter of the Irvine photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.vari T_IRV_EXP2
+This parameter gives temperatur for the Irvine's second exponent - parameter 
+of the Irvine photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    IRV_EXP2_NEW = T_IRV_EXP2 * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_IRV_EXP2_NEW_* = T_IRV_EXP2_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.end

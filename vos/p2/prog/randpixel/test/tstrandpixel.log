@@ -1,0 +1,75 @@
+randpixel out=xxA onl=1024 ons=1024 outfmt=byte points=100  +
+	randfill=255 randseed=123754.6 'list
+Beginning VICAR task randpixel
+*** RANDPIXEL version 2016-06-08 ***
+RANGEN::: Random Seed value of 1207022925 adjusted to 15840589
+randpixel inp=xxA out=xxB points=50 randfill=128 randseed=-84234
+Beginning VICAR task randpixel
+*** RANDPIXEL version 2016-06-08 ***
+RANGEN::: Random Seed value of -945519360 adjusted to -5995264
+randpixel out=r1 onl=512 ons=512 outfmt=byte points=100  +
+    symmetry=symmetry  +
+    randfill=255 randseed=-78845
+Beginning VICAR task randpixel
+*** RANDPIXEL version 2016-06-08 ***
+RANGEN::: Random Seed value of -946209152 adjusted to -6685056
+grid r1 r1g bli=256 lfs=128
+Beginning VICAR task grid
+GRID version 10-Jan-2013
+randpixel out=r0 onl=128 ons=128 outfmt=byte points=100  +
+    randfill=255 randseed=-1745 'list
+Beginning VICAR task randpixel
+*** RANDPIXEL version 2016-06-08 ***
+RANGEN::: Random Seed value of -992337920 adjusted to -2482176
+randpixel out=r2 onl=512 ons=512 outfmt=byte points=100  +
+     shape=square slshape=128 nlshape=128 ssshape=128 nsshape=128  +
+    randfill=255 randseed=-1745 'list
+Beginning VICAR task randpixel
+*** RANDPIXEL version 2016-06-08 ***
+RANGEN::: Random Seed value of -992337920 adjusted to -2482176
+gen b nl=512 ns=512 format=byte linc=1 sinc=1 modulo=64 ival=0
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+randpixel inp=b out=b2 points=100  +
+    randfill=255 randsee=384579
+Beginning VICAR task randpixel
+*** RANDPIXEL version 2016-06-08 ***
+RANGEN::: Random Seed value of 1220266080 adjusted to 12306528
+randpixel out=b0 onl=128 ons=128 outfmt=byte points=100  +
+    randfill=255 randseed=-84579 'list
+Beginning VICAR task randpixel
+*** RANDPIXEL version 2016-06-08 ***
+RANGEN::: Random Seed value of -945475200 adjusted to -5951104
+randpixel inp=b out=b3 points=100  +
+     shape=square slshape=128 nlshape=128 ssshape=128 nsshape=128  +
+    randfill=255 randseed=-84579
+Beginning VICAR task randpixel
+*** RANDPIXEL version 2016-06-08 ***
+RANGEN::: Random Seed value of -945475200 adjusted to -5951104
+randpixel inp=b out=s1 points=100  +
+    symmetry=symmetry  +
+    randfill=255 randseed=1947883
+Beginning VICAR task randpixel
+*** RANDPIXEL version 2016-06-08 ***
+RANGEN::: Random Seed value of 1240319832 adjusted to 15583064
+grid s1 s1g bli=256 lfs=128
+Beginning VICAR task grid
+GRID version 10-Jan-2013
+randpixel inp=s1 out=s2 points=50  symmetry=symmetry  +
+    randfill=128 randseed=-903
+Beginning VICAR task randpixel
+*** RANDPIXEL version 2016-06-08 ***
+RANGEN::: Random Seed value of -1000226816 adjusted to -10371072
+grid s2 s2g bli=256 lfs=128
+Beginning VICAR task grid
+GRID version 10-Jan-2013
+write "*** should say Random circle not active ***"
+*** should say Random circle not active ***
+randpixel out=r3 onl=512 ons=512 outfmt=byte points=100  +
+     shape=circle slshape=128 nlshape=128 ssshape=128 nsshape=128  +
+    randfill=255 randseed=-1745
+Beginning VICAR task randpixel
+*** RANDPIXEL version 2016-06-08 ***
+??E - Random circle not active
+disable-log

@@ -1,0 +1,134 @@
+procedure help=*
+parm inp        type=string  count=1
+parm out        type=string  count=1
+parm size	type=integer count=4	default=(0,0,0,0)
+parm cl		type=real    count=1	valid=(0.:1.) default=1.
+parm cs		type=real    count=1	valid=(0.:1.) default=1.
+parm radius	type=real    count=1  	valid=(0.:1.) default=1.
+
+body
+
+local (r2,begl,endl,begs,ends) real
+let r2 = radius * radius
+let begl = $float(size(1))
+let begs = $float(size(2))
+let endl = $float(size(1)) + $float(size(3)) - 1.0
+let ends = $float(size(2)) + $float(size(4)) - 1.0
+
+!(C5 MOD 1) gets fractional part of CLINBOX
+!MIN takes into account wrap-around
+
+if (size(1) <> 0 and size(2) <> 0 and size(3) <> 0 and size(4) <> 0)
+   if (radius <> 1.)
+      mf inp=&inp function= +
+	("C10=MIN(ABS((C5 MOD 1)-&CL),1.0-ABS((C5 MOD 1)-&CL))**2 +
+             +MIN(ABS((C6 MOD 1)-&CS),1.0-ABS((C6 MOD 1)-&CS))**2")
+      rowop inp=&inp out=&out keycol=(10) range=(0.0, &r2) 'select
+      mf inp=&out function=("C10 = C2 + C5")
+      rowop inp=&out out=&out keycol=(10) range=(&begl,&endl) 'select
+      mf inp=&out function=("C10 = C3 + C6")
+      rowop inp=&out out=&out keycol=(10) range=(&begs,&ends) 'select
+   else
+      mf inp=&inp function=("C10 = C2 + C5")
+      rowop inp=&inp out=&out keycol=(10) range=(&begl,&endl) 'select
+      mf inp=&out function=("C10 = C3 + C6")
+      rowop inp=&out out=&out keycol=(10) range=(&begs,&ends) 'select
+   end-if
+else-if (radius <> 1.)
+      mf inp=&inp function= +
+	("C10=MIN(ABS((C5 MOD 1)-&CL),1.0-ABS((C5 MOD 1)-&CL))**2 +
+             +MIN(ABS((C6 MOD 1)-&CS),1.0-ABS((C6 MOD 1)-&CS))**2")
+      rowop inp=&inp out=&out keycol=(10) range=(0.0, &r2) 'select
+else
+   ibis-copy inp=&inp out=&out
+end-if
+
+end-proc
+
+.TITLE
+VICAR procedure tablesearch
+
+.HELP
+PURPOSE:
+	A procedure generally used in camera calibration processing to
+	search and extract records from an input file.  The input file is
+	created by prf (Point Response Function) and records are extracted
+	from it using either or both of two methods.  If SIZE is specified
+	by the user then the sums of the columns SLBOX + CLINBOX and SSBOX +
+	CSINBOX must lie in the rectangle defined by SIZE.  If CL, CS, and
+	RADIUS are specified by the user then the point represented by the
+	fractional parts of the columns CLINBOX and CSINBOX must lie inside
+	the circle defined by (x - CS)^2 + (y - CL)^2 = RADIUS^2.  If the
+	circle crosses the square defined by (0,0), (0,1), (1,1) and (1,0)
+	then wrap-around is taken into account.
+
+	If either SIZE or RADIUS retain their default values then that
+	method of selection is ignored.  Consequently if they both retain
+	their default values then all the records in the input file are
+	selected and copied to the output file.  If they are both specified
+	then selected records must satisfy both conditions.
+
+	Note: As a consequence of using program mf, tablesearch changes the
+	value of WORK column 10 in the input file.  This column was set up
+	to be used by tablesearch.
+
+EXECUTION:
+	tablesearch inp=input.file out=out.file size=(257,257,512,512) + 
+		    cl=0.5 cs=0.3 radius=0.2
+
+	The above command line uses both methods to select records from the
+	input file and copy them to the output file.
+
+.PAGE
+
+METHOD:
+	1) Use tablelist on input.file to list the records.
+	2) Next use tablesearch to search and extract records based on
+	   either or both of the two methods described above.
+
+HISTORY:
+	4-1996    ...YKK... Wrote C version for VAX/VMS.
+	8-29-1997 ...RRD... Converted to VICAR procedure.
+
+.LEVEL1
+.VARI INP
+Input file
+.VARI OUT
+Output file
+.VARI SIZE
+Size field to contain circular
+centroid area.	 
+.VARI CL 
+Circular centroid area's center
+line coordinate.
+.VARI CS
+Circular centroid area's center
+sample coordinate.
+.VARI RADIUS
+Radius of circular centroid
+area.
+.LEVEL 2
+.VARI INP
+Input file of records created by program prf.
+.VARI OUT
+Output file consisting of records selected based on parameters SIZE, CL, CS
+and RADIUS.
+.VARI SIZE
+If specified, then the sums of the columns SLBOX + CLINBOX and SSBOX +
+CSINBOX must lie in the field defined by SIZE in order for the record to be
+selected.
+.VARI CL
+If CL, CS, and RADIUS are specified by the user then the point represented
+by the fractional parts of the columns CLINBOX and CSINBOX must lie inside
+the circle defined by (x - CL)^2 + (y - CS)^2 = RADIUS^2.
+.VARI CS
+If CL, CS, and RADIUS are specified by the user then the point represented
+by the fractional parts of the columns CLINBOX and CSINBOX must lie inside
+the circle defined by (x - CL)^2 + (y - CS)^2 = RADIUS^2.
+.VARI RADIUS
+If CL, CS, and RADIUS are specified by the user then the point represented
+by the fractional parts of the columns CLINBOX and CSINBOX must lie inside
+the circle defined by (x - CL)^2 + (y - CS)^2 = RADIUS^2.  If RADIUS is not
+specified then this method of selection is ignored.
+.END
+

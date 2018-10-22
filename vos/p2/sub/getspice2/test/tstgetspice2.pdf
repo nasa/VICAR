@@ -1,0 +1,92 @@
+!*****************************************************************************
+! tstgetspice2.pdf - unit test for subroutines getspice2, zgetspice2,
+!                    putspice2, and zputspice2
+!*****************************************************************************
+procedure help=*
+  refgbl $echo
+  refgbl $syschar
+  refgbl $autousage
+body
+  let _onfail="continue"
+  let $echo="yes"
+  let  $autousage="none"
+  local path string
+  local path2 string
+  local path3 string
+
+  if ($syschar(1) = "VAX_VMS")
+    let path="WMS_TEST_WORK:[TESTDATA.MIPL.GLL]"
+    let path2="WMS_GLL:[SSI.UDR]"
+    let path3="WMS_TEST_WORK:[TESTDATA.MIPL.VGR]"
+  else
+    let path="/project/test_work/testdata/mipl/gll/"
+    let path2="/project/gll/ssi/udr/"
+    let path3="/project/test_work/testdata/mipl/vgr/"
+  end-if
+
+  WRITE "***Please read attached help file for testing instructions"
+  WRITE "Testing local mode"
+ tputspice2 inp=&"path"venus.img  SPICEMODE=LOCAL CKNAME=NAIF +
+            INSTITUTE=USC PURPOSE=COLO REQNUM=0123 CDATE=199603151213
+ tputspice2 inp=&"path"venus.img  SPICEMODE=LOCAL CKNAME=NAIF +
+            INSTITUTE=USC PURPOSE=MOSA REQNUM=0123 CDATE=199603151213
+ tputspice2 inp=&"path"venus.img  SPICEMODE=LOCAL CKNAME=NAIF +
+            INSTITUTE=USC PURPOSE=MOSA REQNUM=0456 CDATE=199603151213
+ tputspice2 inp=&"path"venus.img  SPICEMODE=LOCAL CKNAME=NAIF +
+            INSTITUTE=MIPS PURPOSE=MOSA REQNUM=0456 CDATE=199601221213
+ tgetspice2 inp=&"path"venus.img SPICEMODE=LOCAL  CKNAME=NAIF +
+            INSTITUTE=USC PURPOSE=COLO REQNUM=0123 CDATE=199603151213
+ tgetspice2 inp=&"path"venus.img SPICEMODE=LOCAL  CKNAME=NAIF +
+            INSTITUTE=USC PURPOSE=MOSA REQNUM=0123 CDATE=199603151213
+ tgetspice2 inp=&"path"venus.img SPICEMODE=LOCAL  CKNAME=NAIF +
+            INSTITUTE=USC PURPOSE=MOSA REQNUM=0456 CDATE=199603151213
+ tgetspice2 inp=&"path"venus.img SPICEMODE=LOCAL  CKNAME=NAIF +
+            INSTITUTE=MIPS PURPOSE=MOSA REQNUM=0456 CDATE=199601221213
+
+  WRITE "Testing remote mode"
+ tputspice2 inp=&"path"venus.img  SPICEMODE=REMOTE CKNAME=NAIF +
+            INSTITUTE=USC PURPOSE=COLO REQNUM=0123 CDATE=199603151213
+ tgetspice2 inp=&"path"venus.img SPICEMODE=REMOTE  CKNAME=NAIF +
+            INSTITUTE=USC PURPOSE=COLO REQNUM=0123 CDATE=199603151213
+
+ WRITE "Testing VGR remote mode"
+ tgetspice2 inp=&"path3"f1636832.geo spicemode=remote ckname=SEDR target=IO
+
+ tputspice2 inp=&"path3"f1636832.geo spicemode=remote ckname=SEDR target=IO
+
+ WRITE "Testing VGR local mode"
+ tgetspice2 inp=&"path3"f1636832.geo spicemode=local ckname=SEDR target=IO
+
+ tputspice2 inp=&"path3"f1636832.geo spicemode=local ckname=SEDR target=IO
+
+end-proc
+.help
+PROCEDURE FOR TESTING GETSPICE2:
+
+TSTGETSPICE2.PDF tests the subroutines TGETSPICE2 and TPUTSPICE2.  The test
+procedure differs from convention because it requires the compiling of two
+test programs: TGETSPICE2 and TPUTSPICE2.  All required test files can be
+obtained by typing "@GETSPICE2 TEST".  To compile the test programs under VMS:
+   $ VIMAKE TGETSPICE2
+   $ @TGETSPICE2.BLD
+   $ VIMAKE TPUTSPICE2
+   $ @TPUTSPICE2.BLD
+or for UNIX:
+   % vimake tgetspice2
+   % make -f tgetspice.make
+   % vimake tputspice2
+   % make -f tputspice.make
+
+First, we test using local SPICE files.
+TPUTSPICE2 stores SPICE data into the SPICE kernels.  TGETSPICE2 then reads the
+SPICE data from the SPICE kernels and prints what it got.  The retrieval is
+done twice, using the direct FORTRAN and C-bridge.  Any difference between what
+is retrieved via FORTRAN and C are reported (no differences should be found).
+
+The above test is repeated for both REMOTE and DEFAULTSPICE cases.  REMOTE
+tests using the SPICE server.  DEFAULTSPICE tests the default, which for MIPS is
+the SPICE server (some installations will have local as the default).
+
+Disregard the differences in buf(180),buf(181).  This is caused by the string
+being zero terminated with garbage following, and has no effect.
+.end

@@ -1,0 +1,135 @@
+process help=*
+!  PDF FILE FOR flot
+!
+PARM INP     TYPE=STRING   COUNT=1
+PARM OUT     TYPE=STRING   COUNT=1
+!
+PARM SIZE    TYPE=INTEGER  COUNT=4   	 DEFAULT=(1,1,0,0)
+PARM SL      TYPE=INTEGER  COUNT=0:1     DEFAULT=1
+PARM SS      TYPE=INTEGER  COUNT=0:1     DEFAULT=1
+PARM NL      TYPE=INTEGER  COUNT=0:1     DEFAULT=0
+PARM NS      TYPE=INTEGER  COUNT=0:1     DEFAULT=0
+PARM BAND    TYPE=INTEGER  COUNT=0:1     DEFAULT=1
+!
+PARM MODE    TYPE=KEYWORD  COUNT=(0:1)			    +
+             VALID=(CLOCK,COUNTER,VERT,HORIZ,TRANS,ROT180)  +
+	     DEFAULT=(CLOCK)
+!
+PARM PMEM    TYPE=REAL    COUNT=1 VALID=(0.1:2047) DEFAULT=16.0
+!
+END-PROC
+.TITLE
+flot
+.HELP
+ PURPOSE:
+
+Program flot is a VICAR applications program which is used to flip or rotate 
+an image.  The MODE parameter is used to select the operation that will be
+performed on the image.  The six operations available are:
+   1) horizontal flip (reflection through vertical axis).
+   2) vertical flip (reflection through horizontal axiz).
+   3) 90 degrees clockwise rotation.
+   4) 90 degrees counterclockwise rotation.
+   5) transpose (in the matrix sense).
+   6) 180 degrees rotation.
+.PAGE
+ EXECUTION:
+
+The input image may have any valid data format (byte, halfword, ...).
+The data format is obtained from the label of the input file.
+The output image has the same data format  (byte or halfword) as the input 
+image.  No size restrictions are imposed on the input image.  If BAND is
+provided, then the output will include only that band.
+.PAGE
+TAE COMMAND LINE FORMAT
+      The following command line formats show the major allowable forms:
+      flot INP=a OUT=b SIZE=(sl,ss,nl,ns) optional parameters
+      flot INP=a OUT=b  SL=sl SS=ss NL=nl NS=ns optional parameters
+      flot a b (sl,ss,nl,ns) optional parameters
+      flot a b optional parameters
+
+       Here 'a' represents the input image file name, and
+       'b' represents the output image file name.
+.PAGE
+EXAMPLE
+
+      flot INP=A OUT=B 'CLOCK
+
+      In this example the output file B is produced by rotating the input
+      image A 90 degrees in the clockwise direction.
+.PAGE
+RESTRICTIONS
+1. The input file should not be on magnetic tape unless a horizontal flip
+   is being performed.
+2. BAND must be in the range 1 .. NB
+3. Multi-band input must be organized BSQ
+
+ WRITTEN BY:             Steve Pohorsky              19 Sep 1984
+ COGNIZANT PROGRAMMER:   Walt Bunch                  May 21 2015
+
+ PROGRAM HISTORY:
+  1984-09-19 Steve Pohorsky - Initial version
+  1993-07-09 George A. Madrid Jr. - Ported to UNIX
+  2015-05-21 Walt Bunch - Added BAND parm and support for multi-band input
+
+.LEVEL1
+.VARIABLE INP
+Input file name
+.VARIABLE OUT
+Output file name
+.VARIABLE SIZE
+Standard Vicar size field:
+  (SL,SS,NL,NS)
+You can enter SL,SS,NL,
+and NS together as SIZE, OR
+enter the SL,SS,NL, and NS
+parameters separately.
+By default, the entire input
+image is used if these
+parameters are not entered.
+.VARIABLE SL
+Starting line number
+.VARIABLE SS
+Starting sample number
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples
+.VARIABLE BAND
+Single band to rotate and output
+.VARIABLE MODE
+Operation performed on image:
+CLOCK,COUNTER,VERT,HORIZ,TRANS,
+ROT180
+.VARIABLE PMEM
+Physical memory available
+(megabytes). non-VMS systems
+.LEVEL2
+.VARIABLE BAND
+The BAND parameter, defaulting to 1, must be in the range 0 .. inp NB,
+else abend. If not specified, all bands will be rotated and output, so
+NB out = NB inp. If BAND is specified, then NB out = 1 and BAND
+selects the input band to be rotated and output.
+.VARIABLE MODE
+The MODE parameter is used to select the operation that will be
+performed on the image.  The six operations available are:
+   1) horizontal flip (reflection through vertical axis).
+   2) vertical flip (reflection through horizontal axiz).
+   3) 90 degrees clockwise rotation.
+   4) 90 degrees counterclockwise rotation.
+   5) transpose (in the matrix sense).
+   6) 180 degrees rotation.
+The default mode is a 90 degrees clockwise rotation.
+.VARIABLE PMEM
+Physical memory (megabytes) available for flot dynamically allocated buffers.
+This applies to non-VMS systems only.  The default is 16.0.  (The maximum value
+is 2047 (megabytes), to insure that the number of bytes can be stored as a
+32-bit integer.)
+
+This parameter can usually be defaulted.  If the amount of memory available
+is less than the default, then PMEM should be set accordingly to prevent the
+program from crashing.  If the amount of memory available
+is more than the default, then PMEM may be set accordingly to allow larger
+images to be handled in one pass.
+
+.END

@@ -1,0 +1,266 @@
+process help=*
+PARM INP 	 STRING
+PARM PROJECT     TYPE=(STRING,5)  COUNT=1 +
+    VALID=("VGR-1","VGR-2","MAR10","MAR-9","VIKOR","GLL  ","CASSI")
+PARM TARGET      TYPE=(STRING,12) COUNT=1
+PARM SCET        TYPE=INTEGER     COUNT=0:300                      DEFAULT=--
+PARM MODE 	 TYPE=KEYWORD     COUNT=0:1    VALID=(UPDATE,NOUPDATE) + 
+                                                               DEFAULT=NOUPDATE
+PARM CAMERA	 TYPE=INTEGER 	  COUNT=0:50                       DEFAULT=--
+PARM OBJECT      TYPE=KEYWORD                  VALID=(OBJECT,IMAGE) +    
+                                                                  DEFAULT=IMAGE              
+PARM SPKID      TYPE=(STRING,4)   COUNT=0:50                       DEFAULT=NONE
+PARM SPICEMODE  TYPE=KEYWORD      COUNT=0:1 VALID=(LOCAL,REMOTE)   DEFAULT=--
+PARM INSTITUTE  TYPE=(STRING,4)   COUNT=0:1			   DEFAULT=--
+PARM PURPOSE    TYPE=(STRING,4)   COUNT=1			   DEFAULT=NONE
+PARM REQNUM     TYPE=(STRING,4)   COUNT=1			   DEFAULT=NONE
+PARM CDATE      TYPE=(STRING,12)  COUNT=1		   DEFAULT=000000000000
+PARM GROUPID    TYPE=(STRING,3)   COUNT=0:1			   DEFAULT=--
+END-PROC
+
+.TITLE
+IBISUPDATE - Copy corrected camera pointing from IBIS SEDR file to
+      SPICE C-kernel
+
+.HELP
+IBISUPDATE is a VICAR program which copies corrected camera pointing data
+from an IBIS SEDR file to a SPICE C-kernel.  IBISUPDATE is one of a suite
+of programs used primarily for creating digital mosaics.  The program
+currently works for Galileo SSI only.
+
+EXECUTION:
+
+  IBISUPDATE INP=ibisfile  TARGET=targetname  user-parameters...
+where
+  INP is the input IBIS SEDR file, and
+  TARGET is the name of the planet, satellite, or asteroid in the image.
+
+The IBIS SEDR file is originally created by IBISNAV, and later updated with
+corrected pointing via OMCOR2.
+
+.page
+OPERATION:
+
+The data for each image is read from the IBIS SEDR file.  If the SCET parameter
+is specified, the records matching the input SCETs are processed.  Otherwise,
+all records in the IBIS SEDR file are processed.  Processing consists extracting
+the camera pointing and storing it in the MIPS C-kernel MIPS_NEAR.CK.
+
+To later access the updated navigation information with programs like
+MAP2, the user should use the CKNAME parameter with a value of NEAR.
+
+.page
+LOCAL AND REMOTE SPICE ACCESS:
+
+Corrected camera pointing may be stored in local or remote (e.g. at JPL) SPICE
+C-kernels.  Remote access is via a SPICE server.
+
+SPICEMODE specifies whether local or remote SPICE access is to be used.
+If defaulted, SPICEMODE is set to the value of the logical name (or
+environmental variable) DEFAULTSPICE.
+
+PARAMETERS FOR STORING THE IMPROVED CAMERA POINTING:
+
+The following optional parameters are used to store provenance information along
+with the improved (C-Smithed) camera pointing computed by the program.  This
+provenance information is stored in the (C kernel) segment identifier for the
+camera pointing data.  In cases where there are several versions of camera
+pointing for an image in a given C kernel, this provenance information can
+later be used to retrieve a specific instance of camera pointing from the
+kernel.
+
+PURPOSE identifies the purpose for creating the camera pointing.
+REQNUM identifies the request number associated with the camera pointing.
+CDATE specifies the date and time the camera pointing was created.
+GROUPID identifies the group which created the camera pointing.
+INSTITUTE identifies the facility which created the camera pointing.
+
+See the level 2 help (via the TAE tutor mode) for further details.
+
+Example:  'REMOTE INSTITUTE=DLR USERID=TYR stores the improved camera pointing
+          via the SPICE server.  Provenance data regarding the facility (DLR)
+          and user (Thomas Roatsch) who created the data is included.
+
+.page
+GALILEO'S FULL FRAME MODE AND SUMMATION MODE
+
+In conformance to new convention, the CAMERA s/n for GLL is now used to specify
+Full Frame Mode (if s/n = 1) or Summation Mode (if s/n = 2).  If the CAMERA
+is not specified the program defaults CAMERA to Full Frame Mode (s/n = 1).
+
+.page
+EXAMPLES:
+
+             IBISNAV out=IB.SDR  user-parameters...
+
+                ( run OMCOR )
+
+             IBISUPDATE IB.SDR  TARGET=JUPITER CAM=5 'UPDATE +
+                     PROJECT=VGR-1
+     -or-    IBISUPDATE IB.SDR  TARGET=JUPITER 'UPDATE +
+                     PROJECT=GLL
+
+             MAP2 image  SEDRSRC=NEAR parameters
+
+PROGRAM HISTORY:
+
+Original programmer: Jean Lorre
+Cognizant programmer: Jean Lorre
+Revisions:
+  When         Who  What
+  -----------  ---  -----------------------------------------------------------
+  10 Jan 1997  SMC  Corrected .PDF documentation                      (FR89979)
+  14 Nov 1996  SMC  Fixed so that SPKID from the new IBISNAV file format is 
+                    recognized and passed to PUTSPICE95 to write to CK (FR89225)
+  28 Aug 1996  SMC  Implemented support for GLL Summation Mode processing
+                    Obtain Camera S/N from IBIS file, use CAMERA as override 
+                    (DFR)
+   6 Jun 1996  GMY  Implemented GETSPICE95/PUTSPICE95 interface
+  20 Oct 1995  FFM  Ported to Unix
+  24 Aug 1998  RRP  Made it Y2K compliant. Put check for scet (Y2K FRD<901>).
+  04 Jan 1999  TXH  Corrected call to 'mvcl' from 'mvlc' in moving SPKID.
+                    (AR-101223).
+  14 Aug 2002  GMY  Linux compile changes:  cosd(angle) to cos(angle*dtr)
+  29 Jun 2006  LWK  enabled GETSPICE95 call to work for Cassini
+
+.level1
+.vari INP
+String
+input IBIS SEDR file
+.VARI PROJECT
+The project ID.
+.VARI OBJECT
+Specifies whether the 
+images are geometrically 
+corrected.
+IMAGE valid only 
+for GLL project.
+.VARI SCET
+The spacescraft event 
+time for each image.
+Required only for GLL project.
+.vari TARGET
+String 12 characters
+The name of the target body
+.vari CAMERA
+Optional Array of Integers
+serial number of camera
+.VARI SPICEMODE
+Optional keyword
+Location of SPICE kernels
+(LOCAL or REMOTE)
+.VARI INSTITUTE
+Optional 4-char string
+Facility which created camera pointing
+.VARI PURPOSE
+Optional 4-char string
+Purpose for camera pointing
+.VARI REQNUM
+Optional 4-char string
+IPL request number for created camera pointing
+.VARI CDATE
+Optional 12-char string
+Date and time camera pointing was created
+.VARI GROUPID
+Optional 3-char string
+Group which created camera pointing
+
+.level2
+.vari INP
+String
+Name of the input IBIS SEDR file.
+
+.VARI PROJECT
+The project ID.
+
+.VARI OBJECT
+Specifies whether the data is in OBJECT space (geometricaly corrected) or
+IMAGE space (uncorrected).
+
+IMAGE (uncorrected) is only valid for GLL project.
+.VARI SCET
+The spacescraft event time for each image.  Required only for GLL project.
+If omitted the scet times will be extracted from columns 32-37 in the input
+ibis file. Groups of 6 integers for each image in the order:
+Year, day, hour, minute, second, milisecond.
+.vari MODE
+Keyword
+Indicator of whether to update or not update the Voyager SEDR file.  
+        Valid: UPDATE and NOUPDATE.  Default: NOUPDATE.
+.vari CAMERA
+Array of Integers
+The serial number of the camera which took all images.
+By default the program will obtain the cameras from the input IBIS file.
+This parameter is used to override the camera s/n specified in the IBIS table.
+
+If the override is desired on the n-th record, all cameras from the first
+record up to the n-th are to be specified.
+
+For GLL's case, which actually has only one camera, this parameter specifies if
+an image was taken in Full Frame Mode (CAMERA = 1) or Summation Mode (CAMERA = 
+2).
+
+.VARI TARGET
+Ex: TARGET=GANYMEDE specifies that GANYMEDE is the target in the input image.
+
+The TARGET may be a planet, satellite, or asteroid.  A complete list of valid
+target names is located in the ASCII file assigned the logical name (or
+environmental variable) BODY_IDS.
+If defaulted, the target is retrieved from the VICAR label or other TBD means.
+
+.VARI SPICEMODE
+SPICEMODE=LOCAL specifies that SPICE data is to be accessed from local
+SPICE kernels.  SPICEMODE=REMOTE specifies that SPICE data is to be accessed
+via the SPICE server.  If SPICEMODE is defaulted, the logical name (or
+environmental variable) DEFAULTSPICE is used to determine whether LOCAL or
+REMOTE is used.
+
+Note that if SPICE data is not found in LOCAL or REMOTE mode, the other mode
+is attempted in order to retrieve SPICE data.  However, when improved camera
+pointing data is stored, only the specified or default mode is used.
+
+.VARI INSTITUTE
+INSTITUTE is a four character string identifying the facility which creates
+the improved (C-Smithed) camera pointing.  If defaulted, the value of the
+logical name (or environmental variable) VICAR_SITE is used.
+
+Ex:  INSTITUTE=ASU identifies ASU as the creator of the improved camera
+     pointing.
+
+.VARI PURPOSE
+PURPOSE is a four character string identifying the purpose of the observation
+or the purpose of processing.  For example,
+  PURPOSE=MOSA identifies the image as part of a mosaic sequence
+  PURPOSE=COLO identifies the image as part of a color sequence
+
+.VARI REQNUM
+REQUNUM is a four character string identifying the IPL request number for
+which the camera pointing was created.  REQNUM must contain exactly 4 digits.
+
+Ex:  REQNUM=0123 identifies (somewhat) request number R000123
+
+.VARI CDATE
+Date and time the camera pointing was created in the form 'YEARMMDDHHMM'.
+The date string must contain exactly 12 digits.
+
+Ex:  CDATE=199602291200 specifies that the pointing was created at noon
+     on February 29, 1996.
+
+If defaulted, the current date and time is used.
+
+.VARI GROUPID
+GROUPID is a three character string which identifies the group of the user
+running this program to store improved camera pointing.  (The user ID is
+automatically determined by the program).
+
+Ex:  GROUPID=040 identifies group 040 as the creator of the camera pointing.
+
+On VMS, this parameter is ignored since the program automatically determines
+the group ID of the current user.
+
+If GROUPID is defaulted on Unix, the program uses the value of the
+environmental variable GROUPID.  Note that GROUPID is not a system-defined
+variable, and should be defined in your .cshrc as in the following example:
+
+Ex:  setenv GROUPID 040
+.end

@@ -1,0 +1,14 @@
+#define PROGRAM tfind_hist_key
+#define MODULE_LIST tfind_hist_key.c
+
+#define MAIN_LANG_C
+#define USES_C
+
+#define TEST
+
+#define LIB_P1SUB
+#define LIB_RTL
+#define LIB_TAE
+
+/* #define LIB_LOCAL */
+

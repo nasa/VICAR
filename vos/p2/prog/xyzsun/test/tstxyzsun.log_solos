@@ -1,0 +1,49 @@
+tstxyzsun
+xyzsun  +
+  inp=/project/test_work/testdata/gll/asfd1992042809133619920427170918a.pts  +
+  out=asfd1992042809133619920427170918a.xyz 'manual
+Beginning VICAR task xyzsun
+   20 tiepoints located in ascii table
+ First image: Sub_earth latitude=   0.00000 west longitude= 360.00000
+ Sun range=   0. km
+ Second image: Sub_earth latitude=   0.00000 west longitude= 360.00000
+ Sun range=   0. km
+ Solar radius, pole=    695990.00000000 equator=    695990.00000000 km
+ Solar center line=    234.00000000000 sample=    274.00000000000
+ Solar radius in pixels=    194.00000000000
+ Solar north=  0 degrees clockwise from up
+ Camera focal length=  0. mm
+ Camera scale=    1.0000000000000 pixels/mm
+ Camera axis line=    256.00000000000 sample=    256.00000000000
+ush cat asfd1992042809133619920427170918a.xyz
+xyzsun  +
+  inp=/project/test_work/testdata/gll/asfd1992042809133619920427170918a.pts  +
+  out=asfd1992042809133619920427170918a.xyz
+Beginning VICAR task xyzsun
+   20 tiepoints located in ascii table
+ First image: Sub_earth latitude=   0.00000 west longitude= 360.00000
+ Sun range=   0. km
+ Second image: Sub_earth latitude=   0.00000 west longitude= 360.00000
+ Sun range=   0. km
+ Solar radius, pole=    695990.00000000 equator=    695990.00000000 km
+ Solar center line=    256.00000000000 sample=    256.00000000000
+ Solar radius in pixels=    65828.572549625
+ Solar north=  0 degrees clockwise from up
+ Camera focal length=  0. mm
+ Camera scale=    1.0000000000000 pixels/mm
+ Camera axis line=    256.00000000000 sample=    256.00000000000
+ush cat asfd1992042809133619920427170918a.xyz
+ush rm asfd1992042809133619920427170918a.xyz
+end-proc
+exit
+slogoff
+if ($RUNTYPE = "INTERACTIVE")
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+else
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+end-if
+ulogoff
+END-PROC
+END-PROC

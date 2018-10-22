@@ -1,0 +1,10 @@
+/* Imake file for VICAR subroutines USR_MESSAGE */
+
+#define SUBROUTINE usr_message
+
+#define MODULE_LIST usr_message.c
+
+#define P2_SUBLIB
+
+#define USES_ANSI_C
+/*#define LIB_LOCAL */

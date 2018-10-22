@@ -1,0 +1,110 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+enable-log
+
+let $echo="yes"
+let $autousage="none"
+
+write "each of the difpic calls should yield zero differences"
+
+gen r 50 50
+vtiff3o r r.tif
+vtiff3o-tovic r.tif r1
+difpic (r,r1)
+
+vtiff3o r r.tif 'packbits
+vtiff3o-tovic r.tif r1
+difpic (r,r1)
+
+vtiff3o r r.tif 'lzw
+vtiff3o-tovic r.tif r1
+difpic (r,r1)
+
+vtiff3o r r.tif 'tiled
+vtiff3o-tovic r.tif r1
+difpic (r,r1)
+
+vtiff3o r r.tif 'tiled 'lzw
+vtiff3o-tovic r.tif r1
+difpic (r,r1)
+
+f2 out=lut fun="(samp %256)*(samp%4)" nl=1 ns=1024
+vtiff3o (r,lut) lut.tif
+vtiff3o-tovic lut.tif (r1,lut1)
+difpic (r,r1)
+difpic (lut,lut1)
+
+gen g 50 50 linc=0
+gen b 50 50 sinc=0
+
+vtiff3o (r,g,b) color.tif
+vtiff3o-tovic  color.tif (r1,g1,b1)
+difpic (r,r1)
+difpic (g,g1)
+difpic (b,b1)
+
+vtiff3o (r,g,b) color.tif 'planar
+vtiff3o-tovic  color.tif (r1,g1,b1)
+difpic (r,r1)
+difpic (g,g1)
+difpic (b,b1)
+
+vtiff3o (r,g,b) color.tif 'tiled
+vtiff3o-tovic  color.tif (r1,g1,b1)
+difpic (r,r1)
+difpic (g,g1)
+difpic (b,b1)
+
+vtiff3o (r,g,b) color.tif 'planar 'tiled
+vtiff3o-tovic  color.tif (r1,g1,b1)
+difpic (r,r1)
+difpic (g,g1)
+difpic (b,b1)
+
+vtiff3o (r,g,b) color.tif 'planar 'tiled 'lzw
+vtiff3o-tovic  color.tif (r1,g1,b1)
+difpic (r,r1)
+difpic (g,g1)
+difpic (b,b1)
+
+gen a nl=500 ns=500
+vtiff3o a a.tif 'tile tline=128 tsamp=128 'packbits
+vtiff3o-tovic a.tif a1
+difpic (a,a1)
+
+!test dump facility:
+vtiff3o-tovic a.tif a1 'dump
+
+
+! case for reading the VICAR GeoTIFF label, not parameters
+
+gen xxxim1 nl=10 ns=10
+gtgen in=xxxim1 'tiecnvrt +
+   geotiff=("GTModelTypeGeoKey=2(ModelTypeGeographic)", +
+          "GeogEllipsoidGeoKey=7030(Ellipse_WGS84)", +
+          "GeogPrimeMeridianGeoKey=40.0", +
+          "ModelTiePointTag=(2,3,0,-110,39,0.0)", +
+          "ModelTiePointTag=(2,10,0,-110,35,0.0)", +
+          "ModelTiePointTag=(10,3,0,-108,39,0.0)", +
+          "GTRasterTypeGeoKey=2(RasterPixelIsPoint)")
+
+gtlist xxxim1
+
+vtiff3o xxxim1 xxxim1.tif
+
+ush strings xxxim1.tif
+vtiff3o-tovic xxxim1.tif xxim2 'dump
+
+! case for testing single-file multi-band conversion
+
+gen color.vic nl=256 ns=256 nb=3 binc=2
+vtiff3o-from color.vic color2.tif
+vtiff3o-to color2.tif color2.vic
+difpic (color.vic,color2.vic)
+
+theend>
+
+disable-log
+end-proc

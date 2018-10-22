@@ -1,0 +1,43 @@
+1 SPICE2CONVEV
+
+Create a data buffer suitable for input to CONVEV from input image geometry data
+and camera constants.
+
+FORTRAN calling sequence:
+
+      CALL SPICE2CONVEV(SBUF,FL,OAL,OAS,SCALE,MPTYPE,data)
+
+where:
+
+      REAL*8 SBUF(200)  !Buffer returned by subroutine GETSPICE95
+      REAL*4 FL		!Camera focal length (mm)
+      REAL*4 OAL,OAS	!Optical axis intercept line,sample
+      REAL*4 SCALE	!Picture scale (pixels/mm)
+      INTEGER*4 MP	!7=image space, 8=object space
+      REAL*4 DATA(40)	!Output CONVEV data buffer
+
+C calling sequence:
+
+      zspice2convev(sbuf,fl,oal,oas,scale,mptype,data);
+
+where:
+
+      double sbuf[100];  /* Buffer returned by subroutine GETSPICE95 */
+      float  fl;	 /* Camera focal length mm */
+      float  oal,oas;	 /* Optical axis intercept line,sample */
+      float  scale;	 /* Picture scale (pixels/mm) */
+      int mptype;	 /* 7=image space, 8=object space */
+      float data[40];	 /* Output CONVEV data buffer */
+
+2 Operation
+
+SPICE2CONVEV copies the OM matrix, RS vector, polar and equatorial radii,
+and target range from SBUF into DATA.  The input arguments FL, OAL, OAS,
+SCALE, and MPTYPE are also copied to DATA.
+
+2 History
+
+  Original Programmer: Gary Yagi, November 1, 1996
+  Current Cognizant Programmer: Gary Yagi
+  Source Language: F
+  Revision history: New

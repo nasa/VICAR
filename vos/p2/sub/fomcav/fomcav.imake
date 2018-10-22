@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine  FOMCAV  */
+
+#define SUBROUTINE  fomcav
+
+#define MODULE_LIST  fomcav.f  
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

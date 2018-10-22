@@ -1,0 +1,6 @@
+#define SUBROUTINE kqkkor
+#define MODULE_LIST kqkkor.c
+
+#define P2_SUBLIB
+
+#define USES_ANSI_C

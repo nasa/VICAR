@@ -1,0 +1,19 @@
+/*  Imake file for test of VICAR subroutine TXTSUBS */
+
+#define PROGRAM ttxtsubs
+
+#define MODULE_LIST ttxtsubs.c ttxtsubsf.f
+
+#define MAIN_LANG_C
+#define TEST
+
+#define USES_C
+#define USES_FORTRAN
+
+#define P2_SUBLIB
+
+#define LIB_FORTRAN
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_LOCAL

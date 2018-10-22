@@ -1,0 +1,65 @@
+/******************************************************************************
+/*
+/*                     IMAKE FILE FOR MODULE data_transfer
+/*
+/*   To Create the build file give the command:
+/*
+/*		$ vimake data_transfer			(VMS)
+/*   or
+/*		% vimake data_transfer			(Unix)
+/*
+/*****************************************************************************/
+
+/***  Define for whom this file exisits  ***/
+#define SUBROUTINE data_transfer		/* Only one of these */
+/*#define PROCEDURE data_transfer		/* Only one of these */
+/*#define SCRIPT data_transfer		/* Only one of these */
+/*#define PROGRAM data_transfer		/* Only one of these */
+
+/***  List all modules which are used by locally by this module  ***/
+#define MODULE_LIST SocketBase.cc \
+	DataSource.cc DataSourceDisk.cc DataSourceSocket.cc \
+	DataSink.cc DataSinkDisk.cc DataSinkSocket.cc Stopwatch.cc
+
+#if defined (SUBROUTINE) || defined (PROGRAM)
+/**  this contains compilable code  ***/
+#define USES_C_PLUS_PLUS
+#else
+/***  this contains 'scripts'  ***/
+#define USES_CSH
+#endif
+
+/***  Specify  Program or Subroutine specific DEFINES  ***/
+#ifdef PROGRAM
+#define MAIN_LANG_C_PLUS_PLUS
+#define R2LIB
+#define LIB_RTL
+#define LIB_TAE
+#endif
+
+#ifdef SUBROUTINE
+#define P2_SUBLIB
+/***	only one allowed
+#define MPF_SUBLIB
+/**/
+#endif
+
+/***  Defines required for both Programs and Subroutines  ***/
+#define LIB_P2SUB
+
+/***  Local library definitions ...
+/***  ... must be commented out when delivered
+/***
+#define DEBUG
+#ifdef PROGRAM
+#endif
+#define LIB_LOCAL
+
+#if VMS_OS
+#define LOCAL_LIBRARY test_lib.olb
+#else
+#define LOCAL_INCLUDE -I$(IncludePath)
+#define LOCAL_LIBRARY $(ObjectPath)/librts.a
+#endif
+/***  End of local library definitions  ***/
+/**********  End of data_transfer imake file  **********/

@@ -1,0 +1,102 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let _onfail="continue"
+let $echo="yes"
+let $autousage = "none"
+
+!
+!  THIS IS A TEST OF PROGRAM VLOOKUP
+
+! Generate the lookup tables with standard IBIS calls
+
+!
+!  a one-column lut:
+ibis-gen lut1 nc=1 nr=256
+mf lut1 fun=("c1=index-1","c1=(c1-30)*255/70","c1=max(min(c1,255),0)")
+
+! replaces:
+!jstretch-linear 30 100 red
+!jsave-stretch lut1 red
+
+!
+!  a 3-column lut -- standard for (pseudo-)color
+ibis-gen lut2 nc=3 nr=256
+mf lut2 fun=("c1=index-1", +
+   "c2 = (c1-20)*255/100","c2=max(min(c2,255),0)",+
+    "c3 = (c1-10)*255/150","c3=max(min(c3,255),0)")
+
+! replaces:
+!jstretch-linear 20 120 green
+!jstretch-linear 10 150 blue
+!jsave-stretch lut2 (red,green,blue)
+
+!
+!  a 4-column lut
+ibis-gen lut3 nc=4 nr=256 
+mf lut3 fun=("c1=index-1","c2=c1","c3=c1", +
+    "c4 = (c1-5)*255/85","c4=max(min(c4,255),0)")
+
+! replaces:
+!jdef-plane x 4
+!jstretch-linear 5 90 x
+!jsave-stretch lut3 (red,green,blue,x)
+!
+
+gen a nl=5 ns=10 ival=10 sinc=5 linc=15
+list a
+copy a b
+copy a c
+copy a d
+!
+! and a multi-band one:
+gen f nl=5 ns=10 nb=3 ival=5 sinc=5 linc=20 binc=10
+!
+!  simplest case:  1 input, 1 output:
+vlookup a a1 lut1
+list a1
+!
+!   4 input images and 4 output images:
+vlookup inp=(a,b,c,d) out=(a1,b1,c1,d1) lutfil=lut3
+list a1
+list b1
+list c1
+list d1
+!
+!  test the 'size' and 'column' parameters:
+vlookup inp=(a,b,c,d) out=(a1,b1,c1,d1) lutfil=lut3 +
+       size=(1,1,3,10)    column=(2,1,3,4)  
+list a1
+list b1
+list c1
+list d1
+!
+!  test the special "pseudo-color" case:  1 input, 3 outputs:
+vlookup a (a1,b1,c1) lut3
+list a1
+list b1
+list c1
+!
+!  test 'nb' parameter: same case as above but one multi-band file:
+vlookup a a1 lut3 nb=3
+list a1
+!
+!  test multi-band input:  bands beyond band one are ignored
+vlookup f (a1,b1,c1) lut3   
+list a1
+list b1
+list c1
+
+! test table
+!
+vlookup a a1 table=6 
+list a1
+!    new tests
+vlookup a a1 table=6 column=3
+list a1
+!
+!  test multi-band input:  
+vlookup f g lut3  
+list g
+end-proc

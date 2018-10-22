@@ -1,0 +1,36 @@
+PROCESS help=*
+	parm IN		string			count=2
+	parm OUT	string
+	parm SKIP1	keyword	valid=SKIP1	count=0:1	default=--
+END-PROC
+.TITLE
+VICAR program columnar
+.HELP
+PURPOSE
+	Columnar takes in 2 ascii files of records and concatenates respective
+	records side by side separated by 1 space.  If SKIP1 is set then one
+	column of data (through 1st tab) is skipped from 2nd file.
+EXECUTION
+	columnar IN=(infile1, infile2) OUT=outfile [SKIP1=SKIP1]
+REVISION HISTORY
+	7-97 RRD Combined modules columnar, columns, and columns2, rewrote
+                 in C, added pdf file and tstcolumnar, and ported to UNIX 
+.LEVEL1
+.VARIABLE IN
+Two input file names.
+.VARIABLE OUT
+Output file name.
+.VARIABLE SKIP1
+Keyword to skip first
+column of 2nd file.
+.LEVEL2
+.VARIABLE IN
+STRING
+Two input file names.
+.VARIABLE OUT
+STRING
+Output file name.
+.VARIABLE SKIP1
+KEYWORD
+If set then the first column of the 2nd file is skipped.
+.END

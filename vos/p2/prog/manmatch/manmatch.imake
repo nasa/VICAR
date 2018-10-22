@@ -1,0 +1,15 @@
+#define PROGRAM	manmatch
+#define R2LIB
+
+#define MODULE_LIST manmatch.f tc4sedr.f tc4nosedr.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport ibisfile ibiserrs
+#define LIB_MATH77
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_VRDI
+
+/* #define LIB_LOCAL        /* Remove upon delivery */

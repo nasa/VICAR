@@ -1,0 +1,188 @@
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+phottest out=phottest_m.dat pho_func=MINNAERT class_id=2 albedo=0.7  +
+   exponent=0.6 start=(10,10,10) delta=(30,30,180) sigma=0.000001
+Beginning VICAR task phottest
+ 
+ CLASS_ID =    2
+ Function = MINNAERT
+    ALBEDO =   7.000e-01
+    EXPONENT =   6.000e-01
+ 
+ Number of points =          9
+ 
+ sigma =  1.000000e-06
+ 
+photfit2 inp=(phottest_m.dat,phottest_m.dat) pho_func=MINNAERT  +
+   class_id=2 albedo=0.6 min_albedo=0.0 max_albedo=1.0 t_albedo=0.1  +
+   exponent=0.6 min_exponent=0.0 max_exponent=1.0 t_exponent=0.1  +
+   norm=25 rerun=2 maxiter=100 numten=25 metrop=20 percent=90  +
+   toleranc=0.02 'print
+Beginning VICAR task photfit2
+ program PHOTFIT2
+ 
+ Function =MINNAERT
+ parameter number =  2
+ 
+ 
+ First guess and there limits: 
+ ----------------------------- 
+ 
+     ALBEDO =   6.000e-01
+     MIN_ALBEDO =   0.000e+00
+     MAX_ALBEDO =   1.000e+00
+     T_ALBEDO =   1.000e-01
+ 
+     EXPONENT =   6.000e-01
+     MIN_EXPONENT =   0.000e+00
+     MAX_EXPONENT =   1.000e+00
+     T_EXPONENT =   1.000e-01
+ 
+ 
+   1.File: phottest_m.dat
+   ROW   CLASS_ID     RAD      INC_ANG    EM_ANG  PHAS_ANG     EPS
+     1          2  6.979e-01   10.0000   10.0000    1.7343  4.126e-08
+     2          2  7.716e-01   10.0000   40.0000   30.1938  5.493e-07
+     3          2  1.065e+00   10.0000   70.0000   60.1639 -1.306e-07
+     4          2  6.002e-01   40.0000   10.0000   30.1938  3.432e-08
+     5          2  6.637e-01   40.0000   40.0000    6.4231  1.135e-06
+     6          2  9.163e-01   40.0000   70.0000   31.0354  1.703e-06
+     7          2  3.700e-01   70.0000   10.0000   60.1639  2.334e-07
+     8          2  4.091e-01   70.0000   40.0000   31.0354 -9.338e-07
+     9          2  5.648e-01   70.0000   70.0000    9.3955  1.300e-06
+   1.IBIS file contains    9 points
+   Number of points left from this file =     9
+ 
+   2.File: phottest_m.dat
+   ROW   CLASS_ID     RAD      INC_ANG    EM_ANG  PHAS_ANG     EPS
+     1          2  6.979e-01   10.0000   10.0000    1.7343  4.126e-08
+     2          2  7.716e-01   10.0000   40.0000   30.1938  5.493e-07
+     3          2  1.065e+00   10.0000   70.0000   60.1639 -1.306e-07
+     4          2  6.002e-01   40.0000   10.0000   30.1938  3.432e-08
+     5          2  6.637e-01   40.0000   40.0000    6.4231  1.135e-06
+     6          2  9.163e-01   40.0000   70.0000   31.0354  1.703e-06
+     7          2  3.700e-01   70.0000   10.0000   60.1639  2.334e-07
+     8          2  4.091e-01   70.0000   40.0000   31.0354 -9.338e-07
+     9          2  5.648e-01   70.0000   70.0000    9.3955  1.300e-06
+   2.IBIS file contains    9 points
+   Number of points left from this file =     9
+ 
+ 
+  Total number of input points =     18
+  Total number of points left =     18
+ 
+ 
+ 		phoMetropolis :
+ 
+ scaling factor reduces temperatur =  9.120108e-01
+ 
+  loopNumber        Cost  #downhill    #uphill  #rejected #out_of_bounds
+       ALBEDO     EXPONENT
+  Boltzmann =  3.710930e+00  Temperatur =  1.000000e-01
+         20 3.617582e-02          3         10          7          5
+ 6.416308e-01 5.522417e-01
+  Boltzmann =  1.042349e+01  Temperatur =  1.000000e-02
+         40 1.125803e-03          7         11          2          1
+ 7.018494e-01 6.014766e-01
+  Boltzmann =  3.352949e+00  Temperatur =  1.000000e-03
+         60 2.253812e-04          2         11          7          0
+ 6.996185e-01 5.996683e-01
+  Boltzmann =  4.295351e+00  Temperatur =  1.000000e-04
+         80 1.349530e-04          5          6          9          0
+ 6.998027e-01 5.996718e-01
+        100 1.329283e-04          3         12          5          0
+ 6.997942e-01 5.996771e-01
+ 
+          1. Metropolis-result  :
+ ALBEDO =   6.998e-01
+ EXPONENT =   5.997e-01
+ 
+ 
+ 		phoMetropolis :
+ 
+ scaling factor reduces temperatur =  9.120108e-01
+ 
+  loopNumber        Cost  #downhill    #uphill  #rejected #out_of_bounds
+       ALBEDO     EXPONENT
+  Boltzmann =  4.382582e+00  Temperatur =  1.000000e-01
+         20 1.329283e-04          2          9          9          1
+ 6.997942e-01 5.996771e-01
+  Boltzmann =  3.421286e+00  Temperatur =  1.000000e-02
+         40 1.329283e-04          1         12          7          2
+ 6.997942e-01 5.996771e-01
+  Boltzmann =  3.760608e+00  Temperatur =  1.000000e-03
+         60 1.129697e-04          1         14          5          0
+ 6.999984e-01 5.998457e-01
+  Boltzmann =  3.283085e+00  Temperatur =  1.000000e-04
+         80 4.028756e-05          5          6          9          0
+ 7.000015e-01 5.999469e-01
+        100 1.339423e-05          5          5         10          0
+ 6.999769e-01 5.999686e-01
+ 
+          2. Metropolis-result  :
+ ALBEDO =   7.000e-01
+ EXPONENT =   6.000e-01
+ 
+ 
+          Statistical results:
+          --------------------
+ 
+   INC_ANG    EM_ANG  PHAS_ANG      I/F     I/F-FitVal 
+   10.0000   10.0000    1.7343  0.6978377   0.00002237   used 
+   10.0000   40.0000   30.1938  0.7716082   0.00001915   used 
+   10.0000   70.0000   60.1639  1.0653412  -0.00000140   used 
+   40.0000   10.0000   30.1938  0.6002046   0.00001451   used 
+   40.0000   40.0000    6.4231  0.6636541   0.00001191   used 
+   40.0000   70.0000   31.0354  0.9162915  -0.00000661   used 
+   70.0000   10.0000   60.1639  0.3699891  -0.00000021   used 
+   70.0000   40.0000   31.0354  0.4091018  -0.00000464   used 
+   70.0000   70.0000    9.3955  0.5648372  -0.00001811   used 
+   10.0000   10.0000    1.7343  0.6978377   0.00002237   used 
+   10.0000   40.0000   30.1938  0.7716082   0.00001915   used 
+   10.0000   70.0000   60.1639  1.0653412  -0.00000140   used 
+   40.0000   10.0000   30.1938  0.6002046   0.00001451   used 
+   40.0000   40.0000    6.4231  0.6636541   0.00001191   used 
+   40.0000   70.0000   31.0354  0.9162915  -0.00000661   used 
+   70.0000   10.0000   60.1639  0.3699891  -0.00000021   used 
+   70.0000   40.0000   31.0354  0.4091018  -0.00000464   used 
+   70.0000   70.0000    9.3955  0.5648372  -0.00001811   used 
+        Mean I/F error per fitted point =   0.00001099
+ 
+ MEAN VALUES (to thinking about the stability of fitting) :
+ ALBEDO =   6.999e-01 +/-  1.292e-04
+ EXPONENT =   5.998e-01 +/-  2.062e-04
+ 
+ 
+*****************************************************************************
+* ***************************************************************************
+* *
+* *  RESULTING PARAMETERS OF BEST-FIT: 
+* *
+* *      ALBEDO =   7.000e-01
+* *      EXPONENT =   6.000e-01
+* *
+* ***************************************************************************
+*****************************************************************************
+ 
+end-proc

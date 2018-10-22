@@ -1,0 +1,7 @@
+#define SUBROUTINE itl
+
+#define MODULE_LIST itl.f
+
+#define P3_SUBLIB
+
+#define USES_FORTRAN

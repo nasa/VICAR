@@ -1,0 +1,29 @@
+process help=*
+!  PDF FILE FOR "datetime"
+!
+
+!# annot function="VICAR Utilities"
+!# annot keywords=(day,time)
+END-PROC
+.title
+Prints current date and time: dd-mmm-yyyy hh:mm:ss
+.help
+PURPOSE: "datetime" types the day and time.  No parameters are needed.
+
+EXECUTION: TAE COMMAND LINE FORMAT     "datetime".
+
+Results in "The date and time are: dd-mmm-yyyy  hh:mm:ss" typed at terminal.
+
+ WRITTEN BY:             Steve Pohorsky              19 Sep 1984
+
+ COGNIZANT PROGRAMMER:   Steve Pohorsky              19 Sep 1984
+
+ REVISION:               1                           19 Sep 1984
+
+ Made portable for UNIX  Ralph Richardson (CRI)      01 Apr 1994
+ (Rewrote in "C")
+
+ T.Huang  Converted to output 4-digit year date      09 Jul 1998
+
+.LEVEL1
+.end

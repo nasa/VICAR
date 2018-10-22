@@ -1,0 +1,24 @@
+procedure
+!
+! To get a full log, you have to do tricks, such as cutting from an xterm window
+! since type and cat do not go into session.log.
+!
+refgbl $echo
+refgbl $syschar
+body
+let _onfail="continue"
+let $echo="yes"
+if ($syschar(1) = "UNIX")
+  defcmd typeit "ush cat"
+else
+  defcmd typeit "dcl type"
+end-if
+!
+createfile add1.dat
+typeit     add1.dat
+addtofile  add1.dat "NEXT FILE = 00001"
+typeit     add1.dat
+addtofile  add1.dat "/home/xyz/VENUS.IMG"
+typeit add1.dat
+!
+end-proc

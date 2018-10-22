@@ -1,0 +1,29 @@
+#define SUBROUTINE tp_cmd
+
+#define MODULE_LIST \
+	TpSavePointCmd.cc TpDeletePointCmd.cc TpListPointsCmd.cc \
+	TpQuitCmd.cc TpCloseCmd.cc TpShiftCmd.cc TpLoadImageCmd.cc \
+	TpRemoveImageCmd.cc TpRotateImageCmd.cc TpSetMatchIdNextCmd.cc
+#define MODULE_LIST2 \
+	TpWritePointsCmd.cc TpNumDisplaysCmd.cc TpSwapLockCmd.cc \
+	TpSavePointFileCmd.cc TpSavePointFileAsCmd.cc TpColorCodeCmd.cc \
+	TpLoadPointFileCmd.cc TpClosePointFileCmd.cc TpExitStatusCmd.cc
+#define MODULE_LIST3 \
+	TpSaveAndExitCmd.cc TpContrastCmd.cc TpSetAutofindCmd.cc \
+	TpSetPointSymbolCmd.cc TpSetPointSizeCmd.cc TpRedoMatchIdsCmd.cc \
+	TpSaveConfigCmd.cc TpSaveConfigAsCmd.cc TpLoadConfigCmd.cc
+#define MODULE_LIST4 \
+	TpSetPointColorCmd.cc TpSetPointColorSelCmd.cc TpSetMatchModeCmd.cc \
+	TpSetCursorSymbolCmd.cc TpSetCursorColorCmd.cc TpPrintCmd.cc \
+	TpSetMatchModeValuesCmd.cc TpSetMatchIdOffsetCmd.cc
+
+#define P2_SUBLIB
+
+#define MAIN_LANG_C_PLUS_PLUS
+#define USES_C_PLUS_PLUS
+#define CCC_TEMPLATES
+
+#define LIB_MOTIF
+#define LIB_MOTIFAPP
+#define LIB_GUISUB
+

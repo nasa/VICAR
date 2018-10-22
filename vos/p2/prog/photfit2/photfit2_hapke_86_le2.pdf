@@ -1,0 +1,579 @@
+procedure option=selftutor help=*
+
+	parm W_SOILt 		real count=0:1 		def=0.21
+	parm MIN_W_SOILt 	real count=0:1 		def=0.0
+	parm MAX_W_SOILt 	real count=0:1 		def=1.0
+	parm T_W_SOILt 		real count=0:1 		def=0.2
+	parm H_SHOEt		real count=0:1 		Def=0.07
+	parm MIN_H_SHOEt	real count=0:1 		def=0.0
+	parm MAX_H_SHOEt	real count=0:1 		def=2.0
+	parm T_H_SHOEt		real count=0:1 		Def=0.2
+	parm B_SHOEt		real count=0:1 		def=2.0
+	parm MIN_B_SHOEt	real count=0:1 		def=0.0
+	parm MAX_B_SHOEt	real count=0:1 		def=10.0
+	parm T_B_SHOEt		real count=0:1 		def=1.0
+	parm THETAt	 	real count=0:1 		def=20
+	parm MIN_THETAt		real count=0:1 		def=0
+	parm MAX_THETAt		real count=0:1 		def=60.0
+	parm T_THETAt		real count=0:1 		def=6.0
+	parm LE1_SOILt		real count=0:1 		def=0.29
+	parm MIN_LE1_SOILt	real count=0:1 		def=-1.732
+	parm MAX_LE1_SOILt	real count=0:1 		def=1.732
+	parm T_LE1_SOILt	real count=0:1 		def=0.2
+	parm LE2_SOILt	 	real count=0:1 		def=0.39
+	parm MIN_LE2_SOILt	real count=0:1 		def=-2.0
+	parm MAX_LE2_SOILt	real count=0:1 		def=2.0
+	parm T_LE2_SOILt	real count=0:1 		def=0.2
+
+	parm W_SOIL 	 	real count=0:1 def=--
+	parm MIN_W_SOIL 	real count=0:1 def=--
+	parm MAX_W_SOIL 	real count=0:1 def=--
+	parm T_W_SOIL 	 	real count=0:1 def=--
+	parm H_SHOE	 	real count=0:1 def=--
+	parm MIN_H_SHOE	 	real count=0:1 def=--
+	parm MAX_H_SHOE	 	real count=0:1 def=--
+	parm T_H_SHOE	 	real count=0:1 def=--
+	parm B_SHOE		real count=0:1 def=--
+	parm MIN_B_SHOE		real count=0:1 def=--
+	parm MAX_B_SHOE		real count=0:1 def=--
+	parm T_B_SHOE		real count=0:1 def=--
+	parm THETA	 	real count=0:1 def=--
+	parm MIN_THETA	 	real count=0:1 def=--
+	parm MAX_THETA	 	real count=0:1 def=--
+	parm T_THETA	 	real count=0:1 def=--
+	parm LE1_SOIL		real count=0:1 def=--
+	parm MIN_LE1_SOIL	real count=0:1 def=--
+	parm MAX_LE1_SOIL	real count=0:1 def=--
+	parm T_LE1_SOIL		real count=0:1 def=--
+	parm LE2_SOIL		real count=0:1 def=--
+	parm MIN_LE2_SOIL	real count=0:1 def=--
+	parm MAX_LE2_SOIL	real count=0:1 def=--
+	parm T_LE2_SOIL		real count=0:1 def=--
+
+	PARMSET name=photfit2_hapke_86_le2_sub help=*
+
+		parm W_SOIL 	 	real count=0:1 def=--
+		parm MIN_W_SOIL 	real count=0:1 def=--
+		parm MAX_W_SOIL 	real count=0:1 def=--
+		parm T_W_SOIL 	 	real count=0:1 def=--
+		parm H_SHOE	 	real count=0:1 def=--
+		parm MIN_H_SHOE	 	real count=0:1 def=--
+		parm MAX_H_SHOE	 	real count=0:1 def=--
+		parm T_H_SHOE	 	real count=0:1 def=--
+		parm B_SHOE		real count=0:1 def=--
+		parm MIN_B_SHOE		real count=0:1 def=--
+		parm MAX_B_SHOE		real count=0:1 def=--
+		parm T_B_SHOE		real count=0:1 def=--
+		parm THETA	 	real count=0:1 def=--
+		parm MIN_THETA	 	real count=0:1 def=--
+		parm MAX_THETA	 	real count=0:1 def=--
+		parm T_THETA	 	real count=0:1 def=--
+		parm LE1_SOIL		real count=0:1 def=--
+		parm MIN_LE1_SOIL	real count=0:1 def=--
+		parm MAX_LE1_SOIL	real count=0:1 def=--
+		parm T_LE1_SOIL		real count=0:1 def=--
+		parm LE2_SOIL		real count=0:1 def=--
+		parm MIN_LE2_SOIL	real count=0:1 def=--
+		parm MAX_LE2_SOIL	real count=0:1 def=--
+		parm T_LE2_SOIL		real count=0:1 def=--
+
+	END-PROC
+
+body
+
+	if (_tutor=1)
+
+	  restore-parm pho_hapke_86_le2.par
+
+
+	  if ($count(W_SOIL)=0) 
+						let W_SOILt=0.21
+	  else
+		let W_SOILt=&W_SOIL
+	  end-if
+
+	  if ($count(MIN_W_SOIL)=0)
+	 					let MIN_W_SOILt=0.0
+	  else
+		let MIN_W_SOILt=&MIN_W_SOIL
+	  end-if
+
+	  if ($count(MAX_W_SOIL)=0)
+	 					let MAX_W_SOILt=1.0
+	  else
+		let MAX_W_SOILt=&MAX_W_SOIL
+	  end-if
+
+	  if ($count(T_W_SOIL)=0)
+	 					let T_W_SOILt=0.2
+	  else
+		let T_W_SOILt=&T_W_SOIL
+	  end-if
+
+
+
+	  if ($count(H_SHOE)=0)
+	 					let H_SHOEt=0.07
+	  else
+		let H_SHOEt=&H_SHOE
+	  end-if
+
+	  if ($count(MIN_H_SHOE)=0)
+	 					let MIN_H_SHOEt=0.0
+	  else
+		let MIN_H_SHOEt=&MIN_H_SHOE
+	  end-if
+
+	  if ($count(MAX_H_SHOE)=0)
+	 					Let MAX_H_SHOEt=2.0
+	  else
+		let MAX_H_SHOEt=&MAX_H_SHOE
+	  end-if
+
+	  if ($count(T_H_SHOE)=0)
+	 					let T_H_SHOEt=0.2
+	  else
+		let T_H_SHOEt=&T_H_SHOE
+	  end-if
+
+
+
+	  if ($count(B_SHOE)=0)
+	 					let B_SHOEt=2.0
+	  else
+		let B_SHOEt=&B_SHOE
+	  end-if
+
+	  if ($count(MIN_B_SHOE)=0)
+	 					let MIN_B_SHOEt=0.0
+	  else
+		let MIN_B_SHOEt=&MIN_B_SHOE
+	  end-if
+
+	  if ($count(MAX_B_SHOE)=0)
+	 					let MAX_B_SHOEt=10.0
+	  else
+		let MAX_B_SHOEt=&MAX_B_SHOE
+	  end-if
+
+	  if ($count(T_B_SHOE)=0)
+	 					let T_B_SHOEt=1.0
+	  else
+		let T_B_SHOEt=&T_B_SHOE
+	  end-if
+
+
+	  if ($count(THETA)=0)
+	 					let THETAt=20.0
+	  else
+		let THETAt=&THETA
+	  end-if
+
+	  if ($count(MIN_THETA)=0)
+	 					let MIN_THETAt=0.0
+	  else
+		let MIN_THETAt=&MIN_THETA
+	  end-if
+
+	  if ($count(MAX_THETA)=0)
+	 					let MAX_THETAt=60.0
+	  else
+		let MAX_THETAt=&MAX_THETA
+	  end-if
+
+	  if ($count(T_THETA)=0)
+	 					let T_THETAt=6.0
+	  else
+		let T_THETAt=&T_THETA
+	  end-if
+
+
+	  if ($count(LE1_SOIL)=0)
+	 					let LE1_SOILt=0.29
+	  else
+	 	let LE1_SOILt=&LE1_SOIL
+	  end-if
+
+	  if ($count(MIN_LE1_SOIL)=0)
+	 					let MIN_LE1_SOILt=-1.732
+	  else
+		let MIN_LE1_SOILt=&MIN_LE1_SOIL
+	  end-if
+
+	  if ($count(MAX_LE1_SOIL)=0)
+	 					let MAX_LE1_SOILt=1.732
+	  else
+		let MAX_LE1_SOILt=&MAX_LE1_SOIL
+	  end-if
+
+	  if ($count(T_LE1_SOIL)=0)
+	 					let T_LE1_SOILt=0.2
+	  else
+		let T_LE1_SOILt=&T_LE1_SOIL
+	  end-if
+
+
+	  if ($count(LE2_SOIL)=0)
+	 					let LE2_SOILt=0.39
+	  else
+	 	let LE2_SOILt=&LE2_SOIL
+	  end-if
+
+	  if ($count(MIN_LE2_SOIL)=0)
+	 					let MIN_LE2_SOILt=-2.0
+	  else
+		let MIN_LE2_SOILt=&MIN_LE2_SOIL
+	  end-if
+
+	  if ($count(MAX_LE2_SOIL)=0)
+	 					let MAX_LE2_SOILt=2.0
+	  else
+		let MAX_LE2_SOILt=&MAX_LE2_SOIL
+	  end-if
+
+	  if ($count(T_LE2_SOIL)=0)
+	 					let T_LE2_SOILt=0.2
+	  else
+		let T_LE2_SOILt=&T_LE2_SOIL
+	  end-if
+
+
+	   tutor photfit2_hapke_86_le2_sub 				  +
+		|restore=pho_hapke_86_le2.par,				  +
+		 save=pho_hapke_86_le2.par|				  +
+	    		W_SOIL=&W_SOILt				          +
+	    		MIN_W_SOIL=&MIN_W_SOILt			          +
+	    		MAX_W_SOIL=&MAX_W_SOILt			          +
+	    		T_W_SOIL=&T_W_SOILt			 	  +
+	   		H_SHOE=&H_SHOEt				          + 
+	   		MIN_H_SHOE=&MIN_H_SHOEt			  	  + 
+	   		MAX_H_SHOE=&MAX_H_SHOEt			  	  + 
+	   		T_H_SHOE=&T_H_SHOEt				  + 
+	   		B_SHOE=&B_SHOEt				  	  + 
+	   		MIN_B_SHOE=&MIN_B_SHOEt			  	  + 
+	   		MAX_B_SHOE=&MAX_B_SHOEt			  	  + 
+	   		T_B_SHOE=&T_B_SHOEt				  + 
+	    		THETA=&THETAt				  	  + 
+	    		MIN_THETA=&MIN_THETAt			  	  + 
+	    		MAX_THETA=&MAX_THETAt			  	  + 
+	    		T_THETA=&T_THETAt				  + 
+			LE1_SOIL=&LE1_SOILt				  +
+			MIN_LE1_SOIL=&MIN_LE1_SOILt			  +
+			MAX_LE1_SOIL=&MAX_LE1_SOILt			  +
+			T_LE1_SOIL=&T_LE1_SOILt			  	  +
+			LE2_SOIL=&LE2_SOILt				  +	
+			MIN_LE2_SOIL=&MIN_LE2_SOILt			  +	
+			MAX_LE2_SOIL=&MAX_LE2_SOILt			  +
+			T_LE2_SOIL=&T_LE2_SOILt	
+	
+	   return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs needs "
+	   write " photometric function parameters "
+	   write " for the HAPKE_86_LE2 function."
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+
+.title
+'PHOTFIT2_HAPKE_86_LE2' sub-menu 
+
+.help
+
+PURPOSE:
+
+In this PDF, the user is asked for the parameters and there limits needed to 
+fit the Hapke-1986-two-term-Legendre-Polynomial photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.page
+MATHEMATICAL BACKGROUND :
+
+bidirectional reflectance [1/str] :
+
+r(i,e,g) = ...
+
+
+REFERENCE :
+Bruce Hapke, Bidirectional Reflectance Spectroscopy.
+3. Correction for Macroscopic Roughness
+   Icarus, Vol. 59, p.41-59, 1984
+4. The Extinction Coefficient and the Opposition Effect
+   Icarus, Vol. 67, p. 264-280, 1986
+
+.page
+PROGRAMMER:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+.level1
+
+.VARI W_SOIL
+Single-scattering albedo
+
+.var MIN_W_SOIL 
+Minimum of single-scattering albedo
+
+.var MAX_W_SOIL 
+Maximum of single-scattering albedo
+
+.VARI T_LE1_SOIL
+Temperatur of single-scattering albedo
+
+.var H_SHOE
+Width of opposition surge
+
+.var MIN_H_SHOE
+Minimum of width of opposition surge
+
+.var MAX_H_SHOE
+Maximum of width of opposition surge
+
+.var T_H_SHOE
+Temperatur of width of opposition surge
+
+.VARI B_SHOE
+Opposition magnitude
+
+.VARI MIN_B_SHOE
+Minimum of opposition magnitude
+
+.VARI MAX_B_SHOE
+Maximum of opposition magnitude
+
+.VARI T_B_SHOE
+Temperatur of width of opposition magnitude
+
+.var THETA
+Topographic slope angle
+
+.var MIN_THETA
+Minimum of topographic slope angle
+
+.var MAX_THETA
+Maximum of topographic slope angle
+
+.var T_THETA
+Temperatur of width of topographic slope angle
+
+.VARI LE1_SOIL
+Hapke parameter
+First Legendre-Polynom
+
+.VARI MIN_LE1_SOIL
+Minimum of 
+first Legendre-Polynom
+
+.VARI MAX_LE1_SOIL
+Maximum of 
+first Legendre-Polynom
+
+.VARI T_LE1_SOIL
+Temperatur of 
+first Legendre-Polynom
+
+.VARI LE2_SOIL
+Second Legendre-Polynom
+
+.VARI MIN_LE2_SOIL
+Minimum of 
+second Legendre-Polynom
+
+.VARI MAX_LE2_SOIL
+Maximum of 
+second Legendre-Polynom
+
+.VARI T_LE2_SOIL
+Temperatur of 
+second Legendre-Polynom
+
+.level2
+
+.VARI W_SOIL
+Single-scattering albedo of the soil particles. It characterizes the efficiency of an average particle to scatter and absorb light. 
+One of the classical Hapke parameter.
+
+.var MIN_W_SOIL 
+This parameter gives the absolut lower limit of the single-scattering albedo of the soil particles. It characterizes the efficiency 
+of an average particle to scatter and absorb light. 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var MAX_W_SOIL 
+This parameter gives the absolut upper limit of the single-scattering albedo of the soil particles. It characterizes the efficiency 
+of an average particle to scatter and absorb light. 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_W_SOIL 
+This parameter gives temperatur for the single-scattering albedo of the soil 
+particles. It characterizes the efficiency of an average particle to scatter 
+and absorb light. 
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    W_SOIL_NEW = T_W_SOIL * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_W_SOIL_NEW_* = T_W_SOIL_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI H_SHOE
+One of the classical Hapke parameter.
+Parameter which characterizes the soil structure in the terms of porosity, particle-size distribution, and rate of compaction with depth (angular width of opposition surge due to shadowing). 
+
+.var MIN_H_SHOE
+This parameter gives the absolut lower limit of the parameter which characterizes the soil structure (angular width of the 
+opposition surge due to shadowing). 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var MAX_H_SHOE
+This parameter gives the absolut upper limit of the parameter which characterizes the soil structure (angular width of the 
+opposition surge due to shadowing). 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_H_SHOE
+This parameter gives temperatur for the parameter which characterizes the soil 
+structure (angular width of the opposition surge due to shadowing). 
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    H_SHOE_NEW = T_H_SHOE * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_H_SHOE_NEW_* = T_H_SHOE_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI B_SHOE
+One of the classical Hapke parameter. 
+Opposition magnitude coefficient. The total amplitude of the opposition surge due to shadowing. It is the ratio of the light scattered from near the illuminated surface of the particle to the total amount of light scattered at zero phase : 
+B_SHOE=S(0)/(W_SOIL*p(0))
+with p(0) - soil phase function
+S(0) - opposition surge amplitude term which characterizes the contribution of 
+light scattered from near the front surface of individual particles at zero 
+phase.
+.page
+For a true, shadow-hiding opposition effect, 0<=B_SHOE<=1.
+However, there are several other phenomena that may also cause a surge in brightness at small phase angles. These including the following:
+1) The coherent backscatter or weak photon localisation due to multiply 
+   scattered light.
+2) An single-particle opposition effect caused by complex porous agglomerates 
+   ( soil phase function )
+3) Glory caused by sperical particles ( soil phase function )
+4) Internal reflections of transparent particles ( soil phase function )
+   These various phenomena may be large enough to increase the opposition surge 
+   by more than a factor of 2. This possibility may be taken into account by 
+   allowing B_SHOE to be greater than 1.
+ 
+
+.VARI MIN_B_SHOE
+This parameter gives the absolut lower limit of the parameter which characterizes the opposition magnitude coefficient.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_B_SHOE
+This parameter gives the absolut upper limit of the parameter which characterizes theopposition magnitude coefficient.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+ 
+.VARI T_B_SHOE
+This parameter gives temperatur for the parameter which characterizes the 
+opposition magnitude coefficient.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    B_SHOE_NEW = T_B_SHOE * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_B_SHOE_NEW_* = T_B_SHOE_OLD_* * scale, 
+scale depends of NUMTEN.
+ 
+.VARI THETA
+Average topographic slope angle of surface roughness at subresolution scale.
+One of the classical Hapke parameter. 
+
+.var MIN_THETA
+This parameter gives the absolut lower limit of the average topographic slope angle of surface roughness at subresolution scale.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var MAX_THETA
+This parameter gives the absolut upper limit of the average topographic slope angle of surface roughness at subresolution scale.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_THETA
+This parameter gives temperatur for the average topographic slope angle of 
+surface roughness at subresolution scale.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    THETA_NEW = T_THETA * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_THETA_NEW_* = T_THETA_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI LE1_SOIL
+Parameter of the first term of the Legendre-Polynomial soil particle 
+phase function.
+
+.VARI MIN_LE1_SOIL
+This parameter gives the absolut lower limit of the parameter of the first term 
+of the Legendre-Polynomial soil particle 
+phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_LE1_SOIL
+This parameter gives the absolut upper limit of the parameter of the first term 
+of the Legendre-Polynomial soil particle 
+phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_LE1_SOIL
+This parameter gives temperatur for the parameter of the first term of the 
+Legendre-Polynomial soil particle phase function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    LE1_SOIL_NEW = T_LE1_SOIL * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_LE1_SOIL_NEW_* = T_LE1_SOILE_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI LE2_SOIL
+Parameter of the second term of the Legendre-Polynomial soil particle 
+phase function.
+
+.VARI MIN_LE2_SOIL
+This parameter gives the absolut lower limit of the parameter of the second 
+term of the Legendre-Polynomial soil particle 
+phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_LE2_SOIL
+This parameter gives the absolut upper limit of the parameter of the second 
+term of the Legendre-Polynomial soil particle 
+phase function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_LE2_SOIL
+This parameter gives temperatur for the parameter of the second term of the 
+Legendre-Polynomial soil particle phase function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    LE2_SOIL_NEW = T_LE2_SOIL * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_LE2_SOIL_NEW_* = T_LE2_SOIL_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.end

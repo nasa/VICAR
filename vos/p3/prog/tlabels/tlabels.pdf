@@ -1,0 +1,20 @@
+PROCEDURE	HELP=*
+
+PARM	tape	TYPE=STRING
+LOCAL	i	TYPE=INTEGER	INITIAL=1
+
+BODY
+
+LOOP
+   LABEL-LIST &tape/&i
+   LET i=i+1
+END-LOOP
+
+END-PROC
+.TITLE 
+VICAR2 Procedure TLABELS
+.HELP
+     TLABELS generates a listing of the VICAR labels for all files on a tape.
+.LEVEL1
+.VARIABLE TAPE
+Symbolic name for the tape drive

@@ -1,0 +1,16 @@
+/* Imake file for Fortran-Test of VICAR subroutine  GETRES  */
+
+#define PROGRAM tgetres
+
+#define MODULE_LIST tgetres.f  tzgetres.c
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE       
+/*  #define LIB_LOCAL  */      /*  disable when delivery   */
+#define LIB_P2SUB    

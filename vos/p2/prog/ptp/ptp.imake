@@ -1,0 +1,16 @@
+/*  Imake file for PTP  */
+#define PROGRAM ptp
+#define R2LIB
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define MODULE_LIST ptp.f open_images.f get_inp_nav.f get_ref_nav.f \
+		fix_pointing.f icproject.f project_quad.f project_quad2.f \
+		check_gridsize.f psub.f old_ptp_sub.f
+#define FTNINC_LIST fortport
+#define LIB_NETWORK
+#define LIB_P1SUB
+#define LIB_P2SUB
+#define LIB_TAE
+#define LIB_RTL
+#define LIB_SPICE
+#define LIB_MATH77

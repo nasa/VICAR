@@ -1,0 +1,7 @@
+#define SUBROUTINE squeeze
+
+#define MODULE_LIST squeeze.f
+
+#define P3_SUBLIB
+
+#define USES_FORTRAN

@@ -1,0 +1,83 @@
+1 MVE
+
+  General routine for copying or sub-sampling arrays.
+
+  FORTRAN Calling Sequence:  CALL MVE(DCODE,N,A,B,AINC,BINC)
+  C Calling Sequence:        zmve(dcode,n,a,b,ainc,binc);
+
+  Arguments:
+
+	INTEGER*4 DCODE		Data code.
+	INTEGER*4 N		Number of elements to be moved.
+	INTEGER*4 AINC		Increment for input array A.
+	INTEGER*4 BINC		Increment for output array B.
+
+  AINC and BINC are REQUIRED arguments. (dcode, n, ainc, and binc are
+  passed by value for zmve.)
+  The input and output arrays A and B may be any FORTRAN data type
+  (or equivalent C data type) specifiable by DCODE:
+
+	DCODE		Input		Output
+	-----		-----		------
+	  1		BYTE		BYTE
+	  2		INTEGER*2	INTEGER*2
+	  3		BYTE		INTEGER*2
+	  4		INTEGER*4	INTEGER*4
+	  5		BYTE		INTEGER*4
+	  6		INTEGER*2	INTEGER*4
+	  7		REAL*4		REAL*4
+	  8		REAL*8		REAL*8
+	  9		REAL*4		REAL*8
+
+  In addition, making the data code negative reverses its meaning.
+  E.g. if DCODE= -3, then the input array contains INTEGER*2 data
+  and the output array contains BYTE data.
+
+2 Operation
+
+  The subroutine call
+
+		CALL MVE(DCODE,N,A,B,AINC,BINC)
+
+  is equivalent to the following FORTRAN code:
+
+		I = 1
+		J = 1
+		DO K=1,N
+		  B(J) = A(I)
+		  I = I + AINC
+		  J = J + BINC
+		ENDDO
+
+  MVE does check for data overflow when moving data to a smaller data type.
+  Out-of-range data is set to the extreme values of the output range.
+  If the value 257 were moved into a byte array, for example, the
+  result would be chopped down to 255.
+  If the value -1 were moved into a byte array, for example, the
+  result would be 0.
+
+2 Examples
+
+	BYTE A(10),B(10)
+	INTEGER*2 C(10)
+
+	CALL MVE(1,10,A,B(10),1,-1)	  ! Reverse order of the elements
+	CALL MVE(3,10,A,C,1,1)		  ! Unpack a byte array
+	CALL MVE(1,10,0,B,0,1)		  ! Zero out array B
+
+
+2 History
+
+ 92-03-30 ...SP.... Changed to use fortport.fin as improved portability
+                    method.  Added special case code for inca=1=incb.
+                    Added zmve for calls from C.
+ 89-11-22 ...SP.... Adapted FORTRAN version from J. Mosher to use ZEXT for
+                    speed and sysarch.fin (to handle byte-swap) for 
+                    portability.
+                    ELIMINATED OPTIONAL PARAMETERS FOR PORTABILITY.
+
+  Original Programmer:  Gary Yagi, 4 Feb 1975
+  Cognizant Programmer:  Steve Pohorsky
+
+  Source Language:  FORTRAN
+

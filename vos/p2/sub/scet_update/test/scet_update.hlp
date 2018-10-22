@@ -1,0 +1,59 @@
+1 SCET_UPDATE
+
+SCET_UPDATE is designed to assist in detect and/or correct invalid
+Spacecraft Event Time (SCET) and Earth Receive Time (ERT) in a SPICE 
+data buffer.  It does so by invoking DATE_CHECK subroutines to detect 
+invalid date format.  For VGR-1 and VGR-2, the subroutine will attempt 
+to convert the 2-digit year input into 4-digit using 100-year sliding 
+window.  It also sets the MSEC field to 0, because this field is set to 
+-999 for Voyager.
+
+Design Logics:
+
+   For SCET check and update:
+      IF scet is not NULL (i.e. -999) THEN
+         IF invalid scet format THEN
+            IF project is Voyager THEN
+               use 75 as the switch for 100-year window to update scet
+               IF still has invalid format THEN
+                  ABEND
+            ELSE
+              ABEND
+      ELSE
+         ABEND
+
+   For ERT check and update:
+      Same as SCET check and update, but it will not ABEND if the input
+      date is NULL.
+
+
+FORTRAN calling sequence:
+
+   CHARACTER*5 PROJECT
+   INTEGER*4 DATA[80] ! GETLABCON buffer. 
+   INTEGER*4 IND  !return status = 1 when successful
+
+   ...
+   CALL SCET_UPDATE (PROJECT,DATA,IND)
+   ...
+
+
+C calling sequence:
+
+   char project[5];
+   int  data[80];  /* zgetlabcon buffer */
+   int  ind;  /* return status = 1 when successful */
+
+   ...
+   ind = zscet_update (project,data);
+   ...
+
+
+2 History
+
+   Original Programmer: Thomas Huang, August 25, 1998
+   Source Lanugage: C
+   Revision history: New
+
+   October 29, 1998            Removed the 'zvmessage' calls.
+

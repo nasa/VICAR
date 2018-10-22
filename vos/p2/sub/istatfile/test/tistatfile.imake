@@ -1,0 +1,15 @@
+#define PROGRAM tistatfile
+
+#define MODULE_LIST tistatfile_main.f tistatfile.c
+#define MAIN_LANG_FORTRAN
+#define USES_C
+#define USES_FORTRAN
+#define FTN_STRING
+
+#define TEST
+
+#define LIB_P1SUB
+#define LIB_P2SUB
+#define LIB_TAE
+#define LIB_RTL
+

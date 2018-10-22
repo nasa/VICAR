@@ -1,0 +1,120 @@
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+
+local dir string
+
+! Test of picsum using gen
+gen out=pic1.img nl=10 ns=10 ival=10 linc=4 sinc=6
+list pic1.img
+
+gen out=pic2.img nl=10 ns=10 ival=10 linc=6 sinc=4
+list pic2.img
+
+picsum inp=(pic1.img,pic2.img) out=sum.img
+list sum.img
+
+picsum inp=(pic1.img,pic2.img) out=sum.img tscale=(1.,1.)
+list sum.img
+
+picsum inp=(pic1.img,pic2.img) out=sum.img 'ascale
+list sum.img
+
+picsum inp=(pic1.img,pic2.img) out=sum.img 'median
+list sum.img
+
+! make some more images for median filtering:
+gen out=pic3.img nl=10 ns=10 ival=10 linc=8 sinc=2
+list pic3.img
+gen out=pic4.img nl=10 ns=10 ival=10 linc=1 sinc=5
+list pic4.img
+gen out=pic5.img nl=10 ns=10 ival=10 linc=9 sinc=7
+list pic5.img
+picsum inp=(pic1.img,pic2.img,pic3.img,pic4.img,pic5.img) out=sum.img 'median
+list sum.img
+
+
+!!Testing with DN values close/exceed 32767
+gen out=pic1.img nl=10 ns=10 ival=32764 'half
+list pic1.img
+
+gen out=pic2.img nl=10 ns=10 'half
+list pic2.img
+
+picsum inp=(pic1.img, pic2.img) out=picx.img
+list picx.img
+
+
+!!Testing with one HALF and one BYTE input
+gen out=pic1.img nl=10 ns=10 ival=32764 'half
+list pic1.img
+
+gen out=pic2.img nl=10 ns=10
+list pic2.img
+
+picsum inp=(pic1.img, pic2.img) out=picx.img
+picsum inp=(pic2.img, pic1.img) out=picz.img
+difpic (picx.img, picz.img)
+list picx.img
+
+
+!! Test of Cassini ground calibration images
+if ($syschar(1)="UNIX")
+   let dir = "/project/test_work/testdata/cassini/iss/"
+   ush cp /project/test_work/testdata/cassini/iss/sum2.1 .
+   ush cp /project/test_work/testdata/cassini/iss/sum2.2 .
+   ush cp /project/test_work/testdata/cassini/iss/sum2.3 .
+else
+   let dir = "wms_test_work:[testdata.cassini.iss]"
+   dcl copy wms_test_work:[testdata.cassini.iss]sum2.1 *
+   dcl copy wms_test_work:[testdata.cassini.iss]sum2.2 *
+   dcl copy wms_test_work:[testdata.cassini.iss]sum2.3 *
+end-if
+
+picsum (&"dir"sum2.1 &"dir"sum2.3 &"dir"sum2.2) out.img
+hist out.img 'nohist
+label-l out.img
+
+!!Testing the LIST parameter.  This should generate the same output as the 
+!!above test case.
+!Create list of the files
+createfile picsum.srchlist
+addtofile picsum.srchlist "NEXT FILE=0001"
+addtofile picsum.srchlist "sum2.1"
+addtofile picsum.srchlist "sum2.3"
+addtofile picsum.srchlist "sum2.2"
+
+picsum &"dir"sum2.1 out.img list=picsum.srchlist
+hist out.img 'nohist
+label-l out.img
+
+if ($syschar(1)="UNIX")
+   ush rm sum2.*
+else
+   dcl del sum2.*;*
+end-if
+
+
+write "The output DN values should be (sum of 3 DNs * 128.0/3.0)."
+picsum (&"dir"sum2.1 &"dir"sum2.2 &"dir"sum2.3) out.img 'ascale
+list &"dir"sum2.1 sl=10 ss=10 nl=100 ns=100 linc=10 sinc=10
+list &"dir"sum2.2 sl=10 ss=10 nl=100 ns=100 linc=10 sinc=10
+list &"dir"sum2.3 sl=10 ss=10 nl=100 ns=100 linc=10 sinc=10
+list out.img sl=10 ss=10 nl=100 ns=100 linc=10 sinc=10
+hist out.img 'nohist
+
+picsum (&"dir"sum2.1 &"dir"sum2.2 &"dir"sum2.3) out.img tscale=(3.,3.)
+hist out.img 'nohist
+
+picsum (&"dir"sum2.1 &"dir"sum2.2 &"dir"sum2.3) out.img tscale=(3.,3.) mint=5
+hist out.img 'nohist
+
+!! Will not run, different mode and expos
+!picsum (&"dir"sum2.1 &"dir"ubw_1.byte) out.img
+
+end-proc

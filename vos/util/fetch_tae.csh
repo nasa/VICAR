@@ -5,13 +5,13 @@
 
 chmod -R u+w tae
 mkdir tae52
-(cd tae52; tar xvf ../external/tae/tae5.2.solaris.tar)
+(cd tae52; tar xvf ../../external/tae/tae5.2.solaris.tar)
 chmod -R u+w tae52
 cp tae52_changes/bin/all/platform tae52/bin/all/platform
 chmod +x tae52/bin/all/platform
 
 mkdir tae53
-(cd tae53; tar xvf ../external/tae/tae5.3.axp-unix.tar)
+(cd tae53; tar xvf ../../external/tae/tae5.3.axp-unix.tar)
 chmod -R u+w tae53
 cp tae53_changes/bin/all/platform tae53/bin/all/platform
 chmod +x tae53/bin/all/platform

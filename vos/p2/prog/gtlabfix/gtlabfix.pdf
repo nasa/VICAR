@@ -1,0 +1,43 @@
+process help=*
+PARM INP       TYPE=(STRING,99)
+PARM PROPERTY  TYPE=(STRING,99) DEFAULT="GEOTIFF"
+END-PROC
+
+! HELP TEXT FOR GTLABFIX
+.TITLE
+GTLABFIX - Changes exponent format values in Property label.
+.HELP
+PURPOSE
+     GTLABFIX is a VICAR applications program that searches a selected
+property for values that are in exponent format and changes the numbers
+to decimal format.  This is needed for RPC output to NITF format.
+
+See program VICAR2NTF.
+     
+CALL
+     gtlabfix INP PROPERTY
+  WHERE:
+     INP           is the input VICAR image file to be updated.
+     PROPERTY      is the property label to be fixed (usually GEOTIFF).
+
+.PAGE
+RESTRICTIONS
+------------
+
+INP and PROPERTY must be less than 99 characters long.
+
+.PAGE
+WRITTEN BY:            A. L. Zobrist
+COGNIZANT PROGRAMMER:  A. L. Zobrist
+
+REVISIONS: 
+2005-11-07 A. L. Zobrist - Initial version
+2008-01-03 W. L. Bunch - Switched to USES_ANSI_C AND LIB_CARTO; misc cleanup
+2017-05-31 W. L. Bunch - Migrated to MIPL
+
+.LEVEL1
+.VAR INP
+Input file to be modified.
+.VAR PROPERTY
+property label to be fixed.
+.END

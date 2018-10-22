@@ -1,0 +1,18 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body 
+let _onfail="continue"
+let $echo="yes"
+!
+! First, the two batch comment methods:
+comment ""		! without comment message
+comment message="Message"	! with comment message
+!
+! Request a comment
+comment "***** Answer Comment: prompt with <RETURN> *****" 
+comment
+comment "***** Answer next Comment: prompt with some text + <RETURN> *****"
+comment
+!
+end-proc

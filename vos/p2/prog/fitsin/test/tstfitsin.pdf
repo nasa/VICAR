@@ -1,0 +1,165 @@
+procedure
+
+local   afidsroot   type=string count=1
+
+refgbl $echo
+refgbl $syschar
+! Dec 14, 2012 - RJB
+! TEST SCRIPT FOR FITSIN 
+! tests BYTE, HALF, FULL, REAL images
+!   and ibis TABULAR files
+!
+! Vicar Programs:
+!       label-list list ibis-list
+! 
+! parameters:
+!   <none>
+!
+! Requires external test data: 
+!   cartlab or mipl dependent pointers
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+body
+enable-log
+let _onfail="goto rm"
+let $echo=("yes")
+! New exhaustive test of FITSIN - Nov 8, 1994
+!
+! Uses files l637b.fits,p1.fits,pcf230w_a.fits
+! 		1980ly1.fits,iras_12b1.fits
+!		af784.fits,neat668.fits,0001.gsc
+!       psf2x_l10_filter5.fits
+!
+! does not test parameters "BLOCK" or "FACTOR" since data not on tape
+! (They have no meaning for disk files)
+!
+
+!check to see if mipl or cartlab for certain programs
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+
+if (afidsroot = "")
+!MIPL        
+    ush ln -s /project/test_work/testdata/gll tt
+    ush ln -s /project/test_work/testdata/neat nn
+    ush ln -s /project/test_work/testdata/carto ct
+else         
+!CARTLAB     
+    ush ln -s /raid1/vicar_test_images/testdata/gll tt
+    ush ln -s /raid1/vicar_test_images/testdata/neat nn
+    ush ln -s /raid1/vicar_test_images/testdata/carto ct
+end-if       
+    
+! --> test listing of fits header only
+fitsin tt/1980ly1.fits
+
+! --> translate 16-bit data to HALF vicar
+fitsin tt/1980ly1.fits 1980ly1.vic
+label-list 1980ly1.vic
+
+list 1980ly1.vic sl=1 ss=1 nl=10 ns=10
+! --> translate 16-bit data to HALF vicar
+fitsin tt/1980ly1.fits 1980ly1.vic
+label-list 1980ly1.vic
+list 1980ly1.vic sl=1 ss=1 nl=10 ns=10
+
+! --> translate 16-bit data to HALF vicar with embedded BSCALE
+fitsin tt/l637.fits l637.vic
+label-list l637.vic
+list l637.vic sl=1 ss=1 nl=10 ns=10
+
+! --> pass label information from telescope onward
+fitsin tt/l637.fits l637.vic pass="telescop"
+label-list l637.vic
+
+! --> do not pass following label entries
+fitsin tt/l637.fits l637.vic excise=("telescop","chip","has","secz","port",+
+	"dewar","bscale","bzero")
+label-list l637.vic
+
+! --> translate BITPIX=16 with BSCALE parameter to REAL vicar
+fitsin tt/l637.fits l637.vic data="true"
+label-list l637.vic
+list l637.vic sl=1 ss=1 nl=10 ns=10
+
+! --> create header file only
+fitsin tt/l637.fits header=l637.hdr
+ush cat l637.hdr
+
+! --> translate file and create header file
+fitsin tt/l637.fits l637.vic header=l637.hdr
+ush cat l637.hdr
+
+list l637.vic sl=1 ss=1 nl=10 ns=10
+
+! --> do not pass history= and comment= labels
+fitsin tt/l637.fits l637.vic history=nohistory comment=nocomment 
+label-list l637.vic
+
+! --> list header of a file with a very long fits header
+fitsin tt/pcf230w_a.fits
+
+! --> create fits header file of a FITS image with a long fits header
+fitsin tt/pcf230w_a.fits header=pcf230w_a.hdr
+ush cat pcf230w_a.hdr
+
+! --> translate BITPIX=16 fits file with a long header -- gets slower
+fitsin tt/pcf230w_a.fits pcf230w_a.vic
+label-list pcf230w_a.vic 
+list pcf230w_a.vic sl=1 ss=1 nl=10 ns=10
+
+! --> list FITS header for BITPIX=-32
+fitsin tt/p1.fits
+
+! --> create FITS header file for BITPIX=-32 data
+fitsin tt/p1.fits header=p1.hdr
+ush cat p1.hdr
+
+! --> translate BITPIX=-32 (IEEE real) to REAL vicar
+fitsin tt/p1.fits p1.vic 
+label-list p1.vic
+list p1.vic sl=1 ss=1 nl=6 ns=6
+! test one which formerly gave 62 bands
+fitsin ct/psf2x_l10_filter5.fits psf.vic
+label-li psf.vic
+list psf.vic sl=1 ss=1 nl=6 ns=6
+! --> translate BITPIX=-64 (IEEE double) to DOUB vicar
+fitsin tt/af784.fits af784.vic 
+label-li af784.vic
+list af784.vic sl=1 ss=1 nl=5 ns=5
+
+! --> translate BITPIX=16 to HALF vicar
+fitsin tt/iras_12b1.fits iras_12b1.vic
+label-li iras_12b1.vic
+list iras_12b1.vic sl=293 ss=480 nl=6 ns=6
+
+! --> translate BITPIX=16 to HALF vicar
+fitsin tt/iras_12b1.fits iras_12b1.vic data=true
+label-li iras_12b1.vic
+list iras_12b1.vic sl=293 ss=480 nl=6 ns=6
+
+! --> translate BITPIX=16 to FULL vicar since data is unsigned 16-bit data
+fitsin tt/neat668.fits neat668.vic data=u16
+label-li neat668.vic 
+list neat668.vic sl=100 ss=100 nl=6 ns=6
+
+! --> create ibis-2 tabular file from FITS table 
+fitsin nn/0001.gsc 0001.ibis
+label-li 0001.ibis
+ibis-list 0001.ibis nr=15 nc=20 units=units groups=groups formats=formats +
+	screen=120
+
+! --> create ibis-2 tabular file from FITS table with listing 
+fitsin nn/0001.gsc 0001.ibis tablist=list 
+label-li 0001.ibis
+ibis-list 0001.ibis nr=15 nc=20 units=units groups=groups formats=formats +
+	screen=120
+
+
+rm>
+ush rm -f tt 
+ush rm -f nn
+ush rm -f ct
+let $echo="no"
+disable-log
+end-proc

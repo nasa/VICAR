@@ -1,0 +1,20 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY shfv
+
+   To Create the build file give the command:
+
+	$ vimake shfv                     (VMS)
+   or
+	% vimake shfv                     (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE shfv
+
+#define MODULE_LIST shfv.c
+
+#define P2_SUBLIB
+
+#define USES_C

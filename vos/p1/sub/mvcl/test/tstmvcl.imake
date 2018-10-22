@@ -1,0 +1,14 @@
+/* Imake file for Test of VICAR subroutine MVCL */
+
+#define PROGRAM tstmvcl
+
+#define MODULE_LIST tstmvcl.f
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+#define LIB_P1SUB
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+

@@ -1,0 +1,56 @@
+1  GEOMVO
+
+   Given the VO camera serial number and the image-space reseau locations 
+   for a Viking Orbiter image, GEOMVO returns the geometric distortion 
+   correction parameters.  The resulting parameters may then be input 
+   into subroutine TRITRA or CONVISOS for converting between image-space 
+   and object-space line-sample coordinates.  The parameters are also 
+   suitable for input to geometric transformation programs LGEOM, MGEOM, 
+   and MGEOM.
+ 
+   Fortran calling sequence:  
+
+	INTEGER*4 ICAM	
+	REAL*4 RES(2,103)
+	REAL*4 CONV(2216) 
+
+	CALL GEOMVO(CONV,ICAM,RES)
+
+   C calling sequence:
+
+	int icam;	
+	float res[102][1];
+	float conv[2215]; 
+
+	zgeomvo(conv,icam,res);
+
+2 ARGUMENTS
+
+  Input:   
+
+    ICAM  - Viking Orbiter camera serial number.  Valid are:
+        	7=VO-1A		8 = VO-2A
+	        4=VO-1B		6 = VO-2B
+    RES   - Image space line-sample coordinates for the 103 reseau
+	    marks of a Viking Orbiter frame.
+  Output:
+
+    CONV  - GEOMA parameters in the following format:
+
+		 CONV(1) = 'NAH '
+		 CONV(2) = '    '
+		 CONV(3) = 21		(INTEGER*4, int)
+		 CONV(4) = 'NAV '
+		 CONV(5) = '    '
+		 CONV(6) = 8		(INTEGER*4, int)
+		 CONV(7) = 'TIEP'
+		 CONV(8) = '    '
+		 CONV(9) = beginning of tiepoints in REAL*4, float format
+
+2 HISTORY
+
+  Original Programmer: Gary Yagi, 1 June 1990
+  Current Cognizant Programmer: G. Yagi
+  Source Language: Fortran
+  Revisions: 
+		25-Aug-93  ...TLT...  Ported to Unix

@@ -1,0 +1,14 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let _onfail = "continue"
+let $echo = "yes"
+let $autousage = "none"
+GEN A LINC = 0
+GEN B SINC = 0
+LIST A
+LIST B
+multovly (A,B) C
+ibis-list C
+end-proc

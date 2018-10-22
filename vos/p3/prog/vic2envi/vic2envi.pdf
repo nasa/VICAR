@@ -1,0 +1,36 @@
+process help=*
+PARM INP   TYPE=(STRING,60)
+PARM PC    TYPE=KEYWORD VALID="PC" COUNT=(0:1) DEFAULT=--
+END-PROC
+.TITLE
+VIC2ENVI
+.HELP
+PURPOSE:
+VIC2ENVI creates an ENVI header file (.hdr) for a VICAR labelled file.  The
+input VICAR file will remain unaltered, and may be used for further 
+processing under VICAR.  Upon completion of the program VIC2ENVI, the file
+may also be accessed by ENVI, without the need for the user to supply image
+size and format information.
+ 
+Example:
+	VIC2ENVI vicarfile
+
+.LEVEL1
+.VARIABLE INP
+Input VICAR image file name
+.VARIABLE PC
+Use to go from unix to PC
+platforms
+.LEVEL2
+.VARIABLE INP
+This is the name of the input VICAR image file.  The contents of this file
+are not changed by this program.  A separate ENVI header file, a file with
+a ".hdr" extension is created as output.
+.VARIABLE PC
+The header (.hdr) file that gets created is an ASCII text file, and the
+newline conventions differ on unix workstation and PC platforms. The PC
+option creates a header file with correct newlines for use on a PC, even
+when generated on a unix system.  If the ENVI use and the VICAR use are
+on the same type of platform (either both unix or both PC), this keyword
+is not needed.
+.END

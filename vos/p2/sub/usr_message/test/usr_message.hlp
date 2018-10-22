@@ -1,0 +1,106 @@
+1 Usr_message
+
+    Routines in this module:
+
+    null_message  -  prints out a blank line
+    message       -  same as zvmessage()  (no sprintf)
+    message1      -  zvmessage + sprintf with 1 variable
+    message2      -  zvmessage + sprintf with 2 variables
+    message3      -  zvmessage + sprintf with 3 variables
+    message4      -  zvmessage + sprintf with 4 variables
+  
+    errmess       -  zvmessage with error key (no sprintf)
+    errmess1      -  zvmessage with error key + sprintf with 1 variable
+    errmess2      -  zvmessage with error key + sprintf with 2 variables
+    errmess3      -  zvmessage with error key + sprintf with 3 variables
+    errmess4      -  zvmessage with error key + sprintf with 4 variables
+
+    These subroutines have been written to provide a set of UNIX-ported
+    C-callable sprintf/zvmessage utilities.  Their purpose is two-fold:
+
+    1) To isolate all zvmessage calls so that changes to zvmessage can
+    be made globally with changes to this module only; and
+
+    2) To make it slightly easier & faster for programmers to include 
+    lucid, userful, readable messages to the user in their software.
+        - Most user messages can be reduced from two or more lines to one 
+          (since you don't need to type out the "sprintf()" lines yourself 
+          anymore.)
+        - Also, formatting is simpler. The "\n" at the end of sprintf format 
+          lines should not be included, since zvmessage inserts its own carriage
+          returns. (See the example.)
+
+    Variables may be of any type; they are picked up as voids.
+
+    Text should be no longer than 249 characters, not including the '\0'. If 
+    the sprintf'd string exceeds the maximum length, it will not be printed 
+    and an error message will be printed instead. Use additional "message*"'s 
+    as needed for longer text.
+
+2 Calling Sequences
+
+    The variables used in message1-message4, and errmess1-errmess4, may be
+    of any type, so long as the conversion types (%d, %s, %f, etc) match
+    the variable type. The relative placement of variables and conversion
+    types is the same as sprintf().
+
+    Please note that, UNLIKE SPRINTF, these routines should not be 
+    called with a '\n' to force a newline. They include their own
+    newlines; any additional '\n's added will create extra carriage
+    returns.
+
+    int i,j,status;
+    char str,errkey[10];
+    float r;
+    
+    null_message();
+    message("text, no formats");
+    message1("text with format such as %d",
+             i);
+    message2("text with format such as %d and %d",
+             i,j);
+    message3("text with format such as %d and %d and %s",
+             i,j,str);
+    message4("text with format such as %d and %d and %s and %f",
+             i,j,str,r);
+    errmess("Error message",
+             errkey);
+    errmess1("Error message with format %d",
+             status,errkey)
+    errmess2("Error message with format %d and %d",
+             status,i,errkey)
+    errmess3("Error message with format %d and %d and %s",
+             status,i,str,errkey)
+    errmess4("Error message with format %d and %d and %s and %f",
+             status,i,str,r,errkey)
+
+2 Example
+
+       ********Start of example (linked to usr_message.c)********************
+       #include "vicmain_c"
+       #define VERSION "5-4-1993"
+       main44() {
+        int max=10,min=1,status=-3;
+         message("Initializing, please wait.");
+         message1("VICAR program SPAM, revision %s",VERSION);
+         message2("Maximum scale is %d, minimum scale is %d.",max,min);
+         errmess1("SPAM> malloc error, status=%d",status,"SPAM-W-BADMALLOC");
+       }
+       ********End of example***********************************************
+
+2 History
+    
+	Original Programmer: Megan O'Shaughnessy
+        Revisions:	     
+        6/11/93	MOS	Original
+        7/12/94 MOS	Converted to ANSI C. Extended maximum message
+                        and error key lengths from 80 to 249 (the maximum
+                        length for zvmessage.)
+        4/18/97 TXH     Ported to HP 
+
+2 Operation
+    
+	The routines in this module are based on the format string and
+        any variables being sprintf()'d into a string, and then 
+        the string is used in a call to zvmessage, with or without
+        an error key. See the code for details; it's very simple.

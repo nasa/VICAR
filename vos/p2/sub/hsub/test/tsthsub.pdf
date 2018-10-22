@@ -1,0 +1,30 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let _onfail="continue"
+let $echo="yes"
+let $autousage = "no"
+! test for subroutine HSUB
+!  BYTE DATA:
+gen a 10 10
+thsub a dco=1
+!  halfword data:
+gen b 10 10 'half ival=-5
+list b 'half
+thsub b dco=2 ilo=-3 ihi=20
+thsub b dco=2 ilo=-3 ihi=-4
+thsub b dco=2 ilo=0 ihi=20
+thsub b dco=2 ilo=1 ihi=20
+gen c 10 10 'half ival=-1000
+list c 'half
+thsub c dco=2 ilo=-999 ihi=-997
+gen d 10 10 'half ival=-32767
+list d 'half
+thsub d dco=2 ilo=-32767 ihi=-32760
+gen e 10 10 'half ival=32750
+list e 'half
+thsub e dco=2 ilo=32740
+gen f 20 20 'half ival=100
+thsub f dco=2 ilo=100 ihi=120
+end-proc

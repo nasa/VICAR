@@ -1,0 +1,509 @@
+procedure
+refgbl $echo
+
+body
+let _onfail="continue"
+let $echo="no"
+
+write "Note To Testers: "
+write "   In order to execute this test pdf, successful compilation of both "
+write "   tzdate_check.c and tzdate_check.f are required.  To do so, you "
+write "   will need to execute tzdate_check.imake and tdate_check.imake "
+write "   individually."
+write ""
+write ""
+
+write "******** Testing C interfaces ********"
+write ""
+write ">>>>> Testing CHK_SCET_DATE subroutine <<<<<"
+write ""
+write "::: A non-leap year test "
+let $echo = "yes"
+tzdate_check scet=(1998,82,10,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another non-leap year test "
+let $echo = "yes"
+tzdate_check scet=(1998,365,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: A leap year test "
+let $echo = "yes"
+tzdate_check scet=(2000,83,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Another leap year test "
+let $echo = "yes"
+tzdate_check scet=(2000,366,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid date formats "
+write ""
+
+write "::: Test for invalid year format "
+let $echo = "yes"
+tzdate_check scet=(98,82,10,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid year format "
+let $echo = "yes"
+tzdate_check scet=(998,82,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid year format "
+let $echo = "yes"
+tzdate_check scet=(-1998,82,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid julian day for a non-leap year"
+let $echo = "yes"
+tzdate_check scet=(1998,366,10,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Test for invalid julian day for a leap year"
+let $echo = "yes"
+tzdate_check scet=(2000,367,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid julian day number"
+let $echo = "yes"
+tzdate_check scet=(1998,0,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid hour number"
+let $echo = "yes"
+tzdate_check scet=(1998,82,-1,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another est for invalid hour number"
+let $echo = "yes"
+tzdate_check scet=(1998,82,24,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid minute number"
+let $echo = "yes"
+tzdate_check scet=(1998,82,10,-1,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid minute number"
+let $echo = "yes"
+tzdate_check scet=(1998,82,10,60,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid second number"
+let $echo = "yes"
+tzdate_check scet=(1998,82,10,59,-1,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid second number"
+let $echo = "yes"
+tzdate_check scet=(1998,82,10,59,60,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid millisecond number"
+let $echo = "yes"
+tzdate_check scet=(1998,82,10,59,40,-1) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Test for invalid millisecond number"
+let $echo = "yes"
+tzdate_check scet=(1998,82,10,59,40,1000)
+
+let $echo = "no"
+write ""
+write ">>>>> Testing CHK_STD_DATE subroutine <<<<<"
+write ""
+write "::: A non-leap year test "
+let $echo = "yes"
+tzdate_check std=(1998,3,23,10,59,40,68) 'DEBUG
+ 
+let $echo = "no"
+write ""
+write "::: Another non-leap year test "
+let $echo = "yes"
+tzdate_check std=(1998,12,31,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: A leap year test "
+let $echo = "yes"
+tzdate_check std =(2000,3,23,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Another leap year test "
+let $echo = "yes"
+tzdate_check std=(2000,12,31,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid date formats "
+write ""
+ 
+write "::: Test for invalid year format "
+let $echo = "yes"
+tzdate_check std=(98,3,23,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Another test for invalid year format "
+let $echo = "yes"
+tzdate_check std=(998,3,23,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid year format "
+let $echo = "yes"
+tzdate_check std=(-1998,3,23,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid date for a non-leap year"
+let $echo = "yes"
+tzdate_check std=(1998,2,29,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid date for a leap year"
+let $echo = "yes"
+tzdate_check std=(2000,2,30,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid month number"
+let $echo = "yes"
+tzdate_check std=(1998,0,23,10,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid month number"
+let $echo = "yes"
+tzdate_check std=(1998,13,23,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid day number"
+let $echo = "yes"
+tzdate_check std=(1998,3,0,10,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Test for invalid day number"
+let $echo = "yes"
+tzdate_check std=(1998,3,32,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid hour number"
+let $echo = "yes"
+tzdate_check std=(1998,3,23,-1,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Another test for invalid hour number"
+let $echo = "yes"
+tzdate_check std=(1998,3,23,24,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid minute number"
+let $echo = "yes"
+tzdate_check std=(1998,3,23,10,-1,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Another test for invalid minute number"
+let $echo = "yes"
+tzdate_check std=(1998,3,23,10,60,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid second number"
+let $echo = "yes"
+tzdate_check std=(1998,3,23,10,59,-1,68)
+ 
+let $echo = "no"
+write ""
+write "::: Another test for invalid second number"
+let $echo = "yes"
+tzdate_check std=(1998,3,23,10,59,60,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid millisecond number"
+let $echo = "yes"
+tzdate_check std=(1998,3,23,10,59,40,-1)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid millisecond number"
+let $echo = "yes"
+tzdate_check std=(1998,3,23,10,59,40,1000)
+ 
+
+let $echo="no"
+write ""
+write ""
+write "******** Testing FORTRAN interfaces ********"
+write ""
+write ">>>>> Testing CHK_SCET_DATE subroutine <<<<<"
+write ""
+write "::: A non-leap year test "
+let $echo = "yes"
+tdate_check scet=(1998,82,10,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another non-leap year test "
+let $echo = "yes"
+tdate_check scet=(1998,365,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: A leap year test "
+let $echo = "yes"
+tdate_check scet=(2000,83,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Another leap year test "
+let $echo = "yes"
+tdate_check scet=(2000,366,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid date formats "
+write ""
+
+write "::: Test for invalid year format "
+let $echo = "yes"
+tdate_check scet=(98,82,10,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid year format "
+let $echo = "yes"
+tdate_check scet=(998,82,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid year format "
+let $echo = "yes"
+tdate_check scet=(-1998,82,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid julian day for a non-leap year"
+let $echo = "yes"
+tdate_check scet=(1998,366,10,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Test for invalid julian day for a leap year"
+let $echo = "yes"
+tdate_check scet=(2000,367,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid julian day number"
+let $echo = "yes"
+tdate_check scet=(1998,0,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid hour number"
+let $echo = "yes"
+tdate_check scet=(1998,82,-1,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another est for invalid hour number"
+let $echo = "yes"
+tdate_check scet=(1998,82,24,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid minute number"
+let $echo = "yes"
+tdate_check scet=(1998,82,10,-1,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid minute number"
+let $echo = "yes"
+tdate_check scet=(1998,82,10,60,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid second number"
+let $echo = "yes"
+tdate_check scet=(1998,82,10,59,-1,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid second number"
+let $echo = "yes"
+tdate_check scet=(1998,82,10,59,60,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid millisecond number"
+let $echo = "yes"
+tdate_check scet=(1998,82,10,59,40,-1) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Test for invalid millisecond number"
+let $echo = "yes"
+tdate_check scet=(1998,82,10,59,40,1000)
+
+let $echo = "no"
+write ""
+write ">>>>> Testing CHK_STD_DATE subroutine <<<<<"
+write ""
+write "::: A non-leap year test "
+let $echo = "yes"
+tdate_check std=(1998,3,23,10,59,40,68) 'DEBUG
+ 
+let $echo = "no"
+write ""
+write "::: Another non-leap year test "
+let $echo = "yes"
+tdate_check std=(1998,12,31,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: A leap year test "
+let $echo = "yes"
+tdate_check std =(2000,3,23,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Another leap year test "
+let $echo = "yes"
+tdate_check std=(2000,12,31,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid date formats "
+write ""
+ 
+write "::: Test for invalid year format "
+let $echo = "yes"
+tdate_check std=(98,3,23,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Another test for invalid year format "
+let $echo = "yes"
+tdate_check std=(998,3,23,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid year format "
+let $echo = "yes"
+tdate_check std=(-1998,3,23,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid date for a non-leap year"
+let $echo = "yes"
+tdate_check std=(1998,2,29,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid date for a leap year"
+let $echo = "yes"
+tdate_check std=(2000,2,30,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid month number"
+let $echo = "yes"
+tdate_check std=(1998,0,23,10,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Another test for invalid month number"
+let $echo = "yes"
+tdate_check std=(1998,13,23,10,59,40,68)
+
+let $echo = "no"
+write ""
+write "::: Test for invalid day number"
+let $echo = "yes"
+tdate_check std=(1998,3,0,10,59,40,68) 'DEBUG
+
+let $echo = "no"
+write ""
+write "::: Test for invalid day number"
+let $echo = "yes"
+tdate_check std=(1998,3,32,10,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid hour number"
+let $echo = "yes"
+tdate_check std=(1998,3,23,-1,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Another test for invalid hour number"
+let $echo = "yes"
+tdate_check std=(1998,3,23,24,59,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid minute number"
+let $echo = "yes"
+tdate_check std=(1998,3,23,10,-1,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Another test for invalid minute number"
+let $echo = "yes"
+tdate_check std=(1998,3,23,10,60,40,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid second number"
+let $echo = "yes"
+tdate_check std=(1998,3,23,10,59,-1,68)
+ 
+let $echo = "no"
+write ""
+write "::: Another test for invalid second number"
+let $echo = "yes"
+tdate_check std=(1998,3,23,10,59,60,68)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid millisecond number"
+let $echo = "yes"
+tdate_check std=(1998,3,23,10,59,40,-1)
+ 
+let $echo = "no"
+write ""
+write "::: Test for invalid millisecond number"
+let $echo = "yes"
+tdate_check std=(1998,3,23,10,59,40,1000)
+ 
+end-proc
+

@@ -1,0 +1,12 @@
+procedure
+refgbl $autousage
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+let $autousage = "no"
+tmabend 'char
+tmabend
+tmabend 'cchar
+tmabend 'c
+end-proc

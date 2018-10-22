@@ -1,0 +1,101 @@
+procedure
+local   mean    type=real  count=1
+local   sigma   type=real  count=1
+refgbl $echo
+! Jun 22, 2012 - RJB
+! TEST SCRIPT FOR GAUSNOIS
+! tests BYTE, HALF, FULL, REAL images
+!
+! Vicar Programs:
+!       hist difpic list         
+! 
+! parameters:
+!   <none>
+!
+! Requires NO external test data: 
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+body
+let _onfail="stop"
+let $echo="no"
+!
+!
+let $echo="yes"
+
+enable-log
+
+gausnois  noise.img  nl=200 ns=300  mean=100 sigma=25 format=byte  seed=7382382
+hist noise.img mean=mean sigma=sigma
+let $echo="no"
+write " You should have just seen a straightforward usage of noise.img  The"
+write " results are tallied by hist and should return something close to a"
+write " mean of 100 and a sigma of 25 (or in this case, mean of 99.46647 and"
+write " std dev of 24.95622)."
+write ""
+write "File mean = &mean   File sigma = &sigma"
+write ""
+!
+!
+let $echo="yes"
+gausnois  noise.img  nl=200 ns=300  mean=50 sigma=5 format=byte  seed=4617316
+hist noise.img mean=mean sigma=sigma
+let $echo="no"
+write " Next, I shifted the gaussian over and make it narrower.  I set the"
+write " arguments to ask for a mean of 50 and a std. dev. of 5.  You should"
+write " expect to see a mean of 49.51002 and std. dev. of 5.002862."
+write ""
+write "File mean = &mean   File sigma = &sigma"
+write ""
+!
+!
+let $echo="yes"
+gausnois  noise.img  nl=200 ns=300  mean=0.15 sigma=0.2 format=real seed=74526
+hist noise.img mean=mean sigma=sigma
+let $echo="no"
+write " Next, I shifted the gaussian over and make it narrower again.  the"
+write " primary reason for this test is to test the format=real.  I set the"
+write " arguments to ask for a mean of 0.15 and a std. dev. of 0.2.  You"
+write " should expect to see a mean of 0.149699 and std. dev. of 0.200121."
+write ""
+write "File mean = &mean   File sigma = &sigma"
+write ""
+!
+!
+let $echo="yes"
+gausnois  noise.img  nl=10 ns=30  mean=50 sigma=5 format=byte  seed=2167275
+gausnois  noise2.img  nl=10 ns=30  mean=50 sigma=5 format=byte  seed=2167275
+difpic inp=(noise.img,noise2.img)
+let $echo="no"
+write " Here, I called gaussnois twice with the same seed.  I should get the"
+write " same image out (0 differences)"
+write ""
+write ""
+!
+!
+let $echo="yes"
+gausnois  noise.img  nl=10 ns=30  mean=50 sigma=5 format=byte  seed=2167275
+gausnois  noise2.img  nl=10 ns=30  mean=50 sigma=5 format=byte  seed=94151
+difpic inp=(noise.img,noise2.img)
+let $echo="no"
+write " Here, I called gaussnois twice with a different seed.  I should get"
+write " very different images out. (expect 285 differences)"
+write ""
+write ""
+!
+!
+let $echo="yes"
+gausnois  noise.img  nl=10 ns=30  mean=50 sigma=5 format=byte
+!list noise.img
+gausnois  noise2.img  nl=10 ns=30  mean=50 sigma=5 format=byte
+!list noise2.img
+difpic inp=(noise.img,noise2.img)
+let $echo="no"
+write " In this case, I let the seed parameter default.  It should give me"
+write " 2 very different images.  However, it does NOT with todays faster"
+write " processors. Not enough time elapses on the system clock when"
+write " two succesive calls to gausnois occurs with no intervening processes"
+write " "
+
+disable-log
+
+end-proc

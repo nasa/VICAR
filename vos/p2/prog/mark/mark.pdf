@@ -1,0 +1,198 @@
+process help=*
+PARM INP  TYPE=STRING COUNT=(1:2)
+PARM OUT  TYPE=STRING
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL   TYPE=INTEGER COUNT=(0:1) VALID=1:2048 DEFAULT=1
+PARM SS   TYPE=INTEGER COUNT=(0:1) VALID=1:2048 DEFAULT=1
+PARM NL   TYPE=INTEGER COUNT=(0:1) VALID=0:999999 DEFAULT=0
+PARM NS   TYPE=INTEGER COUNT=(0:1) VALID=0:2048   DEFAULT=0
+PARM BOXSIZE TYPE=INTEGER COUNT=(0:1) VALID=(1:30) DEFAULT=8
+PARM DATA TYPE=REAL COUNT=(0:500) DEFAULT=--
+PARM RESTRICT KEYWORD COUNT=(0:1) VALID=(ODD_ONLY,EVENONLY) default=--
+PARM MAXDN TYPE=INTEGER COUNT=(0:1) DEFAULT=0
+END-PROC
+
+.TITLE
+   VICAR PROGRAM MARK
+.HELP
+PURPOSE:
+
+   MARK is a VICAR applications program used to scribe rectangles
+   about specified pixel locations.
+
+EXECUTION:
+
+        MARK  INP=(PIC,LOC) OUT=OPIC
+  or
+        MARK  INP=PIC  OUT=OPIC  DATA=(l1,s1,l2,s2,l3,s3,...)
+
+  where PIC is the input image (byte or halfword),
+        OPIC is the output image (same data format as PIC).
+
+  The pixel locations to be enclosed inside rectangles are specified either
+  by inputing them via a secondary input file (LOC) or via user parameters.
+  See parameters INP or DATA for details.
+
+.page
+OPERATION:
+
+ MAXDN=n specifies the DN value of the scribed rectangle.
+ The DN value of the scribed rectangle will be 0 or MAXDN, depending upon
+ whether the mean value of the pixels on the perimeter are greater than or
+ less than MAXDN/2, respectively.  Default MAXDN=255 for byte data and
+ 511 for halfword data.
+
+ Rectangles are scribed in such a way that center locations can be
+ specified to one-half pixel. The program does this by selecting
+ either an even or an odd dimension for the rectiangle depending on
+ where the coordinate falls with respect to the pixel mesh. This is
+ done independently in the line and sample direction.
+   
+ The location of the inscribed rectangle boundaries depends on the
+ fractional part of the location of the center and the BOXSIZE 
+ parameter specified. If the center has been specified by line-sample
+ coordinates (L,S) and the BOXSIZE as N.  Then the actual interior size
+ and the center of the box, excluding the scribed lines will be:
+   
+         FRACTIONAL PART=F        SIZE=N         CENTERS
+                                 ODD  EVEN    LINE    SAMPLE
+        0.0 .LE. F .LT. .25      N    N-1      L        S   
+        .25 .LE. F .LT. .25      N-1  N        L+1/2    S+1/2
+        .75 .LE. F .LT. 1.0      N    N-1      L+1      S+1
+
+ So if the BOXSIZE=8, the interior region would be 7 lines by
+ 8 samples if the fractional part of the real numbers specifing
+ the line and sample coordinates are less then .25 and between
+ .25 and .75, respectively. For example, BOXSIZE=8, L=35.1 and
+ S=16.3 results in a box of 7 lines by 8 samples with the upper
+ left corner located at line 30 and sample 11.
+
+.page
+PROGRAM HISTORY:
+
+Written By: Sayuri Harami, September 13, 1971
+Cognizant Programmer: Gary Yagi
+REVISIONS: 
+    5 MAR  2001  GMY  Increased max BOXSIZE to 30.  Fixed SIZE field.
+		      Added EVENONLY and ODD_ONLY keywords
+		      Added MAXDN parameter.
+   31 OCT  1994...A.SCOP..(CRI)..Made portable for UNIX
+   29 MAR  1985...M.E.MORRILL....REAL MARK FORMAT FOR RESEAUS
+   24 OCT  1984...M.E.MORRILL....CONVERSION TO VAX-VICAR*2
+   27 JUNE 1975...D.A.HASS.......CONVERCION TO IBM 360/OS
+   26 JULY 1973...K.R.N..........VMIO ALT BUFFERING
+   15 SEPT 1971...J.E.KREZNAR....UPDATE
+   13 SEPT 1971...S.X.HARAMI.....INITIAL RELEASE  
+
+.LEVEL1
+.VARIABLE INP
+ (1) An image file-REQUIRED
+ (2) A coordinate file-OPTIONAL
+     FORMAT=REAL
+.VARIABLE OUT
+ The image file with
+ marked locations.
+.VARIABLE SL
+ INTEGER-OPTIONAL
+ Starting line.
+.VARIABLE SS
+ INTEGER-OPTIONAL
+ Starting sample.
+.VARIABLE NL
+ INTEGER-OPTIONAL
+ Number of lines.
+.VARIABLE NS
+ INTEGER-OPTIONAL
+ Number of samples.
+.VARIABLE BOXSIZE
+ INTEGER-OPTIONAL
+ Size of scribed boxes.
+.VARIABLE DATA
+ REAL-OPTIONAL
+ Centers of boxes
+ to be marked.
+.VAR RESTRICT 
+KEYWORD-OPTIONAL
+Restrict marks to odd or
+even tiepoints only
+.VARI MAXDN
+INTEGER-OPTIONAL
+DN value of scribed rectangle
+
+.LEVEL2
+.VARIABLE INP
+
+     INP=PIC
+ or  INP=(PIC,LOC)
+
+ The primary input image (PIC) will be reproduced as the output image
+ with scribed rectangles.  The maximum image width is 2048 samples.
+
+ The optional secondary input (LOC) is used to specify the pixel locations to
+ be scribed inside rectangles.  Each record of LOC should contain a list of
+ line-sample coordinates (L,S) in REAL data format (single precision floating
+ point) as follows:
+
+   L1,S1,L2,S2,L3,S3,...
+
+ A maximum of 900 pixel locations may be input.  
+
+ In certain applications (e.g. TRACKER3) the matching pixel locations from
+ pairs of images (tiepoints) may be interleaved in LOC:
+
+    L1,S1,U1,V1,L2,S2,U2,V2,L3,S3,U3,V3,....
+
+ If the keyword 'ODD_ONLY is specified, then pixel coordinates (L1,S1), (L2,S2),
+ (L3,S3),... are used.
+
+ If the keyword 'EVENONLY is specified, then pixel coordinates (U1,V1), (U2,V2),
+ (U3,V3),... are used.
+
+.VARIABLE OUT
+ The output image will contain the input with scribed rectangles.
+.VARIABLE SL
+ INTEGER-OPTIONAL
+ Starting line.
+.VARIABLE SS
+ INTEGER-OPTIONAL
+ Starting sample.
+.VARIABLE NL
+ INTEGER-OPTIONAL
+ Number of lines.
+.VARIABLE NS
+ INTEGER-OPTIONAL
+ Number of samples.
+.VARIABLE BOXSIZE
+ TYPE=INTEGER
+
+ The interior dimensions of the rectangles.
+ The exact dimensions depend on the fractional location of the 
+ rectangle center and wither the box is an odd or even number of
+ pixels:
+         FRACTIONAL PART=F        SIZE=N         CENTERS
+                                 ODD  EVEN    LINE    SAMPLE
+        0.0 .LE. F .LT. .25      N    N-1      L        S   
+        .25 .LE. F .LT. .25      N-1  N        L+1/2    S+1/2
+        .75 .LE. F .LT. 1.0      N    N-1      L+1      S+1
+
+ The maximum boxsize is 30 x 30 samples. Default is BOXSIZE=8.
+
+.VARIABLE DATA
+
+	DATA=(l1,s2,l2,s2,l3,s3,...)
+
+ The center locations of rectangles to be scribed specified as (line,samp)
+ pairs of floating point numbers.   A maximum of 500 locations can be input.
+
+.VARI MAXDN
+
+	MAXDN = 3000
+
+ The DN value of the scribed rectangle will be 0 or MAXDN, depending upon
+ whether the mean value of the pixels on the perimeter are greater than or
+ less than MAXDN/2, respectively.  Default MAXDN=255 for byte data and
+ 511 for halfword data.
+
+ Note the MAXDN parameter is useful primarily for halfword data since the
+ default is only appropriate for old Mariner missions which returned 9 bit data.
+.END

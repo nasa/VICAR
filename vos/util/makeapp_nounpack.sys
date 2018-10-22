@@ -1,0 +1,27 @@
+#!/bin/csh
+# This utility makes an application by unpacking it, running vimake, and
+# running the makefile.  It is intended for system build use only, as it uses
+# the "system" options on vunpack and the makefile.  The first argument is
+# the name of the application to build (no extension).  The second argument
+# is the destination directory for the build.  The ".com" file must be in
+# the current directory.  The third argument, if present, is the target to
+# use for the make instead of "system".
+
+echo "##########"
+echo "# module " $1
+echo "##########"
+source $V2TOP/vicset2.csh	# get aliases for vunpack and vimake
+set temp=$cwd			# save current directory
+cd $2				# change to destination directory
+#vunpack $temp/$1.com -q system	# unpack the application
+cp $temp/$1/* .
+vimake $1			# create the build file
+if (${#argv} == 3) then
+  make -f $1.make $3		# build it with given target
+else
+  make -f $1.make system	# build it!
+endif
+if (-f $1.make)	then		# build failed
+  make -f $1.make clean.obj clean.src	# clean it up
+endif
+

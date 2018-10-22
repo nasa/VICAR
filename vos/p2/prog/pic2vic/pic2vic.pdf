@@ -1,0 +1,65 @@
+process help=*
+PARM PIC_INP	TYPE=(STRING,40)	COUNT=1
+PARM OUT	TYPE=(STRING,40)	COUNT=1
+PARM SL         TYPE=INTEGER COUNT=0:1 DEFAULT=-1
+PARM SS         TYPE=INTEGER COUNT=0:1 DEFAULT=-1
+PARM SB         TYPE=INTEGER COUNT=0:1 DEFAULT=-1
+PARM NL         TYPE=INTEGER COUNT=0:1 DEFAULT=-1
+PARM NS         TYPE=INTEGER COUNT=0:1 DEFAULT=-1
+PARM NB         TYPE=INTEGER COUNT=0:1 DEFAULT=1
+PARM SIZE       TYPE=INTEGER COUNT=0:4 DEFAULT=(-1,-1,-1,-1)
+PARM BAND       TYPE=INTEGER COUNT=1   DEFAULT=1
+
+!# annot function="Importing and Exporting Data"
+!# annot keywords=(parameter,PIC,path,compress)
+
+end-proc
+.TITLE
+Converts PIC format images to VICAR
+.HELP
+Converts PIC formatted images to VICAR.  PIC is a trivially simple file format
+used by the Robotics Group at JPL.  It consists of a 4-byte header with lines
+and samples followed by image data.
+
+PIC does not seem to support multi-band data.  However, the FIDO rover at
+least uses it that way.  The BAND parameter can be used to select a band to
+read.  No check is made that the band is present.  Data for each band simply
+follows each other in the file with no intervening header.  There is also
+no header to specify the number of bands (which is why it's not checked).
+
+REVISION HISTORY
+Date:                   March 18,1994
+Cognizant Engineer:     S.V.Hwan
+References:             PIC software, Todd Litwin, February 1993,
+                        Caltech copyright (C) 1993
+Modifications:
+SVH     22 July 1994    Moved PICS related routines to seperate file
+CRI     05 Sept 1994    MSTP S/W Conversion (VICAR Porting)
+RGD     28 Sept 2000    Added BAND parameter
+AXC     15 May  2001    Modified pic_read.c routine to process multiband image
+                        on VMS system (AR-105427)
+
+.LEVEL1
+.VARI PIC_INP
+PIC format image file
+.VARI OUT
+VICAR output file
+.VARI BAND
+Starting band number to read
+.VARI NBANDS
+Number of bands to read
+.LEVEL2
+.VARI PIC_INP
+This parameter specifies the complete path name
+of the PIC format image file of one or more bands
+to be converted to a single-band VICAR image.
+.VARI OUT
+This parameter specifies the complete path name
+of the output VICAR compressed image.
+.VARI BAND
+Band number to read.  Specifying a band # too large will result in
+an end of file error.  Bands start counting at 1.
+.VARI NBANDS
+Number of bands to read.  If (BAND-1) + NBANDS > # Band in Image,
+then an error will occur.
+.END

@@ -1,0 +1,34 @@
+1 rangen
+ 
+  PURPOSE 
+
+       Subroutine to generate sequences  of random numbers.
+       The program is not machine dependent and will always
+       generate  the same random number sequence from the same
+       starting seed.  
+
+  Fortran Calling Sequence:  CALL RANGEN(SEED,RANDOM_NUMBER)
+  C Calling sequence:          zrangen(&seed,&random_number)
+
+2 History
+
+  Original Programer: Randy Schenk (CRI) (1-July-1994)
+  Current Cognizant Programmer: 
+  Revisions:
+             Removed LIB_LOCAL as per FR85768
+
+2 Operation
+  
+  Gereates a random number form a given seed
+
+
+2 Arguments
+
+  SEED is an input integer and an output random number integer:
+  The value of SEED will be moded with 2**24 to adjust it in
+  the following range.
+			0 < seed < 16777215
+
+  RANDOM_NUMBER is an ouput random number:
+                        0 < random_number < 1
+

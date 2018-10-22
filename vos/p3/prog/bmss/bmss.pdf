@@ -1,0 +1,37 @@
+process help=*
+PARM INP TYPE=STRING COUNT=2:50
+PARM OUT TYPE=STRING
+END-PROC
+.TITLE
+BMSS
+.HELP
+PURPOSE:
+BMSS combines up to 50 datasets into a single dataset, concatenating the
+input datasets in a left to right fashion.  Each dataset may have any
+number of bands.  The inputs must have the same number of lines and samples 
+and be of the same format (byte, halfword, fullword, or real*4).  The output
+will be in BIL organization.
+
+EXECUTION:
+
+Example
+
+BMSS INP=(A,B,C) OUT=D  will put images A, B, and C side-by-side to form D.
+
+A, B, and C must have the same number of lines and samples, but
+may have varying number of bands.
+
+
+WRITTEN BY:  J. R. Heyada,  13 July 1987
+COGNIZANT PROGRAMMER:  J. R. Heyada
+
+.LEVEL1
+.VARIABLE INP
+STRING - Input image files
+.VARIABLE OUT
+STRING - Output image file
+.LEVEL2
+.VARIABLE INP
+INP specifies the input data sets.  Up to 50 are allowed.  Each must have
+the same number of lines and samples but may vary in the number of bands.
+.END

@@ -1,0 +1,70 @@
+procedure
+refgbl $echo
+refgbl $autousage
+parm version string def="ibis-1"
+parm org string def="column"
+body
+
+let $autousage="none"
+let $echo="y"
+
+write "***testing transcol with Version=&version, Org=&org***"
+
+!Example 1  Test first mode
+!
+ibis-gen a vers=&version org=&org datacol=(1,3) +
+   data=(1,2,2,4,1,6,2,8) nc=6 nr=50
+ibis-list a csize=6 nr=5
+transcol a b index=1 data=3 values=(1,2) tocol=(5,6)
+ibis-list b csize=6 nr=5
+
+!Example 2
+
+ibis-gen a vers=&version org=&org datacol=(1,2, 3) nc=8 nr=50 +
+  data=( +
+	1	47   5 +
+	2	29   7 +
+	3	32   9 +
+	1	27  11 +
+	2	62  13 +
+	3	66  15 )
+
+ibis-list a csize=6 nr=5 cols=(1,2,3)
+transcol a b +
+	INDEXCOL  = 1 +
+	DATACOL	  = 2 +
+	VALUES    =(1 2 3) +
+        TOCOL  =(4 6 8) 
+ibis-list b nr=5 cols=(1,2,3,4,6,8) csize=6
+
+!Example 3 -- Second mode:
+
+ibis-gen a vers=&version org=&org datacol=(3,4) nc=5 nr=50 +
+  data=( +
+	1	47 +
+	2	29 +
+	3	32 +
+	1	27 +
+	2	62 +
+	3	66 )
+ibis-list a csize=6 nr=5
+transcol inp=a out=b fromcol=(3,4) datacol=5 ncol=5
+ibis-list b csize=6 nr=5
+
+!Example 4
+ibis-gen a vers=&version org=&org datacol=(1,2,3) nc=6 nr=50 +
+  data=( +
+	1	2	3 +
+	4	5	6 +
+	7	8	9 +
+	)
+ibis-list a csize=6 nr=4
+transcol a b +
+	FROMCOL = (1 2 3) +
+	DATACOL	= 6 +
+        NCOL=6
+ibis-list b csize=6 nr=4
+
+let $echo="n"
+
+end-proc

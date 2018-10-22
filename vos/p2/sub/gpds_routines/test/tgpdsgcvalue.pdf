@@ -1,0 +1,4 @@
+Process
+PARM LABEL 	STRING	
+PARM TABLE	STRING	
+End-Proc

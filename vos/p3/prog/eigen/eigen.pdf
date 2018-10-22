@@ -1,0 +1,236 @@
+process help=*
+PARM INP         TYPE=(STRING,80)
+PARM OUT         TYPE=(STRING,80) COUNT=(0:1)		  DEFAULT=--
+PARM SIZE        TYPE=INTEGER    COUNT=4                  DEFAULT=(1,1,0,0)
+PARM SL	         TYPE=INTEGER   			  DEFAULT=1
+PARM SS	         TYPE=INTEGER				  DEFAULT=1
+PARM NL          TYPE=INTEGER				  DEFAULT=0
+PARM NS          TYPE=INTEGER				  DEFAULT=0
+PARM MATRIX      TYPE=KEYWORD    VALID=("CORR","COV")     DEFAULT="COV"
+PARM INC         TYPE=INTEGER                             DEFAULT=3
+PARM USEBANDS    TYPE=INTEGER    COUNT=(0:300)            DEFAULT=--
+PARM OUTPUT_PCS  TYPE=INTEGER    COUNT=(0:300)            DEFAULT=--
+PARM AREA        TYPE=INTEGER    COUNT=(0:200)            DEFAULT=--
+PARM MEAN        TYPE=REAL                                DEFAULT=127.5
+PARM SIGMA       TYPE=REAL                                DEFAULT=45.0
+PARM EXCLUDE     TYPE=REAL       COUNT=(0:1)              DEFAULT=--
+PARM PRINT       TYPE=KEYWORD VALID=("ALL","SUMMARY","NOPRINT") DEFAULT="ALL"
+PARM XFORM_PARMS TYPE=STRING     COUNT=(0:1)              DEFAULT=--
+END-PROC
+.TITLE
+Process EIGEN -- Principal component analysis using eigenvectors.
+.HELP
+PURPOSE:
+        EIGEN will compute the principal component (aka the eigenvector or
+Karhunen-Loeve) transformation matrix of up to 300 input channels.
+The covariance (and, optionally, correlation) matrix, the transformation
+matrix of eigen-vectors, and the eigen-values are printed, unless the user
+requests otherwise.  If an output is provided, the principal component 
+transformation is applied to the input image.
+
+THEORY:
+
+        The measure of inter-dimensional correlation in the multi-variate
+system is usually defined by the covariance matrix of the multi-variate
+data.  The linear transformation that diagonalizes the covariance matrix
+can also be applied to the original data and produce a multi-variate
+system with an inter-dimensional correlation of zero, i.e.; completely
+uncorrelated multi-variate data.  The linear transformation that
+accomplishes this is the matrix of eigen-vectors or characteristic vectors.
+
+        A common application of this transformation is to reduce the
+dimensionality of a multi-variate system.  The objective is to summarize
+most of the variance, or information content, in a system with a
+lessor number of 'artificial' variates, i.e.; principal components.
+Effectively, by uncorrelating the system, we are compressing most of the
+information into a system with lower dimensionality.
+
+        Assume an n-variate system ( n channels of data ).  Let K be the
+n x n covariance matrix of this data and A be the matrix of eigen-vectors
+of K.  Associated with each eigen-vector A(j) there is an eigen-value or
+characteristic root, e(j).
+
+        Let A(j) = (a(1j),a(2j),...,a(nj)) be the eigen-vector corresponding
+        to the jth largest eigen-value.
+
+        Let X = (x(1),x(2),...,x(n)) be the n-variate observation
+        ( n-dimensional pixel ).
+
+        Then the jth principal component is: v(j) = A(j)  X = a(ij)x(i)
+
+NOTE:  The jth eigen-value is actually the variance in the jth
+principal component dimension.  Therefore, the eigen-values are useful
+as a measure the information content that can be expected in the output
+pictures.
+
+OPERATION:
+
+The input image is first statistically sampled, using the INC and AREA, 
+parameters to select the sampling grid and region(s) of interest. The
+user may choose to exclude all pixels that have a specified (by the 
+parameter EXCLUDE) value in all input channels.  The channel by channel 
+means and variances are computed, as well as the interchannel covariance 
+(optionally, correlation) matrix.
+
+From the calculated matrix, the related eigenvalues and eigenvectors are
+computed. The matrix of these eigenvectors is often called the principal
+component rotation matrix.
+
+A "stretching vector" (or Normalization vector) is formed by taking the
+reciprocal of the square root of each element of the eigenvalue vector,
+and multiplying it by the SIGMA parameter. This has the effect of 
+rescaling the output pixels in such a way that the standard deviation
+of each output channel is equal to SIGMA.
+
+Next, an offset value is computed for each output component. The offset
+is seleceted to force the mean pixel value in each output channel to be
+equal to the target value specified by the MEAN parameter.
+
+Finally, if an output dataset has been provided, this transformation is
+applied to the input dataset, and written to the output dataset.
+
+The user may select a subset of the input bands to process, by using the
+USEBANDS parameter.  Similarly, the user may save or use a subset of the
+principal components, by using the OUTPUT_PCS parameter.
+
+WRTTEN BY:   John Addington
+             Ron Alley
+
+COGNIZANT PROGRAMMER: Ron Alley
+
+REVISION:        8 December  2003    REA   Rewritten, adapted from
+                                           DESTRETCH, XFORM, and EIGENVEC
+
+.LEVEL1
+.VARIABLE INP
+input dataset
+.VARIABLE OUT
+(Optional) output dataset
+.VARIABLE SIZE
+The standard Vicar size
+ field (sl,ss,nl,ns)
+.VARIABLE SL
+Starting line
+.VARIABLE SS
+Starting sample
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples
+.VARIABLE MATRIX
+Use correlation or
+covariance statistics?
+(Valid: CORR, COV)
+.VARIABLE INC
+Compute statistics from every
+nth line and nth sample
+.VARIABLE USEBANDS
+Use only these bands in the
+calculation. (Default is to
+use all bands.)
+.VARIABLE OUTPUT_PCS
+Restrict the output to the
+following principal components.
+(Default is to output all
+components.)
+.VARIABLE AREA
+The subareas to be used to
+compute statistics. Up to 50
+regions (SL,SS,NL,NS) may be
+entered. Default is to use
+the entire image.
+.VARIABLE MEAN
+Desired image mean for each
+output channel.
+.VARIABLE SIGMA
+Desired image standard deviation
+for each output channel.
+.VARIABLE EXCLUDE
+Pixels with this DN in all
+bands will be excluded from
+all computations.
+.VARIABLE PRINT
+Determines the detail of the
+printed information output
+(Valid: ALL, SUMMARY, NOPRINT)
+.VARIABLE XFORM_PARMS
+The name for the parameter
+dataset to hold the
+transformation matrix.
+.LEVEL2
+.VARIABLE INP
+Input is a single file in either BSQ or BIL format, containing at least 3 
+channels.  The user may specify which channels are to be used, by means of 
+the USEBANDS parameter.
+.VARIABLE OUT
+OUT contains the name of the output dataset that contains the transformed
+image.  If no output dataset is specified, the statistics will be gathered
+and reported, but no transformation will be applied.
+.VARIABLE SIZE
+The standard Vicar size field ( starting_line, starting_sample, 
+number_of_lines, number_of_samples).
+.VARIABLE SL
+Starting line of the portion of the image that you wish to process.
+.VARIABLE SS
+Starting sample of the portion of the image that you wish to process.
+.VARIABLE NL
+Number of lines in the portion of the image that you wish to process.
+.VARIABLE NS
+Number of samples in the portion of the image that you wish to process.
+.VARIABLE MATRIX
+If the value of the parameter MATRIX is "COV" (the default), the image's
+covariance matrix is used to determine the principal components.  If the
+value of MATRIX is "CORR", then the correlation matrix is used instead.
+.VARIABLE INC
+Statistics are gathered using only every n'th line and n'th sample of the
+image, or region of interest (AREA) within the image. The parameter INC
+specifies the value on "n".
+.VARIABLE USEBANDS
+If this parameter is defaulted, all of the channels in the input file are
+used in the transformation.  If the user wishes to use only a subset of 
+the channels, the USEBANDS parameter is used to select the channels to be
+used.
+.VARIABLE OUTPUT_PCS
+If this parameter is defaulted, the number of output components (channels)
+will be equal to the number of input channels used.  If the user wishes
+to output only a subset of the principal components, the OUTPUT_PCS
+parameter is used to select the principal components to be output.
+.VARIABLE AREA
+Sets of (Starting_line, Starting_sample, Number_of_lines, Number_of_samples)
+are given to define subareas used to generate the image statistics. 
+Up to 50 set of subareas may be supplied.  The default is that the entire image 
+is sampled.
+.VARIABLE MEAN
+A rescaling factor is included in the overall transformation to reposition the
+output values in a range appropriate for output data type (BYTE, HALF, FULL,
+REAL). The MEAN parameter specifies the desired mean value for the output 
+image channels.  If MEAN is defaulted, a value of 127.5 is used.  If the AREA
+parameter has been used, this target mean is for the AREA(s) of interest only.
+To suppress rescaling entirely, assign the parameter SIGMA a negative value.
+.VARIABLE SIGMA
+A rescaling factor is included in the overall transformation to reposition the
+output values in a range appropriate for the data output. The SIGMA parameter
+specifies the desired standard deviation from the mean value in each of the 
+output image channels.  If SIGMA is defaulted, then a value of 45.0 is used.
+If SIGMA is assigned a negative value, the rescaling operation is suppressed.
+If the AREA parameter has been used, this target standard deviation is for 
+the AREA(s) of interest only.
+.VARIABLE EXCLUDE
+A pixel is excluded from use in determining the transformation if the
+DN is equal to 'EXCLUDE' in each channel.
+.VARIABLE PRINT
+The value of the PRINT variable determines the detail of the printed 
+information output to the standard output and session log.
+
+If ALL (the default), the complete list of input means, standard deviations,
+      interchannel covariances and correlations (if computed), eigenvalues,
+      eigenvectors, and transformation equations is printed. 
+If SUMMARY, these tables of values are only summarized, and the eigenvectors
+      and transformation equations are omitted.
+If NOPRINT, only the EIGEN version number is printed.
+.VARIABLE XFORM_PARMS
+If the XFORM_PARM parameter is given a value, the transformation matrix
+will be saved as a VICAR parameter dataset, and have the dataset name
+specified by the save parameter. This parameter dataset may then be included
+in the parameters for XFORM, to repeat this transformation on other datasets.
+.END

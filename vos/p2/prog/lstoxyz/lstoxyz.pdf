@@ -1,0 +1,199 @@
+process help=*
+PARM INP          TYPE=STRING       COUNT=3
+PARM OUT          TYPE=STRING       COUNT=1
+PARM SOURCEL TYPE=(STRING,4) COUNT=(0:1) +
+ VALID=("DAVI ","NAV  ","FARE ","NAV2 ","NEAR ","AMOS ","NTEL ", +
+        "AACS ","NPRE ","NAIF ","SEDR ") DEFAULT=--
+PARM SOURCER TYPE=(STRING,4) COUNT=(0:1) +
+ VALID=("DAVI ","NAV  ","FARE ","NAV2 ","NEAR ","AMOS ","NTEL ", +
+        "AACS ","NPRE ","NAIF ","SEDR ") DEFAULT=--
+PARM DEBUG TYPE=KEYWORD VALID=(DEBUG,NODEBUG) DEFAULT=NODEBUG
+PARM XYZ   TYPE=KEYWORD VALID=(XYZ,LATLON) DEFAULT=LATLON
+END-PROC
+
+.TITLE
+VICAR2 program LSTOXYZ
+
+.HELP
+Converts the tiepoint locations stored in a Mark file and written by
+program TRACKER either to:
+
+ X,Y,Z,Error   coordinates in the planet reference frame
+or
+ Lat,Long,Range-radius,error   coordinates on the planet
+
+and writes them into another Mark file. The Mark file can be converted
+into a topomap by program TOTOPO.
+
+This program does ranging on two flight project images with 
+high quality navigation and generates XYZ coordinates in Km.
+in the planet reference frame. It is a member of the MIPL
+stereo program suite.
+
+If you have no camera models or spice pointing you can use TOPOMAP
+instead to generate relative topography.
+
+.page
+Example:
+       LSTOXYZ left,right,points out parameters
+
+  where: 
+         LEFT is the first input image. This is the first input image
+              to program TRACKER. In this case it must be a map projected
+              image.
+         RIGHT is the second input image. This is the second input image
+              to program TRACKER. The second input must also be a map
+              projection preferably the identical projection as the first
+              input image (non-identical projections are OK except that
+              TRACKER will work better if they are identical).
+         POINTS is a MARK file containing the tiepoints written by
+              program tracker.
+              Mark files contain 512 byte records of real*4 data.
+              Coordinates are stored in groups of 4 words in the
+              order left_line,left_sample,right_line,right_sample...
+         OUT is a Mark file containing either:
+                  The groups of x,y,z,error
+                  values computed by program LSTOXYZ.
+                  (see keyword XYZ)
+            or
+                  The groups of latitude,longitude,range-radius,error
+                  values computed by program LSTOXYZ.
+                  (the default)
+              Mark files contain 512 byte records of real*4 data.
+              Coordinates are stored in groups of 4 words in the
+              order X,Y,Z,ERROR,X,Y,Z,ERROR...
+                 or LAT,LON,RANGE-RADIUS,ERROR...
+
+.page
+Important note to users of the output file:
+There is a 1:1 correspondence between input Mark and output Mark files.
+If an input coordinate is zero then ignore that input and output.
+If an input coordinate is not zero but the output coordinate is
+zero then the input could not be processed for some reason so 
+ignore both input & output for that point. The correspondence
+assures that the input line,samp coordinates match the output XYZ's.
+
+Outputs can be zero because:
+1. input was zero.
+2. the mapping transformation placed a point off or behind the planet.
+3. the 3-space vectors were parallel.
+
+.page
+METHOD:
+LSTOXYZ performs the following steps:
+1. Gets the transformation for both input projections (line,samp ->lat,lon)
+2. Gets the transformation for both object space images(lat,lon->line,samp)
+  For each tiepoint:
+3. Convert line,samp to lat,lon in projection space.
+4. Convert lat,lon to line,samp in original image object space.
+5. Construct two vectors from the spacecraft positions towards
+   those line,samp coordinates in the image plane.
+6. Compute the closest approach point between the two vectors.
+   This is the X,Y,Z value.
+7. The miss distance is the 4th value ERROR.
+
+Note the Spice gives the RS vector (s/c position in planet coords)
+and the OM matrix (rotation of planet to camera coords).
+
+See Manual Of Photogrammetry , Sec Ed, P50.
+
+.page
+OUTPUT UNITS:
+
+  XYZ values are in Kilometers in the planet reference frame.
+    Z is the polar spin axis
+    X & Y form the equatorial plane.
+    X pierces the geoid at the prime meridian (0 longitude).
+
+  LAT is in degrees planetocentric.
+  LONG is in degrees West.
+  RANGE-RADIUS is in kilometers. It is the difference between the
+    range from the XYZ point to planet center and the local
+    planetocentric radius of the geoid at that latitude.
+
+  The fourth value (error) is the closest approach point of the
+  two vectors in Km. It is NOT the error in elevation.
+
+.page
+EXAMPLE: 
+
+         farenc in1
+         farenc in2
+         map3 in1 a
+         map3 in2 b
+         tracker a,b m
+        LSTOXYZ a,b,m xyz 'XYZ
+
+HISTORY
+Written By: J Lorre			jan 91
+Cognizant Programmer: J Lorre
+
+.LEVEL1
+.VARI INP
+Three inputs:
+#1 is the left image
+#2 is the right image
+#3 is the MARK file.
+
+.VARI OUT
+Mark file output
+containing xyz coords.
+or lat,lon's
+
+.VARI SOURCEL
+The source of the 
+SEDR/SPICE for the 
+left image.
+
+.VARI SOURCER
+The source of the 
+SEDR/SPICE for the 
+right image.
+
+.VARI DEBUG
+Prints debugging data.
+
+.VARI XYZ
+Specifies the output
+will contain  
+(X,Y,Z,error)
+
+.LEVEL2
+
+.VARI INP
+There are three input files.
+File#1: This is the left or first input image given to
+        program TRACKER.
+File#2: This is the right or second input image given to
+        program TRACKER.
+File#3: This is the MARK file written by program TRACKER.
+        It is 'REAL' format with 512 byte records containing
+        pairs of tiepoints in the order:
+        left_line,left_samp,right_line,right_samp.
+
+.VARI OUT
+The output file is a Mark file containing the XYZ,error values
+or the lat,lon,range-radius,error values
+corresponding to each input line,samp,line,samp quartet of
+tiepoints computed by TRACKER. There are 32 sets of values
+per record. All are REAL*4.
+
+.VARI SOURCEL
+The source of the SEDR/SPICE for the left image.
+ VALID="DAVI ","NAV  ","FARE ","NAV2 ","NEAR ","AMOS ","NTEL ",
+        "AACS ","NPRE ","NAIF ","SEDR "
+
+.VARI SOURCER
+The source of the SEDR/SPICE for the right image.
+ VALID="DAVI ","NAV  ","FARE ","NAV2 ","NEAR ","AMOS ","NTEL ",
+        "AACS ","NPRE ","NAIF ","SEDR "
+
+.VARI DEBUG
+Prints the line,sample and lat,long for each point in the input
+Mark file as it is processed.
+
+.VARI XYZ
+Specifies that the output Mark file will contain the (X,Y,Z,error)
+values in planet coordinates rather than the
+ (lat,long,range-radius,error) values which are the default.
+

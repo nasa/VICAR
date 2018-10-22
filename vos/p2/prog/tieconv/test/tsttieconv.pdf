@@ -1,0 +1,133 @@
+procedure
+refgbl $echo
+refgbl $autousage
+parm version string def="ibis-1"
+parm org string def="column"
+body
+!let _onfail="continue"
+let $autousage="none"
+let $echo="yes"
+
+
+!! Note to testers:
+!!
+!!  differences in "data" values of less than 0.1% between different
+!!  platforms are due to roundoff and are not significant;
+!!
+!!  also, differences in "residuals" when less than about 1.0E-10
+!!  are completely insignificant.
+!!
+!!  (lwk, 2002/03/28)
+
+
+ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+    nc=4 nr=44
+mf a func=("c1=sqrt(index*17+2763)","c2=sqrt(index*7+3431)")
+mf a func=("c1=mod(c1,0.0001)*1000000","c2=mod(c2,0.0001)*1000000")
+mf a func=("c3=c1*1.1+index/10","c4=c2*1.1+index/10")
+
+tieconv INP=a COLS=(1,2,3,4)  OUT=b +
+      NAH=7,NAV=7,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+    'GEOMV  
+
+! list the IBIS file
+ibis-list b 'format
+
+! testing the lgeom parameter output
+
+tieconv INP=a COLS=(1,2,3,4)  OUT=b2 +
+      NAH=7,NAV=7,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+    'LGEOM  
+
+! now test that the tiepoint data sets are OK in the geom programs
+
+gen mgtest 10 10 SINC=40 LINC=40
+
+geomv (mgtest,b) mgtest2 SIZE=(1,1,10,10)
+list mgtest2
+
+lgeom mgtest mgtest3 SIZE=(1,1,10,10) PARMS=b2
+list mgtest3
+
+difpic (mgtest2,mgtest3)
+
+! now larger test case
+
+ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+    nc=4 nr=3000
+mf a func=("c1=sqrt(index*17+2763)","c2=sqrt(index*7+3431)")
+mf a func=("c1=mod(c1,0.0001)*1000000","c2=mod(c2,0.0001)*1000000")
+mf a func=("c3=c1*1.1+index/10","c4=c2*1.1+index/10")
+
+tieconv INP=a COLS=(1,2,3,4)  OUT=b +
+      NAH=30,NAV=5,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+    'GEOMV  
+
+! list the IBIS file
+ibis-list b 'format
+
+
+! list out a plot file just for definite look at triangles
+
+ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+    nc=4 nr=11
+mf a func=("c1=sqrt(index*17+2763)","c2=sqrt(index*7+3431)")
+mf a func=("c1=mod(c1,0.0001)*1000000","c2=mod(c2,0.0001)*1000000")
+mf a func=("c3=c1*1.1+index/10","c4=c2*1.1+index/10")
+
+tieconv INP=a COLS=(1,2,3,4)  OUT=b +
+      NAH=7,NAV=7,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+    'GEOMV 'PLOT
+
+! list the IBIS file
+ibis-list b 'format
+
+! test linear and keystone keywords
+
+ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+    nc=4 nr=44
+mf a func=("c1=sqrt(index*17+2763)","c2=sqrt(index*7+3431)")
+mf a func=("c1=mod(c1,0.0001)*1000000","c2=mod(c2,0.0001)*1000000")
+mf a func=("c3=c1*1.1+index/10","c4=c2*1.1+index/10")
+
+tieconv INP=a COLS=(1,2,3,4)  poly=linear OUT=b +
+      NAH=7,NAV=7,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+    'GEOMV 
+tieconv INP=b COLS=(1,2,3,4)  poly=linear OUT=b2 +
+      NAH=7,NAV=7,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+    'GEOMV 
+
+! list the IBIS files, the second should have near-zero residuals
+
+ibis-list b 'format
+ibis-list b2 'format
+
+tieconv INP=a COLS=(1,2,3,4)  poly=keystone OUT=b +
+      NAH=7,NAV=7,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+    'GEOMV 
+tieconv INP=b COLS=(1,2,3,4)  poly=keystone OUT=b2 +
+      NAH=7,NAV=7,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+    'GEOMV 
+
+! list the IBIS files, the second should have near-zero residuals
+
+ibis-list b 'format
+ibis-list b2 'format
+
+tieconv INP=a COLS=(1,2,3,4)  poly=keystone OUT=b +
+      NAH=7,NAV=7,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+    'GEOMV 
+tieconv INP=b COLS=(1,2,3,4)  poly=linear OUT=b2 +
+      NAH=7,NAV=7,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+    'GEOMV 
+
+! list the IBIS files, the second should have NONzero residuals
+
+ibis-list b 'format
+ibis-list b2 'format
+
+!!  NOTE:  the GEOMZ option is not incuded in this proc, because
+!!  it is still experimental code.  See Al Zobrist or the Cart lab
+!!  for later versions.
+
+end-proc

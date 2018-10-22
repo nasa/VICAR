@@ -1,0 +1,11 @@
+/* Imake file for VICAR FUNCTION INSIDE */
+
+#define SUBROUTINE inside
+
+#define MODULE_LIST inside.f zinside.c
+
+#define P2_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+

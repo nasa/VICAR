@@ -1,0 +1,15 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+
+enable-log
+
+list o.tmp
+
+disable-log
+
+end-proc

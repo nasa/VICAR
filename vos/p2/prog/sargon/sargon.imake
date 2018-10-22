@@ -1,0 +1,36 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM sargon
+
+   To Create the build file give the command:
+
+		$ vimake sargon			(VMS)
+   or
+		% vimake sargon			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	sargon
+#define R2LIB
+
+#if VMS_OS
+#define MODULE_LIST sargon.f vsort.f relevant_dsubs.f
+#define CLEAN_OTHER_LIST usort.f
+#else
+#define MODULE_LIST sargon.f usort.f relevant_dsubs.f
+#define CLEAN_OTHER_LIST vsort.f
+#endif
+
+
+#define MAIN_LANG_FORTRAN
+#define USES_C
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_VRDI
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

@@ -1,0 +1,247 @@
+procedure
+refgbl $echo
+refgbl $autousage
+local sd  type=real		!Declare SD and AVG
+local avg type=real		!as local TAE variables
+local sum type=real     !sum of all pixel values
+! Jun 22, 2012 - RJB
+! TEST SCRIPT FOR HIST   
+! tests BYTE, HALF, FULL, REAL, DOUB images
+!
+! Vicar Programs:
+!       gen disp                 
+! 
+! parameters:
+!   <none>
+!
+! Requires NO external test data: 
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+body
+let _onfail="stop"
+let $echo="yes"
+let $autousage="none"
+
+enable-log
+
+! TEST SCRIPT FOR HIST
+!
+! BYTE IMAGE
+gen g1515 15 15
+! Do histogram for gen 15 15 output in areas (1,1,3,3) and (10,10,2,2)
+!
+hist g1515 area=(1,1,3,3,10,10,2,2)
+!
+hist g1515 size= (2,2,14,14) area=(1,1,3,3,10,10,2,2)
+!
+!  test linc/sinc
+hist g1515 linc=2 sinc=3
+!
+! test NLINES & LIMITS
+hist g1515 NLINES=10 LIMITS=(5,24)
+hist g1515 NLINES=10 LIMITS=(5,23)
+hist g1515           LIMITS=(5,23) 'wide
+!
+! TEST SPIKES
+hist g1515 SPIKE=5
+hist g1515 SPIKE=1
+!
+! test NOHIST keyword
+hist g1515 'nohist
+!
+!  test output to TCL variables.
+hist g1515 'nohist SIGMA=SD  MEAN=AVG sum=sum	!Compute SD and AVG
+let $echo="no"
+putmsg "Print average and stdev variables" ""
+let $echo="yes"
+disp avg
+disp sd
+disp sum
+!!  Throw in some extra tests for good coverage.
+!
+! test SCREEN keyword
+hist g1515 'screen spike=1
+!
+!  make an all zero file.  Hist should not blow up on 'exclude.
+gen g 10 10 linc=0 sinc=0
+hist g 'exclude
+gen g 1024 1000 sinc=0 
+let $echo="no"
+write "Should get mean =128.0 because of exclude"
+let $echo="yes"
+hist g nlines=10 'exclude
+!
+gen g 10 10 sinc=0
+hist g inc=3
+let $echo="no"
+write "Mean should be 4.5."
+let $echo="yes"
+hist g inc=3 'exclude
+let $echo="no"
+write "Mean should be 6.0."
+let $echo="yes"
+!
+! HALF
+gen g1515 15 15 linc=-1000 sinc=-1000 'half
+! Do histogram for gen 15 15 output in areas (1,1,3,3) and (10,10,2,2)
+!
+hist g1515 area=(1,1,3,3,10,10,2,2)
+!
+hist g1515 size= (2,2,14,14) area=(1,1,3,3,10,10,2,2)
+!
+!  test linc/sinc
+hist g1515 linc=2 sinc=3
+!
+! test NLINES & LIMITS
+hist g1515 NLINES=10 LIMITS=(-24000, -5000)
+hist g1515 NLINES=10 LIMITS=(-23000, -5000)
+hist g1515           LIMITS=(-23000, -5000) 'wide
+!
+! TEST SPIKES
+hist g1515 SPIKE=5
+hist g1515 SPIKE=1
+!
+! test NOHIST keyword
+hist g1515 'nohist
+!
+!  test output to TCL variables.
+hist g1515 'nohist sigma=sd  mean=avg sum=sum 	!Compute SD and AVG
+let $echo="no"
+putmsg "Print average and stdev variables" ""
+let $echo="yes"
+disp AVG
+disp SD
+disp sum
+!!
+! try a case that HIST used to get wrong.  Should not be any
+! > HIGH LIMIT entry.
+gen g 10 10 linc=1000 'half
+hist g nlines=30 spikes=9
+!
+! FULL
+gen f1515 15 15 linc=-100000 sinc=-100000 'full
+! Do histogram for gen 15 15 output in areas (1,1,3,3) and (10,10,2,2)
+!
+hist f1515 area=(1,1,3,3,10,10,2,2)
+!
+hist f1515 size= (2,2,14,14) area=(1,1,3,3,10,10,2,2)
+!
+!  test linc/sinc
+hist f1515 linc=2 sinc=3
+!
+! test NLINES & LIMITS
+hist f1515 NLINES=10 LIMITS=(-2400000, -500000)
+hist f1515 NLINES=10 LIMITS=(-2300000, -500000)
+hist f1515           LIMITS=(-2300000, -500000) 'wide
+!
+! TEST SPIKES
+HIST f1515 SPIKE=5
+HIST f1515 SPIKE=1
+!
+! test NOHIST keyword
+hist f1515 'nohist
+!
+!  test output to TCL variables.
+hist f1515 'nohist SIGMA=SD  MEAN=AVG sum=sum	!Compute SD and AVG
+let $echo="no"
+putmsg "Print average and stdev variables" ""
+let $echo="yes"
+disp avg
+disp sd
+disp sum
+!!
+!    ! test REAL*4 data
+gen r1515 15 15 linc=1.e8 sinc=1.e8 'real4
+! Do histogram for gen 15 15 output in areas (1,1,3,3) and (10,10,2,2)
+!
+hist r1515 area=(1,1,3,3,10,10,2,2)
+!
+hist r1515 size= (2,2,14,14) area=(1,1,3,3,10,10,2,2)
+!
+!  test linc/sinc
+hist r1515 linc=2 sinc=3
+!
+! test NLINES & LIMITS
+hist r1515 NLINES=10 LIMITS=(5.e+8, 24.E+8) 
+hist r1515 NLINES=10 LIMITS=(5.e+8, 23.E+8)
+hist r1515 'nocum          LIMITS=(5.e+8, 23.E+8) 'wide
+!
+! TEST SPIKES
+hist r1515 SPIKE=5
+hist r1515 SPIKE=1
+!
+! test NOHIST keyword
+hist r1515 'nohist
+!
+!  test output to TCL variables.
+hist r1515 'nohist SIGMA=SD  MEAN=AVG sum=sum	!Compute SD and AVG
+let $echo="no"
+putmsg "Print average and stdev variables" ""
+let $echo="yes"
+disp AVG
+disp SD
+disp sum
+!!
+gen r1515 15 15 linc=-123456789.e4 sinc=-1234567890.e4 'real4
+let $echo="no"
+write " Try some wild numbers.  3000 bins.  225 are non-empty."
+write " Should skip all empty bins and put a * after DN to indicate skip."
+let $echo="yes"
+hist r1515 nlines=3000
+!    ! test REAL*8 data
+! DOUB
+gen d1515 15 15 linc=-1.e-9 sinc=-1.e-9 'real8
+! Do histogram for gen 15 15 output in areas (1,1,3,3) and (10,10,2,2)
+!
+hist d1515 area=(1,1,3,3,10,10,2,2)
+!
+hist d1515 size= (2,2,14,14) area=(1,1,3,3,10,10,2,2)
+!
+!  test linc/sinc
+hist d1515 linc=2 sinc=3
+!
+! test NLINES & LIMITS
+HIST d1515 NLINES=10 LIMITS= (-24.e-9, -5.E-9)
+HIST d1515 NLINES=10 LIMITS=(-23.e-9, -5.E-9)
+HIST d1515 'nocum          LIMITS=(-23.e-9, -5.E-9) 'wide
+!
+! TEST SPIKES
+HIST d1515 SPIKE=5
+HIST d1515 SPIKE=1
+!
+! test NOHIST keyword
+hist d1515 'nohist
+!
+!  test output to TCL variables.
+hist d1515 'nohist SIGMA=SD  MEAN=AVG sum=sum	!Compute SD and AVG
+let $echo="no"
+putmsg "Print a1verage and stdev variables" ""
+let $echo="yes"
+disp AVG
+disp SD
+disp sum
+!
+!  test of bands capability
+gen x1515 NS=10 NL=10 NB=10
+hist x1515
+hist x1515 NB=4
+!!
+! test AR 112483.  Std dev should be exactly 0.  Depends on image size.
+gen x1515 337 364 ival=200 linc=0 sinc=0
+hist x1515
+!
+! test result on all-zero files:
+gen g1515 10 10 ival=0 linc=0 sinc=0
+hist g1515 'nohis
+gen g1515 10 10 ival=0 linc=0 sinc=0 'real
+hist g1515 'nohis
+!
+let $echo="no"
+
+! clean up
+ush rm -f ?1515
+ush rm -f g
+
+disable-log
+
+end-proc

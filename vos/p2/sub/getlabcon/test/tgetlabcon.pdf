@@ -1,0 +1,6 @@
+!*****************************************************************************
+! TGETLABCON.PDF - pdf for test program TGETLABCON.F for GETLABCON
+!*****************************************************************************
+process 
+PARM INP          COUNT=1     TYPE=STRING
+END-PROC

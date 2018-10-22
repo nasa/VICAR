@@ -1,0 +1,16 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!
+gen out=a.img nl=100 ns=100 linc=50 sinc=50
+xvd a.img
+polarect2 inp=a.img out=p.img nl=200 ns=50 center=(50,50) +
+ 'direct
+xvd p.img
+polarect2 inp=p.img out=a.img nl=100 ns=100 center=(50,50) +
+ 'inverse
+xvd a.img
+!
+end-proc

@@ -1,0 +1,21 @@
+1 EXPAND
+
+  EXPAND will magnify the length of a video line by an integral
+  multiple.  Magnification is performed by replicating pixels.
+  The subroutine is useful in programs which blow up pictures 
+  for display.
+
+  Calling Sequence:  expand(buf, nsi, inc);
+
+  Arguments:   buf   byte array containing the line to be expanded.  The
+                     array must be large enough to contain the expanded data.
+               nsi   number of input samples
+               inc   magnification factor
+
+2 History
+
+  Original Programmer: 
+  Current Cognizant Programmer: Florance Moss   7-12-83
+  Source Language: IBM Assembly
+  Conversion Language:  Fortran
+  Ported to UNIX and converted to C:  Paul Bartholomew   10-20-92

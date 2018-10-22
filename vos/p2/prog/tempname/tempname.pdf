@@ -1,0 +1,102 @@
+PROCEDURE TEMPNAME HELP=*
+
+SUBCMD DEL
+PARM DIR	STRING	COUNT=0:1	DEFAULT=--
+REFGBL	$SYSCHAR
+END-SUBCMD
+
+SUBCMD-DEFAULT CREATE
+PARM INN STRING
+PARM OUT NAME
+END-SUBCMD
+
+PROCEDURE NAME=DEL
+LOCAL PID STRING
+BODY
+LET PID = $SESSION
+IF ($SYSCHAR(1) = "UNIX")
+  IF ($COUNT(DIR) = 0)
+    ush /bin/rm *.ZZZ&PID
+  ELSE
+    ush /bin/rm &DIR/*.ZZZ&PID
+  END-IF
+ELSE
+  IF ($COUNT(DIR) = 0)  
+    DCL DELETE *.ZZZ&PID;
+  ELSE
+    DCL DELETE &DIR*.ZZZ&PID;
+  END-IF
+END-IF
+END-PROC
+
+PROCEDURE NAME=CREATE
+LOCAL FULL STRING
+BODY
+LET OUT="&INN"//".ZZZ"//$SESSION
+END-PROC
+
+BODY
+IF (_SUBCMD = "CREATE")
+  CREATE
+ELSE
+  DEL
+END-IF
+END-PROC
+
+!# annot function="VICAR Utilities"
+!# annot keywords=(add,ZZZ,ID,delete,OUT)
+
+.TITLE
+Appends ZZZ extension to filename (making it a temporary file)
+.HELP
+PURPOSE:
+
+Tempname is used to add a process-specific extension onto a filename.
+The extension starts with "ZZZ" followed by the process ID.  Tempname
+can also be used to delete temporary files with matching extensions
+from a directory.
+
+EXECUTION:
+
+Tempname has two subcommands: create and del.  The default is create
+so you can just type tempname instead of tempname-create to access it.
+The value of the OUT parameter must be declared as a local variable
+first.  The form of this subcommand is:
+
+	tempname INN OUT 
+
+The form of the del subcommand is as follows:
+
+	tempname-del [DIR]
+
+The DIR parameter is the directory from which you want to delete the
+temporary files.  It is optional and defaults to your current working
+directory.  It deletes files with extensions starting with "ZZZ"
+followed by the current process ID.  In UNIX leave off the trailing
+'/' after the directory name because tempname puts that in.
+
+REVISIONS:
+
+	8-97 ...RRD... Wrote original version.
+
+.LEVEL1
+!
+.SUBCMD CREATE
+Create temporary filename. 
+.VARIABLE INN -CREATE
+STRING
+Filename to add
+extension to.
+.VARIABLE OUT -CREATE
+STRING
+Completed 
+filename.extension
+!
+.SUBCMD DEL
+Delete temporary files.
+.VARIABLE DIR -DEL
+STRING -OPTIONAL
+Directory of
+temporary files.
+.END
+

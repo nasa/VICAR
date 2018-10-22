@@ -1,0 +1,40 @@
+process help=*
+PARM INP TYPE=(STRING,100)
+PARM OPTION KEYWORD VALID=(LABEL,HISTORY,BOTH) DEFAULT=BOTH
+END-PROC
+.title
+VICAR PROGRAM ISISLAB
+.help
+PURPOSE:
+
+ ISISLAB prints the PDS label and history objects of an ISIS cube to
+ the terminal or Vicar log file.
+
+EXECUTION:
+
+  ISISLAB input-file-name OPTION
+
+ where OPTION determines whether the LABEL object, the HISTORY object,
+ or both, are printed.
+
+Cognizant programmer: L.W.Kamp
+Original Version:  26-Feb-1992
+Revisions:
+  1995-09-20 lwk - ported to Alpha
+  1996-06-25 lwk - don't make 2-D Histo object required, so it can read any
+		   ISIS label, not just NIMS cubes
+  1996-11-03 lwk - allow tabs as separators (so can read EDR labels)
+  1998-09-29 lwk - recognize DATA_TABLE for EDRs
+  1999-01-25 lwk - made portable to Unix:  fixed some function arguments &
+		   initializations, removed ZIA, added size to zvopen
+  2000-09-01 lwk - cleaned up code for non-NIMS-cube cases
+  2005-11-02 lwk - removed references to specific objects (except for HISTORY)
+  2017-08-08 wlb - removed DEBUG from imake
+
+.LEVEL1
+.VARI INP
+input ISIS cube file
+.VARI OPTION
+select what is to be
+printed
+.end

@@ -1,0 +1,87 @@
+procedure
+refgbl $echo
+refgbl $syschar
+body
+local PATH1 TYPE=STRING init="wms_test_work:[testdata.sitod1.test_data.images]"
+local PATH2 TYPE=STRING init="wms_test_work:[testdata.mipl.gll]"
+local PATH3 TYPE=STRING init="wms_test_work:[testdata.gll]"
+local PATH4 TYPE=STRING init="wms_test_work:[testdata.mipl.vgr]"
+if ($syschar(1) = "UNIX")
+    let PATH1 ="/project/test_work/testdata/sitod1/test_data/images/"
+    let PATH2 ="/project/test_work/testdata/mipl/gll/"
+    let PATH3 ="/project/test_work/testdata/gll/"
+    let PATH4 ="/project/test_work/testdata/mipl/vgr/"
+end-if
+let _onfail="continue"
+let $echo="yes"
+!
+Write " The Test Data are handled for both VMS and UNIX in this PDF. "
+
+LABLIST  &"path1"gll.edr
+LABLIST  &"path1"gll.edr   'full
+LABEL-LIST  &"path1"gll.edr   
+LABLIST  &"path4"mirandab.vio
+LABLIST  &"path4"mirandab.vio  'full
+LABEL-LIST  &"path4"mirandab.vio  
+LABLIST  &"path2"venus.img
+LABLIST  &"path2"venus.img     'full
+LABEL-LIST  &"path2"venus.img     
+LABLIST  &"path2"venus2.img
+LABLIST  &"path2"venus2.img    'full
+LABEL-LIST  &"path2"venus2.img   
+LABLIST  &"path2"venus3.img
+LABLIST  &"path2"venus3.img    'full
+LABEL-LIST  &"path2"venus3.img    
+LABLIST  &"path1"s0061498500.1    'FULL
+LABEL-LIST  &"path1"s0061498500.1   
+LABLIST  &"path1"s0061510200.1    'FULL
+LABEL-LIST  &"path1"s0061510200.1    
+LABLIST  &"path1"s0061512000.1    'FULL
+LABEL-LIST  &"path1"s0061512000.1    
+LABLIST  &"path3"test_image_ict.udr	   'FULL
+LABEL-LIST  &"path3"test_image_ict.udr	   
+LABLIST  &"path3"test_image_barc.udr	   'FULL
+LABEL-LIST  &"path3"test_image_barc.udr	   
+LABLIST  &"path3"test_image_lossless.udr   'FULL
+LABEL-LIST  &"path3"test_image_lossless.udr  
+
+!placing a valid value for filter
+label-list &"path3"s1677721400.3
+label-replace &"path3"s1677721400.3 star.out "FILTER=3" TASK="TASK"
+lablist star.out
+
+!adding stars
+label-add star.out  stars.out "NSTARS = 5,+
+STAR1=(231,165,12,894),STAR2=(21,32,187,23),STAR3=(5,10,15,20),+
+STAR4=(1,2,3,5),STAR5=(9,4,8,3)" TASK="TASK"
+lablist stars.out
+label-list stars.out
+
+label-replace stars.out star.out "NSTARS = 4" TASK="TASK"
+lablist star.out 'full
+
+label-replace stars.out star.out "NSTARS = 3" TASK="TASK"
+lablist star.out 'full
+
+label-replace stars.out star.out "NSTARS = 2" TASK="TASK"
+lablist star.out 'full
+
+label-replace stars.out star.out "NSTARS = 1" TASK="TASK"
+lablist star.out 'full
+
+label-add     stars.out star.out "RAD = 10.22" TASK="TASK"
+label-replace star.out stars.out "TARGET = RING" TASK="TASK"
+lablist stars.out 'full
+
+if ($syschar(1) = "UNIX")
+	ush rm star.out
+        ush rm stars.out
+else 
+	dcl del star.out;*
+	dcl del stars.out;*
+end-if
+end-proc
+
+
+
+

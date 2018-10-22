@@ -1,0 +1,187 @@
+PROCESS        HELP=*
+! LINEMTCH
+! VICAR/IBIS SOFTWARE
+! VICAR2/MIPL VERSION
+PARM INP TYPE=(STRING) COUNT=(1:2) 
+PARM OUT TYPE=(STRING) COUNT=1
+PARM ITIE TYPE=REAL COUNT=2
+PARM OTIE TYPE=REAL COUNT=2
+PARM LINES TYPE=INTEGER COUNT=(2:200)
+PARM MINS TYPE=INTEGER
+PARM MAXS TYPE=INTEGER
+PARM SPACING TYPE=INTEGER
+PARM POWER TYPE=INTEGER DEFAULT=5
+PARM AREA TYPE=INTEGER DEFAULT=128
+PARM NOPRINT TYPE=KEYWORD VALID=NOPRINT COUNT=(0:1) DEFAULT=--
+END-PROC
+.TITLE
+VICAR/IBIS Program LINEMTCH
+.HELP     
+PURPOSE
+     LINEMTCH performs one-dimensional line-to-line correlation between two
+images.  It is helpful for precise comparison or registration of two images.
+It allows one of the images to have a different scale than the other or
+to be offset from each other, but does not allow one image to be rotated 
+with respect to the other.
+It is similar in purpose to program PICMATCH, but is more special purpose.
+It could have application in geometric calibration of cameras.
+.page
+LINEMTCH requires that the geometric realtionship between the two images be 
+approximately linear.  It computes the variation (OFFSET) between the images
+and the linear model.  Thus it can perform precise (subpixel) measurement
+of non-linear variations.
+
+TAE COMMAND LINE FORMAT
+
+     LINEMTCH INP=(A,B) INP=INT  PARAMS
+
+     where
+     A                   is the first image to be correlated.
+     B                   is the second image to be correlated.
+     INT                 is  the output IBIS interface  file 
+                         that contains the pairs of matching 
+                         sample   locations  together   with 
+                         editing    information   such    as 
+                         correlation value.
+.PAGE
+OPERATION
+
+     First  the  program sets up a geometric model  relating 
+     the two images using ITIE-OTIE parameters.  Since it is 
+     assumed  that  the relationship between the geometry of
+     the two images is approximately linear,   two 
+     tiepoints should be enough to specify the  model.   The 
+     model is used to estimate the a search locations and to 
+     resample  the input image to match the sampling of  the 
+     output  image.   Then  the  FFTs of  input  and  output 
+     samplings  are computed and phase correlation  function 
+     is obtained as an inverse FFT of the normalized product 
+     of those two.   The maximum of the correlation function 
+     should  yield the value of offset.   If the search area 
+     is  larger than the sampling size,  program extracts  9 
+     uniformly  spaced  samplings from the  search  area  of 
+     input image and choses the offset value as maximum of 9 
+     phase correlation function,  thus ruling out accidental 
+     matches.   For each line pair, at the sample locations
+     defined by the parameters MINS, MAXS, & SPACING, the offset
+     (between the geometric model and the location of the
+     cross-correlation maximum) and the correlation value
+     are computed. The  final results are placed in columns  of 
+     the IBIS interface file as follows:
+
+Column:      1            2         3         4       5
+Value:  line pair # input samp  output samp  offs  correlation
+                                                        value
+EXAMPLE
+
+     linemtch INP=(A,B) OUT=INT ITIE=(1,400) OTIE=(20,730)+
+          LINE=(1,1,5,5) MINS=100 MAXS=800 SPAC=100 POWER=5+
+          AREA=128
+RESTRICTIONS
+     Input images must have byte format.
+     Line size <= 60000 samples
+     Power <= 10, area <= 1024
+.PAGE
+WRITTEN BY:                   B. Gokhman
+
+COGNIZANT PROGRAMMER:         K. F. Evans
+
+REVISION:                     New           March 4, 1983
+
+  7-96  SP   Ported to UNIX.  Unfortunately, the only source file available
+             appears as if it was not the final version.  It called a version
+             of FFTT that had 4 arguments.  The current FFTT has 3 arguments.
+             The phase correlation values are supposed to be normalized to
+             1.0 (for an exact match) but the version I am delivering
+             does not seem to give values greater than .5.  This program
+             probably needs more debugging before it is used, which may
+             be never.  The exact meaning of the offset column in the
+             output file remains fuzzy.
+
+.LEVEL1
+.VARIABLE INP
+Input images to correlate
+.VARIABLE OUT
+Interface file for corr info
+.VARIABLE ITIE
+Samp coord of tiepoints(input)
+.VARIABLE OTIE
+Samp coord of tiepoints(output)
+.VARIABLE LINES
+Line numbers to correlate
+.VARIABLE MINS
+First sample for matching
+.VARIABLE MAXS
+Last sample for matching
+.VARIABLE SPACING
+Step in samples
+.VARIABLE AREA
+Search area in samples
+.VARIABLE POWER
+Size of sampling (power of 2)
+.VARIABLE NOPRINT
+Suppress printout
+.LEVEL2
+.VARIABLE INP
+     INP=(A,B)             A  and  B are the  images  to  be                           
+                           correlated.
+.VARIABLE OUT
+     OUT=INT               is the output IBIS interface file 
+                           that   contains   the  pairs   of 
+                           matching     sample     locations 
+                           together with editing information 
+                           such as correlation value.
+.VARIABLE ITIE
+     ITIE=(X1,X2)          X1  and  X2  specify  the  sample 
+                           coordinates  of the two tiepoints 
+                           on the line of "input" images (in 
+                           GEOM sense).
+.VARIABLE OTIE
+     OTIE=(Y1,Y2)          Y1  and  Y2  specify  the  sample 
+                           coordinates of the two  tiepoints 
+                           on the line of "output" image (in 
+                           GEOM sense).
+
+.VARIABLE LINES
+     LINES=(LI1,LO1,LI2,LO2,...LIn,LOn)
+
+                           Pairs  LIK,  LOK specify the line 
+                           numbers from "input" and "output" 
+                           images  to be  correlated.   n  <= 
+                           100.
+
+.VARIABLE MINS
+     MINS=m                Integer  m  specifies  the  first 
+                           sample to perform matching.
+
+.VARIABLE MAXS
+     MAXS=n                Integer   n  specifies  the  last 
+                           sample to perform matching.
+
+.VARIABLE SPACING
+     SPACING=k             Integer  k specifies the step  in 
+                           samples.
+
+.VARIABLE AREA
+     AREA=a                Integer  a specifies  the  search 
+                           area  of  input image,  which  is 
+                           scanned  for  matching  with  the 
+                           fixed  sampling from  the  output 
+                           image.   It  is recommended  that 
+                           area  is chosen to be a power  of 
+                           2,   i.e.;   32,  64,  128,  etc.  
+                           Default:  a = 128.   a <= 1024.
+
+.VARIABLE POWER
+     POWER=j               Integer  j specifies the size  of 
+                           sampling (2**j)   that   is   used   in 
+                           correlations.     FFT     routine 
+                           employed  requires that  sampling 
+                           is chosen as a power of 2,  i.e.; 
+                           32,  64, 128, etc.  Default:  j = 
+                           5, i.e.; sampling = 32.  j <= 10.
+
+.VARIABLE NOPRINT
+     NOPRINT               Cancels   the   printout    mode.  
+                           Default:   results of matching in 
+                           every point will be printed out.

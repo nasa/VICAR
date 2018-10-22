@@ -1,0 +1,15 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+WRITE "This is a test of subroutine comphist"
+
+GEN A 128 128
+tcomphist A  (4,4,100,100) 'ZEROES
+
+WRITE "Test on halfword image (ramp)"
+GEN A 1000 1000 'HALF
+tcomphist A 'ZEROES
+
+end-proc

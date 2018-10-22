@@ -1,0 +1,69 @@
+procedure
+refgbl $echo
+refgbl $autousage 
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+
+! THE INPUT OF FFT1PIX IS THE OUTPUT OF FFT1.
+! *** PLEASE NOTE THAT FFT1 IS NOT CURRENTLY AVAILABLE ON THE UNIX 
+!     SYSTEM AND IS REQUIRED FOR THIS TEST SCRIPT.  ONCE FFT1 IS
+!     AVAILABLE, THIS COMMENT WARNING SHOULD BE REMOVED.	   ***
+! Jun 2010 / lwk:  replaced FFT1 with FFT11;  this gives sensible output,
+! but since I cannot be sure that FFT11 has exactly the same FFT format
+! conventions as the old FFT1, and the documentation for FFT1PIX does not
+! contain numerical examples, I cannot be positive that the program behaves
+! exactly as intended.  Therefore, these notes are retained in the test pdf.
+! (Caveat emptor.)
+
+gen a 16 16
+fft11 a b 
+
+fft1pix b c 
+list c
+
+!
+!TEST THE PARM LOG
+fft1pix b c 'log
+list c
+
+!
+!TEST THE PARM SPIKE
+fft1pix b c spike=2
+list c
+
+!
+!TEST THE PARM NORMAL
+fft1pix b c 'normal
+list c
+
+!
+! TEST THE PARM PHASE
+fft1pix b c 'phase
+list c
+
+!
+! TEST THE PARM PLOT
+fft1pix b plot=(1,3)
+
+!
+! TEST THE PARM AVG
+fft1pix b plot=2 avg=2
+
+!
+! TEST THE PARM FREQ
+fft1pix b plot=5 'freq 
+
+!
+! TEST THE REVERSE MODE
+fft1pix b c 'log
+fft1pix (b,c) d 'reve 'log
+list d
+
+!
+! TEST THE PARM DC AND GAIN
+fft1pix (b,c) d 'reve 'log dc=10. gain=2. 
+list d
+
+end-proc

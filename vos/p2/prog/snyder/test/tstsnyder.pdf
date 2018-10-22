@@ -1,0 +1,35 @@
+procedure
+refgbl $echo
+body
+
+enable-log
+
+let $echo="yes"
+!
+! For triaxial
+tricoef radius=(13.1,11.2,9.2) +
+ planet=phobos mlimit=7 nlimit=7 klimit=7
+!
+! conformal
+snyder +
+ out=(snyder_lat.img,snyder_lon.img,del_snyder_lat.img,del_snyder_lon.img) +
+ nl=180 ns=360 planet=phobos 'conformal
+!xvd snyder_lat.img
+!xvd snyder_lon.img
+!xvd del_snyder_lat.img
+!xvd del_snyder_lon.img
+!
+! authalic
+!snyder +
+! out=(auth_snyder_lat.img,auth_snyder_lon.img,auth_del_snyder_lat.img, +
+! auth_del_snyder_lon.img) +
+! nl=180 ns=360 planet=phobos 'authalic
+!xvd auth_snyder_lat.img
+!xvd auth_snyder_lon.img
+!xvd auth_del_snyder_lat.img
+!xvd auth_del_snyder_lon.img
+!
+
+disable-log
+
+end-proc

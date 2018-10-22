@@ -1,0 +1,140 @@
+PROCESS		HELP=*
+! "aggrg2" PDF/HELP - VICAR/IBIS MOSAIC SOFTWARE
+PARM INP TYPE=(STRING)
+PARM OUT TYPE=(STRING)
+PARM AGCOL TYPE=INTEGER,DEFAULT=1
+PARM AREA TYPE=INTEGER,DEFAULT=1
+PARM BYAR TYPE=INTEGER,COUNT=(1:20),DEFAULT=0
+PARM SUMCOL TYPE=INTEGER,COUNT=(1:20),DEFAULT=0
+END-PROC
+.TITLE
+VICAR/IBIS Program "aggrg2"
+.HELP
+PURPOSE
+
+	"aggrg2" collapses columns of numbers in an IBIS interface file into
+smaller columns using a designated column as the control. Within the control
+column each number which is repeated will define one row. A second key or
+index, the area key, selects the maximum value from an index group and stores
+is row position in the column. The row position is a pointer from which a
+sample can be selected for other columns.
+
+	There are three alternative methods of collapsing columns:
+
+1. The first option selects a sample item from a column based on the row
+position of the maximum value from the key column. One value is selected
+for each group of control values.
+
+2. The second option aggregates all the values in a column based on the
+limits defined by the control values.
+
+3. The third option selects a maximum value from the column based on the
+limits defined by the control values (default).
+
+.PAGE
+	To illustrate the options a sample case is shown:
+
+CONTROL AREA	SAMPLE		CONTROL	OPTION	OPTION	OPTION
+COLUMN	KEY	COLUMN		COLUMN	ONE	TWO	THREE
+1	10	 2		1	 4	12	 6
+1	20	 4		2	10	18	10
+1	15	 6		3	16	42	16
+2	24	 8		4	18	18	18
+2	31	10		5	20	20	20
+3	16	12
+3	31	14
+3	53	16
+4	10	18
+5	20	20
+
+.PAGE
+TAE COMMAND LINE FORMAT
+
+	aggrg2 INP=FILE OUT=FILE2 AGCOL=N AREA=A BYAR=(X,Y,Z) SUMCOL=(A,B,C)
+	aggrg2 INP=FILE OUT=FILE2 AGCOL=N SUMCOL=(X,Y,Z)
+
+	FILE represents the interface file, N the control column,
+	A the keyword area, X,Y, and Z the columns to be collapsed,
+	and A,B, and C the columns to be collapsed by aggregating
+	all the values for an index group.
+
+EXAMPLE
+
+	sort INP=A SORTCOL=1
+	aggrg2 INP=A OUT=B AGCOL=1
+
+	This example collapses the interface file by replacing multiple
+rows with the same value in column 1 by a single row and choosing the
+largest value in the other rows to be retained.
+
+RESTRICTIONS
+
+The interface file can be sorted on the AGCOL, but it does not have to
+be.  It will be collapsed on each set of contiguous values, using
+the breaks between them to identify the sets.  For example if the 
+agcol contains (0,0,1,1,1,1,0,0,0,1,0,0,1,1,0,0) then 7 sets of 
+contiguous values will be recognized.
+
+Dynamic allocation is used so the columns can be of any length.
+
+	WRITTEN BY		A. L. Zobrist		 1 Dec 1975
+	COGNIZANT PROGRAMMER	K. F. Evans
+	REVISION		1			26 Jul 1978
+        Made portable for UNIX  A. Scop (CRI)            2 Jan 1995
+        rewritten in C          A. L. Zobrist            7 Jun 2000
+Thu Jan  3 2008 wlb switched to USES_ANSI_C AND LIB_CARTO; misc cleanup  
+
+.LEVEL1
+.VARIABLE INP
+Standard IBIS input file.
+.VARIABLE OUT
+Standard IBIS output file.
+.VARIABLE AGCOL
+Control column number.
+.VARIABLE AREA
+Area maximum key.
+.VARIABLE BYAR
+Columns to be collapsed by the
+first option.
+.VARIABLE SUMCOL
+Columns to be collapsed by
+aggregating all values for
+an index group.
+.LEVEL2
+.VARIABLE INP
+Standard IBIS interface file
+of 512 samples by N lines.
+.VARIABLE OUT
+Standard IBIS interface file
+of 512 samples by N lines.
+.VARIABLE AGCOL
+This column number is used as
+a control for the columns to
+be compressed. Each number
+repeated in this column will
+form 1 row on the output file.
+THE COLUMN DOES NOT HAVE TO BE
+SORTED, IT WORKS ON "BREAKS" IN
+THE DATA.  FOR EXAMPLE YOU CAN
+USE
+    0,0,1,1,1,1,0,0,0,1,0,0,1,1,0,0
+TO GET SEVEN RECORDS OUT.
+.VARIABLE AREA
+This column is used as an area
+maximum key. The maximum value
+is found in each index group
+and stored by row position.
+This row position is a pointer
+to the same positions in other
+columns.
+.VARIABLE BYAR
+These are the columns to be
+collapsed by the first option,
+that is select one sample row
+position for each index group
+by the maximum key area.
+.VARIABLE SUMCOL
+These are the columns to be
+collapsed by aggregating all
+values for an index group.
+.END

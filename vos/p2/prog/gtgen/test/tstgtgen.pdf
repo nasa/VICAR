@@ -1,0 +1,132 @@
+procedure
+refgbl $echo
+parm version string def="ibis-1"
+parm org string def="column"
+body
+!let _onfail="continue"
+let $echo="yes"
+
+
+!   TEST SCRIPT FOR GTGEN
+
+gtgen out=xxxlab1 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(2,3,0,350807.4,5317081.3,0.0)", +
+          "ModelTiePointTag=(202,103,0,351807.4,5316081.3,0.0)", +
+          "ModelTiePointTag=(2,103,0,350807.4,5316081.3,0.0)", +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+   
+list xxxlab1 'zeroes
+gtlist xxxlab1
+
+
+! vicar image case
+
+gen xxxim1 nl=500 ns=500
+
+gtgen inp=xxxim1 out=xxxim2 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(0,0,0,350807.4,5317081.3,0.0)", +
+          "ModelTiePointTag=(200,100,0,351807.4,5316081.3,0.0)", +
+          "ModelTiePointTag=(200,0,0,351807.4,5317081.3,0.0)", +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+
+label-list xxxim2
+gtlist xxxim2
+
+! add case
+
+gtgen inp=xxxim2 out=xxxim3 'add +
+   geotiff=("PCSCitationGeoKey=""UTM Zone 60 N with WGS84""")
+
+label-list xxxim3
+gtlist xxxim3
+
+! label transfer case
+
+gen xxxim4 nl=40 ns=40
+
+gtgen inp=(xxxim4,xxxim3) out=xxxim5
+
+label-list xxxim5
+gtlist xxxim5
+
+! testing the 'rectfit keyword, first a non-rect case
+
+gtgen out=xxxlab1 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(2,3,0,350807.4,5317081.3,0.0)", +
+          "ModelTiePointTag=(202,103,0,351807.4,5316081.3,0.0)", +
+          "ModelTiePointTag=(2,103,0,350807.4,5316081.2,0.0)", +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+   
+gtlist xxxlab1
+
+! testing the 'rectfit keyword, now repeat with the keyword
+
+gtgen out=xxxlab1 'tiecnvrt 'rectfit +
+   geotiff=("ModelTiePointTag=(2,3,0,350807.4,5317081.3,0.0)", +
+          "ModelTiePointTag=(202,103,0,351807.4,5316081.3,0.0)", +
+          "ModelTiePointTag=(2,103,0,350807.4,5316081.2,0.0)", +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+   
+gtlist xxxlab1
+
+! exponents in tiepoints coordinates
+
+gtgen out=xxxlab2 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(2,3,0,35080.74e+01,53170813D-01,0.0)", +
+          "ModelTiePointTag=(202,103,0,351807.4,5316081.3,0.0)", +
+          "ModelTiePointTag=(2,103,0,350807.4,5316081.3,0.0)", +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+   
+gtlist xxxlab2
+
+
+! test update case, this will save time for world landsat mosaic
+
+gen xxxlab3 nl=1 ns=1
+
+gtgen in=xxxlab3 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(2,3,0,35080.74e+01,53170813D-01,0.0)", +
+          "ModelTiePointTag=(202,103,0,351807.4,5316081.3,0.0)", +
+          "ModelTiePointTag=(2,103,0,350807.4,5316081.3,0.0)", +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+gtlist xxxlab3
+
+! add case for update
+
+gtgen inp=xxxlab3 'add +
+   geotiff=("PCSCitationGeoKey=""UTM Zone 60 N with WGS84""")
+gtlist xxxlab3
+
+! replace case for update
+
+gtgen in=xxxlab3 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(12,3,0,35080.74e+01,53170813D-01,0.0)", +
+          "ModelTiePointTag=(212,103,0,351807.4,5316081.3,0.0)", +
+          "ModelTiePointTag=(12,103,0,350807.4,5316081.3,0.0)", +
+          "GTRasterTypeGeoKey=2(RasterPixelIsPoint)")
+gtlist xxxlab3
+
+
+! add case, special case of adding tiecnvrt-tiepoints, the old
+! mapping should be deleted
+
+gen xxxim1 nl=5 ns=5
+
+gtgen inp=xxxim1 out=xxxim2 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(0,0,0,-110.,34.,0.0)", +
+          "ModelTiePointTag=(0,100,0,-110.,33.,0.0)", +
+          "ModelTiePointTag=(100,0,0,-109.,34.,0.0)", +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+
+label-list xxxim2
+
+! continuing the add case, special case of adding tiecnvrt-tiepoints,
+! the old mapping should be deleted
+
+gtgen inp=xxxim2 out=xxxim3 'add 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(0,0,0,-110.,34.,0.0)", +
+          "ModelTiePointTag=(0,50,0,-110.,33.,0.0)", +
+          "ModelTiePointTag=(50,0,0,-109.,34.,0.0)")
+
+label-list xxxim3
+end-proc

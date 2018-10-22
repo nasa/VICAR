@@ -1,0 +1,21 @@
+/***********************************************************************
+                     IMAKE FILE FOR PROGRAM geoma
+
+   To Create the build file give the command:
+
+		$ vimake geoma			(VMS)
+   or
+		% vimake geoma			(Unix)
+************************************************************************/
+#define PROGRAM	geoma
+#define R2LIB
+
+#define MODULE_LIST geoma.f
+#define FTNINC_LIST fortport
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define LIB_MATH77
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

@@ -1,0 +1,26 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM correlate1d
+
+   To Create the build file give the command:
+
+		$ vimake correlate1d			(VMS)
+   or
+		% vimake correlate1d			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	correlate1d
+#define R2LIB
+
+#define MODULE_LIST correlate1d.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

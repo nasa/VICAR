@@ -1,0 +1,24 @@
+1 IFMESSAGE
+
+  Display a message unless the the TAE NOMESSAGE flag was set (with
+  FLAG-ADD NOMESSAGE).  This may be done, for example, to display the
+  program version unless NOMESSAGE is set.
+
+  FORTRAN Calling Sequence:  call ifmessage( msg )
+  C Calling Sequence:        zifmessage( msg );
+
+  The argument msg is REQUIRED. 
+  In Fortran, it must be a quoted string or CHARACTER type.
+  In C, it must be a quoted string or any other null-terminated string.
+
+  IFMESSAGE calls XVP to check the bit of the TAE global variable $switch
+  that is the NOMESSAGE flag.  If the bit is not set, it calls XVMESSAGE to 
+  print the message.  (See the VICAR online help for FLAG for info on the flag.)
+
+2 History
+
+ 93-7-16  ...SP.... INITIAL VERSION
+
+  Original Programmer: STEVE POHORSKY  July 16, 1993
+  Current Cognizant Programmer: Steve Pohorsky
+  Source Language: Fortran (or C for zifmessage)

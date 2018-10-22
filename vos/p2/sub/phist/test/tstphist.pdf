@@ -1,0 +1,28 @@
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+
+body
+local dir string
+let $autousage="none"
+let _onfail="continue"
+
+let $echo="no"
+write "General Test"
+write ""
+let $echo="yes"
+tphist
+
+let $echo="no"
+write "ENTROPY test with Cassini input"
+write ""
+if ($syschar(1)="UNIX")
+   let dir = "/project/test_work/testdata/cassini/iss/"
+else
+   let dir = "wms_test_work:[testdata.cassini.iss]"
+end-if
+let $echo="yes"
+entropy &"dir"sum2.1 'phist 'zeroes
+
+end-proc

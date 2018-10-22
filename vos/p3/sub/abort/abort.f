@@ -1,0 +1,7 @@
+      SUBROUTINE ABORT(MSG)
+      CHARACTER*80 MSG
+C
+      CALL XVMESSAGE(MSG,' ')
+      CALL ABEND
+      RETURN
+      END

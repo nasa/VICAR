@@ -1,0 +1,16 @@
+!****************************************************************************
+! TSTLUT.PDF, unit test procedure for subroutine LUT.F
+!****************************************************************************
+procedure help=*
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+write "Test subroutine LUT"
+TLUT
+end-proc
+.title TSTLUT.PDF - unit test for subroutine LUT
+.help
+This unit test creates no files and uses little CPU. Just run it in batch,
+with no parameters, and verify the output.
+.end

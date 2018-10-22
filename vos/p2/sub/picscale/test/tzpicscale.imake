@@ -1,0 +1,18 @@
+/* Imake file for Test of VICAR subroutine picscale */
+
+#define PROGRAM tzpicscale
+
+#define MODULE_LIST tzpicscale.c  txpicscale.f
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+#define USES_ANSI_C
+#define USES_FORTRAN
+#define FTN_STRING
+
+#define LIB_RTL 
+#define LIB_TAE
+#define LIB_FORTRAN
+#define LIB_P2SUB
+#define LIB_SPICE
+#define LIB_NETWORK

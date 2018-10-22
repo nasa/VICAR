@@ -1,0 +1,147 @@
+procedure
+parm    mode    type=keyword count=(0:1) valid=(batch,nobatch,inter) default=batch
+local   afidsroot   type=string count=1
+local   aftestdata  type=string count=1
+local path  type=string count=1
+
+! Aug 23, 2013 - RJB
+! TEST SCRIPT FOR MOSPLOT
+! tests HALF images
+!
+! Vicar Programs:
+!       ibis-list
+! 
+! External programs
+!       gnuplot 4.6.0, gimp 2.6
+!
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no xvd display
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!           
+!   In batch mode it produces files testx.eps by calling gnuplot
+!       to create the encapsulated postscript file which can be
+!       later viewed with ghostscript or gimp
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
+!            
+!
+! Requires external test data: 
+!   cartlab or mipl dependent pointers
+!
+!   Cartlab defines env var $AFIDS_ROOT, mipl doesn't
+!   The test data in cartlab is on /raid1/test_data 
+!   but in other facilities it might be somewhere else. 
+!   
+!   To facilitate this test you can define an
+!   environment variable $AFIDS_TESTDATA to point to
+!   that data. The cartlab system does not. In the git archive
+!   on pistol there is softlink to the test data in vdev that
+!   allows this test to pass 
+
+
+  refgbl  $echo
+  refgbl  $SysChar
+body
+let _onfail="stop"
+let $echo="no"
+!check to see if mipl or cartlab for certain programs
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
+if (afidsroot = "")
+!MIPL        
+    ush ln -s /project/test_work/testdata/gll path
+else
+!CARTLAB     
+    if (aftestdata = "")
+        ush ln -s /raid1/vicar_test_images/testdata/gll path
+    else
+        ush ln -s $AFIDS_TESTDATA/vicar_test_images/testdata/gll path
+    end-if
+end-if
+
+let _onfail="goto rm"
+!
+! TEST 1A - default plot is mosplot.gpi - line/sample space
+!          minimum parameters
+  write "===To Test Summation Mode"
+  write "===This call will create a file named summ.over on current directory"
+  let $echo="yes"
+ mosplot path/summ.sedr project=GLL out=summ1.over 
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot mosplot.gpi
+end-if
+!
+! TEST 1B - default plot is mosplot.gpi - line/sample space
+!          minimum parameters - stereographic proj 
+!          (Corresponds to default xrt graph plot)
+ mosplot path/summ.sedr project=GLL out=map1.over latlon=(0,180) +
+     plotout=map1
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot map1.gpi
+end-if
+
+  let $echo="no"
+  
+  write "===The content of the IBIS Overlapping file is"
+  let $echo="yes"
+ ibis-list summ1.over
+  let $echo="no"
+!
+! TEST 2A - PRINT Contents of files - name plotfile
+!
+  write "===This call will create a file named summ2.over on current directory"
+  write "PRINT parm"
+  let $echo="yes"
+ mosplot path/summ.sedr project=GLL out=summ2.over 'print plotout=test2
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test2.gpi
+end-if
+!
+! TEST 2B - PRINT Contents of files - name plotfile
+!          (Corresponds to default xrt graph plot)
+
+ mosplot path/summ.sedr project=GLL out=summ2.over 'print +
+  latlon=(0,180) plotout=map2
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot map2.gpi
+end-if
+
+!
+! TEST3 - Object space
+!
+ mosplot path/summ.sedr project=GLL out=summ3.over 'object plotout=test3
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test3.gpi
+end-if
+!
+! TEST4 - Provide a latitude and longitude boundary
+!
+ mosplot path/summ.sedr project=GLL out=summ4.over latlon=(230.79613,3.5350285) +
+    plotout=map4
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot map4.gpi
+end-if
+ ibis-list summ4.over
+
+
+!
+! TEST5 - Provide a latitude and longitude boundary 
+!        Encapsulated postscript file
+!
+ mosplot path/summ.sedr project=GLL out=summ5.over latlon=(230.79613,3.5350285) +
+    plotout=test5 plotfmt=eps
+ush gnuplot test5.eps.gpi
+if (mode = "nobatch" or mode = "inter")
+    ush gimp test5.eps
+end-if
+
+ 
+rm>
+ush rm path
+let $echo="no"
+end-proc

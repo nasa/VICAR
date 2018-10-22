@@ -1,0 +1,391 @@
+PROCESS HELP=*
+PARM INP TYPE=STRING
+PARM OUT TYPE=STRING COUNT=2
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL TYPE=INTEGER DEFAULT=1
+PARM SS TYPE=INTEGER DEFAULT=1
+PARM NL TYPE=INTEGER DEFAULT=0
+PARM NS TYPE=INTEGER DEFAULT=0
+PARM MSS TYPE=INTEGER VALID=2:50
+PARM BANDS TYPE=INTEGER COUNT=(0,2:12) DEFAULT=--
+PARM INCR INTEGER DEFAULT=1
+PARM LINC INTEGER DEFAULT=1
+PARM SINC INTEGER DEFAULT=1
+PARM THRESH REAL COUNT=0:1 DEFAULT=--
+PARM NCLUS TYPE=REAL COUNT=2
+PARM NCYCLE TYPE=INTEGER DEFAULT=50
+PARM NITER TYPE=INTEGER DEFAULT=0
+PARM TEMP TYPE=REAL DEFAULT=0.2
+PARM RESTART TYPE=KEYWORD COUNT=0:1 VALID=(RESTART,NORESTART) DEFAULT=NORESTART
+END-PROC
+.TITLE
+VICAR Program clusan  
+.HELP
+
+PURPOSE
+
+    clusan is a clustering algorithm that uses the simulated annealing
+optimization technique to find the best cluster partition.  The input is
+multidimensional data in MSS format.  The data are grouped into clusters 
+which have the minimum scaled variance.  This clustering algorithm is
+designed for finding the best cluster partition of a small number of
+multidimensional data points; the maximum is 50000 points.
+
+
+EXECUTION EXAMPLES
+
+clusan DATA.MSS  (DATA.SDS,DATA.CLS)  MSS=6 BANDS=(2,3,5,6) NCLUS=(6,4) +
+          INCR=10 SIZE=(100,100,500,500) THRESH=10.
+
+The input data are in MSS format; i.e. the bands are appended together
+in the sample direction using the program MSS.  The pixels can be in any
+format since they are converted to real in the program.  The MSS parameter 
+specifies how many bands are in the input file.  
+
+The first output file is a statistics dataset (like those produced by 
+USTATS, etc)  which contains the number of data points, the mean vector, 
+and the covariance matrix for each cluster.  This file can be used by
+programs CLUSTEST and DENDSTAT.
+
+The second output file contains the input data for those bands that were 
+used in the clustering and another band which gives the cluster number 
+that the pixel was assigned to.  This file is in MSS format and has the 
+same pixel format as the input file.
+
+The BANDS parameter specifies which bands in the input file will be
+used for the clustering.  This allows the user to try clustering various
+combinations of bands without having to make up a new input dataset each
+time.  There must be at least two, but no more than twelve bands.
+
+The NCLUS parameter guides the algorithm in choosing the number of 
+clusters (see theory of operation).  The first number is the desired number
+of clusters and the second number is about how many clusters the algorithm
+can stray from the desired number.
+
+The INCR (or LINC/SINC) parameter is used to cut down on the number of
+points to be used (since the maximum number is 50000).  This is also the
+purpose of the SIZE parameter.  
+
+The THRESH parameter sets a minimum value for valid pixels (objects).
+Note that in the cluster dataset output all pixels on a line that lie
+below THRESH are moved to the end of the line and assigned the value 0.
+
+
+clusan DATA.CLS  (DATA2.SDS,DATA2.CLS)  MSS=5 BANDS=(1,2,3,4) NCLUS=(8,2) +
+			'RESTART  NCYCLE=25 NITER=100 TEMP=0.5
+
+This example which uses the remaining parameters shows how to restart a 
+clustering run.  To restart the run, the RESTART keyword is specified
+and the second output file from the previous run is used for the input
+file.  Note that the bands in the new input file are in different positions
+than the bands in the old input file, and that the INCR and SIZE parameters
+need not be respecified, as the file has been compressed accordingly.
+MSS is now 5, as the input contains only the 4 bands that were processed
+in the first run, plus an additional pseudo-band containing cluster numbers.
+
+The last three parameters will not usually have to be specified, but allow
+some control over the optimization algorithm (see theory of operation).
+The NCYCLE parameter is the maximum number of temperature cycles the 
+algorithm will perform.  If it is large then the algorithm will lower the
+temperature very slowly, but if it is too small the system will be
+quenched and will not be at a true minimum energy configuration.
+The algorithm will stop before doing NCYCLE temperature cycles if
+the system is in a stable state (i.e. the energy is no longer decreasing).
+
+The NITER parameter specifies how many iterations are to be done for
+each cooling cycle.  The default is to do 4 times the number of data points,
+so that on average each point will be considered about four times per
+cycle.
+
+The TEMP parameter gives the initial temperature to start the system
+off with.  The initial temperature should be of the order of unity.
+A higher starting temperature will make the system behave more randomly
+at first.
+.PAGE
+RESTRICTIONS
+
+1. The maximum number of data points is 50,000.  (The LINC/SINC parameters
+may be used to reduce the number of points used from the input image.)
+
+2. The maximum number of clusters is 100.
+
+3. The number of bands to cluster must be between 2 and 12 inclusive.
+
+4. The maximum sample size of the input MSS file is 60,000 samples.
+
+5. The maximum number of lines that are used (i.e., (NL-SL)/LINC+1)
+  in the input MSS file is 10,000.
+.page
+THEORY OF OPERATION
+
+    Clustering is the technique of grouping data points (or objects) into a
+number of groups based on similarities in the objects' measured attributes.
+While for a small number of attributes (one or two variables) graphing the
+data points can be used to easily find the clusters, as the number of attri-
+butes becomes larger visual methods become impossible.  Many computer
+algorithms exist which cluster data points in any number of dimensions.
+One approach to the problem of clustering is that of optimization.  An 
+objective function which measures the degree of clusterness is maximized over
+all possible partitions of the data points into clusters.  Of course, a wide
+range of such functions could be imagined.  There are also a wide variety of
+optimization methods available to maximize or minimize functions.  Most such
+methods are inappropriate because of the nature of clustering.  Clustering
+involves discrete movements of objects between clusters, so that derivatives
+are not a particularly useful concept.  Also there are many local minima
+for optimization algorithms to get caught in.  One new algorithm which over-
+comes these difficulties is called simulated annealing.
+    Simulated annealing is analogous to the cooling and crystalization process
+of a crystalline solid.  The objective function to be minimized is called the
+energy of the system.  An object is randomly moved from one cluster to another
+in analogy with the random motions of the atoms in a crystal.  If the energy
+is thus decreased the change is accepted.  If the energy is increased the
+change is still accepted with a probability depending on the Boltzmann factor:
+exp(-deltaE/Temp).  Thus increases in the energy comparable to the temperature
+still have a good chance of being accepted while large increases in the energy
+have very little chance of being accepted.  This allows the algorithm to
+rattled its way out of local minima.  The temperature is at first set high so
+that a lot of random motion occurs.  It is then gradually lowered until the
+system freezes.  How exactly the temperature is lowered is called the
+annealing schedule.  There are many possibilities for the annealing schedule,
+but the one used in this implementation is that of Newton's law of cooling,
+i.e. the temperature decreases exponentially:
+  Temp = InitialTemp * exp(-const*Time) .
+
+    The objective function in this program is the normalized average of the
+cluster variances.  The variances in each attribute dimension are scaled by
+the total variance of all of the data points in that dimension.  Thus the
+results are independent of all scalings and translations of the attributes.
+The variances of the clusters are averaged by weighting by the number of
+points in each cluster.  Finally the average of the variances is scaled by
+the number of attributes and scaled according to the number of clusters, so
+that the energy function is invariant and can be compared between configura-
+tions with different number of clusters.  The energy should always be of
+order one.  The energy function treats all of the attributes the same and will
+tend to make hyperspherical clusters even if the clusters should be long and
+stringy.
+
+    The algorithm also uses the simulated annealing technique to find the
+number of clusters.  Every once in a while, it will try lumping two clusters
+together or splitting one cluster up into two and will do the same Boltzmann
+calculation to determine whether to accept the change.  The algorithm can be
+guided to give about a certain number of clusters with the NCLUS parameter.
+The first value gives the number of clusters desired and the second value gives
+a rough number of how many in either direction is acceptable.  NCLUS=(6,2) 
+means "I want 6 clusters give or take about 2".  This feature is implemented
+by adding a parabolic term to the energy function, i.e. a term whose value
+goes as the square of the difference between the actual number of clusters and
+the desired number.
+
+
+
+OPERATION STRATEGY
+
+    The program starts out by randomly selecting the specified number of 
+objects and setting all of the objects to the closest cluster.  Run the 
+program a few times on the same data to see if same minimum energy is 
+reached.  If you want the program to decide entirely by itself the best 
+number of clusters, make NCLUS(2) have some large value.  If the program 
+has trouble converging to the same result it probably means that the data 
+is not particularly clustered.  Generally the program quickly and reliably 
+converges in cases where the data has well defined groupings.
+
+
+PRECISION:   5-Sept-94
+  1.	This portable version uses double precision,which provides a 
+	capability to adjust the sensitivity to changes in the "ENERGY"
+	For portablity testing, this version ignores delta "ENERGY" 
+	changes less than .0000005.
+
+  2.	CLUSTEST has always used double precision. The CLUSAN output 
+ 	statistical files which are used by CLUSTEST are single precision
+ 	(REAL*4).  The stated precision (from the VAX FORTRAN manuals) for
+ 	REAL*4 is "approximately 2**23, that is, typically seven decimal
+ 	digits".  In order to eliminate test differences (VAX vs. UNIX)
+ 	caused by reading the single precision values into double precision
+ 	variables, it is necessary to truncate the input values to six
+ 	decimal digits.  The truncation is currently being implemented by
+ 	the "ported' version of CLUSTEST.
+
+  3.	The changes made for porting cause CLUSAN and CLUSTEST to perform
+ 	differently than the original baseline versions.  The main difference
+ 	appears to be the result of specifying default values for TEMP0 and
+ 	NCYCLES.  Not specifing default values for these parameters produce
+ 	inconsistent results between the different platforms.  For comparison
+ 	testing purposes, the original program was modified to use the same 
+ 	random number generator with the same seed value as the new ported 
+ 	versions.  However, even with these changes the original program does
+ 	not produce exactly the same results when run mutliple times.
+
+
+REFERENCES
+
+Optimization by Simulated Annealing
+	Kirkpatrick, Gelatt, and Vecchi, 
+	Science, May 13, 1983 ,  No. 220
+
+Cluster Analysis For Applications,
+	Anderberg, Michael R.,  Academic Press  (1973).
+
+Classification: Methods for the Exploratory Analysis of Multivariate Data,
+	Gordon, A. D.,  Chapman and Hall (1981).
+
+.PAGE
+HISTORY
+
+Original Programmer:   Frank Evans       November 1985
+Cognizant Progrmmer:   Frank Evans
+
+Revisions:
+  1987-04-06 L.W.Kamp,  added INCR/LINC/SINC & THRESH parameters, fixed
+		        SS/NS, increased BUFFER size.
+  1994-09-05 C.R. Schenk (CRI) Ported to UNIX & changed to double
+                        precision. 
+  2016-11-15 W.L. Bunch Set return type of DISTFUNC to REAL*8.
+
+.LEVEL1
+.VARIABLE INP
+Input attribute file
+.VARIABLE OUT
+Output statistics data set
+and cluster file
+.VARIABLE SIZE
+Standard VICAR size field
+.VARIABLE SL
+Starting line
+.VARIABLE SS
+Starting sample (per band !)
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples (per band !)
+.VARIABLE MSS
+Number of bands in MSS format
+.VARIABLE BANDS
+List of bands (variables)
+to cluster
+.VARIABLE INCR
+Line/sample increment
+.VARIABLE LINC
+Line increment
+.VARIABLE SINC
+Sample increment
+.VARIABLE THRESH
+Minimum valid DN
+.VARIABLE NCLUS
+The number of clusters desired
+The range in number of clusters
+.VARIABLE NCYCLE
+The number of temperature cycles
+.VARIABLE NITER
+The number of iterations per 
+cycle
+.VARIABLE TEMP
+The initial temperature
+.VARIABLE RESTART
+'RESTART to restart a clustering
+
+.LEVEL2
+.VARIABLE INP
+The input data are in MSS format; i.e. the bands are appended together
+in the sample direction using the program MSS.  The pixels can be in any
+format since they are converted to real in the program.  The MSS parameter 
+specifies how many bands are in the input file.  
+.VARIABLE OUT
+    The first output file is a statistics dataset (like those produced by 
+USTATS, etc)  which contains the number of data points, the mean vector, 
+and the covariance matrix for each cluster. 
+ 
+    The second output file is intended for the RESTART option.  It contains 
+the input data for those bands that were used in the clustering and another 
+band which gives the cluster number that the pixel was assigned to.  This 
+file is in MSS format and has the same pixel format as the input file.  If 
+SIZE and/or INCR was specified on the first run, then the data will have 
+been compressed accordingly and these parameters must not be respecified on 
+a restart.
+
+.VARIABLE SIZE
+Standard VICAR size field
+.VARIABLE SL
+Starting line
+.VARIABLE SS
+Starting sample.  This is PER BAND, i.e., it does not apply (as is standard
+for the MIPL SS parameter) to the entire input image, but (because the image
+is in this case in MSS format) to each band separately.
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples.  This is PER BAND, i.e., it does not apply (as is standard
+for the MIPL NS parameter) to the entire input image, but (because the image
+is in this case in MSS format) to each band separately.
+.VARIABLE MSS
+The MSS parameter specifies how many bands are in the input MSS
+format file.  
+.VARIABLE BANDS
+The BANDS parameter specifies which bands in the input file will be
+used for the clustering.  This allows the user to try clustering various
+combinations of bands without having to make up a new input dataset each
+time.  There must be at least two, but no more than twelve bands.
+
+Default is to use all bands in the input file in the order in which they
+occur in the file.  However, if RESTART has been specified, then the last
+band is not used.  I.e., default is:
+  BANDS = (1,2,...,MSS)  if not RESTART,
+  BANDS = (1,2,...,MSS-1)  if RESTART.
+.VARIABLE INCR
+Increment in line and sample direction.  This parameter specifies both
+LINC and SINC, q.v.
+.VARIABLE LINC
+Increment in the line direction.  This parameter specifies that only
+every LINCth line (starting with SL) will be used to select objects from
+the image for the algorithm.
+
+Default = 1 (every line).
+.VARIABLE SINC
+Increment in the sample direction.  This parameter specifies that only
+every SINCth sample (starting with SS) will be used to select objects from
+the image for the algorithm.
+
+Default = 1 (every sample).
+.VARIABLE THRESH
+THRESH specifies the minimum DN value that is to be accepted as a valid
+pixel.  If an object has a DN less than THRESH in any band (of those 
+specified by the BAND parameter), then it is rejected.
+
+The default is to not do thresholding; all pixels in size region are used.
+
+In the second output file, all pixels on a given line that have been rejected
+are written at the end of that line, with 0 DN.  Hence THRESH does not need 
+to be specified on a RESTART, even if it was specified on the first run.
+
+.VARIABLE NCLUS
+The NCLUS parameter guides the algorithm in choosing the number of 
+clusters (see theory of operation).  The first number is the desired number
+of clusters and the second number is about how many clusters the algorithm
+can stray from the desired number.
+.VARIABLE NCYCLE
+The NCYCLE parameter is the maximum number of temperature cycles the 
+algorithm will perform.  If it is large then the algorithm will lower the
+temperature very slowly, but if it is too small the system will be
+quenched and will not be at a true minimum energy configuration.
+The default will usually be adequate.
+.VARIABLE NITER
+The NITER parameter specifies how many iterations are to be done for
+each cooling cycle.  The default is to do 4 times the number of data points,
+so that on average each point will be considered about four times per
+cycle.  The default will usually be adequate.
+.VARIABLE TEMP
+The TEMP parameter gives the initial temperature to start the system
+off with.  The initial temperature should be of the order of unity.
+A higher starting temperature will make the system behave more randomly
+at first.  The default will usually be adequate.
+.VARIABLE RESTART
+To restart the run, the RESTART keyword is specified and the second output 
+file from the previous run is used for the input file.  Note that the 
+bands in the new input file are in different positions than the bands in 
+the old input file and the input includes an additional band containing
+cluster numbers, hence MSS will in general be different than on the first
+run.  If SIZE or INCR (or equivalent parameters) were specified in the 
+first run they must not be specified on a RESTART, as the data will have 
+been compressed accordingly.
+.END
+Ox$ Return

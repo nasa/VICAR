@@ -1,0 +1,90 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="no"
+write " "
+write "MIPS Test PDF for PIC2VIC and VIC2PIC"
+write " "
+write " "
+write "Generate a 200x200 VICAR image... "
+let $echo="yes"
+gen testvic 200 200
+
+let $echo="no"
+write "*** List labels and contents in upper left corner"
+write " "
+let $echo="yes"
+label-list testvic
+list testvic nl=10 ns=10
+
+let $echo="no"
+write "*** Convert test file into PICS format (pic file)"
+write " "
+let $echo="yes"
+vic2pic testvic testpic
+
+let $echo="no"
+write "*** And back to VICAR format"
+write " "
+let $echo="yes"
+pic2vic testpic testvic2
+
+let $echo="no"
+write "*** List labels and contents in upper left corner of result"
+write " "
+let $echo="yes"
+label-list testvic2
+list testvic2 nl=10 ns=10
+
+let $echo="no"
+write "*** Compare the two pictures"
+write " "
+let $echo="yes"
+difpic (testvic testvic2)
+
+let $echo="no"
+write "*** Again to VICAR format with cropped size=(SL,SS,NL,NS)"
+write " "
+let $echo="yes"
+pic2vic testpic testvic2 size=(5,5,10,10)
+
+let $echo="no"
+write "*** List labels and contents in with cropped size"
+write " "
+let $echo="yes"
+label-list testvic2
+list testvic2 nl=10 ns=10
+
+
+let $echo="no"
+
+!
+! Test 3D image
+!
+let $echo="no"
+write "*** Convert 3D test file into PICS format (pic file)"
+write " "
+let $echo="yes"
+gen testvic3d 200 200 3
+label-list testvic3d
+list testvic3d nl=10 ns=10 
+vic2pic testvic3d testpic3d
+
+let $echo="no"
+write "*** And back to VICAR format"
+write " "
+let $echo="yes"
+pic2vic testpic3d testvic3d2 nb=3
+
+let $echo="no"
+write "*** Compare the two pictures"
+write " "
+let $echo="yes"
+label-list testvic3d2
+list testvic3d2 nl=10 ns=10 
+difpic (testvic3d testvic3d2)
+
+end-proc

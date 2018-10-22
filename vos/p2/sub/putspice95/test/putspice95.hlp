@@ -1,0 +1,87 @@
+1. PUTSPICE95
+
+Description:
+ To update the SPICE for GLL with provenance information. If provenance
+ information is not available, their default values will be used.
+
+FORTRAN calling sequence:
+	integer*4	project
+	real*8		buf
+	integer*4	mode
+	integer*4	ind
+
+	call putspice95(PROJECT, BUF, MODE, ind)
+
+C calling sequence:
+	#include "xvmaininc.h"
+	#include "ftnbridge.h"
+	#include "spc.h"
+	#include "spiceinc.h"
+
+	int		project;
+	buf_union_typ	*buf;
+	int		mode;
+	zputspice95(project, buf, mode)
+
+2. ARGUMENTS
+
+   INPUT ARGUMENTS:
+	project = spacecraft identification number consistence    integer*4
+                  with NAIF (GLL = -77, VGR-1 = -31, VGR-2 = -32)
+
+	buf     = 100 word buffer containing SPICE data.
+		  The following item in buf must be
+		  correctly filled when calling putspice95():
+			- Instrument
+			- SCET data
+			- Source string
+			- Target Name
+			- C, OM & ME Matrix
+			- provenance information (should all
+			  be in character format). If not,
+			  default values will be used.
+
+	mode    = 0 use local spice kernels
+                = 1 use MIPS spice kernel via "spiceserver"
+
+   OUTPUT ARGUMENT:
+	ind     = status of call
+		  status values are defined as follows:
+                  0 = Success
+                 -1 = Unrecognizable Project Id
+                 -2 = Error Opening Kernel File
+                 -3 = Cannot Update NAIF KERNEL
+                 -4 = Error Packing Seg. Descriptor
+                 -5 = Error Starting New Array
+                 -6 = Error Adding New Array
+                 -7 = Daf-file Not Close Properly
+                 -8 = Bad User Input Data
+
+	*** For C calling sequence, zputspice95() return
+		an integer as its indicator code.
+
+
+   When calling putspice95, the user can specify both the source of the file
+	he/she wants to update and the ck_id of the file in the usr_info
+	data structure.
+	If both are specified, ck_id will be used. If ck_id is specified but
+	not valid, source will be used. ck_id has higher priority because
+	it is more specific compared to source.
+
+HISTORY
+
+Written By: S Le	6-19-1995
+*** Help file is originally written by Jean Lorre
+
+   May 20, 1998   ...T.Huang...  corrected instrument-code calculation problem.
+
+   Oct 22, 1998   ...T.Huang...   Modifed to return the correct status.
+                                  (i.e. 1=SUCCESS, 0=FAILURE).
+                                  The 'msclt' and 'mslcl' subroutines return
+                                  0 for success and -1 for failure.
+   Apr 01 99   GMY  Add (char*) to eliminate SGI compile warning messages.
+
+   Jun 03, 1999   ...T.Huang...   Obsoleted c95.c
+
+   Jun 24, 1999   ...T.Huang...   Corrected calls to mslcl_<proj>putspice and
+                                  mapping of camera ids.

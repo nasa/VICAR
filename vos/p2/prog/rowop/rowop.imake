@@ -1,0 +1,9 @@
+#define PROGRAM rowop
+
+#define MODULE_LIST rowop.f
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_TAE
+#define LIB_RTL
+#define LIB_P2SUB

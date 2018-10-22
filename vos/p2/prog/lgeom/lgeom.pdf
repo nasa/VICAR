@@ -1,0 +1,426 @@
+process help=*
+ !
+ PARM INP     TYPE=STRING COUNT=(1:2)
+ PARM OUT     TYPE=STRING COUNT=1
+ PARM SIZE    TYPE=INTEGER COUNT=0:4 DEFAULT=(1,1,0,0)
+ PARM SL      TYPE=INTEGER COUNT=0:1 DEFAULT=1
+ PARM SS      TYPE=INTEGER COUNT=0:1 DEFAULT=1
+ PARM NL      TYPE=INTEGER COUNT=0:1 DEFAULT=0
+ PARM NS      TYPE=INTEGER COUNT=0:1 DEFAULT=0
+ PARM NAH     TYPE=INTEGER COUNT=0:1 DEFAULT=--
+ PARM NAV     TYPE=INTEGER COUNT=0:1 DEFAULT=--
+ PARM TIEPOINT TYPE=REAL COUNT=(16:600)+
+               DEFAULT=(1,1,1,1,2,2,2,2,2,1,2,1,2,2,2,2)
+ PARM INTERP  TYPE=KEYWORD COUNT=0:1 VALID=NOIN DEFAULT=--
+ PARM INTRPZ  TYPE=KEYWORD COUNT=0:1 VALID=NOIZ DEFAULT=--
+ PARM PRINT   TYPE=KEYWORD COUNT=0:1 VALID=PRINT DEFAULT=--
+ PARM FORMAT  TYPE=KEYWORD COUNT=0:1 VALID=HALF DEFAULT=--
+ PARM IDSNAM  TYPE=(STRING) COUNT=1 DEFAULT=LGIDS
+ PARM IDSNS   TYPE=INTEGER COUNT=1 DEFAULT=1000
+ PARM WSA     TYPE=INTEGER COUNT=1 DEFAULT=150000
+ PARM PMEM    TYPE=REAL    COUNT=1 VALID=(0.1:2047) DEFAULT=16.0
+ PARM RATIO TYPE=REAL COUNT=1 DEFAULT=2.0
+ PARM PARMS TYPE=(STRING) COUNT=0:1 DEFAULT=--
+ !
+ END-PROC
+!
+! HELP TEXT FOR LGEOM
+.TITLE
+LGEOM
+.HELP
+PURPOSE:
+     LGEOM is a VICAR applications program which makes geometric
+     changes in pictures.  It can be used for correcting geometric
+     distortion, increasing picture size, and reducing picture
+     size.  LGEOM should be used instead of MGEOM if any output
+     line is rotated more than 85 degrees from its input position.
+     It uses an intermediate data set which is created and deleted
+     automatically, unless the entire input picture fits in memory.
+     In this case, LGEOM operates in a one-pass mode.  Memory is 
+     dynamically allocated with STACKA.
+.page
+EXECUTION:
+
+     lgeom (INPUT,PDS) OUTPUT SIZE QUALIFIERS TIEPOINTS
+WHERE
+     INPUT          is the input data set.
+     PDS            is an optional parameter and tiepoints dataset 
+                      created by program MAP.  (Except for in MAP2,
+                      LGEOM is almost always run with the PARMS parameter
+                      as the means of entering the TIEPOINT, NAH, and NAV
+                      parameters.)
+     OUTPUT         is the output data set.
+     SIZE           is a VICAR size field for the output set
+     QUALIFIERS     consist of any of the following parameters
+	  IDSNAM	indicates an alternative name for the
+			itermediate data set (IDS)
+	  IDSNS		indicates an alternative line size for IDS
+          NOIN          indicates no interpolation is to be done
+	  NOIZ		indicates no interpolation with zero DN values.
+     TIEPOINTS      is a collection of parameters as follows:
+	  NAH		The number of (tiepoint) rectangles in the horizontal
+			direction (Number of areas horizontal)
+	  NAV		The number of rectangles vertically.
+	  TIEPOINT	A set of points mapping the rectangles in the
+			output picture to quadrilaterals in the input
+			picture.  For details, see help under the
+			TIEPOINT parameter.
+           or
+	  PARMS		An optional parameter data set (equivalent to
+                        PDS, but in the new VAX format).  
+                        LGEOM is almost always run with the PARMS parameter
+                        as the means of entering the TIEPOINT, NAH, and NAV
+                        parameters.
+
+Tiepoint rectangles need not be defined for the entire picture.
+If an area of the picture is not within a defined rectangle, it is geomed 
+using parameters from the nearest defined rectangle. Thus, in order to have 
+a portion of the input picture reproduced exactly in the output, it is 
+necessary to define a rectangle with zero displacement around the area.
+
+If the output picture does not fill the area reserved for it by the
+SIZE parameter, the pixels in the unfilled area are given the value zero. 
+If the size field is defaulted, the output picture will be the same size as 
+the input picture.
+
+The default mode for LGEOM is four-point bi-linear interpolation;
+i.e. the output pixels will be a function of the DN values of the four
+points in the input picture closest to the fractional line and sample
+calculated by the specified transformation.
+
+The input image may either be byte or halfword data.  The data format is taken
+from the VICAR label of the input file.  The output image has the same data 
+format (byte or halfword) as the input image.  
+
+The size field parameters refer to samples, 
+even for halfword data.  For example, the following
+will enlarge a 100 line by 100 sample (200 bytes) halfword data set A to 216 
+lines by 150 samples (300 bytes).
+	lgeom A B SIZE=(1,1,216,150) NAH=1 NAV=1 +
+	 TIEPOINT=(1,1,1,1, 1,100,1,150, 100,1,216,1, 100,100,216,150)
+
+The keyword NOIN can be used to specify no interpolation. In this
+case the DN value of the point closest to the fractional line and sample
+is used. This method (sometimes referred to as "nearest neighbor") is
+somewhat faster, but is not as accurate as the four point interpolation.
+
+The keyword NOIZ can be used to specify no interpolation with DN values of
+zero.  This is used when zero represents missing data and you do not want
+to interpolate at the boundary of good data and missing data.
+
+LGEOM may accept parameters from disk as a second input file. 
+This is the method used in the MAP2 procedure.  The format
+of this disk data set is a single record consisting of NP+1 words, where
+NP is the number of words of actual parameters and the first word contains
+NP. This is an optional data set.
+
+The common usages of LGEOM are within procedures such as MAP2 and MAPTRANS,
+or following such programs as PICREG, RG, TIECONM, or TIEPARM.  TIEPARM, for
+example, could be used to convert tiepoints in an IBIS interface file into
+a VICAR PARMS file that could be entered as the PARMS parameter in the
+LGEOM command line.
+.page
+EXAMPLE
+
+tieconm OUT=TIEPARMS 'LGEOM NAH=40 NAV=40 +
+          MINL=1.,MINS=1.,MAXL=3000.,MAXS=3000.+
+          TIEPOIN=(1,1,1,1, 1,3000,1,10, 3000,1,10,1, 3000.29,3000,10,10) 
+lgeom LGTEST LGENLARG SIZE=(1,1,3000,3000) PARMS=TIEPARMS
+
+     In this example,  the tiepoints are used to set up a 3000
+     x  3000 grid for use by LGEOM.   The tiepoints given to TIECONM
+     can  be scattered  over  the  image  in  any  fashion   whereas 
+     LGEOM requires a regular grid.
+.page
+LIMITATIONS:
+
+  A. When a second input dataset is used to enter the rectangles (MAP),
+     a maximum of 400 rectangles can be used.  When the TIEPOINT or PARMS
+     parameter is used, the number of rectangles is unlimited.  However,
+     the TAE maximum count of 32767 limits the number of rectangles to 8192.
+
+  B. The maximum number of samples per line in the output file is 32767.
+
+  C. Since STACKA is used to allocate memory, the maximum picture size
+     is unlimited.  When very large pictures are used, the page file quota
+     must be large enough to accomodate a buffer used to map the blocks
+     in the Intermediate Data Set.  The number of bytes in this buffer is
+     6 times the estimated number of blocks in the Intermediate Data Set.
+     (The RATIO parameter can be used to change the estimated number of
+     blocks.)
+
+  D. The output tiepoint coordinates must be whole numbers.  Users rarely
+     need to know of this restriction since the TIEPOINT parameter is
+     usually generated by another VICAR program.  Users only need to be
+     concerned about this if they are actually entering specific values
+     for the TIEPOINT parameter for the LGEOM command line.
+
+.page
+RECORD SIZE OF INTERMEDIATE DATA SET FOR LGEOM (IDSNS):
+
+The optimum size of the intermediate data set (IDS) for LGEOM is a
+function of the number of rectangles, input and output sizes, and the
+available buffer space.
+
+In general, the IDS record length should decrease as the number of pixels
+in the output file increases.  The number of lines needed for IDS is 
+calculated inside the program.
+.PAGE
+
+ TIMING: 
+  The following CPU times for LGEOM was obtained on a 
+VAX 8650 (MIPL2) in May 1993
+			                                                CPU Time
+gen LGA1 NL=1000 NS=1000 IVAL=0 
+!
+! Now do 1.2 times enlargement of a BYTE image IN 1 PASS
+lgeom LGA1 LGA2 SIZE=(1,1,1200,1200) NAH=1 NAV=1 'PRINT  +
+ TIEPOIN=(1,1,1,1, 1,1200,1,1000, 1200,1,1000,1, 1200,1200,1000,1000) 
+!  				5-93  SP  CPU TIME ON MIPL2 (VAX8650)    28.53s
+
+For more information, see the file timelgeom.pdf in lgeom.com.
+.page
+WRITTEN BY: Howard J Frieden		22 December 1970
+
+COGNIZANT PROGRAMMER: Howard J Frieden	 9 November 1990
+
+PORTED TO UNIX: Steve Pohorsky
+
+ REVISION HISTORY
+
+  93-5-26   SP   Made portable for UNIX.  Gave control over progress messages 
+                 to PRINT parameter.  Added PMEM parameter for UNIX.
+
+.LEVEL1
+.VARI INP
+Input and optional
+tiepoint data set names
+.VARI OUT
+Output file name
+.VARI SIZE
+Standard VICAR Size Field
+.VARI SL
+Starting line for output
+.VARI SS
+Starting sample for output
+.VARI NL
+Number of lines for output
+.VARI NS
+Number of samples for output
+.VARI IDSNAM
+Name of Intermediate Data Set
+.VARI IDSNS
+Bytes per line in Intermediate
+Data Set
+.VARI WSA
+Working set adjustment 
+(bytes).  VMS only
+.VARI PMEM
+Physical memory available
+(megabytes). non-VMS systems
+.VARI RATIO
+Ratio for estimating number
+of blocks in IDS.
+.VARI INTERP
+no interpolation.
+Valid: NOIN
+.VARI INTRPZ
+no interpolation with 
+zero DN values
+Valid: NOIZ
+.VARI PRINT
+Print TIEPOINTS and progress 
+messages
+Valid: PRINT
+.VARI FORMAT
+FORMAT is ignored.
+.VARI NAH
+Number of areas horizontally.
+See explanation.
+.VARI NAV
+Number of areas vertically.
+See explanation.
+.VARI TIEPOINT
+Specifies mapping of control
+points between output and
+input pictures.
+.VARI PARMS
+Parameter data set name
+.LEVEL2
+.VARI INP
+Input file name.  This parameter is input as
+     INP=in
+where
+in       is the input file name.
+
+In addition, a second file may be specified which contains the
+line and sample (tiepoint) parameters.  If this second file is specified,
+the parameter would then be 
+     INP=(in,pds)
+where
+PDS is the name of a program-MAP-type parameter data set.
+Note : The second input file (pds) is used only in conjunction with  
+program MAP.  
+
+LGEOM is almost always run with the PARMS parameter
+as the means of entering the TIEPOINT, NAH, and NAV parameters.
+.VARI SIZE
+The size field is specified with four arguments,
+     SIZE=(a,b,c,d)
+where:
+a is the starting line number of the output picture.
+b is the starting sample of the output picture.
+c is the number of lines, and
+d is the number of samples
+For example, SIZE=(1,1,40,50)
+would create an output picture of size 40 lines by 50 samples.
+.VARI SL
+Usually defaulted (SL=1).
+SL tells the program where in the output coordinate system to start the
+output image.  The output coordinate system is the system used for
+all (newline,newsample) coordinates in the TIEPOINT parameter.
+.VARI SS
+Usually defaulted (SS=1).
+SS tells the program where in the output coordinate system to start the
+output image.  The output coordinate system is the system used for
+all (newline,newsample) coordinates in the TIEPOINT parameter.
+.VARI NL
+NL can be used in conjunction with NS in place of the SIZE
+parameter to specify the size of the output picture.  It simply
+represents the number of lines for output.
+.VARI NS
+NS can be used in conjunction with NS in place of the SIZE
+parameter to specify the size of the output picture.  It simply
+represents the number of samples per line for output.
+.VARI IDSNAM
+IDSNAM is an optional parameter which can be used to specify the
+name of the intermediate data set.  This is often used to change the
+location of the data set.  This data set is usually slightly larger than
+the output file, but may be up to 2 times as large in some cases.
+
+For example, if the user's current directory is USERDISK:[USER],
+and he/she does not have enough disk space for IDS, then he/she could
+input IDSNAM=SCX:[USER]LGIDS or some such name to ensure that
+the IDS ends up in a valid directory with enough disk space to hold it.
+
+On VMS systems the user may define a DCL logical name of LGIDS to
+avoid having to specify the parameter repeatedly.  For example, if
+before running the LGEOM job the user inputs
+
+DCL DEFINE LGIDS SCX:[USER]LGIDS
+
+then all subsequent lgeom jobs would point to that Intermediate data
+set until the logical name was deassigned (DCL DEASS LGIDS).
+.VARI IDSNS
+ IDSNS is an optional parameter which may be used to change the number
+ of bytes per line in the Intermediate Data Set.  The main purpose
+ of this parameter is to allow the user to "tune" LGEOM to obtain the
+ optimum speed.  (The value should gradually decrease from its default 
+ value of 1000 when NL or NS get large and the working set is small.)  
+
+ The program may change the value of IDSNS if it is necessary for avoiding
+ aborting execution due to insufficient memory.
+.VARI PMEM
+Physical memory (megabytes) available for LGEOM dynamically allocated buffers.
+This applies to non-VMS systems only.  The default is 16.0.  (The maximum value
+is 2047 (megabytes), to insure that the number of bytes can be stored as a
+32-bit integer.)
+
+This parameter can usually be defaulted.  If the amount of memory available
+is less than the default, then PMEM should be set accordingly to prevent the
+program from thrashing.  If the amount of memory available
+is more than the default, then PMEM may be set accordingly to allow larger
+images to be handled in one pass.
+.VARI RATIO
+RATIO is used to estimate the number of blocks in the Intermediate
+Data Set and allocate a memory buffer to map the blocks. The default
+value of 2.0 should cover all but very unusual cases.  RATIO is the factor
+by which the Intermediate Data Set exceeds the Output Data Set.
+.VARI WSA
+WSA is an optional parameter to reduce the working set size that LGEOM
+automatically determines.  The default value is 150,000 bytes to allow
+for I/O buffers etc.
+.VARI INTERP
+NOIN means no interpolation.  The default method for computing the
+DN values of the output picture is to use a bi-linear interpolation
+on the four nearest neighbors in the input picture.  With NOIN, the
+value of the nearest point is simply used.
+For example, say a point in the output picture was determined
+to have come from point (R,P) in the input picture.  Since R and P
+are real values, we must somehow calculate a DN value for that
+point.  Take IR and IP as the truncated values.  We then have
+          VAL1                                 VAL2
+           *                                    *
+         (IR,IP)                              (IR,IP+1)
+                     POINT
+                       *
+                     (R,P)
+          VAL3                                 VAL4
+           *                                    *
+         (IR+1,IP)                           (IR+1,IP+1)
+Here, POINT is the result of a bilinear interpolation using
+VAL1, VAL2, VAL3, and VAL4.
+If NOIN is specified, then POINT would be VAL1, the nearest
+neighbor.
+.VARI INTRPZ
+NOIZ means no interpolation with zero DN values.  Whenever an interpolation
+is to be done and one of the points is zero, nearest neighbor is used.
+This option is used when zero represents missing data and you do not want
+to interpolate between good data and missing data.
+.VARIABLE PRINT
+ Causes a listing of the TIEPOINT parameters to be generated and causes
+ periodic progress messages to be printed 
+ (Default is that no such listing is printed.)
+.VARI FORMAT
+The format is obtained from the input image label. 
+.VARI NAH
+NAH=N where N is an integer value specifing the number of areas horizontally;
+which is also the number of columns of tiepoints less 1. NAH must
+be specified unless an optional dataset containing the parameters NAH, NAV
+and TIEPOINTs is specified. (2nd optional input dataset if the dataset is 
+created by program MAP, optional parameter dataset (see PARMS parameter) if the
+dataset is created by any other program besides program MAP).
+NAH must also be >= 1.
+.VARI NAV
+NAV=N where N is an integer value specifing the number of areas vertically;
+which is also the number of rows of tiepoints less 1. NAV must be specified
+unless an optional dataset containing the parameters NAH, NAV, and TIEPOINTs
+is specified (2nd optional input dataset if the dataset is created by program
+MAP, optional parameter dataset (see PARMS parameter) if the dataset is created
+by any other program besides program MAP).  NAV must also be >= 1. 
+.VARI TIEPOINT
+TIEPOINT=(newline(1),newsamp(1),oldline(1),oldsamp(1),newline(2),...). The
+values of TIEPOINT specify the mapping of control points between output
+and input pictures.  The numbers which follow the keyword are in multiples
+of four, one multiple of four for each tiepoint. The numbers may be either
+integer or real type. However since the grid in the output must be 
+rectangular, the (newline,newsamp) points must be whole numbers.  The
+total number of tiepoint numbers must be
+			4*(NAH+1)*(NAV+1)
+Within each group of four numbers describing a tiepoint, the first number
+specifies the line coordinate of that tiepoint in the output (transformed)
+picture, the second number specifies the sample coordinate of that tiepoint
+in the output picture, the third number specifies the line coordinate of the
+input picture and the fourth specifies the sample coordinate of the input
+picture. The order in which the tiepoints are specified is left to right
+within a horizontal row of tiepoints. The horizontal rows of tiepoints are
+specified in top-to-bottom sequence. Tiepoint specification is further
+clarified in the OPERATIONS and TIMING sections.  The TIEPOINT parameter
+must be given unless an optional dataset containing the NAH, NAV, and
+TIEPOINT parameters is specified.(2nd optional input dataset if the dataset
+is generated by program MAP, optional parameter data set (see PARMS parameter) 
+if the dataset is generated by any other program besides program MAP ).
+.VARI PARMS
+PARMS can be used to specify the name of an optional parameter data 
+set.  Any combination of the allowable parameters may be given.  If
+any of the parameters are given interactively, the interactive value
+takes precedence.
+
+LGEOM is almost always run with the PARMS parameter
+as the means of entering the TIEPOINT, NAH, and NAV parameters.
+This parameter names a VICAR PARMS file, (xvpopen type for you programmers.)
+
+Note: If the data set is generated by program MAP, it has to be entered as
+a second input instead of PARMS.
+
+.END

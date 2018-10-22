@@ -1,0 +1,9 @@
+      integer model, igeo
+      real*8 rot, re, rp, epsln, fl, oal, oas, pscale, zscale
+      real*8 om(3,3), psc3(3), sclat, sclon, epsln2
+      real*8 cm(3,3), me(3,3), psc(3), rsc, angln, angla, anglb
+      common/cmap/model,igeo,rot,re,rp,epsln
+      common/cmap/fl,oal,oas,pscale,zscale
+      common/cmap/om,psc3,sclat,sclon,epsln2
+      common/cmap/cm,me,psc,rsc,angln,angla,anglb
+

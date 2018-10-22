@@ -1,0 +1,30 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM ifft
+
+   To Create the build file give the command:
+
+		$ vimake ifft			(VMS)
+   or
+		% vimake ifft			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	ifft
+#define R2LIB
+
+#define MODULE_LIST ifft.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+#define LIB_MATH77
+#define LIB_VRDI
+/************************* End of Imake file ***************************/

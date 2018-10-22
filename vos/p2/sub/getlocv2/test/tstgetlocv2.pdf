@@ -1,0 +1,31 @@
+procedure
+!   tsttgetlocv2 
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+local PATH string init="WMS_TEST_WORK:[TESTDATA.MIPL.VGR]"
+local PATH1 string init="dev:[bam059]"
+LOCAL INPIC1 TYPE=STRING
+LOCAL INPIC2 TYPE=STRING
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+if ($syschar(1) = "UNIX")
+  let PATH="/project/test_work/testdata/mipl/vgr/"
+  let PATH1="/home/bam/"
+end-if
+let INPIC1 = "f1636832.raw"
+let INPIC2 = "resfil.tst"
+write "THIS IS A TEST OF MODULE TGETLOCV2"
+write "MAKE A TEST COPY OF the Reseau File"
+ibis-copy &"PATH1"reseau.test tf
+label-list tf
+ibis-list tf nr=26 nc=9 cols=(1,2,3,4,5,6,7,8,9) formats=formats +
+intcols=(1,2,3,4,5)
+tgetlocv2 (&"PATH"&INPIC1,tf)
+write "List contents of file after add"
+label-list tf
+ibis-list tf nr=27 nc=9 cols=(1,2,3,4,5,6,7,8,9) formats=formats +
+intcols=(1,2,3,4,5)
+end-proc

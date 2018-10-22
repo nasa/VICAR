@@ -1,0 +1,25 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let _onfail="continue"
+let $echo="yes"
+let $autousage="none"
+gen a nl=5 ns=5
+grafimg a agr 'both
+ibis-list agr gr1=3  
+grafimg a agr 'xonly
+ibis-list agr gr1=3  
+grafimg a agr 'yonly
+ibis-list agr gr1=3  
+grafimg a agr cube=cube
+ibis-list agr gr1=3  
+grafimg a agr 'prev
+ibis-list agr gr1=3  
+grafimg a agr 'dot
+ibis-list agr gr1=3  
+gen a nl=200 ns=200
+grafimg a agr linc=40 sinc=40
+ibis-list agr gr1=3  
+end-proc
+

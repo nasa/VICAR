@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM lab2tcl
+
+   To Create the build file give the command:
+
+		$ vimake lab2tcl			(VMS)
+   or
+		% vimake lab2tcl			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	lab2tcl
+#define R2LIB
+
+#define MODULE_LIST lab2tcl.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST pgminc
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM ratio
+
+   To Create the build file give the command:
+
+		% vimake ratio0			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	ratio0
+#define R2LIB
+
+#define MODULE_LIST ratio0.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST pgminc
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+/*#define DEBUG	/* remove on delivery */
+/************************* End of Imake file ***************************/

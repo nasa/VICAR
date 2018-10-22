@@ -1,0 +1,76 @@
+process help=*
+PARM INP          TYPE=STRING       COUNT=1
+PARM OUT          TYPE=STRING       COUNT=1
+PARM SIZE         TYPE=INTEGER      COUNT=4            DEFAULT=(1,1,0,0)
+PARM SL           TYPE=INTEGER                         DEFAULT=1
+PARM SS           TYPE=INTEGER                         DEFAULT=1
+PARM NL           TYPE=INTEGER                         DEFAULT=0
+PARM NS           TYPE=INTEGER                         DEFAULT=0
+PARM THRESH       TYPE=INTEGER                         DEFAULT=0
+END-PROC
+.TITLE
+VICAR2 program "dropout"
+.HELP
+PURPOSE:
+"dropout" is a VICAR program which finds and fixes pixel drop outs and
+missing lines. Viking Orbiter images can have series of zero pixels
+corresponding to data missing from the tape recorder. Data was
+originally recorded longitudinally on the tape but was played back
+latitudinally. When a data outage occurred, a regular pattern of
+missing pixels resulted. Ground reconstruction of the data sometimes
+lost whole lines. DROPOUT fixes both of these problems by
+interpolating over the missing data. 
+
+ Written By: Joel Mosher,  24-JUN-1986
+ Cognizant Programmer: Joel Mosher
+ 9-25-86 ... Converted to VICAR2 param i/o...FFM
+ 9-5-94  ... Made portable for UNIX by A. Scop (CRI)
+.page
+OPERATION:
+"dropout" reads each line and locates the missing lines, saving the
+line numbers in a buffer. Up to 2000 lines can be saved. If the line
+is not missing, the line is examined pixel by pixel to locate missing
+pixels. The missing pixels are fixed by interpolation. After each
+line is fixed, DROPOUT goes back to fix the missing lines. Data is
+determined to be missing if the pixel values are less than or equal
+to THRESH (default is THRESH=0) 
+
+TIMING:
+depends on number of missing pixels and lines but usually only a
+couple of minutes. 
+
+EXECUTION:
+  "dropout" can be executed in the following manner:
+    dropout INP=IN OUT=OUT SIZE=(...) PARAMS
+  where IN, OUT, SIZE, and PARAMS are parameters and are
+  explained in their respective PARAMETER section.
+
+.LEVEL1
+.VARI INP
+A standard VICAR input file
+.VARI OUT
+Output file
+.VARI SIZE
+Standard VICAR size field.
+.VARI SL
+Starting line
+.VARI SS
+Starting sample
+.VARI NL
+Number of lines
+.VARI NS
+Number of samples
+.VARI THRESH
+Threshold for determining 
+if data are missing. 
+.LEVEL2
+.VARI IN
+INP=A where A is the name of a standard VICAR input file.
+A is the only input file and the name of the file to be processed.
+.VARI OUT
+OUT=B where B is the name of a standard Vicar output file.
+.VARI SIZE
+SIZE=(0,0,nl,ns) where nl is the number of lines and ns is the number of
+samples and defines a standard VICAR size field.
+.VARI THRESH
+Threshold for determining if data are missing. Default is 0.

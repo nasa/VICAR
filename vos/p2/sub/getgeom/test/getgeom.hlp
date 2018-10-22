@@ -1,0 +1,52 @@
+1 GETGEOM: Returns the geoma parameters required to geometrically correct
+  an image.
+
+  FORTRAN CALLING SEQUENCE:
+
+      IMPLICIT NONE
+      INTEGER*4 UNIT		!Unit number of input GEOMA parameters
+      CHARACTER*5 PROJECT	!GLL VGR-1 VGR-2 VIKOR MAR10 MAR-9 CASSI
+      INTEGER*4 CAMERA		!Camera serial number
+      INTEGER*4 MODE		!0=return nominals   1=read from unit number
+      REAL*4 PARBUF(2720)	!Returned GEOMA parameters
+      Real*4 QARBUF(2720)	!Same buffer as PARBUF
+      INTEGER*4 NAH,NAV		!Number of horizontal and vertical areas
+      INTEGER*4 IND		!Return status: 0=normal, 1=error
+
+      CALL GETGEOM(UNIT,PROJECT,CAMERA,MODE,parbuf,qarbuf,NAH,NAV,ind)
+
+  C CALLING SEQUENCE:
+
+	< There is currently no C-bridge for this routine >
+
+2 OPERATION
+
+GETGEOM returns GEOMA parameters which can be used by routine CONVISOS to
+correct for the geometric distortions induced by vidicon camera systems.  All
+missions flown by JPL since Mariner 9 (Mariner Venus Mercury) are supported.
+The parameters are returned in PARBUF.
+
+For CCD camera systems (Galileo SSI), an optical distortion model is used and
+the buffer PARBUF does not apply.  However, the string 'GLL  ' is stored in
+the first two words of PARBUF, and CAMERA is stored in the third word of
+PARBUF.  This is a cludge to provide CONVEV/CONVISOS with these arguments.
+
+If MODE=0, nominal GEOMA parameters are returned.  The nominal geometric
+distortion parameters for a given camera are based on nominal locations for 
+the reseaux.
+
+If MODE=1, then the GEOMA parameters are read from the GEOMA parameter file
+pointed to be UNIT.  The GEOMA parameter file must be an IBIS tiepoint file in
+the format output by programs RESLOC and FARENC.  Note that GETGEOM will both
+open and close the file.
+
+2 HISTORY
+
+Written By: Jean Lorre        10/1/89
+Cognizant Programmer:         J Lorre
+
+Ported for UNIX Conversion:   W. Lee,  Jan-12-1993
+Upgraded to use IBIS tiepoint files like GEOMA.   SP 7-96
+18 Sep 96  GMY  Store CAMERA in third word of PARBUF for GLL (FR 89818).
+28 Nov 01  GMY  Add Cassini to list of recognized projects.
+21 Aug 02  GMY  Blank fill 'NAH ' and 'NAV ' in output parameters.

@@ -1,0 +1,34 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM map3
+
+   To Create the build file give the command:
+
+		$ vimake map3			(VMS)
+   or
+		% vimake map3			(Unix)
+
+
+************************************************************************/
+#define PROGRAM	map3
+
+#define MODULE_LIST map3.f map3a.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define USES_ANSI_C
+
+
+#define FTNINC_LIST mp_for_defs  
+#define R2LIB
+
+#define LIB_FORTRAN
+#define LIB_P2SUB
+#define LIB_SPICE
+#define LIB_NETWORK
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_MATH77
+/*#define LIB_LOCAL /* remove on delivery */
+/************************* End of Imake file ***************************/
+

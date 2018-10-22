@@ -1,0 +1,1132 @@
+PROCESS HELP=*
+SUBCMD-DEFAULT MAIN
+  PARM INP        STRING      COUNT=2:3
+  PARM OUT        STRING      COUNT=0:1                      DEFAULT=--
+  PARM RES        STRING      COUNT=0:1                      DEFAULT=--
+  PARM TARGET     (STRING,12) COUNT=0:1                      DEFAULT=--
+  PARM SPICEMODE  KEYWORD     COUNT=0:1 VALID=(LOCAL,REMOTE) DEFAULT=--
+  PARM CKNAME     (STRING,4)  COUNT=1 +
+	           VALID=(FARE,NEAR,NAV,NAV2,DAVI,NAIF)	     DEFAULT=DAVI
+  PARM CKID       (STRING,4)  COUNT=1                        DEFAULT=NONE
+  PARM USERID     (STRING,3)  COUNT=0:1                      DEFAULT=--
+  PARM GROUPID    (STRING,3)  COUNT=0:1                      DEFAULT=--
+  PARM INSTITUTE  (STRING,4)  COUNT=1                        DEFAULT=NONE
+  PARM CDATE      (STRING,12) COUNT=1                DEFAULT=000000000000
+  PARM REQNUM     (STRING,4)  COUNT=1                        DEFAULT=NONE
+  PARM PURPOSE    (STRING,4)  COUNT=1                        DEFAULT=NONE
+  PARM PROGRAM    (STRING,6)  COUNT=1                        DEFAULT=*NONE*
+  PARM SPKID      (STRING,4)  COUNT=1                        DEFAULT=NONE
+  PARM DEBUG      KEYWORD     COUNT=0:1  VALID=DEBUG         DEFAULT=--
+END-SUBCMD
+SUBCMD NAV2
+  PARM EXIT	 TYPE=KEYWORD    COUNT=0:1  VALID=EXIT     DEFAULT=--
+  PARM CZOOM     TYPE=INTEGER    COUNT=0:1  VALID=(-4:4)   DEFAULT=--
+  PARM H         TYPE=KEYWORD    COUNT=0:1  VALID=H	   DEFAULT=--
+  PARM HIST	 TYPE=KEYWORD    COUNT=0:1  VALID=HIST     DEFAULT=--
+  PARM SPIKES	 TYPE=INTEGER	 COUNT=0:1  VALID=(0:250)  DEFAULT=--
+  PARM STRETCH   TYPE=INTEGER    COUNT=0:2  	           DEFAULT=--
+  PARM STR1      TYPE=INTEGER    COUNT=0:2  	           DEFAULT=--
+  PARM STR2      TYPE=INTEGER    COUNT=0:2  	           DEFAULT=--
+  PARM GERASE    TYPE=KEYWORD    COUNT=0:1  VALID=GERASE   DEFAULT=--
+  PARM SPTS	 TYPE=KEYWORD    COUNT=0:1  VALID=SPTS     DEFAULT=--
+  PARM GET	 TYPE=INTEGER    COUNT=0:1  VALID=(1:500)  DEFAULT=--
+  PARM DELETE    TYPE=INTEGER    COUNT=0:1  VALID=(1:500)  DEFAULT=--
+  PARM RESTORE   TYPE=INTEGER    COUNT=0:1  VALID=(1:500)  DEFAULT=--
+  PARM FIT	 TYPE=INTEGER    COUNT=0:1  VALID=(2:3)    DEFAULT=--
+  PARM NAVPTS	 TYPE=KEYWORD    COUNT=0:1  VALID=NAVPTS   DEFAULT=--
+  PARM NAVVEL	 TYPE=KEYWORD    COUNT=0:1  VALID=NAVVEL   DEFAULT=--
+  PARM EDIT	 TYPE=KEYWORD    COUNT=0:1  VALID=EDIT     DEFAULT=--
+  PARM PARAMS    TYPE=KEYWORD    COUNT=0:1  VALID=PARAMS   DEFAULT=--
+  PARM (SL,SL1,SL2) TYPE=INTEGER COUNT=0:1		   DEFAULT=--
+  PARM (SS,SS1,SS2) TYPE=INTEGER COUNT=0:1		   DEFAULT=--
+  PARM (U,U1,U2) TYPE=INTEGER    COUNT=0:1		   DEFAULT=--
+  PARM (D,D1,D2) TYPE=INTEGER    COUNT=0:1		   DEFAULT=--
+  PARM (L,L1,L2) TYPE=INTEGER    COUNT=0:1		   DEFAULT=--
+  PARM (R,R1,R2) TYPE=INTEGER    COUNT=0:1		   DEFAULT=--
+  PARM ZOOM      TYPE=INTEGER    COUNT=0:1  VALID=(-4:4)   DEFAULT=--
+  PARM HELP	 TYPE=KEYWORD    COUNT=0:1  VALID=HELP     DEFAULT=--
+END-SUBCMD
+SUBCMD PARAMS
+  PARM EXIT	 TYPE=KEYWORD    COUNT=0:1  VALID=EXIT     DEFAULT=--
+  PARM CORR	 TYPE=KEYWORD    COUNT=0:1  VALID=CORR     DEFAULT=--
+  PARM PROJECT	 TYPE=KEYWORD    COUNT=0:1  VALID=PROJECT  DEFAULT=--
+  PARM HPF	 TYPE=KEYWORD    COUNT=0:1  VALID=HPF      DEFAULT=--
+  PARM PHASE	 TYPE=KEYWORD    COUNT=0:1  VALID=PHASE    DEFAULT=--
+  PARM INTERP	 TYPE=KEYWORD    COUNT=0:1  VALID=INTERP   DEFAULT=--
+  PARM NLW	 TYPE=INTEGER    COUNT=0:1  VALID=(8:128)  DEFAULT=--
+  PARM NSW	 TYPE=INTEGER    COUNT=0:1  VALID=(8:128)  DEFAULT=--
+  PARM MINCORR	 TYPE=REAL       COUNT=0:1  VALID=(0.:1.0) DEFAULT=--
+  PARM ZWIND	 TYPE=INTEGER    COUNT=0:1  VALID=(0:10)   DEFAULT=--
+  PARM NOCORR	 TYPE=KEYWORD    COUNT=0:1  VALID=NOCORR   DEFAULT=--
+  PARM NOPROJEC  TYPE=KEYWORD    COUNT=0:1  VALID=NOPROJEC DEFAULT=--
+  PARM NOHPF	 TYPE=KEYWORD    COUNT=0:1  VALID=NOHPF    DEFAULT=--
+  PARM NOPHASE	 TYPE=KEYWORD    COUNT=0:1  VALID=NOPHASE  DEFAULT=--
+  PARM NOINTERP	 TYPE=KEYWORD    COUNT=0:1  VALID=NOINTERP DEFAULT=--
+  PARM STATUS 	 TYPE=KEYWORD    COUNT=0:1  VALID=STATUS   DEFAULT=--
+END-SUBCMD
+SUBCMD EDIT
+  PARM EXIT	TYPE=KEYWORD    COUNT=0:1  VALID=EXIT   DEFAULT=--
+  PARM HELP	TYPE=KEYWORD    COUNT=0:1  VALID=HELP   DEFAULT=--
+  PARM GEODET	TYPE=KEYWORD    COUNT=0:1  VALID=GEODET DEFAULT=--
+  PARM GEOCEN	TYPE=KEYWORD    COUNT=0:1  VALID=GEOCEN DEFAULT=--
+  PARM PR       TYPE=REAL       COUNT=0:1  	        DEFAULT=--
+  PARM ER       TYPE=REAL       COUNT=0:1  	        DEFAULT=--
+  PARM CAMERA	TYPE=INTEGER	COUNT=0:1 		DEFAULT=--
+  PARM FL       TYPE=REAL       COUNT=0:1  	        DEFAULT=--
+  PARM OAXIS    TYPE=REAL       COUNT=0:2  	        DEFAULT=--
+  PARM SC       TYPE=REAL       COUNT=0:1  	        DEFAULT=--
+  PARM SSP      TYPE=REAL       COUNT=0:2  	        DEFAULT=--
+  PARM PC       TYPE=REAL       COUNT=0:2  	        DEFAULT=--
+  PARM ISPC     TYPE=REAL       COUNT=0:2  	        DEFAULT=--
+  PARM WAPC     TYPE=REAL       COUNT=0:2               DEFAULT=--
+  PARM WAISPC   TYPE=REAL       COUNT=0:2               DEFAULT=--
+  PARM ANGLN    TYPE=REAL       COUNT=0:1  	        DEFAULT=--
+  PARM RANGE    TYPE=REAL       COUNT=0:1 		DEFAULT=--
+  PARM TARGET   TYPE=(STRING,12) COUNT=0:1 		DEFAULT=--
+  PARM STATUS   TYPE=KEYWORD    COUNT=0:1 VALID=STATUS  DEFAULT=--
+  PARM SAVE     TYPE=KEYWORD    COUNT=0:1 VALID=SAVE    DEFAULT=--
+  PARM RESTORE  TYPE=KEYWORD    COUNT=0:1 VALID=RESTORE DEFAULT=--
+  PARM GETSEDR  TYPE=KEYWORD    COUNT=0:1 VALID=GETSEDR DEFAULT=--
+  PARM CKNAME   TYPE=KEYWORD    COUNT=0:1 +
+	   VALID=(FARE,NEAR,NAV,NAV2,DAVI,NAIF,SEDR)    DEFAULT=--
+END-SUBCMD
+SUBCMD RVALUE
+  PARM VALUE    TYPE=REAL       COUNT=0:1  	        DEFAULT=--
+  PARM EXIT	TYPE=KEYWORD    COUNT=0:1  VALID=EXIT   DEFAULT=--
+END-SUBCMD
+SUBCMD IVALUE
+  PARM VALUE    TYPE=INTEGER    COUNT=0:1  	        DEFAULT=--
+  PARM EXIT	TYPE=KEYWORD    COUNT=0:1  VALID=EXIT   DEFAULT=--
+END-SUBCMD
+SUBCMD STRING
+  PARM STRNG	TYPE=(STRING,60) COUNT=0:1		DEFAULT=--
+  PARM EXIT	TYPE=KEYWORD    COUNT=0:1  VALID=EXIT   DEFAULT=--
+END-SUBCMD
+SUBCMD PIC
+  PARM EXIT	TYPE=KEYWORD    COUNT=0:1  VALID=EXIT   DEFAULT=--
+  PARM LEFT	TYPE=KEYWORD    COUNT=0:1  VALID=LEFT   DEFAULT=--
+  PARM RIGHT	TYPE=KEYWORD    COUNT=0:1  VALID=RIGHT  DEFAULT=--
+END-SUBCMD
+SUBCMD READY
+  PARM EXIT     TYPE=KEYWORD    COUNT=0:1  VALID=EXIT   DEFAULT=--
+END-SUBCMD
+SUBCMD QUERY
+  PARM EXIT     TYPE=KEYWORD    COUNT=0:1  VALID=EXIT   DEFAULT=--
+  PARM Y        TYPE=KEYWORD    COUNT=0:1  VALID=Y      DEFAULT=--
+  PARM N        TYPE=KEYWORD    COUNT=0:1  VALID=N      DEFAULT=--
+END-SUBCMD
+SUBCMD VELOCITY
+  PARM VEL      TYPE=REAL       COUNT=0:2               DEFAULT=--
+  PARM EXIT     TYPE=KEYWORD    COUNT=0:1  VALID=EXIT   DEFAULT=--
+END-SUBCMD
+SUBCMD DISTOR
+  PARM EXIT     TYPE=KEYWORD    COUNT=0:1  VALID=EXIT   DEFAULT=--
+  PARM IMAGE	TYPE=KEYWORD    COUNT=0:1  VALID=IMAGE  DEFAULT=--
+  PARM OBJECT	TYPE=KEYWORD    COUNT=0:1  VALID=OBJECT DEFAULT=--
+END-SUBCMD
+END-PROC
+.TITLE
+VICAR Image Navigation Program NAV2
+.HELP
+PURPOSE
+
+NAV2 is an interactive program which improves the camera pointing of an image
+by registering it to a reference image whose camera pointing is accurately
+known.  NAV2 is currently specific to Voyager, Galileo, and Cassini flight
+images.  
+
+The image to be navigated (primary image) and the reference image must have
+overlapping areas in which common features (tiepoints) can be identified.
+These tiepoints are used in combination with image projection data retrieved
+from the MIPS SPICE server to correct the camera pointing angles (C-matrix) of
+the primary image.
+
+In cases where the uncertainties in camera pointing for the primary and
+reference frames are equivalent, both images may be navigated simultaneously.
+The C-matrices of both frames are modified, with the geometric errors being
+split evenly between the two frames.
+
+The algorithms implemented in NAV2 are based on notes provided by
+Andy Ingersoll, 3-19-85.  See also VICAR programs NAV, FARENC and MANMATCH.
+
+.page
+EXECUTION:
+
+NAV2 is an interactive program and requires the allocation of a display device
+with an image plane, graphics plane, and cursor (e.g. trackball, mouse):
+
+      USE  EPA2		!allocate a display device
+      NAV2  INP=(PIC,REF)  TARGET=targetname
+   or NAV2  INP=(PIC,REF)  OUT=NEWPTS  TARGET=targetname
+   or NAV2  INP=(PIC,REF,OLDPTS)  OUT=NEWPTS  TARGET=targetname
+where
+    PIC is the image to be navigated (primary frame),
+    REF is a reference image whose camera pointing is accurately known.
+    OLDPTS and NEWPTS are optional input and output tiepoint files.
+    TARGET is a required parameter for Voyager.
+
+PIC and REF must be Galileo, Voyager, or Cassini images in byte format.
+The input images may be raw images containing geometric camera distortions
+or images which have been geometrically corrected.
+
+If NEWPTS is included, NAV2 will output all tiepoints to this file.
+Tiepoints saved from a previous session can be input as an optional
+third input file (0LDPTS).  OLDPTS and NEWPTS are in IBIS graphics file format.
+
+.page
+OPERATION:
+
+NAV2 uses an east-longitude system.  For Voyager, latitudes are input
+and output to the user as planetographic.  Planetocentric latitudes are
+used for all other missions.  An oblate spheroid target-body model is used.
+
+Initially, the input frames are displayed on a split screen, with the primary
+frame on the left and the reference frame on the right (this is the same
+convention used by the program PICREG).  The images are displayed at reduced
+resolution to display the complete field of view.  If tiepoints are input from
+a previous session, these are displayed in graphics (see OLDPTS and NEWPTS in
+program execution statement above).
+
+The MIPS SPICE server is accessed to retrieve the image projection geometry
+for both the left and right images.  If the input image(s) contain geometric
+distortions, the program will attempt to account for this.  Special provisions
+must be made for dealing with vidicon camera distortions (e.g. Voyager).  See
+the following sections below for details:
+
+	GEOMETRIC CAMERA DISTORTIONS
+	ACCESSING SPICE DATA
+
+The primary frame is navigated via the following steps:
+
+   1) Using the cursor and split-screen display, the user identifies one or
+      more common features (tiepoints) in both images.
+
+   2) The FIT command is used to recompute the C-matrix so as to minimize
+      displacement errors (in pixels) between the left and right images.
+      The displacement error for a tiepoint is zero if both left and right
+      pixel locations project to the same latitude-longitude coordinates.
+      The RMS error, the tiepoint generating the maximum error, and the number
+      of points used in the fit are reported.
+
+   3) The user may iteratively delete bad points and redo the fit,
+      or go back to acquire more tiepoints.
+
+   4) When the user exits from the program, a final fit is performed.
+      The (line,sample) position of the planet center and the north
+      angle (ANGLN) are computed and reported.  Finally, the corrected
+      camera pointing can be optionally stored in a C-kernel.
+
+All tiepoint selection is peformed interactively, with the user responding to
+prompts from the program.  See NAV2 COMMAND PROCESSOR below.
+
+.page
+ADJUSTING FOR ATMOSPHERIC FEATURE MOTION:
+
+If the target-body is a planet with an atmosphere, NAV2 will automatically
+prompt the user for intructions for dealing with zonal and meridional wind
+currents:
+
+	Do you wish to adjust for wind speed?
+	Enter Y or N >
+
+If the user responds with 'N', then all tiepoints are assumed to be stationary.
+If the user responds with 'Y', the next prompt is issued:
+
+	Do you wish to split the pointing error between the two frames?
+	Enter Y or N >
+
+Entering 'Y' will cause both primary and reference frames to be navigated
+simultaneously.  The camera pointing angles of both frames are adjusted by
+moving each optic axis an equal distance (i.e. it is assumed that the
+uncertainties in camera pointing are equivalent for the two frames).
+
+If the target-body is Jupiter, the following prompt is issued:
+
+	Do you wish to use the zonal velocity profile?
+	Enter Y or N >
+
+Entering 'Y' will cause the zonal velocity of each tiepoint to be computed
+as a function of its latitude using a zonal velocity profile.  The profile is
+based on Voyager data.  The meridional velocities are assumed to be zero.
+
+The profile is a table consisting of (latitude, zonal-velocity) pairs, where
+the latitudes are stored in monotonically increasing order but at variable
+angular spacing.  For latitudes between table values, linear interpolation is
+used to compute the zonal velocity.  The table contains data between latitudes
+-55.26 and +55.26.  For latitudes outside the range of the table, the zonal
+velocities are assumed to be zero.
+
+The SCET is used to determine the time separation between frames. This is used
+to convert zonal velocities into pixel displacements (see SCET parameter).
+
+At this point, control is passed to the NAV2 command processor.
+
+.page
+NAV2 COMMAND PROCESSOR:
+
+Upon entry, the user will be prompted to input commands.
+
+The user-prompts in NAV2 are nested, so that certain commands will
+invoke program modules which issue lower level prompts, and so forth.
+All prompts (ideally) will accept the 'EXIT command, which causes
+an exit to the next higher level prompt.  In many cases, entering
+'HELP will display a list of all commands available at the current prompt.
+
+The controlling program is identified by the prompt:
+
+		NAV2>
+
+Entering 'HELP will result in:
+
+	ENTER EXIT, CZOOM, H, HIST, SPIKES, STRETCH, STR1, STR2,
+        GERASE, SPTS, GET, DELETE, FIT, NAVPTS, NAVVEL, EDIT, PARAMS,
+        SL, SL1, SL2, SS, SS1, SS2, ZOOM, U, U1, U2, D, D1, D2, L, L1,
+        L2, R, R1, R2, HELP>
+
+If the user responds by typing carriage return (without entering any
+characters at all) the program will acquire a tiepoint.  See Tiepoint
+Acquisition Cycle below.
+
+The CZOOM command is used to center the display about a feature and
+change the image resolution of the display.  Entering CZOOM=1 will
+cause the split screen to be re-displayed at normal resolution.  The
+user will be prompted to center the left and right screens via the
+trackball.  If previously acquired features are visible, they are
+re-displayed in graphics.
+
+Entering 'H (for Home) will cause the original full-field-of-view
+display to appear.
+
+Entering STRETCH=(5,220) will cause a hardware stretch (linear) of
+the displayed images.
+
+The STR1 and STR2 commands may be used to stretch the left and right
+image areas independently.  Entering STR1=(10,128) will cause the left
+image area to be stretched as it is being written to the image-display memory
+plane.  Note that these commands are independent of the hardware stretch,
+so that following these commands with STRETCH=(5,220) will result in further
+stretching of the stretched images.
+
+The 'HIST command displays the histograms of the image areas for both left and
+right pictures.  The histograms are displayed in graphics, using a logarithmic
+scale in the frequency axis.  The histogram display may be modified by entering
+SPIKES=5, which will cause the five highest frequencies to be scaled to the
+maximum height of the frequency axis.
+
+Entering 'GERASE will erase the graphics plane.
+
+Entering 'SPTS will re-display the acquired tiepoints.
+
+Entering GET=15 will move the cursor to feature 15 on the left
+screen.  If the feature is not visible, the display window will be
+moved so that it is.  The (line,sample) and (lat,lon) coordinates
+of the feature are reported.
+
+Entering DELETE=15 will delete feature 15.  If you later change
+your mind, entering RESTORE=15 will restore the feature.
+
+Entering FIT=2 will cause the camera angular components ANGLA and
+ANGLB of the left image to be recomputed, resulting in an updated
+transformation from (line,sample) to (lat,lon).  The angles are
+recomputed by performing a least squares fit so that points in the
+left image occur at the same (lat,lon) coordinates as corresponding
+points in the right image.
+
+Entering FIT=3 will cause the camera angular components ANGLA, ANGLB,
+and ANGLN (north angle) of the left image to be recomputed.
+
+Entering NAVVEL will cause NAV2 to adjust for wind speed when fitting
+the tiepoints.  The user is prompted to specify processing modes for wind
+adjustment as before.  This command is valid for atmospheric planets only.
+
+Entering NAVPTS cancels any adjustments made for wind speed.
+
+Entering 'EDIT will enable the user to edit the navigation data.
+See EDIT COMMAND below.
+
+Entering 'PARAMS will enable the user to edit the area correlation
+parameters.  See PARAMS COMMAND below.
+
+Entering SL=250 SS=80 will move the display windows of both left and
+right image so that (line,samp)=(250,80) appears in the upper left
+corner.
+
+Entering ZOOM=2 will magnify the displayed area to twice normal resolution
+(via pixel replication).
+
+The commands U, D, L, R are for moving the displayed areas up, down,
+left, or right.  Entering U=10 will move the displayed areas up 10 pixels.
+
+The left image may be moved independently using SL1, SS1, U1, D1, etc.
+Similarly, the right image may be moved using SL2, SS2, U2, D2, etc.
+
+.PAGE
+EDIT COMMAND
+
+Typing 'EDIT will permit the user to edit the navigation data.
+
+	Enter LEFT or RIGHT>
+
+Typing 'RIGHT will permit the navigation data for the right image to be
+edited.  The EDIT command processor is identified by the prompt:
+
+	EDIT>
+
+The EDIT command processor enables the user to modify values which
+effect camera pointing.  These include planet constants, camera
+constants, and SEDR data.  Under normal circumstances, the user
+will never have to edit the camera pointing data since these are
+automatically retrieved from the SEDR file and frame label.
+
+Typing HELP will cause of all the available commands to be listed:
+
+	Enter EXIT,HELP,GEODET,GEOCEN,PR,ER,CAMERA,FL,OAXIS,
+	SC,SSP,PC,ANGLN,RANGE,TARGET,WAPC,STATUS,
+        SAVE,RESTORE,GETSEDR,CKNAME>
+
+Typing 'EXIT will return control back to the NAV2 command processor.
+
+Typing 'GEODET will cause all latitudes input by the user to be treated as
+planetographic, and to report all latitudes to the user as planetographic.
+Typing 'GEOCEN will cause all input and output latitudes to be treated as
+planetocentric.  Note that the default is GEODET for Voyager and GEOCEN for
+all other projects.
+
+
+Typing PR=54450 ER=60330 will change the values of the planet's
+polar and equatorial radii to 54450 and 60330 km respectively.
+
+Typing CAMERA=7 will change the camera-ID to VGR-1 NA (provided the image is
+from Voyager).  The focal length, picture scale, and optic axis intercept for
+this camera will be automatically set for this camera.
+
+Typing  FL=1200.175 will change the camera focal length to
+1200.175 mm.
+
+Typing OAXIS=(400,300) will place the optical axis intercept
+at (line,sample)=(400,300).
+
+Typing SC=80 will change the picture scale to 80 pixels
+per mm on the focal plane.
+
+Typing SSP=(60,240.3) will change the spacecraft position
+to (SCLAT,SCLON)=(60,240.3).
+
+Typing PC=(445.3,558.4) will move the planet center to
+(SCLINE,SCSAMP)=(445.3,558.4).  This will cause the camera pointing
+to be updated.
+
+Typing ANGLN=190.9 will cause the orientation of the projected
+spin axis to be changed to 190.9 degrees, measured clockwise
+from right (the positive sample direction).
+
+Typing RANGE=4794909 will cause the distance from spacecraft to
+planet center to be changed to 4794909 km.
+
+Typing TARGET=SATURN will change the target-ID to Saturn and
+automatically changes the polar and equatorial radii to Saturn's
+nominal values.
+
+Typing WAPC=(455.1,376.2) changes the (line,sample) coordinates
+of the planet center in the wide-angle frame.  The (line,sample)
+coordinates are converted to the narrow-angle field of view and
+the result used as the (line,sample) coordinates for the NA planet
+center.  The camera pointing is then updated.  Here it is assumed
+that the frame being processed is the NA from a WA-NA simultaneous
+exposure.
+
+Typing 'STATUS will cause a summary of the navigation data to be
+printed.
+
+Typing 'SAVE will store the current navigation data in the array
+SNAV.  Typing 'RESTORE will replace the navigation data by
+whatever is in SNAV.  Typing 'GETSEDR will replace the navigation
+data with the nominal pointing.
+
+Typing CKNAME=FARE specifies that the desired source of C-matrix is FARENC.
+Valid source names are:
+
+	DAVI	--Data determined by Mert Davies
+	NAV     --Data determined by program NAV
+	FARE    --Data determined by program FARENC
+	NAV2    --Data determined by program NAV2
+	NEAR    --Data determined by program MANMATCH
+        NAIF    --Data determined by NAIF
+
+The default is to select the C-matrix in the above order of priority.
+
+.PAGE
+PARAMS COMMAND
+
+Typing 'PARAMS will enable the user to modify the area correlation
+parameters:
+
+	Enter EXIT, CORR, PROJECT, HPF, PHASE, INTERP, NLW, NSW,
+        ZWIND, NOCORR, NOPROJEC, NOHPF, NOPHASE, NOINTERP, STATUS
+
+Typing 'EXIT will return control to the NAV2 command processor.
+
+Entering 'CORR will enable the area correlation algorithm.  The algorithm
+consists of multiplying the Fourier transform of the right area by the
+complex conjugate of the transform of the left area, computing the inverse
+transform and locating the maximum.
+
+Entering 'PROJECT will cause the left area to be projected to the same
+perspective as the right area, prior to correlation.  This feature
+corrects for large perspective differences between frames.
+
+Entering 'HPF will cause the axes of the transforms to be set to zero.
+This is equivalent to applying a high-pass filter to the areas prior
+to correlation.
+
+Entering 'PHASE will cause the correlation to be performed using phase
+information only.
+
+Entering 'INTERP will cause the correlation maxima to be located to
+sub-pixel accuracy by locating the centroid of the correlation peak.
+
+Entering NLW=64 NSW=80 specifies the dimensions of the correlation
+areas to be 64x80 pixels.  NLW and NSW must be even integers.
+
+Entering ZWIND=10 will cause a 10x10 window to be used for computing the
+average DN value centered on each tiepoint.  This value is stored in the
+output tiepoint file (see below).
+
+The commands 'NOCORR, 'NOPROJEC, 'NHPF, 'NOPHASE, and 'NOINTERP disable
+the corresponding functions.
+
+Entering 'STATUS displays the current parameter settings.
+
+The default values are 'CORR, 'NOPROJEC, 'HPF, 'NOPHASE, 'INTERP,
+NLW=64 and NSW=64.
+
+.PAGE
+TIEPOINT ACQUISITION CYCLE
+
+Tiepoints are selected by means of the split screen display.  When a new
+tiepoint is to be acquired, its initial location is determined by positioning
+the cursor over the feature in the left image.  The user enters a carriage
+return (CR), thus sending a blank string to the command processor.  This
+signals the command processor to begin a tiepoint acquisition cycle.
+
+The coordinates of the cursor position on the left image are read and
+converted into (line,sample) image coordinates.  The (lat,lon) coordinates
+of the selected feature are computed, based upon current camera pointing
+information, and the results reported:
+
+	FN= 25  (L1,S1)=( 345.23, 673.31)  (LAT1,LON1)=( 22.32,245.32)
+
+If the user has elected to compensate for atmospheric motion, the following
+prompt is issued:
+
+	Enter velocity components (U,V) >
+
+The zonal and meridional velocities should be entered in meters/sec.  If
+the Jupiter zonal velocity profile has been selected, U is automatically
+computed and the prompt is not issued.
+
+A rough estimate of the feature's location in the right image is obtained by
+computing the location of the corresponding (lat,lon) coordinates in the
+right image, compensating for any feature motion.  The cursor is automatically
+moved to this location in the right screen and the following prompt is issued:
+
+	Position RIGHT cursor>
+
+The user may then position the right cursor to center it over the feature.
+When the user is satisfied that the cursor has been properly centered,
+he responds by entering (CR).  The program then performs an area correlation
+to refine the position of the right feature (See PARAMS COMMAND to modify
+the correlation parameters).  The resulting position is then reported:
+
+	        (L2,S2)=( 673.34, 124.32)  (LAT2,LON2)=( 25.23,247.31)
+
+The tiepoint is then stored and the program returns with the NAV> prompt.
+
+The tiepoint acquisition cycle may be aborted at any time by entering
+'EXIT.  If, for example, the selected feature is not visible in the right
+screen, the user should exit the cycle to re-position the right window.
+If a tiepoint is accidentally acquired, it may be deleted via the
+DELETE command.
+
+Initially, the program may fail badly in predicting the position of the
+feature in the right image.  This is because the nominal pointing may
+be very inaccurate.  The program periodically updates the camera pointing
+of the left image, based upon the tiepoints acquired up to that point.
+
+.PAGE
+GENERAL COMMENTS
+
+The general rules regarding TAE parameters apply:
+
+Commands may be abbreviated, as long as enough letters are typed
+to insure uniqueness.
+
+When a command is not followed by a value, it must be preceded
+by an apostrophe, e.g. 'EDIT.  The exception is that if the first
+keyword in a list is entered, the apostrophe may be ommitted,
+e.g:
+	Enter LEFT or RIGHT> L
+
+If you need help or want to get out of a routine, try typing
+HELP or EXIT.  Sometimes it works, sometimes it doesn't....
+
+.page
+GEOMETRIC CAMERA DISTORTIONS:
+
+NAV2 assumes that the input images (primary and reference) have been acquired
+via a camera system with a shutter and focal plane (e.g. vidicon/CCD sensor),
+so that the images are perspective projections of the target body.  The input
+images may be raw images containing geometric camera distortions (image-space
+frames), or images which have been geometrically corrected (object-space
+frames).
+
+NAV2 corrects for Galileo or Cassini camera distortions using a built-in radial
+distortion model.
+
+If a Voyager image-space frame is used, then the reseau locations must first
+be located and stored into a reseau location file (see RES parameter):
+
+  	RESLOC  (PIC,RFILE)
+	RESLOC  (REF,RFILE)
+	NAV2  (PIC,REF)  OUT=TPT  RES=RFILE
+
+In this case, both PIC and REF are image-space frames (It is possible for one
+or both images to be object-space).  The reseaux are located using RESLOC
+and stored in the Reseau Location File.   NAV2 then retrieves the reseau
+locations from the file (see RES parameter).
+
+If the RES parameter is not specified, the program automatically accesses the
+file for the planet-of-encounter as follows:
+
+		VGR:[CCA314.VGR]RESJ.FIL	(Jupiter)
+		VGR:[CCA314.VGR]RESS.FIL	(Saturn)
+		VGR:[CCA314.VGR]RESU.FIL	(Uranus)
+		VGR:[CCA314.VGR]RESN.FIL	(Neptune)
+
+Note that the RES parameter is not required for object-space frames.
+
+.page
+ACCESSING SPICE DATA
+
+NAV2 will retrieve the projection geometry for both images by accessing the
+MIPS SPICE server.  Data is retrieved from the server by target name,
+spacecraft ID, camera ID, and Spacecraft-Event-Time.  These image identifiers
+are usually determined by scanning the image label.  Note, however, that the
+Voyager flight label does not include the target name.  Therefore, the target
+parameter must be included when running NAV2 on Voyager images.
+
+The following parameters may also be used to control the access of SPICE data:
+
+  SPICEMODE specifies whether SPICE data is retrieved from LOCAL kernels or
+  or via the REMOTE SPICE server.  If defaulted, SPICEMODE is set to the value
+  of the environmental variable DEFAULTSPICE.
+
+  CKNAME and CKID are alternative ways to specify the C kernel to be used.  For
+  example, CKNAME=FARE or CKID=M904 specifies that MIPS_FARENC.CK is to be used.
+  When specified, the CKID parameter overrides the CKNAME parameter.  If the
+  camera pointing data is not found in the requested C kernel, the other C 
+  kernels are searched.
+
+Within a given C kernel, there may be a number of different versions of camera
+pointing for a given image.  The segment identifier for each version contains
+provenance information identifying the creator of the pointing data.  One or
+more of the following parameters may be used to retrieve a specific 
+instance of camera pointing based upon this provenance information:
+
+  CDATE specifies the date and time the camera pointing was created.
+  REQNUM identifies the request number associated with the camera pointing.
+  PURPOSE identifies the purpose for creating the camera pointing.
+  PROGRAM identifies the program which created the camera pointing.
+  SPKID identifies the SP-kernel used to create the camera pointing.
+  USERID identifies the user who created the camera pointing.
+  GROUPID identifies the group which created the camera pointing.
+  INSTITUTE identifies the facility which created the camera pointing.
+
+  A complete list of CK and SPK IDs are located in the ASCII file assigned the
+  logical name (or environmental variable) KERNELDB.
+
+.page
+TIEPOINT FILE FORMAT
+
+The tiepoints are written to an IBIS interface (tabular) file with one
+row for each tiepoint.  The following column format is used:
+
+     Column       Description			   Format
+
+        1     First input matching line            real*4
+        2     First input matching sample          real*4
+        3     Second input line                    real*4
+        4     Second input sample                  real*4
+	5     First input estimated line           real*4
+	6     First input estimated sample         real*4
+        7     First input Z value                  real*4
+        8     Second input Z value                 real*4
+        9     Correlation value                    real*4
+       10     Sequence number                      real*4
+
+The estimated (line,sample) coordinates of the left image are computed
+using the camera pointing information retrieved from the SEDR (prior to
+any updates by the program).  The Z values are obtained by averaging
+the DN values over an area centered on the tiepoint (see ZWIND and
+ZREJECT parameters).  The correlation value is a number between -1 and
++1, where +1 represents perfect positive correlation and -1 represents
+perfect negative correlation.  The sequence number is 1 for the first
+tiepoint, 2 for the second, etc.
+
+.page
+HISTORY
+
+Original Programmer: Gary Yagi, 1 November, 1986
+Current Cognizant Programmer: Gary Yagi
+Revisions:
+ 1988-09-23 GMY * Modify for new VRDI interface, multiple versions of camera
+		  pointing in SEDR.
+		* Implement 1024x1024 display capability.
+		* Add code to support systems with only one video plane.
+		* Implement capability to process image-space frames.
+		* Change tiepoint file format to IBIS interface file.
+		* Add independent stretches for left and right images.
+		* Implement compensation for atmospheric feature motion.
+		* Add Jupiter zonal-velocity profile.
+		* Fix FRs 35652 and 37254.
+		* Numerous other modifications and minor bug fixes.
+ 1990-07-28 GMY * Galileo conversion
+ 1991-08-21 GMY * Fix FRs 66566, 61146.
+ 1997-05-07 SMC Port to Unix and Alpha
+                 * Switch the image memory plane (IMP) of image and tiepoint,
+                   so the image can be properly displayed on 8-bit device.
+                 * Upgrade all CONVISOS calls to take camera_id parameter.
+                 * Replace all implicit declaration with explicit ones.
+                 * distinguish between REAL*8 and REAL*4, the old VMS was able
+                   to operate between the two types interchangablly, but the
+                   new OS has problems with it.
+                 * Upgraded to GETSPICE2 and PUTSPICE2
+                 * Convert the S/C ID and Planet ID of the VGR SPICE/SEDR
+                   buffer to that of the GLL's so that PBNAME and PUTSPICE2
+                   can operate and terminate correctly
+                 * Replaced the xdglconstant call with xdglinit so that the
+                   graphic plane can be displayed accross all kinds of devices
+                   and that colors can be used.
+                 * Modified maplabel.f/zonal routine to use Binary Searching
+                   algorithm to find the proper record.  The previous routine
+                   had a problem of going into infinite loop.
+ 2001-10-10 GMY Fix Linux compile errors (NAV2_LINUX)
+                Modify to handle Cassini and VGR image space.
+		Add Cassini and VGR image space test cases to unit test.
+ 2016-02-18 WLB Added enable/disable-log to tstnav2.pdf
+.LEVEL1
+.VARI INP
+STRING - File names for
+input and reference images,
+and optional input tiepoint
+file.
+.VARI OUT
+STRING - File name for
+ouput tiepoint file.
+.VARI SPICEMODE
+Optional keyword
+Location of SPICE kernels
+(LOCAL or REMOTE)
+.VARI CKNAME
+Optional 4-char string
+C-kernel name
+.VARI CKID
+Optional 4-char string
+C-kernel ID
+.VARI USERID
+Optional 3-char string
+User who created camera pointing
+.VARI GROUPID
+Optional 3-char string
+Group which created camera pointing
+.VARI INSTITUTE
+Optional 4-char string
+Facility which created camera pointing
+.VARI PURPOSE
+Optional 4-char string
+Purpose for camera pointing
+.VARI PROGRAM
+Optional 6-char string
+Program which created camera pointing
+.VARI SPKID
+Optional 4-char string
+SP kernel for created camera pointing
+.VARI REQNUM
+Optional 4-char string
+IPL request number for created camera pointing
+.VARI CDATE
+Optional 12-char string
+Date and time camera pointing was created
+.VARI TARGET
+STRING - Target body name
+.VARI DBUG
+KEYWORD - Output diagnostic
+information for program
+maintenance.
+.VARI CZOOM
+INTEGER - Center display and zoom
+.VARI H
+KEYWORD - Display entire image
+.VARI HIST
+KEYWORD - Histogram of displayed image area
+.VARI SPIKES
+INTEGER - Number of spikes in histogram.
+.VARI STRETCH
+INTEGER - Stretch the displayed image
+.VARI STR1
+INTEGER - Stretch the left display
+.VARI STR2
+INTEGER - Stretch the right display
+.VARI GERASE
+Erase graphics plane
+.VARI SPTS
+KEYWORD - Display tiepoints
+.VARI GET
+INTEGER - print tiepoint information
+.VARI DELETE
+INTEGER - Delete tiepoint
+.VARI FIT
+INTEGER - Fit tiepoints and
+compute new OM and C matrices.
+.VARI NAVVEL
+KEYWORD - Adjust for atmospheric
+feature motion.
+.VARI NAVPTS
+KEYWORD - Cancels adjustment for
+atmospheric motion.
+.VARI SL
+INTEGER - Set starting line
+of display window.
+.VARI SS
+INTEGER - Set starting sample
+of display window.
+.VARI U
+INTEGER - Raise displayed area
+.VARI D
+INTEGER - Lower displayed area
+.VARI L
+INTEGER - Move displayed area left
+.VARI R
+INTEGER - Move displayed area right
+.VARI SL1
+INTEGER - Set starting line
+of display window, left image only
+.VARI SS1
+INTEGER - Set starting sample
+of display window, left image only
+.VARI U1
+INTEGER - Raise displayed area,
+left image only
+.VARI D1
+INTEGER - Lower displayed area,
+left image only
+.VARI L1
+INTEGER - Move displayed area left,
+left image only
+.VARI R1
+INTEGER - Move displayed area right,
+left image only
+.VARI SL2
+INTEGER - Set starting line
+of display window, right image only
+.VARI SS2
+INTEGER - Set starting sample
+of display window, right image only
+.VARI U2
+INTEGER - Raise displayed area,
+right image only
+.VARI D2
+INTEGER - Lower displayed area,
+right image only
+.VARI L2
+INTEGER - Move displayed area left,
+right image only
+.VARI R2
+INTEGER - Move displayed area right,
+right image only
+.VARI ZOOM
+INTEGER - Magnify or compress displayed
+area by an integral factor.
+.VARI PARAMS
+KEYWORD - Edit processing parameters
+.VARI CORR
+KEYWORD - Enable correlation
+function.
+.VARI PROJECT
+KEYWORD - Project left area prior
+to correlation.
+.VARI HPF
+KEYWORD - High pass filter areas
+prior to correlation.
+.VARI PHASE
+KEYWORD - Correlate phase
+information only.
+.VARI INTERP
+KEYWORD - Locate centroid
+of correlation peak.
+.VARI NLW
+INTEGER - Length of correlation
+window in pixels.
+.VARI NSW
+INTEGER - Width of correlation
+window in pixels.
+.VARI ZWIND
+INTEGER - Size of area used to
+compute average DN (Z) values.
+.VARI NOCORR
+KEYWORD - Disable correlation
+function.
+.VARI NOPROJEC
+KEYWORD - Disable projection
+.VARI NOHPF
+KEYWORD - Disable high
+pass filter.
+.VARI NOPHASE
+KEYWORD - Disable phase
+correlation.
+.VARI NOINTERP
+KEYWORD - Disable centroid
+location.
+.VARI EDIT
+Edit navigation data
+.VARI GEODET
+Use planetographic latitudes
+.VARI GEOCEN
+Use planetocentric latitudes
+.VARI PR
+REAL - Polar radius (km)
+.VARI ER
+REAL - Equatorial radius (km)
+.VARI FL
+REAL - Camera focal length (mm)
+.VARI OAXIS
+REAL - Optical axis intercept
+ (line,sample) coordinates.
+.VARI SC
+REAL - Picture scale (pixels/mm)
+.VARI SSP
+REAL - Spacecraft position (lat,lon)
+.VARI PC
+REAL - Planet center (line,sample)
+.VARI WAPC
+REAL - Wide-angle planet center (line,sample)
+.VARI ANGLN
+REAL - North angle
+.VARI RANGE
+REAL - Spacecraft range
+.VARI SAVE
+KEYWORD - Save navigation data
+.VARI RESTORE
+KEYWORD - Restore navigation data
+.VARI GETSEDR
+KEYWORD - Retrieve SEDR nav data
+.VARI STATUS
+KEYWORD - Print navigation data or processing parameters
+.VARIABLE RES
+STRING--OPTIONAL
+Specifies the Voyager Reseau Location File.
+.VARI HELP
+List available commands
+.VARI EXIT
+Exit from routine
+.LEVEL2
+.VARI INP
+	INP=(PIC,REF,OLDPTS)
+Input images and optional tiepoint file.  These are the image to be navigated
+(PIC), the reference image (REF), and any tiepoints previously acquired for
+this frame pair (OLDPTS).
+
+The input images may be Voyager or Galileo SSI flight images in byte format.  
+Both geometrically corrected (object-space) and uncorrected (image-space)
+frames may be input.
+.VARI SPICEMODE
+SPICEMODE=LOCAL specifies that SPICE data is to be retrieved from local
+SPICE kernels.  SPICEMODE=REMOTE specifies that SPICE data is to be retrieved
+via the SPICE server.  If SPICEMODE is defaulted, the logical name (or
+environmental variable) DEFAULTSPICE is used to determine whether LOCAL or
+REMOTE is used.  Note that if SPICE data is not found in LOCAL or REMOTE mode,
+the other mode is attempted.
+
+.VARI CKNAME
+CKNAME is a four character string specifying the C-kernel to be used:
+
+  CKNAME        C KERNEL
+  --------      -------------
+  DAVI          MIPS_DAVI.CK
+  NAV           MIPS_NAV.CK
+  FARE          MIPS_FARENC.CK
+  NAV2          MIPS_NAV2.CK
+  NEAR          MIPS_NEAR.CK
+  AMOS          MIPS_AMOS.CK
+  NAIF          the best NAIF kernel is used
+
+If defaulted, the kernels are searched in the above order.
+
+.VARI CKID
+CKID is an alternative way to specify the prefered C-kernel (see CKNAME
+parameter):
+
+  CKID    CKNAME        C KERNEL
+  ----    --------      -------------
+  M906    DAVI          MIPS_DAVI.CK
+  M905    NAV           MIPS_NAV.CK
+  M904    FARE          MIPS_FARENC.CK
+  M903    NAV2          MIPS_NAV2.CK
+  M902    NEAR          MIPS_NEAR.CK
+  M901    AMOS          MIPS_AMOS.CK
+  varies  NAIF          there are a large number of these files
+
+Ex:  CKID=M901 specifies the four character ID which uniquely identifies the
+     C-kernel MIPS_AMOS.CK.
+
+A complete list of the C-kernel IDs is located in the ASCII file assigned the
+logical name (or environmental variable) KERNELDB.
+
+If specified, CKID overrides the CKNAME parameter.
+
+.VARI USERID
+USERID is a three character string which identifies the user who created the
+camera pointing.
+
+Ex:  USERID=HBM identifies Helen Mortensen as the creator of the camera
+     pointing.
+
+.VARI GROUPID
+GROUPID is a three character string which identifies the group which created the
+camera pointing.
+
+Ex:  GROUPID=040 identifies group 040 as the creator of the camera pointing.
+
+.VARI INSTITUTE
+INSTITUTE is a four character string identifying the facility which created
+the camera pointing.
+
+Ex:  INSTITUTE=MIPS specifies that MIPS created the camera pointing.
+
+.VARI PURPOSE
+PURPOSE is a four character string identifying the purpose of the observation
+or the purpose of processing.  For example,
+  PURPOSE=MOSA identifies the image as part of a mosaic sequence
+  PURPOSE=COLO identifies the image as part of a color sequence
+
+.VARI PROGRAM
+PROGRAM is the first six characters of the program creating the camera pointing.
+
+Ex:  PROGRAM=FARENC specifies that FARENC created the camera pointing.
+
+.VARI SPKID
+SPKID specifies the four character ID which uniquely identifies the
+SP kernel used to create the camera pointing.  The SP-kernel IDs are located
+in the ASCII file assigned the logical name (or environmental variable)
+KERNELDB.
+
+Ex:  SPKID=N015 specifies the SP kernel GLL_LONG_2.BSP
+
+.VARI REQNUM
+REQUNUM is a four character string identifying the IPL request number for
+which the camera pointing was created.
+
+Ex:  REQNUM=3456 identifies (somewhat) request number R123456
+
+.VARI CDATE
+Date and time the camera pointing was created in the form 'YEARMMDDHHMM'.
+
+Ex:  CDATE=199602291200 specifies that the pointing was created at noon
+     on February 29, 1996.
+
+.VARI NLW
+INTEGER - Length of correlation window in pixels.
+    The correlation window is of dimension NLW x NSW.
+.VARI NAVVEL
+Entering NAVVEL will cause NAV2 to adjust for atmospheric motion when fitting
+the tiepoints.  The user is prompted to specify the zonal and meridional
+components of each tiepoint.  For Jupiter, the user may elect to have the
+program automatically compute the zonal velocities from a zonal-velocity
+profile (the meridional component is assumed to be zero).  This command is
+valid for atmospheric planets only.
+.VARI ZWIND
+INTEGER - Size of window used to compute average DN values for tiepoints.
+Entering ZWIND=10 will cause a 10x10 window to be used for computing the
+average DN value centered on each tiepoint.  This value is stored in the
+output tiepoint file.
+.VARI CZOOM
+INTEGER - Center display and zoom
+Example: CZOOM=2
+    Center the display around the selected cursor position and magnify
+    the image to twice normal resolution.
+.VARI H
+Display entire image.  The image may be displayed at reduced resolution
+to accomplish this.
+.VARI HIST
+KEYWORD - Overlay (in graphics plane) histogram of displayed image area.
+  A logrithmic frequency scale is used.
+.VARI SPIKES
+INTEGER - Ex: SPIKES=n will scale the frequencies so that the n'th largest
+  frequency corresponds to maximum scale.
+.VARI STRETCH
+INTEGER - Stretch the displayed image
+Example: STRETCH=(25,100)
+    A hardware stretch (linear transformation) is applied to the displayed
+    image.
+.VARI STR1
+The STR1 and STR2 commands may be used to stretch the left and right
+image areas independently.  Entering STR1=(10,128) will cause the left
+image area to be stretched as it is being written to the display.  Note
+that these commands are independent of the hardware stretch, so that
+following these commands with STRETCH=(5,220) will result in further
+stretching of the stretched images.
+.VARI GEODET
+Use planetographic latitudes
+    All input and output latitudes are reported as planetographic.
+    Note that this is the default for Voyager.
+.VARI GEOCEN
+Use planetocentric latitudes
+    All input and output latitudes are reported as planetocentric.
+.VARI PC
+REAL - Planet center (line,sample)
+Example: PC=(433.2,315.3)
+    The camera pointing is updated so that the planet center is 
+    located at (line,sample)=(433.2,315.3) in the image.
+.VARI WAPC
+REAL - Planet center of VGR wide-angle frame.  The input frame is
+assumed to be the narrow-angle frame of a WA-NA simultaneous
+exposure.  WAPC permits input of the planet center (line,sample)
+of the corresponding wide-angle frame.  The planet center for the
+narrow-angle frame is then derived using the known transformation
+between the to camera fields-of-view.
+EX: WAPC=(235.3,335.8)
+.VARI ANGLN
+REAL - North angle
+Example: ANGLN=45.3
+    The camera pointing is updated so that the planet's projected
+    spin axis is oriented at a 45.3 degree angle, measured
+    clockwise from up in the image.
+.VARI RANGE
+REAL - Spacecraft range (km).
+    Distance from spacecraft to planet center.
+.VARI TARGET
+STRING - Target body name
+Example: TARGET=SATURN
+.VARI SAVE
+KEYWORD - Save current navigation or orbital data.
+.VARI RESTORE
+KEYWORD - Restore previously saved navigation or orbital data.  If no
+previous values were saved, initial values are retrieved.
+.VARI GETSEDR
+KEYWORD - Retrieve navigation data from SEDR.  This restores the
+nominal camera pointing.
+.VARIABLE RES
+STRING--OPTIONAL
+Specifies the Voyager Reseau Location File.  If defaulted, the program
+automatically accesses the file for the planet-of-encounter as follows:
+
+               /project/vgr/resj.fil        (jupiter)
+               /project/vgr/ress.fil        (saturn)
+               /project/vgr/resu.fil        (uranus)
+               /project/vgr/resn.fil        (neptune)
+
+.VARI ZOOM
+Magnify or compress displayed area by an integral factor.
+   ZOOM=2 magnifies the area by a factor of two.
+   ZOOM=-4 compresses the area by a factor of four.
+.END

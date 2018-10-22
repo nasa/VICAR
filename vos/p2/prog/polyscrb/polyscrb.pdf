@@ -1,0 +1,227 @@
+process help=*
+!  FILE NAMES      
+!
+PARM INP     TYPE=STRING   COUNT=1
+PARM OUT     TYPE=STRING   COUNT=1
+!
+PARM SIZE    TYPE=INTEGER  COUNT=4       DEFAULT=(1,1,0,0)
+PARM SL      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM SS      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM NL      TYPE=INTEGER  COUNT=1       DEFAULT=0
+PARM NS      TYPE=INTEGER  COUNT=1       DEFAULT=0
+!
+PARM DIM     TYPE=INTEGER  COUNT=1 	 DEFAULT=2	    VALID=(2:3)
+!
+PARM HALF    TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=--         VALID=HALF
+!
+PARM DN      TYPE=INTEGER  COUNT=1       DEFAULT=255        VALID=(0:255)
+PARM BDN     TYPE=INTEGER  COUNT=1       DEFAULT=0          VALID=(0:255)
+PARM PDN     TYPE=INTEGER  COUNT=1       DEFAULT=255        VALID=(0:255)
+!
+PARM EXCLOSE TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=--         VALID=EXCLOSE
+PARM APCLOSE TYPE=REAL     COUNT=(1:2)   DEFAULT=0.0
+PARM OUTSIDE TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=--         VALID=OUTSIDE
+PARM NOPRINT TYPE=KEYWORD  COUNT=(0:1)   DEF= --	    VALID=NOPRINT
+PARM IGNOR   TYPE=REAL     COUNT=2       DEFAULT=(0.0,0.0)
+!
+END-PROC
+.TITLE
+VICAR/IBIS Program "polyscrb"
+.HELP
+ PURPOSE:
+
+Program "polyscrb" takes the data from a standard IBIS graphics-1 vector
+input file and produces from it an output image file of polygon borders
+(line segments) that are scribed (drawn) against a uniform
+background.  The input file consists of the coordinates of points in
+the output image that are to be connected with line segments.  The output
+image that is produced forms a raster base containing polygon outlines.
+Program options allow the user to specify both the data number values for the
+polygon borders and the background areas.  "polyscrb" is used in conjunction
+with programs "polyreg" and "polygeom" to produce a scribed image for input to
+program "paint".
+.PAGE
+ EXECUTION:
+
+The input file consists of the coordinates of sequences of points in
+the output image space.  Each sequence of points is to be connected
+with line segments in sequential order.  The coordinates of points
+are given in floating point (REAL*4) form with the line location first,
+followed by the pixel location in the line.  The program rounds 
+the coordinate locations to the nearest pixel in the output image space.
+
+The records in the input file consist of an integral number of coordinate
+pairs, or in other words, an integral number of points.  Sequences of points
+are packed into the records end to end and may cross record boundaries.
+The end of a sequence of points can either be marked by a null point or the
+end of the input file, or can be implied by means of a polygon closure option.
+By default a null point is a point with the coordinates (0.0,0.0).  A null
+point can be defined otherwise, though, by means of the IGNOR option.  When
+a polygon closure option (EXCLOSE or APCLOSE) is used, the program saves the
+coordinates of the first point in a sequence and checks if this point
+occurs again exactly (EXCLOSE) or approximately (APCLOSE).  If this point
+does occur again, (a closed polygon has been found, and) the sequence
+ends with the second occurrence of the point.  When a polygon closure option 
+is used, the program interprets either a closed polygon or a null point as
+an end of sequence.
+
+In "polyscrb", the size field does not refer to the input file, but instead
+determines a window (in the output image space) which will be written
+out to the output file.  The program finds the line segments or portions
+of line segments that lie within the window and assigns to the pixels along
+these segments the data number value for line segments (polygon borders).
+All pixels in the window area that are not part of a line segment are
+assigned the data number for background areas.
+
+The output image may either be byte or halfword data.  The output
+file must be allocated with AL or a similar program before
+running "polyscrb".
+
+TAE COMMAND LINE FORMAT
+      The following command line formats show the major allowable forms:
+      polyscrb INP=a OUT=b SIZE=(sl,ss,nl,ns) optional parameters
+      polyscrb INP=a OUT=b SL=sl SS=ss NL=nl NS=ns optional parameters
+      polyscrb a b (sl,ss,nl,ns) optional parameters
+      
+       Here 'a' represents the input file name,
+       'b' represents the output image file name.
+.PAGE
+EXAMPLES
+
+ 1.   polyscrb INP=OLINES OUT=SCRIB SIZE=(600,600,100,360) 'EXCLOSE
+
+      In this example a byte-data image is produced for the window which
+      starts at line 600, pixel 600 and which is 100 lines long and 360
+      pixels wide.  The program will check for polygons which close
+      exactly in determining the end of sequences of points in the
+      input file.
+
+ 2.   polyscrb INP=OLINES OUT=SCRIBH SIZE=(600,600,100,360) 'EXCLOSE 'HALF
+
+      In this example a halfword-data image is produced for the same window 
+      which was used in example 1.
+.PAGE
+
+ 3.   polyscrb IN.GRA OUT.IMG  DIM=3
+
+      In this example IN.GRA is a 3-dimensional file; the output line
+      segments will have the dn values specified by the z-value of the
+      initial point.  All other actions are the same.
+
+ 4.   polyscrb IN.GRA OUT.IMG  DIM=3  DN = 255
+
+      Specifying the DN value in the case of a 3-dimensional input will
+      override the z-value in the graphics file; all polygons will have
+      the specified DN value.
+
+RESTRICTIONS
+1. The output image can be byte or halfword data.
+2. Maximum number of samples is 500,000 per line.  The TAE/VICAR executive
+   may impose further size limitations.
+.PAGE
+ OPERATION:
+
+Because the size of output images can be larger than the size of the
+program's work buffer, "polyscrb" builds the output image in strips.
+Each strip contains as many (of the remaining) lines of the window area
+as will fit in the work buffer.  For each strip, "polyscrb" processes each
+line segment one at a time.  When a line segment intersects the strip,
+the slope of the segment is used in determining exactly which pixels to
+use in scribing the line.
+
+ WRITTEN BY:             A. L. Zobrist                1 Dec 1975
+
+ COGNIZANT PROGRAMMER:   Niles Ritter		      2 Jun 1988
+
+ REVISION:               1                           22 Sep 1978
+           AMS (CRI)     Made portable for UNIX       2 Jan 1995
+
+.LEVEL1
+.VARIABLE INP
+Input file name
+.VARIABLE OUT
+Output file name 
+.VARIABLE SIZE
+Standard Vicar size field:
+  (SL,SS,NL,NS)
+You can enter SL,SS,NL,
+and NS together as SIZE, OR
+enter the SL,SS,NL, and NS
+parameters separately.
+.VARIABLE SL
+Starting line number
+.VARIABLE SS
+Starting sample number
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples
+.VARIABLE DIM
+2 or 3 dim file?
+.VARIABLE HALF
+Enter  HALF=HALF (or abbreviate)
+for halfword output.
+.VARIABLE DN
+Data number for polygon borders
+.VARIABLE BDN
+Data number for background areas
+.VARIABLE PDN
+Data number for polygon corners
+(endpoints of line segments)
+.VARIABLE EXCLOSE
+Enter to check for
+polygons which close exactly
+when determining the end of
+sequences of points in the
+input file.
+.VARIABLE APCLOSE
+Distances in checking for
+polygons which close
+approximately.
+.VARIABLE OUTSIDE
+Enter to expand the polygon
+border by one pixel around
+the outside of the polygon.
+.VARI NOPRINT
+Suppresses program messages
+.VARIABLE IGNOR
+Defines coordinates of a
+null point.
+.LEVEL2
+.VARIABLE HALF
+Byte output is the default.
+.VARIABLE DN
+For 2-D the default data number for polygon borders is 255; for 3-D files
+the dn's are set to the z-values, unless DN is explicitly set.
+.VARIABLE BDN
+The default data number for background areas is 0.
+.VARIABLE PDN
+The default data number for polygon corners (endpoints of line segments)
+is the value for the DN parameter.
+.VARIABLE APCLOSE
+The APCLOSE distances are entered when the program is to check for
+polygons which close approximately (to within the APCLOSE distances)
+when determining the end of sequences of points in the input file.
+The first value gives the vertical distance in units of lines.  The second
+value gives the horizontal distance in units of pixels.  Both values are
+real numbers.  The program checks that both the vertical and horizontal
+distances are less than or equal to the APCLOSE parameters.  If only one
+APCLOSE parameter is entered, the value is used for both horizontal
+and vertical distances.
+.VARIABLE OUTSIDE
+This option is used when the polygon borders specified in the input file
+are to be included as part of the interior of the polygons and the actual
+borders are to be drawn around the outside of the specified polygon
+borders.  If this option is used the points of the polygon must be
+listed in the input file in clockwise ('right hand coded') order.
+This is because each line segment will be shifted over one pixel to the
+left (perpendicularly when looking towards the ending point from the
+starting point of the segment).
+.VARI NOPRINT
+Supresses program messages output to the screen.
+.VARIABLE IGNOR
+The default coordinates used to denote a null point are (0.0,0.0).
+A null point in the input file signifies the end of a sequence of points
+to be connected by line segments.  A null point is analogous to a pen-up
+command for a plotter.
+.END

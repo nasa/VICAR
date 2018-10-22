@@ -1,0 +1,12 @@
+Procedure
+Refgbl $Echo
+Body
+Let _Onfail="Continue"
+Let $Echo="Yes"
+TINTERG
+!THIS IS A TEST OF SUBROUTINE INTERG.
+!INTERG INTERPOLATES BETWEEN RESEAUS IN ORDER TO CREATE
+!PSEUDO RESEAUS.
+TINTERG
+Let $Echo="No"
+End-Proc

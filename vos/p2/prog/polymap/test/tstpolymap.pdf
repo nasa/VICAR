@@ -1,0 +1,17 @@
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+body
+local PATH string init="WMS_TEST_WORK:[TESTDATA.MISC]"
+let $autousage="none"
+let _onfail="continue"
+let $echo="no"
+if ($syschar(1) = "UNIX")
+  let PATH="/project/test_work/testdata/misc/"
+end-if
+write "THIS IS A TEST OF MODULE polymap"
+polymap &"PATH"b.test c.test sphe=1 skip=2 zone=11 'utm
+polymap &"PATH"b.test c.test insi=(100,100) sens=1 lati=1 band=0 'landsat
+polymap &"PATH"b.test c.test insi=(100,100) sens=1 lati=1 band=0 'som
+end-proc

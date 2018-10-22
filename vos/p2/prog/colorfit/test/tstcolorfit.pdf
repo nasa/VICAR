@@ -1,0 +1,18 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!
+!colorfit inp=(/home/jjl/junk/r.img,/home/jjl/junk/b.img, +
+! /home/jjl/junk/g.img)
+!f2 inp=(/home/jjl/junk/r.img,/home/jjl/junk/b.img) out=g.img +
+! function="0.44034435653476*IN1+0.39425723025466*IN2+44.904632489732+0.22887502363200*IN1/IN2"
+!xvd inp=(/home/jjl/junk/r.img,/home/jjl/junk/g.img,/home/jjl/junk/b.img)
+!xvd inp=(/home/jjl/junk/r.img,g.img,/home/jjl/junk/b.img)
+gausnois out=x1.img nl=100 ns=100 seed=123456
+gausnois out=x2.img nl=100 ns=100 seed=654321
+f2 inp=(x1.img,x2.img) out=x3.img function="0.5*IN1+0.3*IN2+10.+10.*IN1/IN2"
+colorfit inp=(x1.img,x2.img,x3.img)
+!
+end-proc

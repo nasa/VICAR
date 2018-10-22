@@ -1,0 +1,86 @@
+tstsargon.pdf version 2018-03-27
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+******************* TEST INSTRUCTIONS *****************
+Test: Zero-fill polygon
+In this test, a triangle will be drawn, and the interior zero-filled.
+Enter 'ZERO (note the apostrophe).
+Position cursor in image at first virtex and enter 'NEXT expecting to see nothing.
+Repeat positioning and entering 'NEXT two more times to draw two triangle sides.
+Enter 'NEXT to close triangle.
+Enter 'Y to accept triangle.
+The triangle interior will be set to black.
+Test: Brighten polygon interior by 50 DN
+In this test, a triangle will be drawn, and the interior brightened by 50 DN.
+Enter ADD=50 (note NO apostrophe).
+Position cursor in image at first virtex and enter 'NEXT expecting to see nothing.
+Repeat positioning and entering 'NEXT two more times to draw two triangle sides.
+Enter 'NEXT to close triangle.
+Enter 'Y to accept triangle.
+The triangle interior will be brightened by 50 DN.
+Enter 'EXIT
+XVD will popup with saved output image looking like edited image.
+Another XVD will popup with an example output image.
+Manually close XWA0 window and XVD windows.
+**************** END OF TEST INSTRUCTIONS **************
+Beginning VICAR task sargon
+*** SARGON version 2018-03-27 ***
+ COPYING INPUT TO OUTPUT
+ Unrecognized Output Size, Display Default Used
+
+ Display Device Characteristics
+ Video Output = 512x512
+ No. of LUTs =      3
+ No. of IMPs =      4
+ No. of LINES =     512
+ No. of SAMPS =     512
+ No. of CURSORS =   2
+ No. of IO DEVS =   1
+ GRAPHICS PLANE AVAILABLE
+
+'zero
+FOR EACH POINT, POSITION THE CURSOR AND
+ENTER NEXT AND PRESS RETURN.  ENTER NEXT
+AND PRESS RETURN A SECOND TIME WITHOUT
+MOVING THE CURSOR TO INDICATE THE LAST
+LAST VERTEX. DO NOT END WITH THE ORIGINAL
+VERTEX; THE PROGRAM WILL COMPLETE THE
+POLYGON FOR YOU.
+ READY FOR TRACKBALL
+ TO SPECIFY COORDINATES, POSITION TRACKBALL
+ AND ENTER NEXT.
+ TO EXIT, ENTER ANY OTHER COMMAND
+'next
+'next
+'next
+'next
+NVERT=        3
+'y
+ READY FOR TRACKBALL
+ TO SPECIFY COORDINATES, POSITION TRACKBALL
+ AND ENTER NEXT.
+ TO EXIT, ENTER ANY OTHER COMMAND
+add=50
+FOR EACH POINT, POSITION THE CURSOR AND
+ENTER NEXT AND PRESS RETURN.  ENTER NEXT
+AND PRESS RETURN A SECOND TIME WITHOUT
+MOVING THE CURSOR TO INDICATE THE LAST
+LAST VERTEX. DO NOT END WITH THE ORIGINAL
+VERTEX; THE PROGRAM WILL COMPLETE THE
+POLYGON FOR YOU.
+ READY FOR TRACKBALL
+ TO SPECIFY COORDINATES, POSITION TRACKBALL
+ AND ENTER NEXT.
+ TO EXIT, ENTER ANY OTHER COMMAND
+'next
+'next
+'next
+'next
+NVERT=        3
+'y
+ READY FOR TRACKBALL
+ TO SPECIFY COORDINATES, POSITION TRACKBALL
+ AND ENTER NEXT.
+ TO EXIT, ENTER ANY OTHER COMMAND
+'exit

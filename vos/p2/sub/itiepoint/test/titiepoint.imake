@@ -1,0 +1,15 @@
+/* Imake file for Test of VICAR subroutine ITIEPOINT */
+
+#define PROGRAM titiepoint
+
+#define MODULE_LIST titiepoint.f tzitiepoint.c
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB 

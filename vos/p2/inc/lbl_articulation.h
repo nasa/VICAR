@@ -52,6 +52,7 @@ extern "C" {
  *========
  * Date         Who             Description
  * ============ =============== =============================================
+ * 2017-10-30   G. Hollins      Changed ArticulationDeviceTempCount type
  * 2015-08-19   C. Cheng        Added ArticulationDeviceTempCount
  * 2015-07-01   C. Cheng        Added GravityAcceleration
  * 2015-07-01   C. Cheng        Added ArticulationDevicePhase
@@ -82,7 +83,7 @@ typedef struct
 	LblApiIdItem_typ		ArticulationDevPosition_Id[LBL_POSITION_ARRAY];
 	LblApiNameItem_typ		ArticulationDevPositionName[LBL_POSITION_ARRAY];
 	LblApiIdItem_typ		ArticulationDeviceMode;
-	LblApiRealItem_typ		ArticulationDeviceTempCount[5];
+	LblApiIntItem_typ		ArticulationDeviceTempCount[5];
 	LblApiRealItem_typ		ArticulationDeviceTemp[5];
 	LblApiNameItem_typ		ArticulationDeviceTempName[5];
 	LblApiTypeItem_typ		ArticulationDeviceTempUnit[5];

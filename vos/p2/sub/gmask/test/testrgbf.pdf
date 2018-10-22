@@ -1,0 +1,5 @@
+process
+parm inp (string,40) count=(0:10)
+parm out (string,40)
+parm FLAG type=keyword count=0:1 valid=flag default=--
+end-proc

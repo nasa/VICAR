@@ -1,0 +1,301 @@
+tstadespike
+ 
+gen a 10 10 IVAL=100 LINC=2 SINC=0
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+sargonb a c ZERO 0 (6,5,6,7,7,5)
+Beginning VICAR task sargonb
+SARGONB version 01-JUL-94
+insert c b LINE=8 DN=130 'TRUNC
+Beginning VICAR task insert
+INSERT version 02-MAY-94
+LINE INSERTED          8
+list b
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:lwk       Date_Time:Tue Jan 15 17:05:37 2013
+ Task:INSERT    User:lwk       Date_Time:Tue Jan 15 17:05:38 2013
+     Samp     1       3       5       7       9
+   Line
+      1     100 100 100 100 100 100 100 100 100 100
+      2     102 102 102 102 102 102 102 102 102 102
+      3     104 104 104 104 104 104 104 104 104 104
+      4     106 106 106 106 106 106 106 106 106 106
+      5     108 108 108 108 108 108 108 108 108 108
+      6     110 110 110 110   0   0   0 110 110 110
+      7     112 112 112 112   0 112 112 112 112 112
+      8     130 130 130 130 130 130 130 130 130 130
+      9     114 114 114 114 114 114 114 114 114 114
+     10     116 116 116 116 116 116 116 116 116 116
+adespike b c TOL=10 'print
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    SLTOL=    10    SUTOL=    10    DSLTOL=    10    DSUTOL=    10
+    CLTOL=    10    CUTOL=    10    DCLTOL=    10    DCUTOL=    10
+
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST           11
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST               2
+list c
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:lwk       Date_Time:Tue Jan 15 17:05:37 2013
+ Task:ADESPIKE  User:lwk       Date_Time:Tue Jan 15 17:05:39 2013
+     Samp     1       3       5       7       9
+   Line
+      1     100 100 100 100 100 100 100 100 100 100
+      2     102 102 102 102 102 102 102 102 102 102
+      3     104 104 104 104 104 104 104 104 104 104
+      4     106 106 106 106 106 106 106 106 106 106
+      5     108 108 108 108 108 108 108 108 108 108
+      6     110 110 110 110   0 110 110 110 110 110
+      7     112 112 112 112 112 112 112 112 112 112
+      8     113 113 113 113 113 113 113 113 113 113
+      9     114 114 114 114 114 114 114 114 114 114
+     10     116 116 116 116 116 116 116 116 116 116
+sargonb a d ZERO 0 (6,1,5,5,6,10,7,6)
+Beginning VICAR task sargonb
+SARGONB version 01-JUL-94
+list d
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:lwk       Date_Time:Tue Jan 15 17:05:37 2013
+ Task:SARGONB   User:lwk       Date_Time:Tue Jan 15 17:05:39 2013
+     Samp     1       3       5       7       9
+   Line
+      1     100 100 100 100 100 100 100 100 100 100
+      2     102 102 102 102 102 102 102 102 102 102
+      3     104 104 104 104 104 104 104 104 104 104
+      4     106 106 106 106 106 106 106 106 106 106
+      5     108 108 108 108   0 108 108 108 108 108
+
+      7     112 112 112 112 112   0 112 112 112 112
+      8     114 114 114 114 114 114 114 114 114 114
+      9     116 116 116 116 116 116 116 116 116 116
+     10     118 118 118 118 118 118 118 118 118 118
+adespike d e
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST            9
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST               2
+list e
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:lwk       Date_Time:Tue Jan 15 17:05:37 2013
+ Task:ADESPIKE  User:lwk       Date_Time:Tue Jan 15 17:05:40 2013
+     Samp     1       3       5       7       9
+   Line
+      1     100 100 100 100 100 100 100 100 100 100
+      2     102 102 102 102 102 102 102 102 102 102
+      3     104 104 104 104 104 104 104 104 104 104
+      4     106 106 106 106 106 106 106 106 106 106
+      5     108 108 108 108 108 108 108 108 108 108
+      6     110 110 110 110 110   0 110 110 110 110
+      7     112 112 112 112 112 112 112 112 112 112
+      8     114 114 114 114 114 114 114 114 114 114
+      9     116 116 116 116 116 116 116 116 116 116
+     10     118 118 118 118 118 118 118 118 118 118
+adespike d e BITS=3
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST            9
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST               2
+list e
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:lwk       Date_Time:Tue Jan 15 17:05:37 2013
+ Task:ADESPIKE  User:lwk       Date_Time:Tue Jan 15 17:05:41 2013
+     Samp     1       3       5       7       9
+   Line
+      1     100 100 100 100 100 100 100 100 100 100
+      2     102 102 102 102 102 102 102 102 102 102
+      3     104 104 104 104 104 104 104 104 104 104
+      4     106 106 106 106 106 106 106 106 106 106
+      5     108 108 108 108  96 108 108 108 108 108
+      6      96  96  96  96  96   0  96  96  96  96
+      7     112 112 112 112 112  96 112 112 112 112
+      8     114 114 114 114 114 114 114 114 114 114
+      9     116 116 116 116 116 116 116 116 116 116
+     10     118 118 118 118 118 118 118 118 118 118
+gen h 10 20 IVAL=100 LINC=2 SINC=0 'HALF
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+sargonb h f ZERO 0 (6,1,5,5,6,10,7,6)
+Beginning VICAR task sargonb
+SARGONB version 01-JUL-94
+adespike f g
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST            8
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST               3
+list g
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Tue Jan 15 17:05:41 2013
+ Task:ADESPIKE  User:lwk       Date_Time:Tue Jan 15 17:05:42 2013
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+      1       100   100   100   100   100   100   100   100   100   100   100   100   100   100   100
+      2       102   102   102   102   102   102   102   102   102   102   102   102   102   102   102
+      3       104   104   104   104   104   104   104   104   104   104   104   104   104   104   104
+      4       106   106   106   106   106   106   106   106   106   106   106   106   106   106   106
+      5       108   108   108   108   108   108   108   108   108   108   108   108   108   108   108
+      6       110   110   110   110   110     0   110   110   110   110   110   110   110   110   110
+      7       112   112   112   112   112   112   112   112   112   112   112   112   112   112   112
+      8       114   114   114   114   114   114   114   114   114   114   114   114   114   114   114
+      9       116   116   116   116   116   116   116   116   116   116   116   116   116   116   116
+     10       118   118   118   118   118   118   118   118   118   118   118   118   118   118   118
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Tue Jan 15 17:05:41 2013
+ Task:ADESPIKE  User:lwk       Date_Time:Tue Jan 15 17:05:42 2013
+     Samp      16    17    18    19    20
+   Line
+      1       100   100   100   100   100
+      2       102   102   102   102   102
+      3       104   104   104   104   104
+      4       106   106   106   106   106
+      5       108   108   108   108   108
+      6       110   110   110   110   110
+      7       112   112   112   112   112
+      8       114   114   114   114   114
+      9       116   116   116   116   116
+     10       118   118   118   118   118
+adespike f g DN=1234
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST            7
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST               3
+list g
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Tue Jan 15 17:05:41 2013
+ Task:ADESPIKE  User:lwk       Date_Time:Tue Jan 15 17:05:43 2013
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+      1       100   100   100   100   100   100   100   100   100   100   100   100   100   100   100
+      2       102   102   102   102   102   102   102   102   102   102   102   102   102   102   102
+      3       104   104   104   104   104   104   104   104   104   104   104   104   104   104   104
+      4       106   106   106   106   106   106   106   106   106   106   106   106   106   106   106
+      5       108   108   108   108  1234   108   108   108   108   108   108   108   108   108   108
+      6      1234  1234  1234  1234     0     0  1234  1234  1234  1234   110   110   110   110   110
+      7       112   112   112   112   112  1234   112   112   112   112   112   112   112   112   112
+      8       114   114   114   114   114   114   114   114   114   114   114   114   114   114   114
+      9       116   116   116   116   116   116   116   116   116   116   116   116   116   116   116
+     10       118   118   118   118   118   118   118   118   118   118   118   118   118   118   118
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Tue Jan 15 17:05:41 2013
+ Task:ADESPIKE  User:lwk       Date_Time:Tue Jan 15 17:05:43 2013
+     Samp      16    17    18    19    20
+   Line
+      1       100   100   100   100   100
+      2       102   102   102   102   102
+      3       104   104   104   104   104
+      4       106   106   106   106   106
+      5       108   108   108   108   108
+      6       110   110   110   110   110
+      7       112   112   112   112   112
+      8       114   114   114   114   114
+      9       116   116   116   116   116
+     10       118   118   118   118   118
+adespike f g BITS=11
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST            8
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST               3
+list g
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Tue Jan 15 17:05:41 2013
+ Task:ADESPIKE  User:lwk       Date_Time:Tue Jan 15 17:05:43 2013
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+      1       100   100   100   100   100   100   100   100   100   100   100   100   100   100   100
+      2       102   102   102   102   102   102   102   102   102   102   102   102   102   102   102
+      3       104   104   104   104   104   104   104   104   104   104   104   104   104   104   104
+      4       106   106   106   106   106   106   106   106   106   106   106   106   106   106   106
+      5       108   108   108   108    96   108   108   108   108   108   108   108   108   108   108
+      6        96    96    96    96    96     0    96    96    96    96   110   110   110   110   110
+      7       112   112   112   112   112    96   112   112   112   112   112   112   112   112   112
+      8       114   114   114   114   114   114   114   114   114   114   114   114   114   114   114
+      9       116   116   116   116   116   116   116   116   116   116   116   116   116   116   116
+     10       118   118   118   118   118   118   118   118   118   118   118   118   118   118   118
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:lwk       Date_Time:Tue Jan 15 17:05:41 2013
+ Task:ADESPIKE  User:lwk       Date_Time:Tue Jan 15 17:05:43 2013
+     Samp      16    17    18    19    20
+   Line
+      1       100   100   100   100   100
+      2       102   102   102   102   102
+      3       104   104   104   104   104
+      4       106   106   106   106   106
+      5       108   108   108   108   108
+      6       110   110   110   110   110
+      7       112   112   112   112   112
+      8       114   114   114   114   114
+      9       116   116   116   116   116
+     10       118   118   118   118   118
+adespike /project/test_work/testdata/mipl/vgr/e2575251.6 vgrdespike.fil
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST        40783
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST             240
+list /project/test_work/testdata/mipl/vgr/e2575251.6 (201,21,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:VEDR      User:SMT059    Date_Time:Fri Aug  5 09:35:04 1988
+     Samp    21      23      25      27      29
+   Line
+    201      19  19  21  19  19  20  19  19  19  20
+
+    203      19  20  19  20  20  19  20  20  19  19
+
+    205      19  19  20  20  20  18  19  21  20  21
+
+    207      20  19  19  19  20  19  19  19  19  19
+
+    209      19  19  19  19  19  21  19  20  20  19
+list vgrdespike.fil (201,21,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:VEDR      User:SMT059    Date_Time:Fri Aug  5 09:35:04 1988
+ Task:ADESPIKE  User:lwk       Date_Time:Tue Jan 15 17:05:44 2013
+     Samp    21      23      25      27      29
+   Line
+    201      19  19   0  19  19  20  19  19  19  20
+
+    203      19  20  19  20  20  19  20  20  19  19
+
+    205      19  19  20  20  20  18  19   0  20   0
+
+    207      20  19  19  19  20  19  19  19  19  19
+
+    209      19  19  19  19  19   0  19  20  20  19
+if ($syschar(1) = "VAX_VMS")
+else
+   ush rm a
+   ush rm b
+   ush rm c
+   ush rm d
+   ush rm e
+   ush rm f
+   ush rm g
+   ush rm h
+   ush rm vgrdespike.fil
+end-if
+Let $Echo="NO"
+exit
+slogoff

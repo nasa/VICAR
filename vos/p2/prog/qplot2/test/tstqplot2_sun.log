@@ -1,0 +1,379 @@
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+gen inp1 nl=20 ns=20
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen inp1a nl=40 ns=40 linc=2 sinc=2
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen inp2 nl=20 ns=20 linc=10 sinc=10
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen inp3 nl=128 ns=128 linc=5 sinc=5
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+qplot2 inp1 proc=(1, 1,1,1,20) title=("QPLOT2 TEST 1")
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1 proc=(1, 1,20,20,20) title=("QPLOT2 TEST 2")  +
+    labelsiz=14 plotout=test2
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1 proc=(1, 1,1,20,20) title=("QPLOT2 TEST 3")  +
+    plotout=test3
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1 proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 4 - SLANT PROFILE")  +
+    xtitle=("DN Position") ytitle=("DN Value") plotout=test4
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 5 - SLANT PROFILE")  +
+    xtitle=("DN Position") ytitle=("DN Value")  +
+    xscale=(1,40) yscale=(1,255) plotout=test5
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20, 1, 3,3,13,13, 1, 12,12,1,1)   +
+   title=("QPLOT2 TEST 6 - SLANT PROFILES OF 3 LINES")  +
+   xtitle=("DN Position") ytitle=("DN Value")  +
+   xscale=(1,50) yscale=(1,255) plotout=test6
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 7 - SLANT PROFILE")  +
+   xtitle=("DN Position") ytitle=("DN Value")  +
+   xscale=(1,30) yscale=(1,100) xlength=4 ylength=3 labelsiz=8  +
+    plotout=test7
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 8 - SLANT PROFILE")  +
+   xtitle=("DN Position") ytitle=("Normalized DN Value")  +
+   norm="norm" plotout=test8
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 9 - SLANT PROFILE")  +
+   xtitle=("Relative DN Position") ytitle=("DN Value")  +
+   tics="notics" plotout=test9
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 10 - SLANT PROFILE - RDS=20")  +
+   xtitle=("Relative DN Position") ytitle=("DN Value")  +
+    rds=20.0 plotout=test10
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 11 - SLANT PROFILE - RDS=-5")  +
+   xtitle=("Relative DN Position") ytitle=("DN Value")  +
+    rds=-5.0 plotout=test11
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+Multiple lines on one band
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20)  +
+   title=("QPLOT2 TEST 12 - 2 Files - same ranges")  +
+    plotout=test12
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20)  +
+    title=("QPLOT2 TEST 13 - 2 files - Scaling")  +
+    xscale=(1,40) yscale=(1,255)  plotout=test13
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20)  +
+    title=("QPLOT2 TEST 14 - 2 files - smaller scale")  +
+    xscale=(1,25) yscale=(1,50) plotout=test14
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp2,inp3) proc=(1,1,1,20,20, 2,50,50,70,70)  +
+    title=("QPLOT2 TEST 15 - 2 files - different ranges")  +
+    xscale=(1,25) yscale=(1,255) plotout=test15
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp1,inp2,inp3) proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70)  +
+        title=("QPLOT2 TEST 16 - 3 files - different ranges") plotout=test16
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp1,inp2,inp3,inp1a)  title=("QPLOT2 TEST 17 - Four Images")   +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    plotout=test17
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+gen half1 nl=20 ns=20 linc=20 modulo=32767 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen half1b nl=20 ns=20 linc=20 modulo=32767 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen half1a nl=40 ns=40 linc=200 sinc=2 ival=20 modulo=2048 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen half2 nl=20 ns=20 linc=100 sinc=10 ival=44 modulo=3096 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen half3 nl=128 ns=128 linc=50 sinc=5 ival=75 modulo=1024 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+let $echo="no"
+HALF WORD data sets
+qplot2 (half1,half2,half3,half1a) title=("QPLOT2 TEST 18 - HALF")  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    plotout=test18
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (half1,half1b) proc=(1,1,1,20,20, 2,1,1,20,20)  +
+    title=("QPLOT2 TEST 19 - HALF - LINE 2 displaced by 5 upward")  +
+    displace=5 plotout=test19
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+gen full1 nl=20 ns=20 linc=30 modulo=512 format=full
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen full1b nl=20 ns=20 linc=20 modulo=32767 format=full
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen full1a nl=40 ns=40 linc=100 sinc=2 ival=20 modulo=2048 format=full
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen full2 nl=20 ns=20 linc=100 sinc=10 ival=44 modulo=3096 format=full
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen full3 nl=128 ns=128 linc=50 sinc=5 ival=75 modulo=1024 format=full
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+let $echo="no"
+FULL WORD data sets
+qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 20 - FULL WORD")  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    plotout=test20
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 21 - FULL - Y-scale")  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    yscale=(0,5000.) plotout=test21
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+gen real1 nl=20 ns=20 linc=30 modulo=512 format=real
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen real1b nl=20 ns=20 linc=20 modulo=32767 format=real
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen real1a nl=40 ns=40 linc=100 sinc=2 ival=20 modulo=2048 format=real
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen real2 nl=20 ns=20 linc=100 sinc=10 ival=44 modulo=3096 format=real
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen real3 nl=128 ns=128 linc=50 sinc=5 ival=75 modulo=1024 format=real
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+let $echo="no"
+REAL data sets
+qplot2 (real1,real2,real3,real1a) title=("QPLOT2 TEST 22 - REAL")  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    plotout=test22
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+MIXED data sets
+qplot2 (inp1,half2,full3,real1a)   +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    title=("QPLOT TEST 23 -MIXED Data Types - BYTE,HALF,FULL,REAL")  +
+    plotout=test23
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+Plot needs to be taller for all labels to print
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 (inp1,half2,full3,real1a)   +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20)  +
+    title=("QPLOT TEST 24 -MIXED Data Types - BYTE,HALF,FULL,REAL")  +
+    nolabel=nolabel plotout=test24
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+gen b1 nl=50 ns=50
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen b2 nl=50 ns=50 ival=5 linc=1 sinc=1
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen b3 nl=50 ns=50 ival=20 linc=2 sinc=2
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen b4 nl=50 ns=50 ival=40 linc=3 sinc=3
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen b5 nl=50 ns=50 ival=100 linc=3 sinc=3
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+mss (b1,b2,b3,b4) out=mss4a
+Beginning VICAR task mss
+* OUTPUT CONTAINS   4INTERLEAVED DATA SETS **
+* ACTUAL OUTPUT RECORD LENGTH    200SAMPLES **
+ Note: IEEE floating-point exception flags raised: 
+    Invalid Operation; 
+ See the Numerical Computation Guide, ieee_flags(3M) 
+mss (b5,b2,b3,b4) out=mss4b
+Beginning VICAR task mss
+* OUTPUT CONTAINS   4INTERLEAVED DATA SETS **
+* ACTUAL OUTPUT RECORD LENGTH    200SAMPLES **
+ Note: IEEE floating-point exception flags raised: 
+    Invalid Operation; 
+ See the Numerical Computation Guide, ieee_flags(3M) 
+tran mss4a spec4a outorg=bsq nbands=4
+Beginning VICAR task tran
+TRAN version 06-04-98
+let $echo="no"
+MSS data sets
+qplot2 mss4a proc=(1,1,1,20,20) nchan=2  +
+    title=("QPLOT2 TEST 25 - One Line from Channel 1 - MSS Data")  +
+    plotout=test25
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 mss4a sproc=(10,10) nchan=4  +
+    title=("QPLOT2 TEST 26 - Spectral Plot - Pixel (10,10)")  +
+    plotout=test26
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
+    title=("QPLOT2 TEST 27 - Spectral Plot on MSS image - 4 points")  +
+    plotout=test27
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=3  +
+    title=("QPLOT2 TEST 28 - Spectral Plot 3 channels on MSS image")  +
+    plotout=test28
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+MULTIBAND images  - should FAIL
+let _onfail="continue"
+qplot2 spec4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
+    title=("QPLOT2 TEST 29 - Spectral Plot on Multiband image")
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+??E - Multiband images not supported
+      Convert to MSS format with TRAN
+ ** ABEND called **
+continue
+let _onfail="stop"
+let $echo="no"
+Test eps output
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
+    title=("QPLOT2 TEST 29X - Spectral Plot on MSS image")  +
+    plotout="yes" plotfmt="eps"
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+ush gnuplot qplot.eps.gpi
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4  +
+    title=("QPLOT2 TEST 30 - Spectral Plot on MSS image")  +
+    plotout="test30" plotfmt="eps"
+Beginning VICAR task qplot2
+qplot2 version 2015-08-19
+if (mode = "nobatch" or mode = "inter")
+end-if
+ush gnuplot test30.eps.gpi
+let $echo="no"

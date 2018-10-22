@@ -1,0 +1,54 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+write "THIS IS A TEST OF MODULE fil2"
+write "NORMALLY, fil2 WILL GENERATE AND PASS PARAMETERS"
+write "TO PROGRAM FILTER VIA A PROCEDURE.  THIS SCRIPT"
+write "FILE WILL ONLY TEST THE fil2 END OF THE TASK."
+write "THE IMPORTANT RESULT OF EACH CASE IS THE PRINTOUT"
+write "IDENTIFIED AS 'TOP LEFT WEIGHT QUADRANT'.  EACH"
+write "CASE WILL HAVE ITS IBM EQUIVALENT LISTED HERE."
+fil2 NLW=1 NSW=11  +
+       PSF=(      +
+       1.,.99,.9617,.9175,.8592,.7975,.7292,.6617,   +
+       .5967,.5308,.4717,.415,.3633,.315,.27, +
+       .2292,.1933,.1592,.1325,.105,.0842  )
+write "IBM WEIGHTS:  2216  2388  2550  2673  2752  32000"
+write ""
+fil2 NLW=1 NSW=11 sn=10. +
+       PSF=(      +
+       1.,.99,.9617,.9175,.8592,.7975,.7292,.6617,   +
+       .5967,.5308,.4717,.415,.3633,.315,.27, +
+       .2292,.1933,.1592,.1325,.105,.0842  )
+write "IBM WEIGHTS:  1160  3172  5607  7512  8795  -32000"
+write ""
+fil2 NLW=11 NSW=11 sn=6. +
+       PSF=(      +
+       1.,.99,.9617,.9175,.8592,.7975,.7292,.6617,   +
+       .5967,.5308,.4717,.415,.3633,.315,.27, +
+       .2292,.1933,.1592,.1325,.105,.0842  )
+write "IBM WEIGHTS:  117   195    388    409    366    352"
+write "              195   419    352    405    578    640"
+write "              388   352    512    767    668    604"
+write "              409   405    767    555    813   1072"
+write "              366   578    668    813   1227    298"
+write "              352   640    604   1072    298 -32000"
+write ""
+fil2 SN=6. NLW=11 NSW=11  +
+       MTF=(      +
+       1.,0.,.99,.025,.9617,.05,.9175,.075                     +
+                                  .8592,.1,.7975,.125,.7292,.15,.6617,.175   +
+       .5967,.2,.5308,.225,.4717,.25,.415,.275,.3633,.3,.315,.325,.27,.35 +
+       .2292,.375,.1933,.4,.1592,.425,.1325,.45,.105,.475,.0842,.5  )
+write "IBM WEIGHTS:"
+write "              58   -57    -59    87    152    154"
+write "             -57   -11    153   -57   -255   -287"
+write "             -59   153   -197  -150    361    534"
+write "              87   -57   -150   636    -89   -804"
+write "             152  -255    361   -89  -2403  -2423"
+write "             154  -287    534  -804  -2423  32000"
+end-proc

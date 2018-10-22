@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM astrtchr
+
+   To Create the build file give the command:
+
+		$ vimake astrtchr			(VMS)
+   or
+		% vimake astrtchr			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	astrtchr
+#define R2LIB
+
+#define MODULE_LIST astrtchr.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_MATH77
+/************************* End of Imake file ***************************/

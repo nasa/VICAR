@@ -1,0 +1,28 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM plotint
+
+   To Create the build file give the command:
+
+		$ vimake plotint			(VMS)
+   or
+		% vimake plotint			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	plotint
+
+#define MODULE_LIST plotint.f
+
+#define FTNINC_LIST gnuplotchar
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+/************************* End of Imake file ***************************/

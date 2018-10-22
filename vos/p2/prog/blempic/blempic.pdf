@@ -1,0 +1,95 @@
+PROCESS HELP=*
+ PARM INP     TYPE=STRING	COUNT=1
+ PARM OUT     TYPE=STRING	COUNT=3
+ PARM NL      TYPE=INTEGER	COUNT=1
+ PARM NS      TYPE=INTEGER	COUNT=1 
+END-PROC
+.TITLE
+VICAR2 PROGRAM "blempic"
+.HELP
+PURPOSE:
+
+"blempic" creates images of the permanent blemishes, low-full-well
+pixels, and total blemishes, as recorded in the blemish file output by
+"blemgen".  The program is intended as a diagnostic tool for supporting
+radiometric calibration of CCD camera systems and was initially written
+for the Galileo project.
+
+EXECUTION:
+
+    Example:  blempic INP=BLEMFILE OUT=(PBLEM,SAT,TBLEM) NL=800 NS=800
+
+where BLEMFILE is the input blemish file created by "blemgen", PBLEM is
+an image of the permanent blemishes, SAT is an image of the low-full-well
+pixels, and TBLEM is an image of all blemishes (permanent blemishes and
+low-full-well pixels).  BLEM, SAT, and TBLEM are of size NLxNS (800x800
+in this example).
+
+All parameters are required.  The output picture format (NLxNS) should
+be the same as the picture format of the camera.
+
+.page
+OPERATION:
+
+The image PBLEM contains a non-zero DN at the (line,sample) location of
+each permanent blemish, and zeroes in the remaining pixels:
+
+	DN(i,j) = 0    if the pixel at picture coordinate (i,j) is not
+                       a permanent blemish.
+	DN(i,j) = n    if the pixel is a permanent blemish of class n.
+	DN(i,j) = 255  if the pixel is an unclassified permanent blemish.
+
+See "blemgen" help file for blemish classification skeem.
+
+The image SAT contains a non-zero DN at the (line,sample) location of
+each low-full-well pixel, and zeroes in the remaining pixels:
+
+	DN(i,j) = n    if the pixel saturates at DN=n.
+        DN(i,j) = 0    if the pixel is normal or a permanent blemish.
+
+The image TBLEM is similar to PBLEM (i.e. the DN values represent blemish
+classification numbers) except that it includes all blemishes (permanent
+blemishes and low-full-well pixels).  This image characterizes the case
+of a high-exposure frame in which all low-full-well pixels are saturated.
+
+"blempic" prints out the following statistics:
+
+	1) number of permanent blemishes
+	2) number of low-full-well pixels
+	3) number of unclassified blemishes
+	4) total number of blemishes
+        5) histogram of the DN at which low-full-well pixels saturate
+
+.page
+HISTORY:
+
+Written by: Gary Yagi		18 Aug 88
+Current Cognizant Programmer: Gary Yagi
+Revisions:
+ 08 Jun 97  S. Pohorsky Added corrections for Cassini.
+ 08 May 95  A. Scop     (CRI) Made portable for UNIX
+ 18 Nov 88  G. Yagi     Fix documentation of output TBLEM image.
+ 16 Oct 88  G. Yagi	Add test to PHIST call.
+
+.LEVEL1
+.VARIABLE INP
+TYPE=STRING COUNT=1
+Blemish file
+created by
+BLEMGEN
+.VARIABLE OUT
+TYPE=STRING COUNT=3
+OUT=(PBLEM,SAT,TBLEM)
+where
+PBLEM=permanent blemishes
+SAT=low-full-well pixels
+TBLEM=total blemishes
+.VARIABLE NL
+TYPE=INTEGER
+Number of lines
+in output image
+.VARIABLE NS
+TYPE=INTEGER
+Number of samples
+in output image
+.END

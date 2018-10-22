@@ -1,0 +1,20 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY dform
+
+   To Create the build file give the command:
+
+	$ vimake dform                     (VMS)
+   or
+	% vimake dform                     (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE dform
+
+#define MODULE_LIST dform.c
+
+#define P2_SUBLIB
+
+#define USES_C

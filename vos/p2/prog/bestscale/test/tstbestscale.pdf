@@ -1,0 +1,11 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!
+bestscale inp=(v4.img,v3.img,v2.img,v1.img) +
+  out=(f4.img,f3.img,f2.img,f1.img) scale=(.7,1.1)
+bestfocus inp=(f4.img,f3.img,f2.img,f1.img) out=(f.img,topo.img) 'inverse
+!
+end-proc

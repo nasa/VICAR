@@ -1,0 +1,174 @@
+1 TRIAXTRAN
+
+        Routine to convert from one type of latitude & longitude to another
+        type of latitude & longitude on the triaxial ellipsoid.
+        Reference: Snyder, Survey Review Vol28, 217, July 1985
+
+  FORTRAN Calling Sequence and arguments:  
+
+      call triaxtran(a,b,c,cc,cp,ac,ap,nlimit,klimit,
+     +     mlimit,inlat,inlon,infmt,
+     +     outlat,outlon,outfmt,ind)
+
+ A = major axis radius of the triaxial ellipsoid 
+     at lat=0 eastlon=0.                              input real*8
+ B = next major axis radius of the triaxial ellipsoid 
+     at lat=0 eastlon=90.                             input real*8
+ C = polar axis radius of the triaxial ellipsoid.     input real*8
+ CC = C matrix of coefficients             input      real*8
+ CP = C primed matrix of coefficients      input      real*8
+ AC = COEF matrix of coefficients          input      real*8
+ AP = COEFP array of coefficients          input      real*8
+ nlimit= n dimension limit                 input      integer*4
+ klimit= k dimension limit                 input      integer*4
+ mlimit= m dimension limit                 input      integer*4
+ inlat= input latitude in degrees          input      real*8
+ inlon= input longitude in degrees east    input      real*8
+ infmt= the input lat/lon type             input      integer*4
+ outlat= output latitude in degrees        input      real*8
+ outlon= output longitude in degrees east  input      real*8
+ outfmt= the output lat/lon type           input      integer*4
+ ind=0 normal, ind=1 abnormal status       output     integer*4
+
+ The infmt & outfmt codes are:
+  1 means planetocentric latitude & longitude
+  2 means planetodetic latitude & longitude
+  3 means Snyder latitude & longitude
+  4 means conformal latitude & longitude
+  5 means authalic latitude & longitude
+
+ For example, to convert from centric to conformal, infmt=1 & outfmt=4
+
+ The CC,CP,AC,AP,nlimit,klimit and mlimit arrays and values come 
+ from data stored
+ in a file by program TRICOEF. These data are used only for transformations
+ involving conformal and authalic lat/lon types (infmt & outfmt types 4 & 5).
+ For other formats these data are ignored.
+
+
+  C Calling Sequence and arguments:  
+        
+      ztriaxtran(a,b,c,cc,cp,ac,ap,nlimit,klimit,mlimit,
+          inlat,inlon,infmt,
+          outlat,outlon,outfmt,ind)
+
+ A = major axis radius of the triaxial ellipsoid 
+     at lat=0 eastlon=0.                              input double
+ B = next major axis radius of the triaxial ellipsoid 
+     at lat=0 eastlon=90.                             input double
+ C = polar axis radius of the triaxial ellipsoid.     input double
+ CC = C matrix of coefficients             input      double
+ CP = C primed matrix of coefficients      input      double
+ AC = COEF matrix of coefficients          input      real*8
+ AP = COEFP array of coefficients          input      real*8
+ nlimit= n dimension limit                 input      int
+ klimit= k dimension limit                 input      integer*4
+ mlimit= m dimension limit                 input      int
+ inlat= input latitude in degrees          input      double
+ inlon= input longitude in degrees east    input      double
+ infmt= the input lat/lon type             input      int
+ outlat= output latitude in degrees        input      double
+ outlon= output longitude in degrees east  input      double
+ outfmt= the output lat/lon type           input      int
+ ind=0 normal, ind=1 abnormal status       output     int
+
+
+2 History
+
+  Original Programmer: J Lorre 9/93
+  Source Language: Fortran
+
+2 Operation
+
+  TRIAXTRAN usually requires a set of coefficients written to an IBIS  file
+  by program TRICOEF. You must first access this file and read the column 
+  appropriate for the planet in question before calling the subroutine.
+  A subroutine is available to read the IBIS archive file. It is 
+  called GET_ELLIPSOID and is contained inline in program TRICOEF.
+
+2 Arguments
+
+ A = major axis radius of the triaxial ellipsoid 
+ at lat=0 eastlon=0.                           
+ Radii should be expressed as normalized numbers. Thus A should be
+ 1.0, B should be B/A, and C should be C/A.
+ If you don't normalize the code will do it for you.
+
+ B = next major axis radius of the triaxial ellipsoid 
+ at lat=0 eastlon=90.                          
+ radii should be expressed as normalized numbers. Thus A should be
+ 1.0, B should be B/A, and C should be C/A.
+ If you don't normalize the code will do it for you.
+
+ C = polar axis radius of the triaxial ellipsoid.  
+ radii should be expressed as normalized numbers. Thus A should be
+ 1.0, B should be B/A, and C should be C/A.
+ If you don't normalize the code will do it for you.
+
+ CC = C matrix of coefficients as read from the TRICOEF IBIS file.
+ Only used for conformal projections.
+ CC is dimensioned cc(nlimit,mlimit)
+
+ CP = C primed matrix of coefficients as read from the TRICOEF IBIS file.
+ Only used for conformal projections.
+ CP is dimensioned cp(nlimit,mlimit)
+
+ AC = COEF matrix of coefficients as read from the TRICOEF IBIS file.
+ Only used for authalic projections.
+ AC is dimensioned ac(0:mlimit,0:klimit)
+
+ AP = COEFP matrix of coefficients as read from the TRICOEF IBIS file.
+ Only used for authalic projections.
+ AP is dimensioned ap(nlimit)
+
+ nlimit= n dimension limit               
+ As read from the TRICOEF IBIS file.
+ Only used for conformal and authalic projections.
+ If you are not requesting either conformal or authalic then this value
+ should be 1  .
+
+ klimit= k dimension limit               
+ As read from the TRICOEF IBIS file.
+ Only used for conformal and authalic projections.
+ If you are not requesting either conformal or authalic then this value
+ should be 1  .
+
+ mlimit= m dimension limit               
+ As read from the TRICOEF IBIS file.
+ Only used for conformal and authalic projections.
+ If you are not requesting either conformal or authalic then this value
+ should be 1  .
+
+ inlat= input latitude in degrees        
+
+ inlon= input longitude in degrees east  
+
+ infmt= the input lat/lon type           
+ The infmt & outfmt codes are:
+  1 means planetocentric latitude & longitude
+  2 means planetodetic latitude & longitude
+  3 means Snyder latitude & longitude
+  4 means conformal latitude & longitude
+  5 means authalic latitude & longitude
+ For example, to convert from centric to conformal, infmt=1 & outfmt=4
+
+ outlat= output latitude in degrees    ( RETURNED )
+ Outputs are always from -90 to +90
+
+ outlon= output longitude in degrees east  ( RETURNED )
+ Outputs are always from 0 to 360
+
+ outfmt= the output lat/lon type         
+ The infmt & outfmt codes are:
+  1 means planetocentric latitude & longitude
+  2 means planetodetic latitude & longitude
+  3 means Snyder latitude & longitude
+  4 means conformal latitude & longitude
+  5 means authalic latitude & longitude
+ For example, to convert from centric to conformal, infmt=1 & outfmt=4
+
+ IND is the returned indicator signifying the status of the call.
+ ind=0 is normal, ind=1 is abnormal status     
+
+
+

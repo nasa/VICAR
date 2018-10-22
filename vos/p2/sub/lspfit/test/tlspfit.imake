@@ -1,0 +1,18 @@
+#define PROGRAM tlspfit
+
+#define MODULE_LIST tlspfit.f tzlspfit.c
+                            
+#define MAIN_LANG_FORTRAN
+#define R2LIB
+
+#define USES_FORTRAN
+#define USES_ANSI_C
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_MATH77
+
+/*
+#define LIB_LOCAL
+*/
+

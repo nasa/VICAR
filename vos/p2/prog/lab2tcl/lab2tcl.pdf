@@ -1,0 +1,396 @@
+PROCESS HELP=*
+    local dumint	type=integer
+
+    parm INP		type=string
+    parm V1		type=name default=dumint
+    parm V2		type=name default=dumint
+    parm V3		type=name default=dumint
+    parm V4		type=name default=dumint
+    parm V5		type=name default=dumint
+    parm V6		type=name default=dumint
+    parm V7		type=name default=dumint
+    parm V8		type=name default=dumint
+    parm V9		type=name default=dumint
+    parm V10		type=name default=dumint
+    parm V11		type=name default=dumint
+    parm V12		type=name default=dumint
+    parm V13		type=name default=dumint
+    parm V14		type=name default=dumint
+    parm V15		type=name default=dumint
+    parm V16		type=name default=dumint
+    parm V17		type=name default=dumint
+    parm V18		type=name default=dumint
+    parm V19		type=name default=dumint
+    parm V20		type=name default=dumint
+!    parm KEYWORD	type=(string,8) count=(1:20)
+    parm keyword	type=(string,8) count=(1:20)
+    parm type		type=keyword valid=(system,history,all) default=history
+
+!# annot function="VICAR Procedure Generation"
+!# annot keywords=(system,history,INP,V1,linc,integer,real,string,nl,ns,+
+!#  format,sinc,"Output Parameter","TAE variable")
+END-PROC
+.TITLE
+Copies of VICAR label items to TAE variable
+
+.HELP
+PURPOSE
+"lab2tcl" copies information from the system and history sections of a VICAR
+label into user specified TCL variables.
+
+
+EXECUTION
+
+    procedure
+    local lineInc real
+    body
+	lab2tcl  INP=file.img  V1=lineInc  KEYWORD=linc
+    end-proc
+
+In this example, "lab2tcl" searches for keyword "linc" in the HISTORY section
+of image file "file.img"'s label (note that the program requires a variable
+definition prior to use). If the keyword is found, its value is written into
+the variable "lineInc"; if the keyword is not found, the message:
+    Keyword LINC not found in label.
+is displayed; the program will stop without searching for other specified
+keywords. The label's value is returned as either an integer, a real, or a
+string; label-add sets the value type, e.g.: 
+
+	Integer		Real		String
+	-------		----		------
+	 787		787.		'787'
+	 +3		+3e0		 '3'
+	 -45		-45.78		'negative forty five.'
+
+The variable whose name is given to the V1 parameter should be declared to be
+of the same type as the expected value. 
+
+Some of the label's information is stored in the SYSTEM section of the image
+file. lab2tcl looks in the SYSTEM section if the 'SYSTEM switch is specified: 
+
+    procedure
+    local numlines integer
+    body
+	lab2tcl  INP=file.img  v1=numlines  KEYWORD=nl 'SYSTEM
+    end-proc
+
+In this example, "lab2tcl" searches for keyword "nl" in the SYSTEM section
+of image file "file.img"'s label. "lab2tcl" will look in both sections of the
+image file--in the order SYSTEM,HISTORY--if the 'ALL switch is specified:
+
+    procedure
+    local sampinc real
+    body
+	lab2tcl  INP=file.img  v1=sampinc  KEYWORD=sinc 'ALL
+    end-proc
+
+In this example, lab2tcl searches for keyword "sinc" in the SYSTEM section
+first, then, if it wasn't found, in the HISTORY section. The "not found"
+message will appear if the keyword is not found in the HISTORY section, either.
+
+More than one keyword can be read at a time, setting a corresponding number
+of variables (note that separate parameters are used for each of the variable
+names; the parameters are numbered v1 to v20):
+
+    procedure
+    local numl integer
+    local nums integer
+    local fmt string
+    local linc real
+    local sinc real
+    body
+	lab2tcl  INP=file.img  v1=numl v2=nums v3=fmt v4=linc v5=sinc  +
+	    KEYWORD=(nl,ns,format,linc,sinc)  'ALL
+    end-proc
+
+"lab2tcl" looks for each keyword individually, so that, in this example, it
+will first look for keyword "nl" in SYSTEM then in HISTORY, then it will look
+for "ns" in SYSTEM and HISTORY, and so on. The first missing keyword
+terminates "lab2tcl" for all keyword retrieval.
+
+If an empty string is specified for one of the keywords other than the first,
+the corresponding variable will be assigned the value from the last retrieved 
+variable:
+
+    procedure
+    local nl1 integer
+    local nl2 integer
+    local ns1 integer
+    local ns2 integer
+    body
+	lab2tcl  INP=file.img  v1=nl1 v2=nl2 v3=ns1 v4=ns2  +
+	    KEYWORD=(nl,"",ns,"") 'SYSTEM
+    end-proc
+
+In this example, variables nl1 and nl2 are assigned the value found for keyword
+"nl", while ns1 and ns2 are assigned the value associated with "ns". Variable 
+names cannot be omitted. The message:
+    The first keyword in a KEYWORD list cannot be an empty string.
+is displayed if an empty string is supplied for the first keyword; the program
+will stop without searching for other specified keywords.
+
+
+RESTRICTIONS
+ 1. A maximum of 20 variables can be returned at a time.
+ 2. The parameter KEYWORD must be explicitly mentioned, as in "KEYWORD=ns", 
+    since each variable has its own parameter (V1,V2,V3,...,V20).
+ 3. Only the first value in a multivalued keyword is returned; this 
+    restriction corresponds to label-add, which will only permit the
+    first value to be written.
+ 4. If the keyword appears more than once in a section, the keyword 
+    in the "current task" is used, where the "current task" is the
+    last Task entry depicted in the label-list display.
+ 5. During a HISTORY search, "lab2tcl" looks at the current task for a
+    keyword. If the keyword is not found, the program then scans
+    backwards through the tasks starting with the second-to-last task.
+    "lab2tcl" is limited to 100 tasks, however, including the current task.
+
+
+WRITTEN BY:		M. K. Tschudi	July 14, 1987
+COGNIZANT PROGRAMMER:	R. J. Bambery
+REVISIONS:
+
+    1994-10-31 AMS (CRI) - Made portable for UNIX
+    2010-01-19 R. J. Bambery - Revised pdf file to remove 80 character
+               limit on input file
+    2012-06-05 R. J. Bambery - fix uninitialized variable
+    2012-06-06 R. J. Bambery - fixed TYPE parm to use 20 vals
+    2012-12-09 R. J. Bambery - fixed uninitialized variable i_format
+
+.LEVEL1
+.VARIABLE INP
+Input image whose label value
+is sought
+.VARIABLE V1
+Parameters V1,V2,...,V20 each
+contain the name of a TCL 
+variable that is to receive a
+value corresponding to a KEYWORD
+V1 corresponds to the first
+KEYWORD
+.VARIABLE V2
+The variable to receive the
+value for the second KEYWORD
+.VARIABLE V3
+The variable to receive the
+value for the third KEYWORD
+.VARIABLE V4
+The variable to receive the
+value for the fourth KEYWORD
+.VARIABLE V5
+The variable to receive the
+value for the fifth KEYWORD
+.VARIABLE KEYWORD
+One or more names of label
+entries; each label entry's 
+associated value is returned to
+the corresponding VAR
+.VARIABLE TYPE
+Switch indicating if the 
+HISTORY (default) or SYSTEM
+portion of a label is to be
+searched for KEYWORD, or if
+both SYSTEM & HISTORY should
+be searched (ALL)
+
+.LEVEL2
+.VARIABLE INP
+    This parameter is used to specify a labeled VICAR image to examine.
+
+
+    Type:	string, 80 characters
+    Count:	1
+    Valid:	any
+    Default:	none
+
+.VARIABLE V1
+    The purpose of "lab2tcl" is to transfer label information into a TCL
+    variable; the Vn parameters are used to specify the variable's name.
+    If the specified keyword is found in the image's label, then the
+    variable is set to the keyword's associated value; if the keyword is
+    not found, then the variable is undefined. 
+
+    Label values are typed: integer, real, or string. "lab2tcl" returns
+    the value using the value type; the variable should be declared to
+    be of the same type as the expected value. See either this program's
+    EXECUTION section or program label-add for a description of how
+
+    Parameter names "V1", "V2", etc., may be omitted from the calling 
+    line. You cannot skip a parameter in the sequence, for example:
+	V1=a V2=b V4=c
+    This usage will lead to an error.
+
+    The number of specified keywords determines how many variables are
+    set. In the example:
+	procedure
+	local a integer
+	local b integer
+	local c integer
+	local d integer
+	body
+	! Create an image and add some info to it
+	    gen tempimage
+	    label-add tempimage items="a=7 b=14 c=1987 d=3098470"
+	! Read the information
+	    lab2tcl  INP=tempimage  V1=a V2=b V3=c V4=d  KEYWORD=(a,b)
+	    write "&a/&b"
+	    write "&c  (&d)"
+	end-proc
+    only the variables for parameters V1 and V2 are set; c and d are
+    undefined.
+
+
+    Example:
+	Look for keywords a, b, c, d, e, f, & g (the "lab2tcl" produces 
+	the same result):
+	    procedure
+	    local a integer
+	    local b string
+	    local c string
+	    local d integer
+	    local e real
+	    local f integer
+	    local g real
+	    refgbl $prompt
+	    body
+	    ! Create an image and add some info to it
+		gen tempimage
+		label-add tempimage  +
+		    items="a=1,b='ABC',c='DEF',d=44,e=42.319,f=312,g=5.2e4"
+		label-add tempimage items="prompt='Test'"
+	    ! Read the information
+		lab2tcl INP=tempimage V1=a V2=b V3=c V4=d V5=e V6=f V7=g  +
+		    V8=$prompt  KEYWORD=(a,b,c,d,e,f,g,prompt)
+		write "a=&a, b=&b, c=&c, d=&d, e=&e,"
+		write "f=&f, g=&g"
+		lab2tcl tempimage  a b c d e f g  KEYWORD=(a,b,c,d,e,f,g)
+		write "a=&a, b=&b, c=&c, d=&d, e=&e,"
+		write "f=&f, g=&g"
+	    end-proc
+
+
+    Type:	name
+    Count:	1
+    Valid:	any
+    Default:	none
+.VARIABLE V2
+    See parameter V1 for more information.
+.VARIABLE V3
+    See parameter V1 for more information.
+.VARIABLE V4
+    See parameter V1 for more information.
+.VARIABLE V5
+    See parameter V1 for more information.
+.VARIABLE KEYWORD
+    Label information is stored in (keyword,value) pairs. This parameter
+    is used to enter the names of the keywords of interest. Keywords are 
+    stored in uppercase characters, so upper or lower case characters
+    can be used.
+
+    Examples:
+	Look for keyword "acreage" (the "lab2tcl" produces the same
+	result):
+	    procedure
+	    local acres real
+	    body
+	    ! Create an image and add some info to it
+		gen tempimage
+		label-add tempimage items="acreage=367483.3"
+	    ! Read the information
+		lab2tcl INP=tempimage V1=acres KEYWORD=acreage
+		write "Acres = &acres"
+		lab2tcl INP=tempimage V1=acres KEYWORD=Acreage
+		write "Acres = &acres"
+		lab2tcl INP=tempimage V1=acres KEYWORD=ACREAGE
+		write "Acres = &acres"
+	    end-proc
+
+
+    Type:	string, 8 characters
+    Count:	1 to 20
+    Valid:	any, including empty string ("")
+    Default:	none
+.VARIABLE TYPE
+    A label has at least two categories of information: SYSTEM and
+    HISTORY. The SYSTEM category contains keywords such as:
+	Integer-valued		String-valued
+	name	example		name	example
+	---------------		---------------
+	LBLSIZE    234		FORMAT	'BYTE'
+	BUFSIZ	  2000		TYPE	'IMAGE'
+	DIM	     3		ORG	'BSQ'
+	EOL	     1
+	RECSIZE	    13
+	NL	     8
+	NS	    13
+	N1	    13
+	N2	     8
+	N3	     0
+	N4	     0
+	NBB	     0
+	NLB	     0
+
+    while the HISTORY category contains keywords entered by tasks as well
+    as the label-add program. "lab2tcl" will look in only one category or
+    in both categories; this switch permits you to specify lab2tcl's actions.
+
+    Examples:
+	Using HISTORY category only (the "lab2tcl" produces the same
+	result):
+	    procedure
+	    local acres real
+	    body
+	    ! Create an image and add some info to it
+		gen tempimage
+		label-add tempimage items="acreage=+33.289e9"
+	    ! Read the information
+		lab2tcl INP=tempimage V1=acres KEYWORD=acreage
+		write "Acres = &acres"
+		lab2tcl INP=tempimage V1=acres KEYWORD=acreage 'HISTORY
+		write "Acres = &acres"
+		lab2tcl INP=tempimage V1=acres KEYWORD=acreage TYPE=HISTORY
+		write "Acres = &acres"
+		lab2tcl INP=tempimage V1=acres KEYWORD=acreage TYPE=history
+		write "Acres = &acres"
+	    end-proc
+
+	Using SYSTEM category only (the "lab2tcl" produces the same
+	result):
+	    procedure
+	    local numlines integer
+	    body
+	    ! Create an image, then read some of its info
+		gen tempimage
+		lab2tcl INP=tempimage V1=numlines KEYWORD=nl 'SYSTEM
+		write "image contains &numlines lines"
+		lab2tcl INP=tempimage V1=numlines KEYWORD=nl TYPE=SYSTEM
+		write "image contains &numlines lines"
+		lab2tcl INP=tempimage V1=numlines KEYWORD=nl TYPE=system
+		write "image contains &numlines lines"
+	    end-proc
+
+	Using first SYSTEM then HISTORY categories (the first two "lab2tcl"
+	uses happen to produce the same result as the HISTORY only example,
+	while the third use would be the same as the SYSTEM only example):
+	    procedure
+	    local acres real
+	    local numlines integer
+	    body
+	    ! Create an image and add some info to it
+		gen tempimage
+		label-add tempimage items="acreage=-748.32"
+	    ! Read the information
+		lab2tcl INP=tempimage V1=acres KEYWORD=acreage 'ALL
+		write "Acres = &acres"
+		lab2tcl INP=tempimage V1=acres KEYWORD=acreage 'all
+		write "Acres = &acres"
+		lab2tcl INP=tempimage V1=numlines KEYWORD=nl 'ALL
+		write "image contains &numlines lines"
+	    end-proc
+
+
+    Type:	keyword
+    Count:	1
+    Valid:	SYSTEM, HISTORY, ALL
+    Default:	HISTORY
+.END

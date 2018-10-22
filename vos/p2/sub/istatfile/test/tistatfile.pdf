@@ -1,0 +1,7 @@
+process
+parm out string count=1
+parm nclass integer count=1
+parm nband integer count=1
+parm INST keyword valid=(USE_INST, NO_INST) default=USE_INST
+end-proc
+

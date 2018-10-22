@@ -1,0 +1,64 @@
+process help=*
+PARM INP TYPE=STRING COUNT=1
+PARM OUT TYPE=STRING COUNT=1
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL TYPE=INTEGER COUNT=1 DEFAULT=1
+PARM SS TYPE=INTEGER COUNT=1 DEFAULT=1
+PARM SB TYPE=INTEGER COUNT=1 DEFAULT=1
+PARM NL TYPE=INTEGER COUNT=1 DEFAULT=0
+PARM NS TYPE=INTEGER COUNT=1 DEFAULT=0
+PARM NB TYPE=INTEGER COUNT=1 DEFAULT=0
+PARM ADD TYPE=INTEGER COUNT=(5:125)
+END-PROC
+.TITLE
+ADL
+.HELP
+ADL adds a constant value to pixels that are on lines (oriented
+in any direction) that have been specified by their end points.
+Several different lines may be drawn simultaneously, using differing
+constants. The lines drawn by ADL are one pixel wide. If the DN value
+of a pixel on a line is to be adjusted to a value less than 0, it is set
+to 0; if a pixel is to be adjusted to a value greater than 255, it is
+set to 255.
+RESTRICTIONS;
+1. Maximum image size is 10000 lines and 10000 samples.
+2. Maximum number of lines to be drawn is 25.
+3. Maximum number of pixels to be changed is 12000.
+4. Byte data only.
+HISTORY
+Made portable for UNIX ... J. Turner (CRI).............. 31 Oct. 1994
+Enabled for 3D images  ... N. Toole .................... 16 Sep. 2003
+16-Feb-06 -lwk- corrected treatment of SIZE field in processing of ADD
+.LEVEL1
+.VARIABLE INP
+input dataset
+.VARIABLE OUT
+output dataset
+.VARIABLE SIZE
+standard VICAR size field
+.VARIABLE SL
+starting line
+.VARIABLE SS
+starting sample
+.VARIABLE SB
+starting band
+.VARIABLE NL
+number of lines
+.VARIABLE NS
+number of samples
+.VARIABLE NB
+number of bands
+.VARIABLE ADD
+add x to sl,ss,el,es
+.LEVEL2
+.VARIABLE ADD
+For each line that is to be added to the image, a set of 5 values
+follow the keyword ADD. These 5 values are:
+     1  The value added to all pixels on the line. (positive or negative)
+     2  The line number of the first end point.
+     3  The sample number of the first end point.
+     4  The line number of the other end point.
+     5  The sample number of the other end point.
+Up to 25 sets of 5 values may follow the ADD keyword. End points may be
+specified in any order.
+.END

@@ -1,0 +1,258 @@
+      INCLUDE 'VICMAIN_FOR'
+      SUBROUTINE MAIN44
+C      8 MAY 95 ...CRI...  MSTP S/W CONVERSION (VICAR PORTING)
+C        9-88  SP   MODIFIED BECAUSE DIV HAS BEEN RENAMED TO DIVV.
+C     18 OCT 79   ...JJL...    INITIAL RELEASE
+C     PROGRAM PRINTPIX                                       BILL BENTON
+C
+C     PRINTPIX WILL TAKE ANY SIZE INPUT PICTURE AND WILL PRINT A
+C     PICTURE ON THE LINE PRINTER OF WIDTHS VARYING FROM ONE PAGE TO A
+C     MAXIMUM NUMBER OF PAGES CORRESPONDING TO ONE CHARACTER PER PIXEL
+C     AT 130 CHARACTERS PER PAGE. THE OUTPUT PICTURE IS CORRECTED FOR
+C     ASPECT RATIO.
+C     FORMAT= E,PRINTPIX,IN,*,,PARAMS
+C     SYMBOLS=     IN      ...USER SPECIFIED INPUT DATA SET
+C     PARAMS=      NP,N1   ...WIDTH OF OUTPUT IN PAGES. (DEFAULT=1)
+C                  INC,N2...SETS THE SCANNING INCREMENT AND OVERRIDES
+C                             THE PARAMETER NP.
+C                  COMP    ...PRODUCES A COMPLIMENTARY PICTURE.
+C                  STRETCH,N3,N4...PERFORMS A LINEAR STRETCH BETWEEN
+C                             THE LOWER VALUE N3 AND THE UPPER VALUE N4.
+C                  HEAD    ...PRODUCES SAMPLE HEADINGS AT TOP OF PAGE.
+C                  SMALL   ...PAPER IS THE SMALL TYPE WITH AN ASPECT
+C                             RATIO OF 4 TO 5.
+C                  LARGE   ...PAPER IS THE LARGE TYPE WITH AN ASPECT
+C                             RATIO OF 3 TO 5
+C
+      COMMON /C3/ DNW
+      REAL SINC,R
+      INTEGER SSO
+      INTEGER SS,SL,NSO,NLO,NLI,NSI,NSW,NLW,NP,SMALL,INC,STAT
+      INTEGER DW(13),KINC,INC2,JINC,NN,LINES,LSTR,HSTR
+      INTEGER HEAD,PFLAG,COMP,IPARM(50),TDN(3500),DNW(130)
+      INTEGER*2 DNBUF(3500),STRTAB(256)
+      LOGICAL XVPTST
+      CHARACTER*34 MSG1
+      CHARACTER*74 MSG2
+      CHARACTER*45 MSG3
+      CHARACTER*130 MSG4,MSG6,UNCNFMT
+      CHARACTER*65  MSG5
+      CHARACTER*23  MSG7
+      CHARACTER*6   FORMAT
+
+C        INITIALIZE ALL DEFAULT VALUES.
+      MSG1='STRETCH=     ,      (COMPLEMENTED)'
+      MSG2(1:53)='WARNING---SAMPLE COUNT TOO LARGE---SAMPLE COUNT TRUNC'
+      MSG2(54:74)='ATED TO 3500 SAMPLES.'
+      MSG4(1:53)='I***-****I****-****I****-****I****-****I****-****I***'
+      MSG4(54:104)='*-****I****-****I****-****I****-****I****-****I****'
+      MSG4(105:130)='-****I****-****I****-****I'
+      MSG6=' '
+      MSG7='READ ERROR ON LINE'
+      DSRN=2
+      ZERO=0
+      NP=1
+      LSTR=0
+      HSTR=255
+      HEAD=0
+      PFLAG=0
+      SMALL=1
+      COMP=0
+
+      CALL IFMESSAGE('PRINTPIX version 8-MAY-95')
+C          OPEN INPUT DATA SET
+      CALL XVUNIT(IUNIT,'INP',1,STAT,' ')
+      CALL XVOPEN(IUNIT,STAT,'U_FORMAT','HALF',' ')
+
+C        GET DATA FORMAT AND CHECK
+      CALL XVGET(IUNIT,STAT,'FORMAT',FORMAT,' ')
+      IF(FORMAT(1:4).NE.'BYTE') THEN
+         CALL MABEND('PRINTPIX ACCEPTS BYTE DATA ONLY')
+      END IF
+
+C        GET SIZE INFORMATION AND CHECK
+      CALL XVSIZE(SL,SS,NLO,NSO,NLI,NSI)
+      IF(SL+NLO-1 .GT. NLI) THEN
+         CALL MABEND('NUMBER OF LINES REQUESTED EXCEEDS INPUT SIZE')
+      END IF
+      IF(SS+NSO-1 .GT. NSI) THEN
+         CALL MABEND('NUMBER OF SAMPLES REQUESTED EXCEEDS INPUT SIZE')
+      END IF
+
+C                DETERMINE USER PARAMETERS
+C        'COMP'
+      IF(XVPTST('COMP')) COMP=255
+C        'STRE'
+      CALL XVPARM('STRETCH',IPARM,ICOUNT,IDEF,2)
+      LSTR=IPARM(1)
+      HSTR=IPARM(2)
+C        'NP'
+      CALL XVPARM('NP',NP,ICOUNT,IDEF,1)
+C        'INC'
+      CALL XVPARM('INC',INC,ICOUNT,IDEF,1)
+      IF(INC.NE.1) PFLAG=1
+C        'HEAD'
+      IF(XVPTST('HEAD')) HEAD=1
+C        'SMALL'
+      IF(XVPTST('SMALL')) SMALL=1
+C        'LARGE'
+      IF(XVPTST('LARGE')) SMALL=0
+
+      IF(COMP .EQ. 255) LSTR=255-LSTR
+      IF(COMP .EQ. 255) HSTR=255-HSTR
+      SL=SL-1
+      SS=SS-1
+      SSO=SS
+
+C        CHECK FOR MAXIMUM PICTURE SIZE.  TRUNCATE IF TOO LARGE.
+      IF(NSO .GT. 3500) THEN
+         CALL XVMESSAGE(MSG2,' ')
+         NSO=3500
+      END IF
+
+C        BUILD STRETCH TABLE FOR LINEAR STRETCH.
+      R=255./(HSTR-LSTR)
+      DO I=1,256
+         STRTAB(I)=NINT(((I-1)-LSTR)*R) 
+         IF(STRTAB(I) .LT. 0) STRTAB(I)=0
+         IF(STRTAB(I) .GT. 255) STRTAB(I)=255
+      END DO
+
+C        BEGIN PROCESSING INPUT FILE AND CREATE NEW WORK FILE.
+      IF(PFLAG .EQ. 1) GO TO 2
+      SINC=NSO/130./NP
+      INC=SINC
+      IF(INC*1. .EQ. SINC) GO TO 2
+      INC=INC+1
+
+2     NSW=NSO/INC
+      NLW=NLO/INC
+      NP=NSW/130+(MOD(NSW,130)+129)/130
+      LINES=(NLW/5)*(3+SMALL)+MOD(NLW,5)-MOD(NLW,5)/3
+      J=SL+1
+      I=SS+1
+      K=1
+      IF(MOD(NSW,130) .EQ. 0) K=0
+      IF(PFLAG .EQ.0) NP=NSW/130+K
+      WRITE (MSG3,9900) J,I,NLO,NSO
+9900  FORMAT ('INPUT SL=  ',I4,' SS=  ',I4,' NL=  ',I4,' NS=  ',I4)
+      CALL XVMESSAGE(MSG3,' ')
+      WRITE (MSG5,9910) INC,LINES,NSW,NP
+9910  FORMAT ('OUTPUT SCANNING INCREMENT=  ',I4,' NL=  ',I4,' NS=  ',I4,
+     &        ' PAGES= ',I4)
+      CALL XVMESSAGE(MSG5,' ')
+      IF(SMALL .EQ. 0) CALL XVMESSAGE
+     &   ('***THIS PRINTOUT IS FOR THE LARGE PAPER ASPECT RATIO***',' ')
+      IF(SMALL .EQ. 1) CALL XVMESSAGE
+     &   ('***THIS PRINTOUT IS FOR THE SMALL PAPER ASPECT RATIO***',' ')
+      INC2=INC*INC
+      KINC=0
+7     CALL XVMESSAGE(' ',' ')
+      CALL XVMESSAGE(' ',' ')
+      SS=SS+KINC
+      KINC=130*INC
+      IF(SS+KINC .GT. NSO+SSO) KINC=NSO+SSO-SS
+      K=KINC/INC
+      KINC=K*INC
+      IF(HEAD) 14,14,10
+10    M=K/10
+      DO 9 N=1,M
+         MM=4
+         DW(N)=SS+(N-1)*10*INC
+         IF(N.EQ.1) DW(N)=DW(N)+1
+         NN=(N-1)*10+1
+         IF(N.EQ.1) NN=NN+4
+         IF(DW(N)-1) 99,17,99
+17       MM=1
+         NN=2
+99       WRITE (UNCNFMT,'(''(I'',I4.4,'')'')') MM
+         WRITE (MSG6(NN-(MM):NN-1),UNCNFMT) DW(N)
+9        CONTINUE
+      CALL XVMESSAGE(MSG6(1:K),' ')
+      CALL XVMESSAGE(MSG4(1:K),' ')
+14    CONTINUE
+      DO 3 I=1,NLW
+         IF(SMALL) 6,6,8
+6        IF(MOD(I,5).EQ. 0) GO TO 3
+8        IF(MOD(I,5).EQ. 3) GO TO 3
+         JINC=(I-1)*INC+SL
+         CALL ZIA(TDN,KINC)
+         DO J=1,INC
+            CALL XVREAD(IUNIT,DNBUF,STAT,'LINE',JINC+J,
+     &                 'SAMP',SS+1,'NSAMPS',KINC,' ')
+            CALL ADDV(6,KINC,DNBUF,TDN,1,1)
+         END DO
+         CALL ZIA(DNW,130)
+         CALL ZZ(DNW,TDN,K,INC)
+         CALL DIVV(4,K,INC2,DNW,0,1)
+         DO J=1,K
+            DNW(J)=STRTAB(DNW(J))
+         END DO
+         CALL DNCONV(K)
+3     CONTINUE
+      IF(HEAD) 12,12,13
+13    CALL XVMESSAGE(MSG4(1:K),' ')
+      CALL XVMESSAGE(MSG6(1:K),' ')
+12    CONTINUE
+      IF(SS+KINC+INC-NSO) 7,15,15
+15    IF(LSTR.EQ.0.AND.HSTR.EQ.255.AND.COMP.EQ.0) GO TO 16
+      WRITE (MSG1(10:13),'(I4)') LSTR
+      WRITE (MSG1(16:19),'(I4)') HSTR
+      N=20
+      IF(COMP .EQ. 255) N=34
+      CALL XVMESSAGE(MSG1(1:N),' ')
+16    CONTINUE
+      CALL XVMESSAGE(' ',' ')
+      CALL XVMESSAGE(' ',' ')
+
+C        CLOSE DATA SET
+      CALL XVCLOSE(IUNIT,STAT,' ')
+
+      RETURN
+      END
+
+      SUBROUTINE DNCONV(NCHAR)
+
+C     SUBROUTINE DNCONV CONVERTS A LINE OF 130 DN-LEVELS INTO A LINE
+C     OF CHARACTERS WITH AN APPARENT DARKNESS CORRESPONDING TO EACH
+C     DN-LEVEL.  DCONV THEN PRINTS AND OVERPRINTS THESE CHARACTERS.
+
+      COMMON /C3/ DNW
+      CHARACTER*16 PR
+      CHARACTER*131 ALINE
+      INTEGER DNW(130),TMP
+
+      PR='#@$&WNV%*=?!-:. '
+      ALINE=' '
+      DO I=1,NCHAR
+         TMP=DNW(I)/16+1
+         ALINE(I:I)=PR(TMP:TMP)
+      END DO
+      CALL XVMESSAGE(ALINE(1:NCHAR),' ')
+
+      RETURN
+      END
+
+	subroutine zz(out,in,ns,inc)
+c	subroutine zz take an incremental box over an input buffer,
+c	and forms a summation (with no overlap) which is output in out
+c	thenumber of elements in out is ns and the number of
+c	input elements is ns*inc
+	integer*4 IN(3500),out(3500)
+
+c	   put low pass filter code here
+	j=0
+	k=0
+	NSIN=NS*INC
+	do  i=1,NSIN,inc
+	isum=in(i)
+	       do  j=1,inc
+	       l=i+j
+	       if(l.LE.NSIN)isum=isum+IN(l)-IN(i)
+	       enddo
+	k=k+1
+	out(k)=isum/inc
+	enddo
+
+	return
+	end

@@ -1,0 +1,75 @@
+procedure help=*
+!------------------------------------------------------------------------------
+! tstfracgen.pdf  Unit test for the program fracgen
+! written by: G. A. Madrid Jr.   3-AUG-1993
+! ported to UNIX by: CRS (CRI)  1-JULY-1994
+!------------------------------------------------------------------------------
+refgbl $becho
+refgbl $autousage
+
+body
+let $autousage = "none"
+let $becho="yes"
+
+write "THIS IS A TEST OF MODULE FRACGEN"
+write "TESTING PROGRAM FRACGEN WITH DEFAULTS EXCEPT FOR SEED VALUE"
+fracgen filea seed=32161267
+write "LIST THE RESULT OF THE DEFAULT PARAMETERS"
+list filea (1,1,5,10)
+list filea (201,201,5,10)
+
+write "CREATE AN IMAGE WHERE THE NUMBER OF LINES EXCEEDS THE NUMBER OF SAMPLES"
+fracgen fileb nl=100 ns=50 seed=32161267
+write "NUMBER OF LINES = 100; NUMBER OF SAMPLES = 50"
+list fileb (1,1,5,10)
+list fileb (50,25,5,10)
+
+write "CREATE AN IMAGE WHERE THE NUMBER OF SAMPLES EXCEEDS THE NUMBER OF LINES"
+fracgen filec nl=50 ns=100 seed=32161267
+write "NUMBER OF LINES = 50; NUMBER OF SAMPLES = 100"
+list filec (1,1,5,10)
+list filec (25,50,5,10)
+
+write "CREATE AN IMAGE WITH IMAGE FORMAT REAL"
+fracgen filea format=real seed=32161267
+write "LIST SOME DN VALUES OF THE IMAGE"
+list filea (1,1,5,10)
+list filea (201,201,5,10)
+
+write "SET FRACTAL DIMENSION TO 2.30"
+fracgen filea fracdim=2.30 seed=32161267
+write "LIST THE RESULTS WITH PARAMETER FRACTAL DIMENSION = 2.30"
+list filea (1,1,5,10)
+list filea (201,201,5,10)
+
+write "SET POWER VALUE TO 2.0"
+fracgen filea power=2.0 seed=32161267
+write "LIST THE RESULTS WITH PARAMETER POWER = 2.0"
+list filea (1,1,5,10)
+list filea (201,201,5,10)
+
+write "CREATE AN IMAGE WITHOUT SPECIFYING A SEED VALUE"
+fracgen nostart nl=256 ns=256 fracdim=2.30 power=2.0
+write "LIST SOME REPRESENTATIVE DN VALUES"
+list nostart (1,1,5,10)
+list nostart (201,201,5,10)
+
+write "CREATE AN IMAGE BUT ALSO SPECIFY A SEED VALUE"
+fracgen start nl=256 ns=256 fracdim=2.30 power=2.0 seed=32161267
+write "LIST SOME REPRESENTATIVE DN VALUES"
+list start (1,1,5,10)
+list start (201,201,5,10)
+
+write "COMPARE THE PREVIOUS TWO IMAGES AND PRINT DIFFERENCES"
+difpic inp=(nostart,start) out=xdiff
+
+write "CREATE ANOTHER FILE WITH SAME SEED VALUE"
+fracgen sstart nl=256 ns=256 fracdim=2.30 power=2.0 seed=32161267
+write "LIST SOME REPRESENTATIVE DN VALUES"
+list sstart (1,1,5,10)
+list sstart (201,201,5,10)
+
+write "NOW COMPARE THE TWO IMAGES WITH THE SAME SEED VALUE"
+difpic inp=(start,sstart) out=xdiff
+
+end-proc

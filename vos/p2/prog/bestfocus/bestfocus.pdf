@@ -1,0 +1,101 @@
+process help=*
+PARM INP TYPE=STRING COUNT=(3:10)
+PARM OUT TYPE=STRING COUNT=(1:2)
+PARM INVERSE TYPE=KEYWORD COUNT=(0:1) VALID=("DIRECT","INVERSE") +
+ DEFAULT="DIRECT"
+PARM NLW TYPE=INTEGER COUNT=(0:1) VALID=(3:101) DEFAULT=5
+PARM NSW TYPE=INTEGER COUNT=(0:1) VALID=(3:101) DEFAULT=5
+END-PROC
+
+.TITLE
+VICAR program bestfocus
+
+.HELP
+Purpose: To combine a set of images taken of a 3-d object
+         at progressively different focus positions and create:
+1. A single best focus image.
+2. A relative depth map (topo or DTM).
+
+Usage: bestfocus in=p1,p2,p3,...pn out=focus,topo parameters
+where:
+
+p1...pn are input images with incremental changes in focus. The object
+must be a 3-d target.
+
+'focus' is a composite image made from the best focus locations of 
+all the input images. Same format as input.
+
+'topo' is a scaled relative depth map or topo map (dtm map). See the
+"scale" parameter for scaling. Without scaling the topo image values
+range from 1 to nin where nin is the number of input images.
+Format is REAL.
+ 
+Restrictions:
+The focus must monotonically increase (or decrease) in the order of the
+input images.
+
+
+.PAGE
+
+METHOD:
+Bestfocus computes the local standard deviation in a moving box nlw
+lines by nsw samples across all input images. It then computes a
+curve of standard deviation versus image input number at each pixel.
+The image with the highest standard deviation is nearest the best focus
+and this image is selected for the "focus" image at this pixel.
+The peak of the curve is determined by quadratic fitting to the highest
+point and it's two lower neighbors. This number from 1 to nin (the
+number of input images) is then scaled by the "scale" parameter and
+written to the "topo" image. output=topo*scale1+scale2 (see scale
+defaults). The "inverse" parameter can complement topo before scaling.
+If the highest standard deviation image is 1 or nin then no quadratic
+fit is made and the result will be 1 or nin respectively. Quadratic fitting
+results in non integer topo values but the limit will always be between
+1.0 and real(nin).
+Note a low pass median filter will improve the "topo" image.
+
+HISTORY:
+2-2004  J Lorre. 
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+.LEVEL1
+.VARI INP
+3-10 inputs
+
+.VARI OUT
+1. best focus
+2. topo map (REAL)
+
+.VARI INVERSE
+Complement topomap
+
+.VARI NLW
+Filter height, Odd #.
+
+.VARI NSW
+Filter width, Odd #
+
+
+.LEVEL2
+.VARI INP
+3-10 inputs
+
+.VARI OUT
+1. best focus
+2. topo map (REAL format)
+
+.VARI INVERSE
+Complement topomap
+the topo map will be complemented before being scaled and written.
+
+.VARI NLW
+Filter height, Odd #.
+Must be an odd integer. Default is nlw=5
+
+.VARI NSW
+Filter width, Odd #
+Must be an odd integer. Default is nsw=5
+
+
+end-proc                                                                     
+        

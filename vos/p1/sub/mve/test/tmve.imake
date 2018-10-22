@@ -1,0 +1,18 @@
+/* Imake file for Test of VICAR subroutine MVE */
+
+#define PROGRAM tmve
+
+#define MODULE_LIST tmve.f tzmve.c
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+
+
+#define LIB_TAE
+#define LIB_LOCAL
+/*    #define LIB_P2SUB */

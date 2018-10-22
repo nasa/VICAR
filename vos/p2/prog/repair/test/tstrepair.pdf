@@ -1,0 +1,173 @@
+PROCEDURE
+refgbl $echo
+refgbl $autousage
+BODY
+let $echo="yes"
+let $autousage="none"
+let _onfail="continue"
+gen A 50 100 IVAL=100 LINC=0 SINC=1
+adl A B ADD=(20,10,1,10,60,100,20,1,20,50,-50,20,51,20,100,8,30,1,30,100)
+gen C 1 100 IVAL=50 SINC=2
+append (B,C,A) D
+
+Write "<<<<  This is the original unit test  >>>>"  
+repair D E
+Write "IT SHOULD HAVE REPAIRED 20"
+
+repair D E LINESET=(1,18,25,50)
+Write "IT SHOULD HAVE REPAIRED NOTHING"
+
+repair D E CORR=.99
+Write "IT SHOULD HAVE REPAIRED 10 20"
+
+repair D E 'MV
+Write "IT SHOULD HAVE REPAIRED 10 20 51"
+
+repair D E MEAN=7
+Write "IT SHOULD HAVE REPAIRED 10 20 30 51"
+
+Write "*********  EXTREME ******************"
+Write "*********  EXTREME ******************"
+
+Write "<<<<  The following is the extreme value test  >>>>" 
+Write "Most of these processes will generate ABEND termination"
+
+repair D E size=(1,1,0,0) 
+
+repair D E size=(32767,1,0,0)
+
+repair D E size=(1,32767,0,0)
+
+repair D E size=(1,1,1,0)
+
+repair D E size=(1,1,32767,0)
+
+repair D E size=(1,1,0,1)
+
+repair D E size=(1,1,0,32767)
+
+repair D E sl=1 
+
+repair D E sl=32767
+
+repair D E ss=1
+
+repair D E ss=32767 
+
+repair D E nl=1
+
+repair D E nl=0
+
+repair D E nl=32767 
+
+repair D E ns=1
+
+repair D E ns=0
+
+repair D E ns=32767 
+
+repair D E 'mv
+
+repair D E 'corr
+
+repair D E 'all
+
+repair D E area=(1,1,100,100)
+
+repair D E area=(0,1,100,100)
+
+repair D E area=(-1,1,100,100)
+
+repair D E area=(3489743,1,100,100)
+
+repair D E area=(1,0,100,100)
+
+repair D E area=(1,-1,100,100)
+
+repair D E area=(1,3489743,100,100)
+
+repair D E area=(1,1,0,100)
+
+repair D E area=(1,1,-1,100)
+
+repair D E area=(1,1,3489743,100)
+
+repair D E area=(1,1,100,0)
+
+repair D E area=(1,1,100,-1)
+
+repair D E area=(1,1,100,3489743)
+
+repair D E badline=(1,1,100,100)
+
+repair D E badline=(0,1,100,100)
+
+repair D E badline=(-1,1,100,100)
+
+repair D E badline=(3489743,1,100,100)
+
+repair D E badline=(1,0,100,100)
+
+repair D E badline=(1,-1,100,100)
+
+repair D E badline=(1,3489743,100,100)
+
+repair D E badline=(1,1,0,100)
+
+repair D E badline=(1,1,-1,100)
+
+repair D E badline=(1,1,3489743,100)
+
+repair D E badline=(1,1,100,0)
+
+repair D E badline=(1,1,100,-1)
+
+repair D E badline=(1,1,100,3489743)
+
+repair D E lineset=(1,1,100,100)
+
+repair D E lineset=(0,1,100,100)
+
+repair D E lineset=(-1,1,100,100)
+
+repair D E lineset=(3489743,1,100,100)
+
+repair D E lineset=(1,0,100,100)
+
+repair D E lineset=(1,-1,100,100)
+
+repair D E lineset=(1,3489743,100,100)
+
+repair D E lineset=(1,1,0,100)
+
+repair D E lineset=(1,1,-1,100)
+
+repair D E lineset=(1,1,3489743,100)
+
+repair D E lineset=(1,1,100,0)
+
+repair D E lineset=(1,1,100,-1)
+
+repair D E lineset=(1,1,100,3489743)
+
+repair D E corr=0.0
+
+repair D E corr=0.5
+
+repair D E corr=0.999999
+
+repair D E mean=0.0
+
+repair D E mean=-1.0
+
+repair D E mean=3489743.0
+
+repair D E variance=0.0
+
+repair D E variance=-1.0
+
+repair D E variance=3489743.0
+
+repair D E 'zok
+
+END-PROC

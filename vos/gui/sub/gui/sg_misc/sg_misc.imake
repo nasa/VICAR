@@ -1,0 +1,10 @@
+#define SUBROUTINE sg_misc
+#define MODULE_LIST SgKeyinCmdInterface.cc SgKeyinDialog.cc SgCmdDialog.cc
+
+#define GUI_SUBLIB
+
+#define USES_C_PLUS_PLUS
+
+#define LIB_MOTIF
+#define LIB_MOTIFAPP
+

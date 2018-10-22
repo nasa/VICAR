@@ -98,6 +98,9 @@ clean::                                           @@\
 
 /*
  * make makefile in current directory
+ * Note: V2_FORCE_32 is the env var, V2_FORCE_32def is the
+ * define in imake.  That's so the preprocessor doesn't
+ * replace usages of V2_FORCE_32!
  */
 #ifndef MakeMakefileTarget
 #define MakeMakefileTarget(imakeflags)     @@\
@@ -105,8 +108,12 @@ Makefiles::                                @@\
 	-@if [ -f Makefile ]; then \           @@\
 		$(RM) Makefile.bak; \              @@\
 		$(MV) Makefile Makefile.bak; \     @@\
-	else exit 0; fi                        @@\
-	@$(IMAKE_CMD) imakeflags
+	else exit 0; fi; \                        @@\
+	if [ -z $${V2_FORCE_32+x} ]; then \	@@\
+		$(IMAKE_CMD) imakeflags; \	@@\
+	else				 \	@@\
+		$(IMAKE_CMD) -DV2_FORCE_32def imakeflags;	\ @@\
+	fi
 #endif /* MakeMakefileTarget */
 
 
@@ -643,27 +650,36 @@ IntoSubdirs(clean,subdirs,"Cleaning subdirectories",)
 
 /*
  * Make Makefiles in each subdirectory.
+ * Note: V2_FORCE_32 is the env var, V2_FORCE_32def is the
+ * define in imake.  That's so the preprocessor doesn't
+ * replace usages of V2_FORCE_32!
  */
 #ifndef BuildMakefilesInSubdirs
-#define BuildMakefilesInSubdirs(subdirs,imakeflags)                @@\
-Makefiles::                                                        @@\
-	@echo " "                                                      @@\
-	@echo "     Making Makefiles in subdirectories..."             @@\
-	-@for i in subdirs; \                                          @@\
-	do \                                                           @@\
-		if [ -d $$i ]; then ( \                                    @@\
-			echo "     Making Makefiles in $$i..."; \              @@\
-			if [ -f $$i/Makefile ]; then \                         @@\
-				$(RM) $$i/Makefile.bak; \                          @@\
-				$(MV) $$i/Makefile $$i/Makefile.bak; \             @@\
-			fi; \                                                  @@\
-			$(IMAKE_CMD) -s $$i/Makefile imakeflags; \             @@\
-			cd $$i; \                                              @@\
-			$(MAKE) Makefiles; \                                   @@\
-		) else continue; fi; \                                     @@\
-		echo "     Finished making Makefiles in $$i."; \           @@\
-	done                                                           @@\
-	@echo "     Finished making Makefiles in subdirectories."      @@\
+#define BuildMakefilesInSubdirs(subdirs,imakeflags)                     @@\
+Makefiles::                                                             @@\
+	@echo " "                                                       @@\
+	@echo "     Making Makefiles in subdirectories..."              @@\
+	-@for i in subdirs; \                                           @@\
+	do \                                                            @@\
+		if [ -d $$i ]; then ( \                                 @@\
+			echo "     Making Makefiles in $$i..."; \       @@\
+			if [ -f $$i/Makefile ]; then \                  @@\
+				$(RM) $$i/Makefile.bak; \               @@\
+				$(MV) $$i/Makefile $$i/Makefile.bak; \  @@\
+			fi; \                                           @@\
+			if [ -z $${V2_FORCE_32+x} ]; then \	        @@\
+				$(IMAKE_CMD) -s $$i/Makefile imakeflags; \ @@\
+			else				 \	        @@\
+				$(IMAKE_CMD) -DV2_FORCE_32def -s $$i/Makefile imakeflags; \ @@\
+			fi; \						@@\
+			echo "cd'ing to $$i"; \				@@\
+			cd $$i; \                                       @@\
+			echo "calling subdir make"; \			@@\
+			$(MAKE) Makefiles; \                            @@\
+		) else continue; fi; \                                  @@\
+		echo "     Finished making Makefiles in $$i."; \        @@\
+	done                                                            @@\
+	@echo "     Finished making Makefiles in subdirectories."       @@\
 	@echo " "
 #endif /* BuildMakefilesSubdirs */
 

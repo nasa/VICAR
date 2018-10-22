@@ -1,0 +1,7 @@
+#define SUBROUTINE gllgcor
+
+#define MODULE_LIST gllgcor.c
+
+#define USES_C
+
+#define P2_SUBLIB

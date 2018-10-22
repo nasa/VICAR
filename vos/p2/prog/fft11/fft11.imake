@@ -1,0 +1,12 @@
+#define  PROGRAM   fft11
+
+#define MODULE_LIST fft11.f
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB 
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB

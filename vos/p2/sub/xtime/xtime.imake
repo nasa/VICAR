@@ -1,0 +1,21 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY xtime
+
+   To Create the build file give the command:
+
+	$ vimake xtime                     (VMS)
+   or
+	% vimake xtime                     (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE xtime
+
+#define MODULE_LIST xtime.c
+
+#define FTN_STRING
+#define P2_SUBLIB
+
+#define USES_ANSI_C

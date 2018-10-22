@@ -1,0 +1,18 @@
+#define PROGRAM tpbdata
+
+#define MODULE_LIST tpbdata.f  tzpbdata.c
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_P1SUB
+#define LIB_SPICE
+
+/*#define DEBUG	/* remove on delivery */
+/*#define LIB_LOCAL	/* remove on delivery */

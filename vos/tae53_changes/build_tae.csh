@@ -10,8 +10,13 @@ source $TAE/bin/csh/taesetup
 #
 # Rebuild the imake files that have changed.  This rebuilds all of them,
 # but it won't hurt.
+# We do it twice because the first time sets up the V2_FORCE_32 stuff in
+# the makefile and the second time uses it.
 #
+
 make Makefiles
+make Makefiles
+
 #
 # Make sure all relevant object code gets recompiled due to include changes
 #

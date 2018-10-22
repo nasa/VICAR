@@ -1,0 +1,20 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY zia
+
+   To Create the build file give the command:
+
+	$ vimake zia                     (VMS)
+   or
+	% vimake zia                     (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE zia
+
+#define MODULE_LIST zia.c
+
+#define P1_SUBLIB
+
+#define USES_C

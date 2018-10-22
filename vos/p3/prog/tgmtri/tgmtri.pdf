@@ -1,0 +1,58 @@
+PROCESS       HELP=*
+PARM INP      TYPE=(STRING,40)
+PARM OUT      TYPE=(STRING,40)
+PARM SL       TYPE=INTEGER COUNT=1 DEFAULT=1
+PARM SS       TYPE=INTEGER COUNT=1 DEFAULT=1
+PARM NL       TYPE=INTEGER COUNT=1
+PARM NS       TYPE=INTEGER COUNT=1
+END-PROC
+.TITLE
+VICAR Program TGMTRI
+.HELP
+PURPOSE
+     TGMTRI accepts as input the triangles file that is output by TRIGRID, and
+produces an image of those triangles.  That is, the output file is an image
+dataset of the size of the rectified image. The value of each pixel (halfword)
+is the number of the triangle to be used to generatate that pixel during
+rectification.
+     For example, assume that Line 50, Sample 30 in the output image has the 
+value 200.  This means that triangle 200 is to be used to compute the input
+pixel location that maps to Line 50, Sample 30.  The coefficients for this
+transformation will be in Record (Line) 200 of the input file.  In the output
+image from TGMTRI, the pixels with the value 200 will form a triangular
+region that includes Line 50, Sample 30.
+
+WRITTEN BY:            Ron Alley, November, 1993
+
+COGNIZANT PROGRAMMER:  Ron Alley
+
+REVISIONS: New
+
+
+.LEVEL1
+.VARIABLE INP
+Input triangles dataset
+.VARIABLE OUT
+Output triangle image dataset
+.VARIABLE SL
+Line number of first output line
+.VARIABLE SS
+Sample number of first output sample
+.VARIABLE NL
+Number of lines in output image
+.VARIABLE NS
+Number of samps in output image
+.LEVEL2
+.VARIABLE INP
+The input dataset must be a triangles dataset, normally the output dataset
+from the program TRIGRID.
+.VARIABLE OUT
+The output dataset will be a halfword image dataset. The value at each pixel
+corresponds to the record (line) number in the input file that would be used
+to compute the old pixel location that maps to this point.
+.VARIABLE NL
+NL is the number of lines in the output image.  It should be the number of
+lines in the rectified image that will be created by TGEOM2.
+.VARIABLE NS
+NS is the number of samples in the output image.  It should be the number of
+samples in the rectified image that will be created by TGEOM2.

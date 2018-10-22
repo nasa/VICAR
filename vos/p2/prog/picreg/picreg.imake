@@ -1,0 +1,14 @@
+#define  PROGRAM   picreg
+
+#define MODULE_LIST picreg.f
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB 
+
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_VRDI
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB

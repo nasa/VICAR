@@ -1,0 +1,23 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM makeck
+
+   To Create the build file give the command:
+
+		$ vimake makeck			(VMS)
+   or
+		% vimake makeck			(Unix)
+
+
+************************************************************************/
+#define PROGRAM	makeck
+
+#define MODULE_LIST makeck.f
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define R2LIB
+#define LIB_SPICE
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+/************************* End of Imake file ***************************/

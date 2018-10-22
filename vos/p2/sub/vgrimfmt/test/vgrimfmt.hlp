@@ -1,0 +1,45 @@
+1 VGRIMFMT
+
+	Returns image format information for each Voyager telemetry format.
+		    
+
+	FORTRAN Calling sequence:
+
+                INTEGER*4 	SCAN_RATE
+		INTEGER*2       SS(10),NS(10)
+		CHARACTERS*5	FORMAT
+
+		CALL VGRIMFMT(IMCODE,FORMAT,SCAN_RATE,SS,NS)
+
+	C Calling sequence:
+		int	imcode;
+		int 	scan_rate;
+		char  	format[6];
+		short 	ss[10],ns[10];
+		int 	status;
+
+		zvgrimfmt(imcode,format,&scan_rate,ss,ns);
+
+	Input:	imcode		- integer consisting of image format code,
+				  from bits 3-7 of the Voyager telemetry
+				  format ID.
+
+	Output:	 format		- ASCII image format (e.g. IM-11)
+		 scan_rate	- integer scan rate
+		 ss[10]		- short integer array consisting of samples
+				  for each segment of line.
+		 ns[10]		- short integer array consisting of the
+				  number of samples for each segment.
+ 
+
+	Status returns:	1 for normal return.
+			0 for invalid image code.
+
+
+2 History
+
+Original programmer:	Gary Yagi
+Cognizant programmer:	GARY YAGI
+Source language:	C
+
+Ported to UNIX by:	Raymond Lin,	Nov-1994

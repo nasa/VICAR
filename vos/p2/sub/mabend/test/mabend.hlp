@@ -1,0 +1,24 @@
+1 MABEND
+
+  Print a message and abort the current program.
+
+  FORTRAN Calling Sequence:  call mabend( msg )
+  C Calling Sequence:        zmabend( msg );
+
+  The argument msg is REQUIRED. 
+  In Fortran, it must be a quoted string or CHARACTER type.
+  In C, it must be a quoted string or any other null-terminated string.
+
+  MABEND calls XVMESSAGE to print the message and then calls ABEND.
+  It is a programming convenience that often allows error checking
+  to be coded as 1-line "if" statements.
+
+2 History
+
+ 92-09-25 ...SP.... Made portable for UNIX conversion. 
+                    Added zmabend for calls from C.
+
+  Original Programmer: L. W. Kamp, 5 May 1985.
+  Current Cognizant Programmer: L. W. Kamp
+  Source Language: Fortran (or C for zmabend)
+

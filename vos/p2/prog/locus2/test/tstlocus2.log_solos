@@ -1,0 +1,706 @@
+tstlocus2
+LET $AUTOUSAGE="NONE"
+gridgen G NROW=20 NCOL=20 GSL=40 GSS=40
+Beginning VICAR task gridgen
+GRIDGEN version 1 July 1994
+
+       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16    17    18    19    20
+     40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0  40.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+      21    22    23    24    25    26    27    28    29    30    31    32    33    34    35    36    37    38    39    40
+     80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0  80.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+      41    42    43    44    45    46    47    48    49    50    51    52    53    54    55    56    57    58    59    60
+    120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0 120.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+      61    62    63    64    65    66    67    68    69    70    71    72    73    74    75    76    77    78    79    80
+    160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0 160.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+      81    82    83    84    85    86    87    88    89    90    91    92    93    94    95    96    97    98    99   100
+    200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0 200.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     101   102   103   104   105   106   107   108   109   110   111   112   113   114   115   116   117   118   119   120
+    240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0 240.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     121   122   123   124   125   126   127   128   129   130   131   132   133   134   135   136   137   138   139   140
+    280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0 280.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     141   142   143   144   145   146   147   148   149   150   151   152   153   154   155   156   157   158   159   160
+    320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0 320.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     161   162   163   164   165   166   167   168   169   170   171   172   173   174   175   176   177   178   179   180
+    360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0 360.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     181   182   183   184   185   186   187   188   189   190   191   192   193   194   195   196   197   198   199   200
+    400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0 400.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     201   202   203   204   205   206   207   208   209   210   211   212   213   214   215   216   217   218   219   220
+    440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0 440.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     221   222   223   224   225   226   227   228   229   230   231   232   233   234   235   236   237   238   239   240
+    480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0 480.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     241   242   243   244   245   246   247   248   249   250   251   252   253   254   255   256   257   258   259   260
+    520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0 520.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     261   262   263   264   265   266   267   268   269   270   271   272   273   274   275   276   277   278   279   280
+    560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0 560.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     281   282   283   284   285   286   287   288   289   290   291   292   293   294   295   296   297   298   299   300
+    600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0 600.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     301   302   303   304   305   306   307   308   309   310   311   312   313   314   315   316   317   318   319   320
+    640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0 640.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     321   322   323   324   325   326   327   328   329   330   331   332   333   334   335   336   337   338   339   340
+    680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0 680.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     341   342   343   344   345   346   347   348   349   350   351   352   353   354   355   356   357   358   359   360
+    720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0 720.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     361   362   363   364   365   366   367   368   369   370   371   372   373   374   375   376   377   378   379   380
+    760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0 760.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+
+     381   382   383   384   385   386   387   388   389   390   391   392   393   394   395   396   397   398   399   400
+    800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0 800.0
+     40.0  80.0 120.0 160.0 200.0 240.0 280.0 320.0 360.0 400.0 440.0 480.0 520.0 560.0 600.0 640.0 680.0 720.0 760.0 800.0
+GRIDGEN task completed
+skew G GO OFFSET=(25,10) NROW=20 NCOL=20
+Beginning VICAR task skew
+locus2 (G,GO) NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+KEYWORD GRID_NROW NOT FOUND IN REF
+KEYWORD GRID_NCOL NOT FOUND IN REF
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000             26.925823
+
+ OFFSET ONLY                             1.000000        0.000000              25.000000
+                                         0.000000        1.000000              10.000000              0.000000
+
+ ROTATE, OFFSET                          1.000000        0.000000              25.000000
+                                         0.000000        1.000000              10.000000              0.000000
+
+ MAGNIFY, OFFSET                         1.000000        0.000000              25.000000
+                                         0.000000        1.000000              10.000000              0.000000
+
+ MAGNIFY, ROTATE, OFFSET                 1.000000        0.000000              25.000000
+                                         0.000000        1.000000              10.000000              0.000000
+
+ UNCONSTRAINED LINEAR, OFFSET            1.000000        0.000000              25.000000
+                                         0.000000        1.000000              10.000000              0.000000
+locus2 (GO,G) NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+KEYWORD GRID_NROW NOT FOUND IN REF
+KEYWORD GRID_NCOL NOT FOUND IN REF
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000             26.925823
+
+ OFFSET ONLY                             1.000000        0.000000             -25.000000
+                                         0.000000        1.000000             -10.000000              0.000000
+
+ ROTATE, OFFSET                          1.000000        0.000000             -25.000000
+                                         0.000000        1.000000             -10.000000              0.000000
+
+ MAGNIFY, OFFSET                         1.000000        0.000000             -25.000000
+                                         0.000000        1.000000             -10.000000              0.000000
+
+ MAGNIFY, ROTATE, OFFSET                 1.000000        0.000000             -25.000000
+                                         0.000000        1.000000             -10.000000              0.000000
+
+ UNCONSTRAINED LINEAR, OFFSET            1.000000        0.000000             -25.000000
+                                         0.000000        1.000000             -10.000000              0.000000
+locus2 GO NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+COMPARING TO PERFECT GRID WITH
+ SL  =   40.000000
+ SS  =   40.000000
+ INC =   40.000000
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000             26.925823
+
+ OFFSET ONLY                             1.000000        0.000000             -25.000000
+                                         0.000000        1.000000             -10.000000              0.000000
+
+ ROTATE, OFFSET                          1.000000        0.000000             -25.000000
+                                         0.000000        1.000000             -10.000000              0.000000
+
+ MAGNIFY, OFFSET                         1.000000        0.000000             -25.000000
+                                         0.000000        1.000000             -10.000000              0.000000
+
+ MAGNIFY, ROTATE, OFFSET                 1.000000        0.000000             -25.000000
+                                         0.000000        1.000000             -10.000000              0.000000
+
+ UNCONSTRAINED LINEAR, OFFSET            1.000000        0.000000             -25.000000
+                                         0.000000        1.000000             -10.000000              0.000000
+skew G GO ROTOFF=(-25,50,16) NROW=20 NCOL=20
+Beginning VICAR task skew
+locus2 (G,GO) NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+KEYWORD GRID_NROW NOT FOUND IN REF
+KEYWORD GRID_NCOL NOT FOUND IN REF
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            235.061493
+
+ OFFSET ONLY                             1.000000        0.000000            -157.037787
+                                         0.000000        1.000000             149.497595             90.793785
+
+ ROTATE, OFFSET                          0.961262       -0.275637             -25.000008
+                                         0.275637        0.961262              49.999992              0.000025
+
+ MAGNIFY, OFFSET                         0.961262        0.000000            -140.767695
+                                         0.000000        0.961262             165.767688             89.910187
+
+ MAGNIFY, ROTATE, OFFSET                 0.961262       -0.275637             -25.000005
+                                         0.275637        0.961262              49.999998              0.000024
+
+ UNCONSTRAINED LINEAR, OFFSET            0.961262       -0.275637             -25.000005
+                                         0.275637        0.961262              49.999997              0.000024
+locus2 (GO,G) NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+KEYWORD GRID_NROW NOT FOUND IN REF
+KEYWORD GRID_NCOL NOT FOUND IN REF
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            235.061493
+
+ OFFSET ONLY                             1.000000        0.000000             157.037787
+                                         0.000000        1.000000            -149.497595             90.793785
+
+ ROTATE, OFFSET                          0.961262        0.275637              10.249684
+                                        -0.275637        0.961262             -54.954013              0.000025
+
+ MAGNIFY, OFFSET                         0.961262        0.000000             167.224495
+                                         0.000000        0.961262            -127.436229             89.910187
+
+ MAGNIFY, ROTATE, OFFSET                 0.961262        0.275637              10.249680
+                                        -0.275637        0.961262             -54.954018              0.000024
+
+ UNCONSTRAINED LINEAR, OFFSET            0.961262        0.275637              10.249681
+                                        -0.275637        0.961262             -54.954018              0.000024
+locus2 GO NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+COMPARING TO PERFECT GRID WITH
+ SL  =   38.450455
+ SS  =   38.450455
+ INC =   38.450455
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            235.325989
+
+ OFFSET ONLY                             1.000000        0.000000             140.767503
+                                         0.000000        1.000000            -165.767880             89.910187
+
+ ROTATE, OFFSET                          0.961262        0.275637              -6.020600
+                                        -0.275637        0.961262             -71.224298             12.636242
+
+ MAGNIFY, OFFSET                         0.924023        0.000000             160.746454
+                                         0.000000        0.924023            -122.499439             86.427162
+
+ MAGNIFY, ROTATE, OFFSET                 0.924023        0.264959               9.852670
+                                        -0.264959        0.924023             -52.825109              0.000040
+
+ UNCONSTRAINED LINEAR, OFFSET            0.924023        0.264959               9.852671
+                                        -0.264959        0.924023             -52.825108              0.000040
+skew G GO SCALEOFF=(55,-10,1.2) NROW=20 NCOL=20
+Beginning VICAR task skew
+locus2 (G,GO) NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+KEYWORD GRID_NROW NOT FOUND IN REF
+KEYWORD GRID_NCOL NOT FOUND IN REF
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            170.449432
+
+ OFFSET ONLY                             1.000000        0.000000             139.000014
+                                         0.000000        1.000000              74.000016             65.238045
+
+ ROTATE, OFFSET                          1.000000        0.000000             139.000014
+                                         0.000000        1.000000              74.000016             65.238045
+
+ MAGNIFY, OFFSET                         1.200000        0.000000              54.999984
+                                         0.000000        1.200000             -10.000013              0.000026
+
+ MAGNIFY, ROTATE, OFFSET                 1.200000        0.000000              54.999984
+                                         0.000000        1.200000             -10.000013              0.000026
+
+ UNCONSTRAINED LINEAR, OFFSET            1.200000        0.000000              54.999984
+                                         0.000000        1.200000             -10.000013              0.000026
+locus2 (GO,G) NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+KEYWORD GRID_NROW NOT FOUND IN REF
+KEYWORD GRID_NCOL NOT FOUND IN REF
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            170.449432
+
+ OFFSET ONLY                             1.000000        0.000000            -139.000014
+                                         0.000000        1.000000             -74.000016             65.238045
+
+ ROTATE, OFFSET                          1.000000        0.000000            -139.000014
+                                         0.000000        1.000000             -74.000016             65.238045
+
+ MAGNIFY, OFFSET                         0.833333        0.000000             -45.833318
+                                         0.000000        0.833333               8.333344              0.000022
+
+ MAGNIFY, ROTATE, OFFSET                 0.833333        0.000000             -45.833318
+                                         0.000000        0.833333               8.333344              0.000022
+
+ UNCONSTRAINED LINEAR, OFFSET            0.833333        0.000000             -45.833317
+                                         0.000000        0.833333               8.333343              0.000022
+locus2 GO NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+COMPARING TO PERFECT GRID WITH
+ SL  =   48.000000
+ SS  =   48.000000
+ INC =   48.000000
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000             55.901711
+
+ OFFSET ONLY                             1.000000        0.000000             -55.000014
+                                         0.000000        1.000000               9.999984              0.000035
+
+ ROTATE, OFFSET                          1.000000        0.000000             -55.000014
+                                         0.000000        1.000000               9.999984              0.000035
+
+ MAGNIFY, OFFSET                         1.000000        0.000000             -54.999981
+                                         0.000000        1.000000              10.000013              0.000026
+
+ MAGNIFY, ROTATE, OFFSET                 1.000000        0.000000             -54.999981
+                                         0.000000        1.000000              10.000013              0.000026
+
+ UNCONSTRAINED LINEAR, OFFSET            1.000000        0.000000             -54.999980
+                                         0.000000        1.000000              10.000012              0.000026
+skew G GO SRO=(5,-15,-55,2.1) NROW=20 NCOL=20
+Beginning VICAR task skew
+locus2 (G,GO) NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+KEYWORD GRID_NROW NOT FOUND IN REF
+KEYWORD GRID_NCOL NOT FOUND IN REF
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000           1185.529907
+
+ OFFSET ONLY                             1.000000        0.000000             813.386479
+                                         0.000000        1.000000            -651.597583            565.070007
+
+ ROTATE, OFFSET                          0.573576        0.819152             648.440510
+                                        -0.819152        0.573576            -128.455873            358.809113
+
+ MAGNIFY, OFFSET                         1.204511        0.000000             727.492028
+                                         0.000000        1.204511            -737.492034            561.118469
+
+ MAGNIFY, ROTATE, OFFSET                 1.204511        1.720219               4.999994
+                                        -1.720219        1.204511             -15.000001              0.000051
+
+ UNCONSTRAINED LINEAR, OFFSET            1.204511        1.720219               5.000000
+                                        -1.720219        1.204511             -14.999993              0.000051
+locus2 (GO,G) NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+KEYWORD GRID_NROW NOT FOUND IN REF
+KEYWORD GRID_NCOL NOT FOUND IN REF
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000           1185.529907
+
+ OFFSET ONLY                             1.000000        0.000000            -813.386479
+                                         0.000000        1.000000             651.597583            565.070007
+
+ ROTATE, OFFSET                          0.573576       -0.819152            -477.155123
+                                         0.819152        0.573576            -457.492070            358.809113
+
+ MAGNIFY, OFFSET                         0.273132        0.000000              83.123082
+                                         0.000000        0.273132             483.256637            267.199310
+
+ MAGNIFY, ROTATE, OFFSET                 0.273132       -0.390072              -7.216743
+                                         0.390072        0.273132               2.146616              0.000024
+
+ UNCONSTRAINED LINEAR, OFFSET            0.273132       -0.390072              -7.216742
+                                         0.390072        0.273132               2.146611              0.000024
+locus2 GO NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+COMPARING TO PERFECT GRID WITH
+ SL  =   48.180420
+ SS  =   48.180420
+ INC =   48.180420
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000           1178.131226
+
+ OFFSET ONLY                             1.000000        0.000000            -727.492070
+                                         0.000000        1.000000             737.491993            561.118469
+
+ ROTATE, OFFSET                          0.573576       -0.819152            -391.260713
+                                         0.819152        0.573576            -371.597661            292.099792
+
+ MAGNIFY, OFFSET                         0.328990        0.000000             100.122624
+                                         0.000000        0.328990             582.087692            321.844360
+
+ MAGNIFY, ROTATE, OFFSET                 0.328990       -0.469846              -8.692643
+                                         0.469846        0.328990               2.585621              0.000029
+
+ UNCONSTRAINED LINEAR, OFFSET            0.328990       -0.469846              -8.692641
+                                         0.469846        0.328990               2.585616              0.000029
+skew G GO UNC=(1.3,0.8,0.9,1.8,25,10) NROW=20 NCOL=20
+Beginning VICAR task skew
+locus2 (G,GO) NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+KEYWORD GRID_NROW NOT FOUND IN REF
+KEYWORD GRID_NCOL NOT FOUND IN REF
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            936.654175
+
+ OFFSET ONLY                             1.000000        0.000000             486.999999
+                                         0.000000        1.000000             724.000000            340.552490
+
+ ROTATE, OFFSET                          0.999480       -0.032241             500.759694
+                                         0.032241        0.999480             710.677009            340.300507
+
+ MAGNIFY, OFFSET                         1.550000        0.000000             256.000000
+                                         0.000000        1.550000             493.000001            289.465027
+
+ MAGNIFY, ROTATE, OFFSET                 1.550000       -0.050000             276.999999
+                                         0.050000        1.550000             472.000001            289.005188
+
+ UNCONSTRAINED LINEAR, OFFSET            1.300000        0.800000              24.999999
+                                         0.900000        1.800000              10.000000              0.000006
+locus2 (GO,G) NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+KEYWORD GRID_NROW NOT FOUND IN REF
+KEYWORD GRID_NCOL NOT FOUND IN REF
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            936.654175
+
+ OFFSET ONLY                             1.000000        0.000000            -486.999999
+                                         0.000000        1.000000            -724.000000            340.552490
+
+ ROTATE, OFFSET                          0.999480        0.032241            -523.412502
+                                        -0.032241        0.999480            -694.162398            340.300507
+
+ MAGNIFY, OFFSET                         0.485893        0.000000             -20.705329
+                                         0.000000        0.485893            -135.862069            162.069305
+
+ MAGNIFY, ROTATE, OFFSET                 0.485893        0.015674             -38.636362
+                                        -0.015674        0.485893            -121.645768            161.811844
+
+ UNCONSTRAINED LINEAR, OFFSET            1.111111       -0.493827             -22.839505
+                                        -0.555556        0.802469               5.864197              0.000007
+locus2 GO NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+COMPARING TO PERFECT GRID WITH
+ SL  =   72.000000
+ SS  =   72.000000
+ INC =   72.000000
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            513.600037
+
+ OFFSET ONLY                             1.000000        0.000000            -150.999999
+                                         0.000000        1.000000            -388.000000            300.732452
+
+ ROTATE, OFFSET                          0.999480        0.032241            -187.412502
+                                        -0.032241        0.999480            -358.162398            300.218536
+
+ MAGNIFY, OFFSET                         0.874608        0.000000             -37.269591
+                                         0.000000        0.874608            -244.551723            291.724731
+
+ MAGNIFY, ROTATE, OFFSET                 0.874608        0.028213             -69.545452
+                                        -0.028213        0.874608            -218.962383            291.261322
+
+ UNCONSTRAINED LINEAR, OFFSET            2.000000       -0.888889             -41.111109
+                                        -1.000000        1.444444              10.555555              0.000013
+locus2 GO NROW=20 NCOL=20 UNCFILES=(UNC.L,UNC.S,UNC.M)  +
+         SROFILES=(SRO.L,SRO.S,SRO.M)
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+COMPARING TO PERFECT GRID WITH
+ SL  =   72.000000
+ SS  =   72.000000
+ INC =   72.000000
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            513.600037
+
+ OFFSET ONLY                             1.000000        0.000000            -150.999999
+                                         0.000000        1.000000            -388.000000            300.732452
+
+ ROTATE, OFFSET                          0.999480        0.032241            -187.412502
+                                        -0.032241        0.999480            -358.162398            300.218536
+
+ MAGNIFY, OFFSET                         0.874608        0.000000             -37.269591
+                                         0.000000        0.874608            -244.551723            291.724731
+
+ MAGNIFY, ROTATE, OFFSET                 0.874608        0.028213             -69.545452
+                                        -0.028213        0.874608            -218.962383            291.261322
+
+ UNCONSTRAINED LINEAR, OFFSET            2.000000       -0.888889             -41.111109
+                                        -1.000000        1.444444              10.555555              0.000013
+local URCHK REAL
+locus2 GO NROW=20 NCOL=20 RADIAL=RAD.DAT CENTER=(500,500) UNCRES=URCHK
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+COMPARING TO PERFECT GRID WITH
+ SL  =   72.000000
+ SS  =   72.000000
+ INC =   72.000000
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            513.600037
+
+ OFFSET ONLY                             1.000000        0.000000            -150.999999
+                                         0.000000        1.000000            -388.000000            300.732452
+
+ ROTATE, OFFSET                          0.999480        0.032241            -187.412502
+                                        -0.032241        0.999480            -358.162398            300.218536
+
+ MAGNIFY, OFFSET                         0.874608        0.000000             -37.269591
+                                         0.000000        0.874608            -244.551723            291.724731
+
+ MAGNIFY, ROTATE, OFFSET                 0.874608        0.028213             -69.545452
+                                        -0.028213        0.874608            -218.962383            291.261322
+
+ UNCONSTRAINED LINEAR, OFFSET            2.000000       -0.888889             -41.111109
+                                        -1.000000        1.444444              10.555555              0.000013
+disp URCHK
+
+URCHK=1.33251833176e-05
+
+label-l GO
+Beginning VICAR task label
+LABEL version 15-Nov-2010
+************************************************************
+ 
+        ************  File GO ************
+                3 dimensional IMAGE file
+                File organization is BSQ
+                Pixels are in REAL format from a SUN-SOLR host
+                1 bands
+                1 lines per band
+                800 samples per line
+                0 lines of binary header
+                0 bytes of binary prefix per line
+---- Task: GRIDGEN -- User: lwk -- Wed Mar 28 19:08:47 2012 ----
+---- Task: SKEW -- User: lwk -- Wed Mar 28 19:08:57 2012 ----
+ 
+************************************************************
+locus2 GO NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+COMPARING TO PERFECT GRID WITH
+ SL  =   72.000000
+ SS  =   72.000000
+ INC =   72.000000
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            513.600037
+
+ OFFSET ONLY                             1.000000        0.000000            -150.999999
+                                         0.000000        1.000000            -388.000000            300.732452
+
+ ROTATE, OFFSET                          0.999480        0.032241            -187.412502
+                                        -0.032241        0.999480            -358.162398            300.218536
+
+ MAGNIFY, OFFSET                         0.874608        0.000000             -37.269591
+                                         0.000000        0.874608            -244.551723            291.724731
+
+ MAGNIFY, ROTATE, OFFSET                 0.874608        0.028213             -69.545452
+                                        -0.028213        0.874608            -218.962383            291.261322
+
+ UNCONSTRAINED LINEAR, OFFSET            2.000000       -0.888889             -41.111109
+                                        -1.000000        1.444444              10.555555              0.000013
+label-l G
+Beginning VICAR task label
+LABEL version 15-Nov-2010
+************************************************************
+ 
+        ************  File G ************
+                3 dimensional IMAGE file
+                File organization is BSQ
+                Pixels are in REAL format from a SUN-SOLR host
+                1 bands
+                1 lines per band
+                800 samples per line
+                0 lines of binary header
+                0 bytes of binary prefix per line
+---- Task: GRIDGEN -- User: lwk -- Wed Mar 28 19:08:47 2012 ----
+ 
+************************************************************
+locus2 (GO,G) NROW=20 NCOL=20
+Beginning VICAR task locus2
+GRID_NROW NOT FOUND IN INPUT
+GRID_NCOL NOT FOUND IN INPUT
+KEYWORD GRID_NROW NOT FOUND IN REF
+KEYWORD GRID_NCOL NOT FOUND IN REF
+
+ LOCUS COORDINATE DETRENDING STATISTICS
+
+ DEGREES OF FREEDOM ALLOWED              MATRIX FOR LINEAR                OFFSET PART OF         RESULTING RMS
+  IN MINIMIZING THE RMS                   PART OF TRANSFORMATION           TRANSFORMATION
+
+ NONE                                    1.000000        0.000000               0.000000
+                                         0.000000        1.000000               0.000000            936.654175
+
+ OFFSET ONLY                             1.000000        0.000000            -486.999999
+                                         0.000000        1.000000            -724.000000            340.552490
+
+ ROTATE, OFFSET                          0.999480        0.032241            -523.412502
+                                        -0.032241        0.999480            -694.162398            340.300507
+
+ MAGNIFY, OFFSET                         0.485893        0.000000             -20.705329
+                                         0.000000        0.485893            -135.862069            162.069305
+
+ MAGNIFY, ROTATE, OFFSET                 0.485893        0.015674             -38.636362
+                                        -0.015674        0.485893            -121.645768            161.811844
+
+ UNCONSTRAINED LINEAR, OFFSET            1.111111       -0.493827             -22.839505
+                                        -0.555556        0.802469               5.864197              0.000007
+END-PROC
+disable-log

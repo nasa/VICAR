@@ -1,0 +1,27 @@
+procedure
+refgbl $autousage
+refgbl $echo
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+
+gen input.mss nl=30 ns=180
+
+mssview  input.mss  output.img  mss=6 bands=(3,4) nlout=300 nsout=400 +
+				labels=("red band","ir band")
+! Make sure RED... label appears
+list output.img ns=15 nl=40 'zero size=(286,125,10,17)
+! Look at overview
+size output.img small zoom=-32 
+list small 'zero
+
+mssview  input.mss  output.img  mss=6 bands=(1,2,5) 
+! Take a look at some text
+list output.img ns=15 nl=40 size=(24,6,40,16) 'zero
+! Now look the overview
+size output.img small zoom=-20 
+list small 'zero
+
+
+end-proc

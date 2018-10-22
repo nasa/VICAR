@@ -1,0 +1,8 @@
+procedure
+refgbl $echo
+body
+let $echo="yes"
+!
+ellipse out=a.img nl=502 ns=1002
+!
+end-proc

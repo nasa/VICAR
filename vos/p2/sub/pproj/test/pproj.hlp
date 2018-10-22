@@ -1,0 +1,85 @@
+1  PPROJ
+
+A FORTRAN and C callable routine which transforms coordinates from 
+object space (line,sample) to (latitude,longitude) and vice-versa.
+
+  Fortran Calling Sequence:
+      CALL PPROJ(MAP,LINE,SAMP,LAT,LON,MODE,ILAT,RADIUS,SRANGE,IND)
+
+  C Calling Sequence: 
+      zpproj(map,&line,&samp,&lat,&lon,mode,ilat,&radius,&srange,&ind);
+    Note the & for all scalar arguments except mode and ilat, denoting the 
+    passing by address.
+
+2  ARGUMENTS
+
+      MAP        is the standard 40-word geometry buffer (see subroutine
+                 CONVEV), R*4.
+
+      LINE,SAMP  is the object space location of a point, R*4.
+
+      LAT,LON    are the planetary coordinates of the point, R*4.
+                 Longitude is degrees West, Latitude is in degrees,
+                 either planetodetic or planetocentric, depending on
+                 ILAT.
+
+      MODE       1 = (LAT,LON) to (LINE,SAMP) I*4
+                 2 = (LINE,SAMP) to (LAT,LON) 
+
+      ILAT       0 = planetocentric latitudes
+	         1 = planetodetic latitudes
+
+      RADIUS     is the distance from planet center to the intercept point
+                 of the line of sight with the planet surface.  If the point
+                 falls off the planet then it is the tangent radius to the
+                 line of sight from planet center.   Note that in this case,
+                 LAT,LON are computed assuming this radius instead of the 
+                 one in MAP(26).
+                 This parameter is ignored when MODE=1.
+
+      SRANGE     is the distance from the spacecraft to the intercept point
+                 of the line of sight with the planet surface.  If the point
+                 falls off the planet then it is the distance to the tangent 
+                 to the tangent point defined under RADIUS for this case.
+                 This parameter is ignored when MODE=1.
+
+      IND        Return indicator.  1=success, 0=failure.
+
+If MODE=1, IND=0 if the input (lat,lon) coordinates are on the back side of
+the planet.
+
+If MODE=2, IND=0 if the input (line,samp) coordinates are off the planet.
+
+2  HISTORY
+
+Original Programmer: Gary Yagi, 20 September 1983
+Current Cognizant Programmer: Gary Yagi
+Source Language: Fortran
+Revision:
+  20 SEP 83  cca  convert to vax
+  15 May 90  GMY  Replace alternate return with return indicator
+   2 Aug 90  lwk  added ILAT parameter
+  10 Sep 90  lwk  added RTANG parameter
+  27 Jun 91  lwk  renamed RTANG to RADIUS (& fixed it for ellipsoidal case),
+                  added SRANGE parameter
+   5 Nov 94  SXP  Made portable.  Added zpproj for calls from C.
+
+2  OPERATION
+
+PPROJ uses a perspective projection model of the camera system to transform
+coordinates from object space (line,sample) to (latitude,longitude) and
+vice-versa. The transformation uses the OM-matrix stored in the 40-word
+geometry buffer and assumes an oblate spheroid model of the planet.  PPROJ
+performs the same function as IPPCOV and CORCAV.  However, it also returns
+the distances from the point viewed on the planet to the spacecraft and
+planet center (SRANGE and RADIUS parameters).
+
+When computing latitude/longitude (MODE=2), an additional feature is provided
+when the point falls off the planet:  in this case the routine computes the
+value that the radius would need to have in order to make the line of sight 
+just tangent to the surface and returns this to the caller.  The routine also 
+returns the lat/long of this tangent point.  However, note that IND=0 for this 
+case, so by default these returned values should be ignored;  they are provided 
+in order to enable the user to project off-limb data for certain projections.
+
+Subroutines called:  MVE

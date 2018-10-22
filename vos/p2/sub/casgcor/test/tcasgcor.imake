@@ -1,0 +1,10 @@
+#define PROGRAM tcasgcor
+#define MODULE_LIST tcasgcor.f tccasgcor.c
+#define TEST
+#define MAIN_LANG_FORTRAN
+#define USES_C
+#define USES_FORTRAN
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_LOCAL

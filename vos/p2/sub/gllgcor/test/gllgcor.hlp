@@ -1,0 +1,63 @@
+procedure help=*
+body
+help GLLGCOR
+end-proc
+.title
+VICAR routine GLLGCOR
+.help
+Purpose:
+
+GLLGCOR converts image line,sample values from raw (image space) coordinates to
+geometrically corrected (object space) coordinates or vice-versa.  This routine
+is specific to the Galileo SSI camera.
+
+FORTRAN Calling Sequence:
+
+      INTEGER*4 STATUS			!Always 0 (success)
+      INTEGER*4 IS_LINE,IS_SAMPLE	!Image space line,sample
+      INTEGER*4 OS_LINE,OS_SAMPLE	!Object space line,sample
+      INTEGER*4 MODE			!0=OS to IS, 1=IS to OS
+      INTEGER*4 ICAM			!1=full frame, 2=summation mode
+      CALL GLLGCOR(status,is_line,is_sample,os_line,os_sample,MODE,ICAM)
+
+C Calling Sequence:
+
+      int status;			/* always 0 (success) */
+      int is_line,is_sample;		/* Image space line,sample */
+      int os_line,os_sample;		/* Object space line,sample */
+      int mode;				/* 0=OS to IS, 1=IS to OS */
+      int icam;				/* 1=full frame, 2=summation mode */
+      status=zgllgcor(&is_line,&is_sample,&os_line,&os_sample,mode,icam);
+
+Reference: D-5880, "Solid-State Imaging Subsystem Calibration Report: Part 2",
+  page 133, K. Klaasen, March 22, 1993.
+
+Operation:
+
+GLLGCOR uses an optical distortion model of the SSI camera where the distortion
+is a function of the radial distance from the point where the optical axis
+intercepts the focal plane:
+
+	R_is = A*R_os**3 + R_os
+where
+        R_is is the radial distances from the optical center in Image Space,
+        R_os is the radial distances from the optical center in Object Space,
+        A (=6.58*10**(-9)) is the optical distortion constant
+
+The optical center is at location line=400, sample=400.  The magnitude of the
+distortion is 1.2 pixels at the corners.  All units refer to full-frame images.
+
+The solution of this equation for R_os is from the CRC math tables and is
+tailored to this problem (i.e., only one real root is expected and therefore
+only one calculated).  The solution is accurate to .0005 pixels for radial
+distances varying between 0 and 707 pixels.
+
+History:
+
+Original Programmer:	A. Runkle	March 3, 1989
+Cognizant Programmer:	Gary Yagi
+Source Language: C
+Revision History:
+
+02 Sep 96  GMY  Add ICAM argument to handle summation mode.
+.end

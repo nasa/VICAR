@@ -1,0 +1,17 @@
+procedure
+refgbl $autousage
+refgbl $echo
+body
+!let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+gen A 100 100 IVAL=100. SINC=0. LINC=0.
+zcircle A B DN=10 RPOL=5. REQ=8. 'IN
+list B (43 41 15 20)
+zcircle A B XCEN=-1 YCEN=20 RPOL=10 ECC=-0.2 'IN
+list B (1 1 30 10)
+zcircle A B ECC=-0.4 ANG=-45.0 RPOL=5. DN=50 'IN
+list B (43 40 20 20)
+zcircle A B R=4.
+list B (40 40 20 20)
+end-Proc

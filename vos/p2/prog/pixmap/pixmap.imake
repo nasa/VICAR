@@ -1,0 +1,17 @@
+#define  PROGRAM   pixmap
+
+#define MODULE_LIST pixmap.c
+
+#define MAIN_LANG_C
+#define R2LIB 
+
+/* Comment this out before delivery.
+#define DEBUG
+*/
+
+#define USES_ANSI_C
+
+#define LIB_CARTO
+#define LIB_P2SUB
+#define LIB_TAE
+#define LIB_RTL

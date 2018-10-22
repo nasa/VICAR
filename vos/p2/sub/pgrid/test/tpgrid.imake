@@ -1,0 +1,16 @@
+/* Imake file for Test of VICAR subroutine PGRID */
+
+#define PROGRAM tpgrid
+
+#define MODULE_LIST tpgrid.f tzpgrid.c
+
+#define MAIN_LANG_C 
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_FORTRAN
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB 

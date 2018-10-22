@@ -1,0 +1,9 @@
+
+#define SUBROUTINE ival
+
+#define MODULE_LIST ival.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

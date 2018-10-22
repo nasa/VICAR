@@ -1,0 +1,20 @@
+/* IMAKE file for Test of VICAR subroutine  FLIGHT_LABEL   */
+
+#define PROGRAM tflight_label
+
+#define MODULE_LIST tflight_label.c
+
+#define MAIN_LANG_C
+#define TEST
+
+#define USES_ANSI_C
+
+#define   LIB_RTL
+#define   LIB_TAE
+
+#define   LIB_P2SUB          /* Enable during delivery  */
+
+/*
+#define LIB_LOCAL
+*/
+

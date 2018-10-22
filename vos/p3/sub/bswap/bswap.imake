@@ -1,0 +1,9 @@
+
+#define SUBROUTINE bswap
+
+#define MODULE_LIST bswap.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

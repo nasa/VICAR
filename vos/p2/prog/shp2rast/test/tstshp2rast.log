@@ -1,0 +1,61 @@
+shp2rast shp=ct/lakes pre="mex_50_" suf=".img" pixperdeg=50  +
+  minLat=18 maxLat=19 minLon=-97 maxLon=-96
+Beginning VICAR task shp2rast
+shp2rast version 2017-06-30
+shp2rast: nEntities==3
+shp2rast: ct/lakes touches 5 cells with lon range -104:-96, lat range 18:21
+shp2rast: creating mex_50_n18w097.img
+list mex_50_n18w097.img ss=15 ns=17
+Beginning VICAR task list
+list version 2017-03-29
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:SHP2RAST  User:wlb       Date_Time:Fri Jun 30 13:35:41 2017
+     Samp    15      17      19      21      23      25      27      29      31
+   Line
+
+     30       0   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0
+     31       0   0   0   1   1   1   1   1   0   0   0   0   0   0   0   0   0
+     32       0   0   0   0   0   1   1   0   0   0   0   0   0   0   0   0   0
+     33       0   0   0   0   0   1   1   1   1   0   0   0   0   0   0   0   0
+     34       0   0   0   0   1   1   1   1   1   1   1   1   0   0   0   0   0
+     35       0   0   0   0   1   1   1   1   1   1   1   1   1   0   0   0   0
+     36       0   0   0   0   1   1   1   1   1   1   1   1   1   1   0   0   0
+     37       0   0   0   0   1   1   1   1   1   1   1   1   1   1   1   0   0
+     38       0   0   0   0   0   1   1   1   1   1   1   1   1   1   1   1   0
+     39       0   0   0   0   0   1   1   1   1   1   1   1   1   1   1   1   0
+     40       0   0   0   0   0   1   1   1   1   1   1   1   1   1   1   0   0
+     41       0   0   0   0   0   0   0   1   1   1   1   1   1   1   1   1   0
+     42       0   0   0   0   0   0   0   0   1   1   1   1   1   1   1   1   0
+     43       0   0   0   0   0   0   0   0   0   1   1   1   0   0   1   1   0
+shp2rast shp=ct/lakes pre="mex_50_" suf="_margin.img" pixperdeg=50  +
+  minLat=18 maxLat=19 minLon=-97 maxLon=-96 'margin
+Beginning VICAR task shp2rast
+shp2rast version 2017-06-30
+shp2rast: nEntities==3
+shp2rast: ct/lakes touches 5 cells with lon range -104:-96, lat range 18:21
+shp2rast: creating mex_50_n18w097_margin.img
+list mex_50_n18w097_margin.img ss=15 ns=17
+Beginning VICAR task list
+list version 2017-03-29
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:SHP2RAST  User:wlb       Date_Time:Fri Jun 30 13:35:41 2017
+     Samp    15      17      19      21      23      25      27      29      31
+   Line
+
+     30       0   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0
+     31       0   0   0   1   1   1   1   1   0   0   0   0   0   0   0   0   0
+     32       0   0   0   0   0   1   1   0   0   0   0   0   0   0   0   0   0
+     33       0   0   0   0   0   1   1   1   1   0   0   0   0   0   0   0   0
+     34       0   0   0   0   1   1   1   1   1   1   1   1   0   0   0   0   0
+     35       0   0   0   0   1   1   1   1   1   1   1   1   1   0   0   0   0
+     36       0   0   0   0   1   1   1   1   1   1   1   1   1   1   0   0   0
+     37       0   0   0   0   1   1   1   1   1   1   1   1   1   1   1   0   0
+     38       0   0   0   0   0   1   1   1   1   1   1   1   1   1   1   1   0
+     39       0   0   0   0   0   1   1   1   1   1   1   1   1   1   1   1   0
+     40       0   0   0   0   0   1   1   1   1   1   1   1   1   1   1   0   0
+     41       0   0   0   0   0   0   0   1   1   1   1   1   1   1   1   1   0
+     42       0   0   0   0   0   0   0   0   1   1   1   1   1   1   1   1   0
+     43       0   0   0   0   0   0   0   0   0   1   1   1   0   0   1   1   0
+disable-log

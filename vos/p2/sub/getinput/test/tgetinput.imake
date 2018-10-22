@@ -1,0 +1,15 @@
+#define PROGRAM tgetinput
+
+#define MODULE_LIST tgetinput.c tgetinputf.f
+
+#define MAIN_LANG_C
+#define TEST
+
+#define USES_C
+#define USES_FORTRAN
+
+#define LIB_FORTRAN
+#define LIB_LOCAL
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE

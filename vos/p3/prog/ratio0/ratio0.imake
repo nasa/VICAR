@@ -1,0 +1,15 @@
+#define  PROGRAM   ratio0
+
+#define MODULE_LIST ratio0.f
+
+#define MAIN_LANG_FORTRAN
+#define R3LIB 
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_P3SUB
+
+#define FTNINC_LIST pgminc

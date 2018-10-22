@@ -1,0 +1,20 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY get_seconds
+
+   To Create the build file give the command:
+
+	$ vimake get_seconds                     (VMS)
+   or
+	% vimake get_seconds                     (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE get_seconds
+
+#define MODULE_LIST get_seconds.c
+
+#define P2_SUBLIB
+
+#define USES_ANSI_C

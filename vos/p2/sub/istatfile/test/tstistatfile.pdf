@@ -1,0 +1,15 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+  let $echo="y"
+  let $autousage="none"
+  tistatfile fred.stat 4 6
+  ibis-list fred.stat 'group nr=5 nc=10 csiz=8
+  label-list fred.stat
+  tistatfile fred.stat 50 12 
+  ibis-list fred.stat 'group nr=5 nc=10 csiz=8+
+     cols=(2,4,6,8,10,12,14,16,18,20)
+  label-list fred.stat
+end-proc
+

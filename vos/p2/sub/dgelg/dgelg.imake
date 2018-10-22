@@ -1,0 +1,14 @@
+/* Imake file for VICAR subroutine DGELG */
+
+#define SUBROUTINE dgelg
+
+#define MODULE_LIST dgelg.f zdgelg.c
+#define FTNINC_LIST fortport
+
+#define USES_C
+#define USES_FORTRAN
+#define P2_SUBLIB
+
+
+
+

@@ -1,0 +1,259 @@
+process help=*
+SUBCMD-DEFAULT MAIN
+PARM INP TYPE=STRING
+PARM OUT TYPE=STRING COUNT=2
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL TYPE=INTEGER DEFAULT=1
+PARM SS TYPE=INTEGER DEFAULT=1
+PARM NL TYPE=INTEGER DEFAULT=0
+PARM NS TYPE=INTEGER DEFAULT=0
+PARM SLDS TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM SSDS TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM U TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM D TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM L TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM R TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM THRESH TYPE=REAL COUNT=0:1 DEFAULT=--
+PARM CMUL TYPE=REAL COUNT=0:1 DEFAULT=--
+PARM AMPLITUD TYPE=KEYWORD VALID=AMPLITUD COUNT=0:1 DEFAULT=--
+PARM PHASE TYPE=KEYWORD VALID=PHASE COUNT=0:1 DEFAULT=--
+PARM CIRCLE TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM RECTANGL TYPE=INTEGER COUNT=(0,2) DEFAULT=--
+PARM VERTEX TYPE=KEYWORD VALID=VERTEX COUNT=0:1 DEFAULT=--
+PARM INTERIOR TYPE=KEYWORD VALID=INTERIOR COUNT=0:1 DEFAULT=--
+PARM EXTERIOR TYPE=KEYWORD VALID=EXTERIOR COUNT=0:1 DEFAULT=--
+PARM MULTIPLY TYPE=REAL COUNT=0:1 DEFAULT=--
+PARM ADD TYPE=REAL COUNT=0:1 DEFAULT=--
+PARM RCUR TYPE=KEYWORD VALID=RCUR COUNT=0:1 DEFAULT=--
+PARM WCUR TYPE=INTEGER COUNT=(0,2) DEFAULT=--
+PARM PCUR TYPE=INTEGER COUNT=(0,2) DEFAULT=--
+PARM NO TYPE=KEYWORD VALID=NO COUNT=0:1 DEFAULT=--
+PARM POSITION	TYPE=INTEGER  COUNT=2       DEFAULT=(1,1)    VALID=(1:99999)
+END-SUBCMD
+SUBCMD IPARAM
+PARM EXIT TYPE=KEYWORD VALID=EXIT COUNT=0:1 DEFAULT=--
+PARM SLDS TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM SSDS TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM U TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM D TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM L TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM R TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM THRESH TYPE=REAL COUNT=0:1 DEFAULT=--
+PARM CMUL TYPE=REAL COUNT=0:1 DEFAULT=--
+PARM AMPLITUD TYPE=KEYWORD VALID=AMPLITUD COUNT=0:1 DEFAULT=--
+PARM PHASE TYPE=KEYWORD VALID=PHASE COUNT=0:1 DEFAULT=--
+PARM CIRCLE TYPE=INTEGER COUNT=0:1 DEFAULT=--
+PARM RECTANGL TYPE=INTEGER COUNT=(0,2) DEFAULT=--
+PARM VERTEX TYPE=KEYWORD VALID=VERTEX COUNT=0:1 DEFAULT=--
+PARM INTERIOR TYPE=KEYWORD VALID=INTERIOR COUNT=0:1 DEFAULT=--
+PARM EXTERIOR TYPE=KEYWORD VALID=EXTERIOR COUNT=0:1 DEFAULT=--
+PARM MULTIPLY TYPE=REAL COUNT=0:1 DEFAULT=--
+PARM ADD TYPE=REAL COUNT=0:1 DEFAULT=--
+PARM RCUR TYPE=KEYWORD VALID=RCUR COUNT=0:1 DEFAULT=--
+PARM WCUR TYPE=INTEGER COUNT=(0,2) DEFAULT=--
+PARM PCUR TYPE=INTEGER COUNT=(0,2) DEFAULT=--
+PARM NO TYPE=KEYWORD VALID=NO COUNT=0:1 DEFAULT=--
+PARM POSITION	TYPE=INTEGER  COUNT=2       DEFAULT=(1,1)    VALID=(1:99999)
+END-SUBCMD
+SUBCMD OK
+PARM NO TYPE=KEYWORD VALID=NO COUNT=0:1 DEFAULT=--
+END-SUBCMD
+SUBCMD READY ! TO ALLOW USER TO MOVE CURSOR AND HIT RETURN.
+PARM POSITION	TYPE=INTEGER  COUNT=2       DEFAULT=(1,1)    VALID=(1:99999)
+END-SUBCMD
+END-PROC
+.TITLE
+VICAR Program "ifft"
+.HELP
+PURPOSE:
+"ifft" allows the user to interactively and selectively modify areas of an FFT.
+
+EXECUTION:
+
+Example
+
+	TAE> ifft inp=scr:fft out=(scr:tmpfil,scr:newfft)
+
+	(Parameters are allowable in the command line.)
+
+	REFORMATTING INPUT
+
+	(A couple minutes will elapse, then the FFT will be drawn on the
+	allocated display device.)
+
+	IFFT READY
+	Enter Parameters:  
+
+	(The program is now waiting for one of two types of input.
+	    The first type of input is one of the normal commands. 
+	Commands are available to set the shape and dimensions of
+	the area to be modifed (CIRCLE, RECTANGL, VERTEX mode), to move
+	the cursor (PCURS, WCURS), read the DN value and position of the
+	cursor (RCURS), or adjust the display (SLDS, SSDS, U, D, L, R).
+	The user can also display the phase picture ('PHASE) rather than
+	the default amplitude picture ('AMPLITUD), or can specify that 
+	points outside of the defined area ('EXTERIOR) are to be changed
+	rather the points inside (reset by 'INTERIOR).  Finally, points
+	within the defined area can be multiplied by a factor (MULTIPLY)
+	and/or increased or decreased by a constant (ADD).
+	    The second type of input is a simple RETURN, which tells the
+	program to go ahead and accept an area definition from the
+	trackball and perform the modification.  
+	    The default modification area is a circle, 10 pixels in
+	radius; points inside are multiplied by 0.10.  Whenever the
+	modification function is changed, the program will print out
+	the complete status; e.g., if you use the ADD command immediately
+	after entering the program, IFFT will show that 'INTERIOR, CIRCLE=10,
+	and MULT=0.10 are in effect.)
+
+	Enter Parameters:  CIRCLE=20 MULT=0.0 ADD=45
+
+	TRANSFORM MODIFICATION IN EFFECT:
+	CIRCLE   20        INTERIOR   MULT   0.00
+
+	Enter Parameters:  (Press RETURN to define area)
+	
+	POSITION THE CURSOR AND PRESS <CR>
+
+	(Position the cursor using the trackball and press <CR>.
+	The program will draw a circle around the specified
+	point and come back with ...)
+
+	OK ?   HIT <CR> IF OK OR TYPE NO TO REDO
+	Enter Parameters:  (Press RETURN)
+
+	("ifft" will perform the mod and return)
+
+	Enter Parameters:'EXIT
+
+	WRITING OUTPUT
+	
+	(Several minutes will elapse during output)
+
+	TAE>
+
+OPERATION:
+
+Sequence of steps:
+
+1.  Process command line parameters (MAIN44)
+2.  Copy input FFT into temporary dataset (DSRN 1), reformatting the data
+    so that DC is moved from the upper-left corner to the center (FFT_FORMAT).
+3.  Display the FFT (DISPLY)
+4.  Get parameters from user and process as appropriate (KEYWRD).
+    If none, goto step 9.
+5.  If the display needs to be refreshed (e.g., user changed display format
+    using SS, SSDS, et al.) redisplay screen (DISPLY).
+6.  If user changed modification area shape, size, or handling, print current
+    status.
+7.  If cursor position is to be read or changed, do it (CURSOR).
+8.  If done, copy temporary file into output file, moving DC back to the
+    upper-left corner, and exit the program.  Otherwise, goto step 4.
+9.  Modify mode (MODIFY): 
+    a.  Get trackball location
+    b.  If circle or rectangle, draw shape at current location and goto d.
+    c.  If vertex mode, see if first point.  If so, get next at a.
+        If middle point and not same as the last, draw segment to last
+        point and get next point at a.  (3000 points are allowed.)
+        If same point as last time, complete polygon.
+    d.  Prompt user to accept or reject area.  If rejected, goto step 4.
+        Otherwise, perform current modifications on area and goto 4.
+
+NOTE: Initialization of displays via the VRDI XDGLINIT function sometimes
+does not work on the Unix platforms.  This was per discussions with Bob
+Deen and E. Cruz on 30 May 1994.  Should the display not appear correct,
+the following two work arounds were suggested: 1) Click on the display
+screen, or 2) restart the display.  Usually item 1 will cause the display
+to be reinitialized properly.
+
+WRITTEN BY:  John Reimer, May 1983
+COGNIZANT PROGRAMMER:  John Reimer
+REVISION:  New
+REVISION:  Made portable for UNIX ... V. Unruh ... (CRI) (May  8, 1995)
+1998-04-22 RRP Removed constant IMP from call to XDIFILL and replaced
+               with GRAPHICSPLANE variable which gets its value from
+               XDSGRAPH subroutine.
+1998-07-16 RRP Added INTEGER XDSGRAPH to implie that the function returns
+               a integer value and not a float (AR-100438).
+2016-02-12 WLB Enhanced tstifft.pdf.
+
+.LEVEL1
+.VARIABLE INP
+STRING - Input FFT
+.VARIABLE OUT
+STRING - Output FFT
+.VARIABLE SIZE
+INTEGER - Standard VICAR size field
+.VARIABLE SL
+INTEGER - Starting line
+.VARIABLE SS
+INTEGER - Starting sample
+.VARIABLE NL
+INTEGER - Number of lines
+.VARIABLE NS
+INTEGER - Number of samples
+.VARIABLE EXIT
+KEYWORD - Creates output file and exits program.
+.VARIABLE SLDS
+INTEGER - Starting line on display
+.VARIABLE SSDS
+INTEGER - Starting sample on display
+.VARIABLE U
+INTEGER - Number of pixels to move window (up)
+.VARIABLE D
+INTEGER - Number of pixels to move window (down)
+.VARIABLE L
+INTEGER - Number of pixels to move window (left)
+.VARIABLE R
+INTEGER - Number of pixels to move window (right)
+.VARIABLE THRESH
+REAL - Complex->Byte conversion factor (see HELP detail)
+.VARIABLE CMULTIPL
+REAL - Complex->Byte conversion factor (see HELP detail)
+.VARIABLE AMPLITUD
+KEYWORD - Use amplitude picture (default)
+.VARIABLE PHASE
+KEYWORD - Use phase picture
+.VARIABLE CIRCLE
+INTEGER - Changes modification shape to be a circle of the specified radius.
+.VARIABLE RECTANGL
+INTEGER - Specifies NL and NS for rectangle as modification shape.
+.VARIABLE VERTEX
+KEYWORD - Changes to vertex (dynamic polygon definition) mode.
+.VARIABLE INTERIOR
+KEYWORD - Modify points within the defined area (default).
+.VARIABLE EXTERIOR
+KEYWORD - Modify points outside of the defined area.
+.VARIABLE MULT
+REAL - Factor by which to multiply DN's in modification area.
+.VARIABLE ADD
+REAL - Number to add to DN's in modification area.
+.VARIABLE RCURSOR
+KEYWORD - Read location and DN value of cursor.
+.VARIABLE WCURSOR
+INTEGER - Line and sample coordinates on screen for cursor position.
+.VARIABLE PCURSOR
+INTEGER - Line and sample coordinates in image for cursor position.
+.VARIABLE POSITION
+INTEGER - POSITION=(ld,sd)
+Use (ld,sd) as (image) line 
+and sample cursor coordinates.
+.LEVEL2
+.VARIABLE CMULTIPL
+CMULTIPL and THRESH are may be used to modify the conversion from
+complex data to byte data.  The conversion formula is as follows:
+
+   DN = min( 255, CMULTIPL * log10( max( 1.0, ABS(CDN)/THRESH)))
+
+where CDN is the complex data value, and ABS is the absolute value
+function.
+
+.VARIABLE THRESH
+CMULTIPL and THRESH are may be used to modify the conversion from
+complex data to byte data.  The conversion formula is as follows:
+
+   DN = min( 255, CMULTIPL * log10( max( 1.0, ABS(CDN)/THRESH)))
+
+where CDN is the complex data value, and ABS is the absolute value
+function.
+.END_HELP

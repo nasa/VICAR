@@ -1,0 +1,7 @@
+#define SUBROUTINE uniflt
+
+#define MODULE_LIST uniflt.f
+
+#define P3_SUBLIB
+
+#define USES_FORTRAN

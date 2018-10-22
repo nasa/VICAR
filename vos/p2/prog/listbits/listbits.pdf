@@ -1,0 +1,90 @@
+process help=*
+PARM INP TYPE=STRING
+PARM SIZE    TYPE=INTEGER COUNT=4   DEFAULT=(1,1,0,0)
+PARM SL      TYPE=INTEGER COUNT=1   DEFAULT=1
+PARM SS      TYPE=INTEGER COUNT=1   DEFAULT=1
+PARM NL      TYPE=INTEGER COUNT=1   DEFAULT=0
+PARM NS      TYPE=INTEGER COUNT=1   DEFAULT=0
+PARM SPACE   TYPE=KEYWORD COUNT=0:1 VALID=SPACE DEFAULT=--
+
+!# annot function="VICAR Pixel Listings and Plots"
+!# annot keywords=("DN values",bits,binary)
+
+END-PROC
+.TITLE
+Print the DN values of an image area in binary (ones and zeroes)
+.help
+PURPOSE:
+
+LISTBITS prints the bits in an image area as strings of ones and zeroes.
+
+EXECUTION:
+
+Example 
+
+	listbits  inp=pic user-parameters...
+
+where pic is an image of arbitrary size and data format.
+
+.page
+The image area is printed line-by-line.  The data for each line is printed four
+bytes at a time, displaying the starting byte, a hexadecimal representation,
+and a bit representation, as in the following example:
+
+	listbits  files.dat size=(2,1,1,25)
+
+Line=         2
+  1 0081CEE0 0 0 0 0 0 0 0 0  1 0 0 0 0 0 0 1  1 1 0 0 1 1 1 0  1 1 1 0 0 0 0 0
+  5 00000000 0 0 0 0 0 0 0 0  0 0 0 0 0 0 0 0  0 0 0 0 0 0 0 0  0 0 0 0 0 0 0 0
+  9 0E50003D 0 0 0 0 1 1 1 0  0 1 0 1 0 0 0 0  0 0 0 0 0 0 0 0  0 0 1 1 1 1 0 1
+ 13 80000000 1 0 0 0 0 0 0 0  0 0 0 0 0 0 0 0  0 0 0 0 0 0 0 0  0 0 0 0 0 0 0 0
+ 17 013AF600 0 0 0 0 0 0 0 1  0 0 1 1 1 0 1 0  1 1 1 1 0 1 1 0  0 0 0 0 0 0 0 0
+ 21 E4000087 1 1 1 0 0 1 0 0  0 0 0 0 0 0 0 0  0 0 0 0 0 0 0 0  1 0 0 0 0 1 1 1
+ 25 9B       1 0 0 1 1 0 1 1
+
+The 'SPACE keyword may be used to introduce a blank line between each printed
+line (double spacing).
+
+.page
+2  HISTORY:
+
+	Original Programmer: Gary Yagi		January 10, 1990
+	Current Cognizant Programmer: Gary Yagi
+
+   Made portable for UNIX    Jim Turner (CRI)    30 March 1994
+   Corrected tst pdf as per FR85764     (CRI)    08 March 1995
+
+.LEVEL1
+.VARIABLE INP
+Input file name.
+.VARIABLE SIZE
+Standard vicar size field
+Ex: SIZE=(sl,ss,nl,ns)
+.VARIABLE SPACE
+Keyword specifying double 
+spacing.
+.VARIABLE SL
+INTEGER - Starting line
+.VARIABLE SS
+INTEGER - Starting sample
+.VARIABLE NL
+INTEGER - Number of lines
+.VARIABLE NS
+INTEGER - Number of samples
+.LEVEL2
+.VARIABLE INP
+INP specifies the input data set.
+.VARIABLE SIZE
+The SIZE parameter may be used when a sub-region of an image is to 
+be printed; it has the format SIZE=(SL,SS,NL,NS), where the parameters
+are starting line, starting sample, number of lines, and number of samples.
+.VARIABLE SL
+INTEGER - Starting line (see SIZE)
+.VARIABLE SS
+INTEGER - Starting sample (see SIZE)
+.VARIABLE NL
+INTEGER - Number of lines (see SIZE)
+.VARIABLE NS
+INTEGER - Number of samples (see SIZE)
+.END
+EXIT

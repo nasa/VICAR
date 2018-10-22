@@ -1,0 +1,33 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM lstoxyz
+
+   To Create the build file give the command:
+
+		$ vimake lstoxyz			(VMS)
+   or
+		% vimake lstoxyz			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	lstoxyz
+
+#define MODULE_LIST lstoxyz.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define USES_ANSI_C
+
+#define FTNINC_LIST mp_for_defs  
+#define R2LIB
+
+#define LIB_FORTRAN
+#define LIB_SPICE
+#define LIB_NETWORK
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_MATH77
+/************************* End of Imake file ***************************/

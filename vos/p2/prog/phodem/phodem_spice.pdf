@@ -1,0 +1,179 @@
+procedure option=selftutor help=*
+
+parm MAIN_PROC_NAME string
+
+!-----------------------------------------------------------------------------
+!
+! This is the PDF for the second menu point of the MDF.
+! In this PDF, the user is asked for parameters belonging to a specific
+! topic. In this pho_routines-test, the topic is SPICE, i.e. in this PDF we 
+! could specify SPICE-kernels ad directories with the help of 
+! LOGICALs/ENVIRONMENTs. In the test, however, it's all dummy variables
+! similar to HRSC/WAOS.
+!
+!-----------------------------------------------------------------------------
+
+	PARMSET name=phodem_spice_sub help=*
+
+	parm GECALDIR	type=(string,80) count = 0:2	+
+			default = (HRSC_GEOCAL_DIR, WAOSS_GEOCAL_DIR)
+	parm GECALDAT	type=(string,32) count = 0:1	+
+			default = HRSC_GEOCAL_DATE
+	parm BSPFILE	type=(string,32) count = 0:3	+
+			default = HWSPICE_BSP
+	parm SUNFILE	type=(string,32) count = 0:1	+
+			default = HWSPICE_SUN
+	parm BCFILE	type=(string,32) count = 0:6	+
+			default = HWSPICE_BC
+	parm TSCFILE	type=(string,32) count = 0:6	+
+			default = HWSPICE_TSC
+	parm TIFILE	type=(string,32) count = 0:1	+
+			default = HWSPICE_TI
+	parm TPCFILE	type=(string,32) count = 0:1	+
+			default = HWSPICE_TPC
+	parm TLSFILE	type=(string,32) count = 0:1	+
+			default = HWSPICE_TLS
+
+
+	END-PROC
+
+body
+
+	if (_tutor=1)
+
+	   !***************************************************************   
+	   ! There are always two ways to call a procedure:
+	   ! 1) "tutor proc_name"
+	   ! 2) "VICAR> proc_name" (i.e. from the command line)
+	   !
+	   ! As described above, an initial tutor request sets the variable
+	   ! _TUTOR to 1 in an SELFTUTOR procedure. Hence, if this PDF gets
+	   ! an initial tutor request the Tutor Mode of the procedure 
+	   ! '&"pho_PROC_NAME_spice_sub' is entered: "tutor  
+	   ! '&"pho_PROC_NAME_spice_sub"' (see below).
+	   ! There, we are actually asked for the parameters. Since this
+	   ! procedure '&"pho_PROC_NAME"_spice_sub' does not have anything to 
+	   ! execute in it's body, we have to terminate the procedure execution 
+	   ! of '&"pho_PROC_NAME_spice' by the command RETURN (see below) to  
+	   ! return to the Menu Mode.
+	   !***************************************************************
+
+	   restore-parm common_proc_name.par
+
+	   tutor phodem_spice_sub 			+
+		|restore=&"MAIN_PROC_NAME"_spice.par,	+
+		 save=&"MAIN_PROC_NAME"_spice.par|
+	   return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs."
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+
+.Title
+Sub-menu &"MAIN_PROC_NAME"_SPICE 
+(for VICAR mdf/pdf-test and demonstration-Programs &"MAIN_PROC_NAME")
+
+.help
+In this sub-menu it is possible to specify the names of additional parameters,
+e.g. SPICE Directories and Kernels. In our example, dummy parameters similar to 
+HRSC/WAOSS can be specified.
+
+This program is only intended to be run as tutor from other programs.
+When run from Command Mode, we get an error message:
+
+*********************************************************
+
+ This program is only intended to be run 
+ as tutor from other programs
+
+*********************************************************
+
+Type "run" when you have specified the dummy parameters.
+.page
+Programmer:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+
+
+.level1
+
+.var  GECALDIR
+Directories with 
+geom. Calib. files	
+
+.var  GECALDAT	
+Creation date of the 
+geom. Calib. files
+
+.var  BSPFILE
+Trajectories, SP-kernels
+
+.var  SUNFILE
+Ephemeris of Sun and planets
+
+.var  BCFILE
+Attitude, C-kernels
+
+.var  TSCFILE
+Clock, SCLK-kernels
+
+.var  TIFILE
+Instrument data, I-kernel
+
+.var  TPCFILE
+Planetary constants, PC-kernels
+
+.var  TLSFILE
+Leapseconds, LS-kernel
+
+
+
+.level2
+
+.var  GECALDIR
+Directories with geom. Calib. files
+
+Default Logicals/Environments :
+
+GEOCAL_DIR -   	Directory with twoa complete sets of 
+		9 geometric calibration files
+
+.var  GECALDAT	
+Creation date of the geometric calibration files
+
+.var  BSPFILE
+Trajectories data, SP-kernels
+
+.var  SUNFILE
+Ephemeris data of the Sun and planets
+
+.var  BCFILE
+Attitude data, C-kernels
+
+.var  TSCFILE
+Clock, SCLK-kernels
+
+.var  TIFILE
+Instrument data, I-kernel
+
+.var  TPCFILE
+Planetary constants, PC-kernels
+
+.var  TLSFILE
+Leapseconds, LS-kernel
+
+
+.end

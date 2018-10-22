@@ -1,0 +1,42 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+write "  "
+write " The Test Data are handled for both VMS and UNIX in the PDF. "
+write " At present, (May 1994) in order for UNIX to run the program, "
+write " the data files MUST be copied to the LOCAL directory where the "
+write " program resides. "
+write "                                  OLD       NEW (VMS or UNIX execution)"
+write "  SITOD1:[TEST_DATA.IMAGES.VIKING]218S01.IMG ==> 218s01.img "
+write "  SITOD1:[TEST_DATA.IMAGES.VIKING]218S02.IMG ==> 218s02.img "
+write "  "
+write " This UNIX restriction on the data will be changed eventually. "
+write " For ease of use, VMS will also get the Test Data from the LOCAL "
+write " directory "
+write "  "
+
+write " TEST CAMERA S/N 7"
+write " LIST THE AREA OF A BLEMISH BEFORE REMOVAL"
+list 218s01.img SL=325 SS=530 NL=15 NS=15
+write " REMOVE BLEMISHES"
+blemvorb 218s01.img a
+write "LIST THE REMOVED AREA"
+list a SL=325 SS=530 NL=15 NS=15
+write " USE THE SIZE PARAMETERS"
+blemvorb 218s01.img b SL=325 SS=530 NL=15 NS=15
+list b
+write "OVERRIDE THE CAMERA SERIAL NUMBER AND SPECIFY AN AREA"
+blemvorb 218s01.img c SN=4 AREA=(327,533,8,8)
+list c SIZE=(325,530,15,15)
+write " TEST CAMERA S/N 4"
+write " LIST THE AREA OF A BLEMISH BEFORE REMOVAL"
+list 218s02.img SL=975 SS=475 NL=15 NS=15
+write " REMOVE BLEMISHES"
+blemvorb 218s02.img d
+write "LIST THE REMOVED AREA"
+list d SL=975 SS=475 NL=15 NS=15
+end-proc

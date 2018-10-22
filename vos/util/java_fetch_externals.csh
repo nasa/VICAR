@@ -298,20 +298,61 @@ endif
 
 # JOGL Java Bindings for OpenGL
 if ($?J2_JOGL != 0) then
-  cp $J2_JOGL/lib/jogl.jar $V2HTML/jars/
-  cp $J2_JOGL/lib/gluegen-rt.jar $V2HTML/jars/
-# we need to copy native libs to all platforms' dirs at once, regardless what machine we run the process on.
+  if ($VICCPU == "x86-linux") then
+   cp $J2_JOGL/x86-linux/lib/jogl.jar $V2HTML/jars/
+   cp $J2_JOGL/x86-linux/lib/gluegen-rt.jar $V2HTML/jars/
+  endif
+#
+  if ($VICCPU == "x86-64-linx") then
+   cp $J2_JOGL/x86-64-linx/lib/jogl.jar $V2HTML/jars/
+   cp $J2_JOGL/x86-64-linx/lib/gluegen-rt.jar $V2HTML/jars/
+  endif
+#
+  if ($VICCPU == "x86-macosx") then
+   cp $J2_JOGL/x86-macosx/lib/jogl.jar $V2HTML/jars/
+   cp $J2_JOGL/x86-macosx/lib/gluegen-rt.jar $V2HTML/jars/
+  endif
+
+  if ($VICCPU == "mac64-osx") then
+   cp $J2_JOGL/mac64-osx/lib/jogl.jar $V2HTML/jars/
+   cp $J2_JOGL/mac64-osx/lib/gluegen-rt.jar $V2HTML/jars/
+  endif
+#
+  if ($VICCPU == "sun-solr") then
+   cp $J2_JOGL/sun-solr/lib/jogl.jar $V2HTML/jars/
+   cp $J2_JOGL/sun-solr/lib/gluegen-rt.jar $V2HTML/jars/
+  endif
+#
+## we need to copy native libs to all platforms' dirs at once, regardless what machine we run the process on.
 # So make sure that necessary dirs exist, if not create them.
-  mkdir -m go-w -p $V2HTML/lib/sun-solr/
   mkdir -m go-w -p $V2HTML/lib/x86-linux/
+  mkdir -m go-w -p $V2HTML/lib/x86-64-linx/
+  mkdir -m go-w -p $V2HTML/lib/x86-macosx/
+  mkdir -m go-w -p $V2HTML/lib/mac64-osx/
+  mkdir -m go-w -p $V2HTML/lib/sun-solr/
   cp $J2_JOGL/x86-linux/lib/libjogl.so $V2HTML/lib/x86-linux/
   cp $J2_JOGL/x86-linux/lib/libjogl_awt.so $V2HTML/lib/x86-linux/
   cp $J2_JOGL/x86-linux/lib/libjogl_cg.so $V2HTML/lib/x86-linux/
   cp $J2_JOGL/x86-linux/lib/libgluegen-rt.so $V2HTML/lib/x86-linux/
-  cp $J2_JOGL/sun-solr/lib/libjogl.so $V2HTML/lib/sun-solr/
-  cp $J2_JOGL/sun-solr/lib/libjogl_awt.so $V2HTML/lib/sun-solr/
+  cp $J2_JOGL/x86-64-linx/lib/libjogl.so $V2HTML/lib/x86-64-linx/
+  cp $J2_JOGL/x86-64-linx/lib/libjogl_awt.so $V2HTML/lib/x86-64-linx/
+  cp $J2_JOGL/x86-64-linx/lib/libjogl_cg.so $V2HTML/lib/x86-64-linx/
+  cp $J2_JOGL/x86-64-linx/lib/libgluegen-rt.so $V2HTML/lib/x86-64-linx/
+  cp $J2_JOGL/x86-macosx/lib/libgluegen-rt.jnilib $V2HTML/lib/x86-macosx/
+  cp $J2_JOGL/x86-macosx/lib/libjogl_awt.jnilib  $V2HTML/lib/x86-macosx/
+  cp $J2_JOGL/x86-macosx/lib/libjogl_cg.jnilib $V2HTML/lib/x86-macosx/
+  cp $J2_JOGL/x86-macosx/lib/libjogl.jnilib $V2HTML/lib/x86-macosx/ 
+  cp $J2_JOGL/mac64-osx/lib/libgluegen-rt.jnilib $V2HTML/lib/mac64-osx/
+  cp $J2_JOGL/mac64-osx/lib/libjogl_awt.jnilib  $V2HTML/lib/mac64-osx/
+  cp $J2_JOGL/mac64-osx/lib/libjogl_cg.jnilib $V2HTML/lib/mac64-osx/
+  cp $J2_JOGL/mac64-osx/lib/libjogl.jnilib $V2HTML/lib/mac64-osx/
+  cp $J2_JOGL/sun-solr/lib/gluegen-rt.jar $V2HTML/lib/sun-solr/
+  cp $J2_JOGL/sun-solr/lib/jogl.jar  $V2HTML/lib/sun-solr/
   cp $J2_JOGL/sun-solr/lib/libgluegen-rt.so $V2HTML/lib/sun-solr/
+  cp $J2_JOGL/sun-solr/lib/libjogl_awt.so $V2HTML/lib/sun-solr/
+  cp $J2_JOGL/sun-solr/lib/libjogl.so $V2HTML/lib/sun-solr/
 endif
+
 # JMonkeyEngine3
 if ($?J2_JMONKEYENGINE != 0) then
   cp $J2_JMONKEYENGINE/lib/jME3-core.jar $V2HTML/jars/
@@ -319,6 +360,10 @@ if ($?J2_JMONKEYENGINE != 0) then
   cp $J2_JMONKEYENGINE/lib/jME3-lwjgl-natives.jar  $V2HTML/jars/
   cp $J2_JMONKEYENGINE/lib/jME3-lwjgl.jar  $V2HTML/jars/
   cp $J2_JMONKEYENGINE/lib/lwjgl.jar $V2HTML/jars/  
+endif
+# JAMA (JAva MAtrix)
+if ($?J2_JAMA != 0) then
+  cp $J2_JAMA/Jama-1.0.3.jar $V2HTML/jars/
 endif
 # Apache Derby stuff
 # This jar is built for java 1.6.  
@@ -354,18 +399,15 @@ if ($?J2_JAI != 0) then
    cp $J2_JAI/jars/jai_codec.jar $V2HTML/jars/
    cp $J2_JAI/jars/jai_core.jar $V2HTML/jars/
    cp $J2_JAI/jars/mlibwrapper_jai.jar $V2HTML/jars/
-#   cp $J2_JAI/sun-solr/lib/jai_codec.jar $V2HTML/jars/
-#   cp $J2_JAI/sun-solr/lib/jai_core.jar $V2HTML/jars/
-#   cp $J2_JAI/sun-solr/lib/mlibwrapper_jai.jar $V2HTML/jars/
 # we need to copy native libs to all platforms' dirs at once, regardless what machine we run the process
 # on.
 # So make sure that necessary dirs exist, if not create them.
-  mkdir -m go-w -p $V2HTML/lib/sun-solr/
   mkdir -m go-w -p $V2HTML/lib/x86-linux/
   mkdir -m go-w -p $V2HTML/lib/x86-64-linx/
-   cp $J2_JAI/sun-solr/lib/libmlib_jai.so $V2HTML/lib/sun-solr/
-   cp $J2_JAI/sun-solr/lib/libmlib_jai_vis.so $V2HTML/lib/sun-solr/
-   cp $J2_JAI/sun-solr/lib/libmlib_jai_vis2.so $V2HTML/lib/sun-solr/
+  mkdir -m go-w -p $V2HTML/lib/x86-macosx/
+  mkdir -m go-w -p $V2HTML/lib/mac64-osx/
+  mkdir -m go-w -p $V2HTML/lib/sun-solr/
+
    cp $J2_JAI/x86-linux/lib/libmlib_jai.so $V2HTML/lib/x86-linux/
    cp $J2_JAI/x86-64-linx/lib/libmlib_jai.so $V2HTML/lib/x86-64-linx/
 endif
@@ -374,30 +416,28 @@ if ($?J2_JAI_IIO != 0) then
    cp $J2_JAI_IIO/jars/clibwrapper_jiio.jar $V2HTML/jars/
    cp $J2_JAI_IIO/jars/jai_imageio.jar $V2HTML/jars/
 
-#   cp $J2_JAI_IIO/sun-solr/lib/clibwrapper_jiio.jar $V2HTML/jars/
-#   cp $J2_JAI_IIO/sun-solr/lib/jai_imageio.jar $V2HTML/jars/
 # we need to copy native libs to all platforms' dirs at once, regardless what machine we run the process
 # on.
 # So make sure that necessary dirs exist, if not create them.
-  mkdir -m go-w -p $V2HTML/lib/sun-solr/
   mkdir -m go-w -p $V2HTML/lib/x86-linux/
   mkdir -m go-w -p $V2HTML/lib/x86-64-linx/
-   cp $J2_JAI_IIO/sun-solr/lib/libclib_jiio.so $V2HTML/lib/sun-solr/
-   cp $J2_JAI_IIO/sun-solr/lib/libclib_jiio_vis.so $V2HTML/lib/sun-solr/
-   cp $J2_JAI_IIO/sun-solr/lib/libclib_jiio_vis2.so $V2HTML/lib/sun-solr/
+  mkdir -m go-w -p $V2HTML/lib/x86-macosx/
+  mkdir -m go-w -p $V2HTML/lib/mac64-osx/
+  mkdir -m go-w -p $V2HTML/lib/sun-solr/
+
    cp $J2_JAI_IIO/x86-linux/lib/libclib_jiio.so $V2HTML/lib/x86-linux/
    cp $J2_JAI_IIO/x86-64-linx/lib/libclib_jiio.so $V2HTML/lib/x86-64-linx/
 endif
 
 # TREEVOTEE
-if ($?J2_TREEVOTEE != 0) then
-  cp $J2_TREEVOTEE/treevotee-0.9.9p1ee.jar $V2HTML/jars
-endif
+#if ($?J2_TREEVOTEE != 0) then
+#  cp $J2_TREEVOTEE/treevotee-0.9.9p1ee.jar $V2HTML/jars
+#endif
 
 # JUNAMI
-if ($?J2_JUNAMI != 0) then
-  cp $J2_JUNAMI/junami-0.7.0p1.jar $V2HTML/jars
-endif
+#if ($?J2_JUNAMI != 0) then
+#  cp $J2_JUNAMI/junami-0.7.0p1.jar $V2HTML/jars
+#endif
 
 # JSON_SIMPLE
 if ($?J2_JSON_SIMPLE != 0) then
@@ -450,14 +490,14 @@ if ($?J2_LUCENE != 0) then
 endif
 
 # HTTPCOMPONENTS-CORE
-if ($?J2_HTTPCORE != 0) then
-  cp $J2_HTTPCORE/httpcore-4.1.4.jar $V2HTML/jars      
-endif
+#if ($?J2_HTTPCORE != 0) then
+#  cp $J2_HTTPCORE/httpcore-4.1.4.jar $V2HTML/jars      
+#endif
 
 # HTTPCLIENT
-if ($?J2_HTTPCLIENT != 0) then
-  cp $J2_HTTPCLIENT/httpclient-4.1.3.jar $V2HTML/jars 
-endif
+#if ($?J2_HTTPCLIENT != 0) then
+#  cp $J2_HTTPCLIENT/httpclient-4.1.3.jar $V2HTML/jars 
+#endif
 
 # GANYMED_SSH2
 if ($?J2_GANYMED_SSH2 != 0) then
@@ -509,9 +549,15 @@ endif
 
 # JSON
 if ($?J2_JSON != 0) then
-    cp $J2_JSON/json_simple-1.1.jar $V2HTML/jars
+#    cp $J2_JSON/json_simple-1.1.jar $V2HTML/jars
+   cp $J2_JSON/json-20140107.jar $V2HTML/jars
 endif
 
+# WIS 
+ if ($?J2_WIS != 0) then
+   cp $J2_WIS/wis-0.3.2r2.jar $V2HTML/jars
+endif
+   
 # COMMONS_VFS
 if ($?J2_COMMONS_VFS != 0) then
     cp $J2_COMMONS_VFS/commons-vfs2-2.0.jar $V2HTML/jars
@@ -519,8 +565,18 @@ endif
 
 # HTTPCOMP_CLIENT
 if ($?J2_HTTPCOMP_CLIENT != 0) then
-    cp $J2_HTTPCOMP_CLIENT/httpclient-cache-4.2.5.jar $V2HTML/jars
-    cp $J2_HTTPCOMP_CLIENT/httpmime-4.2.5.jar $V2HTML/jars
+#    cp $J2_HTTPCOMP_CLIENT/httpclient-cache-4.2.5.jar $V2HTML/jars
+#    cp $J2_HTTPCOMP_CLIENT/httpmime-4.2.5.jar $V2HTML/jars
+    cp $J2_HTTPCOMP_CLIENT/commons-codec-1.9.jar $V2HTML/jars
+    cp $J2_HTTPCOMP_CLIENT/commons-logging-1.2.jar $V2HTML/jars  
+    cp $J2_HTTPCOMP_CLIENT/fluent-hc-4.5.3.jar $V2HTML/jars
+    cp $J2_HTTPCOMP_CLIENT/httpclient-4.5.3.jar $V2HTML/jars
+    cp $J2_HTTPCOMP_CLIENT/httpclient-cache-4.5.3.jar $V2HTML/jars
+    cp $J2_HTTPCOMP_CLIENT/httpclient-win-4.5.3.jar $V2HTML/jars
+    cp $J2_HTTPCOMP_CLIENT/httpcore-4.4.6.jar $V2HTML/jars
+    cp $J2_HTTPCOMP_CLIENT/httpmime-4.5.3.jar $V2HTML/jars
+    cp $J2_HTTPCOMP_CLIENT/jna-4.1.0.jar $V2HTML/jars
+    cp $J2_HTTPCOMP_CLIENT/jna-platform-4.1.0.jar $V2HTML/jars
 endif
 
 # JACKRABBIT WEBDAV
@@ -593,7 +649,7 @@ endif
 # SXN
 #
 if ($?J2_SXN != 0) then
-  cp $J2_SXN/sxn-0.9.2.jar $V2HTML/jars
+  cp $J2_SXN/sxn-0.9.3p1.jar $V2HTML/jars
 endif
 
 # COMMONS_BEANUTILS
@@ -662,6 +718,75 @@ if ($?J2_JAI_EXT != 0) then
   cp $J2_JAI_EXT/jt-warp-1.0.3.jar $V2HTML/jars
   cp $J2_JAI_EXT/jt-zonal-1.0.3.jar $V2HTML/jars
   cp $J2_JAI_EXT/junit-4.8.1.jar $V2HTML/jars
+endif
+
+# COMMONS-JCS 
+ if ($?J2_COMMONS_JCS != 0) then
+   cp $J2_COMMONS_JCS/commons-jcs-core/commons-jcs-core-2.1.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-core/commons-jcs-core-2.1-sources.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-core/commons-jcs-core-2.1-javadoc.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-jcache/commons-jcs-jcache-2.1-cdi.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-jcache/commons-jcs-jcache-2.1.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-jcache/commons-jcs-jcache-2.1-javadoc.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-jcache/commons-jcs-jcache-2.1-nocdi.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-jcache/commons-jcs-jcache-2.1-sources.jar $V2HTML/jars 
+   cp $J2_COMMONS_JCS/commons-jcs-jcache-extras/commons-jcs-jcache-extras-2.1.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-jcache-extras/commons-jcs-jcache-extras-2.1-javadoc.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-jcache-extras/commons-jcs-jcache-extras-2.1-sources.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-jcache-openjpa/commons-jcs-jcache-openjpa-2.1.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-jcache-openjpa/commons-jcs-jcache-openjpa-2.1-javadoc.jar $V2HTML/jars
+   cp $J2_COMMONS_JCS/commons-jcs-jcache-openjpa/commons-jcs-jcache-openjpa-2.1-sources.jar $V2HTML/jars
+ endif
+
+# PNGENCODER
+ if ($?J2_PNGENCODER != 0) then
+   cp $J2_PNGENCODER/com.objectplanet.image.PngEncoder.jar $V2HTML/jars
+ endif
+
+# AWS_SDK
+if ($?J2_AWS_SDK != 0) then
+   cp $J2_AWS_SDK/lib/aws-java-sdk-1.11.210.jar $V2HTML/jars
+endif
+
+# JACKSON_CORE
+if ($?J2_JACKSON_CORE != 0) then
+   cp $J2_JACKSON_CORE/jackson-core-2.6.7.jar $V2HTML/jars
+endif
+
+# JACKSON_ANNOTATIONS
+if ($?J2_JACKSON_ANNOTATIONS != 0) then
+   cp $J2_JACKSON_ANNOTATIONS/jackson-annotations-2.6.0.jar $V2HTML/jars
+endif
+
+# JACKSON_DATABIND
+if ($?J2_JACKSON_DATABIND != 0) then
+   cp $J2_JACKSON_DATABIND/jackson-databind-2.6.7.1.jar $V2HTML/jars
+endif
+
+# JACKSON_DATAFORMAT_CBOR
+if ($?J2_JACKSON_DATAFORMAT_CBOR != 0) then
+   cp $J2_JACKSON_DATAFORMAT_CBOR/jackson-dataformat-cbor-2.6.7.jar $V2HTML/jars
+endif
+
+# JODA_TIME
+if ($?J2_JODA_TIME != 0) then
+   cp $J2_JODA_TIME/joda-time-2.8.1.jar $V2HTML/jars
+endif
+
+# HTTPCOMP_FOR_AWS  
+if ($?J2_HTTPCOMP_FOR_AWS != 0) then
+    cp $J2_HTTPCOMP_CLIENT/httpclient-4.5.3.jar $V2HTML/jars
+    cp $J2_HTTPCOMP_CLIENT/httpcore-4.4.6.jar   $V2HTML/jars
+endif
+
+# MAVEN_ANNOTATIONS
+if ($?J2_MAVEN_ANNOTATIONS != 0) then
+    cp $J2_MAVEN_ANNOTATIONS/annotations-2.0.1.jar $V2HTML/jars
+endif
+
+# MAVEN_REFLECTIONS
+if ($?J2_MAVEN_REFLECTIONS != 0) then
+    cp $J2_MAVEN_REFLECTIONS/reflections-0.9.10.jar $V2HTML/jars
 endif
 
 chmod u+w $V2HTML/jars/*

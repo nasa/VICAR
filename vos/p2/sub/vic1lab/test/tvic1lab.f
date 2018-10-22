@@ -1,0 +1,26 @@
+      INCLUDE 'VICMAIN_FOR'
+      SUBROUTINE MAIN44
+      BYTE BUF(1440)
+      CHARACTER*1440 CBUF
+      CHARACTER*72 LINE
+      INTEGER UNIT,STATUS,NLABS,I
+
+      CALL XVUNIT(UNIT,'INP',1,STATUS, ' ')
+      CALL XVOPEN(UNIT,STATUS,'OPEN_ACT','SA','IO_ACT','SA', ' ')
+
+      CALL XVMESSAGE('Labels from input by BYTE buffer:', ' ')
+      CALL VIC1LABX(UNIT,STATUS,NLABS,BUF,20)
+      DO I = 1,NLABS
+         CALL MVLC(BUF((I-1)*72+1), LINE, 72)
+         CALL XVMESSAGE(LINE, ' ')
+      ENDDO
+
+      CALL XVMESSAGE(' ',' ')
+      CALL XVMESSAGE('Labels from input by CHAR*n buffer:', ' ')
+      CALL VIC1LAB(UNIT,STATUS,NLABS,CBUF,20)
+      DO I = 1,NLABS
+         CALL XVMESSAGE(CBUF((I-1)*72+1:I*72), ' ')
+      ENDDO
+
+      RETURN
+      END

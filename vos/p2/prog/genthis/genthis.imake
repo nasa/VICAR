@@ -1,0 +1,24 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM genthis
+
+   To Create the build file give the command:
+
+		$ vimake genthis			(VMS)
+   or
+		% vimake genthis			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	genthis
+#define R2LIB
+
+#define MODULE_LIST genthis.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE

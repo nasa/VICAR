@@ -1,0 +1,12 @@
+#define  PROGRAM   areaiso
+
+#define MODULE_LIST areaiso.c ludcmp.c newt.c spline.c util.c
+#define INCLUDE_LIST util.h
+#define MAIN_LANG_C
+#define R2LIB 
+
+#define USES_C
+
+#define LIB_RTL
+#define LIB_P2SUB
+#define LIB_TAE

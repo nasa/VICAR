@@ -1,0 +1,55 @@
+1 LIGHTING
+
+Calculate the phase, incidence, and emission angles for a specific latitude,
+longitude.
+
+FORTRAN calling sequence:
+
+      CALL LIGHTING(SBUF,LAT,LON,phase,incidence,emission)
+
+where:
+
+      REAL*8 SBUF(200)  !Buffer returned by subroutine GETSPICE95
+      REAL*8 LAT        !Planetocentric latitude of surface pt (deg)
+      REAL*8 LON        !West-longitude of surface pt (deg)
+      REAL*8 PHASE,INCIDENCE,EMISSION	!Output lighting angels (deg)
+
+C calling sequence:
+
+      zlighting(sbuf,lat,lon,phase,incidence,emission);
+
+where:
+
+      double sbuf[100];  /* Buffer returned by subroutine GETSPICE95 */
+      double lat;        /* Planetocentric latitude of surface pt (deg) */
+      double lon;        /* West-longitude of surface pt (deg) */
+      double *phase,*incidence,*emission;  Output lighting angels (deg) */
+
+2 Operation
+
+Lighting uses an oblate spheroid model of the target body.  The equatorial
+and polar radii are extracted from SBUF.
+
+The latitude-longitude of the subsolar and subspacecraft points, and the
+distances from the target center to the sun and spacecraft are extracted from
+SBUF.  These values are sufficient to compute the following at the surface
+point defined by (LAT,LON):
+
+   S = unit vector from surface point to Sun
+   C = unit vector from surface point to spacecraft
+   N = unit vector normal to surface
+
+Then:
+
+   PHASE = ARCCOS(S o C)
+   INCIDENCE = ARCCOS(N o S)
+   EMISSION = ARCCOS(N o C)
+
+where o is the dot product.  All computations are performed in double precision.
+
+2 History
+
+  Original Programmer: Gary Yagi, November 1, 1996
+  Current Cognizant Programmer: Gary Yagi
+  Source Language: F
+  Revision history: New

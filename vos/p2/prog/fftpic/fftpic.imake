@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM fftpic
+
+   To Create the build file give the command:
+
+		$ vimake fftpic			(VMS)
+   or
+		% vimake fftpic			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	fftpic
+#define R2LIB
+
+#define MODULE_LIST fftpic.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/*#define DEBUG	/* remove on delivery */
+/************************* End of Imake file ***************************/

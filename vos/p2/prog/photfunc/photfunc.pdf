@@ -1,0 +1,1464 @@
+process help=*
+PARM INP          TYPE=STRING       COUNT=(1:4)
+PARM OUT          TYPE=STRING       COUNT=0:1      DEFAULT=--
+PARM SIZE         TYPE=INTEGER      COUNT=4        DEFAULT=(1,1,0,0)
+PARM SL           TYPE=INTEGER                     DEFAULT=1
+PARM SS           TYPE=INTEGER                     DEFAULT=1
+PARM NL           TYPE=INTEGER                     DEFAULT=0
+PARM NS           TYPE=INTEGER                     DEFAULT=0
+PARM MINNAERT     TYPE=REAL                        DEFAULT=0.5
+PARM HAPKE        TYPE=REAL COUNT=(0,4:6)          DEFAULT=--
+PARM COOK         TYPE=REAL COUNT=0:1              DEFAULT=--
+PARM VEVERKA      TYPE=REAL COUNT=(0,4)            DEFAULT=--
+PARM BURATTI      TYPE=REAL COUNT=(0,6)            DEFAULT=--
+PARM MOSHER       TYPE=REAL COUNT=(0,6)            DEFAULT=--
+PARM IRVINE       TYPE=REAL COUNT=(0,3)            DEFAULT=--
+PARM NOINTERP     KEYWORD   COUNT=0:1  VALID=NOINTERP	DEFAULT=--
+PARM INCR         TYPE=INTEGER                     DEFAULT=10
+PARM LINC         TYPE=INTEGER                     DEFAULT=10
+PARM SINC         TYPE=INTEGER                     DEFAULT=10
+PARM LIMB     TYPE=REAL                            DEFAULT=0.
+PARM TERMINAT TYPE=REAL                            DEFAULT=0.
+PARM MULTIPLY TYPE=REAL                            DEFAULT=1.
+PARM MAXCOR   TYPE=REAL COUNT=0:1 VALID=0.1:99999  DEFAULT=5.
+PARM MAXDN    TYPE=INTEGER                         DEFAULT=255
+PARM CLASS    TYPE=INTEGER   VALID=(-255:255)      DEFAULT=-255
+PARM TARGET     TYPE=(STRING,12) COUNT=0:1                      DEFAULT=--
+PARM RADII    TYPE=REAL COUNT=3  VALID=(1.:99999.) DEFAULT=(1.0,1.0,1.0)
+PARM FARENC       KEYWORD   COUNT=0:1 VALID=FARENC DEFAULT=-- 
+PARM NORANGLE     TYPE=REAL COUNT=0:1		   DEFAULT=--
+PARM SSCPT        TYPE=REAL COUNT=2          DEFAULT=(0.,0.)
+PARM OSSCPT       TYPE=REAL COUNT=2          DEFAULT=(0.,0.)
+PARM ISSCPT       TYPE=REAL COUNT=2          DEFAULT=(0.,0.)
+PARM TIEPOINT     TYPE=REAL COUNT=1:20       DEFAULT=0.
+PARM MISSION      KEYWORD   COUNT=0:1              DEFAULT=-- +
+  VALID=(VGR-1,VGR-2,GLL,CASSI,WFPC1,WFPC2,SIPS,QUEST,VIKOR,MAR-9,MAR10)
+PARM NOSPICE       KEYWORD   COUNT=0:1 VALID=NOSPICE DEFAULT=--
+PARM OBJECT       KEYWORD  COUNT=0:1 VALID=OBJECT  DEFAULT=-- 
+PARM IMAGE        KEYWORD  COUNT=0:1 VALID=IMAGE   DEFAULT=-- 
+PARM DISTOR       KEYWORD  COUNT=0:1 VALID=DISTOR  DEFAULT=-- 
+PARM CAMERA       TYPE=INTEGER                     DEFAULT=0
+PARM FOCAL        TYPE=REAL COUNT=0:1 VALID=(1.:999999.) DEFAULT=--
+PARM FOCL         TYPE=REAL COUNT=0:1 VALID=(1.:999999.) DEFAULT=--
+PARM LAXIS        TYPE=REAL COUNT=0:1 VALID=(1.:999999.) DEFAULT=--
+PARM SAXIS        TYPE=REAL COUNT=0:1 VALID=(1.:999999.) DEFAULT=--
+PARM PSCALE       TYPE=REAL COUNT=0:1 VALID=(1.:999999.) DEFAULT=--
+PARM OMMATRIX     TYPE=REAL      COUNT=9  DEFAULT=(0.,0.,0.,0.,0.,0.,0.,0.,0.)
+PARM RSVECTOR     TYPE=REAL      COUNT=3           DEFAULT=(0.,0.,0.)
+PARM RMAGNITU TYPE=REAL                            DEFAULT=0.0
+PARM SLATITUD TYPE=REAL                            DEFAULT=0.0
+PARM SLONGITU TYPE=REAL                            DEFAULT=0.0
+PARM SPACE    TYPE=REAL      COUNT=3               DEFAULT=(0.,0.,0.)
+PARM SOLAR    TYPE=REAL      COUNT=2               DEFAULT=(0.,0.)
+PARM PROJECT      KEYWORD   COUNT=0:1              DEFAULT=-- +
+   VALID=(STEREOGR,LAMBERT,MERCATOR,ORTHOGRA,POLE,CYLINDRI,RECTANGU,LATLON)
+PARM LINE         TYPE=REAL COUNT=0:1              DEFAULT=0.
+PARM SAMPLE       TYPE=REAL COUNT=0:1              DEFAULT=0.
+PARM LATITUDE     TYPE=REAL COUNT=0:1              DEFAULT=0.
+PARM LONGITUD     TYPE=REAL COUNT=0:1              DEFAULT=0.
+PARM SCALE        TYPE=REAL COUNT=0:1              DEFAULT=0.
+PARM NORTH        TYPE=REAL COUNT=0:1              DEFAULT=0.
+PARM PAR1         TYPE=REAL COUNT=0:1              DEFAULT=0.
+PARM PAR2         TYPE=REAL COUNT=0:1              DEFAULT=0.
+PARM PRINT    KEYWORD COUNT=0:1 VALID=PRINT DEFAULT=--
+PARM ALL      KEYWORD   COUNT=0:1 VALID=ALL        DEFAULT=-- 
+PARM NOCORREC KEYWORD   COUNT=0:1 VALID=NOCORREC   DEFAULT=-- 
+PARM SCET       TYPE=INTEGER  COUNT=0:6                         DEFAULT=--
+PARM SPICEMODE  TYPE=KEYWORD     COUNT=0:1 VALID=(LOCAL,REMOTE) DEFAULT=--
+PARM CKNAME     TYPE=(STRING,4)  COUNT=0:1 +
+VALID=("FARE ", "NEAR ","NAV  ","NAV2 ","DAVI ","NAIF ")	DEFAULT=--
+PARM CKID       TYPE=(STRING,4)  COUNT=1                        DEFAULT=NONE
+PARM USERID     TYPE=(STRING,3)  COUNT=0:1                      DEFAULT=--
+PARM GROUPID    TYPE=(STRING,3)  COUNT=0:1                      DEFAULT=--
+PARM INSTITUTE  TYPE=(STRING,4)  COUNT=1                        DEFAULT=NONE
+PARM CDATE      TYPE=(STRING,12) COUNT=1                DEFAULT=000000000000
+PARM REQNUM     TYPE=(STRING,4)  COUNT=1                        DEFAULT=NONE
+PARM PURPOSE    TYPE=(STRING,4)  COUNT=1                        DEFAULT=NONE
+PARM PROGRAM    TYPE=(STRING,6)  COUNT=1                        DEFAULT=*NONE*
+PARM SPKID      TYPE=(STRING,4)  COUNT=1                        DEFAULT=NONE
+END-PROC
+
+.TITLE
+VICAR2 program PHOTFUNC
+.HELP
+PURPOSE:
+
+PHOTFUNC corrects an image for spatial variations in apparent brightness caused
+by illumination and viewing geometry.  This variation, known as the photometric
+function, is removed to enable comparison of albedo differences on the target
+surface.  In addition, the brightness correction enables the generation of
+mosaics free from brightness differences along the edges of mosaic elements.
+
+EXECUTION:
+
+    PHOTFUNC INP=(INIMG[,GEOMA][,GRID][,CMAP]) [OUT=OUTIMG]  user-parameters...
+
+  where: INIMG and OUTIMG are the input and output images,
+         GEOMA is a geometric correction parameter file,
+         GRID is a PHOTFIT grid file,
+         CMAP is a classification map (see STATS, FASTCLAS),
+	 [] brackets denote optional values.
+
+Note: The grid input is currently deactivated (PHOTFIT is obsolete.
+      See PHOTFIT2 and PHOTOM)
+
+.page
+OPERATION:  PHOTFUNC can be used on virtually any image of a planet or
+satellite, provided that the projection and lighting geometry are known.
+The image may be a raw flight image (image space), one that has been corrected
+for geometric distortions (object space), or one that has been map projected.
+The image may be arbitrarily large and of any data format.
+
+The projection and lighting geometry is normally obtained by via the SPICE
+server or from the image label.  Alternatively, these may be provided via
+parameters.
+
+Because the computations can be fairly expensive, the function is computed
+exactly for a grid of points spaced m samples and n lines apart (see SINC,
+LINC, and INCR parameters).  For intermediate points within the grid, the
+function is computed using bilinear interpolation.  Note that with increasingly
+faster computers, the need for the interpolation is rapidly diminishing.  Use
+the 'NOINTERP keyword to force exact computations at each pixel.
+
+PHOTFUNC can also operate in a second mode, in which no photometric 
+correction is performed, but information relating to the illumination 
+geometry and photometry is calculated and printed (see NOCORREC and PRINT
+parameters).
+
+Further information is given under the following headings below:
+
+  THE PHOTOMETRIC FUNCTION
+  PROJECTION AND LIGHTING GEOMETRY
+  GEOMETRIC DISTORTIONS
+  COMPUTING THE OM MATRIX
+  COMPUTING THE LIGHTING ANGLES
+  INTERPOLATION ALGORITHM
+  CLASSIFICATION MAP OPTION
+  EXAMPLES
+
+.page
+THE PHOTOMETRIC FUNCTION:  A model of the intrinsic reflectivity of a surface
+is called a Photometric Function F:
+		
+	F(I,E,G,w,...) = B/J
+where:
+	B	is the observed reflected surface brightness,
+	J	is the brightness incident on the surface,
+	I	is the angle of incidence (i.e., of the sun),
+	E	is the angle of emission (i.e., of the observer),
+	G	is the phase, 
+	w	is the albedo of surface particles, and
+	...	denotes any other quantities which may contribute to the 
+                functional relationship of B/J.
+(See also HELP PHOTFIT2.)
+
+PHOTFUNC uses such a model to correct the observed brightness to the
+normalized brightness, B0, which is the brightness that would be 
+observed with normal (90-degree) illumination and viewing angle
+(I = E = G = 0).  Thus:
+
+	B0/J = F(0,0,0,w,...)
+
+and the correction factor f = B/B0 can be computed by dividing the above 
+equations.  Then the apparent brightness B in the input picture is divided
+by f in order to obtain an estimate of the normalized brightness B0 in the 
+output picture. 
+
+Currently, PHOTFUNC supports eight models for F:
+  the Minnaert function:  F=B0*(COS(I)**k*COS(E)**(k-1),
+    (the Lambert function is equivalent to Minnaert for k=1)
+  three Hapke functions (1978 version, Cook modification, and 1984 version),
+  the Veverka function, and
+  the Mosher function (a variant of the Veverka function).
+  the Buratti-Veverka function.
+  the Irvine function.
+See parameters MINNAERT, HAPKE, COOK, VEVERKA, BURATTI, MOSHER, and IRVINE.
+
+Since the program actually only corrects by the normalized factor f, constant
+factors, such as B0 in the first model, drop out and they are not needed
+as input to the program.  (Thus Minnaert needs only 1 parameter in PHOTFUNC.)
+
+When the gain introduced by the function is greater than a constant (see
+MAXCOR parameter), no correction is applied.  All points which are uncorrected
+for any reason (e.g. points off the target) are set to ZERO.
+
+Planets also have a systematic brightness variation with solar phase
+angle. Planetary science literature contains the magnitude phase
+coefficients for satellites and planets. Burns (1977) "Planetary
+Satellites" is one good source. If the geometric effects are removed,
+the planet must still be brightened up by a factor obtained from the
+magnitude phase coefficient depending on the phase angle. CAUTION:
+The coefficients quoted in the literature usually refer to the
+integrated disk of the planet. Care must be taken to account for any
+phase defect (if the terminator is in the picture) which effectively
+reduces the planet's area. By dividing the DNs in the picture by a
+factor of (1+COS(G))/2 where G is the phase angle, the phase
+defect can be removed. 
+
+Also it may be necessary to determine the magnitude phase coefficient
+if the picture was taken at a phase angle not previously seen and/or
+different parts of the planet have different coefficients. The
+coefficient can change over a range of phase angles. Callisto is a
+good example. The leading hemisphere has a different coefficient than
+the trailing hemisphere. Callisto's coefficient also changes at about
+50 degrees phase. 
+
+.page
+PROJECTION AND LIGHTING GEOMETRY
+
+To remove the photometric function from an image, the projection and
+lighting geometry for the image must be known.  Under normal circumstances,
+this information is automatically retrieved from the image label or by
+accessing the SPICE server.  The following description is intended to help
+the user to provide any missing information via parameters.
+
+The projection and lighting information is used to:
+
+(1) relate each pixel in the image to a surface point on the target body
+(2) compute the incidence, emission, and phase angles of light reflected off
+    that surface point.
+
+Both of these problems require a model of the target body.  PHOTFUNC uses a
+tri-axial ellipsoid model defined by the three radii of the ellipsoid (See
+RADII parameter).
+
+The projection information required depends on whether the input image is a
+raw flight image or one that has been transformed to a standard map projection.
+
+For raw images, the following information is required (user parameters in
+parenthesis):
+
+  camera constants: focal length, pixel scale, line-samp coordinates of
+    optical axis intercept (FOCL, PSCALE, LAXIS, SAXIS)
+  geometric distortion parameters: see section on GEOMETRIC DISTORTIONS below.
+  spacecraft vector: lat-long coordinates of the spacecraft and it's distance
+    from the center of the target body (SLAT, SLON, RMAG, SPACE, RSVECTOR).
+  camera pointing direction: transformation matrix from (rotating) target-
+    centered coordinates to camera-centered coordinates (OMMATRIX).
+
+For map projected images, the projection geometry is defined by the following:
+
+  type of projection: e.g. orthographic, stereographic, mercator (PROJECT)
+  picture scale in pixels/km (SCALE)
+  special point line-sample (LINE,SAMPLE)
+  special point lat-long (LATITUDE,LONGITUD)
+  special parallels (PAR1,PAR2) for Lambert projection only
+
+The special point is different for each projection.  See program MAP3 for a
+description of the above parameters.
+
+The lighting geometry for the image is defined by:
+
+  spacecraft vector: same as above
+  solar vector: lat-long coordinates of the sun (SOLAR).
+
+The program first determines whether the image has been map projected by
+scanning for a map label (see programs MAP3, MAPTRANS).  The required projection
+geometry is normally provided in this map label.  However, the map label
+currently does not contain the lighting geometry (spacecraft and solar vectors).
+The program will attempt to retrieve these vectors from the SPICE server using
+the same strategy as for raw flight images (see immediately below).  The user
+may avoid SPICE access by supplying these vectors via the SPACE and SOLAR
+parameters.
+
+For raw flight images, PHOTFUNC will first scan the image label to determine
+the target name, spacecraft ID, camera ID, and Spacecraft-Event-Time (see
+parameters TARGET, MISSION, CAMERA, and SCET).  For a "supported" mission (see
+parameter MISSION), the camera constants and geometric distortion parameters
+are automatically retrieved from built-in tables (via a call to getcamcon).
+See also the section on GEOMETRIC DISTORTIONS below.
+
+If SPICE data is available for the mission (e.g. Voyager, Galileo, Cassini),
+the projection and lighting geometry is automatically retrieved from the SPICE
+server.  If not, that information can be supplied in the image label (see
+program PERSLAB) or via parameters.  If the OM matrix is not know, see the
+section on COMPUTING THE OM MATRIX below.
+
+.page
+GEOMETRIC DISTORTIONS
+
+If the input image is a flight image (i.e. not map projected), the program will
+check if it has already been corrected for geometric camera distortions (by
+scanning for the GEOMA keyword in the image label).  An uncorrected image is
+is said to be in "image space" while a corrected image is said to be in "object
+space" (see keywords DIST, IMAGE, OBJECT).  Note that "object space" is
+identical to the perspective projection output by program MAP3.
+
+If the image is uncorrected, a model of the geometric distortions must be
+available so that it can be accounted for in the projection geometry.  For CCD
+cameras (e.g. Galileo, Cassini), the geometric distortions are largely due to
+the radial distortions of the optics.  For vidicon cameras (e.g. Voyager and
+earlier missions) the distortions are defined by displacements in the reseau
+pattern embedded on the camera's face-plate.  For each "supported" mission,
+a nominal model of the geometric distortions is retrieved from built-in tables.
+For CCD cameras, this model is adequate.  For vidicon cameras, more accurate
+results may be obtained by locating the reseau in the image and inputing the
+resulting GEOMA parameters (see parameter INP and programs RESLOC and RESLOCVO).
+
+   resloc f1636832.fic (res,geo)
+   photfunc (f1636832.fic,geo) a.img HAPKE=(.5,.2,10.,.5,.2) target=IO
+
+A raw Voyager image containing geometric distortions is first input to program
+RESLOC to locate the reseau and compute geometric correction parameters (geo).
+These parameters are input to PHOTFUNC together with the image (the
+image must be first) and are used to account for the geometric distortions.
+
+   resloc f1636832.fic (res,geo)
+   farenc (f1636832.fic,geo) (c,p,g) target=IO
+   geoma (f1636832.fic,g) b.img
+   photfunc b.img a.img HAPKE=(.5,.2,10.,.5,.2) target=IO +
+     sscpt=(400.,400.)
+
+This is similar to the previous example, except that program FARENC is used to
+correct the camera pointing and output GEOMA parameters (g) which center the
+target in the image and correct for geometric distortion.  GEOMA is then used to
+create an object-space image.  The result is input into PHOTFUNC, which
+recognizes that the image is in object-space from the GEOMA keyword in the
+image label.  The SSCPT parameter is required to indicate that the target
+center has been translated to the center of the image by FARENC.  Note that
+if an object-space output is desired, then running GEOMA before PHOTFUNC is
+more effecient since PHOTFUNC runs faster if it does not need to account for
+geometric distortions.
+
+Currently, no nominal models are available for Space Telescope or SIPS.
+
+.page
+COMPUTING THE OM MATRIX
+
+If the OM matrix is not available, it may be computed via the (1) far-encounter
+or (2) tiepoints algorithms.  Both of these methods require that the remaining
+projection information be known.
+
+The far encounter algorithm is used in images in which the target limb is
+visible in the image.  VICAR programs FARENC or NAV is used to fit the
+limb and obtain the line-sample coordinates of the target center.  Parameters
+SSCPT, OSSCPT, or ISSCPT may be used to input these value to PHOTFUNC.  This
+algorithm also requires the north angle (orientation of the target's spin axis
+measured clockwise from up in the image).  See NORANGLE parameter.
+The program inputs these values into the far encounter algorithm (see VICAR
+subroutine MOMATI) to compute the OM matrix.
+
+The tiepoints algorithm is used in high-resolution images in which the target
+limb is not available.  The image is first paired with a reference image whose
+camera pointing is known (see programs MANMATCH, NAV2).  Common features
+(tiepoints) are located in both images (by determining their line-sample
+coordinates) and the corresponding latitude-longitude coordinates are computed.
+These (line,sample) and (lat,long) pairs are input to PHOTFUNC via the
+TIEPOINTS parameter.
+
+Note that a common use of the far encounter and tiepoints algorithms is to
+improve the nominal camera pointing initially available from the SPICE server.
+The programs referred to above normally store their results into SPICE C-kernels
+from which they are automatically retrieved by PHOTFUNC.  The FARENC and
+TIEPOINTS parameters are therefore necessary only if the SPICE server interface
+is circumvented or unavailable.
+
+.page
+COMPUTING THE LIGHTING ANGLES
+
+To compute the lighting angles at a given pixel, the programs must transform
+that pixel to a surface point on the target, and use the spacecraft and solar
+vectors to compute vectors that point from that surface point to the sun and
+spacecraft.  In addition, the target body model (polar and equatorial radii) is
+used to compute the surface normal at that point.
+
+The incidence angle is the angle between the surface normal and the vector
+pointing to the sun.
+
+The emission angle is the angle between the surface normal and the vector
+pointing to the spacecraft.
+
+The phase angle is the angle between the vectors pointing to the sun and
+spacecraft.  Note that since the geometry is three-dimensional, the phase angle
+is normally not equal to the sum of the incidence and emission angles.
+
+.page
+INTERPOLATION ALGORITHM:  The photometric function is computed exactly for a
+grid of points whose spacing is specified by parameters LINC, SINC, or INCR.
+For intermediate points within the grid, the function is computed using
+bilinear interpolation.  In general, a smaller grid spacing reduces the error
+introduced by the interpolation, but increases the execution time.
+
+If one or more of the four grid points surrounding a given pixel is off the
+target body, the photometric function will be computed exactly for every pixel
+within the box within the four grid points.  This criteria can be extended to
+apply to points within LIMB degrees or the limb or TERM degrees of the
+terminator (see LIMB and TERM parameters).  This strategy for avoiding large
+interpolation errors near the limb or terminator may not be the best, as shall
+be clear below.
+
+The keyword 'NOINTERP causes the photometric function to be computed exactly
+at every pixel in the image.  In this mode, the grid (LINC, SINC) is used to
+skip efficiently over dark sky regions of the image.
+
+It is instructive to compute the error introduced by the interpolation
+algorithm by photometrically correcting a full-disk image with and without
+interpolation:
+
+	photfunc f1636832.geo a.img MINN=0.7
+	photfunc f1636832.geo b.img MINN=0.7 'NOIN
+        f2 (a.img,b.img) c.img func="100*in1/in2"
+        fit c.img 'EHIST
+
+The error introduced near the limb of the target is significant.  For high
+resolution images (no visible limb) the error introduced by interpolation is
+negligible.
+
+Keep in mind that the interpolation algorithm was developed in the '70s when
+computers were 1000 times slower and 1000 times more expensive.  In an age of
+more powerful computers, the interpolation algorithm seems less relevant.  The
+following timing results were obtained on a Sun Ultra 5 workstation:
+
+Timing data using interpolation with a 10x10 grid spacing (the default):
+					CPU sec		Wall clock sec
+Galileo 800x800 Image Space image:	 1.63		 3.52
+Cassini 1024x1024 Image Space image:	 1.84		 4.77
+Voyager 800x800 Image Space image:	 3.96		 5.35
+Voyager 1000x1000 Object Space image:    1.57		 3.44
+500x500 Rectilinear projection:		 1.49		 2.70
+
+Corresponding timing data using the 'NOIN keyword:
+					CPU sec		Wall clock sec
+Galileo 800x800 Image Space image:	 8.50            9.80
+Cassini 1024x1024 Image Space image:	15.33		17.00
+Voyager 800x800 Image Space image:	25.22		26.63
+Voyager 1000x1000 Object Space image:    4.84		 6.09
+500x500 Rectilinear projection:		13.44		15.04
+
+Also, some of the photometric functions are computationally expensive if
+calculated for every pixel.  The following are timing results using the 'NOIN
+keyword on a 1024x1024 Cassini image space image:
+						CPU sec		Wall clock sec
+Minnaert:					15.33		17.00
+BURATTI:					17.13		19.23
+VEVERKA:					15.44		17.20
+Old HAPKE function:				15.87		17.44
+HAPKE function with COOK modification:		15.86		17.39
+HAPKE with one term Henyey-Greenstein:		25.72		27.18
+HAPKE with two term Legendre polynomial:	24.93		27.20
+IRVINE:						16.99		18.95
+
+.page
+CLASSIFICATION MAP OPTION:
+
+It is possible to have PHOTFUNC apply its photometric correction only
+to certain points in the image, by supplying a classification map (such
+as can be generated by program FASTCLAS) as a supplementary input file, 
+and specifying a class by the CLASS parameter.  Then only pixels which 
+have the specified DN value in the classification map are corrected.  
+This can be useful if different types of terrain in an image are to have 
+different photometric parameters, as would be the case for the more 
+physically realistic functions, such as those of Hapke.  
+
+The following example illustrates the use of the classification map option.
+Note that the example fails because of this programmer's ignorance in
+using STATS and FASTCLAS.  However, the method should work in principal.
+
+fit io.org a.img (1,1,450,450) 'byte
+fit io.blu b.img (1,1,450,450) 'byte
+fit io.vio c.img (1,1,450,450) 'byte
+
+stats (a.img,b.img,c.img) stats.img exclude=0 +
+  class1=(188,81,20,20) class2=(369,80,20,20)
+fastclas (a.img,b.img,c.img,stats.img) class.img sigma=(20.,10.)
+
+copy io.vio c.img (1,1,450,450)
+photfunc (c.img,class.img) out.img IRVINE=(1.14,.118,.0019) CLASS=2 +
+   'CYLI SCALE=8. NORTH=0. +
+   LATI=80. LONG=230. LINE=225. SAMP=1.
+   SOLAR=(0.541,171.276) SPACE=(-.032,156.474,806030.) +
+
+A 450x450 area of a color triplet is extracted from an IO global mosaic and
+convert to byte data (program STATS will only accept byte inputs).  Programs
+STATS and FASTCLAS are run to create a classification map (class.img) which is
+then input to PHOTFUNC.  Only pixels from Class 2 of the map will be corrected.
+All other pixels are output as 0 DN.  Note that the image input to PHOTFUNC
+must represent the same image area as that of the classification map.  This is
+accomplished by copying the area from the mosaic BEFORE inputing into PHOTFUNC.
+
+This example also illustrates how to enter the projection and lighting geometry
+for map-projected images if these are not included in the image label.
+
+As the program is currently structured, a separate run must be made for 
+each class, with the output of one run forming the input for the next, 
+until all classes have been processed.  (The option to do all classes
+except for a specified one is also supported.)  It should be possible 
+for a future modification to process all classes in one run.
+
+.page
+EXAMPLES:
+
+!--------------------------Galileo image-------------------------------
+
+  photfunc inp=18494401.1 out=a.img MINN=0.7
+
+A Minnaert function is applied to a Galileo image of Callisto.  PHOTFUNC will
+retrieve the mission, camera id, Spacecraft-Event-Time, and target (Callisto)
+from the flight label. These image identifiers are used to automatically
+retrieve the image and lighting geometry via the SPICE server.  If everything
+goes well, running PHOTFUNC can be as easy as pi.
+
+!--------------------------Cassini image-------------------------------
+
+photfunc n1354897340.1 a.img BURATTI=(0.5,.6,-.003,.14,.14,1.0) +
+   SSCPT=(512.,512.)
+
+Assume that the input image has been previously processed by program FARENC to
+center the target body in the image.  The SSCPT parameter specifies that the
+center of the target is at line-sample coordinates (512,512).  This will result
+in a re-computation of the OM matrix (see description of far encounter algorithm
+above).
+
+!--------------------------VGR image space image-------------------------------
+
+photfunc f1636832.fic a.img HAPKE=(.5,.2,10.,.5,.2) target=IO
+
+A raw Voyager image containing geometric distortions is input to PHOTFUNC.
+Since no geometric distortion parameters are provided, nominal values are
+retrieved from built-in tables and used to account for the geometric distortions
+in the projection geometry.  Note that the TARGET parameter is required since
+the target body is not identified in Voyager flight labels.  See the section
+on GEOMETRIC DISTORTIONS above.
+
+!------------------What to do when SPICE data is not available-----------------
+
+photfunc f1636832.fic a.img BURATTI=(0.5,.6,-.003,.14,.14,1.0) 'NOSPICE +
+    TARGET=IO SOLAR=(0.541,171.276) SPACE=(-.032,156.474,806030.) +
+    SSCPT=(539.67,601.21) NORANGLE=15.7
+
+Assume that the input image has a Voyager flight label.  The 'NOSPICE keyword
+prevents the program from attempting to retrieve data from a non-existent
+SPICE server.  Based on the mission (VGR-1) and camera identifiers in the label,
+the camera constants and nominal geometric distortion parameters are retrieved
+from built-in tables.  Based on the TARGET parameter, the polar and equatorial
+radii are retrieved as well (careful, these may not be the latest or greatest).
+
+Assuming that the image label contains no further useful information, the
+solar and spacecraft vectors must be input via parameters.  Finally, the
+subspacecraft line-sample coordinates (a.k.a target center) and north angle are
+input to enable the program to compute the camera pointing (see description of
+far encounter algorithm above).
+
+photfunc f1636832.geo a.img VEVERKA=(0.5,-0.01,0.5,0.01) 'NOSPICE
+    RADII=(1824.3,1824.3,1815.7) +
+    SOLAR=(0.541,171.276) SPACE=(-.032,156.474,806030.) +
+    TIEPOINT=(381.86,382.64,19.35,229.21, +
+        382.17,498.94,25.83,190.00, +
+        381.98,615.31,32.86,163.58, +
+        498.40,498.49,2.539,179.32, +
+        498.53,615.11, 8.65,156.13)
+
+The above example demonstrates the use of the tiepoints mode to specify the
+camera pointing for a high-resolution Voyager image (see description of
+tiepoints algorithm above).
+
+!------------------------Unsupported missions---------------------------------
+
+  photfunc inp=a.img out=b.img VEVERKA=(0.5,-0.01,0.5,0.01) 'OBJECT +
+    TARGET=IO FOCL=1500.19 LAXIS=500. SAXIS=500. PSCALE=84.8214 +
+    SOLAR=(0.541,171.276) SPACE=(-.032,156.474,806030.) +
+    SSCPT=(539.67,601.21) NORANGLE=15.7
+
+If the image is taken from a spacecraft which is not recognized by PHOTFUNC,
+all projection and lighting geometry information must be supplied via
+parameters.  Here the target constants are specified by identifying the target
+body, and the OM matrix is computed from the target center and north angle
+(SSCPT and NORANGLE).
+
+!--------------------------Map projected image---------------------------------
+
+map3 &"path1"f1636832.geo b.img NL=500 NS=500 +
+   'RECT TARGET=IO SCALE=10. +
+   LINE=1. SAMP=1. LATI=80. LONG=230.
+photfunc b.img a.img IRVINE=(1.14,.118,.0019) TARGET=IO
+
+A Voyager image of IO is mapped to a rectilinear projection via program MAP3.
+The resulting projection is input to PHOTFUNC.  Although the projection
+information can be retrieved from the "map label" output by MAP3, this label
+does not currently contain the lighting geometry.  PHOTFUNC will attempt to
+retrieve that information from SPICE.  Since both MAP3 and PHOTFUNC will
+access the SPICE server (in this example), and since the Voyager label does
+not include the target name, this must be provided via the TARGET parameter.
+
+.page
+RESTRICTIONS:
+
+1. The GRID option is currently disabled.
+
+HISTORY
+
+Written By: Joel Mosher			1 AUGUST 1978
+Cognizant Programmer: L.W.Kamp
+Revision: 1				9 FEBRUARY 1981
+Revision: 2     CONVERT TO VICAR2      16 MAY 1985
+Revision: 3     Viking additions       11 MAY 1986
+Rev. 4:     Mods for new PHOTFIT.  2 APR 1987  -- LWK.
+Rev. 5:     Added classificaion map option,  19 Aug. 1987  -- LWK.
+Rev. 6:     Use normalized phot. func., 2 Sept. 1987 -- LWK
+Rev. 7:     Add 6-parameter Hapke fcn., bug fixes, 8 Oct. 1987 -- lwk
+Rev 8       Many bug fixes. Put in exact photometric function at
+            every point for limb & terminator.
+23 Aug 89  ..GMY..  Delete fiddling FDS for WA frames of simultaneous exposure
+15 Aug 93   jjl ability to read map3 perspective label type.
+06 Sep 02  GMY: Major revisions to help and test files.
+	   Major revisions to projection and lighting geometry determination
+	   Add NAIF keyword and delete obsolete SEDR keyword (AR 107288)
+           Updated to read IBIS format geometric distortion files (AR 107368)
+           Changed NOSEDR keyword to NOSPICE.
+	   Deleted GEOMA, NAH, NAV, and START parameters.
+	   Deleted LUMS and THRESH parameters.
+           Logic controlling line loop and interpolation redesigned.
+           Fix bug in farenc algorithm.  Fix to work on floating point images.
+	   Fix computation of surface normal vector.
+07 Oct 02  Replaced oblate spheroid model with triaxial ellipsoid.  All calls
+           to convev have been replaced by calls to mp routines.
+           Added 'NOIN parameter.
+10 Jan 13 -lwk- fixed CHARACTER continuation lines for new compiler flag on Solaris
+
+.LEVEL1
+.VARI INP
+1-4 input files: image,
+[GEOMA], [GRID], [CMAP].
+.VARI OUT
+Output file (optional)
+.VARI SIZE
+Standard VICAR size field.
+.VARI SL
+Starting line
+.VARI SS
+Starting sample
+.VARI NL
+Number of lines
+.VARI NS
+Number of samples
+.VARI RADII
+Three radii of target
+(RA,RB,RC)
+.VARI LINC
+Line spacing of tiepoints.
+.VARI SINC
+Sample spacings of tiepoints.
+.VARI INCR
+Line and sample spacings 
+of tiepoints.
+.VARI NOINTERP
+Keyword: Perform no
+interpolation
+.VARI MINNAERT
+The Minnaert constant K
+.VARI MOSHER
+Mosher function constants 
+.VARI VEVERKA
+Veverka function constants
+.VARI HAPKE
+Constants for Hapke functions
+(4 values= OLD, 5/6 values= NEW)
+.VARI COOK
+Cook modification to OLD HAPKE
+.VARI BURATTI
+(6 values)
+Buratti function.
+.VARI IRVINE
+Irvine constants K,A,B
+.VARI PROJECT
+Specifies projection.
+VALID: LAMBERT,MERCATOR,
+ORTHOGRA,STEREOGR,POLE,
+CYLINDRI,RECTANGU,LATLON
+.VARI PAR1
+Northern most parallel 
+of Lambert conformal.
+.VARI PAR2
+Southern most parallel 
+of Lambert conformal
+.VARI NORTH
+Angle measured clockwise from 
+the center of projection.
+.VARI SCALE
+Projection scale in km/pixel
+.VARI LINE
+Projection special line
+.VARI SAMPLE
+Projection special sample
+.VARI LATITUDE
+Projection special latitude
+.VARI LONGITUD
+Projection special longitude
+.VARI FARENC
+Far encounter mode.
+.VARI SSCPT
+Object space line and sample.
+.VARI OSSCPT
+Object space line and sample.
+.VARI ISSCPT
+Image space line and sample.
+.VARI NORANGLE
+North angle in degrees.
+.VARI TIEPOINT
+Specifies tiepoint mode.
+.VARI TARGET
+String specifying the name
+of the target body.
+.VARI NOSPICE
+Disables access to the
+SPICE server.
+.VARI SOLAR
+Subsolar latitude and longitude
+in degrees.
+.VARI SPACE
+Subspacecraft lat., long. and
+distance to center of planet.
+.VARI SLATITUD
+Subspacecraft latitude in degrees
+.VARI SLONGITUD
+Subspacecraft longitude in degrees
+.VARI RMAGNITU
+Distance from spacecraft to
+planet center in km.
+.VARI OMMATRIX
+Relationship between planet
+coord. system and camera
+coord. system.
+.VARI RSVECTOR
+Planet to spacecraft vector
+.VARI OBJECT
+Indicates camera distortions
+removed.
+.VARI IMAGE
+System distortion not
+geometrically correct.
+.VARI DISTOR
+System distortion not
+geometrically correct.
+.VARI FOCAL
+Camera's focal length in mm.
+.VARI FOCL
+Camera's focal length in mm.
+.VARI LAXIS
+Value of line in object space.
+.VARI SAXIS
+Value of sample in object space.
+.VARI PSCALE
+Scale in object 
+space focal plane.
+.VARI MISSION
+Mission.
+VALID=(VGR-1,VGR-2,GLL,CASSI,WFPC1,
+WFPC2,SIPS,QUEST,VIKOR,MAR-9,MAR10
+.VARI SCET
+Optional SpaceCraft Event Time
+.VARI CAMERA
+Camera serial number.
+.VARI NOPROJEC
+Specifies picture not taken by
+any of the mentioned projects.
+.VARI PRINT
+Information about picture 
+is to be printed.
+.VARI ALL
+Data is to be printed out for
+points beyond the terminator.
+.VARI NOCORREC
+No photometric function
+correction is done.
+.VARI MAXDN
+Maximum data number the
+program can output.
+.VARI TERMINAT
+Restricts interpolation
+to TERMINAT degrees 
+from terminator.
+.VARI LIMB
+Restricts interpolation
+to LIMB degrees 
+from planet limb.
+.VARI MULTIPLY
+Output DN to be multiplied
+by a constant.
+.vari CLASS
+Class number in classification 
+map
+.vari MAXCOR
+Optional keyword
+Maximum permitted intensity
+correction.
+.vari TARGET
+STRING - Target body name
+.vari SPICEMODE
+Optional keyword
+Location of SPICE kernels
+(LOCAL or REMOTE)
+.vari CKNAME
+Optional 4-char string
+C-kernel name
+.vari CKID
+Optional 4-char string
+C-kernel ID
+.vari USERID
+Optional 3-char string
+User who created camera pointing
+.vari GROUPID
+Optional 3-char string
+Group which created camera pointing
+.vari INSTITUTE
+Optional 4-char string
+Facility which created camera pointing
+.vari PURPOSE
+Optional 4-char string
+Purpose for camera pointing
+.vari PROGRAM
+Optional 6-char string
+Program which created camera pointing
+.vari SPKID
+Optional 4-char string
+SP kernel for created camera pointing
+.vari REQNUM
+Optional 4-char string
+IPL request number for created camera pointing
+.vari CDATE
+Optional 12-char string
+Date and time camera pointing was created
+.LEVEL2
+.VARI INP
+ Specifies 1 to 4 input filenames: (IMAGE,GEO,GRID,CMAP)
+
+ IMAGE is the input VICAR image upon which brightness correction is performed.
+ IMAGE is required and must always be the first in this list.  The remaining
+ inputs (GEO, GRID, and CMAP) are optional and may appear anywhere in the INP
+ list after IMAGE.
+
+ IMAGE may be an image from a "supported" or "unsupported" mission.  The
+ degree of support varies with the mission and determines the amount of
+ information that can be automatically retrieved or which must be supplied by
+ the user.  See the MISSION parameter.  IMAGE may be in BYTE, HALF, FULL, or
+ REAL data formats.  There are no size restrictions.
+
+ GEO is a geometric correction parameter file as created by programs RESLOC
+ and RESLOCVO.  GEO is in IBIS graphics format and is identified solely by its
+ record size (512 bytes).
+
+ GRID specifies a file of photometric function parameters in the format
+ generated by PHOTFIT.  The program recognizes it by the word "PHOTFIT"
+ in the label, and a record size of 120 samples.
+ NOTE: Since PHOTFIT is obsolete, this option is currently disabled.
+
+ CMAP specifies a classification map as produced by program FASTCLAS.
+ CMAP is used to limit the brightness correction to pixels of a specified
+ class (See CLASS parameter).  The program recognizes the file by the words
+ "CLASSIFICATION MAP" in the label.  CMAP must be of BYTE format
+ and of the same size as the input image.
+
+.VARI OUT
+OUT=B where B is the output (brightness corrected) image.  B will be in the
+same data format as the input image.  If no output file is specified, then
+brightness correction is performed (See parameter NOCORREC.)
+.VARI SIZE
+SIZE=(sl,ss,nl,ns) is the standard VICAR size field and specifies the image
+area of the input image to be operated on.  SIZE specifies the starting
+line, starting sample, number of lines, and number of samples of the image
+area, so that the area will begin at (sl,ss) of the input image, and the output
+image will have dimensions nl x ns.
+.VARI CLASS
+ CLASS is only used when a classification map has been included among the
+ input data (see INP parameter).  It specifies a DN value that will be used to
+ select a set of pixels from the input image, and only those pixels will be
+ processed by PHOTFUNC.
+
+ E.g., if CLASS=8 is specified, then a pixel in the input image will only
+ be corrected if the corresponding pixel in the classification map has a DN
+ value of 8.
+
+ If the value specified by CLASS is negative, then the absolute value
+ of CLASS is taken to denote a class that is NOT to be processed;  all
+ classes will be processed except for that one and the DN=0 (unclassifiable)
+ class.
+.VARI SOLAR
+SOLAR=(R1,R2) where R1 and R2 are floating point numbers specifying the
+subsolar latitude and longitude in degrees.
+.VARI SPACE
+SPACE=(R3,R3,R5) where R3, R4, and R5 are floating point numbers specifying
+the subspacecraft latitude and longitude in degrees and the distance to the
+center of the target in kilometers respectively.
+.VARI SLATITUD
+SLAT=R4 where R4 is a floating point number specifying the subspacecraft
+latitude in degrees.
+.VARI SLONGITUD
+SLON=R5 where R5 is a floating point number specifying the subspacecraft
+longitude in degrees.
+.VARI RMAGNITU
+RMAG=R6 where R6 is a floating point number specifying the distance from
+subspacecraft to planet center in kilometers.
+.VARI RADII
+RADII=(RA,RB,RC)
+The three radii of the target, in kilometers, where
+  RA = long equatorial radius
+  RB = short equatorial radius
+  RC = polar radius
+The default are values retrieved from SPICE.  If SPICE is not available,
+the data stored in subroutine PBDATA are used.
+.VARI TARGET
+TARGET=string
+Specifies the name of the target body.  The target body name is one of four
+identifiers needed to retrieve the projection and lighting geometry from the
+SPICE server.  If no SPICE data is available, the target name is used to
+retrieve the target radii via a call to PBDATA.
+.VARI OMMATRIX
+OMMATRIX=(R1,R2,..,R10) where Rn is a floating point number specifying the
+nine elements of the OM matrix used to define the relationship between planet
+coordinate system and camera coordiante system. The values are in row major
+order.
+
+The OM matrix is normally retrieved automatically by accessing the SPICE
+server (when available).
+.VARI RSVECTOR
+RSVECTOR=(R1,R2,R3) where Rn is a floating point number and R1, R2, R3 are the
+three values of the RS vector expressed in the planet coordinate system. The
+vector can be alternatively specified in polar coordinates via parameter
+SPACE (or SLAT, SLON and RMAG).
+
+The RS vector is normally retrieved automatically by accessing the SPICE
+server (when available).
+.VARI OBJECT
+OBJECT specifies that the input frame is geometrically correct; that is,
+all camera systems distortions have been removed. This is the default.
+.VARI IMAGE
+IMAGE specifies that the input frame is not geometrically correct; that is,
+camera system distortions have not been removed. The default is the picture
+has been geometrically corrected. If IMAGE is specified, the GEOMA parameters
+must be supplied either through the specifiction of a documented flight
+project or the user can supply an alternate input file.
+.VARI DISTOR
+DISTOR specifies that the input frame is not geometrically correct; that
+is, camera system distortions have not been removed. The default is the
+picture has been geometrically corrected.
+.VARI FOCAL
+FOCAL=R1 where R1 is a floating point number and specifies the value 
+of the camera's focal length in millimeters. The default is 1500 mm.
+.VARI FOCL
+FOCL=R1 where R1 is a floating point number and specifies the value 
+of the camera's focal length in millimeters. The default is 1500 mm.
+.VARI LAXIS
+LAXIS=R1 where R1 is a floating point number and specifies the value of the
+line of the object space optical axis. The default is R1=500.
+.VARI SAXIS
+SAXIS=R1 where R1 is a floating point number and specifies the value of the
+sample of the object space optical axis. The default is 500.
+.VARI PSCALE
+PSCALE=R2 where R2 is a floating point number and specifies the scale in the
+object space focal plane in pixels per millimetrer. The default is 84.821428.
+.VARI FARENC
+FARENC specifies that the far encounter mode is to be used to determine the
+OM matrix. Be sure to specify SSCPT NORA, and the RS vector(or its equivalent).
+.VARI SSCPT
+SSCPT=(R1,R2) where R1 and R2 are floating point numbers which specify the
+object space line and sample respectively or the subspacecraft point in the
+input image. The defaults are R1=R2=0.
+.VARI OSSCPT
+OSSCP=(R1,R2) where R1 and R2 are floating point numbers which specify the
+object space line and sample respectively or the subspacecraft point in the
+input image. The defaults are R1=R2=0.
+.VARI ISSCPT
+ISSCP=(R1,R2) where R1 and R2 are floating point numbers which specify the
+image space line and sample respectively at the subspacecraft point in the
+input image. The default are R1=R2=0.
+.VARI NORANGLE
+NORA=R1 where R1 is a floating point number specifying the angle of north in
+degrees. It is measured in the image plane at the subspacecraft point
+clockwise from up. The default is 0.
+.VARI TIEPOINT
+TIEPOINT=(R1,R2,R3,R4,...,RN) where Rn are floating point numbers and are
+lines, samples, latitudes and longitudes of the tiepoints. The numbers
+following TIEPOINT are in groups of four; each group specifying the line,
+sample, latitude, and west longitude in that order of each tiepoint. At
+least three points are needed to determine the OM matrix. No more than 25
+points can be used and if more than 25 points are input only the first 25
+will be used. If the TIEPOINTS mode is used be sure to specify the RS vector
+or its equivalent.
+.VARI PROJECT
+The following keywords are valid for this parameter:
+
+LAMBERT: specifies that the picture is in a Two-Standard Lambert Conformal
+Conic projection.
+
+MERCATOR: specifies that the picture is a Mercator projection.
+
+ORTHOGRA: specifies that the picture is an orthographic projeciton.
+
+STEROGR: specifies that the picture is a stereographic projection.
+
+POLE: specifies that the picture is a polar projection. If the user
+specifies POLE, he must also specify either ORTH or STER.
+
+CYLI: specifies that the picture is the normal cylindrical projection.
+
+RECT: specifies that the picture is in the simple cylindrical projection.
+
+LATL: specifies that the picture is in the simple cylindrical projeciton.
+.VARI LINE
+LINE=R1 where R1 is a floating point number specifying some arbitrary line
+in the picture which is some specified latitude and/or longitude. The default
+is R1=0.
+.VARI SAMPLE
+SAMPLE =R1 where R1 is a floating point number specifying some arbitrary sample
+in the picture which is some specified latitude and/or longitude. The default
+is R1=0.
+.VARI LATITUDE
+LATITUDE=R1 where R1 is a floating point number specifying an arbitrary
+latitude in the picture which is some specified latitude and/or longitude.
+.VARI LONGITUD
+LONG=R1 where R1 is floating number specifying an arbitrary longitude in the
+picture which is some line and/or sample.
+.VARI PAR1
+PAR1=R1 where R1 is a floating point number specifying the latitude of the
+standard parallels if the projection is Lambert conformal. PAR1 is the northern
+most parallel.
+.VARI PAR2
+PAR2=R1 where R1 is a floating point number specifying the latitude of the
+standard parallels if the projection is Lambert conformal. PAR2 is the southern
+most parallel.
+.VARI NORTH
+NORTH=R2 where R2 is a floating point number specifying the angle in degrees
+of north in the output picture. This angle is measured in the projection plane
+at the center of projection clockwise from up.
+.VARI SCALE
+SCALE=R3 where R3 is a floating point number specifying the number of
+kilometers per pixel at the center of projection for stereographic and
+orthographic projections, at the standard parallels for Lambert Conformal
+and at the equator for simple cylindrical, normal cylindrical and 
+Mercator projections.
+
+.VARI MINNAERT
+MINNAERT=R1, where R1 is a floating point number specifying the Minnaert 
+function k value.  
+The photometric function is:
+
+	F = A * COS(i)**k * COS(e)**k-1
+
+The photometric correction factor, f, used for the 
+Minnaert function is:
+
+	f = F/F0 = COS(i)**k * COS(e)**k-1
+
+where:	F is the brightness
+	F0 is normalized brightness, F0=F(i=0,e=0)
+	k  is the geometrical constant
+	i  is the incidence angle 
+	e  is the emission angle 
+
+Minnaert is the default function, with a default k of 0.5
+
+.vari VEVERKA
+VEVERKA=(A,B,C,D) specifies that the Squyres-Veverka phase angle function 
+in conjunction the Lommel-Seeliger law is to be used, and also specifies 
+its four constants.
+
+The equation for this photometric function is:
+
+	F = ( A + B*g + C*exp(-D*g) ) * COS(i) / (COS(i)+COS(e))
+
+where:	g  is the phase angle in degrees
+	i  is the incidence angle
+	e  is the emission angle
+
+Therefore the correction factor f performed by photfunc is given by:
+
+        f=F/F0  where F0=F(i=0,e=0,g=0)
+	f = (A + B*g + C*exp(-D*g)) * 2/(A+C) * COS(i)/(COS(i)+COS(e))
+
+.vari HAPKE
+HAPKE=(from 4 to 6 parameters)
+This is the Hapke function. There are three versions of this function 
+depending upon the number of parameters specified, as follows:
+
+4-parameters W,B,H,C    This is the 1978 Hapke function.
+     W = single scattering albedo
+     B = first term legendre polynomial phase function.
+     H = porosity
+     C = second term legendre polynomial phase function.
+     CI=cos(i)
+     CE=cos(e)
+     TP=tan(g)
+
+      R = (W/4) * (CI/(CI+CE)) * ((1+Q(TP))*PF(TP)+H(CI)*H(CE)-1)
+
+    where:
+
+      H(X)=(1+2*X)/(1+2*X*SQRT(1-W))     (multiple scattering term)
+      Q(TP)=EXP(-W**2/2)*(1-TP*(3-EXP(-H/TP))*(1-EXP*(-H/TP)/2H) for TP>0
+           =0                                                   for TP<=0
+      PF(CP)=1+B*CP+C*(3*CP**2-1)/2  (phase function of a single particle)
+
+5-parameters W,H,CK,C,B    This is the 1984 Hapke function.
+     W = single scattering albedo
+     H = Backscatter parameter related to soil porosity.
+     CK (TBAR) = Average macroscopic slope angle in degrees.
+     C (OPMAG) = S(0) term in the opposition magnitude coefficient.
+     B = Henyey-Greenstein single particle phase function.
+
+       R = (W/4) * (C01/(C01+C11)) * SF * 
+           ( (1+QF(S0,W,H,P,HG)) * PF(CP) + H(C01)*H(C11) -1)
+    where:
+      C01 = (CI + sinI*tanTB*X1/X2)/BETA
+      C11 = (CE + sinE*tanTB*X3/X2)/BETA
+      BETA = sqrt(1+pi*(tanTB)**2)
+      QF(S0,W,H,P,HG) = S0*H/(W*(H-tan|P/2|)*PF(1)
+    X1,X2,X3,SF are complicated functions of I, E, and TB, and the remaining
+    functions and symbols are as defined above.
+
+      PF(CP) = (1-HG**2)/(1+HG**2+2*HG*CP)**1.5,
+
+6-parameters W,H,CK,C,B,XLG2    This is the 1984 Hapke function.
+     W = single scattering albedo
+     H = Backscatter parameter related to soil porosity.
+     CK (TBAR) = Average macroscopic slope angle in degrees.
+     C (OPMAG) = S(0) term in the opposition magnitude coefficient.
+     B = Term#1 in Legendre polynomial particle phase function.
+     XLG2 = Term#2 in Legendre polynomial particle phase function.
+
+Note: these functions are also normalized as f=F/F0 
+      where F0=F(i=0,e=0,g=0)
+
+.vari MOSHER
+MOSHER = (A,B,C,D,E,F) specifies that the MOSHER function is to be used 
+to process the input image. 
+
+The first 4 values that follow the keyword have the same function as
+the constants for VEVERKA, the last 2 correspond to the values of the 
+Minnaert "k" and a phase angle coefficient.  The MOSHER function is a 
+combination of the Veverka and Minnaert functions:
+
+              PAC=A+B*g+C*exp(-D*g)
+              F = PAC * (cos(i)**(E+F*g)) * (cos(e)**(E+F*g-1))
+     where
+              g is the phase angle in degrees
+              i is the incidence angle
+              e is the emission angle
+
+The correction applied by photfunc is:
+
+              f=F/F0, F0=F(i=0,e=0,g=0)
+              PAC=A+B*g+C*exp(-D*g)*2/(A+C)
+              f = PAC * (cos(i)**(E+F*g)) * (cos(e)**(E+F*g-1))
+
+
+.VARI COOK
+COOK=K where K is a floating point number specifying the COOK parameter. The
+Cook function is a modification to the 1978 Hapke function so W, B, H, and C
+should also be specified, using parameter HAPKE. The modification to the 
+Hapke function is in redefining incidence and emission angles to their
+new values:
+          cos(i) <-- sqrt(1-K*K*(1-cos(i)*cos(i)))
+          cos(e) <-- sqrt(1-K*K*(1-cos(e)*cos(e)))
+
+If HAPKE is not specified, or is specified with 5 values, then this parameter
+is ignored.
+
+.VARI BURATTI
+Specifies the BURATTI-VEVERKA function. 
+The function is of the form:
+            ci                
+    Q= A*-------*f(a) + (1-A)*ci
+          ci+ce               
+
+         p(a)*pi*((2/3)*(1-A)+A*F)-(2/3)*(1-A)*(sin(a)+(pi-a)*cos(a))
+    f(a)=------------------------------------------------------------
+         (A*pi/2)*(1-sin(a/2)*tan(a/2)*ln(cot(a/4)))
+
+    p(a)=B+C*a+D*exp(-E*a)
+
+    The coefficients A,B,C,D,E,F are input parameters 1-6.
+
+    and where
+          a=phase angle
+          i=incidence angle
+          e=emission angle
+          ci=cos(i)
+          ce=cos(e)
+
+
+The correction applied by photfunc is:
+
+    f=Q/q, q=Q(a=0,i=0,e=0)
+
+    q=(B+D-1)*(2/3)*(1-A) + A*(B+D)*F +(1-A)
+
+The coefficients look like: (.5,.6,-.003,.14,.14,1.0)
+The following articles discuss the function and parameters.
+See Icarus 59 392-405 Buratti
+See Icarus 46 137-155 Veverka
+
+.VARI IRVINE
+Specifies the Irvine function. There are three parameters corresponding
+to the constants k,a,b in the equation:
+
+  B*Fsun         k     (1-exp(-ci/a)
+F=------- * (ci*ce)  * ------------
+  pi*ce                (1-exp(-ce/b)
+
+    where
+          i=incidence angle
+          e=emission angle
+          ci=cos(i)
+          ce=cos(e)
+
+The correction applied by photfunc is:
+
+    f=F/F0, F0=F(i=0,e=0)
+
+    Also the constants k,a,b are typically 0.9, 0.118, and 0.0039 respectively.
+    For these values and at i=0 and e=0 the term (1-exp(-1/a))/(1-exp(-1/b))=1
+    so it is omitted from the normalization F0.
+
+The implemented function in Photfunc is therefore:
+
+               k
+        (ci*ce)   (1-exp(-ci/a)
+f=F/F0= ------- * ------------
+          ce      (1-exp(-ce/b)
+
+
+Example:  irvine=(.9,.118,.0039)
+
+.VARI MISSION
+Keyword identifying the mission from which the image as acquired.  Valid
+missions are:
+
+CASSI: Cassini ISS
+GLL: Galileo
+VGR-1 and VGR-2: Voyager 1 and 2
+VIKOR: Viking Orbiter (1976)
+MAR10: Mariner Venus Mercury mission (a.k.a. MVM73).
+MAR-9: Mariner 9 (Mars)
+WFPC1 and WFPC2:  Wide Field Planetary Camera (Space Telescope) before and
+  after camera upgrade.
+SIPS: Silicon Imaging Photometers System, Table Mountain Observatory 24"
+  telescope in the 512 lines by 512 sample mode at the Cassigrain focus.
+QUEST: the SIPS used with a Questar 700 mm lens in the 512 lines by 512 sample
+  mode.
+
+For each of these missions, the camera focal length, the line and sample
+coordinates of the optical axis intercept point, and the picture scale in
+pixels/mm for each specific camera are automatically loaded from built-in
+tables.  See the CAMERA parameter for a view of this table.
+
+In addition, for all the JPL missions (Cassini, Galileo, Voyager, Viking
+Orbiter, Mariners 9 and 10), a model of the geometric camera distortions
+is also retrieved.  For missions using a CCD camera system (Cassini, Galileo),
+a radial distortion model of the optics is used.  For vidicon camera systems
+(Voyager, Viking Orbiter, Mariners 9 and 10), the distortions are modeled
+by the reseau pattern on the face plate of the camera.  Nominal displacements
+for this reseau pattern are used for each specific camera.  For more accurate
+results, locate the reseau directly from the image using RESLOC or RESLOCVO.
+For the other missions, the image is assumed to be free from distortions.
+
+Finally, for Cassini, Galileo, and Voyager, SPICE data containing the
+projection and lighting geometry for the image is automatically retrieved via
+the MIPS SPICE server.  The 'NOSPICE keyword suppresses this feature.
+
+.VARI SCET
+Shutter centered Spacecraft Event Time of the image for which SPICE data is
+to be printed.  SCET is only required if INP is not specified.
+.VARI CAMERA
+CAM=I1 where I1 is an integer specifying the camera serial number. The default
+is to obtain I1 from the picture label.  The camera serial number (together
+with the mission ID) is used to retrieve the focal length, line and sample
+of the optical-axis intercept point, and the picture scale from built-in
+tables.  The current values in these tables are:
+
+		      CAMERA	 FOCAL	  LAXIS  SAXIS  PSCALE (pixels/mm)
+        CASSI NAC       1       2000.00    512    512   83.333333
+	CASSI WAC       2        200.736    "      "      "
+        CASSI NAC 2x2  21       2000.00    256    256   41.666665
+	CASSI WAC 2x2  22        200.736    "      "      "
+        CASSI NAC 4x4  41       2000.00    128    128   20.833333
+	CASSI WAC 4x4  42        200.736    "      "      "
+
+        GLL             1       1501.039   400    400   65.6167979 
+        GLL 2x2 sum     2	1501.039   200    200   32.8083990
+
+	VGR-2 WA        4	 200.770   500    500   84.821428
+	VGR-2 NA        5	1503.49     "      "      "
+	VGR-1 WA        6	 200.465    "      "      "
+	VGR-1 NA        7	1500.19     "      "      "
+
+        VIKOR 1A        7	474.610    575    625   85.0
+        VIKOR 1B        4	474.398     "      "      "
+        VIKOR 2A        8	474.101     "      "      "
+        VIKOR 2B        6	474.448     "      "      "
+
+        MAR10 A         1      1495.66     400    475   74.78
+        MAR10 B         1      1503.69     400    475   74.78
+
+        MAR-9           1	 52.267    400    475   75.0     
+        MAR-9		2	500.636     "      "      "
+
+        WFPC1		1       67991.     400    400   66.66667
+	WFPC1		2       31168.      "      "      "
+        WFPC2		1       67991.      "      "      "
+	WFPC2		2       31168.      "      "      "
+
+	SIPS		1	9753.6     256    256   51.2
+	QUESTAR		1        700.      256    256   512.
+
+Note: These tables are obtained via a call to VICAR subroutine GETCAMCON.  For
+active missions, these values may be updated as they are more accurately
+determined.
+
+See also MISSION parameter.
+
+.VARI NOPROJ
+NOPROJ: specifies that the picture was not taken by one of the mentioned
+projects.
+.VARI LINC
+LINC=I1 where I1 is an integer specifying the line spacings of the
+tiepoints at which the photometric function is computed exactly. The default
+is I1=10.
+.VARI SINC
+SINC=I1 where I1 is an integer specifying the sample spacings of the tiepoints
+at which the photometric function is computed exactly. The default is I1 = 10.
+.VARI INC
+INC=I1 where I1 is an integer specifying the line spacings of the tiepoints at
+which the photometric function is computed exactly. The default is I1=10.
+.VARI INCR
+INCR=I1 where I1 is an integer specitying the sample spacings of the tiepoints
+at which the photometric function is computed exactly. The default is I1=10.
+.VARI NOINTERP
+Keyword: Perform no interpolation.  Instead, compute photometric function
+exactly for each pixel on the target.
+.VARI PRINT
+ PRINT specifies that the program print out the following information
+ about the input picture, at the tiepoints, line, sample, latitude, longitude,
+ incidence angle, emission angle, phase angle, computed brightness correction,
+ from the photometric function, and object space line and sample. These angles
+ are in degrees. Only the points that are actually on the visible side of the
+ planet and illuminated are printed out. 
+
+ The default is to not print this.
+.VARI ALL
+ALL specifies that the data from PRINT be printed out for points
+beyond the terminator, i.e. points not illuminated.
+.VARI NOCORREC
+NOCORREC specifies that the program not perform the photometric function
+correction. The default is to perform it, unless no output file is specified.
+.VARI MAXDN
+MAXD=I3 where I3 is an integer specifying the maximum data number the program
+can output. The default is 255. If the data is HALF or REAL, I3=32767.
+.VARI NOSPICE
+NOSPICE disables access the the MIPS SPICE server.  All geometry
+information must be provided via the parameter list.
+.VARI TERM
+TERM=R1 where R1 is a floating point number specifying the closest
+distance in degrees that pixels computed by interpolation may
+approach the terminator. Points closer than this are computed exactly.
+Default is R1=0.
+.VARI LIMB
+LIMB=R2 Where R2 is a floating point number specifying the closest
+distance in degrees that pixels computed by interpolation may
+approach the limb. Points closer than this are computed exactly.
+Default is R2=0.
+the definition of the limb. See section on OPERATION. The default is R2=0.
+.VARI MULTIPLY
+MULT=R3 where R3 is a floating point number specifying that the output DN be
+multiplied by a constant, R3. This is accomplished by dividing the calculated
+brightness correction at a tiepoint by this constant. The default is R3=1.
+.VARI MAXCOR
+Optional keyword.
+This is the maximum permitted intensity boost to correct for the limb
+and terminator darkening caused by the photometric function. If the
+determined correction is greater than this the DN will remain unchanged.
+Notice the default is 5.
+.VARI SPICEMODE
+SPICEMODE=LOCAL specifies that SPICE data is to be retrieved from local
+SPICE kernels.  SPICEMODE=REMOTE specifies that SPICE data is to be retrieved
+via the SPICE server.  If SPICEMODE is defaulted, the logical name (or
+environmental variable) DEFAULTSPICE is used to determine whether LOCAL or
+REMOTE is used.  Note that if SPICE data is not found in LOCAL or REMOTE mode,
+the other mode is attempted.
+
+.VARI CKNAME
+CKNAME is a four character string specifying the C-kernel to be used:
+
+  CKNAME        C KERNEL
+  --------      -------------
+  DAVI          MIPS_DAVI.CK
+  NAV           MIPS_NAV.CK
+  FARE          MIPS_FARENC.CK
+  NAV2          MIPS_NAV2.CK
+  NEAR          MIPS_NEAR.CK
+  AMOS          MIPS_AMOS.CK
+  NAIF          the best NAIF kernel is used
+
+If defaulted, the kernels are searched in the above order.
+
+.VARI CKID
+CKID is an alternative way to specify the prefered C-kernel (see CKNAME
+parameter):
+
+  CKID    CKNAME        C KERNEL
+  ----    --------      -------------
+  M906    DAVI          MIPS_DAVI.CK
+  M905    NAV           MIPS_NAV.CK
+  M904    FARE          MIPS_FARENC.CK
+  M903    NAV2          MIPS_NAV2.CK
+  M902    NEAR          MIPS_NEAR.CK
+  M901    AMOS          MIPS_AMOS.CK
+  varies  NAIF          there are a large number of these files
+
+Ex:  CKID=M901 specifies the four character ID which uniquely identifies the
+     C-kernel MIPS_AMOS.CK.
+
+A complete list of the C-kernel IDs is located in the ASCII file assigned the
+logical name (or environmental variable) KERNELDB.
+
+If specified, CKID overrides the CKNAME parameter.
+
+.VARI USERID
+USERID is a three character string which identifies the user who created the
+camera pointing.
+
+Ex:  USERID=HBM identifies Helen Mortensen as the creator of the camera
+     pointing.
+
+.VARI GROUPID
+GROUPID is a three character string which identifies the group which created the
+camera pointing.
+
+Ex:  GROUPID=040 identifies group 040 as the creator of the camera pointing.
+
+.VARI INSTITUTE
+INSTITUTE is a four character string identifying the facility which created
+the camera pointing.
+
+Ex:  INSTITUTE=MIPS specifies that MIPS created the camera pointing.
+
+.VARI PURPOSE
+PURPOSE is a four character string identifying the purpose of the observation
+or the purpose of processing.  For example,
+  PURPOSE=MOSA identifies the image as part of a mosaic sequence
+  PURPOSE=COLO identifies the image as part of a color sequence
+
+.VARI PROGRAM
+PROGRAM is the first six characters of the program creating the camera pointing.
+
+Ex:  PROGRAM=FARENC specifies that FARENC created the camera pointing.
+
+.VARI SPKID
+SPKID specifies the four character ID which uniquely identifies the
+SP kernel used to create the camera pointing.  The SP-kernel IDs are located
+in the ASCII file assigned the logical name (or environmental variable)
+KERNELDB.
+
+Ex:  SPKID=N015 specifies the SP kernel GLL_LONG_2.BSP
+
+.VARI REQNUM
+REQUNUM is a four character string identifying the IPL request number for
+which the camera pointing was created.
+
+Ex:  REQNUM=3456 identifies (somewhat) request number R123456
+
+.VARI CDATE
+Date and time the camera pointing was created in the form 'YEARMMDDHHMM'.
+
+Ex:  CDATE=199602291200 specifies that the pointing was created at noon
+     on February 29, 1996.
+.END

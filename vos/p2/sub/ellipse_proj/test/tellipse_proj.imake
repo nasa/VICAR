@@ -1,0 +1,20 @@
+#define PROGRAM tellipse_proj
+
+#define MODULE_LIST tellipse_proj.c
+
+#define MAIN_LANG_C
+#define R2LIB
+
+#define USES_ANSI_C
+
+#define R2LIB
+#define LIB_SPICE
+#define LIB_MATH77
+#define LIB_RTL
+#define LIB_P2SUB
+#define LIB_TAE
+
+#define USES_FORTRAN
+#define LIB_FORTRAN
+
+#define DEBUG		/* for development, remove on delivery */

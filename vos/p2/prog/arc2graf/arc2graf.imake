@@ -1,0 +1,13 @@
+#define PROGRAM arc2graf
+
+#define MODULE_LIST arc2graf.f 
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB
+
+#define USES_FORTRAN
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+
+/*#define DEBUG	/* remove on delivery */

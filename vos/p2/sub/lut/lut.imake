@@ -1,0 +1,10 @@
+/* Imake file for VICAR subroutine LUT */
+
+#define SUBROUTINE lut
+
+#define MODULE_LIST lut.f
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN
+#define FTNINC_LIST fortport

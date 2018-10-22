@@ -61,6 +61,10 @@
 #define LOCAL_LIBRARY sublib.a
 #endif
 
+#if defined(SHARED_LIBRARY)
+#define USES_C_PLUS_PLUS
+#endif
+
 #if defined(USES_C) || defined(USES_ANSI_C)
 #define USES_ANY_C
 #endif
@@ -127,7 +131,11 @@ LDFLAGS = LinkDebugFlags ShareLink
 #if defined(PROFILE)
 LDFLAGS = LinkProfileFlags ShareLink
 #else
+#if defined(V2_COVERAGE)
+LDFLAGS = LinkCoverageFlags ShareLink
+#else
 LDFLAGS = LinkDefaultFlags ShareLink
+#endif
 #endif
 #endif
 #endif
@@ -150,7 +158,7 @@ CCCFLAGS = CCCDebugFlags ShareComp
 #ifdef USES_FORTRAN
 FFLAGS = F77DebugFlags ShareComp
 #endif
-#else
+#else /* not DEBUG */
 #if defined(PROFILE)
 #ifdef USES_ANY_C
 CFLAGS = CProfileFlags ShareComp
@@ -161,7 +169,18 @@ CCCFLAGS = CCCProfileFlags ShareComp
 #ifdef USES_FORTRAN
 FFLAGS = F77ProfileFlags ShareComp
 #endif
-#else
+#else /* not PROFILE */
+#if defined(V2_COVERAGE)
+#ifdef USES_ANY_C
+CFLAGS = CCoverageFlags ShareComp
+#endif
+#ifdef USES_C_PLUS_PLUS
+CCCFLAGS = CCCCoverageFlags ShareComp
+#endif
+#ifdef USES_FORTRAN
+FFLAGS = F77DefaultFlags ShareComp
+#endif
+#else /* not V2_COVERAGE */
 #ifdef USES_ANY_C
 CFLAGS = CDefaultFlags ShareComp
 #endif
@@ -171,8 +190,9 @@ CCCFLAGS = CCCDefaultFlags ShareComp
 #ifdef USES_FORTRAN
 FFLAGS = F77DefaultFlags ShareComp
 #endif
-#endif
-#endif
+#endif /* V2_COVERAGE */
+#endif /* PROFILE */
+#endif /* DEBUG */
 
 #if defined(USES_ANY_C) || defined(USES_C_PLUS_PLUS)
 
@@ -188,12 +208,6 @@ FFLAGS = F77DefaultFlags ShareComp
 #define INC_GUISUB -I$(GUIINC)/gui
 #else
 #define INC_GUISUB
-#endif
-
-#if defined(LIB_TLMSUB)||defined(TLMLIB)||defined(TLM_SUBLIB)
-#define INC_TLMSUB -I$(TLMINC) -I$(TLMGENINC)
-#else
-#define INC_TLMSUB 
 #endif
 
 #if defined(LIB_UPLINKSUB)||defined(UPLINKLIB)||defined(UPLINK_SUBLIB)
@@ -348,6 +362,8 @@ FFLAGS = F77DefaultFlags ShareComp
 #endif
 
 #if defined(LIB_MDMS) || defined(LIB_MDMS_FEI_3) || defined(LIB_MDMS_FEI_3_MISC) || defined(FEI3_MISC_SUBLIB) || defined(LIB_MDMS_DBI) || defined(MDMS_DBI_SUBLIS)
+/* ADDED FOR RHE7 BUILD */
+#define LIB_MDMS
 #define INC_MDMS -I$(MDMSINC)/glbinc -I$(MDMSINC)
 #else
 #define INC_MDMS
@@ -360,13 +376,19 @@ FFLAGS = F77DefaultFlags ShareComp
 #endif
 
 #if defined(LIB_ACE_WRAPPERS)
-#define INC_ACEW -I$(ACE_ROOT)/
+/* #define INC_ACEW -I$(ACE_ROOT)/ */
+/* Added for RHE7 BUILD */
+#define INC_ACEW -I$(ACE_TAO_INSTALL_PREFIX)/include
+/* #define INC_ACEW -I$(ACE_ROOT)/ */
 #else
 #define INC_ACEW
 #endif
 
 #if defined(LIB_TAO)
-#define INC_TAO -I$(TAO_ROOT) -I$(TAO_ROOT)/orbsvcs
+/* #define INC_TAO -I$(TAO_ROOT) -I$(TAO_ROOT)/orbsvcs */
+/* Added for RHE7 BUILD */
+#define INC_TAO -I$(ACE_TAO_INSTALL_PREFIX)/include
+/* #define INC_TAO -I$(TAO_ROOT) -I$(TAO_ROOT)/orbsvcs */
 #else
 #define INC_TAO
 #endif
@@ -412,7 +434,7 @@ FFLAGS = F77DefaultFlags ShareComp
 #endif
 
 #if defined(LIB_HDF)
-#define INC_HDF -I$(HDFLIB)/hdf/src -I$(HDFLIB)/mfhdf/libsrc -I$(HDFEOSLIB)/include
+#define INC_HDF -I$(HDFLIB)/include -I$(HDFEOSLIB)/include
 #else
 #define INC_HDF
 #endif
@@ -435,10 +457,28 @@ FFLAGS = F77DefaultFlags ShareComp
 #define INC_TIFF
 #endif
 
+#if defined(LIB_JPEG)
+#define INC_JPEG -I$(JPEGLIB)/include
+#else
+#define INC_JPEG
+#endif
+
 #if defined(LIB_FFTW)
 #define INC_FFTW -I$(FFTWLIB)/include
 #else
 #define INC_FFTW
+#endif
+
+#if defined(LIB_GDAL)
+#define INC_GDAL -I$(GDALLIB)/include
+#else
+#define INC_GDAL
+#endif
+
+#if defined(LIB_GSL)
+#define INC_GSL -I$(GSLLIB)/include
+#else
+#define INC_GSL
 #endif
 
 #if defined(LIB_SIMBAD)
@@ -453,10 +493,52 @@ FFLAGS = F77DefaultFlags ShareComp
 #define INC_PGPLOT
 #endif
 
+#if defined(LIB_SIFT)
+#define INC_SIFT -I$(SIFT_LIB)
+#else
+#define INC_SIFT
+#endif
+
+#if defined(LIB_CRUMBS)
+#define INC_CRUMBS -I$(CRUMBS_INC) -I$(CRUMBS_LIT_INC)
+#else
+#define INC_CRUMBS
+#endif
+
+#if defined(LIB_CERES)
+#define LIB_EIGEN
+#define LIB_GLOG
+#define INC_CERES -I$(CERES_LIB)/include
+#else
+#define INC_CERES
+#endif
+
+#if defined(LIB_EIGEN)
+#define INC_EIGEN -I$(EIGEN_LIB)
+#else
+#define INC_EIGEN
+#endif
+
+/*!!!! GLOG doesn't build on solaris, should use mini-glog instead.	*/
+/*!!!! Which means defining symbols in imake.config (because we	can't	*/
+/*!!!! put platform-specific stuff in here) and then using it in the	*/
+/*!!!! below definitions and in the link part too.			*/
+#if defined(LIB_GLOG)
+#define INC_GLOG -I$(GLOG_LIB)/include
+#else
+#define INC_GLOG
+#endif
+
 #if defined(LIB_MYSQL)
 #define INC_MYSQL -I$(MYSQLINC)
 #else
 #define INC_MYSQL 
+#endif
+
+#if defined(LIB_MYSQLCONCPP)
+#define INC_MYSQLCONCPP -I${MYSQLCONCPP_LIB}/include
+#else
+#define INC_MYSQLCONCPP
 #endif
 
 #if defined(LIB_PVM)
@@ -525,7 +607,7 @@ FFLAGS = F77DefaultFlags ShareComp
 #define INC_CPPUNIT
 #endif
 
-CPPFLAGS = INC_LOCAL -I$(V2INC) INC_TAE INC_VRDI INC_CILY INC_GUISUB INC_P1SUB INC_TLMSUB INC_UPLINKSUB INC_UPLINKTOURSUB INC_SSVSUB INC_NEATSUB INC_P2SUB INC_GLLSUB INC_CASSUB INC_P3SUB INC_MARSSUB INC_MROSUB INC_DIVSUB INC_MERIDD INC_MSLFSW INC_JNI INC_JAVA INC_FEI INCFEI5CPP INC_MDMS INC_KRB INC_KRB4 INC_SYBASE INC_MYSQL INC_ACEW INC_TAO INC_XERCES INC_CSPICE INC_PDSL INC_PDS INC_ISIS INC_HDF INC_GEOTRANS INC_NATGRID INC_TIFF INC_FFTW INC_SIMBAD INC_PGPLOT INC_PVM INC_MPI INC_TK INC_MA INC_MOTIF INC_XRT INC_CANDELA INC_RW INC_SIRTF INC_EXPAT INC_CPPUNIT 
+CPPFLAGS = INC_LOCAL -I$(V2INC) INC_TAE INC_VRDI INC_CILY INC_GUISUB INC_P1SUB INC_UPLINKSUB INC_UPLINKTOURSUB INC_SSVSUB INC_NEATSUB INC_P2SUB INC_CRUMBS INC_GLLSUB INC_CASSUB INC_P3SUB INC_MARSSUB INC_MROSUB INC_DIVSUB INC_MERIDD INC_MSLFSW INC_JNI INC_JAVA INC_FEI INCFEI5CPP INC_MDMS INC_KRB INC_KRB4 INC_SYBASE INC_MYSQL INC_ACEW INC_TAO INC_XERCES INC_CSPICE INC_PDSL INC_PDS INC_ISIS INC_HDF INC_GEOTRANS INC_NATGRID INC_TIFF INC_JPEG INC_FFTW INC_GDAL INC_GSL INC_SIMBAD INC_PGPLOT INC_EIGEN INC_GLOG INC_SIFT INC_CERES INC_PVM INC_MPI INC_TK INC_MA INC_MOTIF INC_XRT INC_CANDELA INC_RW INC_SIRTF INC_EXPAT INC_CPPUNIT INC_MYSQLCONCPP
 
 
 #endif
@@ -868,10 +950,6 @@ SYSTEMINC = $(GLLINC)
 SYSTEMLIB = $(V2OLB)/libcassub.a
 SYSTEMINC = $(CASINC)
 #endif
-#ifdef TLM_SUBLIB
-SYSTEMLIB = $(V2OLB)/libtlmsub.a
-SYSTEMINC = $(TLMGENINC) 
-#endif
 #ifdef UPLINKTOUR_SUBLIB
 SYSTEMLIB = $(V2OLB)/libuplinktoursub.a
 SYSTEMINC = $(UPLINKTOURINC)
@@ -968,11 +1046,7 @@ ERRFILE = TAE_ERRMSG.msg
 #define P3SL
 #endif
 #endif
-#if defined(LIB_TLMSUB)||defined(TLMLIB)||defined(TLM_SUBLIB)
-#define TLML -ltlmsub 
-#else
-#define TLML
-#endif
+
 #if defined(LIB_UPLINKTOURSUB)||defined(UPLINKTOURLIB)||defined(UPLINKTOUR_SUBLIB)
 #define UPLINKTOURL -luplinktoursub
 #else
@@ -1182,14 +1256,20 @@ _in_a_single_imake_file*************
 #endif
 
 #ifdef LIB_TAO
-#define TAOL -L$(TAO_ROOT)/tao -lTAO_IORTable -lTAO
+/* #define INC_TAO -I$(TAO_ROOT) -I$(TAO_ROOT)/orbsvcs */
+/* Added for RHE7 BUILD */
+/* #define TAOL -L$(TAO_ROOT)/tao -lTAO_IORTable -lTAO */
+#define TAOL -L$(ACE_TAO_INSTALL_PREFIX)/lib -lTAO_IORTable -lTAO
 #else
 #define TAOL
 #endif
 
 
 #ifdef LIB_ACE_WRAPPERS
-#define ACEWL -L$(ACE_ROOT)/lib -lACE CCCACE_EXTRAlib
+/* #define ACEWL -L$(ACE_ROOT)/lib -lACE CCCACE_EXTRAlib */
+/* Add for RHE7 BUILD */
+/* #define ACEWL -L$(ACE_ROOT)/lib -lACE CCCACE_EXTRAlib */
+#define ACEWL -L$(ACE_TAO_INSTALL_PREFIX)/lib -lACE CCCACE_EXTRAlib
 #else
 #define ACEWL
 #endif
@@ -1310,7 +1390,7 @@ _in_a_single_imake_file*************
 #endif
 
 #if defined(LIB_HDF)
-#define HDFL $(HDFLIB)/mfhdf/libsrc/libmfhdf.a $(HDFLIB)/hdf/src/libdf.a $(HDFLIB)mfhdf/port/libudport.a $(HDFEOSLIB)/src/libhdfeos.a -lz -ljpeg
+#define HDFL $(HDFLIB)/lib/libmfhdf.a $(HDFLIB)/lib/libdf.a $(HDFEOSLIB)/src/libhdfeos.a -lz
 #else
 #define HDFL
 #endif
@@ -1328,15 +1408,37 @@ _in_a_single_imake_file*************
 #endif
 
 #if defined(LIB_TIFF)
-#define TIFFL $(TIFFLIB)/lib/libgeotiff.a $(TIFFLIB)/lib/libtiff.a -lz -ljpeg
+#define TIFFL $(TIFFLIB)/lib/libgeotiff.a $(TIFFLIB)/lib/libtiff.a -lz
 #else
 #define TIFFL
 #endif
 
+/* Note: -ljpeg is required when building with TIFFLIB (vtiff3o) on
+Linux, but not on MacOS, though libjpeg is typically available on
+Linux, but not on MacOS. So libjpeg.a is found only for MacOS in
+external, yet it is not used, apparently (!) */
+#if defined(LIB_JPEG)
+#define JPEGL -L $(JPEGLIB)/lib -ljpeg
+#else
+#define JPEGL
+#endif
+
 #if defined(LIB_FFTW)
-#define FFTWL $(FFTWLIB)/lib/libfftw3.so
+#define FFTWL -L $(FFTWLIB)/lib -lfftw3
 #else
 #define FFTWL
+#endif
+
+#if defined(LIB_GDAL)
+#define GDALL $(GDALLIB)/lib/libgdal.a
+#else
+#define GDALL
+#endif
+
+#if defined(LIB_GSL)
+#define GSLL $(GSLLIB)/lib/libgsl.a $(GSLLIB)/lib/libgslcblas.a
+#else
+#define GSLL
 #endif
 
 #if defined(LIB_SIMBAD)
@@ -1349,6 +1451,38 @@ _in_a_single_imake_file*************
 #define PGPLOTL $(PGPLOTLIB)/libcpgplot.a $(PGPLOTLIB)/libpgplot.a
 #else
 #define PGPLOTL
+#endif
+
+#if defined LIB_SIFT
+#define SIFTL -L$(SIFT_LIB) -lSift 
+#else
+#define SIFTL
+#endif
+
+#if defined LIB_CRUMBS
+#define CRUMBSL $(CRUMBS_LIB)/libgrape.a $(CRUMBS_LIB)/libimage.a $(CRUMBS_LIB)/libvsl.a $(CRUMBS_LIB)/libds.a $(CRUMBS_LIB)/libpath.a $(CRUMBS_LIT_LIB)/libcahvor.a
+#else
+#define CRUMBSL
+#endif
+
+#if defined LIB_CERES
+#define CERESL -L$(CERES_LIB)/lib -lceres
+#else
+#define CERESL
+#endif
+
+/* Note: there's no link for LIB_EIGEN.  It's all include. */
+
+#if defined LIB_GLOG
+#define GLOGL $(GLOG_LIB)/lib/libglog.a
+#else
+#define GLOGL
+#endif
+
+#if defined(LIB_MYSQLCONCPP)
+#define MYSQLCONCPPL -L${MYSQLCONCPP_LIB}/lib -lmysqlcppconn
+#else
+#define MYSQLCONCPPL
 #endif
 
 #if defined(LIB_MYSQL)
@@ -1505,12 +1639,6 @@ _in_a_single_imake_file*************
 #define TCLL
 #endif
 
-#if defined(LIB_JPEG)
-#define JPEGL -ljpeg
-#else
-#define JPEGL
-#endif
-
 /* Note: there are currently no includes for this. */
 /* This is used by applications *calling* Java (starting a VM) */
 #if defined(LIB_CALLABLE_JAVA)
@@ -1525,7 +1653,7 @@ _in_a_single_imake_file*************
 #define OMPL
 #endif
 
- LIBS = -L$(V2OLB) LOCL CJL P3SL TLML MARSSL MROL MERIDDL MSLFSWL UPLINKTOURL SSVL NEATL GLLL CASL P2SL GUISL P1SL DIVL CILYL VRDIL MATH77L SIRTFPHEL SPICEL FEI3L FEI5CPPL DBIL TSVCL TNAML TNOTL TPORL TAOL ACEWL PTHRL FEIL MDMSL SYBASEL MYSQLL XERL PDSLL PDSL HDFL GEOTRANSL NATGRIDL TIFFL FFTWL JPEGL SIMBADL PGPLOTL MCL MDCL PVML MPIL EXPL RWL THRL V2L ISISL NETL CRSL TAEL TCLL MAL XRTGRL XRT3DL MOTIFL CANDELAL FTNL CCCL MATHlib KRB4L KRBL OMPL SPECIALlib CPPUNITL
+LIBS = -L$(V2OLB) LOCL CJL P3SL MARSSL MROL MERIDDL MSLFSWL UPLINKTOURL SSVL NEATL GLLL CASL P2SL CRUMBSL GUISL P1SL DIVL CILYL VRDIL MATH77L SIRTFPHEL SPICEL FEI3L FEI5CPPL DBIL TSVCL TNAML TNOTL TPORL TAOL ACEWL PTHRL FEIL MDMSL SYBASEL MYSQLL XERL PDSLL PDSL HDFL GEOTRANSL NATGRIDL TIFFL JPEGL FFTWL GDALL GSLL SIMBADL PGPLOTL SIFTL CERESL GLOGL MCL MDCL PVML MPIL EXPL RWL THRL V2L ISISL NETL CRSL TAEL TCLL MAL XRTGRL XRT3DL MOTIFL CANDELAL FTNL CCCL MATHlib KRB4L KRBL OMPL SPECIALlib CPPUNITL MYSQLCONCPPL
 
 #endif			/* PROGRAM || CCC_TEMPLATES */
 
@@ -1638,10 +1766,10 @@ PROGRAM: EXTRACT_TARGET $(OBJS)
 #ifdef USES_EXTRACT
 #ifdef IMAKE_TOKEN_PASTING_HACK
 #define EXTRACT(x,libname) >/dev/null@@	$(ARX) $$V2OLB/lib##libname##.a x@@	echo
-#define EXTRACT_TAE(x,libname) >/dev/null@@	-$(ARX) $$TAELIB/lib##libname##.a x@@	-if [ ! -f x ]; then echo "static int q;">tmp.c;cc -c -o x tmp.c;$(RM) -f tmp.c;fi@@	echo
+#define EXTRACT_TAE(x,libname) >/dev/null@@	-$(ARX) $$TAELIB/lib##libname##.a x@@	-if [ ! -f x ]; then echo "static int q;">tmp.c;CC_MACRO -c -o x tmp.c;$(RM) -f tmp.c;fi@@	echo
 #else
 #define EXTRACT(x,libname) >/dev/null@@	$(ARX) $$V2OLB/lib/**/libname/**/.a x@@	echo
-#define EXTRACT_TAE(x,libname) >/dev/null@@	-$(ARX) $$TAELIB/lib/**/libname/**/.a x@@	-if [ ! -f x ]; then echo "static int q;">tmp.c;cc -c -o x tmp.c;$(RM) -f tmp.c;fi@@	echo
+#define EXTRACT_TAE(x,libname) >/dev/null@@	-$(ARX) $$TAELIB/lib/**/libname/**/.a x@@	-if [ ! -f x ]; then echo "static int q;">tmp.c;CC_MACRO -c -o x tmp.c;$(RM) -f tmp.c;fi@@	echo
 #endif
 extract:
 	echo LINK_LIST LINK_LIST2 LINK_LIST3 LINK_LIST4 >/dev/null

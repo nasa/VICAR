@@ -1,0 +1,8 @@
+#define SUBROUTINE  	mp_bridges
+
+#define MODULE_LIST 	mp_bridges.c
+
+#define P1_SUBLIB
+
+#define FTN_STRING	
+#define USES_ANSI_C

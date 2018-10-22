@@ -1,0 +1,88 @@
+procedure option=selftutor help=*
+
+  refgbl pho_PROC_NAME
+!-----------------------------------------------------------------------------
+! PHO_PAR_FILE.PDF
+!
+! This is the PDF for the point of the MDF which defines the photometric 
+! function, if "PHO_FUNC" has been set to 'PAR_FILE' in the first point of the 
+! menu "pho_PROC_NAME"_GENERAL.PDF):
+! In this PDF, the user is asked for the name of a file containing photo-
+! metric parameters.
+!
+!-----------------------------------------------------------------------------
+
+        parm PHO_PAR_FILE	string count=0:1 def=--
+
+	PARMSET name=pho_par_file_sub help=*
+
+	  parm PHO_PAR_FILE	string count=0:1 def=--
+
+	END-PROC
+
+body
+
+	if (_tutor=1)
+
+	   tutor pho_par_file_sub 				+
+		|restore=pho_par_file.par, save=pho_par_file.par|
+
+!	   repeat the tutur one time if the filename was not given :
+
+	   restore-parm pho_par_file.par
+
+	   if ( $count( PHO_PAR_FILE ) = 0 )				+
+	   	tutor pho_par_file_sub 					+
+			|restore=pho_par_file.par, save=pho_par_file.par|
+
+	   return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs needs "
+	   write " a photometric parameter IBIS2-file ."
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+
+.title
+PHO_PAR_FILE sub menu (for input of photometric parameter file name as input)
+
+.help
+
+ PHO_PAR_FILE.PDF
+
+ This is the PDF for the point of the MDF which defines the photometric 
+ function, if "PHO_FUNC" has been set to 'PAR_FILE' in the first point of the 
+ menu ("pho_PROC_NAME"_GENERAL.PDF):
+ In this PDF, the user is asked for the name of a IBIS2-file containing photo-
+ metric parameters (see pho_par_file-package).
+
+Programmer:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+
+.level1
+
+.vari PHO_PAR_FILE
+photometric parameter file
+
+.level2
+
+.vari PHO_PAR_FILE
+Name of the photometric parameter file containing parameters for some 
+photometric functions. This IBIS-file is of the type "phopar" (see the 
+pho_par_file-subroutine-package).
+
+.end
+

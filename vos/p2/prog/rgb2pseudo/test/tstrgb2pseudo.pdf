@@ -1,0 +1,16 @@
+procedure
+refgbl $echo
+body 
+!@!@let _onfail="continue"
+let _onfail="return"
+let $echo="yes"
+!
+gen out=r.img nl=5 ns=5 ival=0
+gen out=g.img nl=5 ns=5 ival=10
+gen out=b.img nl=5 ns=5 ival=20
+rgb2pseudo inp=(r.img,g.img,b.img) out=(pseu.img,ibis.img) nbits=4
+list pseu.img
+!qrep inp=ibis.img
+ibis-list inp=ibis.img
+!
+end-proc

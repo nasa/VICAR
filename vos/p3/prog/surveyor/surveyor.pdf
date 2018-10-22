@@ -1,0 +1,41 @@
+PROCESS HELP=*
+END-PROC
+.TITLE
+ SURVEYOR
+.HELP
+     Surveyor is an interactive, pull down menu based
+program used to create terrain fly by animations. As 
+input it takes two registered images (an image of the 
+region from the top and an elevation image). The user 
+then creates a flight path around the data interactively. 
+Once the path is defined Surveyor can create the frames 
+for the animation which can then be put on video tape, 
+film etc. Surveyor is run outside of VICAR on Sun 
+computers.
+
+     Make sure SURVHOME/bin/sun4 is in your path before
+running Surveyor. By doing a 'select d' the SURVHOME
+environment variable will be automatically defined.
+
+.PAGE
+     To run Surveyor do the following at the command prompt:
+> survd
+> surveyor
+     This will run Surveyor. If for some reason you exit from
+Surveyor abnormally, make sure you kill the survd process.
+
+     To find the process id of the survd process do:
+> ps -auxww | grep survd
+
+     And you will get something like:
+
+> YourUserName  747  0.0  0.3 2272  152 ?  I    11:37   0:00 survd
+
+     Then use the kill command to kill the stray survd process:
+
+> kill -9 747
+
+     For more information please consult the user guide.
+Your system administrator should have a copy.
+     
+.END

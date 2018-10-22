@@ -1,0 +1,813 @@
+  process help=*
+
+
+	parm OUT	type=(string,32) count=1	default=photcat.dat
+
+
+	parm PHO_FUNC type=(string,32) count=1 		+
+			valid = (			+
+				LAMBERT,		+
+				MINNAERT,		+
+				IRVINE,			+
+				VEVERKA,		+
+				BURATTI1,		+
+				BURATTI2,		+
+				BURATTI3,		+
+				MOSHER,			+
+				LUMME_BOWEL_HG1,	+
+				HAPKE_81_LE2,		+
+				HAPKE_81_COOK,		+
+				HAPKE_86_HG1,		+
+				HAPKE_86_HG2,		+
+				HAPKE_86_LE2,		+
+				HAPKE_HG1_DOM,		+
+				REGNER_HAPKE_HG1, 	+
+				ATMO_CORR_REGNER	+
+				) 	default=MINNAERT
+
+	parm CLASS_ID	int	count=1			default=1	
+
+
+        parm INC_ANG	real count=0:100 		default=--	+
+			    				valid=(0.0:90)
+        parm EM_ANG 	real count=0:100 		default=--	+
+			    				valid=(0.0:90)
+        parm PHAS_ANG 	real count=0:100 		default=--	+
+							valid=(0.0:180)
+	parm START	real count=0:3			default=(10,10,20)
+	parm DELTA	real count=0:3			default=(30,30,70)
+
+	parm SIGMA	real count=1			default=0.000001
+	parm SEED	int  count=1			default=-9999999
+
+	parm PRINT 	keyword count=0:1 valid=PRINT 	default=-- 
+
+
+	parm ALBEDO 	real count=0:1 			default=--
+	parm EXPONENT 	real count=0:1 valid=(0:1)	default=--
+	parm A_VEVERKA 	real count=0:1 			default=--
+	parm B_VEVERKA 	real count=0:1 			default=--
+	parm C_VEVERKA 	real count=0:1 			default=--
+	parm D_VEVERKA 	real count=0:1 			default=--
+	parm MO_EXP1 	real count=0:1 			default=--
+	parm MO_EXP2 	real count=0:1 			default=--
+	parm E_BURATTI 	real count=0:1 			default=--
+	parm DEN_SOIL 	real count=0:1 			default=--
+	parm W_SOIL 	real count=0:1 valid=(0:1)	default=--
+	parm HG1_SOIL 	real count=0:1 			default=--
+	parm HG2_SOIL 	real count=0:1 			default=--
+	parm HG_ASY_SOIL real count=0:1 		default=--
+	parm LE1_SOIL 	real count=0:1 			default=--
+	parm LE2_SOIL 	real count=0:1 			default=--
+	parm H_SHOE 	real count=0:1 			default=--
+	parm B_SHOE 	real count=0:1 			default=--
+	parm H_CBOE 	real count=0:1 			default=--
+	parm B_CBOE 	real count=0:1 			default=--
+	parm THETA 	real count=0:1 			default=--
+	parm COOK 	real count=0:1 			default=--
+	parm TAU_ATM 	real count=0:1 			default=--
+	parm W_ATM 	real count=0:1 valid=(0:1)	default=--
+	parm HG1_ATM 	real count=0:1 			default=--
+	parm IRV_EXP1 	real count=0:1 			default=--
+	parm IRV_EXP2 	real count=0:1 			default=--
+
+
+
+
+  end-proc
+
+.title
+VICAR program PHOTTEST generates synthetic photometric data and 
+stores them in an IBIS2 photometric catalog (phocat).
+
+.help
+PURPOSE:
+
+PHOTTEST  is a VICAR program which generates synthetic photometric data and 
+stores them in an IBIS2 photometric catalog (phocat), for use in testing 
+photometric functions in program PHOTFIT2.
+	
+
+FUNCTION:
+
+PHOTTEST computes reflectances for a set of points and writes them into the 
+catalog (phocat).  The points can either be specified directly by parameters 
+INC_ANG, EMI_ANG, and PHAS_ANG, or can be computed in a grid using parameters 
+START and DELTA. Shifts can be added to the data with gaussian distribution to 
+simulate observational errors which will be an absolute error. 
+The parameters used to generate the data are written into the property label.
+
+
+PHOCAT FILE:
+
+The structure of the phocat file is desined in such a way that tiepoint files 
+can be extended and containing all collumns of the old IBIS1 photometric 
+catalog files. The program PHOTTEST used only one IMAGE_* group. but tiepoint 
+files using some IMAGE_* groups containing informations relates to the image.
+GENERAL_QLF containes informations relates to the object point (e.g.  CLASS_IDentifier). OBJECT_COORDINATES containes only coordinates of the object 
+point (e.g. LATitude, LONGitude or the X,Y,Z-coordinates in planetocentric 
+coordinate system).
+
+The structure of the photometric catalog file is given by: 
+
+abstract groups	      primitive groups    units	      formats	used in PHOTTEST
+
+IMAGE_1 		line 		  pixels	REAL	 used
+			samp		  pixels	REAL	 used
+			ObjectLine	  pixels	REAL	  --
+			ObjectSamp	  pixels	REAL	  --
+			BoxLines	  pixels	REAL	  --
+			LuminanceLat	  degrees	DOUB	  --
+			LuminanceLong	  degrees	DOUB	  --
+			IncidenceAngle	  degrees	DOUB	 used
+			EmissionAngle	  degrees	DOUB	 used
+			PhaseAngle	  degrees	DOUB	 used
+			DN_BoxMean	  DN		DOUB	  --
+			Radiance	W/cm**2/str/nm	DOUB	  --
+			I/F		  --		DOUB	 used
+			StandDev	  --		DOUB	 used
+
+OBJECT_COORDINATES  	LAT		  degrees	REAL	  --
+			LONG		  degrees	REAL	  --
+
+GENERAL_QLF		--		  --		DOUB	  --
+			CLASS_ID	  --		FULL	 used
+
+
+
+
+
+EXECUTION:
+
+
+
+In the SHELL-VICAR :
+
+	 PHOTTEST 'OUT=PHOTCAT.DAT PARAMS'
+  (no default values for the photometric parameters!)
+
+
+
+In the command modus :
+
+	TAE> PHOTTEST OUT=PHOTCAT.DAT PARAMS
+   (no default values for the photometric parameters!)
+ or
+	TAE> PHOTTESTM OUT=PHOCAT.DAT PARAMS  
+  (it helds for every photometric function its own parameter defaults)
+
+
+
+In the tutor modus  --> menu-driven parameter input :
+
+	TAE> tutor PHOTTESTM   
+  (it helds for every photometric function its own parameter defaults)
+
+
+tutor PHOTTESTM
+
+There are separate PDFs for each selection point seen in the main menu.  On 
+selection of a particular menu point you will enter the normal tutor mode of 
+this PDF.  In this program, the menu points have the following meanings:
+
+1. Select the first menu point to input the general parameters 
+   such as the names of output catalog, the illumination conditions, and 
+   so on.
+2. Containing the parameters of the selected photometric function.
+   The photometric function pertaining to this menu point and the name of this 
+   menu point are changing depending on your input of the parameter PHO_FUNC
+   in the first menu point.
+3. Select this menu point to specify the name of the parameter file which is 
+   generated by the program (the default name in VICAR programs: LAST.PAR).
+   This is useful because in a Menu there is no 'save'-command to save a 
+   parameter file with a user-specified name (e.g. "save proc_name.par").
+
+   EXECUTION :
+
+   USER ACTION				RESULT
+
+   don't call this menu point		last.par
+
+   exit this menu point with 'exit'	last.par
+
+   exit this menu point with 'run'the user-specified name or  
+					phottestm.par' 
+
+4. This menu point is to be entered to execute the main program.
+
+You can repeat all steps and reenter all menu items except the step that leads 
+to the execution of the program.
+
+If you request help for the selection points in the Menu, you will get the help 
+text contained in the respective sub PDFs.
+
+
+
+HELPS :
+
+- You will get the common help contained in the ".mdf" file (phottestm.mdf) by 
+  typing "help *" in the menu,
+- but you will get the help text contained in programs main-PDF (phottest.pdf   
+   or phottestm.pdf) by processing of "help-help" applied to the program 
+  (should be verry similary to the help of phottestm.mdf).
+- If you request help for the selection points in the Menu, you will get the 
+  help text contained in the respective sub PDFs.
+
+
+
+
+REQUIREMENTS and DEPENDENCIES:
+
+LIBRARIES TO RUN PROGRAM:	LIB_TAE, LIB_RTL, LIB_P2SIB, LIB_P1SIB
+
+INCLUDE-FILES:			vicmain_c, math.h, defines.h, 
+				ibisfile.h, ibiserrs.h, 
+				pho.h, pho_global.pdf
+
+SUBROUTINES:			pho_routines.com
+				PHOPDF.COM
+
+	
+GLOBAL VARIABLE:
+The following global variables defined by the pho_global.pdf must be referenced:
+
+Name		Type			Description
+
+PHO_FUNC_type 	string			It containes the names of the 
+					valid photometric functions (to 
+					pass into the menu).
+
+pho_PROC_NAME 	string			Name of the main program 
+
+
+
+INTERFACES:
+
+
+INPUT:	
+
+
+VICAR PDF-PARAMETERS:
+
+Name	Type	count	Default	Description
+
+
+1.) phottestm_general.pdf 	(menu point (1) of PHOTTEST)
+
+OUT	char*32	 1	--	File name for the photometric catalog. 
+							
+PHO_FUNC char*32 1  HAPKE_86_LE2 Photometric function.
+
+CLASS_ID int	1	1	class_id 
+
+INC_ANG	real 	0:100	--	Incidence angles in degree.
+
+EM_ANG	real 	0:100	--	Emission angles in degree.
+
+PHAS_ANG real 	0:100	--	Phase angles in degree.
+
+START		real 0:3	Starting point for grid in degrees.
+				(INC_ANG,EM_ANG,PHAS_ANG)
+
+DELTA		real 0:3	Increment for grid in degrees.
+				(INC_ANG,EM_ANG,PHAS_ANG)
+
+SIGMA		real		Simulated standard deviation.
+
+SEED		int		Arbitrary seed for SIGMA.
+
+PRINT		keyword		Screen output  of data generated.
+
+
+
+2.) pho_"&PHO_FUNC".pdf	(menupoint (2) of PHOTTESTM) 
+(photometry menu; the subPDFs pertaining to photometry are deliverd to the 
+VICAR system by phopdf.com)
+
+actuell  second menu	Name		default		Comment
+(photom.function)	(funct.params)
+
+LAMBERT			ALBEDO		1.0
+
+MINNAERT		ALBEDO		1.0
+			EXPONENT	0.6
+
+IRVINE			EXPONENT	0.9
+			IRV_EXP1	0.118
+			IRV_EXP2	0.0039
+
+VEVERKA			A_VEVERKA	0.997
+			B_VEVERKA	0.6
+			C_VEVERKA	0.003
+			D_VEVERKA	0.14
+
+BURATTI1		ALBEDO		0.5
+			B_VEVERKA	0.6
+			E_BURATTI	0.14
+
+BURATTI2		ALBEDO		0.5
+			B_VEVERKA	0.6
+			C_VEVERKA	0.003
+ 			E_BURATTI	0.14
+
+BURATTI3		ALBEDO		0.5
+			B_VEVERKA	0.6
+			C_VEVERKA	0.003
+			D_VEVERKA	0.14
+			E_BURATTI	0.14
+
+MOSHER			A_VEVERKA	0.5
+			B_VEVERKA	0.6
+			C_VEVERKA	0.003
+			D_VEVERKA	0.14
+			MO_EXP1		0.5
+			MO_EXP2		0.1
+
+LUMME_BOWEL_HG1	W_SOIL	0.3
+			H_SHOE		0.06
+			DEN_SOIL	0.8
+			THETA		20
+			HG1_SOIL	-0.26
+
+HAPKE_81_LE2		W_SOIL		0.3
+			H_SHOE		0.06
+			LE1_SOIL	0.3
+			LE2_SOIL	0.3
+
+HAPKE_81_COOK		W_SOIL		0.3
+			H_SHOE		0.06
+			LE1_SOIL	0.3
+			LE2_SOIL	0.3
+			COOK		0.9
+
+HAPKE_86_HG1		W_SOIL		0.3
+			H_SHOE		0.06
+			B_SHOE		2.0
+			THETA		15.0
+			HG1_SOIL	-0.26
+
+HAPKE_86_HG2		W_SOIL		0.21
+			H_SHOE		0.07
+			B_SHOE		2.0
+			THETA		20.0
+			HG1_SOIL	-0.29
+			HG2_SOIL	0.39
+			HG_ASY_SOIL	1.0
+
+HAPKE_86_LE2		W_SOIL		0.21
+			H_SHOE		0.07
+			B_SHOE		2.012
+			THETA		20.0
+			LE1_SOIL	0.29
+			LE2_SOIL	0.39
+
+HAPKE_HG1_DOM		W_SOIL		0.3
+			H_SHOE		0.06
+			B_SHOE		1.0
+			THETA		20.0
+			HG1_SOIL	-0.26
+ 			H_CBOE		0.06
+			B_CBOE		1.0
+
+REGNER_HAPKE_HG1	W_SOIL		0.3
+			H_SHOE		0.06
+			B_SHOE		2.0
+			THETA		20.0
+			HG1_SOIL	-0.26
+			W_ATM		0.78
+			TAU_ATM		0.05
+			HG1_ATM		0.35
+
+ATMO_CORR_REGNER	W_SOIL		0.3
+			H_SHOE		0.06
+			B_SHOE		2.0
+			THETA		20.0
+			HG1_SOIL	-0.26
+			W_ATM		0.78
+			TAU_ATM		0.05
+			HG1_ATM		0.35
+
+
+
+
+
+3.) common_save_par.pdf		(menupoint (3) of PHOTTESTM)
+(see common_subpdf.com)
+
+SAVE_PAR	string		Name for the TEA-parameter file
+
+
+4.) common_proc_done.pdf	(menupoint (4) of PHOTTESTM)
+(run the main program PHOTTEST; see common_subpdf.com)
+
+
+	
+OUTPUT:
+
+FILES:				IBIS2 photometric catalog file 
+				(see parameter OUT)
+
+SCREEN OUTPUT:			Class identification, photometric function and 
+				its parameters, # points, 
+				mean error and  standard deviation depending of 
+				parameter SIGMA,
+				generated data (optional accordingly parameter 
+				PRINT)
+
+
+
+BACKGROUND AND REFERENCES :	see pho_routines.com and phopdf.com
+
+
+
+SOFTWARE PLATFORM :		VICAR, TAE 5.2
+				
+
+
+HARDWARE PLATFORM :		VMS/UNIX(AXP/SOLARIS,SGI)
+				No particular hardware required;
+				tested on AXP/SOLARIS/SGI
+
+
+PROGRAMMING LANGUAGE :		TCL , C	
+
+
+HISTORY:			20-1-87 L.W.Kamp: 	original 
+				Nov. '95 F.Oschuetz:	new written to be 
+							portable to run on 
+							AXP/SOLARIS/SGI 
+							based on
+							pho_routines.com and
+							phopdf.com 
+
+
+COGNIZANT PROGRAMMER:		Friedel Oschuetz
+				Institute of Planetary Exploration
+				DLR
+				12484 Berlin (FRG)
+
+
+
+.LEVEL1
+
+.VARI OUT
+Photometric catalog
+
+.VARI PHO_FUNC
+Photometric function type
+
+.VARI CLASS_ID
+class_id
+
+.VARI INC_ANG
+Incidence angles
+
+.VARI EM_ANG
+Emission angles
+
+.VARI PHAS_ANG
+Phase angles
+
+.VARI START
+Starting point for grid
+(INC_ANG,EM_ANG,AZIM_ANG)
+
+.VARI DELTA
+Increment for grid
+(INC_ANG,EM_ANG,AZIM_ANG)
+
+.VARI SIGMA
+Standard deviation
+
+.VARI SEED
+Arbitrary seed for SIGMA
+
+.VARI PRINT
+Screen output of data generated.
+
+.VARI ALBEDO
+albedo
+
+VARI EXPONENT
+Minnaert's konstant
+
+.VARI A_VEVERKA 
+Veverka parameter
+
+.VARI B_VEVERKA
+Veverka parameter
+
+.VARI C_VEVERKA
+Veverka parameter
+
+.VARI D_VEVERKA
+Veverka parameter
+
+.VARI MO_EXP2
+Mosher's exponent
+
+.VARI MO_EXP1
+Mosher's exponent
+
+.VARI E_BURATTI
+Buratti's parameter
+
+.VARI DEN_SOIL
+Hapke parameter
+
+.VARI W_SOIL
+Hapke parameter
+
+.VARI HG1_SOIL
+Hapke Parameter
+
+.VARI HG2_SOIL
+Hapke parameter
+
+.VARI HG_ASY_SOIL
+Hapke parameter
+
+.VARI LE1_SOIL
+Hapke parameter
+
+.VARI LE2_SOIL
+Hapke parameter
+
+.VARI H_SHOE
+Hapke parameter
+
+.VARI B_SHOE
+Hapke parameter
+
+.VARI H_CBOE
+Hapke-Dominique parameter
+
+.VARI B_CBOE
+Hapke-Dominique parameter
+
+.VARI THETA
+Hapke parameter
+
+.VARI COOK
+Hapke-Cook parameter
+
+.VARI TAU_ATM
+Regner parameter
+
+.VARI W_ATM
+Regner parameter
+
+.VARI HG1_ATM
+Regner parameter
+
+.VARI IRV_EXP1
+Irvine parameter
+
+.VARI IRV_EXP2
+Irvine parameter
+
+.VARI SAVE_PAR
+file name for par-file
+
+
+.LEVEL2
+
+.VARI OUT
+Filename of the photometric catalog file (IBIS2) of type "phocat".
+The structure of the phocat file is desined in such a way that tiepoint files 
+can be extended and containing all collumns of the old IBIS1 photometric 
+catalog files. 
+The program PHOTTEST used only one IMAGE_* group IMAGE_1 containing 
+informations relates to the image. GENERAL_QLF containes informations relates 
+to the object point (e.g. CLASS_IDentifier). 
+There are 19 columns in this file. All are empty exept folowing columns:
+	IMAGE_1 & IncidenceAngle
+	IMAGE_1 & EmissionAngle	 
+	IMAGE_1 & PhaseAngle
+	IMAGE_1 & I/F 		= reflectance values as computed from the 
+				  photometric function.
+	IMAGE_1 & StandDev
+	GENERAL_QLF & CLASS_ID  = Class identification
+
+
+.VARI PHO_FUNC
+Photometric function :
+
+	valid values :	LAMBERT, 
+			MINNAERT, 
+			IRVINE, 
+			VEVERKA, 
+			BURATTI1, 
+			BURATTI2, 
+			BURATTI3, 
+			MOSHER, 
+			LUMME_BOWEL_HG1, 
+			HAPKE_81_LE2, 
+			HAPKE_81_COOK, 
+			HAPKE_86_HG1, 
+			HAPKE_86_HG2, 
+			HAPKE_86_LE2, 
+			HAPKE_HG1_DOM, 
+			REGNER_HAPKE_HG1, 
+			ATMO_CORR_REGNER
+.page
+NOTE: When returning to the highest level of the menu (i.e. the MDF-file) you 
+will see that the second selection point has been changed according to your 
+input of PHO_FUNC.
+For more see pho_routines.com and PHOPDF.COM 
+
+.VARI CLASS_ID
+The class_id nummerates the photometric functions. For using different fotometric functions or parameter sets.
+
+
+.VARI INC_ANG
+Incidence angle in degree.
+This parameter specifies the incidence angles for up to 100 points. If any of 
+INC_ANG, EMIS_ANG, and PHAS_ANG are specified, then all three must be 
+specified, and all with the same number of values.
+
+.VARI EM_ANG
+Emission angle in degree.
+This parameter specifies the incidence angles for up to 100 points. If any of 
+INC_ANG, EMIS_ANG, and PHAS_ANG are specified, then all three must be 
+specified, and all with the same number of values.
+
+.VARI PHAS_ANG
+Phase angle in degree.
+This parameter specifies the incidence angles for up to 100 points. If any of 
+INC_ANG, EMIS_ANG, and PHAS_ANG are specified, then all three must be 
+specified, and all with the same number of values.
+
+.VARI START
+Starting point for grid in degrees.
+This parameter is only used if INC_ANG, IMI_ANG, and PHAS_ANG are not 
+specified. It is used, togeter with parameter DELTA, to compute a grid of 
+angles. This parameter specifies the starting values for the grid of: (Incidence, Emission, Azimuth) in that order. The Phase angle is computed for 
+each point from the three given angles. 
+The grid range for these angles is: 
+	Incidence & Emission angles  : 0 -  90 degrees. 
+	Azimuth 		     : 0 - 180 degrees.
+
+.VARI DELTA
+Increment for grid in degrees.
+This parameter is only used if INC_ANG, EMIS_ANG, and PHAS_ANG are not 
+specified. It is used, together with parameter START, to compute a grid of 
+angles. This parameter specifies the increment values for the grid of: 
+(Incidence, Emission, Azimuth) in that order.
+The grid range for these angles is: 
+	Incidence & Emission angles  : 0 -  90 degrees. 
+	Azimuth 		     : 0 - 180 degrees.
+
+.VARI SIGMA
+Simulated standard deviation.
+If this quantity is non_zero, then the program will simulate experimental error 
+by adding an absolute "error" to each computed reflectance. These errors will 
+be random with a gaussian probability distribution with standard deviation = 
+SIGMA. Since reflectances cannot exceeded 1.0, this is also assumed to be a 
+maximum on SIGMA. To check that the simulated errors are reasonable, the 
+program prints out the computed mean error and standard deviation for the 
+errors added. The "STD.DEV" should be about equal to SIGMA, and the "MN.ERR" 
+should be close to 0 (much smaller than SIGMA).
+
+.VARI SEED
+Arbitrary seed for SIGMA.
+This is an arbitrary number used to start the random number generator for 
+SIGMA. It is only used if SIGMA is not zero. The default can be used unless the 
+user wants to ensure that the random numbers are different from a previous 
+run. The value of this parameter should be a large, odd, negative integer.
+
+.VARI PRINT
+Screen output of the data generated.
+If this keyword is set to 'PRINT', a table will be printed to the screen. 
+
+.VARI ALBEDO
+Albedo -  valid for the Lambert and Minnaert photometric functions.
+
+.VARI EXPONENT
+Exponent - the geometrical constant k of the Minnaert photometric function.
+
+.VARI A_VEVERKA 
+Parameter of the Veverka, Squyres-Veverka and Mosher photometric functions.
+
+.VARI B_VEVERKA
+Parameter of the Veverka, Mosher, Squyres-Veverka and Buratti 
+photometric functions.
+
+.VARI C_VEVERKA
+Parameter of the Veverka, Mosher, Squyres-Veverka and Buratti 
+photometric functions.
+
+.VARI D_VEVERKA
+Parameter of the Veverka, Mosher, Squyres-Veverka and Buratti 
+photometric functions.
+
+.VARI E_BURATTI
+Buratti's parameter for modification of the Veverka photometric function.
+
+.VARI MO_EXP1
+Modification of the coefficient k in the Minnaert part 
+of Mosher's photometric function (goes along with MO_EXP2).
+
+.VARI MO_EXP2
+Modification of the coefficient k in the Minnaert part 
+of Mosher's photometric function (goes along with MO_EXP1).
+
+.VARI DEN_SOIL
+Specific volume density of the soil.
+
+.VARI W_SOIL
+Single-scattering albedo of the soil particles. It characterizes the 
+efficiency of an average particle to scatter and absorb light. 
+One of the classical Hapke parameter.
+
+.VARI HG1_SOIL
+Parameter of the first term of the Henyey-Greenstein soil particle 
+phase function.
+
+.VARI HG2_SOIL
+Parameter of the second term of the Henyey-Greenstein soil particle 
+phase function.
+
+.VARI HG_ASY_SOIL
+Asymmetry parameter (weight of the two terms 
+in the Henyey-Greenstein soil phase function).
+
+.VARI LE1_SOIL
+Parameter of the first term of the Legendre-Polynomial soil particle 
+phase function.
+
+.VARI LE2_SOIL
+Parameter of the second term of the Legendre-Polynomial soil particle 
+phase function.
+
+.VARI H_SHOE
+One of the classical Hapke parameter.
+Parameter which characterizes the soil structure in the terms of porosity, 
+particle-size distribution, and rate of compaction with depth (angular width 
+of opposition surge due to shadowing). 
+
+.VARI B_SHOE
+One of the classical Hapke parameter. 
+Opposition magnitude coefficient. The total amplitude of the opposition surge 
+due to shadowing. It is the ratio of the light scattered from near the 
+illuminated surface of the particle to the total amount of light scattered at 
+zero phase : 
+B_SHOE=S(0)/(W_SOIL*p(0))
+with p(0) - soil phase function
+S(0) - opposition surge amplitude term which characterizes the contribution of 
+light scattered from near the front surface of individual particles at zero 
+phase.
+.page
+For a true, shadow-hiding opposition effect, 0<=B_SHOE<=1.
+However, there are several other phenomena that may also cause a surge in 
+brightness at small phase angles. These including the following:
+1) The coherent backscatter or weak photon localisation due to multiply 
+   scattered light.
+2) An single-particle opposition effect caused by complex porous agglomerates 
+   ( soil phase function )
+3) Glory caused by sperical particles ( soil phase function )
+4) Internal reflections of transparent particles ( soil phase function )
+   These various phenomena may be large enough to increase the opposition surge 
+   by more than a factor of 2. This possibility may be taken into account by 
+   allowing B_SHOE to be greater than 1.
+ 
+.VARI H_CBOE
+Parameter of the coherent backscattering ( angular width of the opposition 
+surge due to multiply scattered light).
+H_CBOE=lambda/(2*pi*L)
+lambda - wavelength
+L - the free path of the phonon in the medium
+
+.VARI B_CBOE
+Opposition magnitude coefficient of the coherent backscattering 
+(height of opposition surge due to multiply scattered light). 
+
+.VARI THETA
+Average topographic slope angle of surface roughness at subresolution scale.
+One of the classical Hapke parameter. 
+
+.VARI COOK
+ Parameter of the Cook's modification of the old Hapke function.
+
+.VARI TAU_ATM
+Optical depth of the atmosphere.
+
+.VARI W_ATM
+Single scattering albedo of the atmospheric aerosols.
+
+.VARI HG1_ATM
+Parameter of the first term of the Henyey-Greenstein atmospheric phase function.
+
+.VARI IRV_EXP1
+Parameter of the Irvine photometric function.
+
+.VARI IRV_EXP2
+Parameter of the Irvine photometric function.
+
+.VARI SAVE_PAR
+This is the name for the TAE-parameter file containing all parameters 
+needed to running the program. The default name is PHOTTEST.PAR.
+A user-specified name can be given to that file. This is similar to the
+SAVE command in the Tutor Mode.
+
+.end

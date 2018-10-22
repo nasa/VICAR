@@ -1,0 +1,33 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+!
+Write " "
+Write " The Test Data are handled for both VMS and UNIX in this PDF. "
+Write " At present (May 1994) for the UNIX, in order to run the program, "
+Write " the data file (MIPLDISK:[MIPL.VGR].reslfil) which is approx. "
+Write " 28000 blocks MUST be copied to the LOCAL directory where the "
+Write " program resides. "
+Write " This UNIX restriction on the data will be changed eventually. "
+Write " "
+refgbl $syschar
+local resl_fil
+!
+!  First,  VMS
+!
+if ($syschar(1) = "VAX_VMS")
+   let resl_fil = "MIPLDISK:[MIPL.VGR]resl.fil"
+!
+!  Now,    UNIX
+!
+else
+   let resl_fil = "resl.fil"
+end-if
+
+
+tpu75 @resl_fil
+
+end-proc

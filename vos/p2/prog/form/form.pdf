@@ -1,0 +1,60 @@
+PROCESS HELP=*
+  LOCAL DUMMY   INTEGER
+  LOCAL DUMSTR  STRING
+  PARM INP      (STRING,80)
+  PARM FORMAT   NAME    DEFAULT=DUMSTR
+  PARM NL	NAME    DEFAULT=DUMMY
+  PARM NS	NAME    DEFAULT=DUMMY
+  PARM NB	NAME    DEFAULT=DUMMY
+
+!# annot function="Vicar Procedure Generation"
+!# annot keywords=("data format","Output parameter","TAE variable")
+END-PROC
+.TITLE
+Returns image format and size as TAE variables
+.HELP
+ "form" opens an input file and returns the data format, NB, NL, and NS
+ as output parameters.
+
+ The following procedure is an example of its use to obtain the
+ format of a given image file:
+.PAGE
+PROCEDURE
+  PARM  INP	TYPE=STRING
+  LOCAL FORMAT  TYPE=KEYWORD
+  LOCAL NL	TYPE=INTEGER
+  LOCAL NS	TYPE=INTEGER
+  LOCAL NB	TYPE=INTEGER
+BODY
+  form  FILE_NAME  FORMAT  NL  NS
+  write "FORMAT="&FORMAT
+  write "NL=&NL"
+  write "NS=&NS"
+  write "NB=&NB"
+END-PROC
+.PAGE
+ HISTORY:
+
+ WRITTEN BY:               Ray Stagner   03/05/85
+ CHANGES:
+  13-AUG-1990 --LWK-- added NB keyword.
+   2-JAN-1995 --AS--- (CRI) Made portable for UNIX
+
+ COGNIZANT PROGRAMMER:     L.W.Kamp
+
+.LEVEL1
+.VARIABLE INP
+ Input file name
+.vari FORMAT
+ Format of INP.
+ (output)
+.VARI NL
+ Number of lines in INP.
+ (output)
+.VARI NS
+ Number of samples per line
+ in INP.  (output)
+.VARI NB
+ Number of bands in INP. 
+ (output)
+.END

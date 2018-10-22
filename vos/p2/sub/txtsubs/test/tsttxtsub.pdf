@@ -1,0 +1,23 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+ttxtsubs
+ttxtsubs 106 FFFFFF
+ttxtsubs 6 Good
+ttxtsubs 7 Bye
+ttxtsubs 7 Bye height=15 scale=1.25 angle=180 x=70 y=9
+ttxtsubs 7 Bye height=15 scale=0.8 angle=90 x=40 y=25
+ttxtsubs 7 Bye height=15 scale=0.8 angle=-90 x=40 y=1
+ttxtsubs 4 Testing height=10 scale=1.25 angle=0.0 x=1 y=20 loc=1
+ttxtsubs 4 Testing height=10 scale=2.0 angle=0.0 x=40 y=20 loc=2
+ttxtsubs 4 Testing height=15 scale=1.0 angle=0.0 x=70 y=20 loc=3
+ttxtsubs 999
+ttxtsubs 4 Hello height=15 scale=1.0 angle=270
+ttxtsubs 4 Hello height=10 scale=0.7 angle=45 x=20 y=25
+ttxtsubs 4 Hello height=-2
+ttxtsubs 4 Hello height=15 scale=-2.0
+ttxtsubs 3 "Hi There" height=10 scale=1.0
+ttxtsubs 3 Done height=15 scale=1.0
+end-proc

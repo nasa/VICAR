@@ -1,0 +1,224 @@
+process help=*
+  LOCAL DUMMY  TYPE=REAL
+  LOCAL IDUMMY TYPE=INTEGER
+  PARM INP  TYPE=STRING
+  PARM SIZE TYPE=INTEGER COUNT=0:4 DEFAULT=--
+  PARM BANDS TYPE=INTEGER COUNT=0:2 DEFAULT=--
+  PARM SL INTEGER DEFAULT=1
+  PARM SS INTEGER DEFAULT=1
+  PARM SB INTEGER DEFAULT=1
+  PARM NL INTEGER DEFAULT=0
+  PARM NS INTEGER DEFAULT=0
+  PARM NB INTEGER DEFAULT=0
+
+  PARM LINC     INTEGER            VALID=(1:99999) DEFAULT=1
+  PARM EXCLUDE  REAL     COUNT=(0:1)               DEFAULT=--
+
+  PARM MINIVAL NAME DEFAULT=DUMMY
+  PARM MAXIVAL NAME DEFAULT=DUMMY
+  PARM MAXLINE NAME DEFAULT=IDUMMY
+  PARM MAXSAMP NAME DEFAULT=IDUMMY
+  PARM MINLINE NAME DEFAULT=IDUMMY
+  PARM MINSAMP NAME DEFAULT=IDUMMY
+
+!# annot function="VICAR Procedure Generation"
+!# annot keywords=(minimum,maximum,"DN values",TCL,linc,EXCLUDE,+
+!# "Output parameter","TAE variable")
+END-PROC
+.title
+Computes the min and max DN and their first locations and 
+copies these to TAE variables
+.help
+ PURPOSE:
+
+MAXMIN is a VICAR program which finds and prints the minimum and 
+maximum DN values in an image.  It optionally returns these values
+in TCL variables.
+.PAGE
+EXECUTION
+
+MAXMIN supports two and three dimensional VICAR images and all valid
+VICAR data types.  For complex data, MAXMIN finds the values of minimum 
+and maximum magnitude (Fortran CABS function) and reports these values 
+as REAL*4 values.  MAXMIN supports all valid VICAR file organizations
+(BSQ,BIL,BIP).
+
+MAXMIN prints the location in (line,sample) format for both the minimum
+and maximum location.  The band number is also printed if the number 
+of bands is greater than 1.  If the minimum or maximum value occur
+more than once, the location of the first occurrence will be printed.
+
+The execution time of MAXMIN can be reduced by specifying a LINC parameter
+value greater than 1.  In this case, only one out of every LINC lines
+in the image is examined.  This may produce acceptable results if the image
+data is fairly continuous and if an approximate minimum and maximum are
+acceptable.
+
+An EXCLUDE value can be specified to exclude a particular value in the
+search for the minimum and maximum.   
+.PAGE
+TAE COMMAND LINE FORMAT
+      The following command line formats show the major allowable forms:
+
+      maxmin INP=a
+      maxmin INP=a SIZE=(sl,ss,nl,ns) 
+      maxmin INP=a SIZE=(sl,ss,nl,ns) BANDS=(sb,nb)
+      maxmin a (sl,ss,nl,ns) (sb,nb) opt. parameters MINIVAL=var1 MAXIVAL=var2
+
+       Here 'a' represents the input image file name,
+       and 'var1' and 'var2' represent TCL variables of type real
+       in which the minimum and maximum values are returned.
+.PAGE
+EXAMPLES
+
+1.    maxmin INP=A BANDS=(5,2) MINIVAL=MINVALA MAXIVAL=MAXVALA EXCLUDE=0
+
+      In this example MAXMIN finds the minimum and maximum values (excluding 0)
+      for the portion of image A contained in bands 5 and 6.
+      These values are returned in the TCL variables MINVALA, MAXVALA.
+
+2.    The following example show how to convert a double precision
+      image to byte format using appropriate scaling obtained from
+      MAXMIN output.  Program CFORM will map the minimum value to 0
+      and the maximum value to 255.
+
+        procedure
+        refgbl $echo
+        LOCAL minvar REAL
+        LOCAL maxvar REAL
+        body
+        let _onfail="continue"
+        let $echo="yes"
+        gen a 10 10 'REAL8
+        maxmin a MINIVAL=minvar MAXIVAL=maxvar
+        putmsg "Stretch this image to byte format" ""
+        cform a b 'BYTE IRANGE=(&minvar, &maxvar) ORANGE=(0, 255)
+        end-proc
+
+3.    The following example show how to get a histogram of a REAL*4
+      image using as histogram limits the minimum and maximum obtained from
+      MAXMIN output.  Program HIST is used to generate the histogram.
+
+        procedure
+        refgbl $echo
+        LOCAL minvar REAL
+        LOCAL maxvar REAL
+        body
+        let _onfail="continue"
+        let $echo="yes"
+        gen a 10 10 ival=-100 sinc= 5500 'REAL
+        maxmin a MINIVAL=minvar MAXIVAL=maxvar
+        hist a limits=(&minvar, &maxvar) 
+        end-proc
+.PAGE
+ RESTRICTIONS
+1. The maximum number of bytes per line is 65536.
+
+ WRITTEN BY:             Steve Pohorsky              15 April 1988
+
+ COGNIZANT PROGRAMMER:   Steve Pohorsky              15 April 1988
+ PORTED TO UNIX: Steve Pohorsky
+
+ REVISION HISTORY
+  1993-01-08    S. Pohorsky   Made portable for UNIX.  
+  2010-12-04    R.J. Bambery  Modifications for 64bit Linux
+  2012-07-06    R.J. Bambery  Removed some debugging Print statements
+
+.level1
+.vari inp
+Input file name
+.vari size
+Window into input
+.vari bands
+Window into input
+in band dimension
+.vari sl
+Starting line
+= size(1)
+.vari ss
+Starting sample
+= size(2)
+.vari sb
+Starting band
+= bands(1)
+.vari nl
+Number of lines
+= size(3)
+.vari ns
+Number of samples
+= size(4)
+.vari nb
+Number of bands
+= bands(2)
+.VARI LINC
+Increment for skipping lines.
+.VARI EXCLUDE
+Value to exclude in search for
+minimum and maximum.
+.vari minival
+Output TCL variable : min. value
+.vari maxival
+Output TCL variable : max. value
+.vari maxline
+Output TCL variable : line 
+location of 1st occurrence of max
+.vari maxsamp
+Output TCL variable : samp 
+location of 1st occurence of max
+.vari minline
+Output TCL variable : line 
+location of 1st occurence of min
+.vari minsamp
+Output TCL variable : samp i
+location of 1st occurence of min
+
+
+.level2
+.vari inp
+Name of a single input file.
+.vari out
+Name of a single output file.
+.vari size
+The size parameter determines the boundaries in the input
+file from which the MAXMIN is to take place.  It is specified
+as  (SL,SS,NL,NS), where
+	SL is the starting line 
+	SS is the starting sample
+	NL is the number of lines to be copied
+	NS is the number of samples (pixels) in each line
+.vari bands
+The bands parameter determines the bands in the input
+file from which the MAXMIN is to take place.  It is specified
+as (SB,NB), where
+	SB is the starting band
+	NB is the number of bands to be copied
+.vari linc
+The execution time of MAXMIN can be reduced by specifying a LINC parameter
+value greater than 1.  In this case, only one out of every LINC lines
+in the image is examined.  This may produce acceptable results if the image
+data is fairly continuous and if an approximate minimum and maximum are
+acceptable.  The default for LINC is 1.
+.vari exclude
+An EXCLUDE value can be specified to exclude a particular value in the
+search for the minimum and maximum.   The EXCLUDE parameter is a REAL*4 value,
+and is rounded to the nearest integer for images with integral pixel values.
+For images of the complex data type, EXCLUDE is REAL*4, and it is the 
+magnitudes of the pixel values that are compare against EXCLUDE.
+
+In MAXMIN, the minimum and maximum are set to EXCLUDE if all of
+the values in the image are equal to EXCLUDE.  (That would be a flat image.)
+
+The default is to not exclude any values
+.vari minival
+MAXMIN optionally returns the minimum pixel value (DN) in the image into
+a TCL variable (of type real).  The command line syntax for this parameter
+is MINIVAL=var1, where 'var1' represents the TCL variable of type real
+in which the minimum value is returned.
+The minimum value is returned if and only if this parameter is specified.
+.vari maxival
+MAXMIN optionally returns the maximum pixel value (DN) in the image into
+a TCL variable (of type real).  The command line syntax for this parameter
+is MAXIVAL=var1, where 'var1' represents the TCL variable of type real
+in which the maximum value is returned.
+The maximum value is returned if and only if this parameter is specified.
+.end

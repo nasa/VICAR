@@ -1,0 +1,16 @@
+/* IMAKE file for Test of VICAR subroutine  TRIAG   */
+
+#define PROGRAM  ttriag
+
+#define MODULE_LIST ttriag.f 
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+
+#define   LIB_RTL         
+#define   LIB_TAE           
+/*  #define   LIB_LOCAL   */      /*  Disable during delivery   */
+#define   LIB_P2SUB         
+#define   LIB_MATH77  

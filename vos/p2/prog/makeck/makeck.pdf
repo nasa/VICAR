@@ -1,0 +1,32 @@
+process help=*
+PARM OUT 	 STRING
+END-PROC
+
+.TITLE
+  MAKECK - Program to create a new C-kernel
+
+.HELP
+PURPOSE:  MAKECK creates a new SPICE C-kernel as follows:
+
+	MAKECK  OUT=filename
+
+where "filename" is the filename of the output C-kernel.
+
+PROGRAM HISTORY:
+
+Original programmer: Gary Yagi
+Cognizant programmer: Gary Yagi
+Revisions:  New
+
+.level1
+
+.vari OUT
+String
+Output C-kernel
+
+.level2
+
+.vari OUT
+String
+Name of output SPICE C-kernel.
+.end

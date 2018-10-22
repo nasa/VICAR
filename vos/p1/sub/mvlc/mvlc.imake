@@ -1,0 +1,11 @@
+/* Imake file for VICAR subroutine MVLC */
+
+#define SUBROUTINE mvlc
+
+#define MODULE_LIST mvlc.c
+
+#define P1_SUBLIB
+
+#define USES_ANSI_C
+#define FTN_STRING
+

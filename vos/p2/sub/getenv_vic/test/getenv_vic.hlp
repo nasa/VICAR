@@ -1,0 +1,20 @@
+1 getenv_vic 
+ This routine returns the value of an environment variable (Unix) or
+ logical name (VMS).  Under VMS, it will return multivalued logical
+ names as a comma-separated list of translations.
+
+ Calling sequence (Fortran):
+
+     call xgetenv_vic(name, value)
+
+ Both arguments are character*n variables.  A blank string is
+ returned if the name is not found.
+
+ Calling sequence (C):
+
+     value = getenv_vic("NAME");
+
+ Just like getenv(), the return value is a pointer to a static
+ array.  So, the value must be used or copied before this routine
+ (or getenv()) is called again.  NULL is returned if the name is
+ not found.

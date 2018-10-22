@@ -1,0 +1,25 @@
+/* imake file for routines copied from Cart lab VICAR to support
+   new versions of programs obtained from them */
+
+#define SUBROUTINE carto_subs
+#define P2_SUBLIB
+
+#define MODULE_LIST cartoGridUtils.c cartoGtUtils.c cartoLsqUtils.c cartoMatUtils.c \
+                    cartoMemUtils.c cartoSortUtils.c cartoStrUtils.c cartoTaeUtils.c \
+                    astroreference_camera.c ephreference_camera.c eos_coords.c \
+                    mat33.c qmalloc.c quaternion.c rodrigues.c time_conversion.c \
+                    safe_sqrt.c time_utils.c strsel.c count_lines.c tokenize.c \
+                    fgetl.c sprintf_alloc.c cartoTieUtils.c ibisControlMapper.c \
+                    ibishelper.c cartoLinkedList.c ImageUtils.c cloud_masks.c \
+                    cartoLoggerUtils.c cartoClassUtils.c georeference_camera.c \
+                    earth_coordinates.c verbosity_manager.c io_view.c endianness.c \
+                    pfx.c ray_intersect_ellipsoid.c atteph_convert.c slerp.c
+
+#define USES_ANSI_C
+
+#define LIB_TAE
+#define LIB_GSL
+
+/*#define LIB_LOCAL       /* for development, remove on delivery */ 
+/*#define DEBUG           /* for development, remove on delivery */ 
+

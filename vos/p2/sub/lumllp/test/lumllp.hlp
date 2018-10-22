@@ -1,0 +1,67 @@
+1 LUMLLP
+
+ Subroutine to compute phase, incidence, emission, luminance longitude and
+luminance latitude angles for a planet.  LUMLLP is used in photometric
+function calculations. 
+
+ FORTRAN Calling sequence:
+
+ CALL LUMLLP(SLAT,SLON,PLAT,PLON,RPOL,REQU,RANGE,RLAT,RLON,TG,CG,CI,
+     CE,LUMLAT,LUMLON,MODE,FIRST)
+
+2 ARGUMENTS
+
+ SLAT subsolar latitude                      input    R*4 radians
+ SLON subsolar longitude                     input    R*4 radians
+ PLAT subspacecraft latitude                 input    R*4 radians
+ PLON subspacecraft longitude                input    R*4 radians
+ RPOL planet polar radius                    input    R*4 km
+ REQU planet equatorial radius               input    R*4 km
+ RANGE planet center to spacecraft distance. input    R*4 km
+       RANGE=0.0 implies infinite separation.
+ RLAT pixel position latitude                input    R*4 radians
+ RLON pixel position longitude(west)         input    R*4 radians
+ TG   tangent of phase angle (max of 1000.)  returned R*4 --
+ CG   cosine of phase angle                  returned R*4 --
+ CI   cosine of incidence angle              returned R*4 --
+ CE   cosine of emission angle               returned R*4 --
+ LUMLAT luminance latitude                   returned R*4 degrees
+ LUMLON luminance longitude                  returned R*4 degrees
+ MODE 0 specifies a return without computing    input I*4 --
+        LUMLAT or LUMLON
+ FIRST  an argument to force LUMLLP            input  I*4 
+        to do the extensive set up 
+        calculations before beginning.
+        (See under method.)
+2 METHOD
+ Warning... an extensive calculation is performed the first time LUMLLP is
+called to set certian parameters which depend upon SLAT, SLON, PLAT PLON,
+REQU, RPOL.  If the arguments SLAT, SLON,PLAT,PLON,REQU, or RPOL should change,
+then the user must set FIRST to 1 to force the extensive recalculation.
+If FIRST is not 1, LUMLLP will do the extensive calculations as 
+described above on the first call to LUMLLP. Upon subsequent calls to LUMLLP
+those extensive setup calculations will be skipped.
+If FIRST is set to equal 1, LUMLLP will always do the extensive setup 
+calculations. 
+ According to Jean Lorre (3-93) the values computed for luminance,
+latitude, and longitude are of unknown meaning.  This does not appear to
+matter under the current usage of LUMLLP.  Joel Mosher has a version of
+LUMLLP where the values for luminance, latitude, and longitude are meaningful.
+
+The values for emission, incidence, and phase have the regular meaning in this
+version.
+2 HISTORY
+ Original Programmer: unknown  
+ Converted to Vax by: Joel Mosher   17-APR-1986 
+ Ported to UNIX: Steve Pohorsky
+ Current Cognizant Programmer: Steve Pohorsky
+ Source Language: FORTRAN
+ Revision:
+   26 AUG 80 -JJL- INITIAL RELEASE
+   26 JUN 83 -JAM- CONVERTED TO VAX
+   20 APR 87 -jam- check for zero divide at label 40
+   21 Aug 89 -GMY- check for CT in range -1 to 1 before taking ACOS.
+   22 Mar 93  SP   Made portable for UNIX.  Changed optional parameter (FIRST)
+                   to mandatory for portability.
+   19 May 93  SP   Grouped DATA statements after other declarations to meet
+                   ANSI Fortran 77.

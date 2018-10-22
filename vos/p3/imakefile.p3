@@ -4,10 +4,10 @@
 all: make_sub make_prog
 
 make_sub:
-	($(CD) sub; $(V2UTIL)/bldcomfiles.csh $(R3LIB))
+	($(CD) sub; $(V2UTIL)/bldcomfiles_nounpack.csh $(R3LIB))
 
 make_prog: 
-	($(CD) prog; $(V2UTIL)/bldcomfiles.csh $(R3LIB))
+	($(CD) prog; $(V2UTIL)/bldcomfiles_nounpack.csh $(R3LIB))
 	-(cd $(R3LIB); $(V2UTIL)/make_pdf_cache.perl)
 	-($(V2UTIL)/make_html.csh $(R3LIB) index_p3.html)
 

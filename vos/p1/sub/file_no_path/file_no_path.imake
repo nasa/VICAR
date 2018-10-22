@@ -1,0 +1,6 @@
+#define SUBROUTINE file_no_path
+#define MODULE_LIST file_no_path.c 
+
+#define P1_SUBLIB
+
+#define USES_ANSI_C

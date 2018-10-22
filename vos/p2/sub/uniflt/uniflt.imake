@@ -1,0 +1,10 @@
+/* Imake file for VICAR subroutine uniflt */
+
+#define SUBROUTINE uniflt
+
+#define MODULE_LIST uniflt.f
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN
+#define FTNINC_LIST fortport

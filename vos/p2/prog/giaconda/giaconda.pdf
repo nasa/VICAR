@@ -1,0 +1,207 @@
+process help=*
+
+parm INP	count = 1:8
+parm SCFNAME	count = 1:1                     ! Special Colors Filename
+parm OUT	count = (0,3) +			!r,g,b or none
+  		default = --
+parm COLORS	count = 1:10			!special colors
+parm WEIGHTS	type = real +			!for least-squares fit
+  		count = 0:10 +
+  		default = -- 				!1/color
+parm DEVICE	type = keyword +		!output device
+  		valid = "TV" +
+  		default = "TV"
+parm SCALE	type = integer +		!max dn
+  		default = 10000				!I/F = 1
+parm DEVMAT     count = (0,9) +                 !user device matrix
+                type = real +                
+                default = --
+parm DEVOFF	count = 3 +			!user device offset
+  		type = real +
+  		default = (0,0,0)
+end-proc
+
+
+
+.title
+VICAR2 program GIACONDA
+
+.help
+PURPOSE
+
+Welcome to GIACONDA (Generator of Images of Accurate Color On Numerous Digital 
+Apparatus).  GIACONDA transforms images taken through several filters into a
+color image in which designated spectra ("special colors") are reproduced
+accurately.  Special colors are defined, modified and examined using VICAR
+program LEONARDO.  At this time, the only output device supported by this
+program is  the CONRAC 7211 long persistence color monitor. 
+
+EXECUTION
+
+  The program is executed by specifying up to eight half-word images (registed,
+FICOR'ed and VGRFIX'ed, or GALSOS'ed) taken through different filters, up to
+ten special colors, and, optionally, three output files (red, blue, and green),
+a weight for each special color (applied to a least-square fit), and a scale
+factor for the input images, and an image display device.  The program will
+display the resulting transformation matrix (input dn to output intensity) and,
+if output files have been specified, will generate images which may be input to
+the specified device. 
+
+  This program reads the special colors from a file pointed to by the 
+logical name, SCFNAME.  The file is a 100-line by 70-sample VICAR image
+file, which must be created outside of this program.  The same file is read
+and written by LEONARDO to define these colors. 
+
+  If the program indicates "NO UNIQUE SOLUTION", there are several possible
+reasons for the failure:
+  1) Two of the input images were taken through the same filter.
+  2) One of the special colors is a linear combination of the others.
+  3) One of the special-color spectra does not overlap any of the filter
+  	 responses.
+  4) One of the filter responses does not overlap any of the special-color
+  	spectra.
+  5) One of the filters passes nothing in the visible (e.g., VGR UV).
+
+OPERATION
+
+  GIACONDA uses the classical photo-reproduction solution (with a slight
+modification) to accurately reproduce selected ("special") colors.  For a
+given pixel,  the I/F value for each of n filters is the sum of the tristimulus
+values for that pixel, and, therefore, each of the tristimulus values of a
+given pixel may be written as a linear combination of the I/F values obtained
+from each filter.  If these equations (with unknown coefficients) are written
+down for a n special colors, the we have, for each chromaticity coordinate, n
+equations with n unknowns.  Therefore, we can solve for the unknown
+coefficients, and we have the tristimulus values of a pixel as a function of
+the I/F values from each filter.  And, in fact, any linear combination of
+special colors will be accurately reproduced with this solution.  If there are
+more special colors than filters, a least-squares fit solution may be applied,
+as is done by this program. 
+
+  The next step is to convert the tristimulus values to device inputs.  A
+monitor's intesity is equal to the sum of the intensities of the three
+primaries, and, therefore, the intensity for each phosphor can be written as a
+linear combination of the desired tristimulus values.  Intensity is then
+converted to input dn by 
+
+  			DN = I ** 1/2.6,
+
+the 2.6 in the exponent being good for all contemporary CRT's.  (It is assumed 
+here that the monitor has been adjusted so the zero dn produces 0+ intensity.)
+The final dn values are then normalized so that the highest expected input-
+image dn produces a monitor dn of 255 (see SCALE), and out-of-range values are 
+set at 0 or 255.  This exponential results in some surprising effects (e.g.,
+bright skies due to residual dark current).  Only a proportional stretch on the
+output images will maintain the proper hues and saturations.  THIS EXPONENT IS
+NOT APPLIED IF PARAMETER, DEVMAT, IS SPECIFIED.
+
+  The device response for a film recorder is a tougher nut to crack.  Although 
+this program has hooks for that capability, it is not implemented at this time 
+(see memo MSD:384-86-105, "Accurate Color Reproduction", R. Brill).
+
+EXAMPLE
+
+  In the following examples the user creates output files, OUT.*, using input 
+images INP.*, and special colors, CLOUDS, VOLCANOES, SULPHUR, and SAND, with 
+corresponding weights, 3, 2, 1, and 1, respectively.  He uses wants input dn's 
+of 10000 to be the maximum brightness (default).
+
+  VICAR>GIACONDA INP=(INP.ORA,INP.CLR,INP.GRE)+
+  VICAR>+ OUT=(OUT.RED,OUT.GRE,OUT.BLU)+
+  VICAR>+ SCFNAME=(COLORS.DAT)+
+  VICAR>+ COLORS=(CLOUDS,VOLCANOES,SULPHUR,SAND) WEIGHTS=(3.,2.)
+ 
+
+WRITTEN BY: 		   R. BRILL, 20 JUNE, 1986
+
+COGNIZANT PROGRAMMER:	   R. BRILL, 20 JUNE, 1986
+
+Made portable for UNIX ... J. TURNER (CRI),  5 Sept 1994
+
+!
+
+.level1
+
+.vari INP
+input image files
+.vari OUT
+output image files
+.vari COLORS
+special colors
+.vari SCFNAME
+special colors file
+.vari WEIGHTS
+special color weights
+.vari SCALE
+input image maximum dn
+.vari DEVICE
+output device
+.vari DEVMAT
+user device matrix
+.vari DEVOFF
+user device offset
+
+!
+
+.level2
+
+.vari INP
+INP = (input-1,...,input-n), where the inputs are up to eight input image
+filenames of registered, FICOR'ed, and VGRFIX'ed images.  The images must have
+been taken with different filters and must all be the same size. 
+
+.vari OUT
+[OUT = (red-output,green-output,blue-output)], where the -output's are image 
+filenames to be used as inputs to the display device.  If none is specified, 
+the program will only compute and display the transformation matrix.
+
+.vari COLORS
+COLORS = (color-1,...,color-n), where the colors are up to 10 names of special 
+colors defined by the program LEONARDO.  There must be at least as may colors 
+named as their are input images, and none of the colors may be a linear 
+combination of the others.
+
+.vari SCFNAME
+SCFNAME = (input-1), the special colors input file must be specified from
+which GIACONDA reads the special colors. The file is a 100-line by 70-sample 
+VICAR image file.
+
+.vari WEIGHTS
+[WEIGHTS=(weight-1,...,weight-n)], where each weight corresponds to a special 
+color (as they are ordered in the COLORS specification).  These weights are 
+used in the least-squares-fit solution and specify the recipricol of the 
+square of sigma.  The number of weights specified must be at most equal to the 
+number of colors specified.  If fewer are specified, the remainder of them 
+will be set to 1.
+
+.vari SCALE
+[SCALE = max-dn], where max-dn is the maximum input dn that will not be 
+saturated on the output.  The default is 10000 (normally corresponding to I/F 
+= 1).
+
+.vari DEVICE
+[DEVICE = image-device], where image-device specifies the device on which the 
+output image files are to be displayed.  The only valid device at this time is 
+the default, 'TV (Conrac 7211). 
+
+.vari DEVMAT
+[DEVMAT = user-device-matrix], where user-device-matrix is used to convert 
+chomaticity cooridinates to devise inputs.  The default value is the matrix
+generated by the program based on the parameter DEVICE.  The order of entry is
+
+  	rx, ry, rz, gx, gy, gz, bx, by, bz,
+
+where, for example, rx is the x coefficient in the linear equation for the
+red device input.
+
+.vari DEVOFF
+[DEVOFF = user-device-offset], where user-device-offset is a vector which is
+added to device inputs.  This parameter is ignored if DEVMAT is not entered.
+Its default is (0,0,0).  The order of entry is
+
+  	r, g, b,
+
+where, for example, r is the constant coefficient in the linear equation for
+the red device input.
+
+.end

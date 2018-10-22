@@ -1,0 +1,26 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM pscript
+
+   To Create the build file give the command:
+
+		$ vimake pscript			(VMS)
+   or
+		% vimake pscript			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	pscript
+#define R3LIB
+
+#define MODULE_LIST pscript.c
+
+#define MAIN_LANG_C
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+
+/************************* End of Imake file ***************************/

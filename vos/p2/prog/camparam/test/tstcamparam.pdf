@@ -1,0 +1,56 @@
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+
+body
+let $autousage="none"
+let _onfail="continue"
+
+!! parameter values returned from Voyager image label
+LOCAL	CAMERA	TYPE=STRING
+LOCAL	SCAN	TYPE=INTEGER
+LOCAL	SC	TYPE=INTEGER
+LOCAL	FILTER	TYPE=STRING
+LOCAL   FDS     TYPE=INTEGER
+LOCAL   EXPRNG  TYPE=STRING
+
+!! set up test file directory 
+LOCAL   PATH    TYPE=STRING  INIT="/project/test_work/testdata/mipl/vgr/"
+if ($syschar(1) = "VAX_VMS")
+let PATH="wms_test_work:[testdata.mipl.vgr]"
+end-if
+
+CAMPARAM &"path"f1636832.geo SC SCAN CAMERA FILTER
+write " "
+write "write out the variable values returned"
+write "spacecraft number = &sc"
+write "scan rate  = &scan"
+write "camera (NA or WA)  = &camera"
+write "Three character filter name = &filter"
+write " "
+write "check these values against what is in the image label"
+label-l &"path"f1636832.geo
+write " "
+write "now get the FDS also, which should also correspond with label listing"
+CAMPARAM &"path"f1636832.geo SC SCAN CAMERA FILTER FDS
+write " "
+write "write out the variable values returned"
+write "spacecraft number = &sc"
+write "scan rate  = &scan"
+write "camera (NA or WA)  = &camera"
+write "Three character filter name = &filter"
+write "fds count = &fds"
+write " "
+write " "
+write "now get EXPRNG also (should be A for this image)"
+CAMPARAM &"path"f1636832.geo SC SCAN CAMERA FILTER FDS EXPRNG
+write " "
+write "write out the variable values returned"
+write "spacecraft number = &sc"
+write "scan rate  = &scan"
+write "camera (NA or WA)  = &camera"
+write "Three character filter name = &filter"
+write "fds count = &fds"
+write "exposure range = &exprng"
+END-PROC

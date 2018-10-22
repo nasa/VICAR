@@ -1,0 +1,12 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!
+gen out=cc.img nl=100 ns=100 linc=1 sinc=1 ival=0 'real
+hist cc.img
+yfit inp=cc.img out=ccc.img maxy=60.
+hist ccc.img
+!
+end-proc

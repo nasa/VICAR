@@ -1,0 +1,398 @@
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+local dir string
+
+if ($syschar(1)="UNIX")
+   let dir = "/project/test_work/testdata/cassini/iss/"
+else
+   let dir = "wms_test_work:[testdata.cassini.iss]"
+end-if
+
+LET $echo="no"
+WRITE " **** Perfom testing with generic offsets. ****"
+WRITE ""
+LET $echo="yes"
+
+   gen fakeoffsets.dat 1 800 sin=0 'real
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   tgalgen (d0.dat,d1.dat,d2.dat,d3.dat,d4.dat,d5.dat,d6.dat,d7.dat,d8.dat)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   galgen inp=(d1.dat,d2.dat,d3.dat,d4.dat,d5.dat,d6.dat,d7.dat,d8.dat) +
+          out=(cal.out,sat.out,err.out,rms.out,dc.out) +
+          dc=d0.dat  gain=100 light=10. expo=(1,2,3,4,5,6,7,8) +
+          offsets=fakeoffsets.dat skip=2 error=(0,1) 'lfwpt 
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list cal.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list dc.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list sat.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list err.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list rms.out
+
+LET $echo="no"
+WRITE ""
+WRITE ""
+WRITE "  *** Testing LIST option ***  "
+let $echo="yes"
+
+!create list file
+createfile galgen.srchlist
+addtofile galgen.srchlist "NEXT FILE=0001"
+addtofile galgen.srchlist "d1.dat"
+addtofile galgen.srchlist "d2.dat"
+addtofile galgen.srchlist "d3.dat"
+addtofile galgen.srchlist "d4.dat"
+addtofile galgen.srchlist "d5.dat"
+addtofile galgen.srchlist "d6.dat"
+addtofile galgen.srchlist "d7.dat"
+addtofile galgen.srchlist "d8.dat"
+
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   galgen inp=d1.dat list=galgen.srchlist +
+          out=(cal1.out,sat1.out,err1.out,rms1.out,dc1.out) +
+          dc=d0.dat  gain=100 light=10. expo=(1,2,3,4,5,6,7,8) +
+          offsets=fakeoffsets.dat skip=2 error=(0,1) 'lfwpt
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list cal1.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list dc1.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list sat1.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list err1.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list rms1.out
+
+LET $echo="no"
+WRITE ""
+WRITE ""
+WRITE "-- There shouldn't be any differences on the outputs from previous test."
+LET $echo="yes"
+
+difpic (cal.out, cal1.out)
+difpic (dc.out, dc1.out)
+difpic (sat.out, sat1.out)
+difpic (err.out, err1.out)
+difpic (rms.out, rms1.out)
+
+LET $echo="no"
+WRITE ""
+WRITE ""
+WRITE " *** Testing Extended-exposure mode *** "
+WRITE ""
+LET $echo="yes"
+   copy d1.dat edc.dat
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   galgen inp=(d1.dat,d2.dat,d3.dat,d4.dat,d5.dat,d7.dat,d8.dat)  +
+          out=(cal.out,sat.out,err.out,rms.out,dc.out) +
+          dc=d0.dat edc=edc.dat gain=100 light=10. expo=(1,2,3,4,5,6,7) +
+          offsets=fakeoffsets.dat skip=2 error=(0,1) 'lfwp extexpo=5
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list cal.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list sat.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list err.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list rms.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list dc.out
+
+LET $echo="no"
+WRITE ""
+WRITE ""
+WRITE " *** Testing Slope mode *** "
+WRITE ""
+LET $echo="yes"
+
+   galgen inp=(d1.dat,d2.dat,d3.dat,d4.dat,d5.dat,d6.dat,d7.dat,d8.dat) +
+          out=(cal.out,sat.out,err.out,rms.out) +
+          dc=d0.dat gain=100 light=10. expo=(1,2,3,4,5,6,7,8) +
+          offsets=fakeoffsets.dat skip=2 error=(0,1) 'lfwpt 'slope
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list cal.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list sat.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list err.out
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list rms.out
+
+if ($syschar(1)="UNIX")
+   ush rm *.dat
+   ush rm *.out
+   ush rm galgen.srchlist
+else
+   dcl del *.dat;*
+   dcl del *.out;*
+   dcl del galgen.srchlist;*
+end-if
+
+LET $echo="no"
+WRITE ""
+WRITE ""
+WRITE " *** Testing with Cassini data *** "
+LET $echo="yes"
+
+! Create uniform value files
+f2 &"dir"rcp_1.byte d.1 'half func=100
+f2 &"dir"rcp_1.byte d.2 'half func=200
+f2 &"dir"rcp_1.byte d.3 'half func=700
+f2 &"dir"rcp_1.byte d.4 'half func=1100
+f2 &"dir"rcp_1.byte d.5 'half func=1600
+f2 &"dir"rcp_1.byte d.6 'half func=2600
+f2 &"dir"rcp_1.byte d.7 'half func=3600
+
+!Make zero shutter-offset file with cassini label
+f2 &"dir"sos.dat fake_so.dat 'REAL func=0.0
+
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   galgen (d.2,d.3,d.4,d.5,d.6,d.7) out=(f.cal1,f.sat1,f.err1,f.rms1,f.dc1) +
+           dc=d.1 offset=fake_so.dat 'linear expos=(1,6,10,15,25,35) +
+           light=100. numb=(1,1,1,1,1,1,1)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.cal1 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.sat1 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.err1 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.rms1 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.dc1  (1,1,5,5)
+
+LET $echo="no"
+WRITE ""
+WRITE ""
+WRITE " -- do slope fit only & change dnscale to 2.  Slope should be doubled."
+WRITE ""
+LET $echo="yes"
+   galgen (d.2,d.3,d.4,d.5,d.6,d.7) out=(f.cal2,f.sat2,f.err2,f.rms2) dc=d.1 +
+           offset=fake_so.dat 'slope expos=(1,6,10,15,25,35)  light=100. +
+           numb=(2,2,2,2,2,2,2)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.cal2 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.sat2 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.err2 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.rms2 (1,1,5,5)
+
+LET $echo="no"
+WRITE ""
+WRITE ""
+WRITE " -- change expos of 5th input so that lt curve appears to deviate there."
+WRITE " -- all pixels should be reported as lfwp with dnfw of 1600. "
+WRITE ""
+LET $echo="yes"
+
+   galgen (d.2,d.3,d.4,d.5,d.6,d.7) out=(f.cal3,f.sat3,f.err3,f.rms3) dc=d.1 +
+           offset=fake_so.dat 'linear expos=(1,6,10,15,32,35) 'lfwp  +
+           light=100. numb=(1,1,1,1,1,1,1)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.cal3 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.sat3 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.err3 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.rms3 (1,1,5,5)
+
+LET $echo="no"
+WRITE ""
+WRITE ""
+WRITE " -- change dn of samp 3 of 4th input so that lt curve appears to "
+WRITE " -- deviate there.  All pixels at samp 3 should be reported as lfwp "
+WRITE " -- with dnfw of 1200. "
+WRITE ""
+LET $echo="yes"
+
+   f2 d.4 d.4x func="(SAMP.EQ.3)*1200.+(SAMP.NE.3)*IN1"
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list d.4x (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   galgen (d.2,d.3,d.4x,d.5,d.6,d.7) out=(f.cal4,f.sat4,f.err4,f.rms4) dc=d.1 +
+        offset=fake_so.dat 'linear expos=(1,6,10,15,25,35) 'lfwp  light=100. +
+        numb=(1,1,1,1,1,1,1)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.cal4 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.sat4 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.err4 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.rms4 (1,1,5,5)
+
+!throw in some bad pixel data
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   f2 d.4x d.4y func="IN1+(LINE.EQ.4)*20000.-(SAMP.EQ.2)*25000."
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list d.4y (1,1,5,5)
+
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   galgen (d.2,d.3,d.4y,d.5,d.6,d.7) out=(f.cal5,f.sat5,f.err5,f.rms5) dc=d.1 +
+        offset=fake_so.dat 'linear expos=(1,6,10,15,25,35) 'lfwp  light=100. +
+        numb=(1,1,1,1,1,1,1)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.cal5 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.sat5 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.err5 (1,1,5,5)
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   list f.rms5 (1,1,5,5)
+
+LET $echo="no"
+WRITE ""
+WRITE ""
+WRITE " *** Testing with PICSUM'd frames ***"
+WRITE ""
+LET $echo="yes"
+
+flot &"dir"sum2.1 a.dat 'coun
+flot &"dir"sum2.2 b.dat 'coun
+picsum (a.dat,b.dat) g.dc
+flot &"dir"sum2.7 a.dat 'coun
+flot &"dir"sum2.7 b.dat 'coun
+!sum2.8 no longer exists
+!flot &"dir"sum2.8 b.dat 'coun
+picsum (a.dat,b.dat) g.1
+flot &"dir"sum2.14 a.dat 'coun
+flot &"dir"sum2.15 b.dat 'coun
+picsum (a.dat,b.dat) g.2
+flot &"dir"sum2.24 a.dat 'coun
+flot &"dir"sum2.25 b.dat 'coun
+picsum (a.dat,b.dat) g.3
+flot &"dir"sum2.36 a.dat 'coun
+flot &"dir"sum2.37 b.dat 'coun
+picsum (a.dat,b.dat) g.4
+
+LET $echo="no"
+WRITE ""
+LET $echo="yes"
+   galgen (g.1,g.2,g.3,g.4) out=(g.cal1,g.sat1,g.err1,g.rms1,g.dc1) dc=g.dc +
+           offset=&"dir"sos.dat
+
+if ($syschar(1)="UNIX")
+   ush rm d.*
+   ush rm f.*
+   ush rm g.*
+   ush rm *.dat
+else
+   dcl del d.*;*
+   dcl del f.*;*
+   dcl del g.*;*
+   dcl del *.dat;*
+end-if
+
+end-proc

@@ -1,0 +1,263 @@
+procedure
+parm    mode    type=keyword count=(0:1) valid=(batch,nobatch,inter) default=batch
+
+local   afidsroot   type=string count=1
+
+! Feb 18, 2013 - RJB
+! TEST SCRIPT FOR TSTCCDSLOPE
+! tests HALF images
+!
+! Vicar Programs:
+!       translog f2 copy label-replace createfile
+!       addtofile reset ltgen momgen2 gausnois
+!
+! External programs
+!       gnuplot 4.6.x 
+!       gimp for eps file
+!
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no xvd display
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!           
+!   In batch mode it produces files testx.eps by calling gnuplot
+!       to create the encapsulated postscript file which can be
+!       later viewed with ghostscript or gimp
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
+!            
+!            
+! Requires external test data: 
+!   cartlab or mipl dependent pointers
+!
+!local dir string
+refgbl $autousage
+refgbl $echo
+refgbl $syschar
+body
+enable-log
+
+let $autousage="none"
+let _onfail="goto rm"
+let $echo="yes"
+
+!check to see if mipl or cartlab for certain programs
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+
+if (afidsroot = "")
+!MIPL        
+    ush ln -s /project/test_work/testdata/cassini/iss cas 
+else         
+!CARTLAB     
+    ush ln -s /raid1/vicar_test_images/testdata/cassini/iss cas
+end-if       
+ 
+defcmd-replace typeit "ush cat"
+ 
+!CASSINI TEST:
+!---------------------------
+! Make TEST.LTF a test light transfer file which has exposure levels of
+! 0,10,20,40 and each input frame was 10,110,210,410 dn respectively.
+! So, with a 0.0 shutter_offset entered and a LIGHT of 10, the slopes
+! should be a perfect 1.0 and the offsets 0.0 with residuals of 0.0.
+ 
+!Set dns to 10 and replicate
+copy cas/sum2.1 l1.ax
+f2 l1.ax l1.a func=10
+copy l1.a l1.b
+copy l1.a l1.c
+ 
+!Set dns to 110 and replicate - set exposure to 10
+f2 cas/sum2.1 l2.a func=110
+label-rep l2.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
+copy l2.a l2.b
+copy l2.a l2.c
+ 
+!Set dns to 210 and replicate - set exposure to 20
+f2 cas/sum2.1 l3.a func=210
+label-rep l3.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
+copy l3.a l3.b
+copy l3.a l3.c
+ 
+!Set dns to 410 and replicate - set exposure to 40
+f2 cas/sum2.1 l4.a func=410
+label-rep l4.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
+copy l4.a l4.b
+copy l4.a l4.c
+ 
+!Create list of the files created
+createfile l.list
+let $echo="yes"
+addtofile l.list "NEXT FILE=0001"
+addtofile l.list "l1.a"
+addtofile l.list "l1.b"
+addtofile l.list "l1.c"
+addtofile l.list "l2.a"
+addtofile l.list "l2.b"
+addtofile l.list "l2.c"
+addtofile l.list "l3.a"
+addtofile l.list "l3.b"
+addtofile l.list "l3.c"
+addtofile l.list "l4.a"
+addtofile l.list "l4.b"
+addtofile l.list "l4.c"
+reset l.list
+let $echo="yes"
+!typeit l.list
+ 
+!Initialize Light Transfer File
+ltgen l1.a out=test.ltf list=l.list 'GRID
+ 
+!Fill Light Transfer File with stats
+momgen2 list=l.list ltfrcp=test.ltf
+
+! TEST 1 
+! 18 plots - each upper left, upper right, etc.
+let $echo="yes"
+ccdslope test.ltf table=ccdslope1.tbl mofset=0.0 light=10. rej=0 'SUBDC +
+    plot=test1
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test1.gpi
+end-if
+
+!---------------------------
+! Repeat using noise-added input data.
+! Make TEST.LTF a test light transfer file which has exposure levels of
+! 0,10,20,40 and each input frame was 10,110,210,410 dn respectively.
+! So, with a 0.0 shutter_offset entered and a LIGHT of 10, the slopes
+! should be a perfect 1.0 and the offsets 0.0 with residuals of 0.0.
+ 
+!Set dns to 10 and replicate
+gausnois a.img mean=0 sigma=3 format=HALF nl=512 ns=512 seed=512
+f2 (cas/sum2.1, a.img) m1.a func=10+IN2
+gausnois a.img mean=0 sigma=3 format=HALF nl=512 ns=512 seed=612
+f2 (cas/sum2.1, a.img) m1.b func=10+IN2
+gausnois a.img mean=0 sigma=3 format=HALF nl=512 ns=512 seed=712
+f2 (cas/sum2.1, a.img) m1.c func=10+IN2
+ 
+!Set dns to 110 and replicate - set exposure to 10
+gausnois a.img mean=0 sigma=10 format=HALF nl=512 ns=512 seed=812
+f2 (cas/sum2.1, a.img) m2.a func=110+IN2
+label-rep m2.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
+gausnois a.img mean=0 sigma=10 format=HALF nl=512 ns=512 seed=912
+f2 (cas/sum2.1, a.img) m2.b func=110+IN2
+label-rep m2.b 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
+gausnois a.img mean=0 sigma=10 format=HALF nl=512 ns=512 seed=112
+f2 (cas/sum2.1, a.img) m2.c func=110+IN2
+label-rep m2.c 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
+ 
+!Set dns to 210 and replicate - set exposure to 20
+gausnois a.img mean=0 sigma=14 format=HALF nl=512 ns=512 seed=212
+f2 (cas/sum2.1, a.img) m3.a func=210+IN2
+label-rep m3.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
+gausnois a.img mean=0 sigma=14 format=HALF nl=512 ns=512 seed=312
+f2 (cas/sum2.1, a.img) m3.b func=210+IN2
+label-rep m3.b 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
+gausnois a.img mean=0 sigma=14 format=HALF nl=512 ns=512 seed=412
+f2 (cas/sum2.1, a.img) m3.c func=210+IN2
+label-rep m3.c 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
+ 
+!Set dns to 410 and replicate - set exposure to 40
+gausnois a.img mean=0 sigma=20 format=HALF nl=512 ns=512 seed=544
+f2 (cas/sum2.1, a.img) m4.a func=410+IN2
+label-rep m4.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
+gausnois a.img mean=0 sigma=20 format=HALF nl=512 ns=512 seed=566
+f2 (cas/sum2.1, a.img) m4.b func=410+IN2
+label-rep m4.b 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
+gausnois a.img mean=0 sigma=20 format=HALF nl=512 ns=512 seed=588
+f2 (cas/sum2.1, a.img) m4.c func=410+IN2
+label-rep m4.c 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
+ 
+!Create list of the files created
+createfile m.list
+let $echo="yes"
+addtofile m.list "NEXT FILE=0001"
+addtofile m.list "m1.a"
+addtofile m.list "m1.b"
+addtofile m.list "m1.c"
+addtofile m.list "m2.a"
+addtofile m.list "m2.b"
+addtofile m.list "m2.c"
+addtofile m.list "m3.a"
+addtofile m.list "m3.b"
+addtofile m.list "m3.c"
+addtofile m.list "m4.a"
+addtofile m.list "m4.b"
+addtofile m.list "m4.c"
+reset m.list
+let $echo="yes"
+!typeit m.list
+ 
+!Initialize Light Transfer File
+ltgen m1.a out=test.ltfn list=m.list 'GRID
+ 
+!Fill Light Transfer File with stats
+momgen2 list=m.list ltfrcp=test.ltfn
+ 
+if ($syschar(1)="UNIX")
+   ush rm m1.*
+   ush rm m2.*
+   ush rm m3.*
+   ush rm m4.*
+   ush rm m.list
+else
+   dcl del m1.*;*
+   dcl del m2.*;*
+   dcl del m3.*;*
+   dcl del m4.*;*
+   dcl del m.list;*
+end-if
+
+! 
+! TEST 2 - synthetic data reject 
+let $echo="yes"
+ccdslope test.ltfn table=ccdslope2n.tbl mofset=0.0 light=10. rej=0 'SUBDC +
+    plot=test2
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test2.gpi
+end-if
+
+!---------------------------
+! TEST 3
+!go to real data and the sample-dependent shutter-offset file
+ 
+let $echo="yes"
+ccdslope test.ltf mark.out table=ccdslope3.tbl offsets=cas/sos.dat rej=3 +
+    plot=test3
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test3.gpi
+end-if
+
+! TEST 4 - real data deltax  and sigtol
+ 
+let $echo="yes"
+ccdslope test.ltf  offsets=cas/sol.dat rej=2  +
+   'deltax sigtol=1.0 plot=test4
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test4.gpi
+end-if
+
+! TEST 5 - encapsulated postscript file
+
+let $echo="yes"
+ccdslope test.ltf  offsets=cas/sol.dat rej=1  +
+   'deltax sigtol=1.0 plot=test5 plotfmt=eps
+ush gnuplot test5.eps.gpi
+if (mode = "nobatch" or mode = "inter")
+    ush gimp test5.eps
+end-if
+
+
+let $echo="no"
+rm>
+ush rm cas
+!ush rm l.list
+
+disable-log
+end-proc
+

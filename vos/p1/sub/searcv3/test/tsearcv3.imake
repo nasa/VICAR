@@ -1,0 +1,17 @@
+/* Imake file for VICAR program TSEARCV3 */
+
+#define PROGRAM tsearcv3
+
+#define MODULE_LIST tsearcv3.c
+
+#define MAIN_LANG_C
+#define TEST
+
+#define USES_ANSI_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+#define LIB_LOCAL	/* for development, remove on delivery */ 
+#define DEBUG		/* for development, remove on delivery */ 

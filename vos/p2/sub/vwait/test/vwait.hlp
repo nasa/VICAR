@@ -1,0 +1,29 @@
+1 VWAIT
+
+PURPOSE:   Suspends execution of the calling program for a
+           specified interval of time.
+
+Fortran Call:   CALL VWAIT(N)
+C Call:         zvwait(n);
+
+PARAMETERS:
+
+     N   =  Is a fullword integer expression containing the number of
+            0.01 second intervals to suspend program execution.
+            Maximum time = 100 hours.  For zvwait, n is passed by value.
+
+2 NOTES
+
+DESCRIPTION
+
+This routine provides a function
+to suspend execution of a program for a specified time interval. The
+argument N is in units of hundredths of a second of wall clock time.
+
+HISTORY
+
+  Original Programmer: G.M. Yagi     1977-01-17
+  Converted to Vax:    L.W. Kamp     1983-11-22
+  Current Cog Progr:   L.W.Kamp
+  Ported to UNIX:      S. Pohorsky   1992-12-21
+

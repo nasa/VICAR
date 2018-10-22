@@ -1,0 +1,95 @@
+procedure       
+parm    mode    type=keyword count=(0:1) valid=(batch,nobatch,inter) default=batch
+
+refgbl $echo
+! Aug 29, 2013 - RJB
+! TEST SCRIPT FOR DESTRIPE
+! tests HALF images, supports all formats
+!
+! Vicar Programs:
+!       gen sargonb f2 difpic flot xvd
+! 
+! External Programs:
+!   <none>
+!
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no xvd display
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!
+!
+! Requires NO external test data: 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+body
+let _onfail="stop"
+let $echo="yes"
+
+enable-log
+
+gen a nl=512 ns=512 ival=0 modulo=40 linc=1 sinc=1 format=half
+gen b nl=512 ns=512 ival=0 linc=0 sinc=0 format=half
+
+!gen horizontal stripes
+sargonb b c func1=setto const1=6 vert1=(10,1, 10,512, 20,512, 20,1) +
+    func2=setto const2=3 vert2=(21,1, 21,512, 35,512, 35,1) +
+    func3=setto const3=1 vert3=(47,1, 47,512, 65,512, 65,1) +
+    func4=setto const4=2 vert4=(80,1, 80,512, 125,512, 125,1) +
+    func5=setto const5=3 vert5=(80,1, 80,512, 125,512, 125,1) +
+    func6=setto const6=1 vert6=(180,1, 180,512, 225,512, 225,1) +
+    func7=setto const7=2 vert7=(250,1, 250,512, 300,512, 300,1) +
+    func8=setto const8=4 vert8=(340,1, 340,512, 380,512, 380,1) +
+    func9=setto const9=6 vert9=(420,1, 420,512, 450,512, 450,1) +
+    func10=setto const10=2 vert10=(470,1, 470,512, 501,512, 501,1) 
+
+f2 (a,c) d func=("In1+in2 + 100")
+! TEST 1 - remove horizontal destriping by using whole image for
+! correction
+destripe d e orient=horiz
+difpic (d,e)
+difpic (e,b)
+
+let $echo="no"
+if (mode = "nobatch" or mode = "inter")
+    write "Note how the horizontal stripes are removed in e"
+! horizontal stripes are removed in h
+ xvd  d
+ xvd  e
+end-if
+let $echo="yes"
+!
+!  TEST 2 - use a window to arrive at destriping correction
+destripe d f orient=horiz window=(1,1,512,256)
+!xvd f
+! 
+difpic (d,f)
+difpic (f,b)
+difpic (e,f)
+! rotate the image and do vertical destriping
+flot c r mode=clock
+
+f2 (a,r) g func=("In1+in2 + 100")
+!
+!  TEST 3 - Remove vertical stripes
+destripe g h orient=vert
+difpic (g,h)
+difpic (h,r)
+let $echo="no"
+if (mode = "nobatch" or mode = "inter")
+    write "Note how the vertical stripes are removed in h"
+! vertical stripes are removed in h
+ xvd  g
+ xvd  h
+end-if
+let $echo="yes"
+
+!  TEST 4 - use a window to arrive at destriping correction
+destripe g i orient=vert window=(1,1,512,256)
+! xvd i
+!
+
+disable-log
+
+let $echo="no"
+end-proc

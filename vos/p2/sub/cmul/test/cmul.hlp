@@ -1,0 +1,86 @@
+1 CMUL
+
+  CMUL multiplies two complex arrays together. 
+
+  CMUL provides an interface for both FORTRAN and for C programs.  The 
+  Fortran interface multiplies two complex*8 arrays together; the C interface 
+  multiplies two complex structures together, where each structure contains
+  a real and an imaginary part.
+  
+
+  Calling Sequence:
+
+    FORTRAN calling sequence:  CALL CMUL(NUM,C1,I,C2,J,C3)
+
+    Arguments: NUM - INPUT - NUMBER OF ELEMENTS TO MULTIPLY
+               C1  - INPUT - COMPLEX*8 ARRAY
+               I   - INPUT - =1 means CONJUGATE C1
+                             =0 means don't
+               C2  - INPUT - COMPLEX*8 ARRAY
+               J   - INPUT - =1 means CONJUGATE C2
+                             =0 means don't
+               C3  - OUTPUT- RESULT COMPLEX*8 ARRAY
+
+    C calling sequence:  cmul (NUM,C1,I,C2,J,C3)
+
+    Arguments: Num - INPUT - Number of elements to multiply
+               C1  - INPUT - Complex structure 
+                             typedef struct {
+                               float real;
+                               float imaginary;
+                             } COMPLEX;
+               I   - INPUT - =1 means CONJUGATE C1
+                             =0 means don't
+               C2  - INPUT - Complex structure 
+                             typedef struct {
+                               float real;
+                               float imaginary;
+                             } COMPLEX;
+               J   - INPUT - =1 means CONJUGATE C2
+                             =0 means don't
+               C3  - OUTPUT- Result complex structure 
+                             typedef struct {
+                               float real;
+                               float imaginary;
+                             } COMPLEX;
+
+2 History
+
+  Original Programmer: T. RINDFLEISCH, 24 JAN 1970
+  Current Cognizant Programmer: C AVIS
+  Source Language: FORTRAN & C
+  Made portable for UNIX ... J. Turner (CRI) 05 Sep 1994
+
+2 Operation
+
+  CMUL will multiply two complex arrays using the rules
+  of complex arithmetic.  Either of the input arrays may
+  be conjugated before multiplication.
+
+  Depending on the two flags I and J, the subroutine performs:
+               c3 = c1 * c2    or
+               c3 = conjg(c1) * c2  or
+               c3 = c1 * conjg(c2)  or
+               c3 = conjg(c1) * conjg(c2)
+
+2 Arguments
+  
+  Fortran Arguments:
+    NUM - INTEGER*4 - NUMBER OF ARRAY ELEMENTS TO MULTIPLY
+    C1  - COMPLEX*8 - ARRAY TO BE MULTIPLIED
+    I   - INTEGER*4 - FLAG INDICATING CONJUGATION OF C1
+    C2  - COMPLEX*8 - ARRAY TO BE MULTIPLIED
+    J   - INTEGER*4 - FLAG INDICATING CONJUGATION OF C2
+    C3  - COMPLEX*8 - RESULTING PRODUCT ARRAY
+
+  C Arguments:
+    NUM - int       - NUMBER OF ARRAY ELEMENTS TO MULTIPLY
+    C1  - Complex   - Structure containing real & imaginary parts
+          Structure   to be multiplied.
+    I   - int       - FLAG INDICATING CONJUGATION OF C1
+    C2  - Complex   - Structure containing real & imaginary parts
+          Structure   to be multiplied.
+    J   - int       - FLAG INDICATING CONJUGATION OF C2
+    C3  - Complex   - Structure containing results of the multiplied 
+          Structure   real & imaginary parts.
+

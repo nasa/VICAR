@@ -1,0 +1,94 @@
+PROCESS HELP=*
+PARM INPUT TYPE=(STRING)
+PARM OUT  TYPE=(STRING)
+PARM NCOL TYPE=INTEGER DEFAULT=1 valid=1:100
+PARM LCOL TYPE=INTEGER DEFAULT=0
+PARM COLS TYPE=INTEGER COUNT=1:100 DEFAULT=1
+PARM FORMAT TYPE=STRING DEFAULT="*"
+PARM DOUB TYPE=KEYWORD COUNT=(0:1) VALID="DOUB" DEFAULT=--
+PARM DEBUG TYPE=KEYWORD COUNT=(0:1) VALID="DEBUG" DEFAULT=--
+
+
+!# annot keywords=(IBIS,"ASCII file")
+
+END-PROC
+.TITLE
+IBIS program coverting an ASCII file into an IBIS file
+.HELP
+PURPOSE
+
+    "VQUIC" transfers data from an ascii text file to an IBIS interface
+(tabular) file.  The data can be both numeric and character.
+
+
+
+EXECUTION:
+
+vquic INPUT=DATA.TXT  OUT=DATA.INT  NCOL=4  LCOL=1500 FORMAT="(1X,F5.3,A4)"
+
+vquic DATA2.TXT DATA2.INT   COLS=(1,4,5)
+
+
+  Each line in the input ascii text file is transfered to the corresponding 
+row in the interface file.  The input data may be either free formatted 
+numbers, in which case the FORMAT parameter is defaulted, or may be 
+formatted characters and/or numbers, in which case the appropriate 
+Fortran format statement must be specified.  If free formatting is used
+the data separators may be spaces, tabs, or commas.  The FORMAT parameter
+may only contain A, F or I types;  double-precision data must be entered
+in free format ("*"), which is the default format.
+
+  The output file is an IBIS interface file with NCOL columns and LCOL rows.  
+If NCOL is defaulted then it will be found from the maximum column number
+specified with the COLS parameter.  If there are less than LCOL lines in 
+the input file then the remaining rows will be filled with zeros.  If there 
+are more than LCOL lines then the remaining lines will not be read.   
+If LCOL is defaulted then the LCOL will be found from the length of the 
+input file. 
+
+  The COLS parameter specifies the columns that will receive the data.
+If there are more numbers on a line than columns, the remaining numbers 
+will be ignored.  If there are less numbers then if free formatting is 
+being used the missing numbers will be read from the next line, otherwise 
+zeros will be put in for the missing numbers.
+
+  If a input line generates a read error then a warning will be printed
+and zeros will be transfered for the remaining columns in the row.
+
+
+RESTRICTIONS:
+
+The maximum input line length is 255 characters.
+The maximum number of columns in the interface file is 100.
+
+HISTORY:
+
+  1995-01-02 AMS (CRI) - Made portable for UNIX
+  2017-08-15 WLB - removed DEBUG from imake
+
+.LEVEL1
+.VARIABLE INPUT
+Input text data file
+.VARIABLE OUT
+Output IBIS interface file
+.VARIABLE NCOL
+The number of columns in
+the output interface file
+.VARIABLE LCOL
+The number of rows in
+the output interface file
+(Optional)
+.VARIABLE COLS
+The columns to receive
+the data
+.VARIABLE FORMAT
+The Fortran format
+specifier.  E.g.
+"(2A4,2X,2F5.1,1X,I9)"
+.VARIABLE DOUB
+DOUB - for the case of
+free-formatted input as
+double precision values.
+.VARIABLE DEBUG
+Diagnostic information.
+.END

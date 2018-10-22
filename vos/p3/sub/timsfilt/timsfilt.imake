@@ -1,0 +1,7 @@
+#define SUBROUTINE timsfilt
+
+#define MODULE_LIST timsfilt.f
+
+#define P3_SUBLIB
+
+#define USES_FORTRAN

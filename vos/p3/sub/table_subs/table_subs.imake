@@ -1,0 +1,9 @@
+
+#define SUBROUTINE table_subs
+
+#define MODULE_LIST table_subs.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

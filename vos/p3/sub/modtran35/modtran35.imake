@@ -1,0 +1,14 @@
+#define SUBROUTINE modtran3
+
+#define MODULE_LIST \
+	modtran35.f
+
+#define INCLUDE_LIST   \
+	defaults.inc	\
+	PARAM.LST
+
+#define P3_SUBLIB
+
+#define MOD35_SUBLIB
+
+#define USES_FORTRAN

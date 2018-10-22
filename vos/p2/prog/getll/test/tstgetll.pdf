@@ -1,0 +1,83 @@
+procedure
+  RefGbl $echo
+  RefGbl $SysChar
+body
+  Local CoordOut REAL COUNT=2
+  Local GLLFile  STRING
+  Local VGRFile  STRING
+
+  Let $echo="no"
+  If ($SysChar(1)="VAX_VMS")
+    Let GLLFile="wms_test_work:[testdata.mipl.gll]ptp_gll_grn.img"
+    Let VGRFile="wms_test_work:[testdata.mipl.vgr]f1636832.geo"
+  Else
+    Let GLLFile="/project/test_work/testdata/mipl/gll/ptp_gll_grn.img"
+    Let VGRFile="/project/test_work/testdata/mipl/vgr/f1636832.geo"
+  End-If
+
+  write "===This section checks if the program correctly detects source"
+  write "=================================================================="
+  write "===Test Galileo Project with an existing source"
+  Let $echo="yes"
+ GETLL @GLLFile COORDIN=(-70,83) 'tols COORDOUT=CoordOut CKNAME=NAIF
+  Let $echo="no"
+  write "===CoordOut is &CoordOut"
+
+  write "===Test Galileo Project with a non-existing source"
+  Let $echo="yes"
+ GETLL @GLLFile COORDIN=(-70,83) 'tols COORDOUT=CoordOut CKNAME=SMC
+  Let $echo="no"
+  write "===CoordOut is &CoordOut"
+
+  write "===Test Voyager Project with an existing source" 
+  Let $echo="yes"
+ GETLL @VGRFile COORDIN=(16,214) 'tols COORDOUT=CoordOut CKNAME=FARE
+  Let $echo="no"
+  write "===CoordOut is &CoordOut"
+
+  write "===Test Voyager Project with a non-existing source" 
+  Let $echo="yes"
+ GETLL @VGRFile COORDIN=(16,214) 'tols COORDOUT=CoordOut CKNAME=SMC
+  Let $echo="no"
+  write "===CoordOut is &CoordOut"
+  write ""
+
+  write "===This section checks if the program SEES the picture alright"
+  write "=================================================================="
+
+  write "===Test Galileo project, all points should be OFF planet"
+  Let $echo="yes"
+ GETLL @GLLFile (65,537) 'toll
+ GETLL @GLLFile (57,500) 'toll
+ GETLL @GLLFile (79,429) 'toll
+ GETLL @GLLFile (173,294) 'toll
+ GETLL @GLLFile (416,220) 'toll
+ GETLL @GLLFile (688,477) 'toll
+  Let $echo="no"
+  write "===Test Galileo project, all points should be ON planet"
+  Let $echo="yes"
+ GETLL @GLLFile (78,533) 'toll
+ GETLL @GLLFile (118,376) 'toll
+ GETLL @GLLFile (299,235) 'toll
+ GETLL @GLLFile (456,234) 'toll
+ GETLL @GLLFile (634,362) 'toll
+ GETLL @GLLFile (678,483) 'toll
+  Let $echo="no"
+
+  write "===Test Voyager project, all points should be OFF planet"
+  Let $echo="yes"
+ GETLL @VGRFile (277,735) 'toll
+ GETLL @VGRFile (250,605) 'toll
+ GETLL @VGRFile (277,486) 'toll
+ GETLL @VGRFile (354,388) 'toll
+ GETLL @VGRFile (537,319) 'toll
+ GETLL @VGRFile (677,353) 'toll
+  Let $echo="no"
+  write "===Test Voyager project, all pointes should be ON planet"
+ GETLL @VGRFile (333,796) 'toll
+ GETLL @VGRFile (287,735) 'toll
+ GETLL @VGRFile (257,621) 'toll
+ GETLL @VGRFile (279,497) 'toll
+ GETLL @VGRFile (353,394) 'toll
+ GETLL @VGRFile (779,452) 'toll
+end-proc

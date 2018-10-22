@@ -1,0 +1,1385 @@
+.LM 20
+.RM 70
+.TITLE Software Detailed Design : GMASK
+.NO NUMBER
+.KEEP
+.JUST
+.FILL
+.PARAGRAPH -20,1,0
+.AUTOPARAGRAPH
+.TAB STOPS 20,40
+
+MODULE :	GMASK Version 07.05.92
+
+PURPOSE :	GMASK is a set of primitive routines to help the user
+implement image masks.  These routines include functions
+such as drawing line vectors, character strings, gray scale
+boxes, etcetera.  The routines are written in C programming language.
+
+.PARAGRAPH 0,1,0
+
+These routines allow the user to incrementally
+build a mask around an image without using large amounts
+of memory for the image.
+
+.PARAGRAPH -20,1,0
+
+WRITTEN BY : 		Alvin Wong
+
+COGNIZANT PROGRAMMER :	Justin McNeill
+
+DATE WRITTEN :		May 17, 1986
+
+EVISED :		March 15, 1991
+
+LAST REVISED :		May 16, 1995 by Florance Moss
+
+OVERVIEW :	The different types of mask building blocks GMASK supports are :
+.LIST 0,"o"
+.LE;Image data
+.LE;Histograms
+.LE;Line vectors
+.LE;Character strings
+.LE;Gray scale boxes and ellipses
+.LE;Continuous and discrete step gray scale
+.LE;Tick marks and scales
+.END LIST
+.PARAGRAPH 0,1,0
+
+GMASK also supports different data processing and modification tools:
+.LIST 0,"o"
+.LE;Color or black and white modes of operation
+.LE;Assignments of input image bands to specific output color planes
+.LE;Adaptive, fixed or inverse stretches of image data and histograms
+.LE;Display of byte or halfword image data
+.LE;Display of data buffers from within the driver program
+.LE;Calculation of histograms for byte or halfword image data
+.LE;Multiple histogram displays, with or without color blending
+.LE;Determination of low and high DN values from adaptive stretches
+.LE;Zooms or reductions of image data
+.LE;Calculation of character string length
+.LE;Variable spacing between characters in a stored string
+.LE;Centering of defined mask in a frame of specified size and color.
+.END LIST
+.pg
+.PARAGRAPH 0,1,0
+PRESENT DESIGN STATUS
+
+GMASK has been revised and updated by at least three developers and has 
+undergone some major extensions of its capabilities from a simple black and
+white mask generation program to a multiple-band mask generation program for
+the production of color masks.  
+
+The current version of GMASK no longer uses static arrays for the storage of
+mask primitives.  Doubly linked lists that are grown and pruned using dynamic 
+memory allocation have replaced almost all of the static arrays.  Furthermore, 
+GMASK can now produce multiple mask image files from a single driver program,
+display both byte or halfword, zoomed or reduced images and produce stretched 
+and unstretched histograms of those images, write multiple histograms in one 
+mask area implementing two display modes, store histogram arrays from sources 
+other than GMASK's ZA/XACALCULATEHIST, store buffered data from the driver program
+to the output mask ( in a similar fashion that ZA/XASTOREIMAGE stores image 
+files ), and produce mask primitives in any color specified by the user.
+
+Areas that still need to be investigated in GMASK are as follows:
+.BLANK
+.LIST 0,"o"
+.LE;Design of fast, letter-quality fonts
+.LE;Efficient handling of pseudocolor
+.LE;Writing of character strings in a top-to-bottom fashion.
+.LE;Speeding ZA/XACOPYMASK generation of the mask
+.END LIST
+
+Users are encouraged to give criticisms and suggestions on the capabilities of
+GMASK.  These routines are meant to ease mask design and production, not to 
+hinder or retard it.
+.pg
+.PARAGRAPH 0,1,0
+DESIGN PHILOSOPHY
+
+The design of GMASK routines is based on the allocation of memory for the
+storage of mask building blocks in doubly linked lists.  The basic user 
+strategy in using GMASK is to store these mask building blocks by calling 
+the GMASK routines, and to write all the stored mask information, line by line, 
+to the mask output file by calling ZA/XACOPYMASK
+
+The set of routines can be broken into three types:
+
+.LIST
+.DLE ,D,")"
+.LE;SETUP,
+.LE;STORAGE, and
+.LE;IMMEDIATE RESPONSE.
+.END LIST
+
+SETUP routines generally define an enviroment within which other routines
+will operate.  These routines allow users to define a current state such that
+following routine calls produce a desired output.  Such information as font
+angles, font types, scale definitions, dimensions of output mask, and spacing
+between adjacent characters are some of the kinds of information these routines
+handle.  The following routines fall into the category of SETUP:
+.LITERAL
+
+	ZA/XABAND
+	ZA/XACLEARSCALE
+	ZA/XADEFINESCALE
+	ZA/XAINITIALIZE
+	ZA/XAOUTSIZE
+	ZA/XASETCHARSPACING
+	ZA/XASETDIM
+	ZA/XASETFONT
+	ZA/XASETFONTANGLE
+
+.END LITERAL
+STORAGE routines actually store mask primitives in linked lists of structures
+for output until ZA/XACOPYMASK is called.  Vectors, strings, boxes, images, and
+other mask primitives are stored using these routines, which are as follows:
+.LITERAL
+	
+	ZA/XASTOREBOX
+	ZA/XASTORELLIPSE
+	ZA/XASTOREGRAY
+	ZA/XASTOREHISTOGRAM
+	ZA/XASTOREIMAGE
+	ZA/XASTORERAY
+	ZA/XASTORESTRING
+	ZA/XASTORETICK
+	ZA/XASTOREVECTOR
+	ZA/XAZOOMIMAGE
+
+.END LITERAL
+IMMEDIATE RESPONSE routines provide the user with information immediately 
+following the routine call in the program.  Routines in this category are:
+.LITERAL
+
+	ZA/XACALCULATEHIST
+	ZA/XADETERMINELIMIT
+ 	ZA/XASTRINGLENGTH
+
+.END LITERAL
+The only routine which does not fall into any of these categories is the
+ZA/XACOPYMASK routine, which causes the output mask to be written to a file.
+This routine searches through all the linked lists of structures as each output
+mask line is written. 
+
+Thus, the way these routines are designed, the user must do some environment
+SETUP before calling any STORAGE routines, be it font selection, output mask
+size or color definition to name a few.  Once the appropriate environment is 
+set, any STORAGE routines for the display of mask primitives may be called.  
+Once all primitives have been stored, the ZA/XACOPYMASK routine may be called to 
+write the output mask.
+
+The user should follow this simple outline of routine calls to build a mask:
+.LIST
+.DLE ,D,")"
+.LE;Call routine ZA/XASETDIM to set the number of output bands of the mask.  
+A single band output results in a black and white image file, whereas a three 
+band output - red, green, blue - results in a color image file.
+.LE;Call ZA/XAINITIALIZE, an initialization routine, to set necessary default 
+values and to define the maximum number of lines and samples
+and the background grey scale or color of the output mask.
+.LE;Call the appropriate storage routines for the various mask building blocks
+to further define the output mask.
+.LE;Call ZA/XACOPYMASK to translate the stored mask primitives into an image.
+This image is usually written to some output file on hard disk or magtape.
+
+.END LIST
+.pg
+INPUT FILES
+
+No input files are required if images are not to be displayed
+in the mask.  Input files may be either single band or multiple band files.
+Input files of three bands are treated as color inputs and are displayed as
+color outputs in the color mode of GMASK.  The user must specify the input 
+file names in VICAR.
+
+
+OUTPUT FILES
+
+One or more output files can be generated by calling GMASK routine ZA/XACOPYMASK 
+one or more times.
+The files may be either single band, in the case of black/white mode, or 
+multiple bands, in the case of color mode.  The user must specify the output 
+file names in VICAR.
+
+
+ERROR CODES
+
+Storage routines will return a value that will denote
+a normal return or error condition. These are defined :
+
+.TAB STOPS 8,16,24,32,40,48,56,64,72
+.LITERAL
+
+	 0 = Normal return
+
+	-1 = One or more parameters are out of bounds,
+	     usually because of negative or zero values,
+	     or a parameter exceeds some defined maximum.
+
+	-2 = A more complex boundary check shows that
+	     the data exceeded some defined maximum.
+
+.END LITERAL
+.pg
+.FILL
+.JUST
+.LM 8
+PRINCIPAL DATA STRUCTURES
+
+The following is a brief description of the data types
+that GMASK uses.  All data types are used as a linked list of structures.
+What is described is the information in each structure.
+All fields are integer type unless specified otherwise.
+.LM 0
+.TAB STOPS 8,16,24,32,40,48,56,64,72
+.LITERAL
+
+	BoxType - Box representation.  Consists of :
+
+		Starting line
+		Starting sample
+		Width of box
+		Length of box
+		Dn value or DN array for color of box
+
+		Pointer to previous BoxType structure
+		Pointer to next BoxType structure
+
+	EllipseType - Ellipse representation.  Consists of :
+	
+		Center line
+		Center sample
+ 		Major axis radius
+ 		Minor axis radius
+		Width of line
+		Array of object edges
+		Array of smoothing multipliers
+ 		Dn value or Dn array for color of ellipse
+
+		Pointer to previous EllipseType structure
+		Pointer to next EllipseType structure
+
+	BufType - Input buffer characteristics. Consists of :
+
+		Pointer to input buffer (unsigned char)
+		Starting line in buffer
+		Starting sample in buffer
+		Ending line in buffer
+		Ending sample in buffer
+		Start line in mask
+		Start sample in mask
+		Zoom factor
+		Number of samples in a band
+		Number of lines in input buffer
+		Number of samples per line
+		Start sample minus 1 (index)
+		Starting sample in buffer minus 1 (index)
+		Multiplicative magnification factor (float)
+		Indicator of color or B/W display
+		Buffer for zooming calculation (unsigned char)
+
+		Pointer to previous BufType structure
+		Pointer to next BufType structure
+
+	HistType - Histogram representation. Consists of :
+
+		Histogram start line
+		Histogram start sample
+		Histogram end line
+		Histogram end sample
+		Fraction percentage of image to be sampled (float)
+		Saturation percentage for adaptive stretch (float)
+		Pointer to array of excluded DN values for adaptive stretch
+		Number of elements in array of excluded DN values
+
+		Scale factor for DN dimension of display (float)
+		Scale factor for frequency dimension of display (float)
+		Dn value or DN array for color 
+		Number of color bands for multiple histogram
+		Type of stretch used
+		Histogram display orientation (horizontal or vertical)
+		Multiple histogram display mode (minimum-first or color blend)
+		Histogram of 256 elements (unsigned integer)
+		Maximum value in histogram array (maximum frequency)
+		Array of pointers to histograms (for multiple histograms)
+		Pointer to resultant colors for color blend multiple histograms
+
+		Pointer to previous HistType structure
+		Pointer to next HistType structure
+
+.END LITERAL
+.LITERAL
+
+	ImageType - Image data representation.  Consists of :
+
+		Starting line of input image
+		Starting sample of input image
+		Ending line of input image
+		Ending sample of input image
+		Starting line of the output image
+		Starting sample of the output image
+		Unit number of input image
+
+		Number of color bands in image
+		Output band
+		Number of input lines
+		Number of input samples
+		Number of input bands
+		Number of DN values (256 for byte and 65536 for half)
+		Stretch type - Linear or Adaptive or None
+		Low Dn/Sample fraction (float)
+				If ( Stretch type = Linear ) Then
+				   This field gets the low DN value
+				   of the linear stretch; gets the high DN
+				   value of an inverse stretch.	
+				else
+				   this field gets the fraction of the image
+				   to be sampled for the adaptive stretch
+		Saturation Percentage (float)
+				If ( Stretch type = Linear ) Then
+				   This field gets the high DN value
+				   of the linear stretch; gets the low DN
+				   value of an inverse stretch
+				else
+				   this field gets the saturation percentage
+				   for the adaptive stretch
+		Pointer to lookup table for stretch
+                Dn values to be excluded from adaptive stretch 
+                Number of Dn to be excluded from adaptive stretch 
+
+		Pointer to previous ImageType structure
+		Pointer to next ImageType structure
+.END LITERAL
+.LITERAL
+
+	ZImageType - Zoomed image data representation.  Consists of :
+
+		Starting line of input image
+		Starting sample of input image
+		Ending line of input image
+		Ending sample of input image
+		Starting line of the output image
+		Starting sample of the output image
+		Unit number of input image
+
+		Output band
+		Number of color bands in input image
+		Number of input lines
+		Number of input samples
+		Number of input bands
+		Input buffer for magnification calculation
+		Number of DN values (256 for byte and 65536 for half)		
+		Magnification factor (float)
+		Multiplicative magnification factor (float)
+		Zoom type - Interpolation or Replication
+		Stretch type - Linear or Adaptive or None
+		Low Dn/Sample fraction (float)
+				If ( Stretch type = Linear ) Then
+				   This field gets the low DN  value
+				   of the linear stretch; gets the high DN
+				   value of an inverse stretch.
+				else
+				   this field gets the fraction of the image
+				   to be sampled for the adaptive stretch
+		Saturation Percentage (float)
+				If ( Stretch type = Linear ) Then
+				   This field gets the high DN value
+				   of the linear stretch; gets the low DN
+ 				   value of an inverse stretch.
+				else
+				   this field gets the saturation percentage
+				   for the adaptive stretch
+		Pointer to lookup table for stretch
+                Dn values to be excluded from adaptive stretch 
+                Number of Dn to be excluded from adaptive stretch
+		Pointer to buffer for input line read from image (unsigned char)
+		Pointer to previous ZImageType structure
+		Pointer to next ZImageType structure
+                
+
+	StringType - Character string representation.  Consists of :
+
+		Starting line
+		Starting sample
+		Size -	Describes a multiple of the 5 X 7 pixel characters.
+			For example, Size = 1 generates 5 X 7 characters,
+				     Size = 2 generates 10 X 14 characters,
+				     Size = 3 generates 15 X 21 characters,
+				     and so on.
+		Dn value or DN array for color of character string
+		Character string
+
+		Font thickness - If Hershey font, describes the thickness of
+                                 characters in pixels.
+		Font type - Describes whether font is block of Hershey type.
+		Font number - If Hershey font, the font number.
+		Hershey character height
+		Font angle - Angle in which string is to be written.
+
+		Pointer to previous StringType structure
+		Pointer to next StringType structure
+
+.END LITERAL
+.LITERAL
+
+	ScaleType - Scale representation.  Consists of :
+
+		End Cap Length of Center Scale
+		End Cap Thickness of Center Scale
+		Center Line Thick of Center Scale
+		Tick Length of Left/Right Scale
+		Tick Thickness of Left/Right Scale 
+		Tick Frequency of Left/Right Scale (double)
+		Tick Offset of Left/Right Scale (double)
+                Array Length
+                Annotation - position, start value, incrementation, 
+			     modulus, number of significant digits,
+			     font size, text orientation, text justification
+
+	TickType - tick mark representation.  Consists of :
+
+		Start line
+		Start sample
+		End line
+		End sample
+		Width of each tick mark
+		Length of each tick mark
+		Spacing between tick marks
+		Dn value or Dn array for color of tick mark
+
+		Pointer to previous TickType structure
+		Pointer to next TickType structure
+
+	UnitType - Structure to track all input files and their output bands
+
+		Unit number of input file
+		Output band with which the input file is associated
+		Pointer to next UnitType structure
+
+	VectorType - Vector line representation.  Consists of :
+
+		Direction 	- Horizontal or vertical.
+		Starting line
+		Starting sample
+		Ending line
+		Ending sample
+		Width of vector
+		Dn value or Dn array for color of vector
+	
+		Pointer to previous VectorType structure
+		Pointer to next VectorType structure
+.END LITERAL
+.pg
+.NO FILL
+.NO JUST
+.RM 80
+PRINCIPAL SUBROUTINES :
+
+ZA/XABAND  
+	Allows the user to associate a particular input (unit number) 
+	with an output color plane or band number.  This is to be used 
+	only in GMASK color mode.
+
+ZA/XACALCULATEHIST
+	Tallies the histogram of an input file; accepts stretch 
+	parameters to generate a stretched histogram.  Returns the maximum 
+	frequency of histogram bins and the number of points in the histogram. 
+
+ZA/XACLEARSCALE 
+	Clears all current scale characteristics.
+
+ZA/XACOPYMASK 
+	Copies the internal information derived from the above routines 
+	and the user defined input files into a user defined output file.
+
+ZA/XADEFINESCALE 
+	Stores a scale definition.
+
+ZA/XADETERMINELIMIT
+	Returns the minimum and maximum Dn values of adaptive stretch.
+
+ZA/XAINITIALIZE
+	Initializes necessary default values and allows the user to specify 
+	the background color or gray level of an output mask and the maximum 
+ 	line and sample values of the mask.  The current absolute maximum 
+	line size is 20000 lines for the output image.  The current absolute 
+	maximum sample size is 20000 samples for the output image.  Thus, for 
+	a color mask, the maximum output dimension is 20000 x 20000 x 3.
+
+ZA/XAOUTSIZE
+	Allows the user to specify the number of lines and samples in the 
+	output file, superseding the dimensions given in ZA/XAINITIALIZE.  
+	The purpose of this routine is to provide automatic centering of mask 
+	images.  By specifying a dimension of the mask larger than the 
+	dimension given in ZA/XAINITIALIZE, the mask generated will be centered 
+	in a file of dimension and color specified by ZA/XAOUTSIZE.  If the 
+	color or DN of ZA/XAOUTSIZE is different from the color or DN chosen 
+	in ZA/XAINITIALIZE,  a border will be evident around the mask object.
+
+XALODNSTRETCH,XAHIDNSTRETCH
+	These are global symbols denoting the current low and high dn,
+	respectively of the current image being stretched.  These globals
+	are useful for the extraction of this information to label fields or
+	legend information in the output file mask.  It is not recommended
+	for the user to change these global symbols directly.
+
+ZA/XASCALE
+	Draws a scale as defined by ZA/XADEFINESCALE.
+
+ZA/XASETCHARSPACING
+	Allows the user to control the spacing between characters in a string.  
+
+ZA/XASETDIM
+	Sets the software to either a color mode or black/white mode.  
+	The color mode outputs an image file of three bands: red, green 
+	and blue.  
+
+ZA/XASETFONT
+	Allows the user to select font type: default block character font 
+	or hershey font sets.
+
+ZA/XASETFONTANGLE
+	Allows the user to specify the angle at which character strings
+	are written.  Valid values are (-90,0,90).  90 degrees is a rotation
+ 	of the text in a clockwise fashion; -90 is counter-clockwise.
+
+ZA/XASTOREBOX
+	Stores a color or gray level filled box.
+
+ZA/XASTOREBUFFER
+	Stores a user-supplied one-dimensional buffer.
+
+ZA/XASTORELLIPSE
+	Stores a variable line-width gray scale ellipse.
+
+ZA/XASTOREGRAY
+	Stores a gray scale.
+
+ZA/XASTOREHISTOGRAM
+	Translates a buffer to a histogram graphic.  Vertical or horizontal 
+	displays are both provided.  Allows multiple histograms in one graphic.
+
+ZA/XASTOREIMAGE
+	Stores an image. The user has the option of doing a linear, inverse or
+	an adaptive stretch on the image. 
+
+ZA/XASTORERAY
+	Stores a vector of any orientation or angle.
+
+ZA/XASTORESTRING
+	Stores a character string.
+
+ZA/XASTORETICK
+	Stores a set of tick marks.
+
+ZA/XASTOREVECTOR
+	Stores a line vector.
+
+.pg
+ZA/XASTRINGLENGTH
+	Returns the length of a character string.
+
+ZA/XAZOOMIMAGE
+	Stores enlargements or reductions of image data. The user has 
+	the option of doing a linear, inverse or adaptive stretch on the image. 
+.pg
+.NO FILL
+.NO JUST
+.RM 80
+.LM 8
+PARAMETERS
+
+This is a brief description of the actual routine names and their 
+corresponding parameters.  All parameters are of type integer unless 
+otherwise specified.
+
+.TAB STOPS 8,16,24,32,40,48,56,64,72
+.LM 0
+.RM 80
+.LITERAL
+
+
+	ZA/XABAND - Parameters are :
+		
+		Unit number
+		Output band number
+
+	ZA/XACALCULATEHIST - Parameters are :
+	
+		Unit number
+		Image start line
+		Image start sample
+		Image end line
+		Image end sample 
+		Line increment
+		Sample increment
+		Histogram buffer (output, 256 or 65536 elements)
+		Maximum frequency of histogram (output)
+		Number of points in histogram (output)
+		Stretch type
+		Lower saturation percentage; Lo DN of stretch; Hi DN of inv-str
+		Upper saturation percentage; Hi DN of stretch; Lo DN of inv-str
+                Dn values to be excluded from adaptive stretch.
+                Number of Dn to be excluded from adaptive stretch.
+
+	ZA/XACLEARSCALE - Requires no parameters.
+
+	ZA/XACOPYMASK - Parameter is :
+
+		Mirror Image flag (flag)
+
+	ZA/XADEFINESCALE - Parameters are :
+
+           To define the Center Scale :
+
+		End Cap Length
+                End Cap Width
+		Center Line Width
+                Array Length
+                
+           To define the Left or Right Scale :
+
+                Tick Length
+                Tick Width
+                Tick Period
+                Tick Offset
+                Array Length
+.END LITERAL
+.pg
+.LITERAL
+           To define the Annotation :
+
+		Annotation Position
+		Annotation Start Value
+		Annotation Increment
+		Annotation Modulus
+		Annotation Significant Digits
+		Type Size
+		Annotation Orientation
+		Annotation Justification
+                
+	ZA/XADETERMINELIMIT - Parameters are :
+
+		Low  Dn value
+		High Dn value
+
+	ZA/XAINITIALIZE - Parameters are :
+	
+		Maximum number of lines in output mask or mask object
+		Maximum number of samples in output mask or mask object
+		Mask background Dn value or Dn array for color mode
+
+	ZA/XAOUTSIZE - Parameters are :
+	
+		Number of lines in output mask, supersedes ZA/XAINITIALIZE
+		Number of samples in output mask, supersedes ZA/XAINITIALIZE
+		Mask border Dn value or Dn array for color mode
+
+	ZA/XASCALE - Parameters are :
+
+                Starting Line
+                Starting Sample
+                Ending Line
+                Ending Sample
+                Dn Value or Dn array for color mode 
+
+	ZA/XASETCHARSPACING - Parameters are :
+	
+		Number of pixels between consecutive characters in a string
+
+	ZA/XASETDIM - Parameters are :
+	
+		Number of output bands for mask
+
+	ZA/XASETFONT - Parameters are :
+
+		Font flag (String can be either "DEFAULT" or "HERSHEY")
+		Font number
+
+	ZA/XASETFONTANGLE - Parameters are :
+
+		Font angle (Valid values are -90,0,90)
+
+.END LITERAL
+.pg
+.LITERAL
+	ZA/XASTOREBOX - Parameters are :
+
+		Start line
+		Start sample
+		Width
+		Length
+		Dn value or Dn array for color mode
+
+	ZA/XASTOREBUFFER - Parameters are :
+	
+		Buffer to be displayed
+		Buffer start line
+		Buffer start sample
+		Buffer end line
+		Buffer end sample
+		Mask start line
+		Mask start sample
+		Zoom factor
+		Input type - B/W, single band or RGB, three bands
+
+ 	ZA/XASTORELLIPSE - Parameters are :
+ 	
+ 		Center line
+ 		Center sample
+ 		Major axis radius
+ 		Minor axis radius
+		Width of line
+ 		Dn value or Dn array for color
+
+	ZA/XASTOREGRAY - Parameters are :
+
+		Start line
+		Start sample
+		Width
+		Length
+		Starting Dn
+		Ending Dn
+		Type
+
+	ZA/XASTOREHISTOGRAM - Parameters :
+
+		Histogram buffer
+		Histogram start line
+		Histogram start sample
+		Histogram end line
+		Histogram end sample
+		Maximum histogram buffer value (maximum frequency)
+		Display mode (Vertical,Horizontal,VM,VB,HM,HB)
+		Dn value or Dn array for color mode
+.END LITERAL
+.pg
+.LITERAL
+	ZA/XASTOREIMAGE - Parameters :
+
+		Unit  number
+		Start line
+		Start sample
+		End line
+		End sample
+		Output start line
+		Output start sample
+		Stretch type
+		Saturation percentage
+		Fraction sampled
+                Dn values to be excluded from adaptive stretch
+                Number of Dn to be excluded from adaptive stretch
+
+	ZA/XASTORERAY - Parameters are :
+		
+		Start line
+		Start sample
+		Angle clockwise from 12 o'clock
+		Length 
+		Width 
+		Dn value or Dn array for color mode
+		Dummy character string for future use
+		Ending line (returned)
+		Ending sample (returned)
+		
+
+	ZA/XASTORESTRING - Parameters are :
+
+		Start line
+		Start sample
+		Size of characters
+		Dn value or Dn array for color mode
+		Character string - Type is character array of MAXSTRINGSIZE.
+		Font thickness
+
+	ZA/XASTORETICK - Parameters :
+
+		Start line
+		Start sample
+		End line
+		End sample
+		Width of individual tick mark
+		Length of individual tick mark
+		Spacing between adjacent tick marks
+		Dn value or Dn array for color mode
+.END LITERAL
+.pg
+.LITERAL
+	ZA/XASTOREVECTOR - Parameters are :
+
+		Start line
+		Start sample
+		End line
+		End sample
+		Width
+		Dn value or Dn array for color mode
+
+	ZA/XASTRINGLENGTH - Parameters are :
+
+		Character string 
+		Size of characters
+		Font thickness
+                Length of character string
+
+	ZA/XAZOOMIMAGE - Parameters are :
+
+		Unit number
+		Starting line
+		Starting sample
+		Ending line
+		Ending Sample
+		Output starting line
+		Output starting sample
+		Magnification or zoom factor
+		Type of zoom - replication or interpolation - character string
+		Stretch type
+		Saturation percentage
+		Fraction sampled
+                Dn values to be excluded from adaptive stretch
+                Number of Dn to be excluded from adaptive stretch
+
+.END LITERAL
+.pg
+.TAB STOPS 8,16,28,32,40,48,56,64,72
+.LITERAL
+PROGRAM DESIGN :
+
+.END LITERAL
+.LITERAL
+
+ZA/XABAND
+
+  If ( band number is less than zero ) Then
+    Write error message and return
+  else
+    Allocate memory for band structure
+    Associate unit number with output band
+
+
+ZA/XACALCULATEHIST
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+
+   If (BYTE data is used) Then
+      Open input file 
+      Calculate 256 element histogram
+   Else
+      Open input file
+      Calculate 65536 element histogram
+
+   If (Stretch flag is not false) Then
+      Check stretch parameters
+      Exclude any DN values to be excluded
+      If (Stretch is fixed) Then
+         Perform fixed stretch
+      Else
+	 If (Stretch is adaptive) Then
+	    Perform adaptive stretch
+
+   Calculate maximum frequency value of histogram
+
+
+ZA/XACLEARSCALE
+
+   Clear all current scale characteristics
+
+.END LITERAL
+.pg
+.LITERAL
+ZA/XACOPYMASK 
+
+Output image sizing comes in two flavors :
+
+1) If the user defines the maximum number of lines and samples. we use it.
+2) If the user has not defined (1), we derive from the user data
+   the number of lines and samples that are needed.
+
+Algorithm :
+
+   Open input files
+   Calculate stretch for each image
+   Calculate histogram for each image
+   Determine the maximum lines and samples for output image
+   Calculate the number of color bands to be output
+   Open output file
+   Determine if the mirror image flag is present
+
+   Loop for the number of bands in output 
+   Begin  
+     Loop for the number of lines in output
+     Begin
+       Fill mask array with background DN or color
+
+       If ( line # greater than minimum box line) Then
+         Loop through linked list of box structures
+           If ( line # less than last box line ) Then
+             Copy box segment to mask array
+           Else
+             Drop box structure out of the list
+	
+       If ( line # greater than minimum image line) Then
+         Loop through linked list of image structures
+           If ( line # less than last image line ) Then
+             Copy image data to mask array
+           Else
+             Drop image structure out of the list
+
+       If ( line # greater than minimum zoomed image line) Then
+         Loop through linked list of zoomed image structures
+           If ( line # less than last zoomed image line ) Then
+             Copy zoomed image data to mask array
+           Else
+             Drop zoomed image structure out of the list
+
+       If ( line # greater than minimum buffer line) Then
+         Loop through linked list of buffer structures
+           If ( line # less than last buffer line ) Then
+             Copy buffer data to mask array
+           Else
+             Drop buffer structure out of the list
+
+       If ( line # greater than minimum tick line) Then
+         Loop through linked list of tick structures
+           If ( line # less than last tick line ) Then
+             Copy tick data to mask array
+           Else
+             Drop tick structure out of the list
+
+       If ( line # greater than minimum histogram line) Then
+         Loop through linked list of histogram structures
+           If ( line # less than last histogram line ) Then
+             Determine histogram orientation
+               Determine histogram display mode 
+                 Copy histogram data to mask array
+           Else
+             Drop image structure out of the list
+
+       If ( line # greater than minimum vector line) Then
+         Loop through linked list of vector structures
+           If ( line # less than last vector line ) Then
+             Copy vector data to mask array
+           Else
+             Drop vector structure out of the list
+
+       If ( line # greater than minimum string line) Then
+         Loop through linked list of string structures
+           If ( line # less than last string line ) Then
+             Determine angle of string
+               Copy string data to mask array
+           Else
+             Drop string structure out of the list
+          
+       If ( mirror image flag is set )   
+         Write mirrored mask array to output
+       else
+         Write mask array to output
+     End
+   End
+	
+   Close input files
+   Close output file
+
+
+ZA/XADEFINESCALE
+
+   If (scale type is not C, not L, not R )
+      Return scale type error
+   Else
+      If (scale type is C) Then
+          Store scale type, end cap length, end cap width, and center cap width
+          into array
+      Else If (scale type is L or R) Then
+          Store scale type, array size
+          For each array
+              Store tick length, tick width, tick frequency, tick offset 
+              If annotation is specified
+                 Store annotation position, annotation start value, 
+                 annotation increment, annotation significant digits, 
+                 text size, annotation orientation
+                 
+
+ZA/XADETERMINELIMIT 
+
+   Open input files
+   Determine stretch limits of each image
+   Close input files
+
+
+ZA/XAINITIALIZE 
+
+   Set all pointers to NULL
+   Store mask background Dn value or Dn array for color mode
+   Store user defined maximum lines and samples or
+         store default maximum line and sample values
+
+
+ZA/XAOUTSIZE 
+
+   Store mask border Dn value or Dn array for color mode
+   Store user defined maximum lines and samples 
+
+
+ZA/XASCALE
+
+   If (( start line is not equal to end line) and 
+       ( start sample is not equal to end sample)) Then
+      Return scale is neither horizontal nor vertical error
+   Else If ( DN outside the range 0-255 ) Then
+      Return DN outside the range error
+   Else If ( C type has not been defined ) Then
+      Return center is undefined error
+   Else If ( neither L nor R is defined ) Then
+      Return neither left nor right is defined error
+   Else If ( scale falls outside the image ) Then
+      Return scale outside the image error
+
+   If ( start sample = end sample ) Then
+      If (scale type = C )Then 
+          Draw vertical center scale 
+      If (scale type = L )Then 
+          Draw vertical left scale 
+          If annotation specified
+             Draw annotation
+      If (scale type = R )Then 
+          Draw vertical right scale 
+          If annotation specified
+             Draw annotation
+   Else if ( start line = end line ) Then
+      If (scale type = C )Then 
+          Draw horizontal center scale 
+      If (scale type = L )Then 
+          Draw horizontal left scale 
+          If annotation specified
+             Draw annotation
+      If (scale type = R )Then 
+          Draw horizontal right scale 
+          If annotation specified
+             Draw annotation
+
+
+ZA/XASETCHARSPACING
+
+  If ( spacing passed is negative ) Then
+    Write error message
+  else
+    Set spacing between characters to value passed 
+
+
+ZA/XASETDIM
+
+  If ( dimension passed is not one or three ) Then
+    Write error message
+    Set dimension to one
+
+
+ZA/XASTOREBOX 
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+
+   Allocate memory for another BoxType structure.
+   If (memory allocation is successful) Then
+      Store parameter data into array
+      Return normally
+   Else
+      Return memory allocation error
+
+
+ZA/XASTOREBUFFER 
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+
+   Allocate memory for another BufferType structure.
+   If (memory allocation is successful) Then
+      Read buffer into buffer in structure
+      Store parameter data into array
+      Return normally
+   Else
+      Return memory allocation error
+
+ZA/XASTORELLIPSE
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+
+   Allocate memory for another EllipseType structure.
+   If (memory allocation is successful) Then
+      Store parameter data into array
+      Calculate all edges in samples
+      Calculate all smoothing multipliers
+      Return normally
+   Else
+      Return memory allocation error
+
+
+ZA/XASTOREGRAY
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+   
+   If ( horizontal gray scale ) Then
+   Begin
+      If ( continuous scale type ) Then
+	      If ( there is a large sample range and small dn range ) Then
+       		  Distribution = sample difference / dn difference
+      	      Else
+	      If ( there is a small sample range and a large dn range ) Then
+        	 Distribution = dn difference / sample difference
+      Else
+	      Draw 16 separate gray scale boxes with separators
+   End
+   Else
+   If ( vertical gray scale ) Then
+   Begin
+      If( continuous scale type ) Then
+	      If ( there is a large line range and small dn range ) Then
+ 	      	  Distribution = line difference / dn difference
+	      Else
+   	      If ( there is a small line range and a large dn range ) Then
+      		   Distribution = dn difference / line difference
+      Else
+	      Draw 16 separate gray scale boxes with separators
+   End
+
+ZA/XASTOREHISTOGRAM 
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+
+   Allocate memory for another HistType structure
+   If (memory allocation is successful) Then
+      Store parameter data into array
+      Return normally
+   Else
+      Return memory allocation error
+
+
+ZA/XASTOREIMAGE 
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+
+   Allocate memory for another ImageType structure
+   If (memory allocation is successful) Then
+      Store parameter data into array
+      Return normally
+   Else
+      Return memory allocation error
+
+
+ZA/XASTORERAY
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+
+   Allocate memory for another VectorType structure
+   If (memory allocation is successful) Then
+      Store parameter data into array
+      
+      If (Vector is vertical) Then
+         Make sure Start sample < End sample
+	 Calculate end line and sample
+      Else
+      If (Vector is horizontal) Then
+         Make sure Start line < End line
+	 Calculate end line and sample
+      Else
+         Determine quadrant in which vector lies and set dx/dy signs
+	 Calculate dx/dy and vector points
+	 Calculate end line and sample
+      Return normally
+   Else
+      Return memory allocation error
+
+
+ZA/XASTORESTRING
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+
+   Allocate memory for another StringType structure
+   If (memory allocation is successful) Then
+      Store parameter data into array
+      Return normally
+   Else
+      Return memory allocation error
+
+
+ZA/XASTORETICK 
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+
+   Allocate memory for another TickType structure
+   If (memory allocation is successful) Then
+      Store parameter data into array
+      Return normally
+   Else
+      Return memory allocation error
+
+
+ZA/XASTOREVECTOR 
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+
+   Allocate memory for another VectorType structure
+   If (memory allocation is successful) Then
+      Store parameter data into array
+      If (Vector is horizontal) Then
+         Make sure Start sample < End sample
+      Else
+      If (Vector is vertical) Then
+         Make sure Start line < End line
+      Else
+         Vector is diagonal
+	 Calculate dx/dy and vector points
+      Return normally
+   Else
+      Return memory allocation error
+
+
+ZA/XASTRINGLENGTH 
+
+   Return the string length
+
+
+ZA/XAZOOMIMAGE     
+
+   If (negative or out of bounds values in parameters) Then
+      Return out of bounds error
+
+   Allocate memory for another ZImageType structure
+   If (memory allocation is successful) Then
+      Calculate zoomed or reduced image data
+      Store parameter data into array
+      Return normally
+   Else
+      Return memory allocation error
+
+.END LITERAL
+.Subtitle GMASK Helpful Hints
+.PG
+.LM 20
+.RM 70
+.FILL
+.JUST
+.PARAGRAPH 0,1,0
+
+PROGRAM BODY
+
+To get started with GMASK, your main program body should generally look
+like (if using C) :
+
+.LITERAL
+
+	main()
+	{
+	   ZA/XAsetdim( 3 ) ;    /* Set GMASK to color mode 	 */
+	
+	   ZA/XAinitialize( ... ) ;
+
+	   (Body) .....
+
+
+	   ZA/XAcopymask(' ') ;
+	}
+
+.END LITERAL
+
+In general, the first statement should be an "ZA/XAsetdim" followed by an 
+"ZA/XAinitialize" invocation.  The last statement should be "ZA/XAcopymask".  
+This routine actually does the mask generation.
+In between, at (body), should be various invocations to the "ZA/XAstore???"
+routines where "???" is your choice for your mask.
+
+.PG
+
+ALTERNATE CHARACTER FONTS
+
+The user has the option of using the Hershey characters fonts as
+an alternative to the 5x7 block character fonts GMASK provides internally.
+
+The software module TTXTSUBS contains the routines that implement
+this capability.  The routines are prefixed with "TXT".  This module
+must be included with GMASK if the Hershey fonts are to be used.
+
+The user must first invoke the routine "ZA/XAsetfont" to setup the desired font
+and use the "ZA/XAstorestring" routine, "ZA/XAstringlength" routine as before. 
+See above for a description of these routines.  For example, in a C code 
+sequence :
+
+
+.LITERAL
+
+	ZA/XAsetfont( "HERSHEY", 3 ) ;
+	(1) ....
+	ZA/XAsetfont( "DEFAULT", 0 ) ;
+	(2) ....
+
+.END LITERAL
+
+At (1), all subsequent invocations to "ZA/XAstorestring" will use
+the characters of Hershey font number 3, all subsequent invocations
+to "ZA/XAstringlength" will return the length of a character string using
+Hershey font number 3.
+
+At (2), all subsequent invocations to "ZA/XAstorestring" will use
+the default or block characters fonts, all subsequent invocations
+to "ZA/XAstringlength" will return the length of a character string
+using block font.
+Character fonts make be mixed arbitrarily.
+
+For a complete description of the various alternate character fonts,
+see the software
+module TTXTSUBS.  For practical use, character font numbers (3,4,5) have
+the most complete ASCII set.  Font numbers (1,2,8) are less complete
+missing only a few characters like brackets.  For the more adventurous :
+
+.LITERAL
+
+	Font #		Description
+	------		-----------
+	   7		Cursive script
+	  10		Greek
+	  11		English Gothic
+	  12		German Gothic
+	  13		Italian Gothic
+	  14		Cyrillic (For you Ruskkies out there)
+.END LITERAL 
+
+.PG
+
+ROTATION OF CHARACTER FONTS
+
+Character strings may be written at 90, 0 and -90 degrees on a mask
+using the routine "ZA/XAsetfontangle".  Once this routine is invoked
+all subsequent character strings in "ZA/XAstorestring" invocations
+will be written out in that angle.  90 degrees is defined as going
+clockwise and -90 degrees is defined as going counter-clockwise.
+For example, in a C code sequence :
+
+.LITERAL
+
+	ZA/XAsetfontangle( 90 ) ;
+
+	(1) ....
+
+	ZA/XAsetfontangle( 0 ) ;
+
+	(2) ....
+
+.END LITERAL
+
+At (1) all character strings in "ZA/XAstorestring" invocations are
+written at 90 degrees.
+At (2) all character strings in "ZA/XAstorestring" invocations are
+written at 0 degrees.
+.!
+.!
+.NNM
+.ST
+.T

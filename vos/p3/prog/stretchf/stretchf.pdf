@@ -1,0 +1,267 @@
+PROCESS     HELP=*
+PARM INP      TYPE=(STRING,40)  COUNT=1
+PARM OUT      TYPE=(STRING,40)  COUNT=1           
+PARM SIZE     TYPE=INTEGER COUNT=4           DEFAULT=(1,1,0,0)
+PARM SL       TYPE=INTEGER COUNT=1           DEFAULT=1
+PARM SS       TYPE=INTEGER COUNT=1           DEFAULT=1
+PARM NL       TYPE=INTEGER COUNT=1           DEFAULT=0
+PARM NS       TYPE=INTEGER COUNT=1           DEFAULT=0
+PARM DNMIN    TYPE=INTEGER
+PARM DNMAX    TYPE=INTEGER
+PARM LINEAR   TYPE=INTEGER COUNT=(0,2)              DEFAULT=--
+PARM CONTOUR  TYPE=INTEGER COUNT=(0,1)              DEFAULT=--
+PARM GAMMA    TYPE=REAL    COUNT=(0,1)              DEFAULT=--
+PARM FUNCTION TYPE=(STRING,128)  COUNT=(0:1)        DEFAULT=--
+PARM ALARM    TYPE=INTEGER COUNT=(0:50)            DEFAULT=--
+PARM TABLE    TYPE=REAL    COUNT=(0,2:200)          DEFAULT=--
+PARM ITABLE   TYPE=INTEGER COUNT=(0,2:200)          DEFAULT=--
+PARM POST     TYPE=INTEGER COUNT=(0,2)              DEFAULT=--
+PARM OTHER    TYPE=KEYWORD COUNT=0:1    DEFAULT=--  VALID=(COMP,PSTRETCH)
+PARM DNVALUE  TYPE=INTEGER COUNT=0:1                DEFAULT=--
+PARM BACKGND  TYPE=INTEGER COUNT=0:1                DEFAULT=--
+PARM FREQ     TYPE=REAL    COUNT=0:1                DEFAULT=1
+PARM AMPL     TYPE=REAL    COUNT=0:1                DEFAULT=--
+PARM PHI      TYPE=REAL    COUNT=0:1                DEFAULT=0
+PARM DC       TYPE=REAL    COUNT=0:1                DEFAULT=--
+END-PROC
+.TITLE
+ VICAR Program STRETCHF
+.HELP
+    STRETCHF is a VICAR application program which changes the point by point 
+intensity of an image by generating a transfer function on the domain of
+intensity values.  It is similar to the program STRETCH, but is designed to
+accept FULLWORD (integer*4) input. Nine types of stretches are available. 
+These are:
+
+    COMP,LINEAR,CONTOUR,ALARM,GAMMA,TABLE,ITABLE,PSTRETCH,FUNCTION 
+
+     The input image must be fullword. The output image will also be fullword.
+The user must specify the DN range of the data by using the DNMIN and DNMAX 
+parameters.
+
+
+     An optional linear post stretch may be performed following the initial 
+stretch. This post stretch will take the output image DN values ranging from 
+DNMIN to DNMAX to a user specified DN range. This post stretch does not require
+a separate pass through the data. Instead, the initial stretch and the post
+stretch are incorporated in a single look-up table which is then used to process
+the input data.
+.PAGE
+ RESTRICTIONS:
+
+          1. Only one of the nine types of stretches
+             available may be specified in a single execution.
+          2. Input image must be in either fullword format.
+          3. If a post-stretch is requested the values
+             specified must be in the range DNMIN to DNMAX.
+
+EXECUTION:
+
+   The following is the execution statement for STRETCH:
+          STRETCH  INP  OUT  PARAMS
+where INP, OUT, and PARAMS are parameters discussed in their
+respective parameter section in TUTOR mode.
+.LEVEL1
+.VARIABLE INP
+ Input dataset
+.VARIABLE OUT
+ Output data set
+.VARIABLE SIZE
+ Size field = (SL,SS,NL,NS)
+.VARIABLE SL
+ Starting line
+.VARIABLE SS
+ Starting sample
+.VARIABLE NL
+ Number of lines
+.VARIABLE NS
+ Number of samples
+.VARIABLE LINEAR
+ Linear stretch
+ supply MIN, MAX
+.VARIABLE CONTOUR
+ Contour stretch - needs contour
+ interval [See DNVALUE]
+.VARIABLE FUNCTION       
+ User specified function stretch
+ (Example: FUNC="2*DN+1")
+.VARIABLE ALARM
+ Alarm stretch - list DN's to
+ alarm [See DNVALUE]
+.VARIABLE GAMMA
+ Gamma stretch
+ Supply value of gamma
+.VARIABLE TABLE
+ Table stretch
+ (N Pairs of values - 
+   In, Out,
+   In, Out,
+   In, Out,...)
+ [See BACKGND]
+.VARIABLE ITABLE
+ Individual table stretch
+ (N Pairs of values -
+   In, Out,
+   In, Out,
+   In, Out,...)
+ [See BACKGND]
+.VARIABLE POST              
+ Post-stretch option
+ supply MIN, MAX
+.VARIABLE OTHER
+ Other stretch options
+ Valid: COMP, PSTRETCH
+.VARIABLE DNVALUE
+ DN value used for CONTOUR and
+ ALARM stretches
+.VARIABLE BACKGND
+ Background DN value used for
+ TABLE and ITABLE stretches
+.VARIABLE FREQ
+ Frequency for PSTRETCH stretch
+.VARIABLE AMPL
+ Amplitude for PSTRETCH stretch
+.VARIABLE PHI
+ Phase for PSTRETCH stretch
+.VARIABLE DC
+ Mean for PSTRETCH stretch
+.VARIABLE DNMIN
+ Minimum DN value 
+.VARIABLE DNMAX   
+ Maximum DN value  
+.LEVEL2
+.VARIABLE INP
+A standard Vicar input data set
+.VARIABLE OUT
+A standard Vicar output file.
+.VARIABLE SIZE
+  FOUR INTEGERS - A standard Vicar size field specifying starting line,
+                  starting sample, number of lines, and number of samples.
+.VARIABLE SL
+ INTEGER - Starting line
+.VARIABLE SS
+ INTEGER - Starting sample
+.VARIABLE NL
+ INTEGER - Number of lines
+.VARIABLE NS
+ INTEGER - Number of samples
+
+.VARIABLE DNMIN
+ INTEGER -      Specifies the minimum DN value of the input data. 
+		The domain of the stretch function is DNMIN to DNMAX.
+.VARIABLE DNMAX
+ INTEGER -	Specifies the maximum DN value of the input data.
+		The domain of the stretch function is DNMIN to DNMAX.
+.VARIABLE LINEAR
+ TWO INTEGERS - LINEAR=(min,max) performs the following transform:
+		           a = (dnmax-dnmin)/(max-min)
+		           DN(out) = a*(DN(in)-min) + dnmin   
+                if DN(out) would be less than DNMIN:    DN(out) = DNMIN
+                if DN(out) would be greater than DNMAX: DN(out) = DNMAX
+.VARIABLE CONTOUR
+ INTEGER -	Input intensities which are a multiple of n are
+		set to the value specified by the DNVALUE parameter.
+.VARIABLE ALARM
+ N INTEGERS -	The input DN values specified are set the value
+                specified by the DNVALUE parameter.
+.VARIABLE GAMMA
+ This parameter causes a "gamma" stretch to be performed. The gamma
+ stretch is defined by the following formula:
+                            /                        \
+          DN    = DNRANGE * | (DN  -DN   ) / DNRANGE | ** (1.0/gamma)
+            out             |    in   min            |
+                            \                        /
+    where the user specifies the parameter, gamma.
+ 
+ In all cases, the output DN is rounded to the nearest integer prior to
+ output.
+.VARIABLE TABLE
+ N PAIRS REALS - TABLE=(in1,out1,in2,out2,..,inN,outN) will set the
+		 input DN values in1,in2,... to the DN values 
+                 out1,out2,... and will linearly interpolate between
+		 these points to compute the intervening DN values.
+		 All DN values outside the range in1 to inN will 
+		 remain unchanged unless the parameter BACKGND is 
+		 also specified.  In that case, all DN values 
+		 outside the range in1 to inN will be set to
+                 the BACKGND value. The maximum number of pairs 
+		 which may be specified is 100.  The values 
+		 in1,in2,...,inN must be specified in increasing 
+		 order.  
+.VARIABLE ITABLE
+ N PAIRS INTEGERS - ITABLE=(in1,out1,in2,out2,...,inN,outN) will
+		set the input DN values in1,in2,... to the DN values 
+                out1,out2,... but will not do any interpolation.
+		All DN values not explicitly specified, including
+ 		those outside the range in1 to inN will remain
+ 		unchanged unless the BACKGND parameter is also
+		specified.  In that case, all DN values not
+                explicitly specified, including those outside the
+                range in1 to inN, will be set to the BACKGND value.
+                The maximum number of pairs which may be specified 
+		is 100. 
+.VARIABLE FUNCTION
+ STRING - 	Allows the user to explicitly specify the transfer
+		function as a FORTRAN type expression with the
+		keyword DN as the independent variable.  This
+                is similar to the VICAR program F2. For example,
+		FUNCTION="2*DN+3" will multiply each input DN
+		value by 2 and add 3.  This will then be the output
+                DN value, provided it is in the range DNMIN to DNMAX.
+		If it is less than DNMIN it is set to DNMIN or if it
+                is greater than DNMAX it is set to DNMAX.
+.VARIABLE OTHER
+ KEYWORD   There are two stretch options that are specified by a keyword.
+           These two (COMP and PSTRETCH) options are lumped together here.
+
+   COMP     - Causes intensity levels to be complemented. The actual transform 
+              is:          DN(out) = DNMAX+DNMIN-DN(in)
+
+   PSTRETCH - Specifies that a periodic stretch is to be performed.
+              The transfer function is:
+
+              DN(out)=AMPL/2*SIN[2*PI*FREQ*DN(in)/(DNMAX-DNMIN)+PHI]+DC
+
+                  where PI = 3.14159
+                  and AMPL,FREQ,PHI,DC are parameters which may be specified 
+                  seperately by the user and which have the following defaults:
+                                  AMPL= DNMAX-DNMIN
+                                  FREQ= 1.0
+                                  PHI = 0.0
+                                  DC  = (DNMAX-DNMIN)/2
+.VARIABLE POST
+ TWO INTEGERS - Specifies that a linear post stretch will be performed
+                following the initial stretch. The initial stretch
+	        will performed over the range DNMIN to DNMAX.
+                Specifying a post stretch of POST=(LVAL,HVAL) will
+                then take DN value DNMIN to LVAL and DN value DNMAX
+                to HVAL. Actually only one stretch is performed;  
+                the composite of the initial and post stretches.
+                (Default is that no post-stretch is performed.)
+.VARIABLE DNVALUE
+ INTEGER -      Specifies the DN value to use for the CONTOUR and
+		ALARM stretches. The appropriate DN's will be set
+		to this DN value.  (Default is DNVALUE=DNMAX)
+.VARIABLE BACKGND
+ INTEGER -      Specifies a DN value to use as background for the
+		TABLE and ITABLE stretches.  All DN values outside
+		the range specified by TABLE, or all those not
+		explicitly specified by ITABLE will be set to this 
+		value.  (Default is to leave these DN's unchanged.)
+.VARIABLE FREQ
+ REAL -         Specifies the frequency to be used in the case of
+		the PSTRETCH (periodic) stretch.  (Default is
+		FREQ=1.0)
+.VARIABLE AMPL
+ REAL -         Specifies the amplitude to be used in the case of
+		the PSTRETCH (periodic) stretch.  (Default is
+		AMPL=DNMAX-DNMIN)
+.VARIABLE PHI
+ REAL -         Specifies the phase to be used in the case of 
+		the PSTRETCH (periodic) stretch.  (Default is
+		PHI=0)
+.VARIABLE DC
+ REAL -         Specifies the mean to be used in the case of 
+		the PSTRETCH (periodic) stretch.  (Default is
+		DC=(DNMAX-DNMIN)/2 )
+.END

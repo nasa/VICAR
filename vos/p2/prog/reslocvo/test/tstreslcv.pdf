@@ -1,0 +1,28 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+Write " "
+Write " The Test Data are handled for both VMS and UNIX in this PDF. "
+Write " At present (May 1994), in order to run the program, the"
+Write " following data files MUST be copied to the LOCAL directory"
+Write " where the program resides: "
+Write "                OLD     NEW  (VMS or UNIX execution)"
+Write "  VIKING:218S01.IMG ==> 218s01.img "
+Write " "
+Write " This UNIX restriction on the data will be changed eventually. "
+Write " "
+Write " "
+!DCL ASSIGN VIKING:218S01.IMG IMG1
+!dcl assign v2$scratch: s
+reslocvo 218s01.img resloca
+fixloc resloca
+WRITE "THE NEXT RUN WILL TEST THE REST OF THE KEYWORDS."
+reslocvo (218s01.img,resloca) resloca2 SIGMA=1.2 FIT=7 TOLE=5. FRAME=1 'NOIN +
+          CTHR=0.6 NVER=21 NHOR=21 NLW=7 NSW=7 GEOPAR=geopar
+fixloc resloca2
+!geoma 218s01.img OUT PARMS=geopar
+!list OUT (501,501,10,10)
+end-proc

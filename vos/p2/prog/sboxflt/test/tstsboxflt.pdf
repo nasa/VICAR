@@ -1,0 +1,30 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+!
+!  TEST WITH BYTE IMAGES
+!
+gen +BOXFA 20 20 LINC=10 SINC=4 IVAL=0
+list +BOXFA
+sboxflt +BOXFA +BOXFB
+list +BOXFB
+sboxflt +BOXFA +BOXFC length=11 width=11
+list +BOXFC
+sboxflt +BOXFA +BOXFD length=11 width=11 'lowpass
+list +BOXFD
+!
+!  TEST WITH HALFWORD IMAGES
+!
+gen +BOXFA 20 20 LINC=10 SINC=4 IVAL=-100 'HALF
+list +BOXFA
+sboxflt +BOXFA +BOXFB
+list +BOXFB
+sboxflt +BOXFA +BOXFC length=11 width=11
+list +BOXFC
+sboxflt +BOXFA +BOXFD length=11 width=11 'lowpass
+list +BOXFD
+end-proc

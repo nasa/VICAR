@@ -1,0 +1,210 @@
+procedure
+local   maxval  real    count=1
+local   minval  real    count=1
+local   imaxval int    count=1
+local   iminval int    count=1
+local   afidsroot   type=string count=1
+
+refgbl $autousage
+refgbl $echo
+! Jun 20, 2012 - RJB
+! TEST SCRIPT FOR APODIZE
+! replaces test script of 2003 which really didn't illustrate anything
+!
+! Vicar Programs:
+!       gen f2 cform rotate (rotate2, lgeom) copy ccomp  maxmin 
+! Optional: xvd
+! Cartlab:  fft2005
+! MIPL:     fft22 fftflip 
+! 
+! parameters:
+!   <none>
+!
+! Requires NO external test data: 
+!
+! Uses cartlab or mipl dependent pointers
+!
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+body
+let $autousage="none"
+let _onfail="stop"
+let $echo="yes"
+!check to see if mipl or cartlab for certain programs
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+!
+!f2 (F8_fft.amp,F8_fft.pha) F8_fft.abs func="sqrt(in1**2+in2**2)"
+!===========
+! Gen a large image 700x700 sinusoid pattern but to yield 400x400 rotated
+! sinusoid repeats each 8 pixels
+gen mask87.real nl=700 ns=700 format=real sinc=1.0 linc=0 modulo=8
+f2 mask87.real out=F87.real format=real function="sin(in1)"
+cform F87.real F87H  irange=(-1.0,1.0) orange=(0,255) oform=half
+rotate F87H F87N angle=25 center=(350,350) 'nointerp
+rotate F87H F87I angle=25 center=(350,350)
+!no-interp
+copy F87N F87N.rot size=(1,1,400,400)           !size=(150,150,400,400)
+! Do fft on rotated no interpolation
+!NO APODIZATION 
+if (afidsroot = "")
+!MIPL
+    fft22 F87N.rot xxA mode=forward format=comp 
+    fftflip xxA F87N_fft 'flip
+else
+!CARTLAB
+    fft2005 F87N.rot F87N_fft mode=forward format=comp 'quadswap
+end-if
+ccomp F87N_fft (F87N_fft.amp,F87N_fft.pha) trans=polar
+maxmin F87N_fft.amp minival=minval maxival=maxval
+let $echo="no"
+let imaxval = $fix(maxval)
+let iminval = $fix(minval)
+write "NO APODIZATION on NO-INTERPOLATION"
+write "F87N_fft.amp range = &iminval to &imaxval"
+let $echo="yes"
+cform F87N_fft.amp F87N_fft.full irange=(&maxval,&minval) orange=(&imaxval,&iminval) +
+   oform=full
+cform F87N_fft.full F87N_fft.norm irange=(0,35000) orange=(0,255)
+!cform F87N_fft.full F87NH_fft.norm irange=(0,10000) orange=(0,255) oform=half
+
+!interp
+copy F87I F87I.rot size=(1,1,400,400)           !size=(150,150,400,400)
+! F87N_fft.norm is noisier than F87I_fft.norm
+! Do fft on rotated with interpolation
+if (afidsroot = "")
+!MIPL
+    fft22 F87I.rot xxA mode=forward format=comp
+    fftflip xxA F87I_fft 'flip
+else
+!CARTLAb
+    fft2005 F87I.rot F87I_fft mode=forward format=comp 'quadswap
+end-if
+ccomp F87I_fft (F87I_fft.amp,F87I_fft.pha) trans=polar
+maxmin F87I_fft.amp minival=minval maxival=maxval
+let $echo="no"
+let imaxval = $fix(maxval)
+let iminval = $fix(minval)
+write "NO APODIZATION on INTERPOLATION"
+write "F87I_fft.amp range = &iminval to &imaxval"
+let $echo="yes"
+cform F87I_fft.amp F87I_fft.full irange=(&maxval,&minval) orange=(&imaxval,&iminval) +
+   oform=full
+cform F87I_fft.full F87I_fft.norm irange=(0,35000) orange=(0,255)
+!cform F87I_fft.full F87IH_fft.norm irange=(0,10000) orange=(0,255) oform=half
+
+! Now apodize 3x3 on non-interpolated rotated
+!
+apodize F87N.rot F87N33.rot edge=3
+if (afidsroot = "")
+!MIPL
+    fft22 F87N33.rot xxA mode=forward format=comp
+    fftflip xxA F87N33_fft 'flip
+else
+!CARTLAB
+    fft2005 F87N33.rot F87N33_fft mode=forward format=comp 'quadswap
+end-if
+ccomp F87N33_fft (F87N33_fft.amp,F87N33_fft.pha) trans=polar
+maxmin F87N33_fft.amp minival=minval maxival=maxval
+let $echo="no"
+let imaxval = $fix(maxval)
+let iminval = $fix(minval)
+write "3x3 APODIZATION on NON-INTERPOLATION"
+write "F87N33_fft.amp range = &iminval to &imaxval"
+let $echo="yes"
+
+cform F87N33_fft.amp F87N33_fft.full irange=(&maxval,&minval) orange=(&imaxval,&iminval) +
+   oform=full
+cform F87N33_fft.full F87N33_fft.norm irange=(0,35000) orange=(0,255)
+
+! Now apodize 5x5 on non-interpolated
+apodize F87N.rot F87N55.rot edge=5
+if (afidsroot = "")
+!MIPL
+    fft22 F87N55.rot xxA mode=forward format=comp
+    fftflip xxA F87N55_fft 'flip
+else
+!CARTLAB
+    fft2005 F87N55.rot F87N55_fft mode=forward format=comp 'quadswap
+end-if
+ccomp F87N55_fft (F87N55_fft.amp,F87N55_fft.pha) trans=polar
+maxmin F87N55_fft.amp minival=minval maxival=maxval
+let $echo="no"
+let imaxval = $fix(maxval)
+let iminval = $fix(minval)
+write "5x5 APODIZATION on NON-INTERPOLATION"
+write "F87N55_fft.amp range = &iminval to &imaxval"
+let $echo="yes"
+
+cform F87N55_fft.amp F87N55_fft.full irange=(&maxval,&minval) orange=(&imaxval,&iminval) +
+   oform=full
+cform F87N55_fft.full F87N55_fft.norm irange=(0,35000) orange=(0,255)
+! now display F87N_fft.norm    F87N33_fft.norm   and   F87N55_fft.norm side by side
+! see how power thru  DC (row 201) is reduced from non-apodized to 5x5 apodized
+
+! Now apodize 3x3 on interpolated rotated
+!
+apodize F87I.rot F87I33.rot edge=3
+if (afidsroot = "")
+!MIPL
+    fft22 F87I33.rot xxA mode=forward format=comp
+    fftflip xxA F87I33_fft 'flip
+else
+!CARTLAB
+    fft2005 F87I33.rot F87I33_fft mode=forward format=comp 'quadswap
+end-if
+ccomp F87I33_fft (F87I33_fft.amp,F87I33_fft.pha) trans=polar
+maxmin F87I33_fft.amp minival=minval maxival=maxval
+let $echo="no"
+let imaxval = $fix(maxval)
+let iminval = $fix(minval)
+write "3x3 APODIZATION on INTERPOLATION"
+write "F87I33_fft.amp range = &iminval to &imaxval"
+let $echo="yes"
+
+cform F87I33_fft.amp F87I33_fft.full irange=(&maxval,&minval) orange=(&imaxval,&iminval) +
+   oform=full
+cform F87I33_fft.full F87I33_fft.norm irange=(0,35000) orange=(0,255)
+
+! Now apodize 5x5 on interpolated
+apodize F87I.rot F87I55.rot edge=5
+if (afidsroot = "")
+!MIPL
+    fft22 F87I55.rot xxA mode=forward format=comp
+    fftflip xxA F87I55_fft 'flip
+else
+!CARTLAB
+    fft2005 F87I55.rot F87I55_fft mode=forward format=comp 'quadswap
+end-if
+ccomp F87I55_fft (F87I55_fft.amp,F87I55_fft.pha) trans=polar
+maxmin F87I55_fft.amp minival=minval maxival=maxval
+let $echo="no"
+let imaxval = $fix(maxval)
+let iminval = $fix(minval)
+write "5x5 APODIZATION on INTERPOLATION"
+write "F87I55_fft.amp range = &iminval to &imaxval"
+let $echo="yes"
+
+cform F87I55_fft.amp F87I55_fft.full irange=(&maxval,&minval) orange=(&imaxval,&iminval) +
+   oform=full
+cform F87I55_fft.full F87I55_fft.norm irange=(0,35000) orange=(0,255)
+! now display F87I_fft.norm    F87I33_fft.norm   and   F87I55_fft.norm side by side
+! see how power thru  DC (row 201) is reduced from non-apodized to 5x5 apodized
+! using xvd
+! xvd F87I_fft.norm
+! xvd F87I33_fft.norm
+! xvd F87I55_fft.norm
+!
+let $echo="no"
+
+! clean up
+ush rm -f F87*fft*
+ush rm -f F87?
+ush rm -f F87.real
+ush rm -f F87*.rot
+ush rm -f mask87.real
+ush rm -f ZZPAR
+ush rm -f xxA
+
+end-proc

@@ -1,0 +1,84 @@
+1 gll_ssi_bin_ph2
+
+	gll_ssi_bin_ph2 is a set of subroutines which provide the
+	following following functions for Galileo SSI Phase 2 EDRs and UDRs:
+        - read/write EDR and UDR binary telemetry headers:
+
+		get_ssi_ph2_telem_hdr
+		write_ssi_ph2_telem_hdr
+
+        - read/write one EDR or UDR image line:
+
+		get_gll_ph2_ssi_edr_ln
+		write_gll_ph2_ssi_edr_ln
+		get_gll_ph2_ssi_udr_ln
+		write_gll_ph2_ssi_udr_ln
+
+        - write EDR or UDR binary image line prefixes
+
+		write_ssi_ph2_prefix
+
+	(The functionality for reading EDR and UDR binary image prefixes is
+	 given by the subroutine "GET_SSI_PH2_PREFIX".)
+
+2 CALLING SEQUENCE
+
+	These routines are C-callable only. 
+
+	For examples on how to call any of these routines, see the program
+	GLLFILLIN. 
+
+        get_ssi_ph2_telem_hdr(unit,dest)
+		int unit;	
+		ssi_hdr_typ *dest;
+
+	write_ssi_ph2_telem_hdr(unit,source)
+		int unit;
+		ssi_hdr_type *source;
+
+	get_gll_ph2_edr_ln(unit,line,dest)
+		int unit, line;
+		ssi_edr_line_typ *dest;
+
+	write_gll_ph2_edr_ln(unit,line,source)
+		int unit,line;
+		ssi_edr_line_typ *source;
+
+	get_gll_ph2_udr_ln(unit,line,dest)
+		int unit, line;
+		ssi_line_typ *dest;
+
+	write_gll_ph2_udr_ln(unit,line,source)
+		int unit,line;
+		ssi_line_typ *source;
+   	
+
+	write_ssi_ph2_prefix(unit,line,source)
+		int unit, line;
+		ssi_prefix_typ *source;
+
+2 HISTORY
+	
+	Original Programmer: F. Moss
+
+        Note: the unit test for this module is the unit test for the program
+	      GLLFILLIN.
+
+	Revision:	
+	10 AUG 1994	FFM. Original implementation.
+        17 Jan 1995     FFM. Added "&" while calling trout_word23_typ in 
+                             routine write_ssi_ph2_telem_hdr to avoid access
+                             violation.(FR 85878).
+         3 MAY 1996     OAM. Fixed code in get_ssi_ph2_telem_hdr and
+                             write_ssi_ph2_telem_hdr to handle phase 2 
+                             data in full mode.(FR 87159, FR 89146).
+         2 Jun 96  GMY  Fix write_ssi_ph2_prefix to store rct properly.
+        26 Sep 96  HBM/DDK Merge Damon's fixes for RA, DEC, TWIST and 
+                        CLOCK_ANGLE with previous OAM and GMY fixes.  Damon's 
+			fixes are to save the values as ASCII floats and 
+			not halfword integers.
+        04 Dec 96  HBM  Fix trout_word23_typ, trout_word24_typ, trout_word25_typ,
+                        trout_word26_typ routines to store the values of the data
+                        instead of doing nothing with the data. (FR 89919)
+        03 Mar 97  HBM  Fix trin_word25 for img_mode to extract 3 bits instead of 2 bits.
+        01 Feb 98  GMY  Change to ANSI C compiler.

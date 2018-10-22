@@ -1,0 +1,11 @@
+#define PROGRAM tibisgr
+#define MODULE_LIST tibisgr_for.f tibisgr_c.c
+#define USES_FORTRAN
+#define USES_C
+#define FTN_STRING
+#define MAIN_LANG_FORTRAN
+#define TEST
+#define LIB_TAE
+#define LIB_RTL
+#define LIB_P2SUB
+

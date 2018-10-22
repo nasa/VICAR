@@ -1,0 +1,18 @@
+/* Imake file for Test of VICAR subroutine lut */
+
+#define PROGRAM tlut
+
+#define MODULE_LIST tlut.f
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/* #define LIB_LOCAL must be removed before delivery, but used during */
+/* developer testing on VAX and SUN.                                  */ 
+

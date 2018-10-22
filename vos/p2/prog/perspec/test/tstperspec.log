@@ -1,0 +1,159 @@
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+    ibis-gen cube.pic NC=3 NR=26 'ibis-1 'row DATACOL=(1,2,3)  +
+        data=(1,1,1, 1,51,1, 51,51,1, 51,1,1, 1,1,1, 1,1,51,  +
+    1,51,51, 51,51,51, 51,1,51, 1,1,51, 0,0,0, 1,51,1, 1,51,51, 0,0,0,  +
+    51,51,1, 51,51,51, 0,0,0, 51,1,1, 51,1,51, 0,0,0,  +
+    36,41,26, 41,41,36, 36,41,46, 31,41,36, 36,41,26, 0,0,0)
+Beginning VICAR task ibis
+    ibis-list cube.pic NC=3 NR=26 GR1DIM=3
+Beginning VICAR task ibis
+ 
+Number of Rows:42  Number of Columns: 3       
+File Version:IBIS-1  Organization:ROW  SubType:NONE
+ 
+Rows: 1:26
++-----------+-----------+-----------
+         C:1         C:2         C:3
++-----------+-----------+-----------
+        1.00        1.00        1.00
+        1.00       51.00        1.00
+       51.00       51.00        1.00
+       51.00        1.00        1.00
+        1.00        1.00        1.00
+        1.00        1.00       51.00
+        1.00       51.00       51.00
+       51.00       51.00       51.00
+       51.00        1.00       51.00
+        1.00        1.00       51.00
+        0.00        0.00        0.00
+        1.00       51.00        1.00
+        1.00       51.00       51.00
+        0.00        0.00        0.00
+       51.00       51.00        1.00
+       51.00       51.00       51.00
+        0.00        0.00        0.00
+       51.00        1.00        1.00
+       51.00        1.00       51.00
+        0.00        0.00        0.00
+       36.00       41.00       26.00
+       41.00       41.00       36.00
+       36.00       41.00       46.00
+       31.00       41.00       36.00
+       36.00       41.00       26.00
+        0.00        0.00        0.00
+    pltgraf cube.pic title="Plot of original data" dim=3  +
+        plot=pgrf0 mode=axis xrange=(-10,60) yrange=(-10,60)  +
+        xlabel="X meters" ylabel="Y meters"
+if (mode = "nobatch" or mode = "inter")
+end-if
+    perspec cube.pic cube_perspective azimuth=30 distance=100 origin=(26,26,26)
+Beginning VICAR task perspec
+PERSPEC version 2-10-2013 (64-bit) - rjb
+    ibis-list cube_perspective NC=3 NR=26 GR1DIM=3
+Beginning VICAR task ibis
+ 
+Number of Rows:42  Number of Columns: 3       
+File Version:IBIS-1  Organization:ROW  SubType:NONE
+ 
+Rows: 1:26
++-----------+-----------+-----------
+         C:1         C:2         C:3
++-----------+-----------+-----------
+        6.82      -18.64        0.00
+       37.59      -27.52        0.00
+      -13.90      -37.97        0.00
+      -31.29      -22.90        0.00
+        6.82      -18.64        0.00
+        6.82       18.64        0.00
+       37.59       27.52        0.00
+      -13.90       37.97        0.00
+      -31.29       22.90        0.00
+        6.82       18.64        0.00
+        0.00        0.00        0.00
+       37.59      -27.52        0.00
+       37.59       27.52        0.00
+        0.00        0.00        0.00
+      -13.90      -37.97        0.00
+      -13.90       37.97        0.00
+        0.00        0.00        0.00
+      -31.29      -22.90        0.00
+      -31.29       22.90        0.00
+        0.00        0.00        0.00
+       -1.41        0.00        0.00
+       -6.91       12.58        0.00
+       -1.41       24.39        0.00
+        3.75       11.83        0.00
+       -1.41        0.00        0.00
+        0.00        0.00        0.00
+    pltgraf cube_perspective title="Perspective view of a cube - 30 degrees AZ" dim=3  +
+            plot=pgrf1 mode=axis xrange=(-50,50) yrange=(-50,50)  +
+            xlabel="X meters" ylabel="Y meters"
+if (mode = "nobatch" or mode = "inter")
+end-if
+    perspec cube.pic cube_perspective2 azimuth=40 distance=100 origin=(26,26,26)
+Beginning VICAR task perspec
+PERSPEC version 2-10-2013 (64-bit) - rjb
+    ibis-list cube_perspective2 NC=3 NR=26 GR1DIM=3
+Beginning VICAR task ibis
+ 
+Number of Rows:42  Number of Columns: 3       
+File Version:IBIS-1  Organization:ROW  SubType:NONE
+ 
+Rows: 1:26
++-----------+-----------+-----------
+         C:1         C:2         C:3
++-----------+-----------+-----------
+        2.28      -18.49        0.00
+       36.34      -25.79        0.00
+       -4.76      -38.59        0.00
+      -34.17      -24.25        0.00
+        2.28      -18.49        0.00
+        2.28       18.49        0.00
+       36.34       25.79        0.00
+       -4.76       38.59        0.00
+      -34.17       24.25        0.00
+        2.28       18.49        0.00
+        0.00        0.00        0.00
+       36.34      -25.79        0.00
+       36.34       25.79        0.00
+        0.00        0.00        0.00
+       -4.76      -38.59        0.00
+       -4.76       38.59        0.00
+        0.00        0.00        0.00
+      -34.17      -24.25        0.00
+      -34.17       24.25        0.00
+        0.00        0.00        0.00
+        2.41        0.00        0.00
+       -2.34       12.68        0.00
+        2.41       24.37        0.00
+        6.81       11.72        0.00
+        2.41        0.00        0.00
+        0.00        0.00        0.00
+    pltgraf cube_perspective2 title="Perspective view of a cube - 40 degrees AZ" dim=3  +
+            plot=pgrf2 mode=axis xrange=(-50,50) yrange=(-50,50)  +
+            xlabel="X meters" ylabel="Y meters"
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"

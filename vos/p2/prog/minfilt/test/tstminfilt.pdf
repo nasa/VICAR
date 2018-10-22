@@ -1,0 +1,83 @@
+procedure
+refgbl $echo
+refgbl $autousage
+! Jun 24, 2012 - RJB
+! TEST SCRIPT FOR MINFILT
+! tests BYTE, HALF, FULL, REAL images
+!
+! Vicar Programs:
+!       gen list gausnois  
+! 
+! parameters:
+!   <none>
+!
+! Requires NO external test data: 
+!
+body
+let $autousage = "none"
+let _onfail="stop"
+let $echo="yes"
+!This is a test file for minfilt
+!BYTE
+gen out=a.img nl=10 ns=10
+list a.img
+minfilt inp=a.img out=b1.img nlw=5 nsw=1
+list b1.img
+minfilt inp=a.img out=b2.img nlw=1 nsw=5
+list b2.img
+minfilt inp=a.img out=b3.img nlw=5 nsw=5
+list b3.img
+gausnois out=g.img nl=10 ns=10 seed=10595362
+list g.img
+minfilt inp=g.img out=b4.img nlw=5 nsw=5
+list b4.img
+
+!HALF
+gen out=h.img nl=10 ns=10 format=half ival=1000 linc=100 sinc=100
+list h.img
+minfilt inp=h.img out=c1.img nlw=5 nsw=1
+list c1.img
+minfilt inp=h.img out=c2.img nlw=1 nsw=5
+list c2.img
+minfilt inp=h.img out=c3.img nlw=5 nsw=5
+list c3.img
+gausnois out=n.img nl=10 ns=10 format=HALF mean=1280 seed=10595365
+list n.img
+minfilt inp=n.img out=c4.img nlw=5 nsw=5
+list c4.img
+
+!FULL
+gen out=f.img nl=10 ns=10 format=full ival=10000 linc=100 sinc=100
+list f.img
+minfilt inp=f.img out=d1.img nlw=5 nsw=1
+list d1.img
+minfilt inp=f.img out=d2.img nlw=1 nsw=5
+list d2.img
+minfilt inp=f.img out=d3.img nlw=5 nsw=5
+list d3.img
+gausnois out=p.img nl=10 ns=10 format=FULL mean=12800 sigma=140 seed=10595368
+list p.img
+minfilt inp=p.img out=d4.img nlw=5 nsw=5
+list d4.img
+
+
+!REAL
+gen out=r.img nl=10 ns=10 format=real ival=1504.4 linc=156.6 sinc=156.6
+list r.img
+minfilt inp=r.img out=e1.img nlw=5 nsw=1
+list e1.img
+minfilt inp=r.img out=e2.img nlw=1 nsw=5
+list e2.img
+minfilt inp=r.img out=e3.img nlw=5 nsw=5
+list e3.img
+gausnois out=q.img nl=10 ns=10 format=REAL mean=134.5 sigma=19.0 seed=10595372
+list q.img
+minfilt inp=q.img out=e4.img nlw=5 nsw=5
+list e4.img
+
+! clean up:
+ush rm -f ?.img
+ush rm -f ??.img
+
+let $echo="no"
+end-proc

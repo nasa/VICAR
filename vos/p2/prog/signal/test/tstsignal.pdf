@@ -1,0 +1,58 @@
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+local DIR    type=string
+local (IN1 IN2 IN3 IN4 IN5 IN6 IN7 IN8 IN9 IN10 IN11)	type=string
+body
+let $echo="no"
+let $autousage="none"
+let _onfail="continue"
+if ($syschar(1) = "UNIX")
+   let DIR   ="/project/test_work/testdata/cassini/iss/"
+else
+   let DIR   ="WMS_TEST_WORK:[TESTDATA.CASSINI.ISS]"
+end-if
+let IN1 = "&DIR"//"pcsm15.1"
+let IN2 = "&DIR"//"pcsm15.2"
+let IN3 = "&DIR"//"pcsm15.3"
+let IN4 = "&DIR"//"pcsm15.4"
+let IN5 = "&DIR"//"pcsm15.5"
+let IN6 = "&DIR"//"pcsm15.6"
+let IN7 = "&DIR"//"pcsm15.7"
+let IN8 = "&DIR"//"pcsm15.8"
+let IN9 = "&DIR"//"pcsm15.9"
+let IN10 = "&DIR"//"pcsm15.10"
+let IN11 = "&DIR"//"pcsm15.11"
+let $echo=("yes","no","no")	!echo top level only
+
+signal inp=(&IN1 &IN2 &IN3 &IN4 &IN5 &IN6 &IN7 &IN8 &IN9 &IN10 &IN11) +
+       tbl=pcsm15.tbl1 ls=(100,100)
+
+typetext pcsm15.tbl1
+
+createfile tmp.srchlist
+addtofile tmp.srchlist "NEXT FILE=00001"
+addtofile tmp.srchlist "&IN1"
+addtofile tmp.srchlist "&IN2"
+addtofile tmp.srchlist "&IN3"
+addtofile tmp.srchlist "&IN4"
+
+signal list=tmp.srchlist tbl=pcsm15.tbl2 ls=(100,100)
+
+typetext pcsm15.tbl2
+
+label-delete &IN1 t1 key="PICSCALE"
+label-delete &IN2 t2 key="PICSCALE"
+label-delete &IN3 t3 key="PICSCALE"
+label-delete &IN4 t4 key="PICSCALE"
+
+signal inp=(t1 t2 t3 t4) tbl=pcsm15.tbl3 ls=(100,100)
+
+typetext pcsm15.tbl3
+list t1 (100,100,1,1)
+list t2 (100,100,1,1)
+list t3 (100,100,1,1)
+list t4 (100,100,1,1)
+
+end-proc

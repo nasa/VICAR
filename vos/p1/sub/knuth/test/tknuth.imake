@@ -1,0 +1,25 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR TEST PROGRAM tknuth
+
+   To Create the build file give the command:
+
+    $ vimake tknuth                     (VMS)
+   or
+    % vimake tknuth                     (Unix)
+
+*************************************************************************/
+
+#define PROGRAM tknuth
+
+#define MODULE_LIST tknuth.f
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define FTNINC_LIST fortport
+
+#define USES_FORTRAN
+#define MAIN_LANG_FORTRAN
+
+/*#define LIB_LOCAL	/* remove on delivery */

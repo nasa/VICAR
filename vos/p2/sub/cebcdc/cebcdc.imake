@@ -1,0 +1,20 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY cebcdc
+
+   To Create the build file give the command:
+
+	$ vimake cebcdc                     (VMS)
+   or
+	% vimake cebcdc                     (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE cebcdc
+
+#define MODULE_LIST cebcdc.c
+
+#define P2_SUBLIB
+#define DEBUG
+#define USES_ANSI_C

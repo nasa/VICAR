@@ -1,0 +1,201 @@
+procedure option=selftutor help=*
+
+	    parm W_SOIL_temp 	  real count=0:1 		def=0.21
+	    parm H_SHOE_temp	  real count=0:1 		def=0.07
+	    parm B_SHOE_temp	  real count=0:1		def=2.0
+	    parm THETA_temp	  real count=0:1 		def=20
+	    parm HG1_SOIL_temp	  real count=0:1 		def=-0.29
+	    parm HG2_SOIL_temp	  real count=0:1 		def=0.39
+	    parm HG_ASY_SOIL_tem real count=0:1 		def=1
+
+	    parm W_SOIL 	 real count=0:1 def=--
+	    parm H_SHOE		 real count=0:1 def=--
+	    parm B_SHOE		 real count=0:1 def=--
+	    parm THETA		 real count=0:1 def=--
+	    parm HG1_SOIL	 real count=0:1 def=--
+	    parm HG2_SOIL	 real count=0:1 def=--
+	    parm HG_ASY_SOIL	 real count=0:1 def=--
+
+	PARMSET name=pho_hapke_86_hg2_sub help=*
+
+	    parm W_SOIL 	 real count=0:1 def=--
+	    parm H_SHOE		 real count=0:1 def=--
+	    parm B_SHOE		 real count=0:1 def=--
+	    parm THETA		 real count=0:1 def=--
+	    parm HG1_SOIL	 real count=0:1 def=--
+	    parm HG2_SOIL	 real count=0:1 def=--
+	    parm HG_ASY_SOIL	 real count=0:1 def=--
+
+	END-PROC
+
+body
+
+	if (_tutor=1)
+
+	  restore-parm pho_hapke_86_hg2.par
+
+
+	  if ($count(W_SOIL)=0)
+	 						let W_SOIL_temp=0.21
+	  else
+		let W_SOIL_temp=&W_SOIL
+	  end-if
+
+	  if ($count(H_SHOE)=0)
+	 						let H_SHOE_temp=0.07
+	  else
+		let H_SHOE_temp=&H_SHOE
+	  end-if
+
+	  if ($count(B_SHOE)=0)
+	 						let B_SHOE_temp=2.0
+	  else
+		let B_SHOE_temp=&H_SHOE
+	  end-if
+
+	  if ($count(THETA)=0)
+	 						let THETA_temp=20
+	  else
+		let THETA_temp=&THETA
+	  end-if
+
+
+	  if ($count(HG1_SOIL)=0)
+	 						let HG1_SOIL_temp=-0.29
+	  else
+		let HG1_SOIL_temp=&HG1_SOIL
+	  end-if
+
+
+	  if ($count(HG2_SOIL)=0)
+	 						let HG2_SOIL_temp=0.39
+	  else
+		let HG2_SOIL_temp=&HG1_SOIL
+	  end-if
+
+	  if ($count(HG_ASY_SOIL)=0)
+	 					      let HG_ASY_SOIL_tem=1
+	  else
+		let HG_ASY_SOIL_tem=&HG_ASY_SOIL
+	  end-if
+
+
+	   tutor pho_hapke_86_hg2_sub  					  +
+		|restore=pho_hapke_86_hg2.par, save=pho_hapke_86_hg2.par| +
+	    		W_SOIL=&W_SOIL_temp				  +
+	   		H_SHOE=&H_SHOE_temp				  + 
+	   		B_SHOE=&B_SHOE_temp				  + 
+	    		THETA=&THETA_temp				  + 
+	    		HG1_SOIL=&HG1_SOIL_temp				  +
+	    		HG2_SOIL=&HG2_SOIL_temp				  +
+	    		HG_ASY_SOIL=&HG_ASY_SOIL_tem	
+ 
+
+	   return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs needs "
+	   write " photometric function parameters "
+	   write " for the HAPKE_86_HG2 function"
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+
+.title
+'PHO_HAPKE_86_HG2' sub-menu (for photometry VICAR program)
+
+.help
+
+PURPOSE:
+
+In this PDF, the user is asked for the only parameters needed for the 
+Hapke-1986-two-term-Henyey-Greenstein photometric function.
+
+.page
+
+MATHEMATICAL BACKGROUND :
+
+
+bidirectional reflectance [1/str] :
+
+r(i,e,g) = ...
+
+REFERENCE :
+
+Bruce Hapke, Bidirectional Reflectance Spectroscopy.
+3. Correction for Macroscopic Roughness
+   Icarus, Vol. 59, p.41-59, 1984
+4. The Extinction Coefficient and the Opposition Effect
+   Icarus, Vol. 67, p. 264-280, 1986
+
+PROGRAMMER:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+.level1
+
+.VARI W_SOIL
+Hapke parameter
+
+.VARI H_SHOE
+Hapke parameter
+
+.VARI B_SHOE
+Hapke parameter
+
+.VARI THETA
+Hapke parameter
+
+.VARI HG1_SOIL
+Hapke Parameter
+
+.VARI HG2_SOIL
+Hapke parameter
+
+.VARI HG_ASY_SOIL
+Hapke parameter
+
+.level2
+
+.VARI W_SOIL
+Single-scattering albedo of the soil particles; 
+one of the classical Hapke parameter.
+
+.VARI H_SHOE
+Parameter which characterizes the soil structure in the terms of porosity 
+or compaction (width of opposition surge due to shadowing); 
+one of the classical Hapke parameter.
+
+.VARI B_SHOE
+Opposition magnitude coefficient (height of opposition surge due to shadowing);
+one of the classical Hapke parameter. In some papers give the parameter S0.
+The relation between both is:
+B_SHOE==S0/(W_SOIL * soilPhaseFunction(0) )
+
+.VARI THETA
+Average macroscopic slope angle;
+one of the classical Hapke parameter. 
+
+.VARI HG1_SOIL
+Parameter of the first term of the Henyey-Greenstein soil particle 
+phase function.
+
+.VARI HG2_SOIL
+Parameter of the second term of the Henyey-Greenstein soil particle 
+phase function.
+
+.VARI HG_ASY_SOIL
+Asymmetry parameter (weight of the two terms 
+in the Henyey-Greenstein soil phase function).
+
+.end

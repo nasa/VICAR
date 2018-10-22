@@ -1,0 +1,13 @@
+#define PROGRAM	destripe
+#define R2LIB
+
+#define MODULE_LIST destripe.f stacka_big.c
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+

@@ -1,0 +1,104 @@
+procedure help=*
+!------------------------------------------------------------------------------
+! tstshady2.pdf  Unit test for the program shady2
+! written by: M. O'Shaughnessy  10-9-1989
+! extensions: G. Madrid		 28-JUL-1993 
+!
+! If there are problems running fracgen under UNIX, just comment out that
+! portion of the pdf and ftp the terrain.img and shaded.img files from your
+! VAX account.  The test pdf should then work reasonably well, then.
+!
+!
+!------------------------------------------------------------------------------
+refgbl $becho
+refgbl $autousage
+
+body
+let $autousage = "none"
+let $becho="yes"
+
+write "THIS IS A TEST OF MODULE SHADY2"
+!------------------------------------------------------------------------------
+! create test image
+!------------------------------------------------------------------------------
+write "FIRST CREATE THE TEST FILE"
+fracgen filea nl=256 ns=256 format=byte seed=32161267
+write "TESTING PROGRAM SHADY2 WITH DEFAULTS"
+!------------------------------------------------------------------------------
+! test the program SHADY2
+shady2 inp=filea out=fileb 
+write "LIST THE RESULT OF THE DEFAULT PARAMETERS"
+list fileb (1,1,5,10)
+list fileb (201,201,5,10)
+
+write "SET AZIMUTH PARAMETER TO 90 DEGREES"
+shady2 inp=filea out=fileb az=90.0
+write "LIST THE RESULTS WITH AZIMUTH = 90 DEGREES"
+list fileb (1,1,5,10)
+list fileb (201,201,5,10)
+
+write "SET AZIMUTH PARAMETER TO 45 DEGREES"
+shady2 inp=filea out=fileb az=45.0
+write "LIST THE RESULTS WITH AZIMUTH = 45 DEGREES"
+list fileb (1,1,5,10)
+list fileb (201,201,5,10)
+
+write "SET ELEVATION PARAMETER TO 0 DEGREES"
+shady2 inp=filea out=fileb el=0.0
+write "LIST THE RESULTS WITH ELEVATION = 0 DEGREES"
+list fileb (1,1,5,10)
+list fileb (201,201,5,10)
+
+write "SET ELEVATION PARAMETER TO 90 DEGREES"
+shady2 inp=filea out=fileb el=90.0
+write "LIST THE RESULTS WITH ELEVATION = 90 DEGREES"
+list fileb (1,1,5,10)
+list fileb (201,201,5,10)
+
+write "SET SAMPLE SCALE PARAMETER TO 100 FT/PX"
+shady2 inp=filea out=fileb sscale=100.0
+write "LIST THE RESULTS WITH SAMPLE SCALE = 100 FT/PX"
+list fileb (1,1,5,10)
+list fileb (201,201,5,10)
+
+write "SET LINE SCALE PARAMETER TO 100 FT/PX"
+shady2 inp=filea out=fileb lscale=100.0
+write "LIST THE RESULTS WITH LINE SCALE = 100 FT/PX"
+list fileb (1,1,5,10)
+list fileb (201,201,5,10)
+
+write "SET VERTICAL SCALE PARAMETER TO 5 FT/PX"
+shady2 inp=filea out=fileb zscale=5.0
+write "LIST THE RESULTS WITH VERTICAL SCALE = 5 FT/PX"
+list fileb (1,1,5,10)
+list fileb (201,201,5,10)
+
+write "SET SCALE PARAMETER TO 128"
+shady2 inp=filea out=fileb scale=128
+write "LIST THE RESULTS WITH SCALE = 128"
+list fileb (1,1,5,10)
+list fileb (201,201,5,10)
+
+write "TEST SHADY2 WITH DIFFERENT AZIMUTH AND ELEVATION VALUES TOGETHER"
+shady2 inp=filea out=fileb az=45.0 el=15.0
+write "LIST THE RESULTS OF COMBINING DIFFERENT PARAMETER VALUES"
+list fileb (1,1,5,10)
+list fileb (201,201,5,10)
+
+end-proc
+.help
+To examine the performance of shady2, compare the source image terrain.img
+with the output file shaded.img.
+
+To run in batch in VMS type:
+	> tstshady2 |run=(batch,fast)| 
+To run interactively in VMS type:
+	> tstshady2 
+where xxxxxx is the VMS username
+
+To run in batch in UNIX type:
+	> tstshady2 |run=batch| 
+To run interactively in UNIX type:
+	> tstshady2 
+where xxx is the UNIX username
+.end

@@ -1,0 +1,12 @@
+process
+parm font	type=integer		default=4
+parm msg	type=(string,10)	default="Hello"
+parm height	type=integer		default=15
+parm scale	type=real		default=1.25
+parm angle	type=real		default=0
+parm x		type=integer		default=1	valid=(1:80)
+parm y		type=integer		default=20	valid=(1:25)
+parm loc	type=integer		default=1
+end-proc
+.end
+.end

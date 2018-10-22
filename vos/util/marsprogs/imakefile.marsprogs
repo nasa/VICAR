@@ -5,12 +5,12 @@
 all: make_marsprogs 
 
 make_p2prog:
-	($(CD) $(P2SOURCE); $(V2UTIL)/bldcomfiles.csh $(R2LIB))
+	($(CD) $(P2SOURCE); $(V2UTIL)/bldcomfiles_nounpack.csh $(R2LIB))
 	(cd $(R2LIB); $(V2UTIL)/make_pdf_cache.perl)
 	($(V2UTIL)/make_html.csh $(R2LIB) index_p2.html)
 
 make_marsprog:
-	($(CD) $(MARSSOURCE); $(V2UTIL)/bldcomfiles.csh $(MARSLIB))
+	($(CD) $(MARSSOURCE); $(V2UTIL)/bldcomfiles_nounpack.csh $(MARSLIB))
 	(cd $(MARSLIB); $(V2UTIL)/make_pdf_cache.perl)
 	($(V2UTIL)/make_html.csh $(MARSLIB) index_mars.html)
 
@@ -20,16 +20,16 @@ make_ssvprog:
 	($(V2UTIL)/make_html.csh $(SSVLIB) index_ssv.html)
 
 make_marsprogs:
-	-($(CD) $(GUISOURCE); $(V2UTIL)/bldcomfiles.csh $(GUILIB))	
-	-($(CD) $(P2SOURCE); $(V2UTIL)/bldcomfiles.csh $(R2LIB))
+	-($(CD) $(GUISOURCE); $(V2UTIL)/bldcomfiles_nounpack.csh $(GUILIB))	
+	-($(CD) $(P2SOURCE); $(V2UTIL)/bldcomfiles_nounpack.csh $(R2LIB))
 	-(cd $(R2LIB); $(V2UTIL)/make_pdf_cache.perl)
 	-($(V2UTIL)/make_html.csh $(R2LIB) index_p2.html)
-	-($(CD) $(MARSSOURCE); $(V2UTIL)/bldcomfiles.csh $(MARSLIB))
+	-($(CD) $(MARSSOURCE); $(V2UTIL)/bldcomfiles_nounpack.csh $(MARSLIB))
 	-(cd $(MARSLIB); $(V2UTIL)/make_pdf_cache.perl)
 	-($(V2UTIL)/make_html.csh $(MARSLIB) index_mars.html)
 	-($(CD) $(SSVSOURCE); $(V2UTIL)/bldcomfiles.csh $(SSVLIB))
 	-(cd $(SSVLIB); $(V2UTIL)/make_pdf_cache.perl)
 	-($(V2UTIL)/make_html.csh $(SSVLIB) index_ssv.html)
-	-($(CD) $(P3SOURCE); $(V2UTIL)/bldcomfiles.csh $(R3LIB))
+	-($(CD) $(P3SOURCE); $(V2UTIL)/bldcomfiles_nounpack.csh $(R3LIB))
 	-(cd $(R3LIB); $(V2UTIL)/make_pdf_cache.perl)
 	-($(V2UTIL)/make_html.csh $(R3LIB) index_p3.html)

@@ -1,0 +1,18 @@
+#define PROGRAM tst_lbl_routines
+
+#define MODULE_LIST tst_lbl_routines.c
+
+#define TEST
+
+#define USES_ANSI_C
+#define MAIN_LANG_C
+
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+
+#if 0
+#define LIB_LOCAL
+#define LOCAL_LIBRARY `ar t sublib.a`
+#endif
+

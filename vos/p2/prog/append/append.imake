@@ -1,0 +1,25 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM append
+
+   To Create the build file give the command:
+
+		$ vimake append			(VMS)
+   or
+		% vimake append			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	append
+
+#define MODULE_LIST append.c
+
+#define MAIN_LANG_C
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

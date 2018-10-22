@@ -1,0 +1,104 @@
+PROCESS		HELP=*
+PARM INP     TYPE=(STRING,72) COUNT=(1:2)
+PARM INCOL   TYPE=INTEGER COUNT=(1:20)
+PARM OUTCOL  TYPE=INTEGER COUNT=(1:30)
+PARM FILE    TYPE=INTEGER COUNT=(1:50)
+PARM NULL    TYPE=REAL COUNT=(1:30) DEFAULT=0
+PARM NULSTR  TYPE=(STRING,80) COUNT=(1:30) DEFAULT=""
+PARM MODE    TYPE=KEYWORD COUNT=(0:1) VALID=ALPHA DEFAULT=--
+END-PROC
+.TITLE
+VICAR/IBIS Program zipcol
+.HELP
+PURPOSE
+
+	ZIPCOL is used to enter data into an existing IBIS interface file.
+Data can be transferred to the interface file from another interface file,
+data cards, or both sources. Data is entered by matching keys between the
+interface file and the data sources. Pre-sorting of the interface file and
+the data sources is required. The size of the interface file is not changed
+by operation of ZIPCOL.
+
+TAE COMMAND LINE FORMAT
+
+	zipcol INP=(A,B) INCOL=(X1,X2,X3,...XK) OUTCOL=(Y1,Y2,Y3,...YK)
+		NULL=(C1,C2,...CN) FILE=(D1,D2,D3,...DK,E1,E2,...EN)
+
+	Where A is the IBIS interface file being modified and B is a
+secondary input interface file.
+
+EXAMPLE
+
+	zipcol INP=(INT1,INT2) INCOL=(28,27) OUTCOL=(1,2,3,4)
+		FILE=(6,7,8,9,10,11) NULL=(0,0,0,0)
+
+	In this example, columns 6, 7, from INT2 will be used to match
+columns 28, 27 from INT1. If a match is made to columns 6,7 of INT2,
+then columns 8, 9, 10, 11 from INT2 will be placed in columns 1, 2, 3, 4
+of INT1. If no match is found zeros will be placed in columns 1, 2, 3, 4
+of INT1.
+
+.PAGE
+OPERATION
+
+	ZIPCOL operation is as follows. Each key in the first file is checked
+against each key in the second. If a match is found, data is transferred from
+the second file to the first file. Resultant information is written in an
+update mode to the interface file being modified.
+
+	WRITTEN BY		A. L. Zobrist		25 Aug 1981
+	COGNIZANT PROGRAMMER	K. F. Evans
+	DOCUMENTED BY		A. L. Zobrist
+	REVISION		1			19 Aug 1982
+	PORTED TO UNIX          C. R. Schenk (CRI)       6 Mar 1995
+
+.LEVEL1
+.VARIABLE INP
+1. The IBIS interface file
+     being modified.
+2. The secondary input
+     interface file.
+.VARIABLE INCOL
+Matching columns in first file
+.VARIABLE OUTCOL
+Columns in first file to 
+receive data from second
+.VARIABLE NULL
+Values to use in no match
+.VARIABLE NULSTR
+NULL for alphas
+.VARIABLE FILE
+Matching and data columns
+in second interface file
+.VARIABLE MODE
+'ALPHA for matching on
+alphanumeric string data
+
+.LEVEL2
+.VARIABLE INP
+INP number 1 is the IBIS interface file being modified.
+INP number 2 is the secondary input interface file.
+.VARIABLE INCOL
+INCOL is used to specify columns in INP number 1, which are used as matching
+keys. These keys are in columns X1 to Xk.
+.VARIABLE OUTCOL
+OUTCOL is used to specify columns Y1 to Yn of INT1 which will recieve data
+when INCOL matches are found.
+.VARIABLE NULL
+NULL is used to specify what operation will take place if no match is found
+for any keys in INP number 1. If NULL is not specified, the data in columns
+Y1 to Yn remain unchanged if a match does not occur. If NULL is specified,
+then values C1 to Cn are to be used as data values if no match is found. 
+.VARIABLE NULSTR
+ Same as NULL, used to input a 4 character string.
+.VARIABLE FILE
+Columns D1 toDk are the matching keys in the secondary input file. Column
+numbers E1 to En specify the columns where data to be transferred to the
+OUTCOL columns in INP number 1 are found. The number of 'D' values and 'E'
+values must correspond to the number of values following INCOL and OUTCOL
+respectively.
+.VARIABLE MODE
+Use the keyword 'ALPHA if the matching columns contain alphanumeric 
+string data rather than real values.  The files must have been sorted
+alphabetically with SORT.
+.END

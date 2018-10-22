@@ -1,0 +1,199 @@
+process help=*
+PARM INP TYPE=STRING COUNT=2
+PARM OUT TYPE=STRING COUNT=2
+PARM NLW TYPE=INTEGER COUNT=(0:1) VALID=(1:51) DEFAULT=1
+PARM NSW TYPE=INTEGER COUNT=(0:1) VALID=(3:201) DEFAULT=45
+PARM MOTION TYPE=INTEGER COUNT=(0:1) VALID=(1:201) DEFAULT=10
+PARM QUALITY TYPE=REAL COUNT=(0:1) VALID=(0.:1.) DEFAULT=0.7
+PARM OFFSET TYPE=INTEGER COUNT=(0:1) VALID=(0:50) DEFAULT=--
+PARM GEOM TYPE=INTEGER COUNT=(0,2) VALID=(0:50,10:250) DEFAULT=(6,120)
+PARM THRESH TYPE=REAL COUNT=(0:1) VALID=(0.:100.) DEFAULT=1.0
+END-PROC
+
+.TITLE
+VICAR program CORRELATE1D
+
+.HELP
+PURPOSE:
+  To compute 1-d correlated tiepoints between two images.
+  The input stereo pair must have horizontal epipolar lines.
+  The left image is fixed. The right image is variable.
+
+EXECUTION:
+   correlate1d inp=left,right out=ldis,sdis parameters
+where:
+   left is an image where templates are selected at every pixel.
+   right is an image which is searched over to refine tiepoint locations.
+
+   ldis and sdis are disparity images. The integer index
+   in these images corresponds to the left image coordinate. The value
+   at the index corresponds to the right image location. ldis is the
+   line disparity and sdis is the sample disparity.
+
+   for example: (sample,line)
+   if sdis(10,100) is 11.3 and ldis(10,100) is 102.1 then the left image
+   coordinate at (10,100) lies at sample 11.3 and line 102.1 in the right
+   image. Inspect the "delta" keyword for an alternative format. A value of
+   zero for ldis or sdis means the pixel could not be correlated well.
+
+.PAGE
+
+METHOD:
+  This is a simple 1-d correlator which is executed on each input pixel
+location. You can include more than one line at a time. At each input pixel a
+template NSW by NLW pixels is correlated within a search area of width +-
+MOTION pixels. When the highest correlation is located a quadratic is fitted
+to the 3 nearest points to give a sub pixel estimate. 
+   One of the hazards of stereo pair correlation from rover images is the
+occlusion of background by foreground rocks. To avoid the correlator including
+terrain at different distances within the same window the left and right
+halves of the NSW template is correlated independently. The resulting
+correlation quality is the larger of the two. Thus if NSW=41 then the
+actual correlation width will be 21.
+   An analysis is performed to determine the vertical offset between the
+two input images. 20 lines are selected and a patch N pixels wide in the 
+center is correlated across the entire image width and up and down by
++- M lines ( see GEOM=M,N parameter). The best vertical offset is added to
+a histogram of offsets. The offset with the most counts gives the vertical
+shift between images. Parameter OFFSET overrides this step. 
+   In order to minimize the search an analysis is performed to locate the 
+horizontal displacement between lines as a function of line number. 
+This is performed by correlating the central N pixels (see GEOM=M,N parameter)
+of every line across the entire image. The result gives the horizontal offset
+for each line. This is used to start correlations near the correct offset
+so that the correct correlation match will lie within +- MOTION pixels.
+Note that this will not work well if the cameras are severely tilted.
+To erase bad results the offset table is convolved by a median filter
+31 lines long. 
+   The correlator relies upon a single figure of merit which is maximized. This
+is the correlation value, sometimes called Pearson's r. It is the quality of a
+least squares fit between the dn (intensity) vales in the template and the
+search area. If x and y are the template and search dn's then r is computed
+from:                 sum(x*y)-sum(x)*sum(y)/n
+  r^2=--------------------------------------------------
+        [sum(x*x)-(sum(x))^2/n][sum(y*y)-(sum(y))^2/n]
+Notice that the correlation quality is independent of scale or offset.
+   After all correlations are performed the disparity images (outputs) are
+used to permit a second correlation in the reverse direction, from right to 
+left. This should give results similar to the left to right operation, but 
+never exactly, since the correlation is sub pixel and the template is 
+always begun on an integer pixel boundary. Those points which match to within
+THRESH pixels are kept. The rest are set to zero. This test will often locate
+image areas where terrain is visible to one eye but not to the other.
+Tiepoints in error are unlikely to match in both directions.
+   Finally the user can invoke a gore removal scheme (see NOGORES keyword).
+This step only interpolates over gores which are 1 line or 1 sample thick.
+
+HISTORY:
+11-1-2003  J Lorre. 
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+.LEVEL1
+.VARI INP
+2 input images
+
+.VARI OUT
+2 Output images
+
+.VARI NLW
+template height
+
+.VARI NSW
+template width
+
+.VARI MOTION
+horizontal motion
+
+.VARI QUALITY
+minimum acceptable
+quality
+
+.VARI OFFSET
+known vertical
+image offset
+
+.VARI GEOM
+2 inputs:
+1) vertical search
+2) correlation width
+
+.VARI THRESH
+Direct-inverse
+error limit.
+
+.LEVEL2
+
+.VARI INP
+Two input images in the order:
+1. Left stereo image.
+2. Right stereo image.
+
+.VARI OUT
+Two Output disparity images in the order:
+1. Line disparity.
+2. Sample disparity.
+
+.VARI NLW
+nlw=  The line length of the template kernel.
+      The template is the area selected from the left image and correlated
+      over the right image search area. 
+      The template is only moved horizontally.
+      Must be an odd integer. 
+      Defaults to 1
+
+.VARI NSW
+nsw=  The sample width of the template kernel. 
+      The template is the area selected from the left image and correlated
+      over the right image search area. Note that the left and right
+      halves of the template are correlated independently. The resulting
+      correlation quality is the larger of the two. This means that NSW
+      is only 1/2 of the actual width used.
+      The template is only moved horizontally.
+      Must be an odd integer. 
+      Defaults to 45
+
+.VARI MOTION
+motion= The maximum permitted horizontal motion of the template in the 
+        search area from it's initial location in each direction.
+        Thus the search area will be of width nsw+2*smotion.
+        Searching begins from the initial offset and skew.
+        Defaults to 10.
+
+.VARI QUALITY
+quality= The minimum acceptable correlation quality for a point to have
+         in order to be accepted. 
+         0 means no correlation at all.
+         1 means perfect correlation.
+         Defaults to 0.7
+
+.VARI OFFSET
+offset= The integer line offset between the 2 input images. 
+        A positive offset of n indicate the right search area is to be shifted 
+        down n lines relative to the left template in order to align the two
+        input images.
+        If defaulted, this parameter is computed by the program.
+
+.VARI GEOM
+geom=M,N
+      Geom controls the way the program computes the initial geometric
+      relationship between the 2 input images, resulting in the automatic
+      computation of the vertica OFFSET parameter and of a table of
+      horizontal shifts for each image line.
+      M is the maximum permitted vertical offset search used to determine the
+      OFFSET parameter. The search is limited to +- M lines.
+      N is the template width used to correlate the data at the center of 
+      each image line.
+      The defaults are geom=6,120. 
+      The vertical image shift operation is performed only if the 
+      OFFSET keyword is defaulted.
+
+.VARI THRESH
+thresh= The threshold which determines the permissible disagreement in 
+        horizontal shift between the direct and inverse correlations.
+        Tiepoints with a disagreement of over THRESH are set to zero in the 
+        output images.
+        Note: When thresh gets below about 0.8 then many rejections 
+              occur. This implies that the precision of the algorithm is
+              beginning to be tested rather than the precision of the data.
+        Defaults to 1.0
+

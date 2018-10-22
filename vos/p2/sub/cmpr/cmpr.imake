@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine cmpr */
+
+#define SUBROUTINE cmpr
+
+#define MODULE_LIST cmpr.f
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

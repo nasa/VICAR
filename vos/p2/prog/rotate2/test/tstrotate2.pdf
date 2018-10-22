@@ -1,0 +1,56 @@
+procedure
+refgbl $echo
+! Sep 02, 2013 - RJB
+! TEST SCRIPT FOR ROTATE2
+! tests BYTE, HALF images
+!
+! Vicar Programs:
+!       gen list rotate lgeom 
+! 
+! parameters:
+!   <none>
+!
+! Requires NO external test data: 
+!
+!   THIS TEST PROCEDURE DOES NOT CALL ROTATE2
+!
+!  NOTE: You cannot call rotate2 directly. rotate2 only
+!       opens a parameter data set which passes the 
+!       information off to lgeom which actually does
+!       the rotation. rotate2 will produce an output of
+!       1 line and 512 bytes but not a rotated image.
+!       No parameter data set is produced by rotate2
+!       unless you enter the PDS parameter 
+!
+body
+let _onfail="stop"
+let $echo="no"
+write "*************************************************"
+write "THIS IS A TEST OF MODULE ROTATE2"
+write "We will rotate a gen'd image by -45 deg such that"
+write "shading should appear in the sample direction only"
+write "*************************************************"
+let $echo="yes"
+gen A nl=15 ns=15 ival=90
+list A
+rotate A B1 angle=-45.
+list B1
+let $echo="no"
+write "*************************************************"
+write "Shift the output center of rotation and use nointerp"
+write "*************************************************"
+let $echo="yes"
+rotate A B2 angle=-45. 'noin center=(8,4)
+list B2
+let $echo="no"
+write "*************************************************"
+write "Now lets rotate about (10,6) [104 dn]"
+write " and make it end up at (3,3)....and in halfword"
+write "*************************************************"
+let $echo="yes"
+gen C nl=15 ns=15 ival=90 'half
+list C
+rotate C D angle=-45. line=10 samp=6 center=(3,3)
+list D
+let $echo="no"
+end-proc

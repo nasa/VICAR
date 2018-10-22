@@ -1,0 +1,120 @@
+Process help=*
+parm  INP	(string,40)
+parm  OUT	(string,40) 			count=2
+parm  SIZE	integer	default=(1,1,0,0)	count=4
+parm  SL	integer	default=1
+parm  SS	integer	default=1
+parm  NL	integer	default=0
+parm  NS	integer	default=0
+parm  KEY	integer default=11
+parm  EMIS	real	default=0.98
+parm  DATE      integer default=19970921 valid=(19970101:21000000)
+End-proc
+
+.TITLE
+TAE PROCESS SEBASSTE
+.HELP
+PURPOSE:
+SEBASSTE is a VICAR program that converts a SEBASS radiance (preferably
+ground radiance) image to temperature and emissivity images.  This is done
+by a greybody fitting method.  A greybody spectrum of emissivity EMIS is
+draped over the radiance spectrum until the radiance spectrum touches or 
+pierces the greybody spectrum at KEY channels.  This determines the kinetic
+temperature of the pixel, which is then used to compute the emissivity of
+the remaining channels.
+.PAGE
+OPERATION:
+SEBASSTE calculates temperature and emissivity in the following manner: 
+First, the brightness temperature for each of the 128 channels of the pixel
+is calculated. These 128 temperatures are sorted from high to low and the
+channel of the KEY'th highest temperature is assigned an emissivity of the
+value of EMIS.  Using this emissivity, the kinetic temperature is calculated.
+Using this kinetic temperature, the emissivities of the remaining channels
+are calculated.
+
+WRITTEN BY:  Ron Alley April 30, 1997
+
+COGNIZANT PROGRAMMER:  Ron Alley
+
+REVISION: New
+.LEVEL1
+.VARI INP
+Radiance at surface
+SEBASS image
+.VARI OUT
+(1) Emissivity image
+(2) Temperature image
+.VARI SIZE
+The standard  VICAR output size
+field.
+.VARI SL
+Starting line
+.VARI SS
+Starting sample
+.VARI NL
+Number of lines
+.VARI NS
+Number of samples
+.VARI KEY
+The rank of the channel set to
+the standard emissivity.
+.VARI EMIS
+The standard emissivity
+.VARI DATE
+Date of data acquisition
+as yyyymmdd
+.LEVEL2
+.VARI INP
+The input file should be a 128 band SEBASS file of radiance data (preferably
+ground radiance).  The units should be milliWatts per square meter per
+steradian par micrometer, which are the units output by the program SEBASSCAL.
+.VARI OUT
+The first output will be the emissivity image.  It will be a 128 channel file
+of halfword data.  The pixels are scaled by a factor of 10,000.  That is, an
+emissivity of 1.0 is given the value 10000; an emissivity of 0.915 becomes
+9150, etc.
+The second output will be the kinetic temperature image.  It will be a single
+channel file of halfword data.  The pixels will be in units of degrees 
+Celsius scaled by a factor of 100.  That is, a temperature of 9.87 deg C
+is given the value 987; a temperature of -15.35 becomes -1535.
+.VARI SIZE
+The standard VICAR output size field.   Default will calibrate
+the entire data set.
+	Example: SIZE = (1,1,200,128)
+.VARI SL
+Starting line (same as SIZE(1)).
+.VARI SS
+Starting sample (same as SIZE(2)).
+.VARI NL
+Number of lines (same as SIZE(3)).
+.VARI NS
+Number of samples (same as SIZE(4)).
+.VARI KEY
+SEBASSTE calculates temperature and emissivity in the following manner: 
+First, the brightness temperature for each of the 128 channels of the pixel
+is calculated. These 128 temperatures are sorted from high to low and the
+channel of the KEY'th highest temperature is assigned an emissivity of the
+value of EMIS.  Using this emissivity, the kinetic temperature is calculated.
+Using this kinetic temperature, the emissivities of the remaining channels
+are calculated.
+     Therefore, KEY represents the number of channels that pierce the
+greybody curve envelope that is draped over the radiance spectrum. Noise
+free input should be run with KEY=1, and the value of KEY should be raised
+as the amount of overall noise or number of noisy channels increases.
+.VARI EMIS
+SEBASSTE calculates temperature and emissivity in the following manner: 
+First, the brightness temperature for each of the 128 channels of the pixel
+is calculated. These 128 temperatures are sorted from high to low and the
+channel of the KEY'th highest temperature is assigned an emissivity of the
+value of EMIS.  Using this emissivity, the kinetic temperature is calculated.
+Using this kinetic temperature, the emissivities of the remaining channels
+are calculated.
+     Therefore, EMIS represents the expected peak of the emissivity in the
+pixel's true (noise free) spectrum.  The output spectrum will in fact have
+KEY-1 spectral emissivities higher than EMIS, but these are regarded as
+high due to noise.
+.VARI DATE
+This is the date the data were acquired, in the format yyyymmdd (e.g.
+19970922 for September 22, 1997).  It is used to determine which
+wavelength calibration to use.
+.END

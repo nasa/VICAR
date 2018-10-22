@@ -1,0 +1,21 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+! TEST SCRIPT FOR THE PROGRAM DVECTOR
+gausnois out=a.img nl=305 ns=305
+copy a.img left.img nl=300 ns=300
+copy a.img right.img sl=5 ss=3 nl=300 ns=300
+copy a.img mid.img sl=3 ss=5 nl=300 ns=300
+tracker3 inp=(left.img,right.img) out=mark.img +
+  grid=100 nlw=11 nsw=11 'print limit=8
+tracker3 inp=(right.img,mid.img,mark.img) out=mark2.img +
+  grid=100 nlw=11 nsw=11 'print limit=8
+list left.img (13,13,9,9)
+list right.img (13,13,9,9)
+dvector inp=(left.img,mark.img,mark2.img) out=vector.img
+list vector.img (13,13,9,9)
+end-proc

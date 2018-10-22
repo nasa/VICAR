@@ -1,0 +1,215 @@
+process help=*
+PARM INP        TYPE=STRING   COUNT=(1:10)
+PARM OUT        TYPE=STRING
+PARM SIZE       TYPE=INTEGER  COUNT=4                        DEFAULT=(1,1,0,0)
+PARM SL         TYPE=INTEGER                                 DEFAULT=1
+PARM SS         TYPE=INTEGER                                 DEFAULT=1
+PARM NL         TYPE=INTEGER                                 DEFAULT=0
+PARM NS         TYPE=INTEGER                                 DEFAULT=0
+PARM INC        TYPE=INTEGER               VALID=(1:9999)    DEFAULT=20
+PARM LINC       TYPE=INTEGER               VALID=(1:9999)    DEFAULT=20
+PARM SINC       TYPE=INTEGER               VALID=(1:9999)    DEFAULT=20
+PARM INITIAL    TYPE=REAL                                    DEFAULT=5.0
+PARM CLUSTERS   TYPE=INTEGER                                 DEFAULT=500
+PARM EXCLUDE    TYPE=INTEGER  COUNT=(0:10)                   DEFAULT=--
+PARM NONN       TYPE=KEYWORD  COUNT=(0:1)  VALID="NONN"      DEFAULT=--
+PARM CLASSES    TYPE=INTEGER  COUNT=(0:1)  VALID=(1:20000)    DEFAULT=10
+PARM PERCENT    TYPE=REAL     COUNT=(0:1)  VALID=(0.0:100.0) DEFAULT=0.0
+PARM NOPRINT    TYPE=KEYWORD  COUNT=(0:1)  VALID="NOPRINT"   DEFAULT=--
+!PARM MSS        TYPE=INTEGER  COUNT=(0:1)  VALID=(1:999)     DEFAULT=--
+!PARM USE        TYPE=INTEGER  COUNT=(0:24) VALID=(1:999)     DEFAULT=--
+PARM NOTIFY     TYPE=KEYWORD  COUNT=(0:1)  VALID="NOTIFY"    DEFAULT=--
+PARM ALL        TYPE=KEYWORD  COUNT=(0:1)  VALID="ALL"       DEFAULT=--
+ END-PROC
+.TITLE
+	Program USTATS
+.HELP
+ Purpose:  USTATS is a VICAR applications program that performs an
+unsupervised clustering algorithm upon multispectral data.  The output
+is a statistics data set compatible with the program FASTCLAS.
+ Operation:  A sampling of pixels is chosen, determined by the INC, LINC
+or SINC keyword parameters.  The first sampled pixel is set as the first
+cluster.  For each of the remaining pixels to be sampled, the following
+operations are performed:
+
+      1) The Euclidean distance from the mean of each cluster is
+         computed.  The Euclidean distance is defined as:
+           (E.D.)**2 = SUM OVER ALL BANDS of [DN{mean} - DN{pixel}]**2
+
+      2) If the Euclidean distance to each of the existing clusters
+         is greater than the value specified by the INITIAL parameter,
+         a new cluster if formed by this pixel.  Otherwise, the pixel
+         is added to the nearest cluster, and that cluster's mean for
+         each band is recomputed.
+
+      3) The neighboring pixel to the left is then checked to see
+         whether it can be grouped into the same cluster.  If its
+         Euclidean distance is not greater than the INITIAL parameter,
+         it too is added to the cluster, and the means recomputed.
+         This process is repeated until a pixel is found that cannot
+         Be added to the cluster.
+
+      4) The pixel(s) to the right is (are) checked in the same manner
+         as in Step 3.
+
+If the NONN parameter has been specified, Steps 3 & 4 are omitted.  If,
+at some point, this process generates more clusters than have been
+specified in the CLUSTER parameter, the message, 'SAMPLING INCOMPLETE AT
+LINE n' will be printed.  No more pixels will be sampled, but processing
+will continue.
+
+When the sampling process is complete, the clusters that have been
+formed are examined.  Clusters containing only one pixel are removed.
+Standard deviations for each band in each cluster are calculated and,
+if the one-standard-deviation regions of two clusters overlap, they
+are merged into one cluster.  The remaining clusters are sorted by
+population.
+
+The number of clusters to be retained as classes for output is determined
+by the CLASSES and PERCENT parameters.  If either of these parameters
+is specified, the default of 10 clases is overridden.  If both parameters
+are specified, both conditions must be met to be included as an output
+class.
+
+The output statistics data set is of the same format as the output data
+set from STATS, and is suitable for input into FASTCLAS.  The 
+only difference is that USTATS does not compute the off-diagonal
+elements of the correlation matrix, but sets them to zero.
+
+ Restrictions: 
+1)    Image size is internally restricted to 32000 samples.
+2)    12 input data sets
+
+ Examples:
+
+  1) USTATS (A,B,C,D) ST INC=10 INITIAL=8.0 CLUSTERS=300 +
+            EXCLUDE=0  CLASSES=15
+     In this example every tenth sample of every tenth line is sampled.
+     The initial clusters have an 8.0 DN radius and up to 300 clusters
+     may be formed.  Pixels of 0 DN are ignored.  The 15 most populous
+     clusters are output.
+
+  2) USTATS MS ST (1,1,500,1000) MSS=6 USE=(1,2,4,5,6) SINC=5 +
+            PERCENT=1.0
+     In this example the input is in MSS format and contains 6 bands,
+     but the third band is not to be used.  Every fifth sample of every
+     twentieth line (default) is sampled.  Those clusters that are at
+     least 1% of all pixels sampled are retained for output.
+
+  3) USTATS MS ST MSS=4 'NONN
+     In this example, there are 4 MSS bands, all are to be used, and
+     nearest neighbors are not to be sampled.
+.page
+ HISTORY
+ Written by: Ron Alley, March 31, 1978
+
+ Cognizant Programmer: Ray Bambery
+
+     19 OCT 79   ...REA...    INITIAL RELEASE
+     29 AUG 85   ...JHR...    CONVERT TO VICAR2
+      5 SEP 94   ...CRS (CRI) REVISE FOR PORTING
+     10 JUL 95   ...VRU (CRI) CHANGED FIRST OUTPUT FILE FORMAT TO ISTATFILE
+     15 APR 98   ...RRP (AR-9900) UPDATED USTATS.PDF TO RESTRICT CERTAIN
+                        PARAMETERS TO BE LESS THEN OR EQUAL TO ZERO.
+     16 JUL 2011 ...RJB...  Clean up code to prevent warning messages
+                            with gfortran 4.4.4 compiler under Linux
+                            Remove MSS actions, MSS and USE parms.
+                            Convert to HALF and BYTE data set operations
+                            Fix a wide range of logic and coding errors.
+                            The biggest problem was incorrect variance
+                            computation which was not dividing by number of pts.
+
+    21 Jul 2011 ...RJB...  Add complete covariance matrix, not just diagonal.
+                            Debugging code and comments need to be removed.
+                            This version needed in quick turn around.
+.page
+.LEVEL1
+.VARIABLE INP
+STRING - Input data sets.
+.VARIABLE OUT
+STRING - Output data set.
+.VARIABLE SIZE
+INTEGER - Standard VICAR size field.
+.VARIABLE INC
+INTEGER - Initial cluster increment.
+.VARIABLE LINC
+INTEGER - Initial cluster line increment.
+.VARIABLE SINC
+INTEGER - Initial cluster sample increment.
+.VARIABLE INITIAL
+REAL - Radius or inital clusters.
+.VARIABLE CLUSTERS
+INTEGER - Maximum number of clusters.
+.VARIABLE EXCLUDE
+INTEGER - Exclude DN value from sampling.
+.VARIABLE NONN
+STRING - No nearest Neighbors.
+.VARIABLE CLASSES
+INTEGER - Keep N most populous classes.
+.VARIABLE PERCENT
+REAL - Keep classes with X% or greater of all pixels sampled.
+.VARIABLE NOPRINT
+STRING - Do not print populations & means.
+!.VARIABLE MSS
+!INTEGER - Specifies number of bands in MSS format.
+!.VARIABLE USE
+!INTEGER - Denotes which MSS bands to use.
+.VARIABLE NOTIFY
+STRING - Displays progress of program.
+.VARIABLE ALL
+STRING - Skips code which combines & eliminates clusters.
+.LEVEL2
+.VARIABLE INP
+ Input bands for stats.  The input can either be 10 seperate files each
+containing one band or one file in MSS format containing 12 bands.
+The parameter MSS must be used if an MSS format file is being used.
+(default is seperate files)
+.VARIABLE OUT
+ Ouput data set.
+.VARIABLE SIZE
+ Standard VICAR size field.
+.VARIABLE INC
+ Denotes that every Nth sample & Nth line is to be used to form the
+initial clusters. (Default = 20)
+.VARIABLE LINC
+ Denotes that every Nth line is to be used to form the inital clusters.
+(Default = 20)
+.VARIABLE SINC
+ Denotes that every Nth sample is to be used to form the inital clusters.
+(Default = 20)
+.VARIABLE INITIAL
+ Specifies that the boundries of the initial clusters are spheres of
+radius X. (Default = 5.0)
+.VARIABLE CLUSTERS
+ Denotes that a maximum of N clusters will be formed when sampling the
+input picture. (Default = 500)
+.VARIABLE EXCLUDE
+ Denotes that pixels of DN I,J,... (maximum of 10 values may be given)
+are to be excluded from all sampling. (Default is no DN to be excluded.)
+.VARIABLE NONN
+ Specifies that the nearest neighbors of a sampled pixel are not to be
+checked for inclusion into that pixel's cluster.  This will be further
+explained in the Operations Section. (Default is that neighboring pixels
+will be checked)
+.VARIABLE CLASSES
+ Specifies that only the N most populous clusters will be retained as
+classes for output. (Default = 10)
+.VARIABLE PERCENT
+ Specifies that only those clusters that contain at least X percent of all
+pixels sampled will be retained as classes for output. (Default is no
+percentage restrictions on output classes)
+.VARIABLE NOPRINT
+Suppresses the printing of the populations and means of all clusters
+formed. (Default is to print this information.)
+!.VARIABLE MSS
+! Denotes that the input is in MSS format and contains N spectral bands.
+!(Default is one spectral band per input file)
+!.VARIABLE USE
+! Denotes that only bands i,j,k,... of an MSS formatted data set are to be
+!used as input. (Default is all bands are used)
+.VARIABLE NOTIFY
+ Displays messages relating to the current progress of the program.
+(Default is not to display progress.)
+.VARIABLE ALL
+ Skips the code which combines and eliminates clusters. (Default is to
+perform these steps.)

@@ -1,0 +1,48 @@
+      INCLUDE 'VICMAIN_FOR'
+      SUBROUTINE MAIN44
+
+      include  'fortport'  ! DEFINES INT2BYTE
+
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C     THIS IS A TEST FOR MODULE FLOATA                               C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+      CHARACTER  CARD*80             !PRINT BUFFER
+      BYTE       B(5)                !BYTE ARRAY
+      INTEGER*2  H(5)                !HALFWORD ARRAY
+      INTEGER*4  F(5)                !FULLWORD ARRAY
+      REAL*4     R(5)                !REAL ARRAYS
+
+      CALL XVMESSAGE('**BEGIN TEST FOR MODULE FLOATA',' ')
+      CALL XVMESSAGE(' ',' ')
+      CALL XVMESSAGE(
+     . 'FLOATA should generate 0.0 50.0 100.0 150.0 200.0',' ')
+      CALL XVMESSAGE(' ',' ')
+      DO I=1,5          !INITIALIZE THE INPUT ARRAY
+         K    = (I-1)*50
+         B(I) = INT2BYTE(K)
+         H(I) = K
+         F(I) = K
+      ENDDO
+
+      CALL XVMESSAGE(' ',' ')
+      CALL FLOATA(1, 5, B, R)
+      WRITE( CARD, 100) (R(I),I=1,5)
+      CALL XVMESSAGE(CARD, ' ')
+
+      CALL XVMESSAGE(' ',' ')
+      CALL FLOATA(2, 5, H, R)
+      WRITE( CARD, 100) (R(I),I=1,5)
+      CALL XVMESSAGE(CARD, ' ')
+
+      CALL XVMESSAGE(' ',' ')
+      CALL FLOATA(4, 5, F, R)
+      WRITE( CARD, 100) (R(I),I=1,5)
+      CALL XVMESSAGE(CARD, ' ')
+
+      CALL TZFLOATA      ! TEST C INTERFACE
+
+      CALL XVMESSAGE('**END   TEST FOR MODULE FLOATA',' ')
+      RETURN
+ 100  FORMAT(5F6.1)
+      END

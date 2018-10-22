@@ -775,8 +775,7 @@ public class DOMtoHashtable  {
                 nodeValue = "";
             }
         
-            
-        System.out.println("nodeName="+nodeName+" attrKey="+attrKey+" nodeValue="+nodeValue+"  attrValue="+attrValue+" hasSubItems="+hasSubItems);
+        if (debug) System.out.println("nodeName="+nodeName+" attrKey="+attrKey+" nodeValue="+nodeValue+"  attrValue="+attrValue+" hasSubItems="+hasSubItems);
         // nodeValue is just the text part
         
         // now add any units and quotes

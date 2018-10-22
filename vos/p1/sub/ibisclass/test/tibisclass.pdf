@@ -1,0 +1,19 @@
+process
+
+subcmd new
+	parm out string count=1
+end-sub
+
+subcmd get
+	parm inp string count=1
+end-sub
+
+subcmd fnew
+	parm out string count=1
+end-sub
+
+subcmd fget
+	parm inp string count=1
+end-sub
+
+end-proc

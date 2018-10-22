@@ -1,0 +1,87 @@
+procedure
+
+refgbl $echo
+
+! Jun 26, 2012 - RJB
+! TEST SCRIPT FOR STATPLT
+! tests BYTE, HALF images
+!
+! Vicar Programs:
+!       gen stats  
+! 
+! parameters:
+!   <none>
+!
+! Requires NO external test data: 
+!
+! Requires an external graphics package - gnuplot
+!  the *.gpi data produced by statplt are gnuplot scripts
+!
+body
+let _onfail="stop"
+let $echo="yes"
+!
+! setup BYTE datasets
+!
+gen statplta nl=50 ns=50 linc=0 sinc=5
+gen statpltb nl=50 ns=50 linc=5 sinc=1
+gen statpltc nl=50 ns=50 linc=3 sinc=2
+gen statpltd nl=50 ns=50 linc=-2 sinc=3 ival=130
+stats (statplta,statpltb,statpltc,statpltd) statplte +
+       CLASS1=(1,1,10,25) CLASS2=(11,1,20,15)   CLASS3=(31,1,5,25) +
+       CLASS4=(41,1,8,25) CLASS5=(1,20,25,8)    CLASS6=(25,20,25,25) +
+       CLASS7=(35,20,10,30) CLASS8=(1,35,20,15) CLASS9=(25,35,25,15) +
+       CLASS10=(1,35,30,12)
+!
+statplt statplte plotname=statplt1.eps
+ush gnuplot statplt1.eps.gpi
+!       change scales
+statplt statplte xscale=(0,160) yscale=(50,250) +
+        plotname=statplt.eps
+ush gnuplot statplt.eps.gpi
+!       ellipses should halve in size;
+statplt statplte sigma=0.5 plotname=statplt3.eps
+ush gnuplot statplt3.eps.gpi
+!       same plot, switching axes
+statplt statplte bands=(2,1) plotname=statplt4.eps
+ush gnuplot statplt4.eps.gpi
+!       try bands 3 and 4
+statplt statplte bands=(3,4) plotname=statplt5.eps
+ush gnuplot statplt5.eps.gpi
+!
+! setup HALF data sets
+!
+gen statplth nl=50 ns=50 linc=0 sinc=5 format=half
+gen statplti nl=50 ns=50 linc=5 sinc=1 format=half
+gen statpltj nl=50 ns=50 linc=3 sinc=2 format=half
+gen statpltk nl=50 ns=50 linc=-2 sinc=3 ival=130 format=half
+!
+stats (statplth,statplti,statpltj,statpltk) statpltl +
+       CLASS1=(1,1,10,25) CLASS2=(11,1,20,15)   CLASS3=(31,1,5,25) +
+       CLASS4=(41,1,8,25) CLASS5=(1,20,25,8)    CLASS6=(25,20,25,25) +
+       CLASS7=(35,20,10,30) CLASS8=(1,35,20,15) CLASS9=(25,35,25,15) +
+       CLASS10=(1,35,30,12)
+!
+statplt statpltl plotname=statplt10.eps
+ush gnuplot statplt10.eps.gpi
+!       change scales
+statplt statpltl xscale=(0,160) yscale=(50,250) +
+        plotname=statplt11.eps
+ush gnuplot statplt11.eps.gpi
+!       ellipses should halve in size;
+statplt statpltl sigma=0.5 plotname=statplt12.eps
+ush gnuplot statplt12.eps.gpi
+!       same plot, switching axes
+statplt statpltl bands=(2,1) plotname=statplt13.eps
+ush gnuplot statplt13.eps.gpi
+!       try bands 3 and 4
+statplt statpltl bands=(3,4) plotname=statplt14.eps
+ush gnuplot statplt14.eps.gpi
+
+! clean up
+ush rm -f statplt*.eps*.gpi
+ush rm -f statplt?
+ush rm -f .gnuplot
+
+let $echo="no"
+end-proc

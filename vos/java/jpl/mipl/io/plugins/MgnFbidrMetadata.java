@@ -10,7 +10,7 @@ package jpl.mipl.io.plugins;
 
 import javax.imageio.metadata.*;
 import org.w3c.dom.*;
-
+import java.util.List;
 import jpl.mipl.io.vicar.*;
 
 /**
@@ -23,7 +23,7 @@ import jpl.mipl.io.vicar.*;
  * here.  If the "common" IIOMetadataNode version of the metedata is requested
  * it will then be built using the native Document as the input. 
  * <p>
- * The underlying MgnFbidrHeader object can be obtained directly from this
+ * The underlying MgnFbidrHeader objects can be obtained directly from this
  * class, as can access to the binary prefix information.
  */
 public class MgnFbidrMetadata extends IIOMetadata implements Cloneable {
@@ -55,7 +55,7 @@ public class MgnFbidrMetadata extends IIOMetadata implements Cloneable {
     IIOMetadataNode _commonNode = null;
 
     // Store the header in case the client wants to get at it
-    MgnFbidrHeader _fbidr_header = null;
+    List<MgnFbidrHeader> _fbidr_headers = null;
 
     // used to hold any prefix data. It is kept in the metadata since it
     // isn't part of a displayable image.  There is no binary header in this
@@ -82,14 +82,14 @@ public class MgnFbidrMetadata extends IIOMetadata implements Cloneable {
         setFromTree(commonMetadataFormatName, (Node) metadata);
     }
 
-    public MgnFbidrMetadata(Document doc, MgnFbidrHeader hdr) {
+    public MgnFbidrMetadata(Document doc, List<MgnFbidrHeader> hdrs) {
 	super(false,
 		nativeImageMetadataFormatName, 
 		nativeImageMetadataFormatClassName,
 		null, null);
 
         setFromTree(nativeMetadataFormatName, doc);
-	_fbidr_header = hdr;
+	_fbidr_headers = hdrs;
     }
     
    
@@ -248,12 +248,12 @@ public class MgnFbidrMetadata extends IIOMetadata implements Cloneable {
     }
 
 /**
- * Get the MgnFbidrHeader object for this file.  It contains the same
- * information as the XML but as an object with simple get methods.
+ * Get the MgnFbidrHeader list for this file.  It contains the same
+ * information as the XML but as a list of objects with simple get methods.
  */
-    public MgnFbidrHeader getMgnFbidrHeader()
+    public List<MgnFbidrHeader> getMgnFbidrHeaders()
     {
-	return _fbidr_header;
+	return _fbidr_headers;
     }
 
 }

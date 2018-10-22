@@ -1,0 +1,426 @@
+      INCLUDE 'VICMAIN_FOR'
+      SUBROUTINE MAIN44
+C  PROGRAM TINSIDE
+C  THIS IS A TEST PROGRAM FOR LOGICAL FUNCTION INSIDE
+C  INSIDE IS USED TO DETERMINE WHETHER A SPECIFIED POINT
+C  LIES WITHIN OR ON A SPECIFIED POLYGON.  THE VALUE TRUE
+C  IS RETURNED IF THE POINT LIES INSIDE OR ON THE BOUNDARY
+C  OF THE POLYGON.  OTHERWISE FALSE IS RETURNED.  THE ARRAY
+C  TCORNERS CONTAINS THE X AND Y COORDINATES OF THE VERTICES
+C  OF THE POLYGON.  N CONTAINS THE NUMBER OF VERTICES OF THE
+C  POLYGON.  TPOINT CONTAINS X AND Y FOR THE POINT OF INTEREST.
+
+       REAL*4 TPOINT(2)
+       REAL*4 TCORNERS(2,25)
+       INTEGER*4 N
+       CALL XVMESSAGE('POLYGON WITH FOUR VERTICES (A SQUARE)',' ')
+       N=4
+       TCORNERS(1,1) = 0
+       TCORNERS(2,1) = 0
+       TCORNERS(1,2) = 3
+       TCORNERS(2,2) = 0
+       TCORNERS(1,3) = 3
+       TCORNERS(2,3) = 3
+       TCORNERS(1,4) = 0
+       TCORNERS(2,4) = 3
+       CALL XVMESSAGE(' ',' ')
+       CALL PRNT(7,8,TCORNERS,' VERTICES OF THE POLYGON:.')
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING INSIDE THE POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 1
+       TPOINT(2) = 1
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 2
+       TPOINT(2) = 1
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 2
+       TPOINT(2) = 2
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 1
+       TPOINT(2) = 2
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING ON BOUNDARY OF POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 0
+       TPOINT(2) = 0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 1
+       TPOINT(2) = 0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 2
+       TPOINT(2) = 0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3
+       TPOINT(2) = 0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3
+       TPOINT(2) = 1
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3
+       TPOINT(2) = 2
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 2
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 1
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 0
+       TPOINT(2) = 2
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 0
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 0
+       TPOINT(2) = 1
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING OUTSIDE THE POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = -1
+       TPOINT(2) = 0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = -1
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3
+       TPOINT(2) = 4
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 4
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 1
+       TPOINT(2) = 4
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 0
+       TPOINT(2) = -1
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('POLYGON WITH THREE VERTICES (A TRIANGLE)',' ')
+       CALL XVMESSAGE(' ',' ')
+       N = 3
+       TCORNERS(1,1) = 0
+       TCORNERS(2,1) = 0
+       TCORNERS(1,2) = 3
+       TCORNERS(2,2) = 0
+       TCORNERS(1,3) = 0
+       TCORNERS(2,3) = 3
+       CALL XVMESSAGE(' ',' ')
+       CALL PRNT(7,6,TCORNERS,' VERTICES OF THE POLYGON:.')
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING INSIDE THE POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 1
+       TPOINT(2) = 1
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING ON BOUNDARY OF POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 0
+       TPOINT(2) = 0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 1
+       TPOINT(2) = 0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 2
+       TPOINT(2) = 0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3
+       TPOINT(2) = 0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 2
+       TPOINT(2) = 1
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 1
+       TPOINT(2) = 2
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 0
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 0
+       TPOINT(2) = 2
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 0
+       TPOINT(2) = 1
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINT LYING OUTSIDE THE POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = -1
+       TPOINT(2) = 1
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = -1
+       TPOINT(2) = 0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 1
+       TPOINT(2) = -1
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 2
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3
+       TPOINT(2) = 2
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3
+       TPOINT(2) = 1
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('POLYGON WITH TEN VERTICES',' ')
+       CALL XVMESSAGE(' ',' ')
+       N=10
+       TCORNERS(1,1) = 0
+       TCORNERS(2,1) = 2
+       TCORNERS(1,2) = 4
+       TCORNERS(2,2) = 4
+       TCORNERS(1,3) = 5
+       TCORNERS(2,3) = 0
+       TCORNERS(1,4) = 6
+       TCORNERS(2,4) = 4
+       TCORNERS(1,5) = 8
+       TCORNERS(2,5) = 6
+       TCORNERS(1,6) = 5
+       TCORNERS(2,6) = 4
+       TCORNERS(1,7) = 5
+       TCORNERS(2,7) = 7
+       TCORNERS(1,8) = 4
+       TCORNERS(2,8) = 5
+       TCORNERS(1,9) = 2
+       TCORNERS(2,9) = 6
+       TCORNERS(1,10) = 3
+       TCORNERS(2,10) = 5
+       CALL XVMESSAGE(' ',' ')
+       CALL PRNT(7,20,TCORNERS,' VERTICES OF THE POLYGON:.')
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING INSIDE THE POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 3
+       TPOINT(2) = 4
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 5
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING ON BOUNDARY OF POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 0
+       TPOINT(2) = 2
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 4
+       TPOINT(2) = 4
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 5
+       TPOINT(2) = 0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 6
+       TPOINT(2) = 4
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 8
+       TPOINT(2) = 6
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 5
+       TPOINT(2) = 4
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 5
+       TPOINT(2) = 7
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 4
+       TPOINT(2) = 5
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 2
+       TPOINT(2) = 6
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3
+       TPOINT(2) = 5
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 2
+       TPOINT(2) = 4
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 2
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 7
+       TPOINT(2) = 5
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 5
+       TPOINT(2) = 6
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING OUTSIDE THE POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 2
+       TPOINT(2) = 5
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3
+       TPOINT(2) = 3
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 4
+       TPOINT(2) = 6
+       CALL LOCATE(TPOINT,TCORNERS,N)
+
+C
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('BIGGER TRIANGLE',' ')
+       N=3
+
+       TCORNERS(1,1) = 1.
+       TCORNERS(2,1) = 1.
+
+       TCORNERS(1,2) = 100.
+       TCORNERS(2,2) = 100.
+
+       TCORNERS(1,3) = 1.
+       TCORNERS(2,3) = 200.
+
+       CALL XVMESSAGE(' ',' ')
+       CALL PRNT(7,8,TCORNERS,' VERTICES OF THE POLYGON:.')
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING INSIDE THE POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 1.5
+       TPOINT(2) = 10.0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 10.0
+       TPOINT(2) = 100.0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 50.0
+       TPOINT(2) = 100.0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+C
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING ON BOUNDARY OF POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 1.0
+       TPOINT(2) = 200.0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 1.0
+       TPOINT(2) = 100.0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+C
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING OUTSIDE THE POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 1.5
+       TPOINT(2) = 1.0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 0.0
+       TPOINT(2) = 100.0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 1.000001
+       TPOINT(2) = 200.0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 101.
+       TPOINT(2) = 100.0
+       CALL LOCATE(TPOINT,TCORNERS,N)
+
+C
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST SEGMENTS ON SAME LINE',' ')
+       N=9
+
+       TCORNERS(1,1) = 1.
+       TCORNERS(2,1) = 1.
+       TCORNERS(1,2) = 2.
+       TCORNERS(2,2) = 1.
+       TCORNERS(1,3) = 3.
+       TCORNERS(2,3) = 1.
+
+       TCORNERS(1,4) = 3.
+       TCORNERS(2,4) = 2.
+       TCORNERS(1,5) = 4.
+       TCORNERS(2,5) = 2.
+       TCORNERS(1,6) = 5.
+       TCORNERS(2,6) = 2.
+
+       TCORNERS(1,7) = 5.
+       TCORNERS(2,7) = 3.
+       TCORNERS(1,8) = 1.
+       TCORNERS(2,8) = 3.
+       TCORNERS(1,9) = 1.
+       TCORNERS(2,9) = 2.
+
+       CALL XVMESSAGE(' ',' ')
+       CALL PRNT(7,9,TCORNERS,' VERTICES OF THE POLYGON:.')
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING INSIDE THE POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 2.
+       TPOINT(2) = 2.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+C
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING ON BOUNDARY OF POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 1.
+       TPOINT(2) = 1.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 2.
+       TPOINT(2) = 1.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3.
+       TPOINT(2) = 1.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+
+       TPOINT(1) = 3.
+       TPOINT(2) = 2.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 4.
+       TPOINT(2) = 2.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 5.
+       TPOINT(2) = 2.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+C
+       CALL XVMESSAGE(' ',' ')
+       CALL XVMESSAGE('TEST POINTS LYING OUTSIDE THE POLYGON',' ')
+       CALL XVMESSAGE(' ',' ')
+       TPOINT(1) = 0.
+       TPOINT(2) = 1.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 4.
+       TPOINT(2) = 1.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 0.
+       TPOINT(2) = 2.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 6.
+       TPOINT(2) = 2.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 1.
+       TPOINT(2) = 0.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+       TPOINT(1) = 3.
+       TPOINT(2) = 0.
+       CALL LOCATE(TPOINT,TCORNERS,N)
+
+C
+      CALL XVMESSAGE(
+     . 'Repeat two cases in C to test C interface: zinside', ' ')
+
+      call tzinside
+
+       return
+       END
+C*******************************************************************************
+       SUBROUTINE LOCATE(TPOINT,TCORNERS,N)
+       REAL*4  TPOINT(2), TCORNERS(2,25)
+       INTEGER*4 N
+       LOGICAL  INSIDE, LOCPT
+       CALL XVMESSAGE(' ',' ')
+       CALL PRNT(7,2,TPOINT,' X AND Y COORDINATES FOR POINT:.')
+       LOCPT = INSIDE(TPOINT,TCORNERS,N)
+       IF (LOCPT) THEN
+          CALL XVMESSAGE('     ANSWER: T',' ')
+       ELSE
+          CALL XVMESSAGE('     ANSWER: F',' ')
+       END IF
+       RETURN
+       END

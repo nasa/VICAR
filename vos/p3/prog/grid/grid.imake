@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM grid
+
+   To Create the build file give the command:
+
+		$ vimake grid			(VMS)
+   or
+		% vimake grid			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	grid
+#define R2LIB
+
+#define MODULE_LIST grid.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

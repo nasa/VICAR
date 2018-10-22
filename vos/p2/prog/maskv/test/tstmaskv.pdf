@@ -1,0 +1,152 @@
+procedure
+refgbl $autousage
+refgbl $echo
+refgbl $syschar
+Local  path1 TYPE=STRING init="wms_test_work:[testdata.mipl.vgr]"
+Local  path2 TYPE=STRING init="wms_test_work:[testdata.gll]"
+Local  path3 TYPE=STRING init="wms_test_work:[testdata.y2k]"
+
+body
+
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+if  ($syschar(1) = "UNIX")
+       let path1 = "/project/test_work/testdata/mipl/vgr/"
+       let path2 = "/project/test_work/testdata/gll/"
+       let path3 = "/project/test_work/testdata/y2k/"
+end-if
+
+write "THIS IS A TEST OF PROGRAM maskv"
+! THIS IS A TEST SCRIPT FOR THE PROGRAM - maskv
+! TEST DEFAULT PARAMETERS
+gen out=aa.img NL=500 NS=200
+label-list aa.img
+
+maskv aa.img cc.img
+list cc.img (19,119,20,15)  
+
+! TEST THE PARAM 'SIZE'
+maskv cc.img c1.img SIZE=(1,1,100,100)
+
+! GENERATE 3 HISTOGRAMS FOR THE SECOND,THIRD AND FOURTH INPUTS
+hiccup aa.img h1.img
+!the next test should call abend.
+maskv (aa.img, h1.img, h2.img, h3.img) c1_1.img +
+	Expand=1 'hist nrow=2 ncol=2 hsize=150 tics=16 +
+        ticl=128 'log spikes=1
+
+ibis-copy h1.img h2.img
+ibis-copy h2.img h3.img
+label-list h1.img
+label-list h2.img
+maskv (aa.img, h1.img, h2.img, h3.img) c1_1.img +
+	Expand=1 'hist nrow=2 ncol=2 hsize=150 tics=16 +
+        ticl=128 'log spikes=1
+
+!TEST FR89852
+maskv aa.img c1_2.img EXPAND=1 'HIST NROW=2 NCOL=2 HSIZE=150 TICS=16
+
+! TEST THE PARMS 'COMP' AND 'HIST' WHILE 'NOPHIST' AND 'BEFORE' 
+! ARE NOT SPECIFIED
+maskv (aa.img, h1.img, h2.img, h3.img) c2.img 'HIST 'COMP STRETCH=(52,102)
+
+! TEST THE PARMS 'COMP' AND 'HIST' WITH THE 'BEFORE' SPECIFIED
+maskv (aa.img, h1.img, h2.img, h3.img) c3.img 'HIST 'COMP 'BEFORE +
+   STRETCH=(-10,75)
+
+! TEST THE PARMS 'COMP' AND 'HIST' WITH THE 'NOPHIST' SPECIFIED
+maskv (aa.img, h1.img, h2.img, h3.img) c4.img 'COMP '(HIST,NOPHIST) +
+   STRETCH=(102,51)
+
+! TEST THE HISTOGRAM PARAMTERS
+maskv (aa.img, h1.img, h2.img, h3.img) c5.img EXPAND=1 'HIST NROW=2 +
+   NCOL=2 HSIZE=150 TICS=16 TICL=128 'LOG SPIKES=1
+
+! TEST PARMS 'NOID' AND 'NOLA'
+maskv aa.img c6.img 'HIST 'NOID 'NOLA
+
+! TEST HALFWORD IMAGE
+! GENERATE AN 800 BY 800 HALFWORD IMAGE TO ENSURE THAT
+! maskv ALLOWS FULL RESOLUTION DICO PLAYBACK OF VOYAGER 
+! FRAME WITH LABELS AND HISTOGRAMS
+gen out=bb.img NL=800 NS=800 'HALF
+label-list bb.img
+maskv (bb.img, h1.img) c7.img 'HIST STRETCH=(0,1000) 'HALF
+
+! TEST LABEL PARAMETERS
+label-list &"path1"f2048013.byt
+maskv &"path1"f2048013.byt  c8.img '(LABP,LABA,LABD,LABG)
+
+maskv  &"path2"test_image_ict.udr ict.udr
+LABEL-LIST  &"path2"test_image_ict.udr	   
+
+maskv  &"path2"test_image_barc.udr barc.udr
+LABEL-LIST  &"path2"test_image_barc.udr	   
+
+maskv  &"path2"test_image_lossless.udr  lossless.udr 
+LABEL-LIST  &"path2"test_image_lossless.udr  
+
+!placing a valid value for filter
+label-list &"path2"s1677721400.3
+label-replace &"path2"s1677721400.3 test.out "FILTER=3" TASK="TASK"
+maskv test.out img.out
+
+!adding stars
+label-add test.out  star5.out "NSTARS = 5,+
+STAR1=(231,165,12,894),STAR2=(21,32,187,23),STAR3=(5,10,15,20),+
+STAR4=(1,2,3,5),STAR5=(9,4,8,3)" TASK="TASK"
+maskv star5.out  img5.out
+label-list star5.out
+
+label-replace star5.out star4.out "NSTARS = 4" TASK="TASK"
+maskv star4.out img4.out rlogo=2 'squeeze
+
+label-replace star5.out star3.out "NSTARS = 3" TASK="TASK"
+maskv star3.out img3.out rlogo=1 llogo=3
+
+label-replace star5.out star2.out "NSTARS = 2" TASK="TASK"
+maskv star2.out  img2.out 'logo  'hist
+
+label-replace star5.out star1.out "NSTARS = 1" TASK="TASK"
+maskv star1.out  img1.out 'user llogo=4
+
+label-add star5.out  star.out "RAD = 10.22" TASK="TASK"
+label-replace star.out stars.out "TARGET = RING" TASK="TASK"
+maskv stars.out img6.out 'notask htitle="this is a title" +
+      ident="12345678" 'hist
+
+write "The followings are prepared for the Year 2000 tests."
+
+maskv &"path3"scet_jan_01_2000.img scet_jan_01_2000.maskv +
+   htitle="Jan. 01, 2000 Test Output" 'hist
+
+maskv &"path3"scet_mar_01_2000.img scet_mar_01_2000.maskv +
+   htitle="Mar. 01, 2000 Test Output" 'hist
+
+maskv &"path3"scet_dec_31_2000.img scet_dec_31_2000.maskv +
+   htitle="Dec. 31, 2000 Test Output" 'hist
+
+maskv &"path3"scet_jan_01_2001.img scet_jan_01_2001.maskv +
+   htitle="Jan. 01, 2001 Test Output" 'hist
+
+maskv &"path3"scet_mar_01_2001.img scet_mar_01_2001.maskv +
+   htitle="Mar. 01, 2001 Test Output" 'hist
+
+maskv &"path3"scet_dec_31_2001.img scet_dec_31_2001.maskv +
+   htitle="Dec. 31, 2001 Test Output" 'hist
+
+write "Please verify the output images."
+
+if  ($syschar(1) = "UNIX")
+   ush rm *.img
+   ush rm *.udr
+   ush rm *.out
+else
+   dcl del *.img;*
+   dcl del *.udr;*
+   dcl del *.out;*
+end-if
+
+end-proc
+

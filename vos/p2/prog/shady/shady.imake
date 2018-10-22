@@ -1,0 +1,14 @@
+#define  PROGRAM   shady
+
+#define MODULE_LIST shady.f
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB 
+
+#define USES_FORTRAN
+
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB

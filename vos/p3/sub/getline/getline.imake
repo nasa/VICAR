@@ -1,0 +1,9 @@
+
+#define SUBROUTINE getline
+
+#define MODULE_LIST getline.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

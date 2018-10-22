@@ -1,0 +1,190 @@
+procedure option=selftutor help=*
+
+!-----------------------------------------------------------------------------
+! PHODEM_GENERAL.PDF
+!
+! This is the PDF for the first menu point of the MDF file.
+! In this PDF file general parameters are defined like the names of 
+! input/output files.
+!
+!-----------------------------------------------------------------------------
+
+	!**********************************************************************
+	! The global variables PHO_FUNC_type (and $MENUS) will be used in this
+	! procedure, so they have to be declared here.
+	! The global PHO_FUNC_type (the desired photometric function) will be
+	! used to change the third menu point of the MDF file (see above)
+	! according to the input to PHO_FUNC in this PDF.
+	! The global $MENUS keeps the active stack of Menu Definition File
+	! names. $MENUS(1) is the root menu name, $MENUS(2) the menu selected
+	! from the root menu, and so on. The current menu stack can be
+	! displayed with "DISPLAY $MENUS". Since there is only one MDF in
+	! this demo, it doesn't make too much sense to have that global
+	! included here. It is just referenced for completeness.
+	!**********************************************************************
+
+	refgbl PHO_FUNC_type 
+	refgbl $menus
+
+	parm MAIN_PROC_NAME string
+
+	procedure name=phodem_general_sub help=*
+
+		! dummy inputs :
+
+		parm inp	type=(string,32) count=0:1 default=--
+		parm out	type=(string,32) count=0:1 default=--
+
+		! photometric functions :
+
+		parm PHO_FUNC type=(string,32) count=1 	+
+			valid = (			+
+				NONE,			+
+				PAR_FILE,		+
+				LAMBERT,		+
+				MINNAERT,		+
+				IRVINE,			+
+				VEVERKA,		+
+				BURATTI1,		+
+				BURATTI2,		+
+				BURATTI3,		+
+				MOSHER,			+
+				LUMME_BOWEL_HG1,	+
+				HAPKE_81_LE2,		+
+				HAPKE_81_COOK,		+
+				HAPKE_86_HG1,		+
+				HAPKE_86_HG2,		+
+				HAPKE_86_LE2,		+
+				HAPKE_HG1_DOM,		+
+				REGNER_HAPKE_HG1, 	+
+				ATMO_CORR_REGNER	+
+				) 	default="&PHO_FUNC_type"
+
+		! illumination conditions :
+
+    		parm INC_ANG	real count=0:1 +
+					default=--
+    		parm EM_ANG 	real count=0:1 +
+					default=--
+    		parm PHAS_ANG 	real count=0:1 +
+					default=--
+
+
+
+	body
+
+	!*******************************************************************
+	! "pho_global.pdf" is being executed in the following line. 
+	! In this PDF, two globals are defined (PHO_FUNC_type, pho_PROC_NAME)
+	!*******************************************************************
+ 
+	pho_global PHO_FUNC_type="&PHO_FUNC"
+
+	end-proc
+body
+
+	if (_tutor=1)
+
+	   restore-parm common_proc_name.par
+
+ 	   tutor phodem_general_sub 				+
+			|restore=&"MAIN_PROC_NAME"_general.par 	+
+		 	 save=&"MAIN_PROC_NAME"_general.par|
+	else
+	   write " ************************************************"
+	   write " "
+	   write " This program works only when run from tutor mode"
+           write " of other programs."
+	   write " "
+	   write " ************************************************"
+	end-if
+
+end-proc
+
+.TITLE
+VICAR sub-menu &"MAIN_PROC_NAME"_GENERAL
+
+.HELP
+PURPOSE:
+This menu point is dedicated to input general parameters for the program such 
+as the names of input/output images the illumination conditions, and so on.
+
+NOTE : The parameter PHO_FUNC is in need of the photometric task :  
+
+This parameter selects the menu point for input the photometry task:
+   1. to run the program without using a photometric function, you have 
+      to select "NONE"'
+   2. to read in the photometric function and its associated parameters
+      from a photometric parameter file, you have to select "PAR_FILE" and
+   3. to put in the parameter by yourself from the tutor mode, 
+      you have to select the desired photometric function.
+
+When returning to the highest level of the menu 
+(i.e. the &"MAIN_PROC_NAME".MDF-file) you will see that the third selection 
+point has been changed according to your input of PHO_FUNC in this menu.
+
+
+.PAGE
+Programmer:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+
+.LEVEL1
+
+.VARI inp
+Input image
+
+.VARI out
+Output image
+
+.VARI PHO_FUNC
+Photometric function type
+
+.VARI INC_ANG
+incidence angle
+
+.VARI EM_ANG
+emission angle
+
+.VARI PHAS_ANG
+phase angle
+
+
+.LEVEL2
+
+.VARI inp
+File name of the input image
+
+.VARI out
+File name for the output image
+
+.VARI PHO_FUNC
+Photometric function :
+
+This parameter selects the menu point for input the photometry task:
+   1. to run the program without using a photometric function, you have 
+      to select "NONE"'
+   2. to read in the photometric function and its associated parameters
+      from a photometric parameter file, you have to select "PAR_FILE" and
+   3. to put in the parameter by yourself from the tutor mode, 
+      you have to select the desired photometric function.
+
+When returning to the highest level of the menu (i.e. the MDF-file) you will
+see that the third selection point has been changed according to your input of
+PHO_FUNC in this menu.
+
+.VARI INC_ANG
+Incidence angle in degree.
+
+.VARI EM_ANG
+Emission angle in degree.
+
+.VARI PHAS_ANG
+Phase angle in degree.
+
+
+.end

@@ -1,0 +1,40 @@
+process help=*
+SUBCMD-DEFAULT NORMAL
+PARM DATE	TYPE=INTEGER
+PARM ADJUST	TYPE=INTEGER                 DEFAULT=0
+END-SUBCMD
+SUBCMD IPARAM
+PARM HPPLOT TYPE=KEYWORD DEFAULT=-- VALID=(YES,NO) COUNT=(0:1)
+END-SUBCMD
+END-PROC
+.TITLE
+VICAR Program TIMSRESP
+.HELP
+PURPOSE:
+TIMSRESP produces a plot of the TIMS response curves in effect on a specified 
+date. The spectral location of these curves may be adjusted by 0.032 micron
+increments. 
+
+WRITTEN BY:  Ron Alley,  June, 1989
+COGNIZANT PROGRAMMER:  Ron Alley
+
+.LEVEL1
+.VARIABLE DATE
+Date of interest, as yymmdd
+e.g. 870615 for June 15, 1987
+.VARIABLE ADJUST
+# of 0.032 micron steps to
+adjust the spectral calibration
+.LEVEL2
+.VARIABLE DATE
+The program will report the calibration that was in effect on this date. That
+is, it will use the last calibration on or prior to this date. The format of
+the date should be a number consisting of the last two digits of the year,
+the month number (as 2 digits) and the day of month. For example, May 21, 1988
+would be entered as 880521.
+.VARIABLE ADJUST
+The spectral calibration can be adjusted by using this parameter. The
+adjustments are made in 0.032 micron steps. For example, ADJUST=2 will take
+the sensor response reported at 10.000 microns during calibration and list it
+at 10.064 microns.
+.END

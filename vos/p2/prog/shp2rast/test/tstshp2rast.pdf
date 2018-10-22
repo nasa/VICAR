@@ -1,0 +1,48 @@
+procedure
+refgbl $echo
+refgbl $autousage
+parm version string def="ibis-2"
+parm org string def="column"
+local afidsroot  type=string
+local aftestdata type=string
+body
+let _onfail="continue"
+let $autousage="none"
+let $echo="yes"
+
+translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
+ush rm -f ct
+if (afidsroot = "")
+!MIPL
+    ush ln -fns /project/test_work/testdata/carto ct
+else
+!CARTLAB
+    if (aftestdata = "")
+        ush ln -fns /raid1/vicar_test_images/testdata/carto ct
+    else 
+        ush ln -fns $AFIDS_TESTDATA/vicar_test_images/testdata/carto ct
+    end-if
+end-if
+
+enable-log
+
+! TEST SCRIPT FOR SHP2RAST
+
+! Mexico lakes
+
+shp2rast shp=ct/lakes pre="mex_50_" suf=".img" pixperdeg=50 +
+  minLat=18 maxLat=19 minLon=-97 maxLon=-96
+
+list mex_50_n18w097.img ss=15 ns=17
+
+! Mexico lakes with margin
+
+shp2rast shp=ct/lakes pre="mex_50_" suf="_margin.img" pixperdeg=50 +
+  minLat=18 maxLat=19 minLon=-97 maxLon=-96 'margin
+
+list mex_50_n18w097_margin.img ss=15 ns=17
+
+disable-log
+
+end-proc

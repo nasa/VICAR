@@ -1,0 +1,29 @@
+!Test script for subroutine package RING_PROJ
+procedure help=*
+refgbl $echo
+refgbl $syschar
+parm catusr type=string count=1
+parm catsrv type=string count=1 default="miplTest"
+parm catdb  type=string count=1 default="mipl_t"
+body
+let _onfail="continue"
+let $echo="yes"
+local path type=string init="wms_test_work:[testdata.gll]"
+if ($syschar(1) = "UNIX")
+   let path="/project/test_work/testdata/gll/"
+end-if
+
+catlabel inp=&"path"s0368991900.5 out=test.img +
+   catusr=&catusr catsrv=&catsrv catdb=&catdb
+
+gspice inp=&"path"s0368991900.5 target=jupiter 'ring
+
+end-proc
+.help
+TSTRING_PROJ is the unit test for the subroutines in RING_PROJ.COM.
+This test requires the presence of MIPS Galileo catalog, and access to the
+Password Server.  The test consists of running program CATLABEL and GSPICE.
+Both program calls subroutine RPICSCALE which calls RING_SCALE when a ring
+image is inputed.
+.end
+

@@ -1,0 +1,37 @@
+ibis-gen cube.pic NC=3 NR=26 'IBIS-1 'ROW DATACOL=(1,2,3)  +
+    data=(1,1,1, 1,51,1, 51,51,1, 51,1,1, 1,1,1, 1,1,51,  +
+    1,51,51, 51,51,51, 51,1,51, 1,1,51, 0,0,0, 1,51,1, 1,51,51, 0,0,0,  +
+    51,51,1, 51,51,51, 0,0,0, 51,1,1, 51,1,51, 0,0,0,  +
+    36,41,26, 41,41,36, 36,41,46, 31,41,36, 36,41,26, 0,0,0)
+Beginning VICAR task ibis
+    perspec cube.pic cube_perspective azimuth=0 elev=30 distance=100 origin=(26,26,26)
+Beginning VICAR task perspec
+PERSPEC version 2-10-2013 (64-bit) - rjb
+    perspec cube.pic cube_perspective1 azimuth=0 elev=30 distance=1000 origin=(26,26,26)
+Beginning VICAR task perspec
+PERSPEC version 2-10-2013 (64-bit) - rjb
+    perspec cube.pic cube_perspective2 azimuth=90 elev=30 distance=1000 origin=(26,26,26)
+Beginning VICAR task perspec
+PERSPEC version 2-10-2013 (64-bit) - rjb
+    perspec cube.pic cube_perspective3 azimuth=0 elev=60 distance=1000 origin=(26,26,26)
+Beginning VICAR task perspec
+PERSPEC version 2-10-2013 (64-bit) - rjb
+plot3d cube.pic title="A" plot="p3da"
+Beginning VICAR task plot3d
+PLOT3D version 7-13-2013 (64-bit) - rjb
+pltgraf cube_perspective  title="B via PLTGRAF - Az=0 elev=30" DIM=3 dataform="YX" direct=BR PLOT="pg1"
+Beginning VICAR task pltgraf
+PLTGRAF version 13-Jul-2013 (64-bit) - rjb
+pltgraf cube_perspective1 title="B via PLTGRAF - Az=0 elev=30" DIM=3 dataform="XY" direct=BR PLOT="pg2"
+Beginning VICAR task pltgraf
+PLTGRAF version 13-Jul-2013 (64-bit) - rjb
+pltgraf cube_perspective2 title="B via PLTGRAF - Az=90 elev=30" DIM=3 direct=TR PLOT="pg3"
+Beginning VICAR task pltgraf
+PLTGRAF version 13-Jul-2013 (64-bit) - rjb
+pltgraf cube_perspective3 title="B via PLTGRAF - Az=0 elev=60" DIM=3 direct=TR PLOT="pg4"
+Beginning VICAR task pltgraf
+PLTGRAF version 13-Jul-2013 (64-bit) - rjb
+plot3d cube_perspective title="B" origin=(26,26,26) distance=100  plot="p3db1"
+Beginning VICAR task plot3d
+PLOT3D version 7-13-2013 (64-bit) - rjb
+end-proc

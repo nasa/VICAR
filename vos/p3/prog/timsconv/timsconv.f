@@ -1,0 +1,136 @@
+	INCLUDE 'VICMAIN_FOR'
+	SUBROUTINE MAIN44
+C
+	REAL EMIT(6),TEMP(10000),RAD(10000)
+	INTEGER*2 RAD_LUT(40000,6),TEMP_LUT(32767,6)
+	CHARACTER*80 PRT
+	CHARACTER*4 OFMT
+	LOGICAL XVPTST,QRAD
+C						Open input, get size field
+	CALL XVUNIT(IN,'INP',1,ISTAT,' ')
+	CALL XVOPEN(IN,ISTAT,'U_FORMAT','REAL','IO_ACT','SA',
+     +		    'OPEN_ACT','SA',' ')
+	CALL XVSIZE(ISL,ISS,NL,NS,NLIN,NSIN)
+C						Get and process DATE parameter
+	CALL XVPARM('DATE',IDATE,NUM,IDEF,0)
+	IF (IDEF.NE.0) THEN
+C				Check to see if the date is already in the label
+C
+	    CALL XLGET(IN,'HISTORY','INFO1',PRT,ISTAT,'HIST','TIMSLOG',
+     &			'FORMAT','STRING',' ')
+	    IF (ISTAT.LT.0) CALL XLGET(IN,'HISTORY','INFO1',PRT,ISTAT,
+     &				 'HIST','VTIMSLOG','FORMAT','STRING',' ')
+	    IF (ISTAT.LT.0) CALL XLGET(IN,'HISTORY','LAB1',PRT,ISTAT,
+     &				'HIST','VTIMSLOG','FORMAT','STRING',' ')
+C
+	    IF (PRT(6:6).EQ.'D') THEN
+		READ(PRT,90,err=95) MONTH,IDAY,IYEAR
+   90		FORMAT (14X,I2,1X,I2,1X,I2)
+	    ELSE
+		READ(PRT,92,err=95) MONTH,IDAY,IYEAR
+   92		FORMAT (17X,I2,1X,I2,1X,I2)
+	    END IF
+	    IDATE = 10000*IYEAR+100*MONTH+IDAY
+   95	    CONTINUE
+	    IF (IDATE.LT.0) THEN
+		CALL XVMESSAGE(' Unable to read date in VICAR label.',
+     +				' ')
+		CALL XVMESSAGE(' Please specify the date as a parameter.',' ')
+		CALL ABEND
+	    END IF
+	END IF
+C							Get the other parameters
+	QRAD = XVPTST('RAD')
+	CALL XVPARM('TEMPFAC',TEMPFAC,NUM,IDEF,0)
+	CALL XVPARM('RADFAC',RADFAC,NUM,IDEF,0)
+	CALL XVPARM('EMIT',EMIT,NUM,IDEF,6)
+	CALL XVPARM('FORMAT',OFMT,NUM,IDEF,0)
+	IF (IDEF.NE.0) CALL XVGET(IN,ISTAT,'FORMAT',OFMT,' ')
+C								open output
+	CALL XVUNIT(IOUT,'OUT',1,ISTAT,' ')
+	CALL XVOPEN(IOUT,ISTAT,'IO_ACT','SA','OPEN_ACT','SA',
+     &		   'U_FORMAT','REAL','O_FORMAT',OFMT,'OP','WRITE',
+     &		   'U_NL',NL,'U_NS',NS,'U_NB',6,'U_ORG','BIL',' ')
+	CALL XLDEL(IOUT,'HISTORY','LBL1',ISTAT,'HIST','TIMSCAL',' ')
+	CALL XLDEL(IOUT,'HISTORY','LBL2',ISTAT,'HIST','TIMSCAL',' ')
+	CALL XLDEL(IOUT,'HISTORY','LBL1',ISTAT,'HIST','TIMSCAL2',' ')
+	CALL XLDEL(IOUT,'HISTORY','LBL2',ISTAT,'HIST','TIMSCAL2',' ')
+	CALL XLDEL(IOUT,'HISTORY','LBL1',ISTAT,'HIST','TIMSCONV',' ')
+	CALL XLDEL(IOUT,'HISTORY','LBL2',ISTAT,'HIST','TIMSCONV',' ')
+C							Set minimum and maximum 
+	IF (OFMT .EQ. 'BYTE') THEN
+	    ROUND = 0.5
+	    XMIN = 0.0
+	    XMAX = 255.0
+	ELSE IF (OFMT .EQ. 'HALF') THEN
+	    ROUND = 0.5
+	    XMIN = -32768.0
+	    XMAX = 32767.0
+	ELSE IF (OFMT .EQ. 'FULL') THEN
+	    ROUND = 0.5
+	    XMIN = -2147483600.0
+	    XMAX =  2147483600.0
+	ELSE
+	    ROUND = 0.0
+	    XMIN = -1.0E30
+	    XMAX =  1.0E30
+	END IF
+C							Temperature to radiance
+	IF (QRAD) THEN
+	    CALL GET_TIMS_RAD_LUT(IDATE,0.0,RAD_LUT)
+	    CALL XVMESSAGE(' Converting from Temperature to Radiance',
+     &			   ' ')
+	    CALL XLADD(IOUT,'HISTORY','LBL1','Radiance Image',
+     &		       ISTAT,'FORMAT','STRING',' ')
+	    WRITE(PRT,200) RADFAC + 0.00005, CHAR(0)
+  200	    FORMAT('DN =',F9.4,' * milliwatts/(m*m*sr*micrometer)',A1)
+	    CALL XLADD(IOUT,'HISTORY','LBL2',PRT,ISTAT,
+     &			'FORMAT','STRING',' ')
+C								Loop thru image
+	    TEMPFAC = 100.0*TEMPFAC
+	    DO ILINE=ISL,ISL+NL-1
+		DO ICHAN=1,6
+		    CALL XVREAD(IN,TEMP,ISTAT,'LINE',ILINE,'BAND',ICHAN,
+     &				'SAMP',ISS,'NSAMPS',NS,' ')
+		    DO J=1,NS
+			ITEMP = NINT(TEMPFAC*TEMP(J) + 27315.0)
+			ITEMP = MIN(40000,MAX(1,ITEMP))
+			XRAD = EMIT(ICHAN)*RAD_LUT(ITEMP,ICHAN)
+			RAD(J) = MIN(XMAX, 
+     &				 MAX(XMIN, XRAD/RADFAC + ROUND))
+		    END DO
+		    CALL XVWRIT(IOUT,RAD,ISTAT,' ')
+		END DO
+	    END DO
+C							Radiance to temperature
+	ELSE 
+	    CALL GET_TIMS_TEMP_LUT(IDATE,0.0,TEMP_LUT)
+	    CALL XVMESSAGE(' Converting from Radiance to Temperature',
+     &			   ' ')
+	    CALL XLADD(IOUT,'HISTORY','LBL1','Temperature Image',
+     &			ISTAT,'FORMAT','STRING',' ')
+	    WRITE(PRT,300) TEMPFAC + 0.00005, CHAR(0)
+  300	    FORMAT('DN =',F9.4,' Degrees Celsius',A1)
+	    CALL XLADD(IOUT,'HISTORY','LBL2',PRT,ISTAT,
+     &			'FORMAT','STRING',' ')
+C								Loop thru image
+	    DO ILINE=ISL,ISL+NL-1
+		DO ICHAN=1,6
+		    CALL XVREAD(IN,RAD,ISTAT,'LINE',ILINE,'BAND',ICHAN,
+     &				'SAMP',ISS,'NSAMPS',NS,' ')
+		    DO J=1,NS
+			IRAD = NINT(RADFAC*RAD(J)/EMIT(ICHAN))
+			IRAD = MIN(32767,MAX(1,IRAD))
+			XTEMP = TEMP_LUT(IRAD,ICHAN) / 100.0
+			TEMP(J) = MIN(XMAX, 
+     &				  MAX(XMIN, XTEMP/TEMPFAC + ROUND))
+		    END DO
+		    CALL XVWRIT(IOUT,TEMP,ISTAT,' ')
+		END DO
+	    END DO
+	ENDIF
+C								Close datasets
+	CALL XVCLOSE(IN,ISTAT,' ')
+	CALL XVCLOSE(IOUT,ISTAT,' ')
+	RETURN
+	END

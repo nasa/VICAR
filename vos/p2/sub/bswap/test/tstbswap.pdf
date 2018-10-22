@@ -1,0 +1,10 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let _onfail="continue"
+let $echo="yes"
+let $autousage = "no"
+! test for subroutine BSWAP
+tbswap
+end-proc

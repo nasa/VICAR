@@ -1,0 +1,179 @@
+process help=*
+parm inp  type=string count=(0:1) default=--
+parm out  type=string  count=(0:2) default=--
+parm onl type=integer count=(0:1) default=0
+parm ons type=integer count=(0:1) default=0
+parm outfmt type=string count=(0:1) valid=(byte,half,informat) default=informat 
+parm points type=integer count=(0:1) default=100
+parm symmetry type=keyword count=(0:1) valid=(symmetry,nosymm,--) default=--
+parm shape type=keyword count=1 valid=(square,circle) default=square
+parm slshape type=integer count=(0:1) default=0
+parm nlshape type=integer count=(0:1) default=0
+parm ssshape type=integer count=(0:1) default=0
+parm nsshape type=integer count=(0:1) default=0
+parm randfill type=integer count=(0:1) default=1
+parm randseed type=real count=(0:1) default=0
+parm list type=keyword count=(0:1) valid=(list,nolist) default=nolist
+end-proc
+.TITLE
+RANDPIXEL - fill a blank image with random data points
+
+.HELP
+
+PURPOSE:
+
+   RANDPIXEL is an Applications program to fill in a blank image
+with random data points.  If no input file is given then it computes
+the random x,y locations for the pixel and enters the RANDFILL value.
+If an input file is given it computes the random x,y locations and extracts
+the corresponding data value from the input file and places it in that 
+location.
+
+OPERATION:
+
+	RANDPIXEL is an Applications program to fill in a blank image
+with random data points.  If no input file is given then it computes
+the random x,y locations for the pixel and enters the RANDFILL value.
+If an input file is given it computes the random x,y locations and extracts
+the corresponding data value from the input file and places it in that 
+location.
+
+	There is no bkg value.
+	
+
+	2nd output is ibis-2 table of random values (x,y, fillval)
+
+	may want to put symmetrical points around the center, i.e., 
+	one random point is followed by its reflected pair.
+
+
+PARAMETERS
+
+        RANDPIXEL has a variety of options specified by paramters.  INP= is
+optional. If given then the output data set will contain only the pixels
+copied from the points selected by the random pixels. PIXFILL is ignored.
+ONS, ONL and OUTFMT are ignored.
+ 
+	OUT is the output image file name. The second output is an IBIS-2 
+format table. (The second output file is not available yet).
+
+	ONL, ONS and OUTFMT control the format of the output data set. They
+are ignored if an input file is given. 
+
+	POINTS tells how many random points to generate.
+
+	SYMMETRY is a keyword which says to choose symmetric points around 
+center of image. If this is chosen only half the points are random.
+
+	SHAPE tells the shape of the random points to fit in a square or a 
+circle.
+
+	SLSHAPE, NLSHAPE, SSSHAPE, NSSHAPE tell what area to put random numbers
+in. Default is whole frame.
+
+	RANDFILL is the value to place in the random pixel. It is ignored if
+an input image is given. It will select the value of that pixel to be
+placed in the output image.
+
+	RANDSEED is the value to give to the random number generator to start.
+If not given then it will choose its own seed from the date & time.
+
+	LIST means type out random pixels to screen.
+
+ERROR MESSAGES
+
+
+
+LIMITATIONS
+
+      1. The program has not been implemented for multiple band images
+	  2. Only BYTE and HALFWORD images supported
+	  3. Output IBIS table is not generated yet
+      4. Circular apertures still do not work
+      5. Maximum of 4,194,304 pixels (2048x2048) with max samples of 4096
+
+PROGRAM HISTORY:
+
+  1996-07-18 R.J. Bambery - Original release
+  2010-03-15 R.J. Bambery - Made compatible with 64-bit Linux MacOSX (intel/PowerPC) 10.5.8
+  2010-03-16 R.J. Bambery - Made 64-bit clean for chkstat routine
+  2011-05-06 R.J. Bambery - Fixed input modes for symmetric and non-symmetric 
+  2012-06-06 R.J. Bambery - Fixed parameter list for subcircgen_img subroutine
+  2012-06-07 R.J. Bambery - gfortran 4.6.3 revealed that rangen
+    parameters are (long,float) so created integer*8 dseed replacement for
+    integer*4 seed - sigma always became zero when seed was entered into
+    rangen
+  2012-07-03 R.J. Bambery - Removed <tab> in front of continuation
+    lines to make backward compatible with 32-bit Linux gfortran 4.2.1,
+    otherwise compatible 64-bit Linux gfortran 4.6.3
+  2013-09-16 R.J. Bambery - Changed internal call from rangen to rangen_big
+  2016-06-08 W.L. Bunch - Migrated to MIPL.
+
+EXAMPLES:
+
+       RANDPIXEL OUT=SPARSE.OUT PARAMS (for random points of RANDFILL)
+
+       RANDPIXEL INP=DATA OUT=SPARSE.OUT PARAMS  (for extracting pixel valuess)
+
+Parameters are defined above and in the TUTOR mode.
+
+REFERENCE
+
+.LEVEL1
+.VARIABLE INP
+ STRING--OPTIONAL
+ A VICAR starfield
+.VARIABLE OUT
+ STRING--OPTIONAL
+ A Vicar formated output
+ image filename for the
+ catalog starfield.
+ (2048x2048 max)
+.VARIABLE ONL
+ INTEGER-OPTIONAL
+ Output NL if OUT=
+ given
+.VARIBLE ONS
+ INTEGER-OPTIONAL
+ Output NS if OUT=
+ given
+.VARIABLE OUTFMT
+ STRING
+ Output file format
+ if OUT= is given
+ VALID=(BYTE/HALF)
+.VARIABLE POINTS
+ Number of random points
+ across plane to generate
+ DEFAULT=100 
+.VARIABLE SYMMETRY
+ Symmetric or non-
+ symmetric around center
+ DEFAULT=-- (Nonsymmetric)
+.VARIABLE SHAPE
+ SQUARE or CIRCLE
+ DEFAULT=SQUARE
+.VARIABLE SLSHAPE
+ INTEGER-OPTIONAL
+ Default=0
+.VARIABLE NLSHAPE
+ INTEGER-OPTIONAL
+ Default=0
+.VARIABLE SSSHAPE
+ INTEGER-OPTIONAL
+ DEFAULT=0
+.VARIABLE NSSHAPE
+ INTEGER-OPTIONAL
+ DEFAULT=0
+.VARIABLE RANDFILL
+ TYPE=INTEGER 
+ Value to fill in field
+ DEFAULT=1
+.VARIABLE RANDSEED
+ Random number generator
+ seed.
+ DEFAULT=0
+.VARIABLE LIST
+ List pixels to screen
+ DEFAULT=NOLIST
+.end

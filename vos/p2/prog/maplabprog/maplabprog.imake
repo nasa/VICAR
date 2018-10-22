@@ -1,0 +1,18 @@
+#define PROGRAM maplabprog
+
+#define MODULE_LIST maplabprog.f
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB
+
+
+#define INCLUDE_LIST common.fin
+
+#define USES_FORTRAN
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_MATH77
+#define LIB_SPICE
+#define LIB_NETWORK
+/*#define LIB_LOCAL	/* disable on delivery */

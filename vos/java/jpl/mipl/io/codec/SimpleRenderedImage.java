@@ -1,23 +1,5 @@
 package jpl.mipl.io.codec;
-
-/*
- * @(#)SimpleRenderedImage.java	5.2 99/06/07
- *
- * Copyright (c) 1997-1999 Sun Microsystems, Inc. All Rights Reserved.
- *
- * This software is the confidential and proprietary information of Sun
- * Microsystems, Inc. ("Confidential Information"). You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with Sun.
- *
- * SUN MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF
- * THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
- * TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
- * PARTICULAR PURPOSE, OR NON-INFRINGEMENT. SUN SHALL NOT BE LIABLE FOR
- * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
- * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
- */
+import javax.media.jai.*;
 
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -79,7 +61,13 @@ public abstract class SimpleRenderedImage implements RenderedImage {
     /** A Hashtable containing the image properties. */
     protected Hashtable properties = new Hashtable();
 
-    public SimpleRenderedImage() {}
+    TileCache _cache;
+
+    public SimpleRenderedImage() {
+	_cache = JAI.getDefaultInstance().getTileCache();
+	// System.out.println("CACHE VERSION SimpleRenderedImage");	
+	// System.out.println("CACHE memory = "+_cache.getMemoryCapacity());
+    }
 
     /** Returns the X coordinate of the leftmost column of the image. */
     public int getMinX() {
@@ -416,6 +404,33 @@ public abstract class SimpleRenderedImage implements RenderedImage {
     }
 
     /**
+     * Calls getTile(), but checks to see if it's in the cache first.
+     * Adds it to the cache if not.
+     */
+
+    Raster  getTileCached(int tileX, int tileY)
+    {
+	Raster tile;
+
+	if (_cache != null) {
+	    tile = _cache.getTile(this, tileX, tileY);
+	    if (tile != null) {
+            // System.out.println("SimpleRenderedImage CACHE HIT  on "+tileX+","+tileY);	
+		return tile;
+	    }
+	}
+	tile = getTile(tileX, tileY);
+         // System.out.println("SimpleRenderedImage CACHE MISS on "+tileX+","+tileY);	
+
+	if (_cache != null) {
+	    _cache.add(this, tileX, tileY, tile);
+	    // System.out.println("SimpleRenderedImage CACHE ADD on "+tileX+","+tileY);	
+	}
+	return tile;
+    }
+
+
+    /**
      * Returns an arbitrary rectangular region of the RenderedImage
      * in a Raster.  The rectangle of interest will be clipped against
      * the image bounds.
@@ -437,13 +452,16 @@ public abstract class SimpleRenderedImage implements RenderedImage {
         int startY = YToTileY(bounds.y);
         int endX = XToTileX(bounds.x + bounds.width - 1);
         int endY = YToTileY(bounds.y + bounds.height - 1);
+
         Raster tile;
 
         if ((startX == endX) && (startY == endY)) {
-            tile = getTile(startX, startY);
-            return tile.createChild(bounds.x, bounds.y,
+            tile = getTileCached(startX, startY);
+            Raster tile2 = tile.createChild(bounds.x, bounds.y,
                                     bounds.width, bounds.height,
                                     bounds.x, bounds.y, null);
+	    return tile2;
+
         } else {
             // Create a WritableRaster of the desired size
             SampleModel sm =
@@ -456,7 +474,7 @@ public abstract class SimpleRenderedImage implements RenderedImage {
 
             for (int j = startY; j <= endY; j++) {
                 for (int i = startX; i <= endX; i++) {
-                    tile = getTile(i, j);
+                    tile = getTileCached(i, j);
                     Rectangle tileRect = tile.getBounds();
                     Rectangle intersectRect =
                         bounds.intersection(tile.getBounds());
@@ -513,7 +531,7 @@ public abstract class SimpleRenderedImage implements RenderedImage {
             
         for (int j = startY; j <= endY; j++) {
             for (int i = startX; i <= endX; i++) {
-                tile = getTile(i, j);
+                tile = getTileCached(i, j);
                 Rectangle tileRect = tile.getBounds();
                 Rectangle intersectRect =
                     bounds.intersection(tile.getBounds());

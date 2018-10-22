@@ -1,0 +1,12 @@
+/* Imake file for Fortran-Test of VICAR subroutine  ABLE86  */
+
+#define PROGRAM table86
+
+#define MODULE_LIST table86.f  tzable86.c
+#define MAIN_LANG_FORTRAN
+#define TEST
+#define USES_FORTRAN
+#define USES_C
+#define LIB_RTL
+#define LIB_TAE       
+#define LIB_P2SUB    

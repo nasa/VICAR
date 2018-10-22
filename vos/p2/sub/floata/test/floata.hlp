@@ -1,0 +1,67 @@
+1 FLOATA
+
+PURPOSE: Converts byte, INTEGER*2 or INTEGER*4 arrays to REAL*4. This
+         is a complementary function to CONVRT.
+
+2  CALLING SEQUENCE
+
+ Fortran calling sequence:  CALL FLOATA(DCODE, N, IBUF, RBUF)
+ C Calling Sequence:        zfloata(dcode, n, ibuf, rbuf);
+ 
+  (dcode, and n are passed by value for zfloata.)
+
+ PARAMETERS:
+
+      DCODE = Data type for IBUF (See below.)
+      N     = Number of elements to be converted
+      IBUF  = Input array containing byte or integer data
+              to be converted.
+      RBUF  = Output array containing REAL*4 result.
+
+       DATA TYPES 
+       ============
+       DCODE  IBUF
+       ============
+        1     BYTE
+        2     HALF
+        4     FULL
+       ============
+
+2 NOTES
+
+HISTORY
+
+  Original Programmer:  G.M. Yagi  01/17/77
+  Converted to Vax by:  L.W. Kamp  12/15/82
+  Current Cognizant Programmer: Steve Pohorsky
+  Source Language: C
+  Ported to UNIX:       Steve Pohorsky 4-1-93
+
+ REVISION HISTORY:                                          
+   4-1-93  ..SP....   Made portable for UNIX; Added zfloata for calls from C.
+                      Source code is all new - based on zvtrans ala Porting
+                      Guide.
+DESCRIPTION
+
+  This routine provides the programmer with a function to
+  convert a BYTE, INTEGER*2 or INTEGER*4 array to equivalent REAL*4 data.
+  The input data type is controlled by the DCODE parameter.  FLOATA calls
+  the VICAR run-time library routine zvtrans to perform the conversion.
+  (FLOATA calls zvtrans_set the first time it is called or when the value
+  of dcode changes.)
+
+
+  The calling sequence:
+
+       CALL FLOATA(DCODE, N, IBUF, RBUF)
+
+  Is similar to the following code:
+
+
+       DO K=1,N
+          RBUF(K) = FLOAT(IBUF(K))
+       ENDDO
+
+  Where DCODE and N are INTEGER*4, RBUF is a REAL*4 array, and the data type 
+  of the IBUF array is controlled by the data code DCODE.
+

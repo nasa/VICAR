@@ -1,0 +1,108 @@
+procedure
+parm      nl  integer  def=512
+parm      ns  integer  def=512
+
+local      url  integer
+local      urs  integer
+local      ull  integer
+local      uls  integer
+local      lll  integer
+local      lls  integer
+local      lrl  integer
+local      lrs  integer
+local      cl  integer
+local      cs  integer
+local      newns  integer
+local      newnl  integer
+
+local  cmprs  string  ! system variable indicating file compression
+
+refgbl $autousage
+body
+let $autousage="none"
+refgbl $echo
+!
+!
+write "This is a unit test for the program FONT."
+write "Compress the file before calling font."
+write "FONT places text into a VICAR file."
+write "The program is simple and is simply tested."
+write "This tests if the label strings have any order dependance."
+!
+write "create a file &ns x &nl "
+!
+let $echo="yes"
+gen a &"nl" &"ns" ival=128 sinc=1 linc=1
+
+lab2tcl    inp=a v1=cmprs keyword=compress type=system
+write         "a COMPRESS = &cmprs "
+if (cmprs = "NONE")
+	write "file is NOT COMPRESSED - COMPRESSing as c"
+	comprs    a c compress=BASIC
+else 	
+    write "file is already COMPRESSED - copying to c"
+	copy      a c	
+end-if
+
+lab2tcl    inp=c v1=cmprs keyword=compress type=system
+write         "c COMPRESS = &cmprs "
+
+let ull = 50
+let uls = 50
+
+let url = 50
+let urs = (&ns - 50)
+
+let lrl = (&nl - 50)
+let lrs = (&ns - 50)
+
+let lll = (&nl - 50)
+let lls = 50
+
+let cl = (&nl / 2)
+let cs = (&ns / 2)
+
+
+
+write "lrl=&lrl lrs=&lrs "
+! position is (line,sample)
+font c b   font=(1,2,3,4,5) tall=(10,15,20,25,40) +
+         wide=(1.,.8,.7,.5,2.) thick=(1,2,3,4,5) +
+         position=(&lrl,&lrs &url,&urs &cl,&cs &lll,&lls &ull,&uls) +
+         text=("LR","UR","&cl x &cs","LL","UL") +
+         rotate=(0,0,10,80,0) +
+         dn=(200,10,100,40,255) 
+! test using a sub area, this will probably break it
+
+!
+font c d   font=(1,2,3,4,5) tall=(10,15,20,25,40) +
+         wide=(1.,.8,.7,.5,2.) thick=(1,2,3,4,5) +
+         position=(&lrl,&lrs &url,&urs &cl,&cs &lll,&lls &ull,&uls) +
+         text=("LR","UR","&cl x &cs","LL","UL") +
+         rotate=(0,0,10,80,0) +
+         dn=(200,10,100,40,255) 
+
+! cutout a portion of the original image using size()
+let newns = (&ns - (&ns/4))
+let newnl = (&nl - (&nl/4))
+
+let urs = (&newns - 50)
+
+let lrl = (&newnl - 50)
+let lrs = (&newns - 50)
+
+let lll = (&newnl - 50)
+let lls = 50
+
+let cl = (&newnl / 2)
+let cs = (&newns / 2)
+! In font I may need to adjust positions based on start X annd Y
+font c e  size=(50,50,&newnl,&newns) font=(1,2,3,4,5) tall=(10,15,20,25,40) +
+         wide=(1.,.8,.7,.5,2.) thick=(1,2,3,4,5) +
+         position=(&lrl,&lrs &url,&urs &cl,&cs &lll,&lls &ull,&uls) +
+         text=("LR","UR","&cl x &cs","LL","UL") +
+         rotate=(0,0,10,80,0) +
+         dn=(200,10,100,40,255) 
+let $echo="NO"
+!
+end-proc

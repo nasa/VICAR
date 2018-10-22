@@ -1,0 +1,31 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM ellipse
+
+   To Create the build file give the command:
+
+		$ vimake ellipse			(VMS)
+   or
+		% vimake ellipse			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	ellipse
+#define R2LIB
+
+#define MODULE_LIST ellipse.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define USES_C
+
+#define FTNINC_LIST mp_for_defs
+#define R2LIB
+
+#define LIB_FORTRAN
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

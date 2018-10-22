@@ -1,0 +1,35 @@
+procedure
+!  You need to display on a user-area workstation or one with four 
+!     image planes.
+!  TO RUN ON UNIX or Alpha, 
+!   FIRST TYPE
+!    use xwa0   
+!   OR select another VRDI device if desired.
+!THEN TYPE   tstpicreg
+
+refgbl $syschar
+refgbl $echo
+DEFGBL INPIC1   TYPE=STRING
+DEFGBL INPIC2   TYPE=STRING
+REFGBL INPIC1
+REFGBL INPIC2
+LOCAL  DIR      TYPE=STRING 
+body
+let _onfail="continue"
+let $echo="yes"
+
+if ($syschar(1) = "UNIX")
+   LET DIR  ="/project/test_work/testdata/mipl/vgr/"
+else 
+   LET DIR  ="WMS_TEST_WORK:[TESTDATA.MIPL.VGR]"
+end-if
+
+LET INPIC1 = "&DIR"//"picreg.j"
+LET INPIC2 = "&DIR"//"picreg.j2"
+
+use xwc0
+
+write "See section 17.0 of the help file for information on precision"
+write "   and the expected differences."
+enable-script tstpicreg.scr
+end-proc

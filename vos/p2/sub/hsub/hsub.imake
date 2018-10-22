@@ -1,0 +1,11 @@
+/* Imake file for VICAR subroutine HSUB */
+
+#define SUBROUTINE hsub
+
+#define MODULE_LIST hsub.f zhsub.c
+
+#define P2_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+#define FTNINC_LIST fortport

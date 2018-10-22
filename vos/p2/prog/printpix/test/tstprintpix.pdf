@@ -1,0 +1,19 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+!THIS IS A TEST OF MODULE printpix
+!GENERATE TEST IMAGE 100X100
+gen OUT=PRI.DAT NL=100 NS=100
+!DEFAULT COMPRESSION
+printpix INP=PRI.DAT
+!NO COMPRESSION, LABELS
+printpix INP=PRI.DAT SIZE=(1,1,10,10) NC=1 LABEL=3
+! HEADINGS AND STRETCH WITH DEFAULT COMPRESSION
+printpix INP=PRI.DAT 'HEAD STRETCH=(50,200)
+!COMPLEMENT, COMPRESS TO ONE PAGE
+printpix INP=PRI.DAT NP=1 'COMP
+end-proc

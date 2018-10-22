@@ -1,0 +1,71 @@
+1 MIPS SUBROUTINE mp_set_value
+
+PURPOSE
+
+The function mp_set_value accepts double precision numerical values
+for insertion in the map projection (MP) data object for a specific map 
+projection keyword value from FORTRAN application programs.
+
+2 OPERATION
+
+This function allows controlled access to MP data object double
+precision values.
+
+CALLING SEQUENCE
+
+from C:		(see mpSetValues)
+
+from FORTRAN:	call mp_set_value( mp, keyword, value, status )
+
+Necessary include files from calling routine or program: mp_for_defs.fin
+
+
+INPUT 
+
+mp		(MP type)
+
+A pointer to the MP data structure as returned by mpInit.  In FORTRAN,
+this variable is of type REAL*8.  MP type is defined in include file
+mp_routines.h.
+
+keyword		(character string)
+
+Character string which contains the keyword name of the MP data object
+value to be set.
+
+value 		(double)
+
+Double precision numerical value to be stored for the associated map 
+projection keyword in the MP data object.
+
+
+OUTPUT
+
+status 		(integer)
+
+Status flag for the operation of the routine. Zero (0) signifies
+success.  Negative one (-1) signifies failure.
+
+
+3 ENVIRONMENT
+
+Software platforms:	VICAR 11.0
+Hardware platforms:	This routine has been tested on 
+			DEC Alpha, DEC VAX-VMS, Sun Sparcstation
+			(Solaris and SunOS), Silicon Graphics (SGI), 
+			and HP 700. No particular hardware requirements.
+
+3 BACKGROUND
+
+Author:			Lucas Kamp (lwk059@ipl.jpl.nasa.gov)
+Cognizant Engineer:	Justin McNeill (jfm059@ipl.jpl.nasa.gov)
+Date written:		October 1993
+Revision history:	Original
+Background and References:	
+
+1. Map Projection Software Set Software Specification Document,
+	JPL, April 28, 1993;
+2. "Conformal Mapping of the Triaxial Ellipsoid," Survey Review,
+	vol. 28, July 1985.
+3. MIPS Map Projection Software Users' Guide, D-11810, version 1.0,
+	May 1994.

@@ -1,0 +1,16 @@
+/* Imake file for Fortran-Test of VICAR subroutine  ABLE77V2  */
+
+#define PROGRAM table77v2
+
+#define MODULE_LIST table77v2.f  tzable77v2.c
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_P2SUB    
+#define LIB_RTL
+#define LIB_TAE       
+/*#define LIB_LOCAL*/   /*  disable when delivering   */

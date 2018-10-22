@@ -1,0 +1,26 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM tran
+
+   To Create the build file give the command:
+
+		$ vimake tran			(VMS)
+   or
+		% vimake tran			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	tran
+#define R2LIB
+
+#define MODULE_LIST tran.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

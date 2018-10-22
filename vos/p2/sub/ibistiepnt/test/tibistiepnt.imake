@@ -1,0 +1,17 @@
+/* IMAKE file for Test of VICAR subroutine tibistiepnt */
+
+#define PROGRAM tibistiepnt
+
+#define MODULE_LIST tibistiepnt.c 
+
+#define TEST
+
+#define MAIN_LANG_C
+#define USES_ANSI_C
+ 
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+/* #define LIB_LOCAL */
+

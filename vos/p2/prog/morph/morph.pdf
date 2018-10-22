@@ -1,0 +1,170 @@
+process help=*
+PARM INP          TYPE=STRING       COUNT=3
+PARM NAME         TYPE=STRING       COUNT=1
+PARM FRAMES       TYPE=INTEGER      COUNT=1
+PARM INC          TYPE=INTEGER      COUNT=(0:1)   DEFAULT=25
+PARM NPTS   TYPE=INTEGER      COUNT=(0:1)   DEFAULT=8 VALID=(4:20)
+PARM START  TYPE=INTEGER      COUNT=1       DEFAULT=1
+PARM LEFTONLY TYPE=KEYWORD COUNT=(0:1) VALID=("LEFTONLY","BOTH") +
+     DEFAULT="BOTH"
+END-PROC
+
+.TITLE
+VICAR2 program MORPH
+
+.HELP
+MORPH is used to produce intermediate images between two input images.
+It will use the geometric distortion between the input images
+and will introduce a percentage of this distortion into the outputs.
+It will also weight the input images proportionately with their 
+distance from the inputs in intensity. 
+  The geometric distortion is determined by programs TRACKER or 
+TRACKER2 which create a tiepoint grid using hundreds or thousands of
+points not necessarily in a regular pattern. Each output is
+the sum of both inputs weighted in intensity and interpolated in position.
+
+Method:
+If there are N output images and we are interested in output image
+number n where n <= N. And if we have two input images called left
+and right, Then the weighting would be:
+right_weight = n/(N+1)
+left_weight=1-right_weight
+Each tiepoint is interpolated to give it's equivalent position for image n.
+tiepoint_line_image_n=tiepoint_line_left_input*left_weight +
+                      tiepoint_line_right_input*right_weight
+tiepoint_samp_image_n=tiepoint_samp_left_input*left_weight +
+                      tiepoint_samp_right_input*right_weight
+We then create a regular grid on image n and for each intersection locate
+the nearest tiepoint on n in each of the four quadrants. If more points
+are desired the rest are found from the nearest remaining points 
+(see NPTS keyword). 
+We then fit
+x and y polynomials going from n to the left and right images of the form:
+Y=Axy+By+Cx+D  and X=Exy+Fy+Gx+H for each grid intersection ( INC keyword).
+The box INC by INC centered on the grid intersection is then mapped via the
+polynomials onto the left and right images. This determines where a pixel 
+on n comes from in both input images. Each point is averaged by linearly
+weighting each polynomial based upon how far the point is from the center
+of that polynomial. Weighting is done horizontally only between adjacent
+polynomials.
+   The DN value in each input image is interpolated bilinearly and then
+combined to give the DN value for that pixel in n, thus:
+DN_n(X,Y)=DN_left*left_weight+DN_right*right_weight.
+
+Restrictions:
+Morph must place all the inputs into memory as 16 bit images. Restrictions
+can easily be aleviated by changing the parameter statement in the main
+program and recompiling it. 
+At the moment:
+  the two input images cannot exceed 1000 lines by 1000 pixels.
+  the number of tiepoints cannot exceed 10000.
+  the ratio of NS/INC cannot exceed 150.
+In the NPTS=4 mode if a grid point has less than 4 points (one in each 
+quadrant) the grid point area is abandoned. This leads to blank space
+around the output images. Higher values of NPTS permits extrapolation.
+
+.page
+Example:
+
+tracker2 inp=(left.img,right.img) out=mark.img +
+  grid=100 nlw=11 nsw=11 edge=10 'print window=(2,1) look=(5,5) +
+  limit=(8,8) see=1
+morph inp=(left.img,right.img,mark.img) frames=2 name=morph
+
+(tracker2 generates a grid of tiepoints in the mark file. Morph uses
+the tiepoints field to determine the amount of distortion  between the
+images. In this case it generates two outputs 1/3 and 2/3 of the way
+between left and right images. Each output is weighted in intensity
+linearly between the inputs. Thus morph1.img has 2/3 the weight of
+left.img and 1/3 the weight of right.img . 
+The output images are named: morph1.img and morph2.img)
+
+HISTORY
+
+Written By: J Lorre			Nov 15 1992
+Cognizant Programmer: J Lorre
+.LEVEL1
+.VARI INP
+Three inputs.
+#1 is the left image
+#2 is the right image.
+#3 is the mark file
+
+.VARI FRAMES
+Number of output
+images generated.
+
+.VARI START
+Starting output
+frame number.
+
+.VARI NAME
+The name prefix
+of outputs.
+
+.VARI INC
+Grid interval
+
+.VARI NPTS
+# points used
+in local fit.
+
+.VARI LEFTONLY
+Only use left image.
+
+.LEVEL2
+
+.VARI INP
+There are three input files.
+File#1: This is the left or first input image given to
+        program TRACKER or TRACKER2. 
+File#2: This is the right or second input image given to
+        program TRACKER. 
+File#3: This is the MARK file written by program TRACKER.
+        It is 'REAL' format with 512 byte records containing
+        pairs of tiepoints in the order:
+        left_line,left_samp,right_line,right_samp.
+
+.VARI FRAMES
+The number of output images produced. Outputs are the same size
+as inputs. output morphs are spaced equally between the two input
+images. Thus if there were 3 output images then they would be spaced
+at 1/4, 1/2, and 3/4 of the way between the two input images.
+The format of the output is the same as the input.
+
+.VARI START
+The starting number of the first output frame. Normally you would
+not specify START and it would default to 1.  In the event that the
+program were aborted in mid run you could restart it where you left off
+by setting START=n where n was the output frame number which was the
+first missing output frame (missing because the job was cancelled).
+Thus if 5 outputs were desired and only two were created then you
+could restart the job USING IDENTICAL PARAMETERS AS BEFORE but
+adding START=3.
+
+.VARI NAME
+The prefix for the output file names.
+If you specify name=abc and if frames=3 for example then the three
+output files will be called (in order left to right):
+abc1.img abc2.img and abc3.img  .
+
+.VARI INC
+The grid interval in pixels in the output image. At each grid intersection
+a polynomial is fit to the nearest 4 tiepoints to perform a geom mapping
+from the morph to the first and second input images. 
+One tiepoint is selected from each of the 4 quadrants. INC should be
+less than the tiepoint grid spacing but not much less than half of it
+for efficiency .
+
+.VARI NPTS
+Number of  points used at each grid intersection to fit a surface
+linking the morph to the left and right images geometrically.
+The range is 4 to 20.  If npts=4 then an exact fit is made and no
+extrapolation beyond the point array is permitted. Lerger values
+permit a least squares fit with inverse distance weighting and
+supports extrapolation.
+
+.VARI LEFTONLY
+Only use left image to compute the output images. This converts the program 
+into a geom operation in which the left image is moved towards the right image.
+The right input image is ignored.

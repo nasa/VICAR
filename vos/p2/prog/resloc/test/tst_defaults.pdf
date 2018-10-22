@@ -1,0 +1,32 @@
+!Test resloc in default mode...
+!
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let $echo="no"
+let _onfail="continue"
+
+resloc Io (res,geo)
+
+write "Contents of res..."
+label-list res
+ibis-list res nr=1 nc=9 cols=(1,2,3,4,5,6,7,8,9) formats=formats +
+intcols=(1,2,3,4,5)
+
+write "Contents of geo..."
+label-list geo
+ibis-list geo nr=10 nc=4 cols=(1,2,3,4) 
+
+!Check res by printing mark 102 before and after running ressar77
+ressar77 (Io,res) Io_after
+list Io (396,476,11,11)       	!mark 102 before removal
+list Io_after (396,476,11,11)   !mark 102 after removal
+
+!Check geo by geometrically transforming the image into object space...
+geoma (Io,geo) OS
+list OS (496,588,11,11)         !print the same reseau mark in object space
+
+!view Io_after and OS by using xvd...
+end-proc

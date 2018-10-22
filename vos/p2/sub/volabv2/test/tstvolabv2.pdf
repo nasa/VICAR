@@ -1,0 +1,42 @@
+!****************************************************************************
+! TSTVOLABV2_VMS.PDF, unit test procedure for subroutine VOLABV2.F.
+!   Testers: please read the unit test for information!
+!
+!   This pdf assumes that if you are not on a unix host, then you are on
+!   a  vax-vms host.
+!*****************************************************************************
+procedure help=*
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="no"
+write "******************************"
+write "          NOTE TO TESTER:"
+write "******************************"
+Write  " "
+Write  " The Following Test Data are handled separately for VMS and UNIX. "
+Write  " Currently for the UNIX, in order to run the program, the data"
+Write  " files MUST be copied to the LOCAL directory where the program"
+Write  " resides."
+write " "
+refgbl $syschar
+
+local img1       type=string             !...218s01.img
+local img2    type=string             !...218s02.img
+
+if ($syschar(1) = "UNIX")
+  let img1 = "218s01.img"
+  let img2 = "218s02.img"
+else ! VAX format
+  let img1 = "VIKING:218s01.img"
+  let img2 = "VIKING:218s02.img"
+end-if
+let  $echo="yes"
+
+label-list @img1
+tvolabv2 inp=@img1
+
+label-list @img2
+tvolabv2 inp=@img2
+
+end-proc

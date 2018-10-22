@@ -1,0 +1,77 @@
+1 DFORM
+  DFORM converts integer*2 (short), integer*4 (int) or real*4 (float) data 
+  into signed byte data and optionally collects histograms, performs bit
+  extraction or scaling of array values.
+
+  Calling Sequence:
+	
+  from FORTRAN program ...
+	CALL DFORM ( IN_BUF, OUT_BUF, NS, HISBUF, ISW, ITYPE, CMODE, 
+			IB1, IB2, R1, R2, COLL )
+
+  from C program ...
+  	zdform ( in_buf, out_buf, ns, hisbuf, isw, itype, cmode, 
+			ib1, ib2, r1, r2, coll );
+
+  where        	in_buf   	input array           		( VOID )
+
+		out_buf		output byte array		( BYTE )
+
+    		ns     		no. of elements in array buf   	( INTEGER )
+
+       		hisbuf 		histogram buffer               	( INTEGER )
+
+   		isw    		process switch                	( INTEGER )
+   			0 = convert data and acquire histogram
+                        1 = initialize for later calls
+
+               	itype  		data type                     	( INTEGER )
+                        0 = byte 	(signed char)
+                        1 = integer * 2	(short int)
+                        2 = integer * 4	(int)
+                        3 = real * 4	(float)
+
+  		cmode  		conversion mode              	( INTEGER )
+                        0 = no compression                      
+                        1 = bit range selected
+                        2 = scaled
+
+		ib1    		low order bit selected        	( INTEGER )
+            	ib2    		high order bit selected         ( INTEGER )
+
+		r1     		low scale value			( REAL )
+               	r2    		high scale value   		( REAL )
+ 
+      		coll   		histogram collection flag 	( INTEGER )
+ 			0 = no histogram to be collected
+			1 = histogram collected
+
+2 Operation - Bit Extraction
+
+One note regarding bit extraction mode -  This function is implemented to do
+explicit bit extraction without modification to compensate for the handling of
+negative numbers. Thus, a value like +1001, when undergoing bit extraction for
+its lowest seven bits, results in a value of NEGATIVE 23 (-23), instead of
+a positive 233 (+233). The reason for this is that the highest order bit in
+the byte is used for sign with two's complement arithmetic for the remaining
+bits. However, in extracting the lowest three bits, a POSITIVE 1 (+1) would
+result.
+
+2 History
+
+  Original Programmer: Barbara A. McGuffie
+  Current Cognizant Programmer: Justin McNeill
+  Source Language: C
+
+  Revision history:
+
+	June 22, 1993 	Made portable by Justin McNeill. Additional
+			argument added for output array. COLL argument
+			is no longer optional. Test programs expanded
+			and corrected. Bit extraction for INTEGER*4 
+			data corrected.
+
+	Dec. 13, 1993	Corrected byte-to-byte transfer and simplified
+			handling of data conversion (removed unnecesary
+			allocation of holding arrays). Expanded test
+			script. (FR 76815) (JFM059)

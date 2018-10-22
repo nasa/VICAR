@@ -1,0 +1,19 @@
+/* Imake file for Test of VICAR subroutine usr_message */
+
+#define PROGRAM tusr_message
+
+#define MODULE_LIST tusr_message.c
+
+#define MAIN_LANG_C
+#define TEST
+
+#define USES_ANSI_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/* #define LIB_LOCAL must be removed before delivery, but used during */
+/* developer testing on VAX and SUN.                                  */ 
+/****
+#define LIB_LOCAL 
+****/

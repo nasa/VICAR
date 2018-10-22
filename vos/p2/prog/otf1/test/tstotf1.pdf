@@ -1,0 +1,526 @@
+procedure
+parm    mode    type=keyword count=(0:1) valid=(batch,nobatch,inter) default=batch
+local   minval  type=real  count=1
+local   maxval  type=real  count=1
+
+local   pixrad  type=real  count=1
+local   pixdeg  type=real  count=1
+local   psfrad  type=real  count=1
+local   psfdeg  type=real  count=1
+local   psfpix  type=integer  count=1
+
+! removed VMS - tailored to linux/macosx on AFIDS/Vicar
+!
+
+! Nov 15, 2012 - RJB
+! TEST SCRIPT FOR OTF1
+! tests BYTE, HALF images
+!
+! Vicar Programs:
+!       copy size gen insect list genthis boxflt2 addnoise
+!       fft11 ccomp maxmin cform lave img2ascii typetext deriv
+! 
+! External programs
+!       gnuplot 4.6 or greater
+! 
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no display 
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!           
+!   In batch mode it produces files testx.eps by calling gnuplot
+!       to create the encapsulated postscript file which can be
+!       later viewed with ghostscript or gimp
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
+!            
+! External test data: 
+!    External data from Cassini is no longer available so has
+!       been removed from this script
+!     
+! Output:    
+!   GENed test.imga sets, .gpi and .eps files and intermediate 
+!       tmp* files 
+!   the *.gpi data produced by otf1 are gnuplot scripts
+!            
+! NOTE: There are some extra steps that can be run after TEST 32
+!       If desired, follow the instructions given there,
+!
+refgbl $autousage
+refgbl $echo
+refgbl $syschar
+body
+enable-log
+
+let _onfail="stop"
+let $echo="yes"
+!
+
+!
+!*********************************************************
+! Generate images needed for input to OTF1
+!*********************************************************
+!
+! MAKE STEP FUNCTION IMAGE - BYTE FORMAT
+gen out=bk.img nl=40 ns=40 linc=0.0 sinc=0.0 ival=0.0
+gen out=wt.img nl=40 ns=40 linc=0.0 sinc=0.0 ival=218
+insect inp=(bk.img,wt.img) out=edge.img size=(1,1,40,40) +
+   insect=(1,1,40,20,1,21)
+list edge.img (1,11,40,30)
+
+!MAKE LINEAR RAMP FOR EDGE, AND EXPAND INTO A 20X16 IMAGE
+genthis a.img nl=1 ns=16 +
+   dn=(0,0,0,0,24,48,72,96,120,144,168,192,216,216,216,216)
+size a.img s1edge.img 'noin lzoom=20 szoom=1
+list s1edge.img
+!deriv inp=s1edge.img out=(s1lsf.img,s1infl.img) orient=horiz
+!SMOOTH THE RAMP WITH A BOX FILTER
+boxflt2 inp=s1edge.img out=s2edge.img nlw=9 nsw=9
+list s2edge.img
+! generate derivative to get lsf
+!deriv inp=s2edge.img out=(s2lsf.img,s2infl.img) orient=horiz
+! NOW add noise to ramp
+addnoise s1edge.img s1edgeN.img sigma=3 seed=1351456636
+
+addnoise s2edge.img s2edgeN.img sigma=3 seed=1351456636
+!
+! generate short ramp
+!
+genthis b.img nl=1 ns=8 +
+    dn=(0,0,24,72,120,168,216,216)
+size b.img t1edge.img 'noin lzoom=20 szoom=1
+list t1edge.img
+
+
+!SMOOTH THE RAMP WITH A BOX FILTER
+boxflt2 inp=t1edge.img out=t2edge.img nlw=5 nsw=5
+list t2edge.img
+
+
+! NOW add noise to ramp
+addnoise t1edge.img t1edgeN.img sigma=3 seed=1351456636
+
+addnoise t2edge.img t2edgeN.img sigma=3 seed=1351456636
+!
+! generate padded short ramp
+!
+genthis c.img nl=1 ns=16 +
+    dn=(0,0,0,0,0,0,60,96,108,170,216,216,216,216,216,216)
+size c.img u1edge.img 'noin lzoom=20 szoom=1
+list u1edge.img
+
+!SMOOTH THE RAMP WITH A BOX FILTER
+boxflt2 inp=u1edge.img out=u2edge.img nlw=5 nsw=5
+list u2edge.img
+
+! NOW add noise to ramp - use a fixed seed for test
+addnoise u1edge.img u1edgeN.img sigma=3 seed=1351456636
+
+addnoise u2edge.img u2edgeN.img sigma=3 seed=1351456636
+!
+!*********************************************************
+! Completed images needed for input to OTF1
+!*********************************************************
+!
+
+!
+! otf1 has many parameters and many tests
+!
+! The simplest is an internal test - The SINC test
+! 
+! TEST 0 - INTERNAL TEST WITH SINC FUNCTION - output table
+! 
+otf1 'sinctst plotout=sinctst
+!let $echo="no"
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot sinctst.gpi
+end-if
+!
+!  TEST 1 - SINCTST with diagnostics
+! an output and diagnostics
+
+otf1 'diag 'sinctst plotout=sinctst2 table=sinctst2.tbl
+typetext sinctst2.tbl
+!let $echo="no"
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot sinctst2.gpi
+end-if
+
+! There are 3 mutulually exclusive input types to otf1
+! 1) Edge Spread Function - a 1-line entry
+! 2) Line Spread Function - a 1-line entry
+! 3) An image containing an edge
+!
+! First, is to input an Edge Spread Function
+!
+! TEST 2 - ESF entry
+!
+! 16 step ESF - output, 2 plots and no other parms
+!       Note 16 steps is a power of 2 and aids internal FFT
+!
+otf1 out=test2.tbl esf=(0,0,0,0,24,48,72,96,120,144,168,192,216,216,216,216) +
+    plotout=test2
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test2.gpi
+end-if
+!
+! TEST 3 - Another ESF entry
+!
+! 13-step ESF - output, 2 plots and no other parms
+! this is a non-power of two entry
+!
+!
+otf1 out=test3.img esf=(0,0,0,12,30,62,94,126,158,190,206,224,224) +
+    plotout=test3 plotprof=test3
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test3.gpi
+    ush gnuplot test3.prof.gpi
+end-if
+
+copy test3.img test3_r.img sl=2 ss=1 nl=1 ns=124
+size test3_r.img test3_124r.img 'noin lzoom=124 szoom=1
+
+polarect test3_124r.img test3_cr.img  'AUTO XCEN=62 YCEN=62
+!
+! TEST 4 - 16-step ESF entry with multiple parameters
+!
+!
+otf1 out=test4.img esf=(0,0,0,0,24,48,72,96,120,144,168,192,216,216,216,216) +
+    plotout=test4 plotprof=test4 proftab=test4 'noprint
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test4.gpi
+    ush gnuplot test4.prof.gpi
+end-if
+!
+! TEST 5 - Reverse Step wedge
+!
+otf1 table=test5.tbl columns=nocolhdr plotprof=test5 proftab=test5 +
+  plotout=test5 +
+  esf=(100,100,100,100,99,90,66,33,20,18,17,17,17,17,17,17)
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test5.gpi
+    ush gnuplot test5.prof.gpi
+end-if
+
+!
+! TEST 6 - LINE SPREAD FUNCTION
+! check against lsf of s2edge.img - below
+!
+otf1 out=test6.img lsf=(0,8,10,14,16,18,22,24,21,19,16,13,11,8) +
+   plotout=test6 'noprint
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test6.gpi
+end-if
+!
+! TEST 7 - Simplest invocation with input image - simple 0,1 step function
+!       prints out a 8-column table and a plot of columns 3, 4, 6, and 8 
+!       versus frequency (column 1 or 2)  vertically to the terminal screen
+!
+otf1 inp=edge.img
+!
+! TEST 8 - Repeat Test 1 but noprint
+!
+otf1 inp=edge.img 'noprint
+! 
+! TEST 9 - Repeat edge, but with a plot
+!
+otf1 inp=edge.img plotout=test9
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test9.gpi
+end-if
+!
+! TEST 10 - Repeat edge, but with a plot and NO phase
+!
+otf1 inp=edge.img plotout=test10 phase=nophase
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test10.gpi
+end-if
+
+!
+! TEST 11 - Do same for a noiseless ramp Get an output image and table 
+!
+otf1 inp=s1edge.img plotout=test11
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test11.gpi
+end-if
+!
+! TEST 12 - Do same for a smooth ramp
+!
+otf1 inp=s2edge.img plotout=test12
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test12.gpi
+end-if
+!
+! TEST 13 - Now a noisy ramp
+!
+otf1 inp=s1edgeN.img plotout=test13
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test13.gpi
+end-if
+!
+! TEST 14 - Finally, a Noisy smoothed ramp
+!
+otf1 inp=s2edgeN.img plotout=test14
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test14.gpi
+end-if
+!
+! TEST 15 - Do similar for a short ramp
+!
+otf1 inp=t2edge.img plotprof=t2edge plotout=test15
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot t2edge.prof.gpi
+    ush gnuplot test15.gpi
+end-if
+!
+! TEST 16 - noisy short ramp
+!
+otf1 inp=t2edgeN.img plotprof=t2edgeN plotout=test16
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot t2edgeN.prof.gpi
+    ush gnuplot test16.gpi
+end-if
+!
+! TEST 17 - padded short ramp
+!
+otf1 inp=u2edge.img plotprof=u2edge plotout=test17
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot u2edge.prof.gpi
+    ush gnuplot test17.gpi
+end-if
+
+!
+! TEST 18 - padded short Noisy ramp
+!
+otf1 inp=u2edgeN.img plotprof=u2edgeN plotout=test18
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot u2edgeN.prof.gpi
+    ush gnuplot test18.gpi
+end-if
+
+! Now we will repeat some of the above tests 
+! with other parameters
+!
+!
+! TEST 19 - Simple Ramp - Get an output image and table
+!
+otf1 inp=s1edge.img out=test19.img table=test19.tbl  plotout=test19
+typetext test19.tbl
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test19.gpi
+end-if
+!
+! TEST 20 - Simple Ramp - Get an output image and table
+!       No headers in table
+!
+otf1 inp=s1edge.img out=test20.img table=test20.tbl  plotout=test20 +
+    columns=nocolhdr
+typetext test20.tbl
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test20.gpi
+end-if
+!
+! TEST 21 - get warnings about image size - image is smaller
+!   than requested
+!
+otf1 inp=s1edge.img size=(1,1,35,40) plotout=test21
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test21.gpi
+end-if
+
+!
+! NEED TO TEST  NOISE. REFLECT, MEAN, NONORMAL, INTERVAL, DATA,
+!  LSF, PZOOM, DIAG (on other than sinctest)
+!
+! TEST 22 - Reflect option - Compare with TEST 5 
+!
+otf1 inp=s1edge.img 'reflect plotout=test22
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot --persist test22.gpi
+!    ush gnuplot --persist test5.gpi
+end-if
+
+!
+! TEST23 - Missing data set to mean 
+!
+otf1 inp=s1edge.img plotout=test23 'mean table=test23.tbl
+typetext test23.tbl
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test23.gpi
+end-if
+
+!
+! TEST 24 - NORMAL=NONORMAL option
+!
+otf1 inp=s1edge.img plotout=test24 'nonormal table=test24.tbl
+typetext test24.tbl
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test24.gpi
+end-if
+!
+! TEST 25 - Noise parameter
+! 
+! test the NOISE parameter by adding noise to previous image:
+
+otf1 s1edgeN.img plotout=test25 noise=2 'noprint 
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test25.gpi
+end-if
+!
+! TEST 26 - NOISE=5 sigma
+! 
+otf1 s1edgeN.img plotout=test26 noise=5 'noprint 
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test26.gpi
+end-if
+!
+! TEST 27 - PZOOM
+!
+! test pzoom parameter 
+otf1 inp=s2edge.img plotout=test27 pzoom=4 'noprint
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test27.gpi
+end-if
+
+!
+! TEST 28  - INTERVAL
+!
+otf1 inp=s1edge.img plotout=test28 'nonormal interval=0.5 table=test28.tbl
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test28.gpi
+end-if
+
+!
+! TEST 29 - TEST plotout=YES plotprof=YES
+!
+otf1 inp=s1edge.img plotout=yes plotprof=yes
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot plotprof.prof.gpi
+    ush gnuplot otfplot.gpi
+end-if
+!
+! TEST 30 - Look at the sharp step wedge a.img
+!
+otf1 inp=a.img plotout=test30 plotprof=test30
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test30.prof.gpi
+    ush gnuplot test30.gpi
+
+end-if
+
+
+! TEST 31 - return parameters
+!
+! Optics professionals often express pixel sizes in radians
+! for specific satellites. OTF1 allows the user to output
+! data in radians. Since point spread functions are normally
+! circular then OTF allows the user to specify the rotation
+! of the edge with respect to the top of the image (NORTH)
+! THis is not true north. OTF1 does not access the image 
+! coodinate system if provided in the header
+
+otf1 inp=s2edge.img gsd=30. altitude=400000 psfpix=psfpix +
+    pixrad=pixrad pixdeg=pixdeg psfrad=psfrad psfdeg=psfdeg +
+    norangle=22.0 plotprof=test31
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test31.prof.gpi
+end-if
+
+let $echo="no"
+write "s2edge.img  gsd = 30 meters   altitude = 400,000 meters"
+write "          radians/pixel = &pixrad  degrees/pixel = &pixdeg"
+write "   psf is &psfpix pixels  psf in radians = &psfrad  psf in degrees = &psfdeg"
+let $echo="yes"
+
+!
+! TEST 32 - output plot in eps format
+!
+otf1 inp=s2edge.img gsd=30. altitude=400000 psfpix=psfpix +
+    pixrad=pixrad pixdeg=pixdeg psfrad=psfrad psfdeg=psfdeg +
+    norangle=22.0 plotout=test32 plotprof=test32 plotfmt=eps
+
+ush gnuplot test32.eps.gpi
+ush gnuplot test32.prof.eps.gpi
+let $echo="no"
+goto theend
+!
+!*********************************************************
+! The following are steps that can be used for comparison
+! to data produced in the previous tests
+! To perform the following comment out the goto theend
+! statement
+!*********************************************************
+!
+!FFT 1-D of images - used for comparison
+! s1edge.img is simple ramp
+fft11 s1edge.img  xxA
+ccomp xxA out=(xxAa,xxAp)           !ramp
+maxmin xxAa minival=minval maxival=maxval
+cform xxAa s1edgefft1az.img irange=(&minval,&maxval) +
+    orange=(0,1.0) oform=real
+lave s1edgefft1az.img xxAl 'vert
+img2ascii xxAl s1edgefft1az.asc org=columns index=yes
+typetext s1edgefft1az.asc
+!
+! s2edge.img is smoothed ramp
+fft11 s2edge.img xxB
+ccomp xxB out=(xxBa,xxBp)           !smoothed
+maxmin xxBa minival=minval maxival=maxval
+cform xxBa s2edgefft1az.img irange=(&minval,&maxval) +
+    orange=(0,1.0) oform=real
+lave s2edgefft1az.img xxBl
+img2ascii xxBl s2edgefft1az.asc org=columns index=yes
+typetext s2edgefft1az.asc
+!
+! s1edgeN.img is noisy ramp
+fft11 s1edgeN.img xxC
+ccomp xxC out=(xxCa,xxCp)           !noise on ramp
+maxmin xxCa minival=minval maxival=maxval
+cform xxCa s1edgeNfft1az.img irange=(&minval,&maxval) +
+    orange=(0,1.0) oform=real
+lave s1edgeNfft1az.img xxCl
+img2ascii xxCl s1edgeNfft1az.asc org=columns index=yes
+typetext s1edgeNfft1az.asc
+!
+! s2edgeN.img is noisy smoothed ramp
+fft11 s2edgeN.img xxD
+ccomp xxD out=(xxDa,xxDp)           !noise on smoothed ramp
+maxmin xxDa minival=minval maxival=maxval
+cform xxDa s2edgeNfft1az.img irange=(&minval,&maxval) +
+    orange=(0,1.0) oform=real
+lave s2edgeNfft1az.img xxDl
+img2ascii xxDl s2edgeNfft1az.asc org=columns index=yes
+typetext s2edgeNfft1az.asc
+
+! Derivatives of esf (smoothed ramp)
+otf1 inp=s2edge.img  imgpsf="yes" 'diag
+! MAKE A DERIVATIVE FOR COMPARISON
+deriv inp=s2edge.img out=(s2lsf.img,s2infl.img) orient=horiz
+! esf of noisy smoothed ramp
+otf1 inp=s2edgeN.img imgpsf="yes" 'diag
+
+deriv inp=s2edgeN.img out=(s2lsfN.img,s2inflN.img) orient=horiz
+
+
+
+theend>
+ 
+disable-log
+end-proc

@@ -1,0 +1,12 @@
+#define  PROGRAM   efgiso
+
+#define MODULE_LIST efgiso.c
+
+#define MAIN_LANG_C
+#define R2LIB 
+
+#define USES_C
+
+#define LIB_RTL
+#define LIB_P2SUB
+#define LIB_TAE

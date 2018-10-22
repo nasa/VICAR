@@ -1,0 +1,33 @@
+1 CORCAV
+ To convert from lat/lon to line/sample in a geometrically
+ corrected perspective projection.
+
+ FORTRAN Calling Sequence:  
+  CALL CORCAV(IND,LAT,ELO,OMMA,RSVEC,FOCL,REQ,FLAT,LINE,SAMP,CL,CS,FLAG)
+
+ C Calling Sequence:  
+  zcorcav(&ind,&lat,&elo,omma,rsvec,&focl,&req,&flat,&line,&samp,&cl,&cs,&flag);
+      Note the & for all scalar arguments denoting the passing by address.
+
+2 ARGUMENTS
+ ind   - (i*4,return)- = 0 normal,  = 99 point behind planet
+       - (i*4,entry) - = -1  backside test is skipped.
+ lat   - (r*4,entry) - latitude in degrees
+ elo   - (r*4,entry) - east longitude in degrees
+ omma  - (r*8,entry,9 element array) - OM-matrix
+ rsvec - (r*8,entry,3 element array) - RS-vector
+ focl  - (r*4,entry) - camera focal length
+ req   - (r*4,entry) - equatorial radius of planet
+ flat  - (r*4,entry) - req minus polar radius
+ line  - (r*4,return) - line coordinate in object space pixels
+ samp  - (r*4,return) - sample coordinate in obect space pixels
+ cl    - (r*4,entry) - obj. sp. line of optical axis
+ cs    - (r*4,entry) - obj. sp. samp of optical axis
+ flag  - (r*4,entry) - if point is behind planet, then line=samp=flag
+2 HISTORY
+ WRITTEN BY : J. J. LORRE,  16 JUNE 1977
+ COGNIZANT PROGRAMMER:  J. LORRE
+ Ported to UNIX: Steve Pohorsky
+ REVISIONS:
+   21 AUG 89  ..GMY..  Check for lat=0 or 180 when computing geocentric radius
+   23 FEB 93  ..SP...  Made portable.  Added zcorcav for calls from C.

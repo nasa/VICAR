@@ -1,0 +1,13 @@
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+body
+let _onfail="continue"
+let $echo="yes"
+
+use xwc0
+
+enable-script tstedimage1.scr
+
+end-proc

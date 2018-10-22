@@ -1,0 +1,191 @@
+process help=*
+PARM INP TYPE=STRING COUNT=2
+PARM OUT TYPE=STRING 
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL TYPE=INTEGER DEFAULT=1
+PARM SS TYPE=INTEGER DEFAULT=1
+PARM NL TYPE=INTEGER DEFAULT=0
+PARM NS TYPE=INTEGER DEFAULT=0
+PARM OUTFMT TYPE=KEYWORD VALID=(OUTBYTE,OUTINTEG,OUTHALF,OUTREAL) DEF=OUTBYTE
+PARM MODE TYPE=KEYWORD VALID=(PHASE,AMPLITUD) DEF=AMPLITUD
+PARM ITER TYPE=INTEGER DEFAULT=100
+PARM PRINT TYPE=KEYWORD VALID=PRINT COUNT=0:1 DEFAULT=--
+PARM BETA TYPE=REAL DEFAULT=0.5
+PARM PSF TYPE=INTEGER COUNT=(4:600) DEFAULT=(0,0,0,0)
+END-PROC
+.TITLE
+fftmagic
+.HELP
+PURPOSE:
+fftmagic provides an iterative method for obtaining either the phase from the
+amplitude or the amplitude from the phase of a Fourier transform.  The
+technique is controversial and may not work for all images. 
+
+ 
+EXECUTION:
+
+Examples
+
+fftmagic INP=(EST,REF) OUT=PIC 
+
+This command will read estimate picture EST and reference picture REF as byte
+data (default), and create an output picture, PIC, also in byte format, whose
+Fourier transform will correspond in amplitude (default) to that of REF.
+Up to 100 iterations will be performed (default), and negative pixels on odd
+iterations will be multiplied by -0.5 (the negative default of BETA).
+
+fftmagic INP=(EST,REF) OUT=PIC  'OUTINTEG 'PHASE
+
+This command is similar, except that the output picture will be in
+in integer format, as specified by the OUTINTEG command, instead
+of the default, which is to match the format of the input pictures; other
+output format specifications include OUTREAL, OUTBYTE, and OUTHALF.  Finally,
+the output picture's Fourier transform will be matched in PHASE to that of
+the reference picture (REF), instead of matching amplitude as in the example
+above.  The omitted keywords are INPFMT, OUTFMT, and MODE, respectively.
+
+fftmagic INP=(EST,REF) OUT=PIC ITER=200 'PRINT  BETA=0.75
+
+This command will again read the input pictures in byte format, but will this
+time perform up to 200 iterations.  Normally, the program will iterate until no
+pixels have changed, or 100 loops have been made; in this case, the program
+will use up to 200 iterations.  The PRINT option specified above causes the
+number of pixels changed and the sum of the negative pixels to be printed at
+each iteration.  Finally, negative pixels will be multiplied by -BETA = -0.75
+instead of the default -0.5.
+
+fftmagic INP=(EST,REF) OUT=PIC PSF=(1,100,20,40)
+
+This command demonstrates the use of the PSF keyword.  PSF specifies the
+(line, sample, radius) triplets needed to describe point spread functions in 
+the REF image.  These triplets are preceded by the number of triplets to be
+used; in this case, there is one point spread function, centered at line 100,
+sample 20, and with a radius of 40.  Additional triplets can follow as
+necessary.  When PSF is specified, each center position is re-centered at the
+max DN value in each circular area and the sum of the pixels less background
+(determined from the border points) is computed for the values within each
+circle.  The, for each iteration, all of the points inside each circle are
+set to the mean DN plus the sum of the DN's as previously computed.  PSF acts
+as an additional boundary condition for stellar-type point spread functions.
+
+
+Notes and Restrictions
+
+1) Both FFT's must reside in core together.  Together they take NxNx8 bytes if
+   N is the picture dimension.
+2) (Timing restriction belonging here will be inserted when VAX benchmarks
+   have been run.)  (Was:  For 64x64 pictures each iteration consumes about
+   4 seconds.)
+
+
+OPERATION:
+fftmagic computes and stores in core the FFT's of the initial estimate picture
+and the reference picture.  It then forces the amplitude or phase of the 
+estimate to match that of the reference.  The inverse FFT is taken and all
+negative DN's are multiplied by -BETA (as specified by the BETA keyword) on the
+odd iterations and by 0 on the even iterations.  If PSF has been specified, 
+then star images are also set to delta functions.
+
+
+	       EST             REF
+		|		|
+		|		|
+		V		V
+             FFT(EST)       FFT(REF)
+		 \             /
+		  \           /
+		   \         /
+		    \       /
+		     \     /
+		      \   /
+			V
+		     MATCH <------------------------------+
+		     PHASE OR				  |
+		     AMPLITUDE				  |
+			|				  |
+			|				  ^
+			V			   RESET NEGATIVES
+		     FFT**-1 (EST) -----------> RESET PSF'S
+
+
+
+
+
+
+REFERENCE:
+Fienup, J.R., Optical Society of America, Optics Letters, Volume 3, No. 1.
+
+
+WRITTEN BY:  J. J. Lorre, 25 October 1979
+COGNIZANT PROGRAMMER:  A. S. Mazer
+REVISION:  New
+
+MADE PORTABLE FOR UNIX: CRI     03-OCT-94
+
+.LEVEL1
+.VARIABLE INP
+STRING - Estimate and reference pictures
+.VARIABLE OUT
+STRING - Output picture
+.VARIABLE SIZE
+INTEGER - Standard VICAR size field
+.VARIABLE SL
+INTEGER - Starting line
+.VARIABLE SS
+INTEGER - Starting sample
+.VARIABLE NS
+INTEGER - Number of lines
+.VARIABLE NL
+INTEGER - Number of samples
+.VARIABLE OUTFMT
+KEYWORD - Output data format (OUTBYTE, OUTHALF, OUTINTEG, OUTREAL)
+.VARIABLE MODE
+KEYWORD - Selects phase boundary condition (AMPLITUDE, PHASE)
+.VARIABLE ITER
+INTEGER - Number of iterations allowed
+.VARIABLE PRINT
+KEYWORD - Program status trace (PRINT)
+.VARIABLE BETA
+REAL - Negative-pixel factor
+.VARIABLE PSF
+INTEGER - Spec for point-spread functions
+.LEVEL2
+.VARIABLE INP
+INP specifies the initial estimate picture (EST) and the reference picture 
+(REF).  The initial estimate picture will be used to obtain the unknown part
+of the Fourier transform.  EST is usually a random noise scene.  The reference
+picture's Fourier transform will be used (either the amplitude or the phase)
+as a "known" quantity.
+.VARIABLE OUT
+OUT specifies the picture whose Fourier transform corresponds either in phase
+or amplitude to REF after ITER iterations.
+.VARIABLE OUTFMT
+OUTFMT specifies the format for output data.  The valid values are OUTBYTE,
+OUTHALF, OUTINTEG, and OUTREAL.  The default is to use the format of the
+input pictures.
+.VARIABLE MODE
+MODE=PHASE (or 'PHASE) specifies that the phase of the reference picture (REF)
+will be used as a boundary condition, leaving the amplitude to be determined. 
+The default is for the amplitude to be used as the boundary condition. 
+.VARIABLE ITER
+ITER specifies the maximum number of iterations allowed.  If no pixels are 
+reset on any pass, the iteration process is terminated.  Default is ITER=100.
+.VARIABLE PRINT
+'PRINT causes the number of pixels changed and the sum of the
+negative pixels to be printed at each iteration.  
+.VARIABLE BETA
+BETA specifies the real value to be multiplied by each negative pixel in order
+to render it positive or zero.  The negative of BETA is used in the program,
+and only every other iteration is used.  The default is BETA = 0.5 .
+.VARIABLE PSF
+The PSF keyword is used in the form PSF=(N,L1,S1,R1,...,Ln,Sn,Rn), where 
+each L, S, and R triplet specifies the line, sample, and radius of a 
+point-spread function in the reference (REF) image.  If PSF is specified,
+each center position is re-centered at the max DN value in each circular area
+and the sum of the pixels less background (determined from the border points)
+is computed for the values within the circle.  Then, for each iteration, all
+of the points inside each circle are set to the mean DN of the border points
+and the central pixel is set to the mean DN plus the sum of the DN's as
+previously computed.  PSF acts as an additional boundary condition for stellar-
+type point-spread functions.
+.END

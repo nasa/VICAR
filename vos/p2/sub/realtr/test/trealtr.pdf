@@ -1,0 +1,4 @@
+! pdf for test pgm for subroutine realtr
+PROCESS
+PARM 	INP	TYPE=STRING
+END-PROC

@@ -1,0 +1,120 @@
+!------------------------------------------------------------------------------
+! process SHADY2.pdf 
+!------------------------------------------------------------------------------
+process help=*
+PARM INP 	TYPE=(STRING,80)		
+PARM OUT 	TYPE=(STRING,80)		
+PARM SIZE 	TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0) 
+PARM SL 	TYPE=INTEGER DEFAULT=1		
+PARM SS 	TYPE=INTEGER DEFAULT=1		
+PARM NL 	TYPE=INTEGER DEFAULT=0		
+PARM NS 	TYPE=INTEGER DEFAULT=0		
+PARM OFORMAT    TYPE=KEYWORD DEFAULT=BYTE VALID=(BYTE,HALF) 
+PARM AZIMUTH 	TYPE=REAL DEFAULT=0.0		
+PARM ELEV 	TYPE=REAL DEFAULT=45.0		
+PARM SSCALE 	TYPE=REAL DEFAULT=208.0		
+PARM LSCALE 	TYPE=REAL DEFAULT=208.0		
+PARM ZSCALE 	TYPE=REAL DEFAULT=1.0		
+PARM SCALE 	TYPE=REAL DEFAULT=254.0		
+END-PROC
+.TITLE
+VICAR2 program SHADY2
+.HELP
+PURPOSE
+
+SHADY2 shades a image as though it were being illuminated by a source
+at a given azimuth and elevation.
+.page
+EXECUTION
+
+Example:
+To shade the input image as though it were illuminated by a sun in the 
+northeast at an elevation of 10 degrees above the horizon, enter
+
+VICAR> SHADY2 inp=input.img out=output.img azimuth=45.0 elev=10.0
+.page
+OPERATION
+
+SHADY2 uses the four nearest neighbors around each pixel to compute a
+local normal.  The cosine between this vector and the illumination
+vector is computed and multiplied by SCALE to obtain the output DN.  The
+subroutine STACKA is used to allocate buffers so that no size restrictions
+exist.
+.page
+HISTORY
+
+Written by:  M.A. Girard, 25 July 1978
+Cognizant programmer:  M. O'Shaughnessy
+
+Revisions: 
+J.H. Reimer, 10 April 1983  
+	Original documentation
+J.H. Reimer, 1 July 1985
+	Converted to VICAR2 format
+M. O'Shaughnessy, 9 October 1989
+	Extended documentation, upgraded SHADY2 to r2lib, 
+	wrote unit test procedure
+Ron Alley, 7 February 2000
+        Made BYTE the default output data format, with HALF optional.
+.LEVEL1
+.VARIABLE inp
+Name of input image file
+.VARIABLE out
+Name of output image file
+.VARIABLE size
+Standard VICAR size field
+.VARIABLE sl
+Starting line
+.VARIABLE ss
+Starting sample
+.VARIABLE nl
+Number of lines
+.VARIABLE ns
+Number of samples
+.VARIABLE oformat
+Output image format
+(BYTE or HALF)
+.VARIABLE azimuth
+Azimuth of light source
+.VARIABLE elev
+Elevation of light source
+.VARIABLE sscale
+Sample scale (ft/pixel)
+.VARIABLE lscale
+Line scale (ft/pixel)
+.VARIABLE zscale
+Vertical scale (ft/dn)
+.VARIABLE scale
+DN scale factor
+.LEVEL2
+.VARIABLE oformat
+By default, the output pixels are stored as BYTE data.  The user may
+optionally specify HALF (16 bit, signed pixels) as the output data
+image format.
+.VARIABLE azimuth
+AZIMUTH is the azimuth of the illumination source (the 'sun') in real 
+degrees measured clockwise from 'up' in the image plane.  
+
+examples:
+azimuth=0.0 	places the source at the top of the image
+azimuth=90.0 	places the source to the right of the image. 
+.VARIABLE elev
+ELEV is the elevation of the illumination source in real degrees measured
+from the image plane. 
+
+examples:
+elev=0.0 	puts the 'sun' at sunset
+elev=90.0 	puts the 'sun' directly overhead
+.VARIABLE sscale
+SSCALE is the scale in the sample direction.  Default is 208.0 which is
+the DMA resolution in feet/pixel.
+.VARIABLE lscale
+LSCALE is the scale in the line direction.  Default is 208.0.
+.VARIABLE zscale
+ZSCALE is the scale in the Z or vertical direction.  Default is 1.0 which
+is the DMA resolution in feet/dn.
+.VARIABLE scale
+For each input pixel, the cosine of the angle between the illumination 
+direction and the local normal is calculated.  SCALE is a constant which,
+when multiplied by the cosine, gives the output DN.
+.END

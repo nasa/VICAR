@@ -1,0 +1,29 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM auxiliary
+
+   To Create the build file give the command:
+
+		$ vimake auxiliary			(VMS)
+   or
+		% vimake auxiliary			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	auxiliary
+#define R2LIB
+
+#define MODULE_LIST auxiliary.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define R2LIB
+
+#define LIB_FORTRAN
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define DEBUG
+/************************* End of Imake file ***************************/

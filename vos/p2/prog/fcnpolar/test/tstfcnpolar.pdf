@@ -1,0 +1,28 @@
+procedure help=*
+refgbl $echo
+body
+let _onfail="continue"
+let $echo=("yes","no","no")	! echo only1 top level
+!
+createfile polar.dat
+addtofile polar.dat "ISSNA	PTP_NAC_EM	-1.276000022888e+01"
+addtofile polar.dat "SCLK	ANGLE(DEG.)		AVE_DK_DN		AVE_BR_DN		RATIO"
+addtofile polar.dat "111016	0.000000000000e+00	1.000000000000e+00	1.000000000000e+00	1.000000000000e+00"
+addtofile polar.dat "111016	4.500000000000e+01	1.000000000000e+00	1.500000000000e+00	1.500000000000e+00"
+addtofile polar.dat "111016	9.000000000000e+01	1.000000000000e+00	2.000000000000e+00	2.000000000000e+00"
+addtofile polar.dat "111016	1.350000000000e+02	1.000000000000e+00	1.500000000000e+00	1.500000000000e+00"
+addtofile polar.dat "111016	1.800000000000e+02	1.000000000000e+00	1.000000000000e+00	1.000000000000e+00"
+addtofile polar.dat "111016	2.250000000000e+02	1.000000000000e+00	1.500000000000e+00	1.500000000000e+00"
+addtofile polar.dat "111016	2.700000000000e+02	1.000000000000e+00	2.000000000000e+00	2.000000000000e+00"
+addtofile polar.dat "111016	3.150000000000e+02	1.000000000000e+00	1.500000000000e+00	1.500000000000e+00"
+addtofile polar.dat "111016	3.600000000000e+02	1.000000000000e+00	1.000000000000e+00	1.000000000000e+00"
+!
+fcnpolar polar.dat
+end-proc
+.help
+
+	Test pdf for the routine fcnpolar.
+
+	Note:   The answer= line should be approximately  1.00000  1.00000  90.0000.
+		Results will vary due to the use of subroutine metropolis.
+.end

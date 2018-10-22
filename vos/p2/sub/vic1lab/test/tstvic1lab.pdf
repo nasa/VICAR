@@ -1,0 +1,8 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+TVIC1LAB MIPLDISK:[MIPL.VGR]F1636832.RAW
+end-proc
+

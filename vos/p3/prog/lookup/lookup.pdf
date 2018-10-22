@@ -1,0 +1,298 @@
+process help=*
+!  FILE NAMES      INPUT AND OUTPUT FILE NAMES ARE OPTIONAL
+!
+PARM INP     TYPE=STRING   COUNT=(0:5)   DEFAULT=--
+PARM OUT     TYPE=STRING   COUNT=(0:5)   DEFAULT=--
+!
+PARM SIZE    TYPE=INTEGER  COUNT=4       DEFAULT=(1,1,0,0)
+PARM SL      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM SS      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM NL      TYPE=INTEGER  COUNT=1       DEFAULT=0
+PARM NS      TYPE=INTEGER  COUNT=1       DEFAULT=0
+!
+PARM LIST    TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=--         VALID=LIST
+PARM TABNO   TYPE=INTEGER  COUNT=1       DEFAULT=0
+PARM PS	     TYPE=INTEGER  COUNT=1	 DEFAULT=0	    VALID=(0:11)
+PARM NEWTBLF TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=--         VALID=NEWTBLF
+PARM SAVE    TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=--         VALID=SAVE
+PARM TBLSAVE TYPE=INTEGER  COUNT=1       DEFAULT=0
+PARM USE     TYPE=INTEGER  COUNT=(1:4)   DEFAULT=(1,2,3,4)  VALID=(1:4)
+!
+PARM CHANGE  TYPE=INTEGER  COUNT=(2:300) DEFAULT=(0,0)      VALID=(0:255)
+PARM NCHAN   TYPE=INTEGER  COUNT=1       DEFAULT=1          VALID=(1:4)
+!
+!   LTABLE HAS A THEORETICAL MAXIMUM COUNT OF 1280.  MAX FOR TAE IS 300?
+PARM LTABLE  TYPE=INTEGER COUNT=(2:300)   DEFAULT=(0,0)     VALID=(-255:255)
+!
+END-PROC
+.TITLE
+LOOKUP
+.HELP
+ PURPOSE:
+
+LOOKUP generates output images from input images using data number
+mappings defined in a multi-channel lookup table.  The user can specify 
+the table by giving its location (if it is contained in a file), by 
+entering the contents of the table as program parameters, or by naming an 
+IDX pseudocolor transformation. The user has the option of modifying the 
+table via the CHANGE and LTABLE parameters. The modified table may then be 
+saved by specifying the SAVE or TBLSAVE parameter.
+.PAGE
+ EXECUTION:
+
+In the table format used by LOOKUP, a lookup table is made up of four
+independent channels.  Each channel defines a mapping or discrete
+transfer function to be applied to an input image. Some of these
+channels may be undefined depending on the application.  The lookup
+table is limited to four channels because LOOKUP allows at most
+four output images.  LOOKUP allows at most four input images.
+
+In the most straightforward use of LOOKUP, the number of input images
+is equal to the number of output images and the default channel
+assignments are used.  In this case, the first channel in the table
+is used to map the first input image to the first output image, the
+second channel in the table is used to map the second input image to 
+the second output image, and so on.
+.PAGE
+The user may select to use different channels (than the default) with
+the images by using the USE parameter.  The user may also specify
+fewer input images than output images.  In this case, the last input
+image is mapped through the remaining channels to create the appropriate
+number of output images.  Thus, one input image could be mapped through
+three independent channels (transfer functions) to three output images.
+This feature allows simple production of Pseudo Color pictures.
+.PAGE
+When the user specifies a lookup table in a file, LOOKUP requires that
+the file have a particular format.  The file must contain a VICAR label
+followed by one or more tables, each table being stored as one 1024-byte
+record.  A table record contains 1024 output data number values in the
+following order:
+
+ d(0,1), d(0,2), d(0,3), d(0,4),... d(255,1), d(255,2), d(255,3), d(255,4),
+
+where d(i,j) is the output data number to which the data number i is mapped
+by channel j.  The user specifies the location of the table by giving the
+name of the file and the number (ordinal) of the table within the file.  
+In general, such a file is built using another VICAR program or using
+LOOKUP itself.
+.PAGE
+TAE COMMAND LINE FORMAT
+      The following command line formats show the major allowable forms:
+      LOOKUP INP=(a...) OUT=(b...) SIZE=(sl,ss,nl,ns) optional parameters
+      LOOKUP INP=(a...) OUT=(b...) SL=sl SS=ss NL=nl NS=ns optional parameters
+      LOOKUP (a...) (b...) (sl,ss,nl,ns) optional parameters
+      LOOKUP (a...) (b...) optional parameters
+
+       Here (a...) represents a list of one to five file names which includes
+       from one to four input image file names optionally followed by the
+       name of a file containing the lookup table to be used by this program.
+       (b...) represents a list of one to four output image file names
+       optionally followed by an output lookup table file.
+
+      LOOKUP also accepts command lines without the INP or OUT fields.  
+      This allows the user to use LOOKUP just for working with tables.
+.PAGE
+EXAMPLES
+
+1.    LOOKUP  INP=(L1 T1) OUT=L2 'LIST TABNO=2 USE=3
+
+      In this example, channel 3 of table 2 of file T1 is used to map
+      image file L1 to image file L2.
+
+2.    LOOKUP IN (RED,GREEN,BLUE) PS=3
+
+      In this example, the IDX pseudocolor transformation PS 3 is used to
+      map image file IN to files RED, GREEN, and BLUE. The color assignments
+      must be in this order to get results corresponding to what is seen in
+      IDX.
+.PAGE
+3.    LOOKUP INP=(L1) OUT=(L3,L4,L5,T2) 'NEWTBLF        +
+             LTABLE=( 0       0  1  2                   +
+                      1  -98  2  3  4                   +
+                      99 -255 5  6  7                     )
+
+      In this example, the three channels of the table defined through the
+      LTABLE parameter are used to map the input file to the three output
+      files.  T2 is the output table file, in which the table is saved.
+
+RESTRICTIONS
+1. The input and output images and the table file must be byte data.
+2. Maximum number of samples is 20000 per line.
+
+ WRITTEN BY:                 Steven Pohorsky           2 Aug 1983
+ COGNIZANT PROGRAMMER:       Steven Pohorsky
+ REVISION:                   3                        24 April 1986
+
+.LEVEL1
+.VARIABLE INP
+Input file name(s);
+ includes input images
+ optionally followed by
+ table file.
+.VARIABLE OUT
+Output file name(s)
+.VARIABLE SIZE
+Standard Vicar size field:
+  (SL,SS,NL,NS)
+.VARIABLE SL
+Starting line number
+.VARIABLE SS
+Starting sample number
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples
+.VARIABLE LIST
+Enter to get the lookup
+table listed to your terminal.
+.VARIABLE TABNO
+Number (ordinal) of the lookup
+table if the table is in a file.
+This parameter is required
+if the table is in a file.
+.VARIABLE PS
+Number of the IDX pseudocolor
+table, if the table is a
+standard IDX pseudocolor.
+Valid: 1-11.
+.VARIABLE NEWTBLF
+Enter to have the
+lookup table saved if the
+table file is new.
+.VARIABLE SAVE
+Enter to have the
+lookup table saved in the next 
+available location in an
+existing table file.
+.VARIABLE TBLSAVE
+To have the lookup table saved
+in an exactly specified
+location in an existing table 
+file, enter the table number
+(location).
+.VARIABLE USE
+Specifies which channel of the
+table corresponds to which
+output image. The nth value
+entered is the channel for
+the nth output image.
+.VARIABLE CHANGE
+One or more of the following
+type of changes can be entered
+using the following format:
+CHANGE=(n1,m1 n2,m2 ...)
+The table entries for data
+number ni are, for each channel,
+replaced with the table entries
+for data number mi, for
+i=1,2,...
+.VARIABLE NCHAN 
+The number of channels for which
+data is entered under the LTABLE
+parameter.  The default for
+NCHAN is the number of output
+images.
+.VARIABLE LTABLE
+Specifies values for the lookup
+table.  If a table from a file
+is not used, then the table
+must be defined through LTABLE
+values.
+.LEVEL2
+.VARIABLE INP
+If an input table file is specified, it must be the last input file listed,
+and the TABNO, TBLSAVE, or SAVE parameter must be specified.
+.VARIABLE OUT
+If an output table file is specified, it must be the last output file listed,
+and the NEWTBLF, TBLSAVE, or SAVE parameter must be specified.
+.VARIABLE LIST
+The default LIST value is no listing of the lookup table.
+.VARIABLE TABNO
+The basis for the lookup table will be the table number (record number)
+specified by this parameter. If this parameter is used, a lookup table
+dataset must be supplied as the last input dataset.
+.VARIABLE PS
+The basis for the lookup table will be the IDX pseudocolor table of the same
+number. IT may then be modified via the LTABLE parameter. Valid tables are:
+      PS=0      for an identity transformation (all outputs like input)
+         1      for the original 8 color table
+         2      for the original 16 color table
+         3      for the original 32 color table
+         4      for the 16 color table, with colors selected for screen display
+         5      for the 8 color table, with colors selected for screen display
+         6      for the 6 color table
+         7      for the 4 color table
+         8      for the 32 color table, with colors selected for MDA playback
+         9      for the 16 color table, with colors selected for MDA playback
+        10      for the 10 color table, with colors selected for MDA playback
+        11      for the 8 color table, with colors selected for MDA playback
+PS3 and PS8 use black and white as two of the 32 colors; PS10 and PS11 use
+black and white in addition to the stated number of colors to denote saturation.
+They map only 0 and 255 input. All other tables do not use black or white.
+.VARIABLE NEWTBLF
+If you wish to save (write out) the lookup table and the 
+table file is new, enter 'NEWTBLF. The lookup table will be saved as table 1.
+ If NEWTBLF is specified, then neither SAVE nor TBLSAVE is specified.
+.VARIABLE SAVE
+If you wish to save (write out) the lookup table in an existing table
+file, enter either 'SAVE to have the lookup table saved in the next 
+available location in the table file,      or
+enter a specific location (table number) for TBLSAVE.
+The modified table file will be written to the output table file specified
+in the OUT parameter.  The input table file is not modified.
+.VARIABLE TBLSAVE
+If you wish to save (write out) the lookup table in an existing table
+file, enter either 'SAVE to have the lookup table saved in the next 
+available location in the table file,      or
+enter a specific location (table number) for TBLSAVE.
+The modified table file will be written to the output table file specified
+in the OUT parameter.  The input table file is not modified.
+.VARIABLE USE
+The default is USE=(1,2,3,4).
+.VARIABLE CHANGE
+Pairs of values are entered following the CHANGE keyword.  Each pair
+of values represents a change to the lookup mapping.  Although the
+program accomplishes the change by changing the table, the effect on
+the lookup mapping can best be explained as changing input data numbers
+of the first value (in the pair) to the second value (of the pair)
+before the lookup table is applied.  Each change is based
+on the table specified and is independent of other changes
+specified with it.
+The CHANGE parameters may be used with or without LTABLE parameters.
+If both LTABLE and CHANGE parameters are used, the CHANGE parameters
+are applied to the result produced by the LTABLE parameters.
+.VARIABLE LTABLE
+By specifying LTABLE parameters the user can apply modifications to
+an existing table or can completely define a new table.  These
+parameters specify the data numbers for each channel to which
+given data numbers are to be mapped.
+
+LTABLE parameters are entered in groups of NCHAN+1 values
+for a single data number or NCHAN+2 values for a range of
+data numbers. For a single data number, the group consists
+of the data number followed by the values assigned to that
+data number for each of the NCHAN channels.  For a range of
+data numbers, the group consists of the data number for the
+start of the range followed by  -1 times the data number 
+for the end of the range followed by the values assigned to
+any data number in that range for each of the NCHAN channels.
+
+When modifying an existing table, the user enters groups of 
+parameters only for the data numbers for which changes are
+desired.  When defining a new table, the user enters the full
+table so that a mapping is defined for all of the data numbers
+from 0 to 255.
+
+The following example illustrates the format and usage of the LTABLE
+parameters.  In this example the mapping is completely defined for
+two channels.  The first channel maps  0 to 1, 1 to 3, and 2 through
+255 to 5.  The second channel maps  0 to 2, 1 to 4, and 2 through
+255 to 6.
+          LTABLE = ( 0         1  2           +
+                     1         3  4           +
+                     2  -255   5  6             )
+
+The LTABLE parameters may be used with or without CHANGE parameters.
+If both LTABLE and CHANGE parameters are used, the CHANGE parameters
+are applied to the result produced by the LTABLE parameters.
+.END

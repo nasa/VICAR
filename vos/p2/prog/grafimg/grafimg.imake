@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM grafimg
+
+   To Create the build file give the command:
+
+		$ vimake grafimg		(VMS)
+   or
+		% vimake grafimg		(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	grafimg
+#define R2LIB
+
+#define MODULE_LIST grafimg.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

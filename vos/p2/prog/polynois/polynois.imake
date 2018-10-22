@@ -1,0 +1,29 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM polynois
+
+   To Create the build file give the command:
+
+		$ vimake polynois		(VMS)
+   or
+		% vimake polynois		(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	polynois
+#define R2LIB
+
+#define MODULE_LIST polynois.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_MATH77
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/* #define LIB_LOCAL */
+/************************* End of Imake file ***************************/

@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine VOSN8  */
+
+#define SUBROUTINE  vosn8
+
+#define MODULE_LIST  vosn8.f  
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

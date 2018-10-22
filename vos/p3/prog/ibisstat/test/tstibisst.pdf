@@ -1,0 +1,91 @@
+PROCEDURE
+  refgbl $echo
+  refgbl $autousage
+  parm nrows integer def=100
+  parm mean real def=0.0
+  parm sdev real def=1.0
+  parm seed real def=9.0
+BODY
+  let _onfail="continue"
+  let $autousage="none"
+!    gausnois  N     NL=8 NS=128 FORMAT=REAL MEAN=0 SIGMA=1 SEED=7382382
+!    pcopin    N  T  LCOL=100 NCOL=11 COL=(6,7,8,9,10,11)
+
+!
+!    The following use of "ibis-gen" and "mf" generate an IBIS file
+!    with a uniform-distribution in columns #1 and #2, with a
+!    gaussian distribution in columns #6,#7,#8,#9,#10,#11.
+!
+!    The generation of an "IBIS-1" type file facilitates the testing
+!    and comparison of the unported (which uses on IBIS-1) with the
+!    ported versions of "ibisstat".  
+
+    ibis-gen  T  nc=11 nr=&nrows 'ibis-1
+
+    mf  T   FUNCTION=("c1=(sin(3.7*index**2)+1)/2",                   +
+                      "c2=(sin(5.3*(index+&seed)**2)+1)/2",           +
+                      "c6=(sqrt(-2*alog(c1))*sin(2*(3.1415926)*c2))", +      
+                      "c6=&mean + &sdev*c6")
+    let seed = 8.0
+
+    mf  T   FUNCTION=("c2=(sin(5.3*(index+&seed)**2)+1)/2",           +
+                      "c7=(sqrt(-2*alog(c1))*sin(2*(3.1415926)*c2))", +      
+                      "c7=&mean + &sdev*c7")
+
+    let seed = 7.0
+
+    mf  T   FUNCTION=("c2=(sin(5.3*(index+&seed)**2)+1)/2",           +
+                      "c8=(sqrt(-2*alog(c1))*sin(2*(3.1415926)*c2))", +      
+                      "c8=&mean + &sdev*c8")
+
+    let seed = 6.0
+
+    mf  T   FUNCTION=("c2=(sin(5.3*(index+&seed)**2)+1)/2",           +
+                      "c9=(sqrt(-2*alog(c1))*sin(2*(3.1415926)*c2))", +      
+                      "c9=&mean + &sdev*c9")
+
+    let seed = 5.0
+
+    mf  T   FUNCTION=("c2=(sin(5.3*(index+&seed)**2)+1)/2",           +
+                      "c10=(sqrt(-2*alog(c1))*sin(2*(3.1415926)*c2))", +      
+                      "c10=&mean + &sdev*c10")
+
+    let seed = 4.0
+
+    mf  T   FUNCTION=("c2=(sin(5.3*(index+&seed)**2)+1)/2",           +
+                      "c11=(sqrt(-2*alog(c1))*sin(2*(3.1415926)*c2))", +      
+                      "c11=&mean + &sdev*c11")
+ 
+  let $echo="yes"
+ 
+    mf        T     FUNCTION=("C1=(INDEX-50)/25", "C2=C1*C1", "C3=C1*C2", +
+		      "C4=11.5+5.0*C1-2.3*C2+0.3*C3+0.1*C6", "C5=0.1")
+
+    ibisstat  T  O  'REGRESS COLS=(1,2,3) DEPCOL=4 ERRCOL=5   +
+			COLNAME=("X","X SQUARE","X CUBED") DEPNAME="Y-VALUE"
+    ibisstat  O     'HIST COLS=2 COLNAME="RESID"  BINS=16
+
+
+    mf        T     FUNCTION=( "C1=4.1*C6-0.5*C7+1.2*C8",  +
+			"C2=0.3*C1-7.4*C2+1.7*C8", "C3=-0.5*C1+0.9*C2+6.2*C3")
+
+    ibisstat  T     'SUMMARY  COLS=(1,2,3,6,7,8)
+    ibisstat  T     'SCATTER  COLS=(1,2, 6,7)
+    ibisstat  T  O  'CORRE    COLS=(1,2,3)  'NOPRINT
+!    qrep      O     'LABEL  
+    ibis-list  O    
+    ibisstat  T  O  'FACTOR   COLS=(1,2,3)
+    ibisstat  O     'CORRE    COLS=(1,2,3)
+ 
+
+    mf        T      FUNCTION=( "C7=C7-0.2", "C8=C8+0.3", "C9=C9+0.45", +
+				"C11=2.0*C11+C10")
+    ibisstat  T      'ANOVA    COLS=(6,7,8,9,10)  REPLICS=(70,68,85,46,78)
+    ibisstat  T      'BEHRENS  COLS=(6,7,8)  BCOLS=(9,10,11) NUMPOINT=(90,60)
+
+    mf        T      FUNCTION="C1=(INDEX-50)/20"
+    ibisstat  T  O   'DENSITY  'STUDENT  COLS=(1,1)  NDF=(5,20)
+!    qrep      O      'LABEL  SROW=75 NROW=20  FORMAT="(4F12.5)"
+    ibis-list O  sr=75 nr=20
+    LET $ECHO = "NO"
+END-PROC

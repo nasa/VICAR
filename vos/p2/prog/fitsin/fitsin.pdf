@@ -1,0 +1,599 @@
+process help=*
+PARM INP    TYPE=STRING
+PARM OUT    TYPE=STRING     COUNT=(0:10) DEFAULT=--
+PARM HEADER TYPE=STRING     COUNT=(0:10) DEFAULT=--
+PARM DATA   TYPE=STRING     COUNT=(0:1) VALID=(TRUE,FITS,U16) DEFAULT=FITS
+PARM BLOCK  TYPE=STRING     COUNT=(0:1) VALID=(BLOCK,NOBLOCK) DEFAULT=NOBLOCK
+PARM FACTOR TYPE=INTEGER    COUNT=(0:1) DEFAULT=1
+PARM PASS   TYPE=STRING     COUNT=(0:1) DEFAULT=--
+PARM EXCISE TYPE=STRING     COUNT=(0:10) DEFAULT=--
+PARM COMMENT TYPE=STRING    COUNT=(0:1) VALID=(COMMENT,NOCOMMENT) 	DEFAULT=COMMENT
+PARM HISTORY TYPE=STRING    COUNT=(0:1) VALID=(HISTORY,NOHISTORY) DEFAULT=HISTORY
+PARM NULL   TYPE=STRING     COUNT=(0:1) VALID=(NULL,NONULL) DEFAULT=NULL
+PARM TABLIST TYPE=STRING    COUNT=(0:1) VALID=(LIST,NOLIST) DEFAULT=NOLIST
+END-PROC
+.TITLE
+FITSIN  --  log FITS format data.
+.HELP
+PURPOSE:
+       
+   FITSIN is a VICAR*2 Applications program to convert FITS formatted
+Astronomical data into VICAR*2 formatted image files. It is based on 
+documentation by Don Wells of NRAO.
+
+OPERATION:
+
+	Flexible Image Transport System (FITS) tapes are a general interchange
+data format used by radio and optical astronomy observatories for passing
+multidimensional data.  In the original definition the tape format consisted
+of fixed length records of 2880 bytes with at least one header block of ASCII
+information that preceeds the binary (data) information. The fixed length
+record of 2880 bytes was chosen because it was divisible by the word lengths
+of the most common computer systems of the late 1970's. However, since the
+packing density of 1/2-inch tape was pretty poor when newer tape drives
+became available in the 1980's the standard was revised to allow up to 10
+logical 2880 byte records to be packed into up to 28800 bytes in a physical
+block. The FITS keyword BLOCKED = T was added to denote that perhaps the tape
+was blocked at greater than 2880 bytes. Note that it does not demand that
+the tape be blocked only that it might be. 
+
+	The data records from the instrument are packed into these
+fixed length records after the FITS header.
+
+	FITSIN reads the FITS header block of 2880 bytes and extracts
+information from it. The entire header block is printed out on the log. All
+or portions of the FITS ASCII header can be passed to the VICAR history
+label. They will be stored as comments inside the VICAR label using the
+keyword "VFnnn=" where nnn are three digits starting with 001. A maximum
+of 999 label entries are allowed.
+
+	FITS tapes may or may not contain ANSI standard labels.  If you 
+process an ANSI FITS tape as an unlabeled tape then the real FITS images
+files numbered 1, 2, 3, 4,... will be file numbers 2, 5, 8, 11,... on the
+tape. File numbers 1, 3, 4, 6, 7, etc will be ANSI header records.
+
+
+FITS HEADER 
+
+	Each header block consists of 36 80-byte records (card images).
+The first 10 columns of each card image contains an 8-character keyword
+followed by a blank and an equals sign. Columns 11 through 30 contain a
+value or string in ASCII characters which is right-justified. Columns 31
+through 80 are a comment field. The first character of a comment field
+(column 31) is a slash, /.
+
+	The first FITS header record at a minimum consists of the following
+information:
+
+        '         111111111122222222223'  <--card column number
+        '123456789012345678901234567890'
+        'SIMPLE   =               T'            !LOGICAL
+        'BITPIX   =              16'            !INTEGER
+        'NAXIS    =               2'            !INTEGER
+        'NAXIS1   =             512'            !INTEGER
+        'NAXIS2   =             512'            !INTEGER
+        'END                       '
+
+	The first card contains "SIMPLE    =" in columns 1 through 10  
+followed by a logical "T" or "F" in column 30. "T" indicates that the
+tape format follows the basic rules of FITS format. "F" implies that
+it does not.
+	The second card contains "BITPIX    =" which gives the number of bits
+per pixel in each data record.  The valid values are 8, 16, 32, -32 and -64.
+All axes of data must have the same number of bits per pixel. Note that
+integer data types 8, 16 and 32 are byte-reversed from the VAX and that 
+BITPIX=-32 is IEEE floating point format, and -64 is IEEE double precision
+floating point formate, not VAX floating and double, respectively.
+	The third card contains "NAXIS     =" which gives the number of
+dimensions (axes) of the data.  FITSIN currently only processes three
+dimensions or less.  When a sample tape of four or more dimensions is
+received then it should be possible to convert the data to IBIS tabular
+files although the current program does not do this.
+	The fourth and subsequent cards (up to the number of dimensions)
+contain "NAXIS1    =", "NAXIS2     =", "NAXIS3    =",...,"NAXISn    ="
+which define the number of pixels along each dimension, n.
+	Any number of optional header cards may follow.
+	The last card is always the "END" card.
+
+	FITS allows many optional header cards.  These optional header cards
+vary from one sensor to another and one observatory to another. Some of 
+the more important ones, as far as FITSIN is concerned, are BZERO, BSCALE,
+BUNIT, OBJECT, DATE, DATAMAX, DATAMIN, COMMENT, HISTORY, and BLANK. For
+example, the following FITS keywords are never passed to the VICAR label:
+	SIMPLE
+	BITPIX
+	NAXIS
+	NAXISm	(where m is an integer)
+	END
+	
+The following FITS keywords are always passed to the VICAR label if found:
+	BZERO
+	BSCALE
+	BUNIT
+	OBJECT
+	DATE
+	EXTEND
+	XTENSION 
+	TABNAME 
+	BLANK
+	DATAMAX 
+	DATAMIN 
+	EXTNAME 
+	EXTVER 
+	EXTLEVEL 
+	TFIELDS 
+
+An example of a more complete FITS header is one from the 200 inch
+telescope at Palomar.
+
+SIMPLE  =                    T /                                                
+BITPIX  =                   16 /                                                
+NAXIS   =                    2 /                                                
+NAXIS1  =                  800 /                                                
+NAXIS2  =                   60 /                                                
+BSCALE  =         8.175754E-01 /                                                
+BZERO   =         2.538707E+04 /                                                
+OBJECT  = 'L637              ' /                                                
+FRAME   =                  233 /                                                
+NIGHT   =                    2 /                                                
+DATE    = '27-APR-1989       ' /                                                
+TELESCOP=                  200 /                                                
+PORT    =                    1 /                                                
+DEWAR   =                    8 /                                                
+CHIP    = 'TI432             ' /                                                
+ETIME   =                  300 /                                                
+TIME    =                  300 /                                                
+DECS    = '+                 ' /                                                
+EPOCH   =                 1950 /                                                
+HAS     = '-                 ' /                                                
+SECZ    =         1.109078E+00 /                                                
+TEMP    =        -1.147000E+02 /                                                
+ERASE   =         1.228969E+03 /                                                
+FILTER  = 'NONE              ' /                                                
+SATURATE=                    0 /                                                
+GRATING =                  600 /                                                
+SLIT    = '2.0S              ' /                                                
+CRVAL1  =  5.9551000976563E+03 / Angstroms                                      
+CDELT1  =  1.1090113863032E+00 /                                                
+CRPIX1  =         1.000000E+00 /                                                
+CTYPE1  = 'WAVELENGTH        ' /                                                
+CRVAL2  =  1.0000000000000E+00 /                                                
+CDELT2  =  1.0000000000000E+00 /                                                
+CRPIX2  =         1.000000E+00 /                                                
+CTYPE2  = 'COLUMN #          ' /                                                
+END                                                                             
+
+CONVERSION OF FITS HEADERS INTO VICAR LABELS
+
+	FITS header records are converted into VICAR label items using
+the VFxxx keyword. Up to 999 labels can be transferred.  For example,
+FITS keyword   
+
+CRVAL1  =  5.9551000976563E+03 / Angstroms                                      
+
+will transfer as
+
+VF023='CRVAL1  =  5.9551000976563E+03 / Angstroms                   '
+
+
+Many of the FITS labels have strings in them. By convention a string
+begins with a single quote (') and ends with another quote.  Transfer
+of single quotes to VICAR labels cause problems so single quotes are
+converted into double quotes  into VICAR labels.  For example,
+FITS keyword
+
+OBJECT  = 'L637              ' /                                                
+
+This would be converted into the VICAR label item
+
+VF003='OBJECT  = "L637              " /                                '       
+
+
+
+FITS DATA
+
+	Data on fits tape are packed into 2880 byte fixed length records.
+The label items BITPIX, NAXIS, NAXIS1, NAXIS2, ..., NAXISn describe how
+the data is packed. BITPIX which can only take on the values 8, 16, 32,
+-32 and -64 tell how many pits there are per pixel.  NAXIS tells how many
+dimensions the data has. FITSIN in its current implementation can
+process only values of 1, 2 and 3. NAXIS1, NAXIS2 and NAXIS3 give
+the number of pixels per axis (sample, line, band) in VICAR nomenclature.
+It is common to use BITPIX of 8 and NAXIS=0 for FITS tabular data.
+
+PARAMETERS
+
+	The OUT=filename parameter is not required.  If not given then
+only the header of the INP= file is scanned and printed out to the terminal
+and/or session log.  The scan will also state the number of FITS keywords
+found and the number. Up to 10 output files can be given for multiple
+FITS data sets per FITS file.
+
+	The HEADER= parameter is not required. It saves each FITS label 
+in a file which has 80 byte fixed length records. No FITS labels are 
+created or omitted in this file and no other parameter controls the
+contents. The HEADER file does not have VICAR labels.  Up to 10 HEADER
+files are allowed for multiple data sets per FITS file.
+
+	The parameter DATA="FITS"/"TRUE"/"U16" refers to the data format to
+pass to the VICAR image. The default is FITS format which means that 
+it will pass to the output image the same data format that is stored in the FITS
+image. If the FITS data is 8 bit then the output will be VICAR format
+'BYTE', if 16 bit then the output will be VICAR format 'HALF', etc.
+In this mode it will thus ignore any BSCALE and BZERO FITS labels if
+found in the FITS label. Consequently, if the original experimenter
+normalized the data using BSCALE and BZERO to pack the data in 8 or 16 bit
+format the VICAR image will retain this packing.  For some applications
+this is entirely acceptable, for others it is not.
+
+	If DATA="TRUE" then FITSIN will transform the FITS data into a VICAR
+'REAL'format data set regardless of the FITS data values. It will then use the
+FITS BSCALE and BZERO values stored in the FITS label to convert the data
+(whatever the format, 8 bit, 16 bit or 32 bit integers or 32-bit IEEE
+FITS floating point formats) into VAX 'REAL' format by the formula
+
+			REAL = (FITS*BSCALE)+BZERO
+where,
+
+REAL is the R*4 output value in the VICAR image,
+FITS is the FITS stored data value in 8 bit, 16 bit, 32 bit or -32 bit format,
+BSCALE is the value stored in the FITS BSCALE header record,
+BZERO is the value stored in the FITS BZERO header record.
+					
+If no BSCALE or BZERO values are found in the label when you give this option
+then FITSIN will warn you and then use default values of BSCALE=1.0 and
+BZERO=0.0 to do the conversion. Thus, use of the "DATA=TRUE" option will
+force the output to be VICAR 'REAL' no matter what format the FITS data is in.
+
+	DATA="U16"
+	FITS data assumes that 8-bit is unsigned and 16-bit is signed. VICAR 
+uses the same convention. Consequently, there can be problems for displaying 
+in VICAR 16-bit FITS data converted to VICAR HALF format by FITSIN.
+It will show up as -32768 to +32767 in VICAR. To get around this you can
+force 16-bit data into a 32-bit integer (VICAR FULL format). Use DATA="U16" 
+to give properly scaled data from 0 to 65535. The U16  parameter
+will use BSCALE and BZERO if given in the FITS header.
+
+	The BLOCK= parameter is only for reading of blocked FITS tapes. Valid entries
+are "BLOCK" or "NOBLOCK".  If "BLOCK" is entered then enter a value of from one
+to 10 for "FACTOR".  
+
+Other parameters are geared toward limiting the FITS header keywords from
+being passed to the VICAR label since only 999 are allowed. The options for
+selecting which FITS labels to pass to the VICAR label are the following:
+
+	PASS="FITS KEYWORD" - Indicates at which FITS keyword to begin passing
+	the FITS label records to VICAR label records.  By default, FITS 
+	keywords starting after FITS keyword "NAXIS3 =" are passed or
+	"NAXIS =" if NAXIS = 0 (in the case of tables).
+	
+	EXCISE="FITS KEYWORD" - Indicates which FITS keywords not to pass to
+	the VICAR label records.  Up to 10 keywords may be EXCISEd. By default
+	no FITS keywords are excised.
+	
+	COMMENT="COMMENT"/"NOCOMMENT" - Pass/Don't Pass FITS "COMMENT =" records
+	to the VICAR label.  By default, FITS "COMMENT =" keywords are passed.
+	
+	HISTORY="HISTORY"/"NOHISTORY" - Pass/Don't Pass FITS "HISTORY =" records
+	to the VICAR label.  By default, FITS "HISTORY =" keywords are passed.
+	
+	NULL="NULL"/"NONULL" - Pass/Don't Pass FITS blank (null) records to
+	the VICAR label.  By default, null keyword records are passed.
+
+Note that by specifying PASS and EXCISE keywords along with COMMENT="NOCOMMENT",
+HISTORY="NOHISTORY", and/or NULL="NONULL" that FITS "COMMENT=", "HISTORY=" and
+null records will not be passed to the VICAR label. This technique is normally
+used after a tape scan which detects pages of FITS label information which is
+of little use to the VICAR user.
+
+	TABLIST="LIST"/"NOLIST" - List FITS tables to screen
+
+
+FITS files can transfer text data. This is usually done by the following:
+SIMPLE  =                    T / Standard FITS format
+BITPIX  =                    8 / Character Information
+NAXIS   =                    0 / No image data array present
+EXTEND  =                    T / Extension exists
+ .
+ .
+ .
+END
+XTENSION= 'TABLE   '           / Table Extension
+BITPIX  =                    8 / Character Information
+NAXIS   =                    2 / Two-dimensional table
+NAXIS1  =                   80 / Number of characters per line
+NAXIS2  =                  560 / Number of rows
+PCOUNT  =                    0 / No Random Parameters
+GCOUNT  =                    1 / Only one group
+TFIELDS =                    1 / One field per row
+
+EXTNAME = 'REV_1_1 '           / Generic Comments
+EXTVER  =                    1 / Integer Version Number
+
+TTYPE1  = 'TEXT    '           / Free text
+TBCOL1  =                    1 / Start in column 1
+TFORM1  = 'A80     '           / 80 Character Field
+
+END
+
+You can list such text files to screen by using the TABLIST=LIST option
+
+Suggestions for future:
+    1 remove PASS,  EXCISE, HISTORY and COMMENT parameters. 
+      They were only used on old VAX code that had limitations
+      on the number of labels.
+    2 Use fitsio for data interpretation. Leave ibis tables though
+
+LIMITATIONS
+
+	1. The program has not been implemented for multi-dimensional files
+	greater than 3 dimensions. (NAXIS < 4)
+	2. Up to 999 FITS keywords can be passed to the VICAR label.
+	3. FITS "Blocked" tape formats are not supported although it will copy
+	data as best it can.
+	4. Changes (single quote) in FITS labels to (double quotes)
+	in VICAR labels
+	5. Cannot process FITS 'BINTABLE' or '3DTABLE' files
+	6. Allows up to 10 FITS data sets to be embedded in one FITS file
+	7. Program has been run on a variety of FITS tapes as well as disk
+	data sets but none were in BLOCKED format.
+	8. Need yet to create a TEXT output file
+
+PROGRAM HISTORY:
+    03 Aug 2014...R.J.Bambery...Reconciled differences between mipl version
+                                and Cartographic Lab. This in response to
+                                email by Walt Bunch to reconcile histories
+                                of the 2 versions. i.e., add the following changes
+                                12 MAY 2003   LWKamp   ..Added check for incomplete last block in FITS file;
+                                   fixed chkstat calls (now require all arguments)
+                                14 NOV 2002...A.C.Chen   ...Converted FITS keywords from "PASS" and 
+                                   "EXCISE" parameters to upper case so FITS
+                                   label keywords can be passed or excluded
+                                   correctly. Modified test pdf.   
+    14 Dec 2012...R.J.Bambery...Fixed bug which gave 62 bands for 1 band
+                                in BITPIX=-32 Matlab created file
+    28 Jun 2012...R.J.Bambery...Removed <tab> in front of continuation
+                                lines to make backward compatible with
+                                32-bit Linux gfortran 4.2.1, otherwise
+                                compatible 64-bit Linux gfortran 4.6.3 
+    07 Jun 2012...R.J.Bambery...Initialize variables in hdrproc that caused premature
+                                END_OF_FILE with gfortran 4.6.3
+    04 May 2011...R.J.Bambery...Fix abort on test script due to character*1 vs byte
+                                conflicts -- worked on gcc 3.4 compilers
+                                Fixed some logic on TABLE files to IBIS
+    02 May 2011...R.J.Bambery...fix warning messages from gcc 4.4 compiler
+    12 Sep 2010...R.J.Bambery...Fixed numerous errors due to HOST, reworked parameter
+                                passings, and other internals
+    12 Aug 2010...R.J.Bambery...Fixed errors (warning messages on Mac/Intel and Linux)
+                                By changeing a number of variable names
+                                No longer have access to Mac/PowerPC
+    25 Mar 2010...R.J.Bambery...Somebody had changed the definitions of true = 'T'
+                                and false = 'F' to 124 and 70 (ascii equivalents)
+                                for some compiler, but it doesnt work under Linux
+                                or MacOSX compilers. See subroutines valhdr,
+                                fitschk and fitskey 
+    30 Jan 2010...R.J.Bambery...Made compatible with 64-bit afids Build 793
+                                Linux, MacOSX (both Intel/PowerPC)
+    28 Aug 2008...R.J.Bambery...add proper number of arguments (5) to chkstat
+                                adjust arguments for xvpcnt to 2
+    24 Feb 2008...R.J.Bambery...fixes for linux g77
+                                g77 doesnt like if (k.eq.'0') or k='0' statements
+                                define   byte zero /'0'/
+	23 Jun 2004...R.J.Bambery...put END_OF_FILE checks on xvreads
+     5 Feb 2004...R.J.Bambery...Update comments, 16-bit messages to screen.
+	22 Jul 2003...R.J.Bambery... Fixed BZERO,BSCALE in DATA=U16.
+     2 MAR 1995...R.J.Bambery...Fixed text file printing to screen
+							(was truncated to 45 characters)
+	 9 NOV 1994...R.J.Bambery...Delivered to Gloria Conner
+	14 AUG 1994...R.J.Bambery...Added U16 parameter to pass unsigned 16-bit
+				    data to VICAR fullword images
+	11 AUG 1994...R.J.Bambery...Added ability to process FITS -64 data
+	23 MAR 1994...R.J.Bambery...Added ability to process up to 10
+				    FITS data sets per FITS file
+	18 MAR 1994...R.J.Bambery...Fixed a "PASS=" parameter bug
+				    Changed default NULL=NULL from
+				    NULL=NONULL
+	 4 DEC 1993...R.J.Bambery...Incorporation of IBIS-2 tabular
+				    file routines
+	26 JUN 1993...R.J.Bambery...Allow for listing of FITS table files
+	23 JUN 1993...R.J.Bambery...Fixed bugs in FITSCHK (nproc to noproc)
+	10 MAY 1993...R.J.Bambery...Made portable to UNIX
+				    Removed IEEE specific floating pt code
+				    because of new VICAR executive
+	10 APR 1991...R.J.BAMBERY...Added blocking factor and bands
+	18 MAR 1991...R.J.BAMBERY...Fixed bugs and prevent ASCII dump of
+					entire file when invalid header found
+	20 FEB 1991...R.J.BAMBERY...ADDED IEEE FLOATING POINT CODE
+	28 SEP 1990...R.J.BAMBERY...ADDED HEADER OPTION
+	17 SEP 1990...R.J.BAMBERY...EXPANDED FITS LABELS TO 999 FROM 99
+    25 AUG 1990...R.J.BAMBERY...EXPANDED OPTIONS,
+				    MULTIPLE FITS HEADER RECORDS
+	30 JUN 1987...G.W.GARNEAU...Updated and expanded
+	12 DEC 1984...M.E.MORRILL...VAX/VICAR-2 Conversion
+	17 APR 1982...M.E.MORRILL...IBM Version, initial release.
+
+EXAMPLES:
+
+       FITSIN INP=FITS.DAT  PARMS   (for scanning headers)
+                   --or--
+       FITSIN INP=FITS.DAT  OUT=IMAGE.DAT PARAMS (for converting data)
+
+       FITSIN INP=FITS.DAT  HEADER=FITS.HDR (for saving FITS labels)
+		  --or--
+       FITSIN INP=FITS.DAT  OUT=IMAGE.DAT HEADER=FITS.HDR PARAMS (for
+				 saving FITS labels and converting data)
+      
+Parameters are defined above and in the TUTOR mode. SIZE field is computed
+from FITS information.
+
+REFERENCE
+
+http://fits.gfsc.nasa.gov/fits_intro.html
+
+Donald C. Wells, "FITS: A Flexible Image Transport System", National Optical
+Astronomy Observatories (NOAO) publication, 1979
+
+Flexible Image Transport System (FITS) Draft Standard, NSDSSO 100-2.0,
+Mar 29, 1999. Obtainable from web page above.
+
+A User's Guide for the Flexible Image Transport System (FITS), Version 4.0,
+Apr 14, 1997. Obtainable from web page above.
+
+Help on FITS is available through NASA/Office of Standards and Technology,
+Greenbelt MD.
+anonymous ftp: nssdca.gsfc.nasa.gov
+WWW: http://fits.cv.nrao.edu
+
+Usenet newsgroup: sci.astro.fits
+
+.LEVEL1
+.VARIABLE INP
+ STRING
+ A FITS tape file number or
+ disk file.
+.VARIABLE OUT
+ STRING--OPTIONAL
+ A Vicar formated output
+ image filename.
+ (Up to 10 embedded data
+ sets can be converted 
+ into separate VICAR files)
+.VARIABLE HEADER
+ STRING-OPTIONAL
+ A file name for outputting
+ FITS labels
+ (Up to 10 embedded data
+ sets FITS labels can be
+ listed into separate
+ VICAR files)
+.VARIABLE DATA
+ STRING-OPTIONAL
+ Data format to pass to VICAR
+ image
+ FITS/TRUE/U16
+ DEFAULT="FITS"
+.VARIABLE BLOCK
+ STRING-OPTIONAL
+ FITS image is blocked/not
+ blocked,
+ (NOT supported yet)
+ BLOCK/NOBLOCK
+ DEFAULT=BLOCK
+.VARIABLE FACTOR
+ INTEGER-OPTIONAL
+ Blocking factor when 
+ BLOCK=BLOCK is selected.
+ Must be integer.
+ DEFAULT=1
+.VARIABLE PASS
+ STRING-OPTIONAL
+ Pass to VICAR history label,
+ FITS label records beginning
+ with PASS="FITS KEYWORD".
+ DEFAULT=-- (All FITS labels)
+.VARIABLE EXCISE
+ STRING-OPTIONAL
+ Do not pass to VICAR history
+ label FITS label records
+ beginning with
+ EXCISE="FITS KEYWORD".
+ DEFAULT="        " (null)
+.VARIABLE COMMENT
+ STRING-OPTIONAL
+ Pass/Don't Pass FITS
+ "COMMENT =" labels
+ COMMENT/NOCOMMENT
+ DEFAULT=COMMENT
+.VARIABLE HISTORY
+ STRING-OPTIONAL
+ Pass/Don't Pass FITS
+ "HISTORY =" labels
+ HISTORY/NOHISTORY
+ DEFAULT=HISTORY
+.VARIABLE NULL
+ STRING-OPTIONAL
+ Pass/Don't Pass FITS
+ "           " (null) labels
+ NULL/NONULL
+ DEFAULT=NONULL
+.VARIABLE TABLIST
+ STRING-OPTIONAL
+ List/Nolist of FITS tables
+ to screen
+ DEFAULT=NOLIST
+.LEVEL2
+.VARIABLE INP
+ A FITS formatted data file on tape or disk.
+.VARIABLE OUT
+ A Vicar formatted output image filename. Output can be 'BYTE', 'HALF', 'FULL'
+ or 'REAL' depending on FITS format or the FITSIN parameter "DATA="
+.VARIABLE HEADER
+ An output file containing FITS label information in ASCII 80 byte fixed
+ length records.
+.VARIABLE DATA
+ STRING-OPTIONAL
+ Data format to pass to VICAR image. Default is "FITS" tape format which
+ can be 'BYTE', 'HALF', 'FULL'  or 'REAL'.
+ 
+ If "TRUE" then will pass R*4 format data to VICAR using FITS parameters
+ BSCALE and BZERO keywords in FITS labels based on the formula 
+
+	"TRUE" = (FITS*BSCALE)+BZERO.
+ 
+ If DATA is set to "TRUE" and no BSCALE or BZERO values are not found then
+ the program will warn you, but will create an output data set of type
+ real*4 by using the default settings of BSCALE=1.0 and BZERO=0.0.
+ 
+ When DATA=TRUE output file will always be 'REAL'.
+ Use U16 to transform unsigned FITS data into unsigned VICAR FULL data since
+ VICAR uses 16-bit signed data.
+ FITS/TRUE/U16
+ DEFAULT="FITS"
+.VARIABLE BLOCK
+ STRING-OPTIONAL
+ FITS image tape is blocked/not blocked,
+ BLOCK/NOBLOCK
+ DEFAULT=BLOCK
+.VARIABLE FACTOR
+ INTEGER-OPTIONAL
+ Blocking factor when BLOCK=BLOCK is selected. Maximum permitted value is 10.
+ Must be integer. 
+ Find Blocking factor from MIPL TAPES utility.
+ DEFAULT=1
+.VARIABLE PASS
+ STRING-OPTIONAL
+ Pass to VICAR history label the FITS label records beginning
+ with PASS="FITS KEYWORD". Normally this is done after a tape scan.
+ 
+ "BSCALE =", "BZERO =", "BUNIT =", "OBJECT =", "COMMENT =" and "DATE ="
+ keywords will always be passed to the VICAR label even if found before the
+ FITS keyword you choose for PASS=.
+ 
+ DEFAULT=-- (All FITS labels)
+.VARIABLE EXCISE
+ STRING-OPTIONAL
+ Don't pass to VICAR history label the FITS label records beginning
+ with EXCISE="FITS KEYWORD". This gives you the option of eliminating other
+ less helpful FITS  keywords. Normally this is done after a tape scan.
+ Up to 10 keywords may be excised in addition to those specified with the
+ COMMENT, HISTORY, and NULL keywords.
+.VARIABLE COMMENT
+ STRING-OPTIONAL
+ Pass/Don't Pass FITS "COMMENT =" labels
+ COMMENT/NOCOMMENT
+ DEFAULT=COMMENT
+.VARIABLE HISTORY
+ STRING-OPTIONAL
+ Pass/Don't Pass FITS "HISTORY =" labels
+ HISTORY/NOHISTORY
+ DEFAULT=HISTORY
+.VARIABLE NULL
+ STRING-OPTIONAL
+ Pass/Don't Pass FITS "           "(null) labels
+ NULL/NONULL
+ DEFAULT=NONULL
+.VARIABLE TABLIST
+ STRING-OPTIONAL
+ List/Nolist of FITS tables to screen
+ DEFAULT=NOLIST
+.END

@@ -1,0 +1,28 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM momgen
+
+   To Create the build file give the command:
+
+		$ vimake momlist		(VMS)
+   or
+		% vimake momlist		(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	momlist
+#define R2LIB
+
+#define MODULE_LIST momlist.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/* #define DEBUG */
+
+/************************* End of Imake file ***************************/

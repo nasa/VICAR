@@ -1,0 +1,180 @@
+1 LSPFIT,CLFIT,MOMENT,RMSFIT,POLYTRAN
+
+LSPFIT,CLFIT,MOMENT,RMSFIT, and POLYTRAN comprise a subroutine set for
+performing a polynomial fit over two sets of ordered pairs.  Two common
+applications are (1) the fitting of tiepoints to compute a distortion model for
+registering a pair of images (see program TPFIT) and (2) the measurement of
+geometric camera distortions by comparing the position of a set of imaged grid
+points to their known locations (see program LOCUS).
+
+Let (Xi,Yi) and (Ui,Vi), i=1,2,3,...,n be two sets of matching tiepoints.  The
+transformation mapping each (Ui,Vi) onto the corresponding (Xi,Yi) are the
+polynomials U=p(X,Y) and V=q(X,Y), where:
+
+ p(X,Y) = A00 + A10*X + A01*Y + A20*X**2 + A11*X*Y + A02*Y**2 + ... + A0,m*y**m
+ q(X,Y) = B00 + B10*X + B01*Y + B20*X**2 + B11*X*Y + B02*Y**2 + ... + B0,m*y**m
+
+The routine LSPFIT performs a least squares fit to determine the coefficients
+aij and bij which minimize the error between the polynomials and the actual
+points.  The routine CLFIT (Constrained Linear FIT) considers a linear
+transformation where the mapping is restricted to a combination of three basic
+operations: scale, rotation, and offset.
+
+The routine MOMENT computes statistical data from the tiepoints.  These are
+input to LSPFIT or CLFIT to perform the fit.  RMSFIT computes the error in the
+fit and optionally performs the transformation (by calling POLYTRAN).
+
+The equations used in this program set are documented in the following memo:
+   "Least squares polynomial fit routines", Gary Yagi, March 5, 1998.
+
+
+FORTRAN calling sequence:
+
+      INTEGER*4 IFIT,M,N,IER,MODE,IMAX
+      REAL*4 PTS(4,N),X,Y,U,V
+      REAL*8 MOM(N1),UMOM(N2,2),COEF(N2,2),RMS
+
+      CALL LSPFIT(M,MOM,UMOM,coef,ier)
+      CALL CLFIT(IFIT,MOM,UMOM,coef,ier)
+      CALL MOMENT(M,PTS,N,mom,umom)
+      CALL RMSFIT(MODE,M,PTS,N,COEF,rms,dmax,imax)
+      CALL POLYTRAN(M,COEF,X,Y,u,v)
+
+  The values N1 and N2, which determine the size of the arrays MOM(N1),
+  UMOM(N2,2), and COEF(N2,2) are computed as follows:
+
+                N1 = (M+1)(2M+1)
+		N2 = (M+1)(M+2)/2
+
+  where M is the order of the polynomial.
+
+C calling sequence:
+
+      Note:
+         Include file name: zlspfit.h
+
+         For the C interfaces, PTS is in Nx4 format (i.e. float pts[N][4];).
+         This is because Fortran matrix is in column-major order and C is 
+         row-major order.
+
+         ier should be the return value for subroutines zlspfit and zclfit.
+
+      int zlspfit    (int m, double *mom, double *umom, double *coef);
+      int zclfit     (int ifit, double *mom, double *umom, double *coef);
+      void zmoment   (int m, float *pts, int n, double *mom, double *umom);
+      void zrmsfit   (int mode, int m, float *pts, int n, double *coef, 
+                      double *rms, double *dmax, int *imax);
+      void zpolytran (int m, double *coef, 
+                      float x, float y, float *u, float *v);
+
+2 Arguments:
+
+
+  INTEGER M		Order of the polynomial.  0<= M <=100.
+
+  INTEGER IFIT
+	Code which specifies the combination of operations (rotate, scale,
+        offset) to be used in the fit.	Let the variables ROTATE, SCALE, and
+	OFFSET have values 1 or 0 depending whether that operation is allowed
+	or suppressed.  Then IFIT has the value:
+
+	        IFIT  ROTATE SCALE  OFFSET
+	          1      0      0      1
+	          2      0      1      0
+	          3      0      1      1
+	          4      1      0      0
+	          5      1      0      1
+	          6      1      1      0
+	          7      1      1      1
+
+	IFIT is a bit map which can be computed as follows:
+
+	        IFIT = 4*ROTATE + 2*SCALE + OFFSET
+
+  REAL*4 PTS(4,N)
+	Array of N data points (Xi,Yi) and (Ui,Vi) as follows:
+		PTS(1,I)=Xi		PTS(3,I)=Ui
+		PTS(2,I)=Yi		PTS(4,I)=Vi
+  INTEGER*4 N	Number of tiepoints in PTS array
+
+  REAL*8 MOM(N1),UMOM(N2,2)
+	MOM and UMOM contain statistical data about the tiepoints.  These
+ 	data are computed by routine MOMENT and used in computing the fit by
+	routines LSPFIT and CLFIT.
+
+        MOM contains sums of products sjk=SUM(Xi**j*Yi**k), i=1,2,3,...,n
+	in the following order:
+
+		s00
+		s10    s01
+		s20    s11    s02
+                s30    s21    s12    s03
+		.        .      .      .
+		.        .      .      .     .
+		.        .      .      .     .     .
+                s2m,0  s2m+1,1  .      .     .   s0,2m
+	where
+ 
+        UMOM contains sums of products ujk=SUM(Ui*Xi**j*Yi**k) and
+	vjk=SUM(Vi*Xi**j*Yi**k), i=1,2,3,...,n, in the following order:
+
+		u00
+		u10   u01
+		u20   u11    u02
+		.       .      .     .
+		.       .      .     .    .
+		.       .      .     .    .    .
+                um,0  um-1,1   .     .    .   u0,m
+		v00
+		v10   v01
+		v20   v11    v02
+		.       .      .     .
+		.       .      .     .    .
+		.       .      .     .    .     .
+                vm,0  vm+1,1   .     .    .   v0,m
+
+
+  REAL*8 COEF(N2,2)
+	Contains the coefficients Aij and Bij in the following order:
+
+		A00
+		A10   A01
+		A20   A11     A02
+		 .     .       .      .
+		 .     .       .      .     .
+		 .     .       .      .     .     .
+		Am,0  Am-1,1  Am-2,2  .     .     .  A0,m
+		B00
+		B10   B01
+		B20   B11     B02
+		 .     .       .      .
+		 .     .       .      .     .
+		 .     .       .      .     .     .
+		Bm,0  Bm-1,1  Bm-2,2  .     .     .  B0,m
+
+  INTEGER*4 IER		Return status, 0=success
+  REAL*8 RMS		RMS error
+  INTEGER*4 IMAX	Index to PTS with largest error
+
+  INTEGER*4 MODE
+	If MODE=1, the input (ui,vi) values in the PTS array are
+	replaced by their computed polynomial values.
+
+  REAL*4 X,Y,U,V
+	(X,Y) and (U,V) are the input and output coordinates from a call to
+        routine POLYTRAN, where
+
+		U=p(X,Y) and V=q(X,Y)
+
+2 Operation
+
+
+2 History
+
+  Original Programmer: Gary Yagi, March 5, 1998
+  Current Cognizant Programmer: Gary Yagi
+  Source Language: F
+  Revision history: New
+
+  April 06, 1998      Thomas Huang      Added C-bridges for the subroutines.
+

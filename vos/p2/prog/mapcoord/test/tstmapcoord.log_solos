@@ -1,0 +1,218 @@
+tstmapcoord
+
+
+-------------------------------------------------------------
+|-----------------------------------------------------------|
+|-----------------------------------------------------------|
+|---------------------TEST CASE 1---------------------------|
+|-----------------------------------------------------------|
+|-----------------------------------------------------------|
+-------------------------------------------------------------
+
+
+-------------------------------------------------------------
+|TEST 1 : INITIALIZE INPUT DATA                             |
+-------------------------------------------------------------
+  LET IDATA1=400.0
+  LET IDATA2=500.0
+  LET IDATA3=600.0
+  LET $ECHO="NO"
+-------------------------------------------------------------
+|TEST 1 : ON THE ORIGINAL IMAGE USING GLLPHOT.              |
+|         RESULTS FOR HERE SHOULD MATCH RESULTS FROM MAPCOORD |
+|         RUN.                                              |
+|Note added 12-Mar-2010 (LWK):  GLLPHOT has been obsoleted, |
+|so its output can no longer be used as a benchmark.  Tests |
+|will have to use logs of previous runs of this proc.       |
+-------------------------------------------------------------
+  MAPCOORD INP=/project/test_work/+
+testdata/mipl/gll/earth1.img       COORDIN=(4.000000000000e+02,4+
+.000000000000e+02,5.000000000000e+02,5.000000000000e+02,6.000000000000e+02,6.000000000000e+02)       OUT_LAT=DLAT OUT_LON=DLON
+Beginning VICAR task MAPCOORD
+MAPCOORD version May 18, 1998
+GIVEN POINTS ARE TAKEN AS LINE-SAMP.
+ LABEL SAYS THE PROJECT IS GLL
+Creating nominal geom parameters
+|----------------------||---------------------------|
+|   OBJECT SPACE       ||      WEST IN DEGREES      |
+|---------|------------||--------------|------------|
+|  LINE   |   SAMPLE   ||  LATITUDE    |  LONGITUDE |
+|---------|------------||--------------|------------|
+|  400.00 |   400.00   ||  -41.57478   |   28.09799 |
+|---------|------------||--------------|------------|
+|  499.99 |   499.99   ||  -31.99328   |   63.26208 |
+|---------|------------||--------------|------------|
+|  599.89 |   599.89   ||  -14.87613   |   87.74152 |
+|----------------------||---------------------------|
+
+MAPCOORD task completed.
+  LET $ECHO="NO"
+-------------------------------------------------------------
+|TEST 1 : NOW ADD MAP PROJECTION LABEL TO THE INPUT.        |
+|         THERE IS NO PROJECTION DONE. ONLY A LABEL WILL BE |
+|         ADDED.                                            |
+-------------------------------------------------------------
+  PERSLAB INP=/project/test_work/testdata/mipl/gll/earth1.img OUT=earth1_map.img
+Beginning VICAR task PERSLAB
+PERSLAB version (August 28, 2002)
+Project is GLL
+GETLABCON: warning indicator
+Correcting the NORTH_ANGLE with 90-degree offset
+Target planet body is: EARTH
+Planet id number        399
+  LET $ECHO="NO"
+-------------------------------------------------------------
+|TEST 1 : NOW RUN MAPCOORD ON THE OUTPUT IMAGE.               |
+-------------------------------------------------------------
+  MAPCOORD INP=earth1_map.img  +
+     COORDIN=(4.000000000000e+02,4.000000000000e+02,5.0000000000+
+00e+02,5.000000000000e+02,6.000000000000e+02,6.000000000000e+02)       OUT_LAT=DLAT OUT_LON=DLON
+Beginning VICAR task MAPCOORD
+MAPCOORD version May 18, 1998
+GIVEN POINTS ARE TAKEN AS LINE-SAMP.
+ LABEL SAYS THE PROJECT IS GLL
+|----------------------||---------------------------|
+|   OBJECT SPACE       ||      WEST IN DEGREES      |
+|---------|------------||--------------|------------|
+|  LINE   |   SAMPLE   ||  LATITUDE    |  LONGITUDE |
+|---------|------------||--------------|------------|
+|  400.00 |   400.00   ||  -41.57473   |   28.09827 |
+|---------|------------||--------------|------------|
+|  500.00 |   500.00   ||  -31.99133   |   63.26593 |
+|---------|------------||--------------|------------|
+|  600.00 |   600.00   ||  -14.85442   |   87.76544 |
+|----------------------||---------------------------|
+
+MAPCOORD task completed.
+  LET $ECHO="NO"
+-------------------------------------------------------------
+|TEST 1 : NOW CHECK TO SEE IF WE GET SAME LINE SAMPLE WHEN  |
+|         GIVEN THE SAME LAT LON FROM THE PREVIOUS INPUT.   |
+-------------------------------------------------------------
+  MAPCOORD INP=earth1_map.img COORDTYPE=LATLON  +
+     COORDIN=(-4.157473373413e+01,2.809826660156e+01,-3.19913311+
+0046e+01,6.326593017578e+01,-1.485441780090e+01,8.776544189453e+01)       OUT_LAT=DLAT OUT_LON=DLON
+Beginning VICAR task MAPCOORD
+MAPCOORD version May 18, 1998
+GIVEN POINTS ARE TAKEN AS LAT-LON.
+ LABEL SAYS THE PROJECT IS GLL
+|---------------------------||----------------------|
+|      WEST IN DEGREES      ||   OBJECT SPACE       |
+|--------------|------------||---------|------------|
+|  LATITUDE    |  LONGITUDE ||  LINE   |   SAMPLE   |
+|--------------|------------||---------|------------|
+|  -41.57473   |   28.09827 ||  400.00 |   400.00   |
+|--------------|------------||---------|------------|
+|  -31.99133   |   63.26593 ||  500.00 |   500.00   |
+|--------------|------------||---------|------------|
+|  -14.85442   |   87.76544 ||  600.00 |   600.00   |
+|---------------------------||----------------------|
+MAPCOORD task completed.
+  LET $ECHO="NO"
+MISMATCH 3.999989929199e+02 4.000000000000e+02
+MISMATCH 4.000016784668e+02 4.000000000000e+02
+MISMATCH 5.000005493164e+02 5.000000000000e+02
+MISMATCH 5.000020751953e+02 5.000000000000e+02
+MISMATCH 6.000000610352e+02 6.000000000000e+02
+MISMATCH 6.000009765625e+02 6.000000000000e+02
+-------------------------------------------------------------
+|TEST 2 : Voyaager image-space test                         |
+-------------------------------------------------------------
+Beginning VICAR task MAPCOORD
+MAPCOORD version May 18, 1998
+GIVEN POINTS ARE TAKEN AS LINE-SAMP.
+Warning::year number is not 4-digit.
+Warning::year number is not 4-digit.
+ LABEL SAYS THE PROJECT IS VGR-1
+Creating nominal geom parameters
+|----------------------||---------------------------|
+|   OBJECT SPACE       ||      WEST IN DEGREES      |
+|---------|------------||--------------|------------|
+|  LINE   |   SAMPLE   ||  LATITUDE    |  LONGITUDE |
+|---------|------------||--------------|------------|
+|  497.99 |   499.40   ||  -12.75861   |  175.23819 |
+|---------|------------||--------------|------------|
+|  614.66 |   615.43   ||   -6.70656   |  142.17203 |
+|---------|------------||--------------|------------|
+|  731.55 |   732.23   ||   -0.61849   |  102.66302 |
+|----------------------||---------------------------|
+
+MAPCOORD task completed.
+
+
+-------------------------------------------------------------
+|-----------------------------------------------------------|
+|-----------------------------------------------------------|
+|---------------------TEST CASE 3---------------------------|
+|-----------------------------------------------------------|
+|-----------------------------------------------------------|
+-------------------------------------------------------------
+
+
+-------------------------------------------------------------
+|TEST 3 : INITIALIZE INPUT DATA                             |
+-------------------------------------------------------------
+  LET IDATA1=825.0
+  LET IDATA2=867.0
+  LET IDATA3=897.0
+  LET IDATA4=672.0
+  LET $ECHO="NO"
+-------------------------------------------------------------
+|TEST 3 : USE A MOSAIC IMAGE AS NEXT TEST.                  |
+|   THE IMAGE 4600.byt AND 4605.byt ARE USED TO CREATE      |
+|   e6global.nmos. I HAVE ARBITRARILY PICKED POINTS OFF     |
+|   e6global.nmos, THAT I THOUGHT ARE SOMEWHAT RECOGNIZABLE |
+|   ON 460 IMAGES AND THAT IS THE REASON WHY THE LONGITUDE  |
+|   IS LITTLE OFF.                                          |
+-------------------------------------------------------------
+  LET $ECHO="NO"
+-------------------------------------------------------------
+|TEST 3 : MAPCOORD ON THE POINTS THAT I THINK MATCH WHEN    |
+|         GIVEN A VISUAL TEST.                              |
+-------------------------------------------------------------
+  MAPCOORD INP=/project/test_work/testdata/mipl/gll/e6global.nmos COORDIN=(8.25+
+0000000000e+02,8.670000000000e+02,8.970000000000e+02,6.720000000000e+02)       OUT_LAT=DLAT OUT_LON=DLON
+Beginning VICAR task MAPCOORD
+MAPCOORD version May 18, 1998
+GIVEN POINTS ARE TAKEN AS LINE-SAMP.
+ LABEL SAYS THE PROJECT IS GLL
+|----------------------||---------------------------|
+|   OBJECT SPACE       ||      WEST IN DEGREES      |
+|---------|------------||--------------|------------|
+|  LINE   |   SAMPLE   ||  LATITUDE    |  LONGITUDE |
+|---------|------------||--------------|------------|
+|  825.00 |   867.00   ||  -41.17764   |  195.48232 |
+|---------|------------||--------------|------------|
+|  897.00 |   672.00   ||  -38.42732   |  214.69397 |
+|----------------------||---------------------------|
+
+MAPCOORD task completed.
+  LET $ECHO="NO"
+-------------------------------------------------------------
+|TEST 3 : NOW CHECK TO SEE IF WE GET SAME LINE SAMPLE WHEN  |
+|         GIVEN THE SAME LAT LON FROM THE PREVIOUS INPUT.   |
+-------------------------------------------------------------
+  MAPCOORD INP=/project/test_work/testdata/mipl/gll/e6+
+global.nmos COORDTYPE=LATLON       COORDIN=(-4.1+
+17763900757e+01,1.954823150635e+02,-3.842732238770e+01,2.146939697266e+02)       OUT_LAT=DLAT OUT_LON=DLON
+Beginning VICAR task MAPCOORD
+MAPCOORD version May 18, 1998
+GIVEN POINTS ARE TAKEN AS LAT-LON.
+ LABEL SAYS THE PROJECT IS GLL
+|---------------------------||----------------------|
+|      WEST IN DEGREES      ||   OBJECT SPACE       |
+|--------------|------------||---------|------------|
+|  LATITUDE    |  LONGITUDE ||  LINE   |   SAMPLE   |
+|--------------|------------||---------|------------|
+|  -41.17764   |  195.48232 ||  825.00 |   867.00   |
+|--------------|------------||---------|------------|
+|  -38.42732   |  214.69397 ||  897.00 |   672.00   |
+|---------------------------||----------------------|
+MAPCOORD task completed.
+  LET $ECHO="NO"
+MISMATCH 8.969999389648e+02 8.970000000000e+02
+-------------------------------------------------------------
+|REMOVING IMAGES CREATED INTERMEDIATELY                     |
+-------------------------------------------------------------
+exit
+slogoff

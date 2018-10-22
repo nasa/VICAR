@@ -4,5 +4,5 @@
 all:  make_sub 
 
 make_sub: 
-	($(CD) sub; $(V2UTIL)/bldcomfiles.csh $(R1LIB))
+	($(CD) sub; $(V2UTIL)/bldcomfiles_nounpack.csh $(R1LIB))
 

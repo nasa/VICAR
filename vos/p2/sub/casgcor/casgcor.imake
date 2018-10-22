@@ -1,0 +1,7 @@
+#define SUBROUTINE casgcor
+
+#define MODULE_LIST casgcor.c
+
+#define USES_C
+
+#define P2_SUBLIB

@@ -1,0 +1,15 @@
+#define PROGRAM stretch
+
+#define MODULE_LIST stretch.f manual_stretch.f \
+                    hist_params.f get_histogram.f exclude_histogram.f \
+                    histogram_stretch.f bimodal.f \
+                    hpeak.f astretch.f post_stretch.f print_histogram.f stati.f
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/*#define DEBUG	/* remove on delivery */

@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine init_spice */
+#define SUBROUTINE init_spice
+#define MODULE_LIST  gll_spice_env.c init_spice.f initspice.c reset1.f zreset1.c
+#define FTN_STRING
+#define USES_FORTRAN
+#define USES_ANSI_C
+#define P2_SUBLIB
+#define LIB_NETWORK
+

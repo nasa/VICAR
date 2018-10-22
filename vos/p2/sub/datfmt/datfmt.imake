@@ -1,0 +1,22 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY datfmt
+
+   To Create the build file give the command:
+
+	$ vimake datfmt                     (VMS)
+   or
+	% vimake datfmt                     (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE datfmt
+
+#define MODULE_LIST datfmt.c
+
+#define FTN_STRING
+#define P2_SUBLIB
+
+#define USES_ANSI_C
+

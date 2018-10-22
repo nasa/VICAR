@@ -1,0 +1,26 @@
+/***********************************************************************
+ 
+                     IMAKE FILE FOR PROGRAM galsos
+ 
+   To Create the build file give the command:  vimake galsos
+ 
+************************************************************************/
+#define PROGRAM galsos
+ 
+#define MODULE_LIST galsos.c gll_ssi_bin.c gll_ssi_bin_ph2.c gllcalname.c \
+ get_ssi_prefix.c get_ssi_ph2_prefix.c
+#define INCLUDE_LIST gll_lrs.h gll_rts_main.h gll_ssi_edr.h gll_tlm_code.h \
+ gll_ph2_ssi_bin.h gll_rts_main_diff.h gll_ph2_ssi_edr.h gll_ssi_bin.h \
+ gll_ict_qqc.h gll_decompression.h gll_main.h gll_ssi_bin_diff.h
+ 
+#define MAIN_LANG_C
+#define USES_ANSI_C
+#define R2LIB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_SPICE
+#define LIB_FORTRAN
+#define LIB_MATH77
+/*#define DEBUG */	/* comment out on delivery */
+/************************* End of Imake file ***************************/

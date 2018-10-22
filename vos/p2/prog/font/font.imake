@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM font
+
+   To Create the build file give the command:
+
+		$ vimake font			(VMS)
+   or
+		% vimake font			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	font
+#define R2LIB
+
+#define MODULE_LIST font.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/*#define DEBUG*/
+/************************* End of Imake file ***************************/

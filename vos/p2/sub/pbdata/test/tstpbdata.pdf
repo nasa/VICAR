@@ -1,0 +1,13 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+!let $echo="yes"
+WRITE "*************NOTE TO TESTERS:********************"
+WRITE "Differences in testlogs may exist between platforms"
+WRITE "due to round off differences and differences in"
+WRITE "the display of character strings"
+WRITE " "
+WRITE "Test of subroutine PBDATA"
+tpbdata
+end-proc

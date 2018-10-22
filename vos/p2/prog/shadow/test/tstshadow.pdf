@@ -1,0 +1,86 @@
+procedure
+refgbl $echo
+body
+
+local inp1 string init="/project/test_work/testdata/mer/1F483288473EFFCMUFP1214L0M1.IMG"
+local inp2 string init="/project/test_work/testdata/mer/1F490747543EFFCNY9P1214L0M1.IMG"
+local inp3 string init="/project/test_work/testdata/mer/1F483644096EFFCMX8P1214L0M1.IMG"
+local inp4 string init="/project/test_work/testdata/mer/1F498644828EFFCONGP1214L0M1.IMG"
+local inp5 string init="/project/test_work/testdata/mer/1F484710941EFFCNBHP1214L0M1.IMG"
+local inp6 string init="/project/test_work/testdata/mer/1F517554350EFFCQG7P1214L0M1.IMG"
+local adaptive_out1 string init="1F483288473EFFCMUFP1214L0M1_adaptive.IMG"
+local adaptive_out2 string init="1F490747543EFFCNY9P1214L0M1_adaptive.IMG"
+local adaptive_out3 string init="1F483644096EFFCMX8P1214L0M1_adaptive.IMG"
+local adaptive_out4 string init="1F498644828EFFCONGP1214L0M1_adaptive.IMG"
+local adaptive_out5 string init="1F484710941EFFCNBHP1214L0M1_adaptive.IMG"
+local adaptive_out6 string init="1F517554350EFFCQG7P1214L0M1_adaptive.IMG"
+local global_out1 string init="1F483288473EFFCMUFP1214L0M1_global.IMG"
+local global_out2 string init="1F490747543EFFCNY9P1214L0M1_global.IMG"
+local global_out3 string init="1F483644096EFFCMX8P1214L0M1_global.IMG"
+local global_out4 string init="1F498644828EFFCONGP1214L0M1_global.IMG"
+local global_out5 string init="1F484710941EFFCNBHP1214L0M1_global.IMG"
+local global_out6 string init="1F517554350EFFCQG7P1214L0M1_global.IMG"
+local sk_out1 string init="1F483288473EFFCMUFP1214L0M1_adaptive_sk.IMG"
+local sk_out2 string init="1F490747543EFFCNY9P1214L0M1_adaptive_sk.IMG"
+local sk_out3 string init="1F483644096EFFCMX8P1214L0M1_adaptive_sk.IMG"
+local sk_out4 string init="1F498644828EFFCONGP1214L0M1_adaptive_sk.IMG"
+local sk_out5 string init="1F484710941EFFCNBHP1214L0M1_adaptive_sk.IMG"
+local sk_out6 string init="1F517554350EFFCQG7P1214L0M1_adaptive_sk.IMG"
+local illum_out1 string init="1F483288473EFFCMUFP1214L0M1.illum"
+local illum_out2 string init="1F490747543EFFCNY9P1214L0M1.illum"
+local illum_out3 string init="1F483644096EFFCMX8P1214L0M1.illum"
+local illum_out4 string init="1F498644828EFFCONGP1214L0M1.illum"
+local illum_out5 string init="1F484710941EFFCNBHP1214L0M1.illum"
+local illum_out6 string init="1F517554350EFFCQG7P1214L0M1.illum"
+local relf_out1 string init="1F483288473EFFCMUFP1214L0M1.refl"
+local relf_out2 string init="1F490747543EFFCNY9P1214L0M1.refl"
+local relf_out3 string init="1F483644096EFFCMX8P1214L0M1.refl"
+local relf_out4 string init="1F498644828EFFCONGP1214L0M1.refl"
+local relf_out5 string init="1F484710941EFFCNBHP1214L0M1.refl"
+local relf_out6 string init="1F517554350EFFCQG7P1214L0M1.refl"
+
+let _onfail="continue"
+let $echo="yes"
+!
+
+! ADAPTIVE GAMMA BRIGHTNESS CORRECTION TEST CASE
+shadow inp=&inp1 out=&adaptive_out1
+shadow inp=&inp2 out=&adaptive_out2
+shadow inp=&inp3 out=&adaptive_out3
+shadow inp=&inp4 out=&adaptive_out4
+shadow inp=&inp5 out=&adaptive_out5
+shadow inp=&inp6 out=&adaptive_out6
+
+! GLOBAL GAMMA BRIGHTNESS CORRECTION TEST CASE
+shadow inp=&inp1 out=&global_out1 GAMMA=0.5
+shadow inp=&inp2 out=&global_out2 GAMMA=0.6
+shadow inp=&inp3 out=&global_out3 GAMMA=0.7
+shadow inp=&inp4 out=&global_out4 GAMMA=0.8
+shadow inp=&inp5 out=&global_out5 GAMMA=0.9
+shadow inp=&inp6 out=&global_out6 GAMMA=1.0
+
+! SIGMA AND KSIZE TEST CASE
+shadow inp=&inp1 out=&sk_out1 sigma=0.9 ksize=5
+shadow inp=&inp2 out=&sk_out2 sigma=0.7 ksize=3
+shadow inp=&inp3 out=&sk_out3 sigma=1.0 ksize=5
+shadow inp=&inp4 out=&sk_out4 sigma=1.1 ksize=3
+shadow inp=&inp5 out=&sk_out5 sigma=0.8 ksize=7
+shadow inp=&inp6 out=&sk_out6 sigma=0.9 ksize=5
+
+! OUT_ILLUM TEST CASE
+shadow inp=&inp1 out=&adaptive_out1 out_illum=&illum_out1
+shadow inp=&inp2 out=&adaptive_out2 out_illum=&illum_out2
+shadow inp=&inp3 out=&adaptive_out3 out_illum=&illum_out3
+shadow inp=&inp4 out=&adaptive_out4 out_illum=&illum_out4
+shadow inp=&inp5 out=&adaptive_out5 out_illum=&illum_out5
+shadow inp=&inp6 out=&adaptive_out6 out_illum=&illum_out6
+
+! OUT_REFLECT TEST CASE
+shadow inp=&inp1 out=&adaptive_out1 out_reflect=&relf_out1
+shadow inp=&inp2 out=&adaptive_out2 out_reflect=&relf_out2
+shadow inp=&inp3 out=&adaptive_out3 out_reflect=&relf_out3
+shadow inp=&inp4 out=&adaptive_out4 out_reflect=&relf_out4
+shadow inp=&inp5 out=&adaptive_out5 out_reflect=&relf_out5
+shadow inp=&inp6 out=&adaptive_out6 out_reflect=&relf_out6
+
+End-proc

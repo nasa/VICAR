@@ -1,0 +1,35 @@
+1 VOSN4
+
+2  PURPOSE
+
+     To provide the calling program a buffer containing nominal Viking
+     Orbiter distortion correction data in the GEOMA format.
+
+2  CALLING SEQUENCE
+
+     CALL VOSN4(BUF)
+
+
+     BUF    is an 800 word array of GEOMA parameters returned.
+
+     VOSN4 should be called to get data for the camera serial number 4.
+     VOSN6 should be called to get data for the camera serial number 6.
+     VOSN7 should be called to get data for the camera serial number 7.
+     VOSN8 should be called to get data for the camera serial number 8.
+
+2  OPERATION
+
+     The data in the array is similar to the format as the parameter
+     file which can be input to GEOMA.  The difference between the
+     two formats is in the first word.  This subroutine begins with
+     NAH and the first word in the GEOMA dataset is the number of words
+     (800) following the first word.
+
+2  HISTORY
+
+     Original Programmer:  Gary Yagi
+     Current Cognizant Programmer:  Joel Mosher
+     Source Language:  Fortran
+     Latest Revision: 1, 24-JUN-1985
+
+     Ported for UNIX Conversion:  W.P. Lee;  November 4, 1992 

@@ -1,0 +1,32 @@
+procedure
+
+refgbl $autousage
+refgbl $echo
+refgbl $aecho
+refgbl $becho
+
+body
+
+let $autousage = "none"
+let $echo  = "yes"
+let $aecho = "yes"
+let $becho = "yes"
+
+!	generate the input image
+!
+gen +
+   out = frac.img +
+   nl  = 512 +
+   ns  = 512
+
+!	generate the contours and their annotation
+!
+conlab +
+   inp = frac.img +
+   out = doug.las
+
+let $echo  = "no"
+let $aecho = "no"
+let $becho = "no"
+
+end-proc

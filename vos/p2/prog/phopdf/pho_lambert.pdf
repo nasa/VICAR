@@ -1,0 +1,92 @@
+procedure option=selftutor help=*
+
+        parm ALBEDO_temp	real count=0:1 			def=1.0
+        parm ALBEDO		real count=0:1 valid=(0:1)     	def=--
+
+	PARMSET name=pho_lambert_sub help=*
+
+             parm ALBEDO	real count=0:1 valid=(0:1)     	def=--
+
+	END-PROC
+
+body
+
+	if (_tutor=1)
+
+	  restore-parm pho_lambert.par
+
+	  if ($count(ALBEDO)=0)
+	 						let ALBEDO_temp=1.0
+	  else
+		let ALBEDO_temp=&ALBEDO
+	  end-if
+
+	  tutor pho_lambert_sub 				+
+		|restore=pho_lambert.par, save=pho_lambert.par| +
+			ALBEDO=&ALBEDO_temp
+
+	  return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs needs "
+	   write " photometric function parameters "
+	   write " for the Lambert function."
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+
+.title
+'PHO_LAMBERT' sub-menu (for a photometry VICAR application program)
+
+.help
+
+PURPOSE:
+
+This is the sub-menu associated with the Lambert photometric
+function. This function needs just one input parameter (ALBEDO).
+
+.page
+
+MATHEMATICAL BACKGROUND :
+
+Lambert's law does provide a reasonably good descrition of the reflectance of 
+high-albedo surfaces, like snow, but the approximation is poor for dark 
+surfaces.
+
+The Lambert's law is based on the empirical observation that the brightnessses 
+of many surfaces are nearly independent of the emmission angle and azimuthal 
+angle and on the fact that the brightness of any surface must be proportional 
+to cos(incidence angle).
+
+bidirectional reflectance [1/str] :
+
+r(i,e,g)=A*cos(i)
+
+
+.page
+PROGRAMMER:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+.level1
+
+.var ALBEDO
+Surface albedo
+
+.level2
+
+.var ALBEDO
+This parameter gives the albedo of the surface. 
+
+.end
+

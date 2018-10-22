@@ -1,0 +1,155 @@
+procedure
+refgbl $echo
+body
+let $echo="yes"
+
+enable-log
+
+!
+!gen out=b.img nl=10 ns=10
+!
+!MAP3 b.img ster_target.img NL=500 NS=500 'STEREOGR SCAL=.1 +
+!   LINE=250 SAMP=250 LATI=90 LONG=0 +
+!  nora=0 'NOGEOM 'NOSEDR 'NOPROJEC radii=(10,10,10) +
+! ommatrix=(1.,0.,0.,0.,1.,0.,0.,0.,1.) rsvector=(1.,1.,1.)
+!
+! conformal using snyder values
+!mapaux inp=(ster_target.img,snyder_lat.img,snyder_lon.img,tissot.img) +
+! out=(a.img,angle.img) planet=phobos grid=30.
+!overlay inp=a.img out=ster_aux.img maxdn=0 dla1=30 dlo1=30 dla2=30 dlo2=30 +
+! 'nonumber
+!xvd ster_aux.img
+!
+! conformal using auxiliary values
+!mapaux inp=(ster_target.img,cen_lat.img,cen_lon.img,tissot.img) +
+! out=(a.img,angle.img) planet=phobos grid=10.
+!overlay inp=a.img out=ster_aux.img maxdn=0 dla1=10 dlo1=10 dla2=10 dlo2=10 +
+! 'nonumber
+!concat inp=(ster_aux.img,angle.img) out=ster_mos.img percent=3. ns=1000
+!xvd ster_mos.img
+!
+!MAP3 b.img sinu_target.img NL=350 NS=750 'SINUSOID SCAL=.1 +
+!   LINE=175 SAMP=375 LATI=0 LONG=0 NORANGLE=0 +
+!  'NOGEOM 'NOSEDR 'NOPROJEC radii=(11.144,11.144,11.144) +
+! ommatrix=(1.,0.,0.,0.,1.,0.,0.,0.,1.) rsvector=(1.,1.,1.)
+!
+! authalic using snyder values
+!mapaux inp=(sinu_target.img,auth_snyder_lat.img,auth_snyder_lon.img, +
+! sinu_triax_resid.img) +
+! out=(a.img,sinu_resid_proj.img) planet=phobos grid=10.
+!overlay inp=a.img out=sinu_aux.img maxdn=0 dla1=10 dlo1=10 dla2=10 dlo2=10 +
+! 'nonumber
+!concat inp=(sinu_aux.img,sinu_resid_proj.img) +
+! out=sinu_mos.img percent=3. ns=750
+!xvd sinu_mos.img
+!barne_r inp=sinu_mos.img miplbox=21 primary=42057
+!
+! authalic using auxiliary values
+!mapaux inp=(sinu_target.img,sinu_cen_lat.img,sinu_cen_lon.img,sinu_resid.img) +
+! out=(a.img,sinu_resid_proj.img) planet=phobos grid=10.
+!overlay inp=a.img out=sinu_aux.img maxdn=0 dla1=10 dlo1=10 dla2=10 dlo2=10 +
+! 'nonumber
+!concat inp=(sinu_aux.img,sinu_resid_proj.img) +
+! out=sinu_mos.img percent=3. ns=750
+!xvd sinu_mos.img
+!barne_r inp=sinu_mos.img miplbox=21 primary=42057
+!
+! authalic from Cheng's solution
+gen out=b.img nl=500 ns=500
+areaiso out= +
+ (area_lat.img,area_lon.img,area_map.img,angle_map.img,del_area_lat.img, +
+ del_area_lon.img) +
+ planet=phobos 'north
+mapaux inp=(b.img,area_lat.img,area_lon.img,area_map.img) +
+ out=(n_area_projection.img,n_area_residual.img) grid=10 'north
+areaiso out= +
+ (area_lat.img,area_lon.img,area_map.img,angle_map.img,del_area_lat.img, +
+ del_area_lon.img) +
+ planet=phobos 'south
+mapaux inp=(b.img,area_lat.img,area_lon.img,area_map.img) +
+ out=(s_area_projection.img,s_area_residual.img) grid=10 'south
+astrtchr inp=n_area_residual.img out=x.img excl=(-1000.,.1)
+astrtchr inp=s_area_residual.img out=y.img excl=(-1000.,.1)
+concat inp=(n_area_projection.img,x.img, +
+ s_area_projection.img,y.img) out=area_projection.img +
+ ns=1000
+!xvd area_projection.img
+!
+! Phobos auxiliary conformal solution
+gen out=b.img nl=10 ns=10
+MAP3 b.img north_target.img NL=500 NS=500 'STEREOGR SCAL=.1 +
+   NORANGLE=0 LINE=250 SAMP=250 LATI=90 LONG=0 +
+  'NOGEOM 'NOSEDR 'NOPROJEC radii=(10,10,10) +
+ ommatrix=(1.,0.,0.,0.,1.,0.,0.,0.,1.) rsvector=(1.,1.,1.) +
+ cscale=1. focl=1.
+MAP3 b.img south_target.img NL=500 NS=500 'STEREOGR SCAL=.1 +
+   NORANGLE=0 LINE=250 SAMP=250 LATI=-90 LONG=0 +
+  'NOGEOM 'NOSEDR 'NOPROJEC radii=(10,10,10) +
+ ommatrix=(1.,0.,0.,0.,1.,0.,0.,0.,1.) rsvector=(1.,1.,1.) +
+ cscale=1. focl=1.
+efgiso out=(E.img,F.img,G.img,R.img) planet=phobos nl=180 ns=360
+efgiso out=(E6.img,F6.img,G6.img,R6.img) planet=phobos nl=180 ns=360 +
+ nlw=19 nsw=37
+efgiso out=(E5.img,F5.img,G5.img,R5.img) planet=phobos nl=180 ns=360 +
+ nlw=11 nsw=19
+efgiso out=(E4.img,F4.img,G4.img,R4.img) planet=phobos nl=180 ns=360 +
+ nlw=7 nsw=9
+efgiso out=(E3.img,F3.img,G3.img,R3.img) planet=phobos nl=180 ns=360 +
+ nlw=5 nsw=5
+efgiso out=(E2.img,F2.img,G2.img,R2.img) planet=phobos nl=180 ns=360 +
+ nlw=3 nsw=3
+efgiso out=(SE.img,SF.img,SG.img,SR.img) planet=phobos nl=180 ns=360 +
+  triaxial=(11.7,11.7,11.7)
+auxiliary inp=( +
+ E6.img,F6.img,G6.img, +                   
+ E5.img,F5.img,G5.img, +
+ E4.img,F4.img,G4.img, +
+ E3.img,F3.img,G3.img, +
+ E2.img,F2.img,G2.img, +
+ E.img,F.img,G.img,SE.img,SF.img,SG.img) +
+ nl=180 ns=360 out=(cen_lat.img,cen_lon.img,tissot.img,+
+ del_lat.img,del_lon.img) loop=10 range=.2
+mapaux inp=(north_target.img,cen_lat.img,cen_lon.img,tissot.img) +
+ out=(a.img,n_tissot.img) planet=phobos grid=10.
+overlay inp=a.img out=n_ster_aux.img maxdn=0 dla1=10 dlo1=10 dla2=10 dlo2=10 +
+ 'nonumber
+mapaux inp=(south_target.img,cen_lat.img,cen_lon.img,tissot.img) +
+ out=(b.img,s_tissot.img) planet=phobos grid=10.
+overlay inp=b.img out=s_ster_aux.img maxdn=0 dla1=10 dlo1=10 dla2=10 dlo2=10 +
+ 'nonumber
+concat inp=(a.img,b.img,n_ster_aux.img,s_ster_aux.img, +
+ n_tissot.img,s_tissot.img) +
+ out=ster_mos.img percent=3. ns=1000
+!xvd ster_mos.img
+!
+! Phobos auxiliary authalic solution
+gen out=b.img nl=10 ns=10
+MAP3 b.img sinu_target.img NL=350 NS=750 'SINUSOID SCAL=.1 +
+   LINE=175 SAMP=375 LATI=0 LONG=0 NORANGLE=0 +
+  'NOGEOM 'NOSEDR 'NOPROJEC radii=(11.7,11.7,11.7) +
+ ommatrix=(1.,0.,0.,0.,1.,0.,0.,0.,1.) rsvector=(1.,1.,1.) +
+ cscale=1. focl=1.
+efgiso out=(E.img,F.img,G.img,R.img) planet=phobos nl=180 ns=360
+efgiso out=(SE.img,SF.img,SG.img,SR.img) planet=phobos nl=180 ns=360 +
+  triaxial=(11.7,11.7,11.7)
+auxiliary inp=( +
+ E6.img,F6.img,G6.img, +
+ E5.img,F5.img,G5.img, +
+ E4.img,F4.img,G4.img, +
+ E3.img,F3.img,G3.img, +
+ E2.img,F2.img,G2.img, +
+ E.img,F.img,G.img,SE.img,SF.img,SG.img) +
+ nl=180 ns=360 out=(sinu_cen_lat.img,sinu_cen_lon.img,sinu_resid.img,+
+ sinu_del_lat.img,sinu_del_lon.img) loop=10 range=.2 'authalic
+mapaux inp=(sinu_target.img,sinu_cen_lat.img,sinu_cen_lon.img,sinu_resid.img) +
+ out=(a.img,sinu_resid_proj.img) planet=phobos grid=10.
+overlay inp=a.img out=sinu_aux.img maxdn=0 dla1=10 dlo1=10 dla2=10 dlo2=10 +
+ 'nonumber
+concat inp=(a.img,sinu_aux.img,sinu_resid_proj.img) +
+ out=sinu_mos.img percent=3. ns=750
+!xvd sinu_mos.img
+!
+
+disable-log
+
+end-proc

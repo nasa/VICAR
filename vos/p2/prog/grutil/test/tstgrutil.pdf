@@ -1,0 +1,37 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let _onfail="continue"
+let $echo="yes"
+let $autousage="none"
+!	Make three 2-D graphics files
+  IBIS-GEN A  DATA=(100,10,150,10,150,15,0,0) NC=2 datacol=(1,2)
+  IBIS-GEN B  DATA=(200,20,250,20,250,25,0,0) NC=2 datacol=(1,2)
+  IBIS-GEN C  DATA=(300,30,350,30,350,35,0,0) NC=2 datacol=(1,2)
+  IBIS-LIST A
+  IBIS-LIST B
+  IBIS-LIST C
+!	Test append option
+  GRUTIL (A,B,C) D  DIM=2 'APPEND
+  IBIS-LIST D GR1=2 
+!	Test 2D to 3D option
+  GRUTIL (A,B,C) E  '2DTO3D
+  IBIS-LIST E   GR1=3
+!	Test 3D to 2D option
+  GRUTIL E  (F,G)   '3DTO2D
+  IBIS-LIST F     GR1=2
+  IBIS-LIST G     GR1=2
+!	Test swap option
+  GRUTIL D  H  DIM=2  'SWAP
+  IBIS-LIST H     GR1=2
+!	Test redim option
+  GRUTIL E  I  DIM=3 OUTDIM=2 'REDIM
+  IBIS-LIST I     GR1=2
+!	Test fill option
+  GRUTIL D  J  INTERVAL=2  'FILL
+  IBIS-LIST J     GR1=2  
+!	Test smooth option
+  GRUTIL J  K  INTERVAL=10  'SMOOTH
+  IBIS-LIST K     GR1=2  
+end-proc

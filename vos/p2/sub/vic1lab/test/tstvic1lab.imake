@@ -1,0 +1,13 @@
+/* Imake file for Test of VICAR subroutine VIC1LAB */
+
+#define PROGRAM tvic1lab
+
+#define MODULE_LIST tvic1lab.f
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+

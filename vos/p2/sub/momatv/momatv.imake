@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine MOMATV  */
+
+#define SUBROUTINE  momatv
+
+#define MODULE_LIST  momatv.f  
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

@@ -1,0 +1,7 @@
+#define SUBROUTINE logo
+
+#define MODULE_LIST logo.f
+
+#define P3_SUBLIB
+
+#define USES_FORTRAN

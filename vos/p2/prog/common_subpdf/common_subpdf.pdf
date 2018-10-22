@@ -1,0 +1,16 @@
+procedure help=*
+body
+write " "
+write "**********************************************************************"
+write " "
+write " This procedure is only a dummy and does nothing. "
+write " It helps to install the common_subpdf's into the VICAR. "
+write " "
+write "**********************************************************************"
+
+!# annot function="VICAR Utilities"
+
+end-proc
+
+.title
+Various sub-PDFs which can be used by menu-driven PDFs        

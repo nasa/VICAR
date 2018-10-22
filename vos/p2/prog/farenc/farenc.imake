@@ -1,0 +1,30 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM farenc
+
+   To Create the build file give the command:
+
+		$ vimake farenc			(VMS)
+   or
+		% vimake farenc			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	farenc
+#define R2LIB
+
+#define MODULE_LIST farenc.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define FTNINC_LIST mp_for_defs
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_SPICE
+#define LIB_NETWORK
+#define LIB_MATH77
+/************************* End of Imake file ***************************/

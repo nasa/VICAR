@@ -1,0 +1,12 @@
+/* Imake file for VICAR subroutine JDAY*/
+
+#define SUBROUTINE  jday
+
+#define MODULE_LIST  jday.f  zjday.c
+
+#define P2_SUBLIB
+
+#define USES_ANSI_C
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+

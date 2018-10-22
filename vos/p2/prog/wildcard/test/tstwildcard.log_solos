@@ -1,0 +1,46 @@
+tstwildcard
+let $autousage="none"
+local FILES STRING COUNT=0:100
+flag-del debug
+gen TEST01.IMG 5 5
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+if ($syschar(1) = "VAX_VMS")
+else
+  ush cp TEST01.IMG TEST02.IMG
+  ush cp TEST01.IMG TEST03.IMG
+  ush mkdir tstwildcard
+  ush cp TEST01.IMG tstwildcard
+  ush cp TEST02.IMG tstwildcard
+end-if
+if (PCA="PCA") flag-add debug
+if ($syschar(1) = "VAX_VMS")
+else
+  wildcard inp='TEST*.IMG' loc=FILES n=50
+let $echo="no"
+Beginning VICAR task wildcard_unix
+WILDCARD version 05-SEP-94
+
+FILES=("/home/lwk/test_solos/TEST01.IMG","/home/lwk/test_solos/TEST02.IMG",
+"/home/lwk/test_solos/TEST03.IMG","/home/lwk/test_solos/tstwildcard/TEST01.IMG",
+"/home/lwk/test_solos/tstwildcard/TEST02.IMG")
+
+Beginning VICAR task wildcard_unix
+WILDCARD version 05-SEP-94
+
+FILES="/home/lwk/test_solos/TEST03.IMG"
+
+Beginning VICAR task wildcard_unix
+WILDCARD version 05-SEP-94
+
+FILES="/home/lwk/test_solos/tstwildcard/TEST02.IMG"
+
+Beginning VICAR task wildcard_unix
+WILDCARD version 05-SEP-94
+
+FILES=("/home/lwk/test_solos/tstwildcard/TEST01.IMG",
+"/home/lwk/test_solos/tstwildcard/TEST02.IMG")
+
+exit
+slogoff

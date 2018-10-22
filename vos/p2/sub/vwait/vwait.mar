@@ -1,0 +1,32 @@
+	.psect vwait
+	.title vwait
+;
+;	CALL VWAIT(N)
+;	INTEGER*4 N
+;
+;  wait for N x 0.01 seconds.
+;  (max. time = # 10**-4-sec-units per longword = 100 hours)
+;
+;  83-11-22  ...LWK...
+;
+	.entry vwait,^m<>
+;
+	movl	@4(ap),r0		; store N
+	clrl	r1			; clear hi bits
+	mull2	#100,r0			; convert to 10**-4 sec units
+	ashq	#10,r0,r0		; convert to 100-nanosec in [r1,r0]
+	mcoml	r1,r1			; complement hi 32 bits
+	mcoml	r0,r0			; complement lo 32 bits
+	incl	r0			; add 1 for negate
+	bcc	10$			; branch if no carry
+	incl	r1			; else carry to hi part
+10$:	movq	r0,deltim		; store result
+	$setimr_s #0,deltim,,		; set timer
+	$waitfr_s #0			; wait
+	movl	#ss$_normal,r0		; normal return code
+	ret
+;
+	.PSECT	VWAIT_DATA,NOEXE,WRT,QUAD
+deltim:	.blkq	1
+;
+	.end

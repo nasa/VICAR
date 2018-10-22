@@ -1,0 +1,12 @@
+#define  PROGRAM   minfilt
+
+#define MODULE_LIST minfilt.f
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB 
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB

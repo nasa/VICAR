@@ -1,0 +1,578 @@
+      INCLUDE 'VICMAIN_FOR'
+      SUBROUTINE MAIN44
+C
+C        'XFORM'   LINEAR TRANSFORMATION PROGRAM
+C
+C	 8 JAN  04       ...REA... Add BIL output capability,
+C				   Expand permitted number of channels to 300
+C				   Correct rounding bug for negative numbers.
+C       23 MAR  00       ...REA... Add BIL, BSQ input capability,
+C                                  change USE parameter name to USEBANDS,
+C				   and change HISTSIZE and RANGE defaults
+C	15 APR  91       ...REA... COMBINE ASU & PLDSJ1 VERSIONS FOR UNIX
+C	30 JUNE 86       ...REA... REWRITE, IGNORING AP COMPATIBILITY	
+C        5 JAN  77	 ...JDA... INITIAL RELEASE
+C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C
+C        PARAMETERS
+C     'MATRIX',...  TRANSFORMATION MATRIX (NI COL  X  NO LINES)
+C     'PRESET'      SCALE PARAMETERS ARE PRESET TO X=0.    Y=1.
+C                   THE DEFAULT OF BOTH 'SCALE' & 'PRESET' IS AUTOSCAN
+C                   WHICH SCANS DATA & COMPUTES SCALE PARAMETERS
+C     'PERCENT',R   (DECIMAL) PERCENT HISTOGRAM SATURATION (DEFAULT=1.)
+C     'HPERCENT',R   PERCENT SATURATION AT HIGH END.(DEFAULT=0.5)
+C     'LPERCENT',R    PERCENT SATURATION AT LOW END. (DEFAULT=0.5)
+C     'INC',N       LINE & SAMPLE INCREMENT IN AUTOSCAN
+C     'LINC',N      LINE INCREMENT IN AUTOSCAN
+C     'SINC',N      SAMPLE INCREMENT IN AUTOSCAN
+C     'CENTER',R    OUTPUT DATA CENTERED ABOUT R
+C     'SPREAD',R    (DECIMAL) DESIRED SPREAD OF OUTPUT HISTOGRAM
+C     'FIRM'        TRUNCATES ALL VALUES TO THE 'SPREAD' RANGE
+C     'MSS',I       I IS THE NUMBER OF INTERLEAVED BANDS ON INPUT.
+C     'AREA',SL,SS,NL,NS   AUTO-SCAN SAMPLE AREA
+C     'FORMAT','XXXX' OUTPUT FORMAT  ('BYTE', 'HALF', 'FULL', 'REAL') 
+C     'USEBANDS',I,J...  I,J,... ARE THE BAND NUMBERS TO USE AS INPUT DATA.
+C     'GAIN',I,Y... GAIN = Y FOR BAND I
+C     'OFFSET',I,X... OFFSET = X FOR BAND I
+C     'EXCLUD',R    EXCLUDE INPUT PIXEL R FROM SCAN
+C     'HISTSIZE',I  NUMBER OF HISTOGRAM BINS PER OUTPUT
+C     'RANGE',X,Y   VALUES ASSOCIATED WITH THE FIRST AND LAST HISTOGRAM BINS
+C
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+C
+C
+C WE USE THE FOLLOWING CONVENTIONS:
+C
+C  NIDS	   =  NUMBER OF INPUT DATASETS
+C  NODS	   =  NUMBER OF OUTPUT DATASETS
+C  NI	   =  NUMBER OF INPUT BANDS
+C  NO	   =  NUMBER OF OUTPUT BANDS
+C  NB      =  NUMBER OF INPUT BANDS AVAILABLE (MSS, BIL, BSQ, 
+C						or separate inputs)
+C
+C  NSICHN  =  NUMBER OF SAMPLES / INPUT BAND
+C  NSI     =  NUMBER OF SAMPLES / INPUT LINE
+C  NSO     =  NUMBER OF SAMPLES / OUTPUT LINE
+C
+C
+	PARAMETER (NDIM=300)
+	EXTERNAL SCN,XFM
+	COMMON /SCANBLOCK/LINC,ISINC,BOT,TOP,EXCLUD,EXCL,CENTER,SPREAD,
+     +			  HGAIN,HOFFSET,NAREAS,IAREA
+	LOGICAL EXCL
+	INTEGER IAREA(200)
+	COMMON /IOBLOCK/NI,NO,NIDS,NODS,XMATRIX,INUNIT,IOUTUNIT,GAIN,
+     +			OFFSET,IBND,NSICHN,ISL,ISS,NL,NSO,
+     +			CUTOFFB,CUTOFFT,MSS,MSSSUB,IFMT
+	REAL CLIPLO(4)/0.0,-32768.0,-2.14748E9,-1.70141E38/
+	REAL CLIPHI(4)/255.0,32767.0,2.14748E9,1.70141E38/
+	REAL GAIN(NDIM),OFFSET(NDIM),XMATRIX(NDIM,NDIM),RPARM(NDIM*NDIM)
+	INTEGER IBND(NDIM),INUNIT(30),IOUTUNIT(NDIM),IPARM(NDIM)
+	LOGICAL SCAN/.TRUE./
+	LOGICAL MSS,MSSSUB,XVPTST
+	CHARACTER*132 BUF
+	CHARACTER*4 FORMAT,OFORMAT,ORG
+C								      initialize
+	CALL XVMESSAGE('XFORM version 8-JAN-2004',' ')
+	DO I=1,NDIM
+	    GAIN(I) = 1.0
+	    OFFSET(I) = 0.0
+	    IBND(I) = I
+	END DO
+C
+C					open input datasets, get size field
+	CALL XVPCNT('INP',NIDS)
+	CALL XVPCNT('OUT',NODS)
+	DO I=1,NIDS
+	    CALL XVUNIT(INUNIT(I),'INP',I,ISTAT,' ')
+	    CALL XVOPEN(INUNIT(I),ISTAT,'U_FORMAT','REAL',
+     +			'IO_ACT','SA','OPEN_ACT','SA',' ')
+            CALL XVGET(INUNIT(I),ISTAT,'ORG',ORG,' ')
+            IF (ORG .EQ. 'BIP') THEN
+		CALL XVMESSAGE('BIP format is not supported',' ')
+		CALL ABEND
+	    ENDIF
+	END DO
+	CALL XVSIZE(ISL,ISS,NL,NS,NLI,NSI)
+	CALL XVGET(INUNIT(1),ISTAT,'FORMAT',FORMAT,'NB',NB,' ')
+	IF(ISL+NL-1.GT.NLI) THEN
+	    CALL XVMESSAGE(
+     +		' Number of lines requested exceeds input size',' ')
+	    CALL ABEND
+	ENDIF
+	IF (NIDS.GT.1) NB=NIDS
+C
+C					        *** PROCESS PARAMETERS ***
+C
+C									format
+	CALL XVPARM('FORMAT',OFORMAT,ICOUNT,IDEF,0)
+	IF (ICOUNT.EQ.1) FORMAT = OFORMAT
+	IFMT = 0
+	IF(FORMAT.EQ.'BYTE') IFMT=1
+	IF(FORMAT.EQ.'HALF') IFMT=2
+	IF(FORMAT.EQ.'FULL') IFMT=3
+	IF(FORMAT.EQ.'REAL') IFMT=4
+	IF(IFMT.EQ.0) THEN
+	    WRITE (BUF,100) FORMAT
+  100	    FORMAT(A8,' pixel format is not supported')
+	    CALL XVMESSAGE(BUF,' ')
+	    CALL ABEND
+	END IF
+C									inc
+	CALL XVPARM('INC',LINC,ICOUNT,IDEF,0)
+	ISINC = LINC
+C									linc
+	CALL XVPARM('LINC',I,ICOUNT,IDEF,0)
+	IF (ICOUNT.EQ.1) LINC=I
+C									sinc
+	CALL XVPARM('SINC',I,ICOUNT,IDEF,0)
+	IF (ICOUNT.EQ.1) ISINC=I
+C									percent
+	CALL XVPARM('PERCENT',PCENT,ICOUNT,IDEF,0)
+	BOT = PCENT/2.0
+	TOP = PCENT/2.0
+C									lpercent
+	CALL XVPARM('LPERCENT',RPARM,ICOUNT,IDEF,1)
+	IF(ICOUNT.EQ.1) BOT=RPARM(1)
+C									hpercent
+	CALL XVPARM('HPERCENT',RPARM,ICOUNT,IDEF,1)
+	IF(ICOUNT.EQ.1) TOP=RPARM(1)
+	PCENT = BOT+TOP
+C									exclude
+	CALL XVPARM('EXCLUDE',EXCLUD,ICOUNT,IDEF,0)
+	EXCL = ICOUNT .NE. 0 
+C									spread
+	CALL XVPARM('SPREAD',SPREAD,ICOUNT,IDEF,0)
+	IF(ICOUNT.EQ.0) SPREAD = CLIPHI(IFMT) - CLIPLO(IFMT)
+C									center
+	CALL XVPARM('CENTER',CENTER,ICOUNT,IDEF,0)
+	IF (ICOUNT.EQ.0) THEN
+	    IF (IFMT .EQ. 1) THEN
+		CENTER = SPREAD / 2.0
+	    ELSE
+		CENTER = 0.0
+	    END IF
+	END IF
+C									firm
+	IF (XVPTST('FIRM') ) THEN
+	    CUTOFFB = CENTER-SPREAD/2.0
+	    CUTOFFT = CENTER+SPREAD/2.0
+	ELSE
+	    CUTOFFB = CLIPLO(IFMT)
+	    CUTOFFT = CLIPHI(IFMT)
+	END IF
+C									mss
+	CALL XVPARM('MSS',NIMSS,ICOUNT,IDEF,0)
+	IF (ICOUNT.EQ.1) THEN
+	    MSS = .TRUE.
+	    NB = NIMSS
+	    NSICHN = NSI/NB
+	    IF (NIMSS*NSICHN.NE.NSI) THEN
+		CALL XVMESSAGE(
+     + ' number of input samples is not consistent with number of bands'
+     +  ,' ')
+		CALL ABEND
+	    ENDIF
+	ELSE
+	    MSS = .FALSE.
+	    NSICHN = NSI
+	END IF
+	IF(NS.EQ.NSI) THEN
+	    MSSSUB = .FALSE.
+	    NSO = NSICHN
+	ELSE
+	    MSSSUB = .TRUE.
+	    NSO = NS
+	    IF(ISS+NSO-1.GT.NSI) THEN
+		CALL XVMESSAGE(
+     +           ' Number of samples specified exceeds input size',' ')
+		CALL ABEND
+	    ENDIF
+	END IF
+C									usebands
+	CALL XVPARM('USEBANDS',IPARM,ICOUNT,IDEF,NDIM)
+	IF(ICOUNT.NE.0) THEN
+	    MSSSUB = .TRUE.
+	    NI = ICOUNT
+ 	    IF(NI.GT.NB) THEN
+		CALL XVMESSAGE(' Inconsistent MSS and USE parameters',
+     +					' ')
+		CALL ABEND
+	    ENDIF
+	    DO J=1,NI
+		IBND(J) = IPARM(J)
+	    END DO
+	ELSE
+	    NI = NB
+	END IF
+C									area
+	CALL XVPARM('AREA',IAREA,ICOUNT,IDEF,0)
+	IF (MOD(ICOUNT,4) .NE. 0) THEN
+	    CALL XVMESSAGE(
+     +			' Invalid number of area parameter values',' ')
+	    CALL ABEND
+	ENDIF
+	IF(ICOUNT.EQ.0) THEN
+	    IAREA(1) = ISL
+	    IAREA(2) = ISS
+	    IAREA(3) = NL
+	    IAREA(4) = NSO
+	    NAREAS = 1
+	ELSE
+	    NAREAS = ICOUNT/4
+	END IF
+C									matrix
+	CALL XVPARM('MATRIX',RPARM,ICOUNT,IDEF,0)
+	NO = ICOUNT/NI
+	IF (NI*NO.NE.ICOUNT) THEN
+	    CALL XVMESSAGE(' Invalid number of matrix elements',' ')
+	    CALL ABEND
+	ENDIF
+	N = 1
+	DO I=1,NO
+	    DO J=1,NI
+		XMATRIX(J,I) = RPARM(N)
+		N = N+1
+	    END DO
+	END DO
+C									preset
+	IF(XVPTST('PRESET')) SCAN=.FALSE.
+C									gain
+	CALL XVPARM('GAIN',RPARM,ICOUNT,IDEF,0)
+	IF (ICOUNT.NE.0) THEN
+	    SCAN=.FALSE.
+	    IF (ICOUNT.EQ.1) THEN
+		DO J=1,NO
+		    GAIN(J) = RPARM(1)
+		END DO
+	    ELSE
+		DO J=1,ICOUNT
+		    GAIN(J) = RPARM(J)
+		END DO
+	    END IF
+	END IF
+C									offset
+	CALL XVPARM('OFFSET',RPARM,ICOUNT,IDEF,0)
+	IF (ICOUNT.NE.0) THEN
+	    SCAN=.FALSE.
+	    IF (ICOUNT.EQ.1) THEN
+		DO J=1,NO
+                    OFFSET(J) = RPARM(1)
+	        END DO
+	    ELSE
+		DO J=1,ICOUNT
+		    OFFSET(J)=RPARM(J)
+		END DO
+	    END IF
+	END IF
+C									histsize
+	CALL XVPARM('HISTSIZE',IHSTLEN,ICOUNT,IDEF,0)
+C									range
+	CALL XVPARM('RANGE',RPARM,ICOUNT,IDEF,0)
+	HGAIN = (IHSTLEN-1)/(RPARM(2)-RPARM(1))
+	HOFFSET = 1.0 - HGAIN*RPARM(1)
+C								open outputs
+	IF (NODS .EQ. 1) THEN
+	    IF (NO .EQ. 1) THEN
+		ORG = 'BSQ'
+	    ELSE
+		ORG = 'BIL'
+	    END IF
+	    CALL XVUNIT(IOUTUNIT(1),'OUT',1,ISTAT,' ')
+	    CALL XVOPEN(IOUTUNIT(1),ISTAT,'U_NL',NL,'U_NS',NSO,
+     +			'OP','WRITE','OPEN_ACT','SA','IO_ACT','SA',
+     +			'U_FORMAT','REAL','O_FORMAT',FORMAT,'U_NB',NO,
+     +			'U_ORG',ORG,' ') 
+	    DO J=1,NO
+		IOUTUNIT(J) = IOUTUNIT(1)
+	    END DO
+	ELSE
+	    DO I=1,NODS
+		CALL XVUNIT(IOUTUNIT(I),'OUT',I,ISTAT,' ')
+		CALL XVOPEN(IOUTUNIT(I),ISTAT,'U_NL',NL,'U_NS',NSO,
+     +			    'OP','WRITE','OPEN_ACT','SA','IO_ACT','SA',
+     +			    'U_FORMAT','REAL','O_FORMAT',FORMAT,
+     +			    'U_NB',1,'U_ORG','BSQ',' ') 
+		CALL XLADD(IOUTUNIT(I),'HISTORY','BAND',I,ISTAT,
+     +			   'FORMAT','INT',' ')
+	    END DO
+	END IF
+C
+	IF (MSS) THEN
+	    WRITE (BUF,200) NSO
+  200	    FORMAT(' *** Output  NS =',I5,' ***')
+	    CALL XVMESSAGE(BUF,' ')
+	END IF
+C						print the transformation matrix
+	CALL XVMESSAGE(' ',' ')
+	WRITE (BUF,300) NO,NI
+  300	FORMAT('     (',I2,','I2,') TRANSFORMATION MATRIX')
+	CALL XVMESSAGE(BUF,' ')
+	NK = (NI-1)/13+1
+	N1 = 1
+	N2 = MIN0(NI,13)
+	DO K=1,NK
+	    CALL XVMESSAGE(' ',' ')
+	    DO J=1,NO
+		LOC = 2
+		WRITE (BUF,400) (XMATRIX(I,J),I=N1,N2)
+  400		FORMAT(1X,13F10.4)
+		CALL XVMESSAGE(BUF,' ')
+	    END DO
+	    N1 = N2+1
+	    N2 = MIN0(N2+13,NI)
+	END DO
+	CALL XVMESSAGE(' ',' ')
+C							compute buffer sizes
+	INSO = NSO
+	INI = NI
+	INO = NO
+C					    no need to rescale floating point
+	IF (IFMT.EQ.4) SCAN=.FALSE.
+	IF (SCAN) THEN
+C							auto-scale scan phase
+C							print the scaling info
+C
+	    CALL XVMESSAGE(' *** AUTO-SCALE MODE ***',' ')
+	    WRITE (BUF,500) SPREAD,CENTER,PCENT
+  500	    FORMAT(5X,'Desired Spread',F8.1,'   Center',F8.1,
+     +		   '   Percent Sat.',F5.1)
+	    CALL XVMESSAGE(BUF,' ')
+C							   call SCN via STACKA
+	    L1 = INSO*INI*4
+	    L2 = IHSTLEN*INO*4
+	    CALL STACKA(8,SCN,2,L1,L2,INSO,IHSTLEN,INI,INO)
+	END IF
+C
+C							   transformation phase
+	CALL XVMESSAGE(' *** SCALING FACTORS ***',' ')
+	CALL XVMESSAGE('     OFFSET    GAIN',' ')
+	DO K=1,NO
+	    WRITE (BUF,600) OFFSET(K),GAIN(K)
+  600	    FORMAT(F11.3,F9.3)
+	    CALL XVMESSAGE(BUF,' ')
+C						    to compensate for truncation
+C						    when going to integer output
+	END DO
+C						 allocate buffers and call XFM
+	L1 = 4*NI*NSO
+	L2 = 4*NO*NSO
+	CALL STACKA(7,XFM,2,L1,L2,INSO,INI,INO)
+	RETURN
+	END
+C******************************************************************************
+C								SUBROUTINE SCN
+C
+	SUBROUTINE SCN(XIN,L1,IHIST,L2,INSO,IHSTLEN,INI,INO)
+	PARAMETER (NDIM=300)
+	COMMON /SCANBLOCK/LINC,ISINC,BOT,TOP,EXCLUD,EXCL,CENTER,SPREAD,
+     +			  HGAIN,HOFFSET,NAREAS,IAREA
+	LOGICAL EXCL
+	INTEGER IAREA(200)
+	COMMON /IOBLOCK/NI,NO,NIDS,NODS,XMATRIX,INUNIT,IOUTUNIT,GAIN,
+     +			OFFSET,IBND,NSICHN,ISL,ISS,NL,NSO,
+     +			CUTOFFB,CUTOFFT,MSS,MSSSUB,IFMT
+	REAL XMATRIX(NDIM,NDIM),GAIN(NDIM),OFFSET(NDIM)
+	INTEGER INUNIT(30),IOUTUNIT(NDIM),IBND(NDIM)
+	LOGICAL MSS,MSSSUB,QSUB
+	INTEGER LOC(NDIM)
+	REAL XIN(INSO,INI)
+	INTEGER IHIST(IHSTLEN,INO)
+	CHARACTER*132 BUF
+	CHARACTER*8 KEY
+C
+	BOT_OUT = CENTER-SPREAD/2.0
+	CALL ZIA(IHIST,IHSTLEN*NO)
+C						       histogram gathering loop
+	DO II=1,NAREAS
+	    ISLA = IAREA(4*II-3)
+	    ISSA = IAREA(4*II-2)
+	    NLA = IAREA(4*II-1)
+	    NSA = IAREA(4*II)
+	    IELA = ISLA+NLA-1
+	    WRITE (BUF,100) ISLA,ISSA,NLA,NSA,LINC,ISINC
+  100	    FORMAT('     AREA SAMPLED (',I5,',',I5,',',I5,',',I5,
+     +		   ')   LINC=',I3,'   SINC=',I3)
+	    CALL XVMESSAGE(BUF,' ')
+	    WRITE (BUF,200) ISLA,ISSA,NLA,NSA,LINC,ISINC
+  200	    FORMAT(I5,',',I5,',',I5,',',I5,')   LINC=',I3,'   SINC=',I3)
+	    DO III=1,NODS
+		KEY = 'SUBAREA' // CHAR(II+48)
+		CALL XLADD(IOUTUNIT(III),'HISTORY',KEY,BUF,
+     +			   ISTAT,'FORMAT','STRING',' ')
+	    END DO
+C							set MSS subarea pointers
+	    IF (NSA.NE.NSICHN .OR. MSSSUB) THEN
+		QSUB = .TRUE.
+		DO I=1,NI
+		    LOC(I) = (IBND(I)-1)*NSICHN + ISSA
+		END DO
+	    ELSE
+		QSUB = .FALSE.
+	    END IF
+C							read data
+	    DO I=ISLA,IELA,LINC
+		IF (MSS) THEN			   ! MSS with subarea or subset
+		    IF (QSUB) THEN
+			DO J=1,NI
+			    CALL XVREAD(INUNIT(1),XIN(1,J),ISTAT,'LINE',
+     +				       I,'SAMP',LOC(J),'NSAMPS',NSA,' ')
+			END DO
+		    ELSE					! full MSS image
+			CALL XVREAD(INUNIT(1),XIN,ISTAT,'LINE',I,' ')
+		    END IF
+		ELSE					   ! individual input ds
+		    IF (NIDS.GT.1 .OR. NI.EQ.1) THEN
+			DO J=1,NI
+			    CALL XVREAD(INUNIT(J),XIN(1,J),ISTAT,
+     +				'LINE',I,'SAMP',ISSA,'NSAMPS',NSA,' ')
+			END DO
+		    ELSE
+			DO J=1,NI
+			    CALL XVREAD(INUNIT(1),XIN(1,J),ISTAT,
+     +					'LINE',I,'BAND',IBND(J),
+     +					'SAMP',ISSA,'NSAMPS',NSA,' ')
+			END DO
+		    END IF
+		END IF
+C							        update histogram
+		DO J=1,NSA,ISINC
+		    DO K=1,NO
+			X = 0.0
+			DO L=1,NI
+			    X = X+XMATRIX(L,K)*XIN(J,L)
+			END DO
+			N = MIN(MAX(NINT(X*HGAIN+HOFFSET),1),IHSTLEN)
+			IHIST(N,K) = IHIST(N,K)+1
+		    END DO
+		END DO
+	    END DO
+	END DO
+C					      remove spike, if EXCLUD specified
+	IF (EXCL) THEN
+	    DO I=1,NO
+		X = 0.0
+		DO J=1,NI
+		    X = X+XMATRIX(J,I)*EXCLUD
+		END DO
+		N = MIN(MAX(NINT(X*HGAIN+HOFFSET),1),IHSTLEN)
+		IHIST(N,I) = 0
+	    END DO
+	END IF
+C
+	DO I=1,NO
+C							 sum histogram bins
+	    N = 0
+	    DO J=1,IHSTLEN
+		N = N+IHIST(J,I)
+	    END DO
+	    BOT_SAT = MAX((N*BOT)/100.0, 0.5)
+	    TOP_SAT = MAX((N*TOP)/100.0, 0.5)
+C						 find low end saturation point
+	    R = 0.0
+	    J = 0
+	    DO WHILE (R.LT.BOT_SAT)
+		J = J+1
+		R = R+IHIST(J,I)
+	    END DO
+	    BOT_VAL = (J-(R-BOT_SAT)/IHIST(J,I)-HOFFSET)/HGAIN
+C						 find high end saturation point
+	    R = 0.0
+	    J = IHSTLEN+1
+	    DO WHILE (R.LT.TOP_SAT)
+		J = J-1
+		R = R+IHIST(J,I)
+	    END DO
+	    TOP_VAL = (J+(R-TOP_SAT)/IHIST(J,I)-HOFFSET)/HGAIN
+C							    compute gain/offset
+	    R = TOP_VAL - BOT_VAL
+	    IF (R.EQ.0.0) THEN
+		CALL XVMESSAGE(' Histogram has no spread',' ')
+		CALL ABEND
+	    ENDIF
+	    GAIN(I) = SPREAD/R
+	    OFFSET(I) = BOT_OUT-GAIN(I)*BOT_VAL
+	END DO
+C
+	RETURN
+	END
+C******************************************************************************
+C								SUBROUTINE XFM
+C
+	SUBROUTINE XFM(XIN,L1,XOUT,L2,INSO,INI,INO)
+C
+	PARAMETER (NDIM=300)
+	COMMON /IOBLOCK/NI,NO,NIDS,NODS,XMATRIX,INUNIT,IOUTUNIT,GAIN,
+     +			OFFSET,IBND,NSICHN,ISL,ISS,NL,NSO,
+     +			CUTOFFB,CUTOFFT,MSS,MSSSUB,IFMT
+	REAL XMATRIX(NDIM,NDIM),GAIN(NDIM),OFFSET(NDIM)
+	INTEGER INUNIT(30),IOUTUNIT(NDIM),IBND(NDIM)
+	LOGICAL MSS,MSSSUB
+	INTEGER LOC(NDIM)
+	REAL XIN(INSO,INO),XOUT(INSO,INO)
+C							apply gain to matrix
+	DO I=1,NO
+	    DO J=1,NI
+		XMATRIX(J,I) = XMATRIX(J,I)*GAIN(I)
+	    END DO
+	END DO
+C							set MSS subarea pointers
+	IF (MSSSUB) THEN
+	    DO I=1,NI
+		LOC(I) = (IBND(I)-1)*NSICHN + ISS
+	    END DO
+	END IF
+C							    transformation loop
+	IEL = ISL+NL-1
+	DO I=ISL,IEL
+C							read data
+	    IF (MSS) THEN			   ! MSS with subarea or subset
+		IF (MSSSUB) THEN
+		    DO J=1,NI
+			CALL XVREAD(INUNIT(1),XIN(1,J),ISTAT,'LINE',I,
+     +				    'SAMP',LOC(J),'NSAMPS',NSO,' ')
+		    END DO
+		ELSE						! full MSS image
+		    CALL XVREAD(INUNIT(1),XIN,ISTAT,'LINE',I,' ')
+		END IF
+	    ELSE					   ! individual input ds
+		IF (NIDS.GT.1 .OR. NI.EQ.1) THEN
+		    DO J=1,NI
+			CALL XVREAD(INUNIT(J),XIN(1,J),ISTAT,'LINE',I,
+     +				    'SAMP',ISS,'NSAMPS',NSO,' ')
+		    END DO
+		ELSE
+		    DO J=1,NI
+			CALL XVREAD(INUNIT(1),XIN(1,J),ISTAT,'LINE',I,
+     +				    'BAND',IBND(J),'SAMP',ISS,
+     +				    'NSAMPS',NSO,' ')
+		    END DO
+		END IF
+	    END IF
+C							  compute transformation
+	    DO J=1,NSO
+		DO K=1,NO
+		    XOUT(J,K) = OFFSET(K)
+		    DO L=1,NI
+			XOUT(J,K) = XOUT(J,K)+XMATRIX(L,K)*XIN(J,L)
+		    END DO
+		    XOUT(J,K) = MIN(MAX(XOUT(J,K),CUTOFFB),CUTOFFT)
+		END DO
+	    END DO
+C						       for integer pixels, round
+	    IF (IFMT .NE. 4) THEN
+		DO K=1,NO
+		    DO J=1,NSO
+			XOUT(J,K) = NINT(XOUT(J,K))
+		    END DO
+		END DO
+	    END IF
+C								   write output
+	    DO J=1,NO
+		CALL XVWRIT(IOUTUNIT(J),XOUT(1,J),ISTAT,'NSAMPS',NSO,
+     +			   ' ')
+	    END DO
+	END DO
+	RETURN
+	END

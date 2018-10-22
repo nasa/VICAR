@@ -1,0 +1,519 @@
+procedure
+refgbl $echo
+refgbl $autousage
+! Jun 24, 2012 - RJB
+! TEST SCRIPT FOR MF4      
+! tests IBIS tabular files
+!
+! Vicar Programs:
+!       ibis-copy ibis-list 
+! 
+! parameters:
+!   <none>
+!
+! Requires NO external test data
+
+body
+let $autousage="none"
+let _onfail="stop"
+let $echo="yes"
+
+
+! basic double precision case
+
+ibis-gen xx1 NC=3 NR=4 deffmt=DOUB
+
+mf4 xx1 f="c1=@index"
+mf4 xx1 f="c2=c1+2"
+mf4 xx1 f="c3=@sqrt(c2)"
+
+ibis-list xx1 csiz=(16,16,16) cfor="%16.14f %16.14f %16.14f"
+
+! random case, and sum
+
+ibis-gen xx1 NC=2 NR=100 deffmt=DOUB
+mf4 xx1 f="c1=@rand$c2=c1$@rsum(c2)"
+ibis-list xx1 csiz=(16,16) cfor="%16.14f%16.9f"
+
+! random case, test seed
+
+ibis-gen xx1 NC=2 NR=100 deffmt=DOUB
+mf4 xx1 f="c1=@rand$c2=c1$@rsum(c2)" seed=1
+ibis-list xx1 csiz=(16,16) cfor="%16.14f%16.9f"
+
+! test distance function
+
+ibis-gen xx1 NC=5 NR=1
+
+mf4 xx1 f="c1=35.0$c2=-121.0$c3=35.0$c4=-122.0"
+mf4 xx1 f="@dist(c1,c2,c3,c4,c5)"
+
+ibis-list xx1 
+
+
+! basic string case, also double precision cosine
+
+ibis-gen xx1 nr=1 nc=2 format=("A10","A12","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aaaaabbbbb") strcols=(1)
+
+mf4 xx1 +
+ f="c1='bc'$c2=@cat(@trim(c1,' '),'xxxxxx')$c3=@cos(c3)$c1=@ucase(c1)"
+
+
+ibis-list xx1 csiz=(16,16,16) cfor="%16s %16s %16.12f"
+
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=c3+@sQrt(70)$c4=c3"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="C3=70$c4=(c3+@index+@rand+100)$c3=@sQrt(c4)"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=(5||3)"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=(5&&3)"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=5^3"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=2.1^15.0"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=2.1^15.01"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c4=(c3>=0)*@sqrt(c3)" ! toms case
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2='b'"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=35.0$c4=-122.0$c4=@max(c3,c4)"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@trim(c1,'e')"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 +
+ f="c1='bc'$c2=@cat(@trim(c1,' '),'xxxxxx')$c3=@cos(c3)$c1=@ucase(c1)"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@break(c1,'db')"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@fstr(c1,7)"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@bstr(c1,7)"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@adelete(c1,'bd')"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@sdelete(c1,'bb')"
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@sdelete(c1,'bc')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@replace(c1,'bb=qqq')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@replace(c1,'bc=qqq')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@strlen(c1)" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@strlen('abc')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@streq(c1,'aabbccddee')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@streq(c1,'aabbccddeef')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@strsub(c1,'bb')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@strsub(c1,'bc')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@rjust(c1,12)" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@ljust(c1,12)" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@num('23456')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@num('23456.7890123')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@i2str(1234567890)" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@i2str(-75)" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@f2str(47.55555,2)" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@pos(c1,'bb')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@pos(c1,'bc')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@pos(c1,'^a')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@pos(c1,'b*d')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@pos(c1,'e%')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=@pos(c1,'b?c')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@strpat(c1,'bbc')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@strpat(c1,'^a')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@strpat(c1,'b*d')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@strpat(c1,'e%')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c2=@strpat(c1,'b?c')" 
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+!  standard case, see function inside mf4 parm
+
+ibis-gen xx1 nr=1 nc=3 format=("A10","A12","DOUB","DOUB") +
+      data=(0.00001) datacols=(3) +
+      string=("aabbccddee") strcols=(1)
+
+mf4 xx1 f="c3=(1+2)*(3+4)+(5*6)" debug=1
+
+ibis-list xx1 csiz=(16,16,16,16) cfor="%16s %16s %16.12f %16.12f"
+
+let $echo="no"
+END-PROC

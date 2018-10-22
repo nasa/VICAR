@@ -1,6 +1,7 @@
 .SUFFIXES: .o .cc .c 
 
-CC = g++44 -Wno-invalid-offsetof
+# For Red Hat 5 use g++44 below
+CC = g++ -m32 -Wno-invalid-offsetof
 DEBUG = -g
 CCFLAGS = $(DEBUG) -DFUNCPROTO -DXTFUNCPROTO -I../MotifApp -I/usr/X11R6/include
 LIBS = -l/usr/X11R6/lib -lXm -lXt -lXext -lX11

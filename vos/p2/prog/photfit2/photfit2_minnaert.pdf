@@ -1,0 +1,234 @@
+procedure option=selftutor help=*
+
+    	parm ALBEDOt		real count=0:1 			def=0.5 
+        parm MIN_ALBEDOt	real count=0:1 			def=0.0
+        parm MAX_ALBEDOt	real count=0:1 			def=1.0
+        parm T_ALBEDOt		real count=0:1 			def=0.3
+ 	parm EXPONENTt		real count=0:1 			def=0.6
+ 	parm MIN_EXPONENTt	real count=0:1 			def=0.0
+ 	parm MAX_EXPONENTt	real count=0:1 			def=1.0
+ 	parm T_EXPONENTt	real count=0:1 			def=0.3
+
+    	parm ALBEDO	 	real count=0:1 			def=-- 
+        parm MIN_ALBEDO		real count=0:1 valid=(0:1)     	def=--
+        parm MAX_ALBEDO		real count=0:1 valid=(0:1)     	def=--
+        parm T_ALBEDO		real count=0:1 valid=(0:1)     	def=--
+ 	parm EXPONENT	 	real count=0:1 			def=--
+ 	parm MIN_EXPONENT	real count=0:1 			def=--
+ 	parm MAX_EXPONENT	real count=0:1 			def=--
+ 	parm T_EXPONENT	 	real count=0:1 			def=--
+
+	PARMSET name=photfit2_minnaert_sub help=*
+
+    	   parm ALBEDO		real count=0:1 			def=-- 
+           parm MIN_ALBEDO	real count=0:1 valid=(0:1)     	def=--
+           parm MAX_ALBEDO	real count=0:1 valid=(0:1)     	def=--
+           parm T_ALBEDO	real count=0:1 		     	def=--
+ 	   parm EXPONENT	real count=0:1 			def=--
+ 	   parm MIN_EXPONENT	real count=0:1 			def=--
+ 	   parm MAX_EXPONENT	real count=0:1 			def=--
+ 	   parm T_EXPONENT	real count=0:1 			def=--
+
+	END-PROC
+
+body
+
+	if (_tutor=1)
+
+	   restore-parm pho_minnaert.par
+
+
+	   if ($count(ALBEDO)=0)
+	 						let ALBEDOt=0.5
+	   else
+		let ALBEDOt=&ALBEDO
+	   end-if
+
+
+	  if ($count(MIN_ALBEDO)=0)
+	 						let MIN_ALBEDOt=0.0
+	  else
+		let MIN_ALBEDOt=&MIN_ALBEDO
+	  end-if
+
+	  if ($count(MAX_ALBEDO)=0)
+	 						let MAX_ALBEDOt=1.0
+	  else
+		let MAX_ALBEDOt=&MAX_ALBEDO
+	  end-if
+
+	  if ($count(T_ALBEDO)=0)
+	 						let T_ALBEDOt=0.3
+	  else
+		let T_ALBEDOt=&T_ALBEDO
+	  end-if
+
+
+	   if ($count(EXPONENT)=0)
+	 						let EXPONENTt=0.6
+	   else
+		let EXPONENTt=&EXPONENT
+	   end-if
+
+	   if ($count(MIN_EXPONENT)=0)
+	 					let MIN_EXPONENTt=0.6
+	   else
+		let MIN_EXPONENTt=&MIN_EXPONENT
+	   end-if
+
+	   if ($count(MAX_EXPONENT)=0)
+	 					let MAX_EXPONENTt=0.6
+	   else
+		let MAX_EXPONENTt=&MAX_EXPONENT
+	   end-if
+
+	   if ($count(T_EXPONENT)=0)
+	 						let T_EXPONENTt=0.3
+	   else
+		let T_EXPONENTt=&T_EXPONENT
+	   end-if
+
+
+	   tutor photfit2_minnaert_sub 					+
+		|restore=pho_minnaert.par, save=pho_minnaert.par|	+
+			ALBEDO=&ALBEDOt					+
+			MIN_ALBEDO=&MIN_ALBEDOt				+
+			MAX_ALBEDO=&MAX_ALBEDOt				+
+			T_ALBEDO=&T_ALBEDOt				+
+			EXPONENT=&EXPONENTt				+
+			T_EXPONENT=&T_EXPONENTt				+
+			MIN_EXPONENT=&MIN_EXPONENTt			+
+			MAX_EXPONENT=&MAX_EXPONENTt	
+	
+	   return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs needs "
+	   write " photometric function parameters "
+	   write " for the MINNAERT function."
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+.title
+'PHOTFIT2_MINNAERT' sub-menu 
+
+.help
+
+PURPOSE:
+
+In this PDF, the user is asked for the parameters and there limits needed to  
+fit Minnaerts's photometric function. This function needs just two input 
+parameters (Albedo, geometric exponent k) and there absolute limits.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.page
+MATHEMATICAL BACKGROUND :
+
+It is found empirically that Minnaert's law approximately describes the 
+variation of brightness of many surfaces over a limited range of angles.
+But the general law breaks down completely at the limb of a planet.
+
+Minnaert (1941) suggested generalizing Lambert's law so that the power emitted 
+per unit solid angle per unit area of the surface be proportional 
+(cos(i)*cos(e))**k [ Lambert's power is proportional to (cos(i)*cos(e))**1 ].
+
+bidirectional reflectance [1/str] :
+
+r(i,e,g)=ALBEDO*(cos(i)*cos(e))**EXPONENT/cos(e)
+
+REFERENCE :
+M. Minnaert, The reciprocity principle in Lunar photometry,
+Astrophysical Journal, Vol. 93, No. 2, p. 403-410, 1941
+.page
+PROGRAMMER:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+
+.level1
+
+.var ALBEDO
+Surface albedo
+
+.var MIN_ALBEDO
+Minimum of surface albedo
+
+.var MAX_ALBEDO
+Maximum of surface albedo
+
+.var T_ALBEDO
+Temperatur of Surface albedo
+
+.var EXPONENT
+Minnaert exponent
+
+.var MIN_EXPONENT
+Maximum of Minnaert exponent
+
+.var MAX_EXPONENT
+Maximum of Minnaert exponent
+
+.var T_EXPONENT
+Temperatur of Minnaert exponent
+
+.level2
+
+.var ALBEDO
+This parameter gives the albedo of the surface. 
+
+.var MIN_ALBEDO
+This parameter gives the absolut lower limit of the albedo of the surface. 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var MAX_ALBEDO
+This parameter gives the absolut upper limit of the albedo of the surface. 
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.var T_ALBEDO
+This parameter gives temperatur for the albedo of the surface. 
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    ALBEDO_NEW = T_ALBEDO * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_ALBEDO_NEW_* = T_ALBEDO_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.VARI EXPONENT
+Exponent - the geometrical constant k of the Minnaert photometric function.
+
+.VARI MIN_EXPONENT
+This parameter gives the absolut lower limit of the Minnaert exponent - the 
+geometrical constant k of the Minnaert photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI MAX_EXPONENT
+This parameter gives the absolut upper limit of the Minnaert exponent - the 
+geometrical constant k of the Minnaert photometric function.
+If a sulution guess falls out-of-bonds then the attemp will be aborted and 
+a new guess attempted.
+
+.VARI T_EXPONENT
+This parameter gives temperatur for the Exponent - the geometrical constant k
+of the Minnaert photometric function.
+This parameter gives the range over which random guesses can be expected to 
+vary at first:
+    EXPONENT_NEW = T_EXPONENT * tan( PI * ran_num + PI/2 ).
+As the system cools the range will constrict gradually :
+	T_EXPONENT_NEW_* = T_EXPONENT_OLD_* * scale, 
+scale depends of NUMTEN.
+
+.end

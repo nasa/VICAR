@@ -1,0 +1,17 @@
+!  Procedure to test the procedure pixgrad
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let _onfail="continue"
+let $echo="yes"
+let $autousage="none"
+gen a 10 10 sinc=2
+pixgrad a (b c)
+list b
+list c
+gen a 10 10 sinc=2 'half
+pixgrad a (b c)
+list b
+list c
+end-proc

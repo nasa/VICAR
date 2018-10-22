@@ -1,0 +1,18 @@
+	.psect tbl
+	.title tbl
+;
+;  83-7-14 ...LWK..
+;
+;  Vicar1 subroutine, replaces equivalent VICAR routine.
+;
+;  Fortran call:   CALL TBL(BUF,TAB,N)
+;   BUF = byte buffer to be translated
+;   TAB = 256-byte lookup table
+;   N   = # of elements in BUF
+;
+	.entry	tbl,^m<r2,r3,r4,r5>
+;
+	movtc	@12(ap),@4(ap),#0,@8(ap),@12(ap),@4(ap)
+;
+	ret
+	.end

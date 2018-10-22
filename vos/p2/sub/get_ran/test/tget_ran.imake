@@ -1,0 +1,24 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR TEST PROGRAM tget_ran
+
+   To Create the build file give the command:
+
+	$ vimake tget_ran                     (VMS)
+   or
+	% vimake tget_ran                     (Unix)
+
+*************************************************************************/
+
+#define PROGRAM tget_ran
+
+#define MODULE_LIST tget_ran.f
+
+#define TEST
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+#define USES_FORTRAN
+#define MAIN_LANG_FORTRAN

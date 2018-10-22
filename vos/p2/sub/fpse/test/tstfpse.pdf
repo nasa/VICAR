@@ -1,0 +1,14 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let _onfail="stop"
+write " "
+WRITE "This is a test of subroutine FPSE and the C bridge for FPSE"
+write "BEFORE RUNNING, build BOTH  tfpse AND tzpse "
+tfpse
+write " "
+tzfpse
+end-proc

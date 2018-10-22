@@ -1,0 +1,3 @@
+process
+parm OUT STRING
+end-proc

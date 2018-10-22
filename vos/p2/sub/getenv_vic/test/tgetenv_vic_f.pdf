@@ -1,0 +1,7 @@
+process help=*
+end-proc
+.TITLE
+VICAR program TGETENV_VIC_F
+.HELP
+This program is a the Fortran test program for getenv_vic().
+.END

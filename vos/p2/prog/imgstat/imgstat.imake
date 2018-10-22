@@ -1,0 +1,26 @@
+
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM imgstat
+
+   To Create the build file give the command:
+
+		$ vimake imgstat 			(VMS)
+   or
+		% vimake imgstat	       		(Unix)
+
+
+************************************************************************/
+
+#define PROGRAM	imgstat
+#define R2LIB
+
+#define MODULE_LIST imgstat.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

@@ -1,0 +1,103 @@
+procedure help=*
+PARM INP     TYPE=(STRING,60)
+PARM OUT     TYPE=(STRING,60)
+PARM SIZE    TYPE=INTEGER    COUNT=4                      DEFAULT=(1,1,0,0)
+PARM SL	     TYPE=INTEGER   				  DEFAULT=1
+PARM SS	     TYPE=INTEGER				  DEFAULT=1
+PARM NL      TYPE=INTEGER				  DEFAULT=0
+PARM NS      TYPE=INTEGER				  DEFAULT=0
+PARM TRANS   TYPE=REAL       COUNT=5
+PARM PATHRAD TYPE=REAL       COUNT=5
+LOCAL TR     TYPE=REAL
+LOCAL PATH   TYPE=REAL
+
+BODY
+
+let TR = TRANS(1)
+let PATH = PATHRAD(1)
+COPY @INP SCRASTGRADX @SIZE @SL @SS @NL @NS SB=1 NB=1
+F2 SCRASTGRADX SCRASTGRAD10 FUNC="(IN1-&PATH)/&TR"
+
+let TR = TRANS(2)
+let PATH = PATHRAD(2)
+COPY @INP SCRASTGRADX @SIZE @SL @SS @NL @NS SB=2 NB=1
+F2 SCRASTGRADX SCRASTGRAD11 FUNC="(IN1-&PATH)/&TR"
+
+let TR = TRANS(3)
+let PATH = PATHRAD(3)
+COPY @INP SCRASTGRADX @SIZE @SL @SS @NL @NS SB=3 NB=1
+F2 SCRASTGRADX SCRASTGRAD12 FUNC="(IN1-&PATH)/&TR"
+
+let TR = TRANS(4)
+let PATH = PATHRAD(4)
+COPY @INP SCRASTGRADX @SIZE @SL @SS @NL @NS SB=4 NB=1
+F2 SCRASTGRADX SCRASTGRAD13 FUNC="(IN1-&PATH)/&TR"
+
+let TR = TRANS(5)
+let PATH = PATHRAD(5)
+COPY @INP SCRASTGRADX @SIZE @SL @SS @NL @NS SB=5 NB=1
+F2 SCRASTGRADX SCRASTGRAD14 FUNC="(IN1-&PATH)/&TR"
+
+TRAN (SCRASTGRAD10,SCRASTGRAD11,SCRASTGRAD12,SCRASTGRAD13,SCRASTGRAD14) +
+   @OUT 'BSQ
+
+ush rm -f SCRASTGRAD*
+END-PROC
+.TITLE
+	Procedure ASTGRAD
+.HELP
+PURPOSE:
+ASTGRAD takes as input the 5 ASTER TIR channels of Level 1B data, in units of
+milliWatts per square meter per steradian per micrometer and performs an
+atmospheric correction to yield upwelling radiance at surface, in the same
+units.  The user is required to provide the path transmittance and path
+radiance for each channel.
+
+OPERATION:
+ASTGRAD uses the VICAR programs COPY an F2 to copy out each ASTER TIR channel
+and apply the following formula:
+
+     Radiance(ground) = [Radiance(sensor) - Pathrad] / Transmittance
+
+Once all 5 channels have been processed, the results are reassembled into a
+single file by the VICAR program TRAN.  The output file will have BSQ
+organization.
+.LEVEL1
+.VARIABLE INP
+input data set
+.VARIABLE OUT
+output data set
+.VARIABLE SIZE
+The standard Vicar size
+ field (sl,ss,nl,ns)
+.VARIABLE SL
+Starting line
+.VARIABLE SS
+Starting sample
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples
+.VARIABLE TRANS
+Path transmittance
+.VARIABLE PATHRAD
+Path radiance
+(mW/m^2/sr/um)
+.LEVEL2
+.VARIABLE INP
+Input dataset containing ASTER 1B TIR radiance at sensor data, in units of
+milliWatts per square meter per steradian per micrometer.
+.VARIABLE OUT
+Output dataset containing ASTER 1B TIR upwelling radiance at surface data,
+in units of milliWatts per square meter per steradian per micrometer.
+.VARIABLE SIZE
+The standard Vicar size field ( starting_line, starting_sample, 
+number_of_lines, number_of_samples).
+.VARIABLE TRANS
+The values of TRANS should be the tranmittance from the surface to top of
+atmosphere.  5 values must be provided, one for each ASTER TIR channel.
+.VARIABLE PATHRAD
+The values of PATHRAD are the amounts of path emitted radiance observed at
+the top of atmosphere, when viewing nadir.  The required units are 
+milliWatts per square meter per steradian per micrometer.
+.END

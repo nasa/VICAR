@@ -1,0 +1,42 @@
+procedure
+refgbl $autousage
+refgbl $echo
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+! TEST SCRIPT FOR FFTFIT
+!
+! THIS SCRIPT TAKES A WHILE TO EXECUTE (FOREWARNING!)
+!
+gen PIC 128 128 IVAL=2 LINC=0 SINC=0 'HALF
+fft22 PIC FT
+fftfit (FT,PIC) OUT 'MULT 'FIND
+fft22 OUT FTOUT 'INV FORMAT=HALF
+list FTOUT (1,1,10,10)
+hist FTOUT 'NOHIST
+!
+gen PIC 128 128 IVAL=2 LINC=0 SINC=0 'HALF
+fft22 PIC FT
+fftfit (FT,PIC) OUT SET=(2,4)
+fft22 OUT FTOUT 'INV FORMAT=HALF
+list FTOUT (1,1,10,10)
+hist FTOUT 'NOHIST
+!
+gen PIC 128 128 IVAL=2 LINC=.1 SINC=.1 'HALF
+fft22 PIC FT
+fftfit (FT,PIC) OUT 'MULT LINE=129 SAMP=129 SCALE=0.5
+fft22 OUT FTOUT 'INV FORMAT=HALF
+list FTOUT (1,1,10,10)
+hist FTOUT 'NOHIST
+!
+gen PIC 128 128 IVAL=2 LINC=.1 SINC=.1 'HALF
+fft22 PIC FT
+fftfit (FT,PIC) OUT SCALE=0.1
+fft22 OUT FTOUT 'INV FORMAT=HALF
+list FTOUT (1,1,10,10)
+hist FTOUT 'NOHIST
+!
+! END-SCRIPT
+!
+end-proc

@@ -1,0 +1,25 @@
+1  ITER
+
+      To provide iterative convergence for oblate planets for
+      subroutine TRANV.  JPL publication 77-7, page 8.
+
+2  CALLING SEQUENCE from FORTRAN 
+
+      CALL ITER(CHI,PHI,EPS,PI)
+
+2  ARGUMENTS
+      All of the arguments are DOUBLE PRECISION.
+
+      CHI    conformal latitude 
+      PHI    geodetic latitude (returned)
+      EPS    radial eccentricity
+      PI     pi
+
+2  HISTORY
+
+      Original Programmer: J. J. Lorre, 16 June 1977
+      Current Cognizant Programmer: J. J. Lorre
+      Source Language: Fortran
+      Ported to UNIX:  Steve Pohorsky
+
+

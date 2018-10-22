@@ -1,0 +1,31 @@
+#define SUBROUTINE  	pho_routines
+
+#define MODULE_LIST  	pho_routines.c pho_bidirefs.c pho_routinesf.f
+
+#define INCLUDE_LIST  	pho_private.h pho_init.h
+
+#define FTNINC_LIST pho
+
+#define USES_ANSI_C
+#define USES_FORTRAN
+
+#define FTN_STRING
+
+#define P2_SUBLIB
+
+/********************************************
+DEBUGGER for development 
+
+#define LOCAL_LIRARY
+#define LIB_LOCAL
+#define DEBUG
+#define LIB_P2SUB_DEBUG
+
+*******************************************/
+
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE
+
+
+

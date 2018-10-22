@@ -1,0 +1,275 @@
+gen out=b.img nl=500 ns=500
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+areaiso out=  +
+ (area_lat.img,area_lon.img,area_map.img,angle_map.img,del_area_lat.img,  +
+ del_area_lon.img)  +
+ planet=phobos 'north
+Beginning VICAR task areaiso
+/project/test_work/testdata/general/phobos.model
+North projection only
+mapaux inp=(b.img,area_lat.img,area_lon.img,area_map.img)  +
+ out=(n_area_projection.img,n_area_residual.img) grid=10 'north
+Beginning VICAR task mapaux
+*** mapaux version 2017-08-09 ***
+Reading object projection /project/test_work/testdata/general/phobos.img
+ Map dimensions nl=         720  ns=        1440
+areaiso out=  +
+ (area_lat.img,area_lon.img,area_map.img,angle_map.img,del_area_lat.img,  +
+ del_area_lon.img)  +
+ planet=phobos 'south
+Beginning VICAR task areaiso
+/project/test_work/testdata/general/phobos.model
+South projection only
+mapaux inp=(b.img,area_lat.img,area_lon.img,area_map.img)  +
+ out=(s_area_projection.img,s_area_residual.img) grid=10 'south
+Beginning VICAR task mapaux
+*** mapaux version 2017-08-09 ***
+Reading object projection /project/test_work/testdata/general/phobos.img
+ Map dimensions nl=         720  ns=        1440
+astrtchr inp=n_area_residual.img out=x.img excl=(-1000.,.1)
+Beginning VICAR task astrtchr
+** ASTRTCHR version 2017-05-31
+
+LOWER OUTPUT LIMIT = 0.0000E+00
+UPPER OUTPUT LIMIT = 0.2550E+03
+
+NUMBER OF SORTED PIXELS =       10000
+
+LINE INTERVAL =             5
+SAMPLE INTERVAL =           5
+
+LOWER HISTOGRAM BOUND = 0.9398E+00
+UPPER HISTOGRAM BOUND = 0.1082E+01
+astrtchr inp=s_area_residual.img out=y.img excl=(-1000.,.1)
+Beginning VICAR task astrtchr
+** ASTRTCHR version 2017-05-31
+
+LOWER OUTPUT LIMIT = 0.0000E+00
+UPPER OUTPUT LIMIT = 0.2550E+03
+
+NUMBER OF SORTED PIXELS =       10000
+
+LINE INTERVAL =             5
+SAMPLE INTERVAL =           5
+
+LOWER HISTOGRAM BOUND = 0.8745E+00
+UPPER HISTOGRAM BOUND = 0.1127E+01
+concat inp=(n_area_projection.img,x.img,  +
+ s_area_projection.img,y.img) out=area_projection.img  +
+ ns=1000
+Beginning VICAR task concat
+ image=            1  min dn=    1.00000000      max dn=    255.000000
+ image=            2  min dn=    0.00000000      max dn=    255.000000
+ image=            3  min dn=    10.0000000      max dn=    255.000000
+ image=            4  min dn=    0.00000000      max dn=    255.000000
+gen out=b.img nl=10 ns=10
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+MAP3 b.img north_target.img NL=500 NS=500 'STEREOGR SCAL=.1  +
+   NORANGLE=0 LINE=250 SAMP=250 LATI=90 LONG=0  +
+  'NOGEOM 'NOSEDR 'NOPROJEC radii=(10,10,10)  +
+ ommatrix=(1.,0.,0.,0.,1.,0.,0.,0.,1.) rsvector=(1.,1.,1.)  +
+ cscale=1. focl=1.
+Beginning VICAR task MAP3
+Map3 version 10-Jan-2013
+ LABEL SAYS INPUT PICTURE IS IMAGE SPACE
+    CAMERA=          0
+ JULIAN DATE OF EVENT FRAME=  1721058.5
+/CAM FOC L/    RA   /    RB   /    RC   /   RMAG  /LA SSC PT/LO SSC PT/
+/      1.0/   10.000/   10.000/   10.000/      1.7/   35.264/  -45.000/
+    OM MATRIX
+/ 1.000000/ 0.000000/ 0.000000
+/ 0.000000/ 1.000000/ 0.000000
+/ 0.000000/ 0.000000/ 1.000000
+    RS VECTOR (TARGET COORDINATES)
+             1.0             1.0             1.0
+COORDINATES OF CENTER OF INPUT PICTURE--LATITUDE = -81.87 LONGITUDE =  315.00
+PROJECTION IS POLAR STEREOGRAPHIC
+ DATA=
+            2.500E+02  2.500E+02  9.000E+01  0.000E+00  0.000E+00  0.000E+00  1.000E-01  1.000E+00  0.000E+00  0.000E+00
+            0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00
+            0.000E+00  0.000E+00  0.000E+00  0.000E+00  1.000E+01  1.000E+01  0.000E+00  0.000E+00  0.000E+00  0.000E+00
+            0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00
+MAP3 b.img south_target.img NL=500 NS=500 'STEREOGR SCAL=.1  +
+   NORANGLE=0 LINE=250 SAMP=250 LATI=-90 LONG=0  +
+  'NOGEOM 'NOSEDR 'NOPROJEC radii=(10,10,10)  +
+ ommatrix=(1.,0.,0.,0.,1.,0.,0.,0.,1.) rsvector=(1.,1.,1.)  +
+ cscale=1. focl=1.
+Beginning VICAR task MAP3
+Map3 version 10-Jan-2013
+ LABEL SAYS INPUT PICTURE IS IMAGE SPACE
+    CAMERA=          0
+ JULIAN DATE OF EVENT FRAME=  1721058.5
+/CAM FOC L/    RA   /    RB   /    RC   /   RMAG  /LA SSC PT/LO SSC PT/
+/      1.0/   10.000/   10.000/   10.000/      1.7/   35.264/  -45.000/
+    OM MATRIX
+/ 1.000000/ 0.000000/ 0.000000
+/ 0.000000/ 1.000000/ 0.000000
+/ 0.000000/ 0.000000/ 1.000000
+    RS VECTOR (TARGET COORDINATES)
+             1.0             1.0             1.0
+COORDINATES OF CENTER OF INPUT PICTURE--LATITUDE = -81.87 LONGITUDE =  315.00
+PROJECTION IS POLAR STEREOGRAPHIC
+ DATA=
+            2.500E+02  2.500E+02 -9.000E+01  0.000E+00  0.000E+00  0.000E+00  1.000E-01 -1.000E+00  0.000E+00  0.000E+00
+            0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00
+            0.000E+00  0.000E+00  0.000E+00  0.000E+00  1.000E+01  1.000E+01  0.000E+00  0.000E+00  0.000E+00  0.000E+00
+            0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00
+efgiso out=(E.img,F.img,G.img,R.img) planet=phobos nl=180 ns=360
+Beginning VICAR task efgiso
+/project/test_work/testdata/general/phobos.model
+Model file: #rows= 39, #cols=75
+efgiso out=(E6.img,F6.img,G6.img,R6.img) planet=phobos nl=180 ns=360  +
+ nlw=19 nsw=37
+Beginning VICAR task efgiso
+/project/test_work/testdata/general/phobos.model
+Model file: #rows= 39, #cols=75
+efgiso out=(E5.img,F5.img,G5.img,R5.img) planet=phobos nl=180 ns=360  +
+ nlw=11 nsw=19
+Beginning VICAR task efgiso
+/project/test_work/testdata/general/phobos.model
+Model file: #rows= 39, #cols=75
+efgiso out=(E4.img,F4.img,G4.img,R4.img) planet=phobos nl=180 ns=360  +
+ nlw=7 nsw=9
+Beginning VICAR task efgiso
+/project/test_work/testdata/general/phobos.model
+Model file: #rows= 39, #cols=75
+efgiso out=(E3.img,F3.img,G3.img,R3.img) planet=phobos nl=180 ns=360  +
+ nlw=5 nsw=5
+Beginning VICAR task efgiso
+/project/test_work/testdata/general/phobos.model
+Model file: #rows= 39, #cols=75
+efgiso out=(E2.img,F2.img,G2.img,R2.img) planet=phobos nl=180 ns=360  +
+ nlw=3 nsw=3
+Beginning VICAR task efgiso
+/project/test_work/testdata/general/phobos.model
+Model file: #rows= 39, #cols=75
+efgiso out=(SE.img,SF.img,SG.img,SR.img) planet=phobos nl=180 ns=360  +
+  triaxial=(11.7,11.7,11.7)
+Beginning VICAR task efgiso
+Triaxial radii: 11.700000 11.700000 11.700000
+/project/test_work/testdata/general/phobos.model
+Model file: #rows= 39, #cols=75
+auxiliary inp=(  +
+ E6.img,F6.img,G6.img,  +
+ E5.img,F5.img,G5.img,  +
+ E4.img,F4.img,G4.img,  +
+ E3.img,F3.img,G3.img,  +
+ E2.img,F2.img,G2.img,  +
+ E.img,F.img,G.img,SE.img,SF.img,SG.img)  +
+ nl=180 ns=360 out=(cen_lat.img,cen_lon.img,tissot.img, +
+ del_lat.img,del_lon.img) loop=10 range=.2
+Beginning VICAR task auxiliary
+Conformal auxiliary coord conversions
+mapaux inp=(north_target.img,cen_lat.img,cen_lon.img,tissot.img)  +
+ out=(a.img,n_tissot.img) planet=phobos grid=10.
+Beginning VICAR task mapaux
+*** mapaux version 2017-08-09 ***
+Reading object projection /project/test_work/testdata/general/phobos.img
+ Map dimensions nl=         720  ns=        1440
+overlay inp=a.img out=n_ster_aux.img maxdn=0 dla1=10 dlo1=10 dla2=10 dlo2=10  +
+ 'nonumber
+Beginning VICAR task overlay
+*** Program OVERLAY version 23-Jun-2004 ***
+ Input is in byte data format
+ Scale(deg/pixel) =  0.57295775
+ Number of points used =       18308
+ OVERLAY task completed
+mapaux inp=(south_target.img,cen_lat.img,cen_lon.img,tissot.img)  +
+ out=(b.img,s_tissot.img) planet=phobos grid=10.
+Beginning VICAR task mapaux
+*** mapaux version 2017-08-09 ***
+Reading object projection /project/test_work/testdata/general/phobos.img
+ Map dimensions nl=         720  ns=        1440
+overlay inp=b.img out=s_ster_aux.img maxdn=0 dla1=10 dlo1=10 dla2=10 dlo2=10  +
+ 'nonumber
+Beginning VICAR task overlay
+*** Program OVERLAY version 23-Jun-2004 ***
+ Input is in byte data format
+ Scale(deg/pixel) =  0.57295775
+ Number of points used =       17721
+ OVERLAY task completed
+concat inp=(a.img,b.img,n_ster_aux.img,s_ster_aux.img,  +
+ n_tissot.img,s_tissot.img)  +
+ out=ster_mos.img percent=3. ns=1000
+Beginning VICAR task concat
+ image=            1  min dn=    0.00000000      max dn=    255.000000
+ image=            2  min dn=    10.0000000      max dn=    255.000000
+ image=            3  min dn=    0.00000000      max dn=    255.000000
+ image=            4  min dn=    0.00000000      max dn=    255.000000
+ image=            5  min dn=    0.00000000      max dn=    19.7710590
+ image=            6  min dn=    0.00000000      max dn=    23.2660980
+gen out=b.img nl=10 ns=10
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+MAP3 b.img sinu_target.img NL=350 NS=750 'SINUSOID SCAL=.1  +
+   LINE=175 SAMP=375 LATI=0 LONG=0 NORANGLE=0  +
+  'NOGEOM 'NOSEDR 'NOPROJEC radii=(11.7,11.7,11.7)  +
+ ommatrix=(1.,0.,0.,0.,1.,0.,0.,0.,1.) rsvector=(1.,1.,1.)  +
+ cscale=1. focl=1.
+Beginning VICAR task MAP3
+Map3 version 10-Jan-2013
+ LABEL SAYS INPUT PICTURE IS IMAGE SPACE
+    CAMERA=          0
+ JULIAN DATE OF EVENT FRAME=  1721058.5
+/CAM FOC L/    RA   /    RB   /    RC   /   RMAG  /LA SSC PT/LO SSC PT/
+/      1.0/   11.700/   11.700/   11.700/      1.7/   35.264/  -45.000/
+    OM MATRIX
+/ 1.000000/ 0.000000/ 0.000000
+/ 0.000000/ 1.000000/ 0.000000
+/ 0.000000/ 0.000000/ 1.000000
+    RS VECTOR (TARGET COORDINATES)
+             1.0             1.0             1.0
+COORDINATES OF CENTER OF INPUT PICTURE--LATITUDE = -83.06 LONGITUDE =  315.00
+PROJECTION SPECIFIED IS SINUSOIDAL
+ DATA=
+            3.750E+02  1.750E+02  0.000E+00  0.000E+00  0.000E+00  0.000E+00  1.000E-01  1.000E+00  0.000E+00  0.000E+00
+            0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00
+            0.000E+00  0.000E+00  0.000E+00  0.000E+00  1.170E+01  1.170E+01  0.000E+00  0.000E+00  0.000E+00  0.000E+00
+            0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00  0.000E+00
+efgiso out=(E.img,F.img,G.img,R.img) planet=phobos nl=180 ns=360
+Beginning VICAR task efgiso
+/project/test_work/testdata/general/phobos.model
+Model file: #rows= 39, #cols=75
+efgiso out=(SE.img,SF.img,SG.img,SR.img) planet=phobos nl=180 ns=360  +
+  triaxial=(11.7,11.7,11.7)
+Beginning VICAR task efgiso
+Triaxial radii: 11.700000 11.700000 11.700000
+/project/test_work/testdata/general/phobos.model
+Model file: #rows= 39, #cols=75
+auxiliary inp=(  +
+ E6.img,F6.img,G6.img,  +
+ E5.img,F5.img,G5.img,  +
+ E4.img,F4.img,G4.img,  +
+ E3.img,F3.img,G3.img,  +
+ E2.img,F2.img,G2.img,  +
+ E.img,F.img,G.img,SE.img,SF.img,SG.img)  +
+ nl=180 ns=360 out=(sinu_cen_lat.img,sinu_cen_lon.img,sinu_resid.img, +
+ sinu_del_lat.img,sinu_del_lon.img) loop=10 range=.2 'authalic
+Beginning VICAR task auxiliary
+Authalic auxiliary coord conversions
+mapaux inp=(sinu_target.img,sinu_cen_lat.img,sinu_cen_lon.img,sinu_resid.img)  +
+ out=(a.img,sinu_resid_proj.img) planet=phobos grid=10.
+Beginning VICAR task mapaux
+*** mapaux version 2017-08-09 ***
+Reading object projection /project/test_work/testdata/general/phobos.img
+ Map dimensions nl=         720  ns=        1440
+overlay inp=a.img out=sinu_aux.img maxdn=0 dla1=10 dlo1=10 dla2=10 dlo2=10  +
+ 'nonumber
+Beginning VICAR task overlay
+*** Program OVERLAY version 23-Jun-2004 ***
+ Input is in byte data format
+ Scale(deg/pixel) =  0.48970753
+ Number of points used =       27601
+ OVERLAY task completed
+concat inp=(a.img,sinu_aux.img,sinu_resid_proj.img)  +
+ out=sinu_mos.img percent=3. ns=750
+Beginning VICAR task concat
+ image=            1  min dn=    0.00000000      max dn=    255.000000
+ image=            2  min dn=    0.00000000      max dn=    255.000000
+ image=            3  min dn=    0.00000000      max dn=    1.51513886
+disable-log

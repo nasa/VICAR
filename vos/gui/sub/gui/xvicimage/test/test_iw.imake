@@ -1,0 +1,16 @@
+#define PROGRAM test_iw
+
+#define MODULE_LIST test_iw.c
+
+#define MAIN_LANG_C
+#define USES_C
+
+#define TEST
+
+#define LIB_GUISUB
+#define LIB_MOTIF
+#define LIB_XMU
+
+#define LIB_LOCAL	/*!!!!*/
+
+

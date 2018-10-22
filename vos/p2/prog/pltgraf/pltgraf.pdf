@@ -1,0 +1,646 @@
+process      help=*
+    parm INP      type=(string,80)  count=1:2
+    PARM PLOT     type=STRING  COUNT=(0:1)     DEFAULT="pltgraf"
+    PARM PLOTFMT TYPE=STRING  COUNT=(0:1) VALID=(GNUPLOT,EPS) DEFAULT=GNUPLOT
+
+    parm TITLE    type=(string,120) default=""
+    parm XLABEL   type=(string,60) default=""
+    parm YLABEL   type=(string,60) default=""
+    parm COMMENT  type=(string,70) default=""
+    parm DATE     type=keyword valid=(NODATE,DATE) default=NODATE
+
+    parm MODE     type=keyword valid=(AXIS,NOAXIS,NOBOX) default=AXIS
+
+    parm XLEN     type=real  valid=(0.5:10.0)  default=8.0
+    parm YLEN     type=real  valid=(0.5:10.0)  default=8.0
+
+    parm XRANGE   type=real count=2 default=(0,1)
+    parm YRANGE   type=real count=2 default=(0,1)
+    parm ZRANGE   type=real count=2 default=(1,8)
+
+    parm DATAFORM type=(string,2) valid=(YX,XY) default="XY"
+    parm DIM      type=integer default=2 valid=2:3
+    parm DIRECT   type=(string,2) valid=(BR,TR,TL,BL) default="BR"
+
+    parm FINALPOS type=keyword valid=(CURR,NEXT) default=CURR
+
+    parm DATACOLS type=integer valid=(1:100) count=(1:6) default=3
+    parm FORMAT   type=(string,4) count=(1:11) default=" "
+    parm XCOL     type=integer count=1 valid=(1:40) default=1
+    parm YCOL     type=integer count=1 valid=(1:40) default=2
+    parm HEIGHCOL type=integer count=1 valid=(1:40) default=1
+    parm ANGLECOL type=integer count=1 valid=(1:40) default=1
+    parm TSIZE	  type=real valid=(.0375:.6) default=.15
+end-proc
+
+.title
+VICAR/IBIS Program "pltgraf"
+.help
+PURPOSE
+    "PLTGRAF" plots an IBIS graphics file inside a labeled  box.  
+
+
+
+OPERATION
+
+    PLRTGRAF plots whatever information is given in an IBIS-1 graphics file.
+    If a 3-D object is described in the graphics file, its viewpoint is
+    in whatever perspective that the vertices are given. Thus, if the
+    true 3-D is hidden by looking at an elev of 0 and Azimuth of 180, then
+    the depth perception is lost.
+
+    If a different perspective is desired then that graphics-1 file perspective
+    can be changed by the program PERSPEC and the results from that transformation
+    can be plotted by PLTGRAF.
+
+    The window size and plot size can be selected or  automatic window sizing
+    invoked.  Graphics outside of  the window are clipped.  Three
+    dimensional graphics-1  files can also be plotted.  The format of the
+    data in the file can be specified (XY or YX), and the direction of the
+    axes on the plot can be chosen.   
+
+    "PLTGRAF" can also plot attribute information such as text and numbers 
+    from an (optional) IBIS interface file.  
+
+.PAGE
+EXECUTION
+If the display parameters are set to defaults,
+
+	pltgraf INP=file.gra
+
+will plot the graphics file "pltgraf"
+
+Display parameters:
+                                title
+            3.0 +--------|--------|--------|--------|
+                |                                   |
+            2.0 +                                   +
+  y-axis anno.  |                                   |
+            1.0 +                                   +
+                |                                   |
+            0.0 +--------|--------|--------|--------|
+               0.0      1.0      2.0      3.0      4.0
+                            x-axis anno.      comment
+
+  text labeling data (default for each is no text):
+    title="title"		Title (above data)
+    xlabel="x-axis anno."	X-axis annotation (below data)
+    ylabel="y-axis anno."	Y-axis annotation (to left of data)
+    comment="comment"		Comment text (below data, right justified)
+    'date			Date, in the form "day-mon-da, year",
+                                prepended to comment text (comment not
+				necessary to get date) (DATE parameter)
+
+  box and numbers bordering data (MODE parameter; default is 'axis):
+    'axis			Draw box, tick marks, and numbers
+    'noaxis			Draw box only
+    'nobox			No border around data
+
+  plot size (defaults shown):
+    xlen=4.0			Width of plot in inches, not counting text 
+				and numbers outside of box
+    ylen=3.0			Height of plot in inches, not counting text 
+				and numbers outside of box
+
+  window into data (default for each is to use min. & max. of data):
+    xrange=(lower_x,upper_x)	Only points with x values in the range
+				    lower_x <= x <= upper_x
+				are displayed.
+    yrange=(lower_y,upper_y)	Only points with y values in the range
+				    lower_y <= y <= upper_y
+				are displayed.
+    zrange=(lower_z,upper_z)	Only points with z values in the range
+				    lower_z <= z <= upper_z
+				are displayed.
+
+  data format (defaults shown):
+    dataform="YX"		Data in file is in (y,x) or (y,x,z) format.
+				"XY" indicates (x,y) or (x,y,z) format.
+    dim=2			Number of dimensions for each data point--here,
+				2d. dim=3 indicates 3d.
+    direct="BR"			Direction of increasing x and y values--here,
+				from top to bottom for y and from left to right
+				for x. Other directions are "TR", "TL", "BL".
+
+  control of final pen position (default shown):
+    'curr			At the end of the plot, the cursor is positioned
+				at the origin of the plot just finished. 'next
+				positions the cursor 1 inch to the right of the 
+				plot. (FINALPOS parameter)
+
+  special annotation--only used if an interface file is supplied as the 
+  second file in the INP parameter (defaults shown):
+    datacols=3			A list of 1 to 6 numbers indicating the 
+				columns in the interface file that contain
+				text and/or numbers to be plotted.
+    format="REAL,HALF,ASCI,     The format of the input data to be displayed.
+           etc"	                One format for each column. The first two
+                                formats must be present and represent the
+                                format of the x and y value columns.  The
+                                next two columns, if present, represent the
+                                angle and size of the text.  Column 5 may 
+                                be either a number to display or text columns
+                                to display. A maximum of 20 characters 
+                                (5 columns can be displayed).  The user may 
+                                optionally plot both text and a value at an
+                                x,y location.                 
+    xcol=1			The number of the column that contains
+				x-coordinate of the left edge of the text
+				and/or numbers (before rotation).
+    ycol=2			The number of the column that contains
+				y-coordinate of the bottom edge of the text
+				and/or numbers (before rotation).
+    tsize=.15			Default text size if heighcol is defaulted.
+    heighcol=1			The number of the column that contains the
+				height for the text and/or numbers. If the
+				default is taken, then a height of tsize is
+				used for all rows in the interface file.
+    anglecol=1			The number of the column that contains the
+				CCW rotation angle--in degrees from horizontal--
+				for the text and/or numbers. If the default is
+				taken, then an angle of 0.0 degrees is used
+				for all rows in the interface file.
+.PAGE
+IBIS GRAPHICS-1 FILES
+
+    IBIS graphics-1 files are a way to store 2-dimensional or 3-dimensional
+polygonal objects in a file. The file contains a list of the successive vertices
+of the polygons. When the list contains a line of all zeroes then it terminates
+that face of the polygon. In the view of a drawing program it would be a
+"pen-up" command. 
+
+    With the advent of the IBIS-2 format graphics-1 files are deprecated.
+In the new IBIS-2 format graphics-1 can replace that format via an index
+column. In the IBIS-2 context each row is associated with a single vertex,
+and the row order in a column determines the sequence of plotting the
+vertices. A pen-up type command would involve a change of the value in
+the index column. 
+
+
+.PAGE
+PLOT OUTPUTS
+
+    The other type of output come from the PLOT and PLOTFMT parameters.
+PLOT allows the user to display data from 5 areas on the CCD on an x,y
+plot using the gnuplot package after exiting the program. PLOT produces
+a file of gnuplot commands contained in a file having a .gpi file extension.
+Another file with an .asc extension is create containing columns of data
+that are displayed by the gpi file.
+
+   The PLOTFMT parameter allows the user to generate a postscript file of
+the output for use in documentation by choosing PLOTFMT=EPS. The default
+is to generate a gnuplot interactive display.
+
+.PAGE
+
+  PLOT NAMING CONVENTIONS
+
+  The user should enter only the parent file name without an extension
+  for the PLOTOUT parameter.  The program will supply the extensions.
+
+  For example, if the user has an input file of indata.dat and  PLOTOUT=outplot
+  then for the interactive plot the following files are produced:
+
+     outplot.gpi
+     indata.dat.asc
+
+  The first file is the gnuplot instruction file and the second is the
+  data file used by gnuplot.
+
+  If the user wanted an encapsulate postscript file with PLOTFMT=eps
+  then the following files are produced:
+
+     outplot.eps.gpi
+     indata.dat.asc
+
+  Remember entering the following command gives the eps file, outplot.eps
+
+  ush gnuplot outplot.eps.gpi
+
+  If you move the gpi file to another directory, you must also move the
+  input data file, indata.dat.asc to the same directory.
+
+  Note that the gpi file produced by this program has the name of the
+  input file embedded in the plot command inside the gpi file, e.g..
+
+  plot  'indata.dat.asc' u  1: 9 t .......
+
+.PAGE
+USING GNUPLOT
+
+
+  INTERACTIVE:
+
+    This program uses the gnuplot package for its plots. Gnuplot is a
+  separate package from Vicar and is not actually invoked inside this
+  program.  Instead this program creates a template of gnuplot commands
+  which are written out as a separate file. The plot is then viewed after
+  exiting this program. The file has the extension .gpi. You view
+  the plot by issuing the following command in the vicar shell.
+
+  ush gnuplot output.gpi
+
+  or external to vicar as
+
+  gnuplot output.gpi
+
+    After viewing the data, you close the plot by clicking the mouse anywhere
+  except on the top bar of the plot. Clicking on the top bar allows you
+  to move the plot to any convenient place on the terminal screen.  (While
+  the plot is displayed you cannot enter any commands to the vicar shell).
+
+  The data to be plotted by gnuplot is read from a separate file, created
+  by this program, which contains columns of data in ascii text.
+  File naming conventions are discussed in the OUTPUT section, but in this
+  case that file extension will be .asc.
+
+  It is possible to keep the plot alive for comparison purposes by issuing
+  the following command.
+  ush gnuplot --persist output.gpi
+  (You will be able to enter commamds to the vicar shell after clicking on
+  the mouse on the plot).
+
+  Note: This program creates multiple output plots per run. You bring up each plot
+  panel sequentially. You close each plot by clicking the mouse on any
+  portion of the plot.
+
+
+  HARDCOPY:
+
+  This program also allows you to create a hardcopy encapsulated postscript
+  plot suitable for publications. This file can be viewed with ghostscript
+  or gimp. The encapsulated postscript file is not created by this program
+  by by the gnuplot program from a gpi file made especially for this purpose.
+  this file has the extension, eps.gpi. You create the hardcopy plot via
+  the following command
+
+  ush gnuplot output.eps.gpi
+
+  This creates the eps file output.eps. You can view this file by
+
+  ush gimp output.eps
+
+.PAGE
+    DEVELOPER Note:
+
+    This program used to link to the XRT plot library -lxrt. Calls to
+  that library were mitigated through a Calcomp conversion library,
+  xrtps located in the p2 subroutine library. With the conversion to
+  gnuplot, neither of these packages are used.
+
+.PAGE
+EXAMPLES
+
+    pltgraf INP=FILE.GRA  TITLE="Map of an Unknown Land"  +
+        XLEN=10  YLEN=5.0  +
+	XRANGE=(-120,-115)  YRANGE=(34,36)  +
+	XLABEL="LONGITUDE" YLABEL="LATITUDE"  DIRECT="TR" 
+
+In this example the data window is (-120,-115) in longitude and (34,36) in
+latitude, and the size of the plot is 10 by 5 inches. The direction of the axes
+is set to top-right since this is a latitude-longitude plot. 
+
+
+    pltgraf  FILE.GRA  XLEN=7 YLEN=3.5 'NOAXIS TITLE="Another Map" +
+	XLABEL="south" 'DATE
+
+In this example, the data window is found from the extent of the data so that
+the whole file is displayed. Because of the 'NOAXIS keyword, a box is drawn
+around the data but the axes are not labeled with numbers and no tick marks
+are drawn. A title and the x-axis annotation are displayed; today's date is
+drawn in the lower right corner of the plot.
+
+
+    pltgraf  THREE.GRA  DIM=3  XRANGE=(1000,1400) YRANGE=(600,900) +
+	ZRANGE=(0,10000)
+
+This example demonstrates how to plot 3-D graphics files. The first two
+dimensions are treated identically as with 2-D graphics files.
+
+
+    ibis-gen LINES NC=3 NR=8 'IBIS-1 'ROW DATACOL=(1,2,3) DATA=( +
+	 1,  1,  1,	 2,  2,  2,	 3,  3,  3,	 4,  4,  4,
+	 5,  5,  5,	 6,  6,  6,	 7,  7,  7,	 8,  8,  8)
+    pltgraf LINES DIM=3 'NOAXIS XLEN=8 YLEN=8 'DATE COMMENT=" test" +
+	ZRANGE=(1,7)
+
+In this plot, a box will be drawn around the data and the comment
+"WED SEP 17, 1987 test" (current date) will be drawn in the lower right
+corner of the plot just outside of the box. The last line segment,
+(7,7) to (8,8), will not be drawn, however, because the second point's z
+value--8--is outside of ZRANGE.
+
+
+.PAGE
+Optional Interface File Examples:
+
+    pltgraf (PLOT.GRA,TEXT.INT) XCOL=1 YCOL=3 DATACOLS=(5,6,7,8) +
+	FORMAT=("REAL","REAL","HALF","ASCI",'ASCI','ASCI') +
+        HEIGHCOL=10 ANGLECOL=11 'NOBOX +
+	COMMENT="Test annotation"
+
+This example shows the use of an interface file to plot annotation. First, the
+data in the first file will get plotted; no box, tick marks, axes number 
+labels, axes annotation, or title will be plotted ('NOBOX + omission of
+XLABEL, YLABEL, & TITLE). A comment will be drawn in the lower right corner
+of the plot.
+
+Next, the annotation from the interface file will be plotted.  The position of
+the text to be plotted is in columns specified by XCOL and YCOL (these
+positions are scaled to fit the plot in the same way that data points are
+scaled). The DATACOLS specifies the interface columns that hold the text and
+numbers to be plotted.  The data in the columns is specified with the 
+FORMAT parameter. For this example, the first two columns (1,3) are real 
+numbers and contain the x and y location at which the following datacols will
+be plotted.  Column 5 contains a half word value to plotted at x,y and columns
+6,7,8 contain associated text to be plotted at the same location.
+
+.page
+RESTRICTIONS
+ 
+ 1. Plotted text must not be longer than 60 characters.
+ 2. Interface file text may not be longer than 20 characters.
+
+WRITTEN BY:                     Frank Evans
+COGNIZANT PROGRAMMER:           Barbara McGuffie
+
+REVISIONS:                       
+
+    Feb     1986 Frank Evans   - Put in calls to standard IBIS
+                                 graphics-1 file subroutines.
+                                 Added 3-D option.
+    Mar     1986 Frank Evans   - Allowed different coordinate systems
+                                 Modified 3-D option.
+    Jun     1986 Frank Evans   - Added interface attribute file
+    Jan     1987 Frank Evans   - Added dataform parameter
+    Jun     1987  Michael Tschudi Used call to SETGR to avoid opening graphics
+                                  file twice (done to reset file to its first
+                                  coordinate)
+    Sep 17, 1987 Michael Tschudi 1. add PEN param
+                                 2. add ZTOPEN param
+                                 3. add COMMENT param
+                                 4. add DATE param
+                                 5. add FINALPOS param
+                                 6. add NOBOX to the MODE param
+                                 7. change formula for centering title from
+                                        xlen/2.-0.25*.67*(slength(title)/2.+2)
+                                    to
+                                        (xlen-0.2490*slength(title))/2.0
+                                 8. if xlabel specified along with 'NOAXIS or
+                                    'NOBOX, then it is displayed without axis 
+                                    numbers; same for ylabel
+                                 9. change pen number calculation for scaled z
+                                    from
+                                        pen = int(z)
+                                    to
+                                        pen = nint(z)
+                                    to avoid round-off error
+                                10. fixed ZRANGE so that the range is checked
+                                11. set plot to draw in same location 
+                                    regardless of MODE switch value
+                                12. fixed default FORMAT value
+    Feb 23, 1990 Howard Frieden Check that interface file annotation is within
+                                the plot area.  Also, center the annotation
+                                and add TSIZE parameter.
+    Jul 10, 1996 A. Scop (CRI) - Made portable for UNIX
+    May  1, 1998 BAM           - Corrected subroutine PLOTTEXT 
+                           which had not been ported properly.
+    Feb 13, 2013 R. J. Bambery - Converted to gnuplot and 
+                                gfortran 4.6.3 64-bit compatiability
+    Feb 20, 2013 R. J. Bambery - Updated test and documentation
+    Mar 15, 2013 R. J. Bambery - remove all debugging statements,
+                                dataform is default=XY not YX
+    Jul 07, 2013 R. J. Bambery - Renamed table file and fixed logic
+                                in XY vs YX and TR, BR, TL, BL
+                                (capitalization)  and ranges in gpi files
+    Jul 13, 2013 R. J. Bambery - Adjusted eps format to more readable fonts
+
+.LEVEL1
+.VARIABLE INP
+ 1. Input IBIS graphics-1 file
+ 2. Optional interface file with
+    special annotation
+.VARIABLE PLOT
+ STRING-OPTIONAL
+ Turns on PLOT.
+.VARIABLE PLOTFMT
+ Output plot format
+ GNUPLOT or EPS
+.VARIABLE TITLE
+String for title
+.VARIABLE XLABEL
+String for x-axis annotation
+.VARIABLE YLABEL
+String for y-axis annotation
+.VARIABLE COMMENT
+String for lower-right corner
+annotation
+.VARIABLE DATE
+Switch indicating that the curr.
+date should be prepended to 
+COMMENT ('DATE) or not ('NODATE)
+
+.VARIABLE MODE
+Switch indicating level of 
+border detail around data:
+  'AXIS: box, ticks, numbers
+  'NOAXIS: box only
+  'NOBOX: nothing
+
+.VARIABLE XLEN
+Length of x-axis in inches
+.VARIABLE YLEN
+Length of y-axis in inches
+
+.VARIABLE XRANGE
+Range for x-variable
+.VARIABLE YRANGE
+Range for y-variable
+.VARIABLE ZRANGE
+Range for z-variable
+
+.VARIABLE DATAFORM
+File format:  XY, YX.
+.VARIABLE DIM
+Dimension of graphics
+file (2 or 3)
+.VARIABLE DIRECT
+Increasing direction for axes:
+  TR for top right
+  BR for bottom right
+  TL for top left
+  BL for bottom left
+
+.VARIABLE FINALPOS
+Position for pen following plot:
+  'CURR: at origin of plot (for
+    overprinting)
+  'NEXT: to right of plot (for
+    adjacent plot)
+
+.VARIABLE DATACOLS
+Columns (up to 10) that hold the
+text or numbers to be plotted
+.VARIABLE FORMAT
+String containing IBIS FORMAT
+statement to use to format the 
+data columns (parentheses req'd)
+.VARIABLE XCOL
+Column number that holds left-
+edge x coords for text/numbers
+(before rotation)
+.VARIABLE YCOL
+Column number that holds bottom-
+edge y coords for text/numbers
+(before rotation)
+.VARIABLE TSIZE
+Text size in inches when 
+HEIGHCOLis defaulted. 
+Default is .15 
+.VARIABLE HEIGHCOL
+Column number that holds the
+height of the text in inches.
+(Default yields TSIZE inches)
+.VARIABLE ANGLECOL
+Column number that holds the
+angle of the text in degrees.
+(Default yields 0 degrees)
+
+.LEVEL2
+.VARIABLE INP
+    Type:	string, 72 characters
+    Count:	1 or 2
+    Valid:	any
+    Default:	none
+.VARIABLE PLOT
+    STRING-OPTIONAL
+    Specifies the filename to 
+    receive the output plot data.
+.VARIABLE PLOTFMT
+    STRING-OPTIONAL
+    Output plot format
+    GNUPLOT or EPS
+
+.VARIABLE TITLE
+    Type:	string, 60 characters
+    Count:	1
+    Valid:	any
+    Default:	""
+.VARIABLE XLABEL
+    Type:	string, 60 characters
+    Count:	1
+    Valid:	any
+    Default:	""
+.VARIABLE YLABEL
+    Type:	string, 12 characters
+    Count:	1
+    Valid:	any
+    Default:	""
+.VARIABLE COMMENT
+    Type:	string, 60 characters
+    Count:	1
+    Valid:	any
+    Default:	""
+.VARIABLE DATE
+    Type:	keyword
+    Count:	1
+    Valid:	'NODATE, 'DATE
+    Default:	'NODATE
+
+.VARIABLE MODE
+    Type:	keyword
+    Count:	1
+    Valid:	'AXIS, 'NOAXIS, 'NOBOX
+    Default:	'AXIS
+
+.VARIABLE XLEN
+    Type:	real
+    Count:	1
+    Valid:	0.5 to 10.0 inches
+    Default:	4.0
+.VARIABLE YLEN
+    Type:	real
+    Count:	1
+    Valid:	0.5 to 10.0 inches
+    Default:	3.0
+
+.VARIABLE XRANGE
+    Type:	real
+    Count:	2
+    Valid:	any
+    Default:	1.0 (if defaulted, then the actual range of the data is used)
+.VARIABLE YRANGE
+    Type:	real
+    Count:	2
+    Valid:	any
+    Default:	1.0 (if defaulted, then the actual range of the data is used)
+.VARIABLE ZRANGE
+    Type:	real
+    Count:	2
+    Valid:	any
+    Default:	1.0 (if defaulted, then the actual range of the data is used)
+
+.VARIABLE DATAFORM
+    The DATAFORM parameter specifies the way to assign the coordinates in
+    the file to the x and y axes of the plot.  The default (YX) uses the
+    first coordinate for the Y axis and the second for the X axis. 
+
+    Type:	string, 2 characters
+    Count:	1
+    Valid:	"YX", "XY"
+    Default:	"YX"
+.VARIABLE DIM
+    Type:	integer
+    Count:	1
+    Valid:	2 or 3
+    Default:	2
+.VARIABLE DIRECT
+    Type:	string, 2 characters
+    Count:	1
+    Valid:	"BR", "TR", "TL", "BL"
+    Default:	"BR"
+
+.VARIABLE FINALPOS
+    Type:	keyword
+    Count:	1
+    Valid:	'CURR or 'NEXT
+    Default:	'CURR
+
+.VARIABLE DATACOLS
+    Type:	integer
+    Count:	1 to 10
+    Valid:	1 to 40
+    Default:	3
+.VARIABLE FORMAT
+    Type:	string, 4 characters
+    Count:	1:100
+    Valid:	IBIS format information enclosed in parentheses
+    Default:	none
+.VARIABLE XCOL
+    Type:	integer
+    Count:	1
+    Valid:	1 to 40
+    Default:	1
+.VARIABLE YCOL
+    Type:	integer
+    Count:	1
+    Valid:	1 to 40
+    Default:	2
+.VARIABLE TSIZE
+    Type:	real
+    Count:	1
+    Valid:	.0075 to 3.0
+    Default:	.15
+.VARIABLE HEIGHCOL
+    Type:	integer
+    Count:	1
+    Valid:	1 to 40
+    Default:	1 (if defaulted, then a height of TSIZE inches is 
+		used for all rows)
+.VARIABLE ANGLECOL
+    Type:	integer
+    Count:	1
+    Valid:	1 to 40
+    Default:	1 (if defaulted, then an angle of 0.0 degrees is
+		used for all rows)
+.END

@@ -1,0 +1,21 @@
+/***********************************************************************
+                     IMAKE FILE FOR PROGRAM amer
+   To Create the build file give the command:
+		$ vimake amer			(VMS)
+   or
+		% vimake amer			(Unix)
+************************************************************************/
+#define PROGRAM	amer
+#define R2LIB
+
+#define MODULE_LIST amer.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+/* #define INCLUDE_LIST amer.fin */
+/* #define FTNINC_LIST fortport */
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

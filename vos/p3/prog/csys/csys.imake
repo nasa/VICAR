@@ -1,0 +1,9 @@
+#define PROGRAM csys
+#define MODULE_LIST csys.f
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+/*#define LIB_LOCAL		/* remove on delivery */
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_SPICE
+#define LIB_FORTRAN

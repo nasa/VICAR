@@ -1,0 +1,133 @@
+Procedure help=*
+
+parm inp	string
+parm out	string
+parm sl		integer default=1
+parm nl		integer default=0
+parm striplen	integer	default=3500
+parm gapwidth	integer	default=47
+local inpv	string
+local i		integer	initial=1
+local nstrips	integer
+local nli       integer
+refgbl $echo
+
+Body
+
+let $echo="no"
+if (nl = 0) 
+  form &inp nl=nli
+else
+  let nli = nl
+end-if
+write "nl=&nli"
+let nstrips = (nli+striplen-1)/striplen
+let inpv = inp
+
+if (nstrips = 1)
+  let striplen = nli
+end-if
+
+loop
+ if (i = nstrips) break
+ let inpv = inpv//","//inp
+ let i = i + 1
+end-loop
+
+let inpv = "("//inpv//")"
+
+STRIPPIT &inpv &out SL=&sl NL=&nl STRIPLEN=&striplen GAPWIDTH=&gapwidth
+
+let $echo="yes"
+
+End-proc
+
+.TITLE
+TAE PROCEDURE STRIPPER
+.HELP
+PURPOSE:
+ 
+   STRIPPER is a TAE procedure which takes an image and puts it into strips
+of STRIPLEN lines with a spacing of GAPWIDTH number of samples between the
+strips.  It was written to facilitate the formatting of long and skinny
+flight lines for playback.
+ 
+EXECUTION:
+ 
+   The following is the execution statement format for STRIPPIT:
+ 
+		STRIPPIT INP OUT PARAMS
+ 
+   where INP, OUT, and PARAMS are parameters discussed in their respective
+parameter sections. 
+.PAGE
+OPERATION:
+ 
+   STRIPPER does the seemingly simple task of cutting and pasting long slender
+flight line images into parallel strips in order to format the images for
+playback.  It uses a slightly more complex algorithm than would seem necessary
+because of the inefficiency of non-sequential I/O (especially XVREADing) which
+would slow down the operation considerably.  Instead, a maximum size buffer is
+allocated for the output, and the reading and writing is done on a block by
+block basis, one block being the maximum number of lines by the number of
+strips necessary in the output.
+
+   The two unique parameters (other than SIZE) are STRIPLEN and GAPWIDTH.
+STRIPLEN lets the user select the number of lines of the strips, and GAPWIDTH
+sets the number of samples spacing between the image strips.  The defaults
+are set up for standard TIMS processing.
+
+   This program was written to facilitate the processing of TIMS data, which
+has come in lengths of over 22,000 lines in a single flight line.  It can just
+as well be used by anyone working with long flight lines of AIS, NS001 or other
+airborne sensors, however.
+ 
+ 
+RESTRICTIONS:
+ 
+   As it is currently designed, the output can be in no wider than 10,000
+samples, and must be byte format.
+
+.PAGE 
+EXAMPLES:
+ 
+1) STRIPPIT INP OUT
+ 
+2) STRIPPIT INP OUT STRIPLEN=2000 GAPWIDTH=20
+ 
+ 
+TIMING:
+ 
+WRITTEN BY:  R. E. Walker     16DEC85
+ 
+COGNIZANT PROGRAMMER:  same
+ 
+REVISION: NEW
+.LEVEL1
+.VARIABLE INP
+input dataset name
+.VARIABLE OUT
+output dataset name
+.VARIABLE SL
+first line of input to be used
+.VARIABLE NL
+number of lines of input to be used
+.VARIABLE STRIPLEN
+number of lines in output image
+.VARIABLE GAPWIDTH
+number of pixels separating each strip
+.LEVEL2
+.VARIABLE INP
+The name of the input dataset.
+.VARIABLE OUT
+The name of the output dataset.
+.VARIABLE SL
+The first line of input image to be output.
+.VARIABLE NL
+The number of lines of input image to be output.
+.VARIABLE STRIPLEN
+The number of lines in the output image.  That is, the number of lines in
+each strip.  The default is 3500 pixels.
+.VARIABLE GAPWIDTH
+The number of pixels separating each strip.  The default is 47 pixels.
+.END

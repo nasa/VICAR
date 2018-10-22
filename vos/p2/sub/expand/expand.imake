@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine EXPAND */
+
+#define SUBROUTINE expand
+
+#define MODULE_LIST expand.c
+
+#define P2_SUBLIB
+
+#define USES_C

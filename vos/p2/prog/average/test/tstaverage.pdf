@@ -1,0 +1,92 @@
+procedure
+refgbl $echo
+refgbl $autousage
+! Jun 19, 2012 - RJB
+! TEST SCRIPT FOR AVERAGE
+! tests BYTE, HALF, FULL, REAL images
+!
+! Vicar Programs:
+!       gen list label-list
+! 
+! parameters:
+!   <none>
+!
+! Requires NO external test data: 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+body
+let $autousage="none"
+let _onfail="stop"
+let $echo="yes"
+!
+!     BUILD 3 INPUT BYTE IMAGES 
+!
+gen LOOK1  NL=10 NS=10  IVAL=0
+gen LOOK2  NL=10 NS=10  IVAL=5
+gen LOOK3  NL=10 NS=10  IVAL=10
+!
+list LOOK1
+list LOOK2
+list LOOK3
+!
+average INP=(LOOK1, LOOK2, LOOK3) OUT=(LOOK11)
+list LOOK11
+average INP=(LOOK1, LOOK2, LOOK3) OUT=(LOOK12)  SIZE=(2,2,2,5)
+list LOOK12
+
+!
+!     BUILD 3 INPUT HALF IMAGES 
+!
+gen half1   NL=10 NS=10  IVAL=100 format=half
+gen half2   NL=10 NS=10  IVAL=500 format=half
+gen half3   NL=10 NS=10  IVAL=1000 format=half
+
+list half1
+list half2
+list half3
+
+average INP=(half1, half2, half3) OUT=(half11)
+list half11
+average INP=(half1, half2, half3) OUT=(half12)  SIZE=(2,2,2,5)
+list half12
+label-li half12
+
+!
+!     BUILD 3 INPUT FULL IMAGES 
+!
+gen full1   NL=10 NS=10  IVAL=1000 format=full
+gen full2   NL=10 NS=10  IVAL=5000 format=full
+gen full3   NL=10 NS=10  IVAL=10000 format=full
+
+average INP=(full1, full2, full3) OUT=(full11)
+list full11
+
+average INP=(full1, full2, full3) OUT=(full12)  SIZE=(2,2,2,5)
+list full12
+label-li full12
+
+!
+!     BUILD 3 INPUT REAL IMAGES 
+!
+gen real1   NL=10 NS=10  IVAL=1000 format=real
+gen real2   NL=10 NS=10  IVAL=5000 format=real
+gen real3   NL=10 NS=10  IVAL=10000 format=real
+
+average INP=(real1, real2, real3) OUT=(real11)
+list real11
+
+average INP=(real1, real2, real3) OUT=(real12)  SIZE=(2,2,2,5)
+list real12
+label-li real12
+
+
+
+!   CLEAN UP
+! 
+ush rm -f LOOK*
+ush rm -f half*
+ush rm -f full*
+ush rm -f real*
+!
+let $echo="no"
+end-proc

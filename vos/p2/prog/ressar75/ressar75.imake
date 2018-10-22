@@ -1,0 +1,30 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM ressar75
+
+   To Create the build file give the command:
+
+		$ vimake ressar75			(VMS)
+   or
+		% vimake ressar75			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	ressar75
+#define R2LIB
+
+#define MODULE_LIST ressar75.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_MATH77
+
+/*#define DEBUG		/* remove on delivery */
+/*#define LIB_LOCAL	/* remove on delivery */
+/************************* End of Imake file ***************************/

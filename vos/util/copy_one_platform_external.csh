@@ -12,17 +12,17 @@ echo $VER
 if (-d $SRC/$VER/$PLAT) then
    pushd $SRC/$VER/$PLAT
    mkdir -p $DST/$VER/$PLAT
-   tar cf - . | (cd $DST/$VER/$PLAT; tar xBfp -)
+   tar cpf - . | (cd $DST/$VER/$PLAT; tar xBfp -)
    popd
 endif
 if (-d $SRC/$VER/src) then
    pushd $SRC/$VER/src
    mkdir -p $DST/$VER/src
-   tar cf - . | (cd $DST/$VER/src; tar xBfp -)
+   tar cpf - . | (cd $DST/$VER/src; tar xBfp -)
    popd
 endif
 if (-f $SRC/$VER/README.mipl) then
-   cp $SRC/$VER/README.mipl $DST/$VER
+   cp -p $SRC/$VER/README.mipl $DST/$VER
 endif
 
 exit

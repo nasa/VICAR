@@ -1,0 +1,9 @@
+
+#define SUBROUTINE interpolate
+
+#define MODULE_LIST interpolate.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

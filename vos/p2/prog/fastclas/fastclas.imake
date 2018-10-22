@@ -1,0 +1,18 @@
+/***********************************************************************
+                     IMAKE FILE FOR PROGRAM fastclas
+   To Create the build file give the command:
+		$ vimake fastclas			(VMS)
+   or
+		% vimake fastclas			(Unix)
+************************************************************************/
+#define PROGRAM	fastclas
+#define R2LIB
+#define MODULE_LIST fastclas.f
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+#define LIB_MATH77
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

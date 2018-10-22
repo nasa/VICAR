@@ -1,0 +1,48 @@
+process help=*
+PARM INP     TYPE=(STRING,40)     COUNT=3
+PARM OUT     TYPE=(STRING,40)
+PARM WIDTH   TYPE=INTEGER         DEFAULT=101    VALID=(1:1001)
+PARM FORMAT  TYPE=KEYWORD         DEFAULT=BYTE   VALID=(BYTE,HALF,FULL)
+PARM AREA    TYPE=INTEGER    COUNT=(0:200)                DEFAULT=--
+END-PROC
+.TITLE
+	Program TERNARY
+.HELP
+PURPOSE:
+      TERNARY produces a ternary diagram as an image dataset. The output is 
+an equilateral triangle of length specified by the WIDTH parameter. The 
+background of the triangle is filled with 255 for byte output and -1 otherwise.
+The values within the triangle represent the number of pixels associated with
+that location in the ternary diagram.
+.LEVEL1
+.VARIABLE INP
+3 input data sets
+.VARIABLE OUT
+output data set
+.VARIABLE WIDTH
+Pixels of resolution
+.VARIABLE FORMAT
+Output data format
+(BYTE, HALF, or FULL)
+.VARIABLE AREA
+The subareas to be included
+in the ternary diagram. Up
+to 50 regions (SL,SS,NL,NS)
+may be entered. Default is 
+to use the entire image.
+.LEVEL2
+.VARIABLE INP
+The three input datasets. They will be represented on the ternary diagram as the
+left, top, and right corners, respectively.
+.VARIABLE OUT
+Output dataset containing the ternary diagram.
+.VARIABLE WIDTH
+Pixels of resolution. This will be the number of samples in the output dataset.
+The number of lines in the output will be sqrt(3)/(2*WIDTH).
+.VARIABLE FORMAT
+The output data format. Valid options are byte, halfword, or fullword.
+.VARIABLE AREA
+Sets of (Starting_line, Starting_sample, Number_of_lines, Number_of_samples)
+are given to define subareas used to generate the ternary diagram. Up to 50
+sets of subareas may be entered.
+.END

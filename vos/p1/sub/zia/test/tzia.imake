@@ -1,0 +1,23 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR TEST PROGRAM tzia
+
+   To Create the build file give the command:
+
+	$ vimake tzia                     (VMS)
+   or
+	% vimake tzia                     (Unix)
+
+*************************************************************************/
+
+#define PROGRAM tzia
+
+#define MODULE_LIST tzia.f
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_LOCAL
+
+#define USES_FORTRAN
+#define MAIN_LANG_FORTRAN

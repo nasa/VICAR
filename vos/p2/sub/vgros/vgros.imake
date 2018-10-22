@@ -1,0 +1,11 @@
+/* Imake file for VICAR subroutine VGROS */
+
+#define SUBROUTINE vgros
+
+#define MODULE_LIST vgros.f zvgros.c
+
+#define P2_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+

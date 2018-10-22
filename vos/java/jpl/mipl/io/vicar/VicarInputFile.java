@@ -95,6 +95,10 @@ public class VicarInputFile implements VicarInput
    // boolean debug_tile = true;
    
    boolean debug = false;
+   // boolean debug = true;
+   
+   boolean _flip_image_horizontal = false;
+   boolean _flip_image_vertical = false;
    
    // new ImageReadParam values to handle subsampling, cropping and band select
    // these could either be null if unused or the values set to whole image
@@ -730,16 +734,23 @@ public class VicarInputFile implements VicarInput
 			
    }
 /***********************************************************************
- * openInternalLast * 
+ * openInternalLast * 
  * called at the end of openInternal. Can be used by subclasses to do any 
  * extra work once openInternal has completed. Created so 
  * PDSInputFile and ISISInputFile  oculd have the oportunity to modify 
- * _input_stream_wrap.  */
+ * _input_stream_wrap.  */
 protected void openInternalLast() {
+	
+	int nl = _system.getNL();
+	int ns = _system.getNS();
+	// Rectangle(int x, int y, int width, int height)
+	Rectangle r = new Rectangle(0,0, ns, nl);
+	setSourceRegion(r);
 	
 	// provided for subclasses to put good stuff here
 	if (debug) {
 		System.out.println("VicarInputFile.openInternalLast()");
+		System.out.println("sourceRegion "+r);	
 	}
 	// get any binary prefix
 	int nlb = _system.getNLB();
@@ -1586,22 +1597,51 @@ Disabled */
 	// _sourceRegion.x or _sourceRegion.y 
 	// other wise we jump too far into the image
 	
-	int in_x = x * _sourceXSubsample;
+	// temp fix srlevoe 8-2-2017
+	int in_x = x;
+	if (_sourceRegion.x == 0)
+	    in_x = x * _sourceXSubsample;
 	
 	int in_x_crop = in_x;
+	if (debug) {
+		System.out.println("VicarInputFile.readTile XXX0 in_x="+in_x+" in_x_crop="+in_x_crop+" x="+x+" _sourceXSubsample="+_sourceXSubsample+" _sourceRegion.x="+_sourceRegion.x+" ");
+	}
 	if (_sourceXSubsample == 1) {
 		in_x_crop = in_x;
+	} else if (_sourceRegion.x != 0) {
+	    // in_x_crop = x - _sourceRegion.x;
+		if (debug) {
+			System.out.println("VicarInputFile.readTile XXX1 in_x="+in_x+" in_x_crop="+in_x_crop+" x="+x+" _sourceXSubsample="+_sourceXSubsample+" _sourceRegion.x="+_sourceRegion.x+" ");
+		}
 	} else {
 		in_x_crop = (x * _sourceXSubsample) - _sourceRegion.x;
+		if (debug) {
+			System.out.println("VicarInputFile.readTile XXX2 in_x="+in_x+" in_x_crop="+in_x_crop+" x="+x+" _sourceXSubsample="+_sourceXSubsample+" _sourceRegion.x="+_sourceRegion.x+" ");
+		}
 	}
 	// int in_x = x ;
 	// int in_y = y ;
-	int in_y = y * _sourceYSubsample;
+	// temp fix srlevoe 8-2-2017
+	int in_y = y;
+	if (_sourceRegion.y == 0)
+	    in_y = y * _sourceYSubsample;
+	
 	int in_y_crop = in_y;
+	if (debug) {
+		System.out.println("VicarInputFile.readTile YYY0 in_y="+in_y+" in_y_crop="+in_y_crop+" y="+y+" _sourceYSubsample="+_sourceYSubsample+" _sourceRegion.y="+_sourceRegion.y+" ");
+	}
 	if (_sourceYSubsample == 1) {
 		in_y_crop = in_y;
+	} else if (_sourceRegion.y != 0) {
+		in_y_crop = in_y;
+		if (debug) {
+			System.out.println("VicarInputFile.readTile YYY1 in_Y="+in_y+" in_y_crop="+in_y_crop+" y="+y+" _sourceYSubsample="+_sourceYSubsample+" _sourceRegion.y="+_sourceRegion.y+" ");
+		}
 	} else {
 		in_y_crop = (y * _sourceYSubsample) - _sourceRegion.y ;
+		if (debug) {
+			System.out.println("VicarInputFile.readTile YYY2 in_x="+in_y+" in_y_crop="+in_y_crop+" y="+y+" _sourceYSubsample="+_sourceYSubsample+" _sourceRegion.y="+_sourceRegion.y+" ");
+		}
 	}
 	
 	in_x = in_x_crop;
@@ -1698,6 +1738,7 @@ Disabled */
 		in_w = _system.getNS() - in_x;
 	if (in_y + in_h > _system.getNL())
 		in_h = _system.getNL() - in_y;
+	
 	
 	if (debug_tile) {
 		System.out.print(" XX in_x="+in_x+" in_y="+in_y+" in_w="+in_w+" in_h="+in_h+" in_x_off="+in_x_off+" in_y_off="+in_y_off);
@@ -2515,6 +2556,7 @@ Disabled */
 	}
     }
 
+
 /***********************************************************************
  * Low-level routine to seek on <code>_input_stream</code>.  This function,
  * as well as all the other <code>stream_</code>* functions, is required
@@ -2540,6 +2582,32 @@ Disabled */
 	throw new UnsupportedOperationException("Seek not supported for this stream type");
     }
 
+/***********************************************************************
+ * Low-level routine to return the file position in <code>_input_stream</code>.
+ * Intended for random-access files only; returns UnsupportedOperationException
+ * if called for a stream that doesn't support positioning.
+ *
+ * This function, as well as all the other <code>stream_</code>* functions,
+ * is required to handle the plethora of possible input stream objects mandated
+ * by the pathetically poor design of <code>java.io</code>.
+ * <p>
+ * @throws UnsupportedOperationException if the stream's type is not recognized
+ * or the position cannot be determined.
+ */
+    protected long stream_pos() throws IOException
+    {
+	if (_input_stream instanceof SeekableStream) {
+	    return ((SeekableStream)_input_stream).getFilePointer();
+	}
+
+	if (_input_stream instanceof ImageInputStream) {
+	    return ((ImageInputStream)_input_stream).getStreamPosition();
+	}
+
+	throw new UnsupportedOperationException("Obtaining file pos not supported for this stream type");
+    }
+
+        
 /***********************************************************************
  * Low-level routine to skipBytes on <code>_input_stream</code>.
  * @see #stream_seek

@@ -1,0 +1,130 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+
+!***************************************************************************
+!
+!	GMASK TEST PDF FOR VMS OPERATING SYSTEM MACHINES
+!
+!	Author: J. McNeill
+!	Date: 	August 1993
+!
+!***************************************************************************
+!
+! Note:	This is the test PDF for VMS ONLY, use TSTGMASK_UNIX.PDF for
+!  	testing on UNIX system.
+!***************************************************************************
+!***************************************************************************
+! Note:	On CODA, ftp the following data from VAX ops1:[demo_images] via binary
+! option:
+! MANDRILL.RED, MANDRILL.GRN, MANDRILL.BLU,
+! Then remove the "!" from the following statements:
+!***************************************************************************
+!
+!
+! gen out=input4.hlf ns=512 nl=512 format="half" linc=0 sinc=128 ival=-32768
+! gen out=input.byt ns=100 nl=100 linc=0 sinc=1
+! Test color C mask program
+! TESTRGB in=(mandrill.red,mandrill.grn,mandrill.blu, +
+!	      b52.img,input4.hlf,io.red,io.grn,io.blu,jpllogo.img) +
+!	      out=GMASKRGBC.DAT
+!
+! Test color fortran mask program
+! TESTRGBF in=(mandrill.red,mandrill.grn,mandrill.blu, +
+!	   b52.img,input4.hlf,io.red,io.grn,io.blu,jpllogo.img) +
+!	   out=GMASKRGBF.DAT
+!
+! Test BW C mask program
+! TESTBW  in=(mandrill.red,b52.img,input4.hlf,io.red,jpllogo.img) +
+!         out=GMASKBWC.DAT
+! Test BW fortran mask program
+! TESTBWF in=(mandrill.red,b52.img,input4.hlf,io.red,jpllogo.img) +
+!	out=GMASKBWF.DAT
+!write "*******************************************************************"
+!write " TEST OF XAOUTSIZE and INVERSE STRETCHES OF XASTORE- XAZOOMIMAGE  "
+!write "*******************************************************************"
+!write " "
+!write "TESTAUX, TESTAUXF and TESTDIF should all have identical outputs."
+!write "TESTDIF uses stretched inputs produced by STRETCH.COM, while "
+!write "TESTAUX and TESTAUXF use GMASK stretch routines.  XAOUTSIZE is also"
+!write "tested.  All outputs should be of dimensions 512x512, with a 200x200"
+!write "window of images."
+!TESTAUX  input.byt GMASKAUX.DAT 
+!TESTAUXF input.byt GMASKAUXF.DAT 
+!
+!TESTDIF input.str GMASKDIF.DAT
+!
+!write " "
+!write "THERE SHOULD BE NO DIFFERENCE BETWEEN GMASKAUX_U.DAT, GMASKAUXF_U.DAT"
+!write "and GMASKDIF_U.DAT"
+!difpic (GMASKAUX_U.DAT,GMASKAUXF_U.DAT) DIFF.DAT
+!difpic (GMASKAUX_U.DAT,GMASKDIF_U.DAT) DIFF.DAT
+!
+!TESTRAY (S:GMASKRAY1.DAT,S:GMASKRAY2.DAT)
+!difpic (s:gmaskray1.dat,T:gmaskray1.dat) 
+!difpic (s:gmaskray2.dat,T:gmaskray2.dat)
+!
+!***************************************************************************
+! Note:	On CODA, remove the following statements
+!***************************************************************************
+!***************************************************************************
+!
+! Note:	On VAX, run the following pdf:
+!
+!***************************************************************************
+dcl assign ops1:[demo_images] 		O
+dcl assign dev2:[ffm059] 		S
+
+gen out=S:input4.hlf ns=512 nl=512 format="half" linc=0 sinc=128 ival=-32768
+gen out=S:input.byt ns=100 nl=100 linc=0 sinc=1
+
+! Test color C mask program
+TESTRGB in=(O:mandrill.red,O:mandrill.grn,O:mandrill.blu, +
+	O:b52.img,S:input4.hlf,O:io.red,O:io.grn,O:io.blu,O:jpllogo.img) +
+	out=S:GMASKRGBC.DAT
+
+! Test color fortran mask program
+TESTRGBF in=(O:mandrill.red,O:mandrill.grn,O:mandrill.blu, +
+	O:b52.img,S:input4.hlf,O:io.red,O:io.grn,O:io.blu,O:jpllogo.img) +
+	out=S:GMASKRGBF.DAT
+
+! Test BW C mask program
+TESTBW  in=(O:mandrill.red,O:b52.img,S:input4.hlf,O:io.red,O:jpllogo.img) +
+	out=S:GMASKBWC.DAT
+
+! Test BW fortran mask program
+TESTBWF in=(O:mandrill.red,O:b52.img,S:input4.hlf,O:io.red,O:jpllogo.img) +
+	out=S:GMASKBWF.DAT
+
+write "*******************************************************************"
+write " TEST OF XAOUTSIZE and INVERSE STRETCHES OF XASTORE- XAZOOMIMAGE  "
+write "*******************************************************************"
+write " "
+write "TESTAUX, TESTAUXF and TESTDIF should all have identical outputs."
+write "TESTDIF uses stretched inputs produced by STRETCH.COM, while "
+write "TESTAUX and TESTAUXF use GMASK stretch routines.  XAOUTSIZE is also"
+write "tested.  All outputs should be of dimensions 512x512, with a 200x200"
+write "window of images."
+TESTAUX  S:input.byt S:GMASKAUX.DAT 
+
+TESTAUXF S:input.byt S:GMASKAUXF.DAT 
+
+STRETCH S:input.byt S:input.str linear=(50,10)
+TESTDIF S:input.str S:GMASKDIF.DAT
+
+write " "
+write "THERE SHOULD BE NO DIFFERENCE BETWEEN GMASKAUX_U.DAT, GMASKAUXF_U.DAT"
+write "and GMASKDIF_U.DAT"
+
+difpic (GMASKAUX_U.DAT,GMASKAUXF_U.DAT) DIFF.DAT
+difpic (GMASKAUX_U.DAT,GMASKDIF_U.DAT) DIFF.DAT
+
+TESTRAY (S:GMASKRAY1.DAT,S:GMASKRAY2.DAT)
+
+DCL DEASSIGN S
+DCL DEASSIGN O
+
+end-proc
+

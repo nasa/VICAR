@@ -1,0 +1,8 @@
+Procedure
+Refgbl $Echo
+Body
+Let  _Onfail="Continue"
+Let  $Echo="Yes"
+TFOMCAV
+Let  $Echo="No"
+End-Proc

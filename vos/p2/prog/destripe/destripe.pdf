@@ -1,0 +1,83 @@
+PROCESS help=*
+  parm inp      type=string count=1 
+  parm out      type=string count=(0:1) default=--
+  parm window   type=integer count=4 default=(1,1,0,0)
+  parm orient   type=keyword    count=(0:1) valid=(HORIZ,VERT) default=HORIZ
+end-proc
+.title
+vicar program destripe
+.help
+PURPOSE
+    A vicar application program to remove striping in images caused by
+variations in detector response. 
+
+OPERATION
+
+    This program removeds stripe or banding artifacts in images do to  
+variations in the response of the detector. This is especially
+useful for pushbroom sensors.
+
+    Internally, the program averages rows or columns.
+
+    The WINDOW parameter allows you to select a rectangular window in
+the image to do the averaging. The adjustment is applied to all
+rows or columns in the image. Otherwise, the entire image is scanned.
+
+    Choose orient=vert when stripes appear in vertical (columnar)
+direction and chose orient=horiz (sample or rowwise) direction.
+The output image has the banding or striping removed.
+
+
+INTERNALS
+
+    The internal data is stored in real*4 format. Stacka is called
+to allocate the internal buffers. It is limited to 536,200,000 full 
+words (2,144,800,000 bytes), which is an image of about
+15320x35000 or 21000x25000 in lines and samples.
+
+    The program always lets you know the memory it uses for stacka
+by the message, e.g.,
+ memory allocated =     262144, 
+which is in full words.
+
+RESTRICTIONS
+
+    1) This program does not work on DOUB images.
+    2) This program does not work on multiband images
+    3) The image is limited to nl and ns equal to 536,200,000 fullwords
+        (2,144,800,000 bytes)
+
+PROGRAM HISTORY:
+
+Written by: Ray Bambery, 22 October 2011
+Cognizant programmer: Ray Bambery
+Revision history:
+
+  2011-10-22 R. J. Bambery - initial release
+  2011-10-27 R. J. Bambery - found internal limits
+  2012-06-04 R. J. Bambery - removed last debugging statements
+  2012-12-02 R. J. Bambery - fixed image array size in horiz routine
+  2012-12-11 R. J. Bambery - fixed averaging bug in horiz routine
+  2016-05-26 W. L. Bunch - migrated to MIPL
+
+.LEVEL1
+.VARI INP
+Input image.
+.VARI OUT
+Output image with striping
+removed
+.VARI WINDOW
+Size of the window to use
+to compute the destriping
+values
+.VARI ORIENT
+Direction to remove striping or
+banding.
+HORIZ is in line direction.
+VERT is in sample direction.
+
+.END
+
+
+
+

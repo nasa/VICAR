@@ -1,0 +1,113 @@
+procedure option=selftutor help=*
+
+    	parm ALBEDO_temp	 real count=0:1 		def=1.0 
+ 	parm EXPONENT_temp	 real count=0:1 		def=0.6
+
+    	parm ALBEDO	 	 real count=0:1 def=-- 
+ 	parm EXPONENT	 	 real count=0:1 def=--
+
+	PARMSET name=pho_minnaert_sub help=*
+
+    	   parm ALBEDO		 real count=0:1 def=-- 
+ 	   parm EXPONENT	 real count=0:1 def=--
+
+	END-PROC
+
+body
+
+	if (_tutor=1)
+
+	   restore-parm pho_minnaert.par
+
+
+	   if ($count(ALBEDO)=0)
+	 						let ALBEDO_temp=1.0
+	   else
+		let ALBEDO_temp=&ALBEDO
+	   end-if
+
+
+	   if ($count(EXPONENT)=0)
+	 						let EXPONENT_temp=0.6
+	   else
+		let EXPONENT_temp=&EXPONENT
+	   end-if
+
+
+	   tutor pho_minnaert_sub 					+
+		|restore=pho_minnaert.par, save=pho_minnaert.par|	+
+			ALBEDO=&ALBEDO_temp				+
+			EXPONENT=&EXPONENT_temp
+	
+	   return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs needs "
+	   write " photometric function parameters "
+	   write " for the MINNAERT function."
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+.title
+'PHO_MINNAERT' sub-menu (for photometry VICAR application programs)
+
+.help
+
+PURPOSE:
+
+In this PDF, the user is asked for the only parameters needed for the 
+Minnaerts's photometric function. This function needs just two input parameters 
+(Albedo, geometric exponent k).
+
+.page
+MATHEMATICAL BACKGROUND :
+
+It is found empirically that Minnaert's law approximately describes the 
+variation of brightness of many surfaces over a limited range of angles.
+But the general law breaks down completely at the limb of a planet.
+
+Minnaert (1941) suggested generalizing Lambert's law so that the power emitted 
+per unit solid angle per unit area of the surface be proportional 
+(cos(i)*cos(e))**k [ Lambert's power is proportional to (cos(i)*cos(e))**1 ].
+
+bidirectional reflectance [1/str] :
+
+r(i,e,g)=ALBEDO*(cos(i)*cos(e))**EXPONENT/cos(e)
+
+REFERENCE :
+M. Minnaert, The reciprocity principle in Lunar photometry,
+Astrophysical Journal, Vol. 93, No. 2, p. 403-410, 1941
+.page
+PROGRAMMER:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+
+.level1
+
+.var ALBEDO
+Surface albedo
+
+.var EXPONENT
+Minnaert exponent
+
+
+.level2
+
+.var ALBEDO
+This parameter gives the albedo of the surface. 
+
+.VARI EXPONENT
+Exponent - the geometrical constant k of the Minnaert photometric function.
+
+.end

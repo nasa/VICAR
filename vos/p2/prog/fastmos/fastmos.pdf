@@ -1,0 +1,646 @@
+process help=*
+!  FILE NAMES      
+!
+PARM INP     TYPE=STRING   COUNT=(1:48)
+PARM OUT     TYPE=STRING   COUNT=1
+!
+PARM SIZE    TYPE=INTEGER  COUNT=4       DEFAULT=(1,1,0,0)
+PARM SL      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM SS      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM SB      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM NL      TYPE=INTEGER  COUNT=1       DEFAULT=0
+PARM NS      TYPE=INTEGER  COUNT=1       DEFAULT=0
+PARM NB      TYPE=INTEGER  COUNT=1       DEFAULT=0
+!
+PARM MMODE   TYPE=KEYWORD  COUNT=1       DEFAULT=OVERLAY  +
+               VALID=(OVERLAY,AVERAGE,MOD,MAX,MIN)
+!
+PARM THRESH  TYPE=REAL  COUNT=1       DEFAULT=0.0
+PARM PROGRESS TYPE=KEYWORD COUNT=(0:1)   DEFAULT=--         VALID=PROGRESS
+PARM EDGE    TYPE=KEYWORD  COUNT=(0:1)   DEFAULT=--         VALID=EDGE
+PARM NTHRESH TYPE=REAL COUNT=(0:1)   DEFAULT=--
+PARM LTHRESH TYPE=REAL COUNT=(0:1)   DEFAULT=--
+PARM RTHRESH TYPE=REAL COUNT=(0:1)   DEFAULT=--
+PARM NSEQ    TYPE=INTEGER  COUNT=1       DEFAULT=8          VALID=(1:32768)
+PARM NIBBLE  TYPE=INTEGER  COUNT=1       DEFAULT=4          VALID=(0:32768)
+PARM LNIBBLE TYPE=INTEGER  COUNT=(0:1)   DEFAULT=--         VALID=(0:32768)
+PARM RNIBBLE TYPE=INTEGER  COUNT=(0:1)   DEFAULT=--         VALID=(0:32768)
+PARM NINCR   TYPE=INTEGER  COUNT=1       DEFAULT=1          VALID=(1:32768)
+!
+PARM OFF1    TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF2    TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF3    TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF4    TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF5    TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF6    TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF7    TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF8    TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF9    TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF10   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF11   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF12   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF13   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF14   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF15   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF16   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF17   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF18   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF19   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF20   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF21   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF22   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF23   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF24   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF25   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF26   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF27   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF28   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF29   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF30   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF31   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF32   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF33   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF34   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF35   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF36   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF37   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF38   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF39   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF40   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF41   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF42   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF43   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF44   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF45   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF46   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF47   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+PARM OFF48   TYPE=INTEGER  COUNT=(2:4)   DEFAULT=(1,1) 
+!
+!# parm inp(6-48) hints=default
+!
+END-PROC
+.TITLE
+FASTMOS
+.HELP
+ PURPOSE:
+
+Program FASTMOS takes input images and mosaics them to form an output image.
+FASTMOS performs mosaicking by reading all of the input image files and 
+combining them to form an output image according to the parameters for
+mosaicking mode, edging, and image placement.  In a typical application, the
+output image is a composite picture made from two or more input images each
+of which contains a portion of the overall picture.
+.PAGE
+ EXECUTION:
+
+The size of the output image is determined by the number of lines and number 
+of samples in the SIZE field if the SIZE field is entered by the user.  If the
+SIZE field is not entered, the output file is the same size as the first
+input file.
+
+FASTMOS can accept from one to 48 input images.  The input images are not
+required all to have the same size.  The data type of the input images may
+either be byte or halfword data, but all of the input images must have the
+same data type.  The data type is obtained from the VICAR label of the first 
+input image.
+
+For mosaicking, the program needs to know the locations in the output image 
+of each of the input images.  This is done by giving the location in the output
+image of each input image.  The locations are given in terms of line number and
+pixel number within a line.  The offset parameters (OFF1, OFF2, OFF3,...) are
+used to specify the locations for the respective input images.  The offset
+parameter can be omitted for images at the default location of line 1, pixel 1.
+An input image is not required to lie entirely within the boundaries of the
+output image.  If the upper left hand corner of an input image is not within 
+the boundaries of the output image, the location of the input image is given
+by extending the numbering of lines and pixels beyond the boundaries of the
+output image.  Thus negative numbers or zero would be used for the locations
+of input images beginning to the left or above the boundaries of the output
+image.  Input images are allowed to overlap.
+
+The mode by which FASTMOS determines the output data number values from the
+input data numbers is user selectable through the MODE parameter.  There
+are currently five modes to choose from.  All of the modes make use of the
+THRESH threshold parameter, which is usually greater than or equal to 0.
+In determining the output data number for a given pixel, FASTMOS finds
+out which of the input images containing that pixel have a data number for that
+pixel which is greater than the THRESH value.  The data numbers
+for that pixel from those input images form a set of values that is then used
+in the selected mode to give the output data number.  For example, if 
+MODE=AVERAGE is selected, then the output data number for a pixel is the
+average of those values for the pixel that are greater than the
+THRESH value.  The following rules apply for each of the modes.  If none
+of the input images have a data number value for a given pixel that is
+greater than the THRESH value, the output data number is the
+data number from the first input image if the pixel is contained in the
+first input image, and the output data number is L0 if the pixel is not
+contained in the first input image, where L0 is 0 if THRESH is greater than 0,
+L0 is 0 if THRESH=0 and the data format is byte, and L0 is equal to THRESH
+otherwise for integer data.  For real*4 data, L0 is -1.0E10.
+If exactly one of the input images has 
+a data number value for a given pixel that is greater than the 
+THRESH value, the output data number is the data number from the one input 
+image.  If more than one of the input images have a data number value for a 
+given pixel that is greater than the THRESH value, the output 
+data number is determined by the mosaicking mode.  The five mosaicking modes 
+are discussed under the MODE parameter.
+
+FASTMOS has an option for edging the input images prior to applying the
+mosaicking mode.  Edging effectively removes the 'edges' of the input images
+so that pixels in the 'edges' are not considered to be contained in their
+images as far as the mosaicking process is concerned.  Several parameters
+determine the precise effect of edging in any situation, but basically if
+edging is selected, then each line of each input image is edged first on the
+left and then on the right.  Edging means scanning through a line from one
+end or another to the point at which the data numbers are greater than
+a threshold value and then removing the pixels from the end of
+the line up to a certain number of pixels beyond the point.  This is 
+referred to as finding the edge of the scene data and nibbling-in a 
+certain number of pixels beyond the edge.  Because of the line by 
+line processing performed by the program, edging is only available
+in the horizontal direction.  (Edging the top and bottom of images would
+normally require an intermediate data set.)  Edging is typically used
+to remove distortion around the edges of pictures that was caused by
+interpolation, filtering, or other things.
+
+FASTMOS uses dynamic memory allocation (using subroutine STACKA) to avoid
+imposing any restrictions on the size of the images. 
+
+The output image has the same data format  (byte or halfword) as the input 
+images.  
+.PAGE
+TAE COMMAND LINE FORMAT
+      The following command line formats show the major allowable forms:
+      fastmos INP=(a...) OUT=b SIZE=(sl,ss,nl,ns) optional parameters
+      fastmos INP=(a...) OUT=b  SL=sl SS=ss NL=nl NS=ns optional parameters
+      fastmos (a...) b (sl,ss,nl,ns) optional parameters
+      fastmos (a...) b optional parameters
+
+       Here '(a...)' represents a list of one to 48 input image file names,
+       and 'b' represents the output image file name.
+.PAGE
+EXAMPLES
+
+1.    fastmos INP=(A,B,C) OUT=D SIZE=(1,1,1000,1000)           +
+              'AVERAGE  OFF1=(100,100) OFF2=(-100 -25 600 700) 
+
+      In this example the output file D is a 1000 line by 1000 pixel 
+      image produced by mosaicking three images using
+      the averaging mode. The default THRESH threshold value of 0 is used.
+      The position relative to the output image of each of the input 
+      images is as follows:
+
+      Image A,  the first input, is positioned with its upper-lefthand
+                corner (ULC) at line 100, pixel 100.  Since only two values
+                were specified for OFF1, the entire image is used.
+
+      Image B,  is positioned with its ULC outside the boundaries of
+                the output image at line -100, pixel -25.  The first 600
+                lines and the first 700 pixels per line are used from image B.
+                Of these, the first 101 lines and 26 samples are ignored
+                because they do not lie within the boundaries of the output
+                image.
+
+      Image C,  is positioned with its ULC at the default position of
+                line 1, pixel 1.  The entire image is used.
+.PAGE
+2.    fastmos INP=(A,B,C,D,E) OUT=F
+
+      In this example the output file F has the same size as the input file
+      A.  The data format of the files defaults to the format given in the
+      label of file A.  The mosaicking is performed by using the default
+      overlay mode. The default THRESH value of 0 is used.  The five input
+      images have been pre-registered so that they begin in the same location.
+
+
+3.    fastmos INP=(A,B,C,D,E) OUT=F THRESH=10   'EDGE NTHRESH=50
+
+      In this example the output file F has the same size as the input file
+      A.  The data format of the files defaults to the format given in the
+      label of file A.  The mosaicking is performed by using the default
+      overlay mode. The THRESH value of 10 is used.  Each of the input
+      images gets edged horizontally using a threshold value of 50.  
+      The edging nibbles away (the default) four pixels beyond the edge 
+      of the scene data.
+.PAGE
+
+4.    fastmos INP=(A,B,C,D,E) OUT=F THRESH=10   'AVERAGE     +
+              'EDGE LTHRESH=5 LNIBBLE=3 RTHRESH=10 RNIBBLE=1
+
+      This is the same as example 3 except that the averaging mode is used
+      and the edging parameters are different.  The edging on the left 
+      uses a threshold of 5 and extends 3 pixels beyond the scene edge.
+      The edging on the right uses a threshold of 10 and extends 1 pixel
+      beyond the scene edge. 
+
+5.    GEN A 10 10
+      GEN B 10 10 IVAL=101
+      fastmos INP=(A,B) OUT=F SIZE=(1 1 16 16) THRESH=0 'OVERLAY OFF1=(2,1) 
+
+      This is a mostly academic example in which all of the files have
+      byte data format.  In this example the output file F has the size 
+      16 lines by 16 samples.  Program FASTMOS internally makes a copy of
+      files A and B padded with zeroes to a size of 16 by 16 with the offsets
+      specified for A and defaulted for B.  It then compares the copy of A
+      to the THRESH value.  Since THRESH=0, everything in the copy of A
+      goes into the file F, and nothing in file B is utilized.
+      This illustrates that THRESH=0 is not normally used for mosaicking
+      byte data.  (It might be used for averaging images of the same size and 
+      offset.  fastmos was originally implemented with the requirement of 
+      THRESH >= 1 since it uses 0 for any padding around byte input images.)
+
+.PAGE
+RESTRICTIONS
+The input images may be any format of 4 or fewer bytes per pixel, and must all
+be of the same format.  The output image will be the same format as the inputs.
+
+
+ OPERATION:
+
+FASTMOS performs mosaicking on a line by line basis.  The offsetting of
+input images is done at READ time.
+.PAGE
+
+ TIMING: 
+
+  The following CPU times for FASTMOS was obtained on a 
+VAX 8650 (MIPL2) in April 1993
+			                                                CPU Time
+gen FASTA1 NL=1000 NS=1000 IVAL=0 
+gen FASTA2 NL=1000 NS=1000 IVAL=200
+fastmos INP=(FASTA1,FASTA2) OUT=FASTAO8 SIZE=(1,1,2000,2000) +
+!  				4-93  SP  CPU TIME ON MIPL2 (VAX8650)    17.66s
+
+For more information, see the file timefastmos.pdf in fastmos.com.
+
+ The following timing data were measured on a Solaris Sun4 with two 1000x1000
+ byte input images, in seconds:
+
+                          User   System   Wall-clock
+ byte/halfword version:   0.17    0.17      0.73 
+ real*4 version:          0.26    0.17      0.89
+.page
+
+ ORIGINAL PROGRAMMER:    W. Benton
+ PORTED TO UNIX: Steve Pohorsky
+ COGNIZANT PROGRAMMER:   Lucas Kamp
+
+ REVISION HISTORY
+  93-4-7    SP   Made portable for UNIX.  Added PROGRESS parameter to
+                 print percentage DONE during execution.
+  03-8-14   NTT  Enabled for 3D (multi-banded) images
+2012-09-18  lwk  Enabled for real*4 data (converted all buffers to real*4).
+2012-10-02  lwk  made THRESH parameters consistent with old (integer) FASTMOS;
+                 because the default threshold is now 0.0 (used to be 1), the
+                 tests are now for DN>THRESH instead of DN>=THRESH.
+
+.page
+ CHANGED BEHAVIOUR DUE TO CONVERSION TO REAL*4 (OCT.2012):
+The output of FASTMOS is slightly different than it used to be, because of
+the requirement that the behaviour with respect to the default threshold
+value of zero be consistent between the two versions. The integer version
+(old fastmos) did this by setting the default THRESH parameter to 1 and
+keeping DN >= THRESH. However, for real*4 data, that would lead to the
+undesirable result of throwing away DNs between 0 and 1, so the default
+value of THRESH was changed to 0 and the check was changed to keep DN>THRESH.
+The logfile of the old version is retained in the .com file under the name
+tstfastmos_integer.log_solos, for comparison with the new one, named
+tstfastmos.log_solos. It can be seen that, when the default THRESH is used,
+the results are the same for the two versions, but when a non-zero value of
+THRESH is specified, the results differ at the edges, typically by one pixel.
+
+.LEVEL1
+.VARIABLE INP
+Input image file names
+.VARIABLE OUT
+Output image file name
+.VARIABLE SIZE
+Standard Vicar size field:
+  (SL,SS,NL,NS)
+You can enter SL,SS,NL,
+and NS together as SIZE, OR
+enter the SL,SS,NL, and NS
+parameters separately.
+.VARIABLE SL
+Starting line number
+(This field is ignored.)
+.VARIABLE SS
+Starting sample number
+(This field is ignored.)
+.VARIABLE SB
+Starting band number
+(This field is ignored.)
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples
+.VARIABLE NB
+Number of bands
+.VARIABLE MMODE
+Mosaicking mode -- OVERLAY,
+AVERAGE, MOD, MAX, or MIN.
+.VARIABLE THRESH
+Threshold used for mosaicking.
+.VARIABLE PROGRESS
+Enter for progress reporting.
+.VARIABLE EDGE
+Enter for edging.
+.VARIABLE NTHRESH
+Threshold for edging on both
+left and right.
+.VARIABLE LTHRESH
+Threshold for edging on left.
+.VARIABLE RTHRESH
+Threshold for edging on right.
+.VARIABLE NSEQ
+Number of sequential pixels
+which must satisfying edging 
+threshold criteria at edge of
+scene data.
+.VARIABLE NIBBLE
+Number of pixels to remove
+beyond edge of scene data for
+edging on both left and right.
+.VARIABLE LNIBBLE
+Number of pixels to remove
+beyond edge of scene data for
+edging on left.
+.VARIABLE RNIBBLE
+Number of pixels to remove
+beyond edge of scene data for
+edging on right.
+.VARIABLE NINCR
+If NINCR=n, then scanning for
+edge of scene data will check
+every nth pixel.
+.VARIABLE OFF1
+Offset values for first input
+image.
+.VARIABLE OFF2
+Offset values for second input
+image.
+.VARIABLE OFF3
+Offset values for third input
+image.
+.VARIABLE OFF4
+Offset values for fourth input
+image.
+.VARIABLE OFF5
+Offset values for fifth input
+image.
+.VARIABLE OFF6
+Offset values for sixth input
+image.
+.VARIABLE OFF7
+Offset values for seventh input
+image.
+.VARIABLE OFF8
+Offset values for eighth input
+image.
+.VARIABLE OFF9
+Offset values for ninth input
+image.
+.VARIABLE OFF10
+Offset values for input image 10
+.VARIABLE OFF11
+Offset values for input image 11
+.VARIABLE OFF12
+Offset values for input image 12
+.VARIABLE OFF13
+Offset values for input image 13
+.VARIABLE OFF14
+Offset values for input image 14
+.VARIABLE OFF15
+Offset values for input image 15
+.VARIABLE OFF16
+Offset values for input image 16
+.VARIABLE OFF17
+Offset values for input image 17
+.VARIABLE OFF18
+Offset values for input image 18
+.VARIABLE OFF19
+Offset values for input image 19
+.VARIABLE OFF20
+Offset values for input image 20
+.VARIABLE OFF21
+Offset values for input image 21
+.VARIABLE OFF22
+Offset values for input image 22
+.VARIABLE OFF23
+Offset values for input image 23
+.VARIABLE OFF24
+Offset values for input image 24
+.VARIABLE OFF25
+Offset values for input image 25
+.VARIABLE OFF26
+Offset values for input image 26
+.VARIABLE OFF27
+Offset values for input image 27
+.VARIABLE OFF28
+Offset values for input image 28
+.VARIABLE OFF29
+Offset values for input image 29
+.VARIABLE OFF30
+Offset values for input image 30
+.VARIABLE OFF31
+Offset values for input image 31
+.VARIABLE OFF32
+Offset values for input image 32
+.VARIABLE OFF33
+Offset values for input image 33
+.VARIABLE OFF34
+Offset values for input image 34
+.VARIABLE OFF35
+Offset values for input image 35
+.VARIABLE OFF36
+Offset values for input image 36
+.VARIABLE OFF37
+Offset values for input image 37
+.VARIABLE OFF38
+Offset values for input image 38
+.VARIABLE OFF39
+Offset values for input image 39
+.VARIABLE OFF40
+Offset values for input image 40
+.VARIABLE OFF41
+Offset values for input image 41
+.VARIABLE OFF42
+Offset values for input image 42
+.VARIABLE OFF43
+Offset values for input image 43
+.VARIABLE OFF44
+Offset values for input image 44
+.VARIABLE OFF45
+Offset values for input image 45
+.VARIABLE OFF46
+Offset values for input image 46
+.VARIABLE OFF47
+Offset values for input image 47
+.VARIABLE OFF48
+Offset values for input image 48
+.LEVEL2
+.VARIABLE SIZE
+If the SIZE field is not entered, the output image has the same size as the
+first input image.  If the SIZE field is entered, the number of lines and
+number of samples refer to the size of the output image.  The starting line
+and starting sample are ignored.
+.VARIABLE NB
+Number of bands.
+.VARIABLE MMODE
+The mosaicking mode specifies how the output data number values are determined 
+from the input data numbers.   The following rules apply for each of the 
+modes.  If none of the input images have a data number value for a 
+given pixel that is greater than the THRESH value, the 
+output data number is the data number from the first input image if 
+the pixel is contained in the first input image, and the output 
+data number is L0 if the pixel is not contained in the first input image, where
+L0 is 0 if THRESH is greater than 0, L0 is 0 if THRESH=0 and the data format 
+is byte, and L0 is equal to THRESH otherwise, for integer data.  For real*4
+data, L0 is -1.0E10.
+If exactly one of the input images has a data number value for a given pixel that
+is greater than the THRESH value, the output data number is the
+data number from the one input image.  If more than one of the input images
+have a data number value for a given pixel that is greater than the
+THRESH value, the output data number is determined by the mosaicking mode. 
+
+There are currently five modes to choose from.  They are listed by name below.
+For each mode a description is given of how the output data number is 
+determined when there is more than one input image having a data number value 
+that is greater than the THRESH value for a given pixel.  The
+default mode is OVERLAY.
+
+OVERLAY  - The input images are checked against the THRESH value in the order
+           in which they are entered by the user.  The first data number value
+           found which meets the threshold criteria is used for the output
+           image.  This means that the order in which the input files are 
+           entered gives a priority to the data in the files.
+
+AVERAGE  - The average of the values meeting the threshold criteria is used.
+           The average is found by integer division with no rounding.
+
+MOD      - When there are two values meeting the threshold criteria, the 
+           average of the values is used.  When there are more than two 
+           values meeting the threshold criteria, the value closest to the
+           average is used.  This mode may be particularly useful when
+           combining many images with high bit-error rates.
+
+MAX      - The maximum of the values meeting the threshold criteria is used.
+
+MIN      - The minimum of the values meeting the threshold criteria is used.
+.VARIABLE THRESH
+Only values greater than the THRESH threshold parameter are used
+by the mosaicking mode in determining the data numbers for the output image.
+The THRESH value is usually greater than 0 for mosaicking.  THRESH can be
+set to 0 for cases such as averaging images.  The default value is 1.
+(See Example 5 in the main help for details about the case of THRESH=0
+for byte data.  Users may need to convert images to halfword to use THRESH=0
+for mosaicking.  Other VICAR programs, such as INSECT may be an alternative.)
+
+For halfword images for which negative DNs are considered valid, a negative
+THRESH value may be used.  In this case, 0 is an inappropriate value for
+representing the absence of image data.  When THRESH is less than 0, FASTMOS
+uses an output DN of THRESH-1 to represent the absence of image data.
+(If THRESH = -32768, -32768 is used to represent the absence of image data.)
+This value is used as an output DN where the output pixel does not lie in one
+of the input images.  (See the MMODE parameter.)
+.VARIABLE PROGRESS
+If the PROGRESS parameter is specified, FASTMOS prints the percentage done
+(in generating the output image) every 10% from 10 to 90%.
+The default is to not print the progress.
+.VARIABLE EDGE
+If the EDGE parameter is specified, all input images are edged prior to
+applying the mosaicking mode. No edging is the default.  'EDGE M U S T
+be specified to invoke the edging algorithm.
+
+If edging is selected, then each line of each input image is edged first on the
+left and then on the right.  Edging means scanning through a line from one
+end or another to the point at which the data numbers are greater than
+a threshold value and then removing the pixels from the end of
+the line up to a certain number of pixels beyond the point.  This is 
+referred to as finding the edge of the scene data and nibbling in a 
+certain number of pixels beyond the edge.  Because of the line by 
+line processing performed by the program, edging is only available
+in the horizontal direction.  (Edging the top and bottom of images would
+normally require an intermediate data set.)  Edging is typically used
+to remove distortion around the edges of pictures that was caused by
+interpolation, filtering, or other things.
+
+Several parameters are used to control the way that edging is done.  The 
+parameters NTHRESH, LTHRESH, RTHRESH, NSEQ, and NINCR determine the location
+of the edge of the scene data for lines of the input images.  The parameters
+NIBBLE, LNIBBLE, and RNIBBLE determine how many pixels beyond the edge of 
+the scene data are removed.
+
+The edge of the scene data for a line is determined as follows.  The program
+scans through the pixels of a line comparing the data numbers against the
+edging threshold.  (Separate edging thresholds can be specified for scanning
+from the left and scanning from the right using the LTHRESH and RTHRESH
+parameters.  The NTHRESH parameter can be used to specify the same threshold
+for scanning from the left and scanning from the right.)  The scanning begins
+at one end of the line, and it checks successive pixels unless the NINCR
+parameter is entered.  If NINCR is entered, the scanning checks only every
+NINCRth pixel.  The program scans until it finds a group of NSEQ consecutive
+(in terms of NINCR) pixels all of which have a data number greater than
+the edging threshold.  The edge of the scene data is defined as the
+first pixel (according to the direction of the scan) of that group.
+
+The nibbling number is the number of pixels, starting with the edge of the
+scene data, which are to be removed along with any pixels from the end of
+the line to the edge of the scene data.  (If the nibbling number is zero, 
+then just the pixels from the end of the line to the edge of the scene data
+are removed.)  Separate nibbling numbers can be specified for scanning from 
+the left and scanning from the right using the LNIBBLE and RNIBBLE parameters.
+The NIBBLE parameter can be used to specify the same nibbling number for 
+scanning from the left and scanning from the right.  
+
+If no edge of the scene data is found when scanning, the entire line is 
+removed.
+.VARIABLE NTHRESH
+The default for NTHRESH is THRESH.  (See also under EDGE.)
+.VARIABLE LTHRESH
+The default for LTHRESH is NTHRESH.  (See also under EDGE.)
+.VARIABLE RTHRESH
+The default for RTHRESH is NTHRESH.  (See also under EDGE.)
+.VARIABLE NSEQ
+The default for NSEQ is 8.  (See also under EDGE.)
+.VARIABLE NIBBLE
+The default for NIBBLE is 4.  (See also under EDGE.)
+.VARIABLE LNIBBLE
+The default for LNIBBLE is 4.  (See also under EDGE.)
+.VARIABLE RNIBBLE
+The default for RNIBBLE is 4.  (See also under EDGE.)
+.VARIABLE NINCR
+The default for NINCR is 1.  (See also under EDGE.)
+.VARIABLE OFF1
+Either two or four values may be entered for OFF1.  The first two values
+give the line and pixel numbers, respectively, of the upper left hand corner
+of the first input image file with respect to the output image. 
+If the upper left hand corner of the input image is not within the 
+boundaries of the output image, the location of the input image is given
+by extending the numbering of lines and pixels beyond the boundaries of the
+output image.  Thus negative numbers or zero would be used for the locations
+of input images beginning to the left or above the boundaries of the output
+image.  The default for the first two values is line 1 and pixel 1.  (The
+default assumes that the input image was pre-registered.)
+
+If entered, the third and fourth values give, respectively, the number of lines
+and number of pixels per line to be used from the image.  This is used when
+not all of the image is to be used in the program.  The default is to use all
+of the lines and samples as specified in the VICAR label.
+.VARIABLE OFF2
+(See under OFF1.)
+.VARIABLE OFF3
+(See under OFF1.)
+.VARIABLE OFF4
+(See under OFF1.)
+.VARIABLE OFF5
+(See under OFF1.)
+.VARIABLE OFF6
+(See under OFF1.)
+.VARIABLE OFF7
+(See under OFF1.)
+.VARIABLE OFF8
+(See under OFF1.)
+.VARIABLE OFF9
+(See under OFF1.)
+.END

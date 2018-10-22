@@ -1,0 +1,52 @@
+1 FFTT
+
+	One-dimensional FFT.  Complex input and output.
+
+  FORTRAN Calling Sequence and arguments:  
+        
+        CALL FFTT(power,mode,buffer)
+
+        integer*4 power....input size = 2**power elements (input)
+        integer*4 mode.....+1 for inverse transform (input)
+                           -1 for direct transform
+        real*4 buffer......a complex*8 data array (input/output)
+
+  C Calling Sequence and arguments:  
+        
+        fftt(power,mode,buffer)
+
+        int power......input size = 2**power elements (input)
+        int mode.......+1 for inverse transform (input)
+                       -1 for direct transform
+        float *buffer..a complex*8 data array (input/output)
+
+2 History
+
+  Ported to UNIX: T. L. Truong,  7/1/93
+  Original Programmer: T. Rindfleisch, 10/16/1967
+  Current Cognizant Programmer: C. Avis
+  Source Language: Fortran
+
+2 Operation
+
+  FFTT has been rewritten to use the subroutine RFT2CH.
+  The complex data array is formatted as RFT2CH expects, and 
+  is reformatted upon return from RFT2CH.  It is always 
+  returned as a complex*8 array (as the old FFTT did).
+
+  The number of elements is limited by the routine's buffer
+  size of 1024 elements.  pow <= 10.
+2 Arguments
+
+  power...FFTT can only transform arrays whose size is a power
+          of 2.  The power argument defines the size in elements
+          by defining that power.
+
+  mode....FFTT can do direct or inverse transforms.  The mode 
+          argument determines the direction.  
+                mode = -1  means direct
+                mode = +1  means inverse.
+
+  buffer..This is both the input data array (complex*8) and the
+          output data array (complex*8) of size 2**power elements.
+

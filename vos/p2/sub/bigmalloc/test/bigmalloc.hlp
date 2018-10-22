@@ -1,0 +1,72 @@
+1 BIGMALLOC
+
+  unsigned char *BigMalloc(int size);
+  unsigned char *BigMallocForce(int size);
+  void BigFree(unsigned char *addr);
+
+  These functions allocate and free large chunks of memory.  They are
+  used just like the C library malloc() and free() routines.
+
+  BigMalloc() checks the requested size.  If it is greater than a threshhold
+  size (currently one megabyte), then BigMallocForce is called to allocate
+  the memory.  If it is less than or equal to the threshhold, then the
+  standard malloc() routine is called instead.
+
+  BigMallocForce() allocates the area as described below regardless of the
+  threshhold value.  Since there is some overhead involved, it is best not
+  to use this routine directly, but instead to let BigMalloc() decide whether
+  it is worth using the BigMalloc scheme or not.
+
+  Both BigMalloc() and BigMallocForce() return a pointer to the requested
+  memory area.  If the BigMalloc scheme fails, then the standard malloc()
+  routine will be tried.  If that fails also, then NULL is returned.
+
+  BigFree() frees the memory allocated by BigMalloc() or BigMallocForce().
+  Only BigFree should be use to free this memory; do not call free() directly.
+
+  Note:  The function return types should be declared in prototypes so the
+  C compiler will treat them correctly.  The address returned may be cast
+  into any type of pointer.
+
+  There is no Fortran bridge to these routines since Fortran does not
+  understand pointers.
+
+  VMS implementation
+  ------------------
+
+  The reason these functions exists stems from VMS.  Programs are limited
+  in the amount of the system paging file they can use by PGFLQUO (the
+  account's page file quota).  However, the available virtual address space
+  is typically much larger than the page file quota.  BigMalloc gets around
+  the page file quota limitation by creating a temporary file for use as
+  a paging file for the requested memory.  Since the memory does not use
+  the system paging file, the page file quota is not charged.
+
+  The limitation of this scheme is, of course, that there must be disk space
+  available to create the temporary paging file.  The temporary file is
+  created on the disk that is pointed at by the logical name "v2$scratch".
+  The directory and/or file portion of the logical name are not used; only
+  the disk.  The file is a temporary file with no directory entry, so it is
+  invisible to any other program.  The file is automatically deleted when
+  it is closed.  If there is not enough space on the requested disk, then
+  BigMalloc will try to call malloc() instead.
+
+  If the BigMalloc fails, there are three basic reasons (in order of
+  probability):  1) The disk pointed at by v2$scratch does not have enough
+  space,  2) v2$scratch is not defined or is defined to a non-existent disk,
+  or 3) the virtual address space for the process is full.
+
+  Unix implementation
+  -------------------
+
+  Currently, these routines simply call malloc() and free() under Unix,
+  as no mechanism similar to VMS has yet been identified.  However,
+  application programs should still use BigMalloc to allocate large chunks
+  of memory anyway, because the routines may be implemented in the future
+  under Unix, and they could be necessary if the program is run under VMS.
+
+2 History
+
+  Original Programmer:  Bob Deen 08-89
+  Current Cognizant Programmer:  Bob Deen  04-93
+  Source Language:  C

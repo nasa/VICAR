@@ -1,0 +1,73 @@
+! This TEST PDF file has been written for Alpha and Unix Platform
+procedure
+  RefGbl $echo
+  RefGbl $SysChar
+body
+  Local GLLFile    TYPE=STRING
+  Local GLLPh2Full TYPE=STRING  ! Galileo Phase 2 Full Frame
+  Local GLLPh2Summ TYPE=STRING  ! Galileo Phase 2 Summation Mode
+  Local VGRFile    TYPE=STRING
+  Local CASFile    TYPE=STRING
+
+  Local PCL    TYPE=REAL
+  Local PCS    TYPE=REAL
+  Local SCLAT  TYPE=REAL
+  Local SCLON  TYPE=REAL
+  Local SCALE  TYPE=REAL
+
+  Let $echo="no"
+  If ($SysChar(1)="VAX_VMS")
+    Let GLLFile="wms_test_work:[testdata.mipl.gll]venus.img"
+    Let GLLPh2Full="WMS_TEST_WORK:[TESTDATA.GLL]s0349632000.u"
+    Let GLLPh2Summ="WMS_TEST_WORK:[TESTDATA.GLL]s0349666200.u"
+    Let VGRFile="wms_test_work:[testdata.mipl.vgr]f1636832.fic"
+    Let CASFile="wms_test_work:[testdata.cassini.cas$i$ss]n1354897340.1"
+  Else
+    Let GLLFile="/project/test_work/testdata/mipl/gll/venus.img"
+    Let GLLPh2Full="/project/test_work/testdata/gll/s0349632000.u"
+    Let GLLPh2Summ="/project/test_work/testdata/gll/s0349666200.u"
+    Let VGRFile="/project/test_work/testdata/mipl/vgr/f1636832.fic"
+    Let CASFile="/project/test_work/testdata/cassini/casIss/n1354897340.1"
+  End-If
+
+  write "===Project GLL test"
+  Let $echo="yes"
+ GETPC &"GLLFile" PCL=PCL PCS=PCS SCLAT=SCLAT SCLON=SCLON SCALE=SCALE 'REMOTE
+  Let $echo="no"
+  WRITE "===Returned TAE variables are:"
+  WRITE "===  PCL   = "&PCL
+  WRITE "===  PCS   = "&PCS
+  WRITE "===  SCLAT = "&SCLAT
+  WRITE "===  SCLON = "&SCLON
+  WRITE "===  SCALE = "&SCALE
+
+  WRITE "=== Testing Phase 2 full frame image"
+  Let $echo="yes"
+ GETPC &"GLLPh2Full" 'REMOTE
+  Let $echo="no"
+  WRITE "=== Testing Phase 2 summation mode image"
+  Let $echo="yes"
+ GETPC &"GLLPh2Summ" 'REMOTE
+  Let $echo="no"
+
+  write "===================================================================="
+  write "===Project VGR test"
+  Let $echo="yes"
+ GETPC &"VGRFile" PCL=PCL PCS=PCS target=IO
+  Let $echo="no"
+  WRITE "===Returned TAE variables are:"
+  WRITE "===  PCL   = "&PCL
+  WRITE "===  PCS   = "&PCS
+
+  write "===================================================================="
+  write "===Project CASSI test"
+  Let $echo="yes"
+ GETPC &"CASFile" PCL=PCL PCS=PCS SCLAT=SCLAT SCLON=SCLON SCALE=SCALE 'REMOTE
+  Let $echo="no"
+  WRITE "===Returned TAE variables are:"
+  WRITE "===  PCL   = "&PCL
+  WRITE "===  PCS   = "&PCS
+  WRITE "===  SCLAT = "&SCLAT
+  WRITE "===  SCLON = "&SCLON
+  WRITE "===  SCALE = "&SCALE
+end-proc

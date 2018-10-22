@@ -1,0 +1,51 @@
+1 FICOR
+
+This subroutine returns the conversion value(s) from the FICOR77 label.
+
+  Fortran Calling Sequence:  CALL FICOR(UNIT, BUF, CON, MODE)
+
+				INTEGER*4 UNIT
+				BYTE BUF 
+				REAL*4 CON 
+				INTEGER*4 MODE
+
+  C Calling Sequence:  ficor(unit, buf, con, mode) 
+
+				int unit
+				unsigned char buf[7200]
+                                char cbuf[7200]
+				float con 
+				int mode 
+
+2 History
+
+  Original Programmer: Joel A. Mosher
+  Current Cognizant Programmer: G.Yagi
+  Source Language: Originally FORTRAN buf converted to C
+  Ported to Unix:  D.D. Knight   9/23/93
+
+  Revisions:
+    24 May 99  GMY  Changed "i = buf[0]" to "i = buf"
+
+3 Operation
+
+  This subroutine grabs the entire label (up to 7200 bytes long)
+  using XLGETLABEL and then locates the conversion factors by
+  searching for the characters 'MULTIPLIED DN VALUE BY'.
+
+4 Arguments
+
+  UNIT (unit): standard Vicar2 unit number for the image whose label is
+         to be searched.
+
+  BUF (buf): buffer to hold the label; this should contain up to 7200 bytes.
+       
+  CON (con): if MODE is 0 or 1, then this should be one longword (REAL*4);
+       if MODE is 2, then this should be dimensioned CON(2).
+
+  MODE (mode)
+
+  MODE=0: the conversion factor to microwatts/cm**2/steradian/nanometer
+          is returned.
+  MODE=1: the conversion factor to Albedo*10000 is returned.
+  MODE=2: both are returned.$ if p1.eqs."HELP" then exit

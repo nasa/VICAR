@@ -58,8 +58,14 @@ then
       fi
       if [ "`uname -m`" = "x86_64" ]
       then
-         echo "x86_64_linx"
-         exit
+         if [ -z "${V2_FORCE_32+x}" ]
+         then
+            echo "x86_64_linx"
+            exit
+         else
+            echo "x86_linux"
+            exit
+         fi
       fi
    fi
 fi
@@ -74,6 +80,17 @@ then
       fi
       if [ "`uname -p`" = "i386" ]
       then
+         if [ "`uname -m`" == "x86_64" ]
+         then
+##### uncomment the below to enable mac64_osx...
+            if [ -z "${V2_FORCE_32+x}" ]
+            then
+               echo "mac64_osx"
+               exit
+            fi
+            echo "x86_macosx"
+            exit
+         fi
          echo "x86_macosx"
          exit
       fi

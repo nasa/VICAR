@@ -1,0 +1,39 @@
+procedure help=*
+parm  NAME    type=name
+refgbl $syschar
+refgbl $echo
+body
+let $echo="no"
+if ($syschar(1) = "VAX_VMS")
+   username_vms name=@NAME
+else
+   username_unix name=@NAME
+end-if
+
+!# annot function="VICAR Procedure Generation"
+!# annot keywords=(TAE,userid)
+
+end-proc
+.title
+Returns current user ID
+.help
+ Program Description
+
+ This procedure returns the current user name.
+
+ Calling Sequence:
+
+           TAE> local  userid  type=(string,12)
+
+           TAE> username  userid
+           TAE> disp userid
+
+ Written By:            Glenn Dimit  (Nov. 15, 1984)
+ Cognizant Programmer:  Glenn Dimit  (Nov. 15, 1984)
+ Revisions:
+ Made portable for UNIX ... V. Unruh ... (CRI) (Jan.  2, 1995)
+.level1
+.variable NAME
+Output local vaiable name
+.end
+end-proc

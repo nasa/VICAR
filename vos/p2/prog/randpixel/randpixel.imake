@@ -1,0 +1,10 @@
+#define PROGRAM	randpixel
+
+#define MODULE_LIST randpixel.f
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define R2LIB
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB

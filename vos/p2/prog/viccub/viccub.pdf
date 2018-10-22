@@ -1,0 +1,25 @@
+process help=*
+PARM INP COUNT=(1:255)
+PARM OUT
+end-proc
+
+.Title
+ Program VICCUB
+
+.HELP
+
+PURPOSE
+
+WRITTEN BY Thomas Roatsch, DLR    9-Apr-1997
+
+VICCUB copies input images into 1 multi-band image.
+
+All images must have the same size and the same format.
+The maximum number of input images is 255.
+
+.LEVEL1
+.VARI INP
+ Names of input files
+.VARI OUT
+ Name of output file
+.End

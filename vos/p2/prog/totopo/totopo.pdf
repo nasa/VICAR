@@ -1,0 +1,277 @@
+process help=*
+PARM INP          TYPE=STRING       COUNT=4
+PARM OUT          TYPE=STRING       COUNT=1
+PARM DEBUG TYPE=KEYWORD VALID=(DEBUG,NODEBUG) DEFAULT=NODEBUG
+PARM XYZ   TYPE=KEYWORD VALID=(XYZ,LATLON) DEFAULT=LATLON
+PARM MODE  TYPE=(STRING,5) VALID=("TOPO ","ORTHL","ORTHR", +
+           "ERROR")   DEFAULT="TOPO "
+PARM NODATA TYPE=REAL DEFAULT=0.
+PARM RADIUS TYPE=INTEGER COUNT=(0:1) VALID=(1:17) DEFAULT=13
+PARM MINPTS TYPE=INTEGER COUNT=(0:1) VALID=(1:1000) DEFAULT=4
+PARM MAXPASS TYPE=INTEGER COUNT=(0:1) VALID=(1:100000) DEFAULT=4
+END-PROC
+
+.TITLE
+VICAR2 program TOTOPO
+
+.HELP
+Converts the tiepoint locations stored in a Mark file and written by
+program TRACKER3 and XYZ coordinates created by program LSTOXYZ to one of:
+1. A topomap.
+2. An orthonormal view of the left image.
+3. An orthonormal view of the right image.
+4. An error map
+
+A topomap is a map of elevation above a surface
+(in this case above the geoid or oblate spheroid).
+In this mode the correlator (tracker3) can be run with a wide grid spacing
+such as : GRID=3 NLW=15 NSW=15.
+
+An orthonormal image is an image viewed from directly above
+(in the planetocentric sense) at every pixel. Orthonormal
+views have no parallax. If you want good resolution on orthonormal
+maps then the correlator (tracker3) should be executed on every pixel,
+ie: parameter GRID=1.
+
+An error map is a map of the miss distance of the two vectors
+in the XYZ solution in program LSTOXYZ.
+
+All output images are REAL.
+
+.page
+Example:
+       TOTOPO left,right,points,xyz out parameters
+
+  where: 
+         LEFT is the first input image. This is the first input image
+              to program TRACKER. In this case it must be a map projected
+              image.
+         RIGHT is the second input image. This is the second input image
+              to program TRACKER. The second input must also be a map
+              projection preferably the identical projection as the first
+              input image (non-identical projections are OK except that
+              TRACKER will work better if they are identical).
+         POINTS is a MARK file containing the tiepoints written by
+              program tracker.
+              Mark files contain 512 byte records of real*4 data.
+              Coordinates are stored in groups of 4 words in the
+              order left_line,left_sample,right_line,right_sample...
+         XYZ is a MARK file containing the xyz coordinates written by
+              program LSTOXYZ.
+              Mark files contain 512 byte records of real*4 data.
+              Coordinates are stored in groups of 4 words in the
+              order of either:lat,long,range-radius,error....
+                or
+                              x,y,z,error...
+                  (see keyword XYZ)
+
+          OUT is identical to LEFT but contains one of:
+              1. A topomap.
+              2. An orthonormal view of the left image.
+              3. An orthonormal view of the right image.
+              4. An error map.
+              
+All output images are REAL.
+
+.page
+METHOD:
+
+The correct output location for any tiepoint is the lat,long
+computed by program LSTOXYZ. This coordinate is converted 
+to line,sample for the input projection. Then what goes to
+that coordinate depends upon the mode:
+
+In the TOPO mode the elevation of the surface above the geoid
+is written to the output.
+
+In the ORTHL or ORTHR modes the original line,samp (from the
+output of TRACKER) point to the input DN value which is to be
+placed into the output.
+
+In the ERROR mode a map of the miss distance of the two vectors
+in the XYZ solution in program LSTOXYZ is written to the output
+after scaling.
+
+.page
+LIMITATIONS:
+
+At the moment input & output pictures (not Mark files) 
+cannot each exceed a total number of pixels of 1000 by 1000.
+
+The ORTHR image will have the label of the left (first) input.
+
+.page
+OUTPUT UNITS:
+
+  Topomaps are in kilometers (one DN = 1 kilometer) above the
+planet oblate spheroid. Zero DN is at the geoid (zero elevation).
+  The orthonormal images are just geometrically undistorted
+replicas of the first two input images.
+
+.page
+EXAMPLE: 
+
+         farenc in1
+         farenc in2
+         map3 in1 a
+         map3 in2 b
+         tracker a,b m
+         lstoxyz a,b,m xyz
+         totopo a,b,m,xyz out
+
+! EXAMPLE OF BATCH STEREO RUN:
+!
+! First correct navigation.
+FARENC INP=moon1.img OUT=g1.img +
+ 'update below=10 dnth=10 activi=45 GEOM=3 +
+  area=(3,2,790,790)
+dcl del g1.img;1
+FARENC INP=moon2.img OUT=g2.img +
+ 'update below=10 dnth=10 activi=35 GEOM=3 +
+  area=(3,2,790,790) cluster=(30,10)
+dcl del g2.img;1
+!
+! Next convert the perspective views to IDENTICAL projections.
+map3 INP=moon1.img OUT=moon1.map +
+  'MERC nl=512 ns=512 sedrsrc=FARE scale=10. +
+   line=256 samp=256 lat=0 long=70.
+map3 INP=moon2.img OUT=moon2.map +
+  'MERC nl=512 ns=512 sedrsrc=FARE scale=10. +
+   line=256 samp=256 lat=0 long=70.
+!
+! Then collect a dense tiepoint grid (every point).
+tracker inp=(gll1:[jjl320]moon1.map,gll1:[jjl320]moon2.map) +
+   out=gll1:[jjl320]tiep.img +
+   nlw=13 nsw=13 grid=1 'fit window=(2,2) +
+   limit=(6,6) look=(2,2)
+!
+! Then convert tiepoints to lat,long,Del-radius,error values.
+lstoxyz inp=(gll1:[jjl320]moon1.map,gll1:[jjl320]moon2.map, +
+      gll1:[jjl320]tiep.img) out=gll1:[jjl320]xyz.img +
+      sourcel=FARE sourcer=FARE
+
+! Then create the topomap (meters above the geoid).
+totopo inp=(gll1:[jjl320]moon1.map,gll1:[jjl320]moon2.map, +
+      gll1:[jjl320]tiep.img, +
+      gll1:[jjl320]xyz.img) out=gll1:[jjl320]topo.img mode=TOPO
+!
+! Last create left orthonormal view
+totopo inp=(gll1:[jjl320]moon1.map,gll1:[jjl320]moon2.map, +
+      gll1:[jjl320]tiep.img, +
+      gll1:[jjl320]xyz.img) out=gll1:[jjl320]orth.img +
+      mode=ORTHL
+
+
+HISTORY
+Written By: J Lorre			feb 91
+Cognizant Programmer: J Lorre
+
+.LEVEL1
+.VARI INP
+Four inputs:
+#1 is the left image
+#2 is the right image
+#3 is the MARK file.
+#4 is the XYZ file
+
+.VARI OUT
+Same size as input.
+REAL format.
+
+.VARI MODE
+This dictates the 
+nature of the output 
+MODE=TOPO
+MODE=ORTHL
+MODE=ORTHR
+MODE=ERROR
+Default is TOPO.
+
+.VARI DEBUG
+Prints debugging data.
+
+.VARI XYZ
+Specifies the fourth
+input is in XYZ.
+(X,Y,Z,error)
+
+.VARI NODATA
+DN to initialize output.
+
+.VARI RADIUS
+Radius of circle
+collecting points.
+should be larger
+than mark grid size.
+
+.VARI MINPTS
+Minimum number of points
+within circle to permit
+interpolation.
+
+.VARI MAXPASS
+Number of passes
+through the image.
+
+.LEVEL2
+
+.VARI INP
+There are Four input files.
+File#1: This is the left or first input image given to
+        program TRACKER.
+File#2: This is the right or second input image given to
+        program TRACKER.
+File#3: This is the MARK file written by program TRACKER.
+        It is 'REAL' format with 512 byte records containing
+        pairs of tiepoints in the order:
+        left_line,left_samp,right_line,right_samp.
+File#4: This is the output of program LSTOXYZ containing either:
+        X,Y,Z,ERROR or Lat,Lon,Range-radius,Error
+
+.VARI OUT
+The same size as the first input but contains either:
+1. The topomap
+2. The left input orthonormal view.
+3. The right input orthonormal view.
+REAL format.
+
+.VARI MODE
+This dictates the nature of the output file. Three outputs are
+possible. These are:
+MODE=TOPO  Which writes out an elevation map.
+MODE=ORTHL Which writes an orthonormal version of the first (left)
+           input.
+MODE=ORTHR Which writes an orthonormal version of the second (right)
+           input.
+MODE=ERROR Which writes the miss distance between the two vectors
+           solution for XYZ.
+Default is TOPO.
+
+.VARI DEBUG
+Prints the line,sample and lat,long for each point in the input
+Mark file as it is processed.
+
+.VARI XYZ
+Specifies that the Fourth input file will contain the (X,Y,Z,error)
+values in planet coordinates rather than the
+ (lat,long,range-radius,error) values which are the default.
+
+.VARI NODATA
+If no data is assigned to any pixel in the output file
+(because of a sparse tiepoint grid) the un-assigned
+pixels will be set to NODATA. Default is 0.0
+
+.VARI RADIUS
+Radius of circle within which points are collected to be used to
+interpolate over the central pixel (if it is zero).
+RADIUS should be greater than the grid size used in tracker3.
+
+.VARI MINPTS
+For interpolation to be performed a minimum of MINPTS must be
+collected within the circle.
+
+.VARI MAXPASS
+Number of passes to be performed through the image. If no points
+are interpolated then iteration ceases.
+
+end-proc                                                                     

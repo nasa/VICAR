@@ -1,0 +1,21 @@
+/* Imake file for PHOTFUNC */
+
+#define PROGRAM photfunc
+#define R2LIB
+
+#define FTNINC_LIST mp_for_defs
+
+#define MODULE_LIST photfunc.f image_geometry.f map_label.f get_mission.f \
+		os_parms.f farenc_mode.f phot_parms.f grid_labels.f \
+		photb.f compute_segment.f setup.f phot_sub.f toplanet.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_SPICE
+#define LIB_TAE
+#define LIB_MATH77
+#define LIB_RTL
+#define LIB_VRDI
+#define LIB_P2SUB
+#define LIB_NETWORK

@@ -1,0 +1,331 @@
+process help=*
+PARM INP TYPE=STRING COUNT=1
+PARM OUT TYPE=STRING COUNT=1
+PARM MANUAL TYPE=KEYWORD COUNT=(0:1) VALID=(MANUAL,AUTO) +
+ DEFAULT=AUTO
+PARM OAL TYPE=REAL COUNT=(0:1) VALID=(1.:1000.) DEFAULT=256.
+PARM OAS TYPE=REAL COUNT=(0:1) VALID=(1.:1000.) DEFAULT=256.
+PARM CENLINE TYPE=REAL COUNT=(0:1) VALID=(1.:1000.) DEFAULT=--
+PARM CENSAMP TYPE=REAL COUNT=(0:1) VALID=(1.:1000.) DEFAULT=--
+PARM SCALE TYPE=REAL COUNT=(0:1) VALID=(.0001:1000.) DEFAULT=--
+PARM FOCAL TYPE=REAL COUNT=(0:1) VALID=(1.:100000.) DEFAULT=--
+PARM NORTH TYPE=REAL COUNT=(0:1) VALID=(-360.:360.) DEFAULT=0.
+PARM ERADIUS TYPE=REAL COUNT=(0:1) VALID=(1.:1000000.) DEFAULT=695990.
+PARM PRADIUS TYPE=REAL COUNT=(0:1) VALID=(1.:1000000.) DEFAULT=695990.
+PARM SCLONG1 TYPE=REAL COUNT=(0:1) VALID=(-360.:360.) DEFAULT=--
+PARM SCLAT1 TYPE=REAL COUNT=(0:1) VALID=(-90.:90.) DEFAULT=--
+PARM SCLONG2 TYPE=REAL COUNT=(0:1) VALID=(-360.:360.) DEFAULT=--
+PARM SCLAT2 TYPE=REAL COUNT=(0:1) VALID=(-90.:90.) DEFAULT=--
+PARM RANGE TYPE=REAL COUNT=(0:1) VALID=(1.:1.0e+10) DEFAULT=--
+PARM NOSPICE TYPE=KEYWORD COUNT=(0:1) VALID=(SPICE,NOSPICE) +
+ DEFAULT=SPICE
+PARM SWITCH TYPE=KEYWORD COUNT=(0:1) VALID=(SWITCH,NOSWITCH) +
+ DEFAULT=NOSWITCH
+PARM EPIPOLAR TYPE=KEYWORD COUNT=(0:1) VALID=(EPIPOLAR,NOEPIPOLAR) +
+ DEFAULT=NOEPIPOLAR
+PARM SPICEFILE TYPE=(STRING,80) COUNT=(0:1) +
+ DEFAULT=/project/spice/ops/generic_kernels/spk/de405s.bsp
+END-PROC
+
+.TITLE
+VICAR program XYZSUN
+
+.HELP
+PURPOSE:
+To convert an ascii tiepoints file written by tracker3 into an expanded
+ascii file containing x,y,z,latitude,longitude,radius for the sun.
+This program supports solar imagery only.
+It converts image coordinates from a stereo pair into absolute solar 
+coordinates.
+(Does not run correctly on SGI, no known cause).
+
+EXECUTION:
+xyzsun inp=tpts out=tptsxyz
+
+.PAGE
+
+METHOD:
+xyzsun reads the times in the ascii header and constructs via the farenc 
+algorithm om matrices and rs vectors for the two images.
+It then computes the intersection of view rays for each tiepoint.
+The xyz points are stored in the output ascii file.
+The output ascii file has the same records as the input file but contains
+in addition the xyz solar coordinates.
+
+The input file contains the following information:
+linel   left image line
+sampl   left image sample
+liner   right image line
+sampr   right image sample
+dnl     left image dn
+dnr     right image dn
+
+The output file contains the following information:
+linel   left image line
+sampl   left image sample
+liner   right image line
+sampr   right image sample
+dnl     left image dn
+dnr     right image dn
+x       sun cartesian x in km   
+y       sun cartesian y in km   
+z       sun cartesian z in km   
+lat     sun centric latitude in degrees
+lon     sun centric longitude in degrees west
+r       distance from sun center in km
+dr      distance above apparent surface
+error   miss distance between view rays in km
+
+The time for the left two columns is recorded in record 2 of the tiepoints
+file in the form: asfd19920112044820.vic where the format is: yyyymmddhhmmss.
+The time for columns 3 & 4 is in record 3. These are placed there by tracker3.
+The time strings are the labels of the two input files to tracker3.
+
+The SPICE is consulted to determine the solar sub earth point at each time.
+The program assumes that both images are centered at the same image 
+coordinates.
+
+
+HISTORY:
+1-1-97  J Lorre. 
+15-Jan-2013 -lwk- fixed continued CHARACTER constant for new compiler flag on Solaris;
+                  replaced SPICE initializations with call to init_spice
+
+COGNIZANT PROGRAMMER:  Lucas Kamp
+
+.LEVEL1
+.VARI INP
+ascii tiepoints
+file from
+tracker3.
+
+.VARI OUT
+output ascii file
+with xyz values.
+
+.VARI MANUAL
+Uses first 4
+tiepoints to 
+navigate image
+
+.VARI OAL
+Optical Axis Line
+Defaults to 256
+
+.VARI OAS
+Optical Axis Sample
+Defaults to 256
+
+.VARI CENLINE
+Line of planet center.
+Computed from first 
+4 input tiepoints.
+
+.VARI CENSAMP
+Sample of planet center
+Computed from first 
+4 input tiepoints.
+
+.VARI SCALE
+Image plane scale.
+Pixels/mm.
+Computed from first 
+4 input tiepoints.
+
+.VARI FOCAL
+Camera focal length.
+In mm.
+Computed from first 
+4 input tiepoints.
+
+.VARI SCLONG1
+Sub spacecraft longitude.
+Left picture.
+Degrees Planetocentric West
+Overrides SPICE
+
+.VARI SCLAT1
+Sub spacecraft latitude.
+Left picture.
+Degrees planetocentric.
+Overrides SPICE
+
+.VARI SCLONG2
+Sub spacecraft longitude.
+Right picture.
+Degrees Planetocentric West
+Overrides SPICE
+
+.VARI SCLAT2
+Sub spacecraft latitude.
+Right picture.
+Degrees planetocentric.
+Overrides SPICE
+
+.VARI NORTH
+North angle.
+Angle of north spin axis
+Degrees clockwise from up.
+
+.VARI RANGE
+Distance to planet.
+In km.
+Overrides SPICE
+
+.VARI ERADIUS
+Equatorial planet 
+radius km
+DEFAULT=695990.
+
+.VARI PRADIUS
+Polar planet 
+radius km
+DEFAULT=695990.
+
+.VARI NOSPICE
+Keyword to not use
+spice kernels.
+
+.VARI SPICEFILE
+Name of solar system
+sp kernel
+
+.VARI SWITCH
+Switches line with
+sample on input file.
+
+.VARI EPIPOLAR
+Sets the right image
+line to the left
+image line.
+
+.LEVEL2
+.VARI INP
+ascii tiepoints file from tracker3.
+Contains these quantities:
+linel   left image line
+sampl   left image sample
+liner   right image line
+sampr   right image sample
+dnl     left image dn
+dnr     right image dn
+
+.VARI OUT
+output ascii file with xyz values.
+Contains these quantities:
+linel   left image line
+sampl   left image sample
+liner   right image line
+sampr   right image sample
+dnl     left image dn
+dnr     right image dn
+x       sun cartesian x in km   
+y       sun cartesian y in km   
+z       sun cartesian z in km   
+lat     sun centric latitude in degrees
+lon     sun centric longitude in degrees west
+r       distance from sun center in km
+dr      distance above apparent surface
+error   miss distance between view rays in km
+
+.VARI MANUAL
+To use the first 4 tiepoints for navigation purposes.
+The first 4 tiepoints are used to set the solar image location, size, camera
+focal length and scale. So the first 4 points must be placed on the:
+1. left solar limb
+2. right solar limb
+3. top solar limb
+4. bottom solar limb
+Default is to assume the image is centered in the picture and the scale
+is 42 arc minutes over 512 pixels.
+
+.VARI OAL
+Optical Axis Line
+Defaults to 256
+
+.VARI OAS
+Optical Axis Sample
+Defaults to 256
+
+.VARI CENLINE
+Line of sun center.
+Computed from first 4 input tiepoints.
+
+.VARI CENSAMP
+Sample of sun center
+Computed from first 4 input tiepoints.
+
+.VARI SCALE
+Image plane scale.
+Pixels/mm.
+Computed from first 4 input tiepoints.
+
+.VARI FOCAL
+Camera focal length.
+In mm.
+Computed from first 4 input tiepoints.
+
+.VARI SCLONG1
+Sub spacecraft longitude. 
+Left picture.
+Degrees solarcentric West.
+Overrides SPICE
+
+.VARI SCLAT1
+Sub spacecraft latitude.
+Left picture.
+Degrees solarcentric.
+Overrides SPICE
+
+.VARI SCLONG2
+Sub spacecraft longitude.
+Right picture.
+Degrees solarcentric West
+Overrides SPICE
+
+.VARI SCLAT2
+Sub spacecraft latitude.
+Right picture.
+Degrees solarcentric.
+Overrides SPICE
+
+.VARI NORTH
+North angle.
+Angle of north spin axis
+Degrees clockwise from up.
+
+.VARI RANGE
+Distance to planet.
+In km.
+Overrides SPICE
+
+.VARI ERADIUS
+Equatorial planet 
+radius km
+DEFAULT=695990.
+
+.VARI PRADIUS
+Polar planet 
+radius km
+DEFAULT=695990.
+
+.VARI SWITCH
+Switches line with sample on the input file.
+For people who can't keep it straight.
+
+.VARI EPIPOLAR
+Sets the right image line to the left image line, so both line coordinates
+are the same for each tiepoint.
+
+.VARI NOSPICE
+Keyword to specify the source of navigation (sclong, sclat, range).
+SPICE (the default) says to compute them using spice kernels.
+NOSPICE says to bypass spice and take them from the parameters.
+To be used only if the spice kernels are unavailable, to avoid a crash.
+
+.VARI SPICEFILE
+The name of the solar system spice sp kernel. Defaults to:
+/project/spice/ops/generic_kernels/spk/de405s.bsp
+This is a binary kernel operating under solaris operating system.
+It is assumed that the LEAPSECONDS and CONSTANTS kernels are defined by
+these 2 logical names and exist in the standard GLL spice directory.

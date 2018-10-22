@@ -1,0 +1,78 @@
+process help=*
+  PARM INP  	(STRING,40)		COUNT=2
+  PARM OUT  	(STRING,40)
+  PARM SIZE 	INTEGER DEFAULT=--	COUNT=0:4 
+  PARM SL 	INTEGER DEFAULT=1
+  PARM SS 	INTEGER DEFAULT=1
+  PARM NL 	INTEGER DEFAULT=0
+  PARM NS 	INTEGER DEFAULT=0
+  PARM SCALE	REAL
+end-proc
+.HELP
+      WATERMAP is a program to compute the atmospheric moisture content image,
+starting with the CIBR image and a 2 column table of moisture contents and
+CIBR values.  WATERMAP finds the values of a and b that fits the table values 
+to a curve of the form
+                                          b
+                       CIBR = exp(-a*WATER )
+
+Then, using the inverse of this equation, it computes the water image from
+the CIBR map.
+       Operationally, this is done by means of a lookup table of the possible
+input values.  The data type of the input image may be byte, halfword, or 
+fullword, but the values must fall within the range of 1 to 32767.  The 
+parameter SCALE is used to rescale the data into the units used in the fitted 
+table.
+       The rescaled CIBR values should all fall within the range 0 to 1.  If
+a value less than 0 is encountered, it is marked in the output with a value of 
+99999.0.  Input values that are greater than 1 are set to -1 in the output.
+.LEVEL1
+.VARIABLE INP
+Input CIBR image, 
+Water-CIBR table
+.VARIABLE OUT
+Output watermap image
+(REAL)
+.VARIABLE SIZE
+Window into input
+.VARIABLE SL
+Starting line
+= size(1)
+.VARIABLE SS
+Starting sample
+= size(2)
+.VARIABLE NL
+Number of lines
+= size(3)
+.VARIABLE NS
+Number of samples
+= size(4)
+.VARIABLE SCALE
+Input rescaling factor
+.LEVEL2
+.VARIABLE INP
+     Two inputs are required.  The first input is a VICAR labelled image of the 
+CIBR.  It may be byte, halfword, or integer, but must not contain negative 
+values or values greater than 32767.
+     The second input is a table (ASCII file, not a VICAR labelled file) of two
+columns.  The first column should contain the values of water content, while the
+second column should have the corresponding CIBR values.  Entries that have CIBR
+values outside the range 0 to 1, or water values less than or equal to 0, are
+discarded.
+.VARIABLE OUT
+The output dataset is an image of water content.  It has a data type of real,
+regardless of the input data type.  The image will have the same units as the
+water column in the input table.
+.VARIABLE SIZE
+The size parameter determines the boundaries in the input
+file from which the computation is to take place.  It is specified
+as  (SL,SS,NL,NS), where
+	SL is the starting line 
+	SS is the starting sample
+	NL is the number of lines to be procesed
+	NS is the number of samples (pixels) on each line
+.VARIABLE SCALE
+This value is multiplied to all pixels prior to applying the CIBR
+transformation.  It must be specified to get the units of the CIBR image
+to match the units used to determine the fit parameters.
+.END

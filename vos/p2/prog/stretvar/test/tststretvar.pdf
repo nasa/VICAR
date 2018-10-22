@@ -1,0 +1,11 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+gen A 20 10 LINC=0 SINC=25
+stretvar A B TABLE=(1,0,0,255,255,20,127,0,128,255)
+list B
+end-proc

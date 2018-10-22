@@ -1,0 +1,21 @@
+process help=*
+PARM INP TYPE=(STRING,40)
+PARM OUT TYPE=(STRING,40)
+END-PROC
+.TITLE
+GARSLOG
+.HELP
+     GARSLOG is a program to log into VICAR format satellite image data that
+is currently in the "GARS" format. GARS format is used by the University of
+Wisconsin for tape output.  A number of sensor sources are supported, most
+commonly GOES, NOAA, and TIROS series satellites. 
+     The input dataset should alreadly be VICAR labelled (by CONVIM or some
+similar means). There are no parameters other than input and output datasets.
+.LEVEL1
+.VARIABLE INP
+input dataset
+(VICAR labelled)
+.VARIABLE OUT
+output dataset
+.LEVEL2
+.END

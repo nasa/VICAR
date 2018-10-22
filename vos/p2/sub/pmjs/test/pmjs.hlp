@@ -1,0 +1,39 @@
+1  pmjs
+
+2  PURPOSE
+
+      Subroutine to print the location of the reseau for a Voyager frame.
+
+
+  FORTRAN calling Sequence:  CALL pmjs(rloc,n)
+  C Calling Sequence:        zpmjs(rloc,n)
+			
+
+
+
+2  ARGUMENTS
+
+     rloc    is a floating point array of 404 elements, containing
+             the line-sample coordinates of each reseau mark in the
+             following order:
+
+                            l(1),s(1),l(2),s(2),....l(202),s(202)
+
+     n       is an integer which specifies the precision of the array
+             'rloc'.  'n' is 1 for single precision arrays (REAL*4) and 2
+             for double precision arrays (REAL*8).
+
+     NOTE:   Both 'rloc' and 'n' are inputs to the program
+
+2  HISTORY
+
+     Original Programmer: Gary Yagi, 1 October 1980
+     Current Cognizant Programmer: Gary Yagi
+     Source Language: Fortran
+     Made portable for UNIX        Meredith Cox (CRI)      24 Apr 1994
+
+2  OPERATION
+
+     The line-sample coordinates of each reseau mark is printed
+     in a format which displays the grid pattern of the reseau.
+

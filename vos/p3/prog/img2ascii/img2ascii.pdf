@@ -1,0 +1,73 @@
+PROCESS		HELP=*
+!
+! IMG2ASCII - Create an ASCII text file of DN values from an image
+!
+PARM INP TYPE=(STRING,72)
+PARM OUT TYPE=(STRING,72)
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM NOTES TYPE=(STRING,3) VALID=("ON","OFF") DEFAULT="OFF"
+END-PROC
+.HELP
+
+PURPOSE
+
+	Create an ASCII file of values from a VICAR image
+
+TAE COMMAND LINE FORMAT
+
+	IMG2ASCII INP OUT PARMS
+
+	Where valid parms are SIZE and NOTES
+.PAGE
+EXAMPLES
+
+    IMG2ASCII INP=SURFACE.IMG OUT=SURFACE.TXT SIZE=(100,100,50,50) NOTES=ON
+
+	In this example, IMG2ASCII produces an ASCII text file, SURFACE.TXT
+of values from the VICAR image SURFACE.IMG starting at line and sample 100
+and ending at line and sample 150. Upon program completion, with the
+NOTES switch on, the min and max values encountered and the dimension of
+the text file written are reported to the user.
+
+.PAGE
+OPERATION
+
+	Only the DN values are output to the text file. The line and
+sample values are not output to the text file. The program will notify
+the user as to the dimension of the newly created text file (in the case
+that the user specifies a SIZE larger than the input picture the output
+file will trim to the max line and samples of the input picture).
+
+
+RESTRICTIONS
+
+	Converting binary VICAR images to ASCII text files will create
+files that are much larger in disk storage space than the images. An image
+100 square that uses 21 blocks will create an ASCII file of 134 blocks.
+Currently only BYTE and HALF images function with IMG2ASCII.
+
+Revisions:
+
+  27 June 1994  F. Moss   Add test pdf
+
+  Made portable for UNIX ...  J. Turner (CRI)   5 Sept 1994 
+.LEVEL1
+.VARIABLE INP
+A VICAR image
+(BYTE or HALF)
+.VARIABLE OUT
+ASCII text file
+(No VICAR label)
+.VARIABLE SIZE
+Normal VICAR size field
+.VARIABLE NOTES
+Switch (ON or OFF)
+.LEVEL2
+.VARIABLE NOTES
+ON and OFF switch
+indicating the min
+and max values and
+the dimension of 
+the text file
+written to disk.
+.END

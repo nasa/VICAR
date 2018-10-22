@@ -1,0 +1,11 @@
+#define SUBROUTINE xsnapwidget
+#define MODULE_LIST XImageHandler.cc XImageToVicar.cc WidgetSnapshot.cc
+
+#define GUI_SUBLIB
+
+#define MAIN_LANG_C_PLUS_PLUS
+#define USES_C_PLUS_PLUS
+
+#define LIB_MOTIF
+#define LIB_RTL
+

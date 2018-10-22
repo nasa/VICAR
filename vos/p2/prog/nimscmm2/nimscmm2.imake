@@ -1,0 +1,19 @@
+#define PROGRAM nimscmm2
+#define MODULE_LIST nimscmm2.c nims_fsubs2.f getom.f nims_cal.f load_spice95.f
+#define MAIN_LANG_C
+#define USES_ANSI_C
+#define USES_FORTRAN
+#define INCLUDE_LIST calwork.fin darkwork.fin calfile.fin
+#define LIB_P2SUB
+/*#define GLLLIB*/
+/*#define LIB_SYBASE*/
+/*#define LIB_MDMS*/
+/*#define LIB_KERBEROS*/
+#define LIB_RTL
+#define LIB_MATH77
+#define LIB_SPICE
+#define LIB_TAE
+#define LIB_FORTRAN
+#define LIB_NETWORK
+/*#define LIB_LOCAL	/* disable on delivery */
+/*#define DEBUG		/* disable on delivery */

@@ -1,0 +1,312 @@
+procedure
+
+!local invals type=real count=(0:20)
+local outvals type=real count=(0:20)
+local outnum type=integer count=1 init=0
+local foutnum type=real count=1 
+local inval1   type=real count=1 init=0.0
+local inval2   type=real count=1 init=0.0
+local inval3   type=real count=1 init=0.0
+local inval4   type=real count=1 init=0.0
+local inval5   type=real count=1 init=0.0
+local inval6   type=real count=1 init=0.0
+local inval7   type=real count=1 init=0.0
+local inval8   type=real count=1 init=0.0
+
+local val1 type=real count=1 init=0.0
+local val2 type=real count=1 init=0.0
+local val3 type=real count=1 init=0.0
+local val4 type=real count=1 init=0.0
+local val5 type=real count=1 init=0.0
+local cnt1 type=real count=1 init=0.0
+local cnt2 type=real count=1 init=0.0
+local cnt3 type=real count=1 init=0.0
+local difval1 type=real count=1 init=0.0
+local difval2 type=real count=1 init=0.0
+local difval3 type=real count=1 init=0.0
+local difval4 type=real count=1 init=0.0
+local outval1 type=real count=1 init=0.0
+local outval2 type=real count=1 init=0.0
+local outval3 type=real count=1 init=0.0
+local avg type=real count=1 init=0.0
+local rms type=real count=1 init=0.0
+
+refgbl $echo
+! Sep 16, 2013 - RJB
+! TEST SCRIPT FOR TCLMATH
+! tests math calls in pdf scripts
+!
+! Vicar Programs:
+!   <none>  
+!
+! External Programs:
+!   <none> 
+!
+! Parameters:
+!   <none>
+!
+! Requires NO external test data: 
+!
+
+body
+let _onfail="stop"
+let $echo="no"
+
+enable-log
+
+!test AVERAGE
+let inval1=10.0
+let inval2=20.0
+let inval3=30.0
+let inval4=40.0
+let inval5=50.0
+let $echo="yes"
+tclmath invals=(&inval1,&inval2,&inval3,&inval4,&inval5) +
+  func=average outvals=outvals outcount=outnum
+let $echo="no"
+let val1=outvals(1)
+write "********************************"
+write " TEST 1 - AVERAGE TEST"
+write "number of outputs = &outnum"
+write "average = &val1"
+write " "
+write "********************************"
+write ""
+
+! SQUARE ROOT
+let inval1=9.0
+let inval2=25.0
+let inval3=100.0
+let inval4=225.0
+let inval5=2.0
+let $echo="yes"
+tclmath invals=(&inval1,&inval2,&inval3,&inval4,&inval5) +
+ func=sqroot outvals=outvals outcount=outnum
+let $echo="no"
+let val1=outvals(1)
+let val2=outvals(2)
+let val3=outvals(3)
+let val4=outvals(4)
+let val5=outvals(5)
+write "********************************"
+write "TEST 2 - SQUARE ROOT TEST"
+write "number of outputs = &outnum"
+write "square root of 9.0 = &val1"
+write "square root of 25.0 = &val2"
+write "square root of 100.0 = &val3"
+write "square root of 225.0 = &val4"
+write "square root of 2.0 = &val5"
+write " "
+write "********************************"
+write ""
+
+!SQUARE
+let inval1=3.0
+let inval2=5.0
+let inval3=10.0
+let inval4=15.0
+let inval5=2.0
+let $echo="yes"
+tclmath invals=(&inval1,&inval2,&inval3,&inval4,&inval5) +
+ func=square outvals=outvals outcount=outnum
+let $echo="no"
+let val1=outvals(1)
+let val2=outvals(2)
+let val3=outvals(3)
+let val4=outvals(4)
+let val5=outvals(5)
+
+write "********************************"
+write "TEST 3 - SQUARE TEST"
+write "number of outputs = &outnum"
+write "square of 3.0 = &val1"
+write "square of 5.0 = &val2"
+write "square of 10.0 = &val3"
+write "square of 15.0 = &val4"
+write "square of 2.0 = &val5"
+write " "
+write "********************************"
+write ""
+
+let cnt1=1525.0
+let cnt2=1547.0
+let cnt3=1539.0
+
+let avg=(cnt1 + cnt2 + cnt3)/3.0
+
+let difval1=(cnt1-avg)
+let difval2=(cnt2-avg)
+let difval3=(cnt3-avg)
+
+let inval1=difval1
+let inval2=difval2
+let inval3=difval3
+let $echo="yes"
+
+tclmath invals=(&inval1,&inval2,&inval3) +
+  func=square outvals=outvals outcount=outnum
+let $echo="no"
+let difval1=outvals(1)
+let difval2=outvals(2)
+let difval3=outvals(3)
+let foutnum = $float(&outnum)
+let rms=(difval1 + difval2 + difval3) / foutnum
+write "********************************"
+write "TEST 4 - SQUARE TEST - RMS"
+write "number of outputs = &outnum"
+write "rms = &rms"
+write ""
+write "********************************"
+write ""
+
+let cnt1=1525.0
+let cnt2=1547.0
+let cnt3=1539.0
+
+let avg=(cnt1 + cnt2 + cnt3)/3.0
+
+let difval1=(cnt1-avg)
+let difval2=(cnt2-avg)
+let difval3=(cnt3-avg)
+let $echo="yes"
+tclmath invals=(&difval1,&difval2,&difval3) func=square +
+	outvals=outvals outcount=outnum
+let $echo="no"
+let difval1=outvals(1)
+let difval2=outvals(2)
+let difval3=outvals(3)
+
+let rms=(difval1 + difval2 + difval3)/$float(outnum)
+
+write "********************************"
+write "TEST 5 - SQUARE TEST"
+write "number of outputs = &outnum"
+write "rms = &rms"
+write ""
+write "********************************"
+write ""
+
+! LOG 10
+let inval1=2.0
+let inval2=5.0
+let inval3=10.0
+let $echo="yes"
+tclmath invals=(&inval1,&inval2,&inval3) +
+   func=LOG +
+    outvals=outvals outcount=outnum
+let $echo="no"
+let difval1=outvals(1)
+let difval2=outvals(2)
+let difval3=outvals(3)
+
+write "********************************"
+write "TEST 6 - LOG 10  TEST"
+write "number of outputs = &outnum"
+write "log10 of 2.0 = &difval1"
+write "log10 of 5.0 = &difval2"
+write "log10 of 10.0 = &difval3"
+write ""
+write "********************************"
+write ""
+
+! NATURAL LOG (LN)
+ 
+let inval1=2.0
+let inval2=5.0
+let inval3=10.0
+let $echo="yes"
+tclmath invals=(&inval1,&inval2,&inval3) +
+   func=NATLOG +
+    outvals=outvals outcount=outnum
+let $echo="no"
+let difval1=outvals(1)
+let difval2=outvals(2)
+let difval3=outvals(3)
+
+write "********************************"
+write "TEST 7 - NATURAL LOG (LN) TEST"
+write "number of outputs = &outnum"
+write "ln of 2.0 = &difval1"
+write "ln of 5.0 = &difval2"
+write "ln of 10.0 = &difval3"
+write ""
+write "********************************"
+write ""
+
+! EXPONENTIAL
+
+let inval1=2.0
+let inval2=5.0
+let inval3=10.0
+let $echo="yes"
+tclmath invals=(&inval1,&inval2,&inval3) +
+   func=EXP +
+    outvals=outvals outcount=outnum
+let $echo="no"
+let difval1=outvals(1)
+let difval2=outvals(2)
+let difval3=outvals(3)
+
+write "********************************"
+write "TEST 8 - EXPONENTIAL TEST"
+write "number of outputs = &outnum"
+write "exp of 2.0 = &difval1"
+write "exp of 5.0 = &difval2"
+write "exp of 10.0 = &difval3"
+write ""
+write "********************************"
+write ""
+! CUBE TEST
+let inval1=2.0
+let inval2=5.0
+let inval3=10.0
+let $echo="yes"
+tclmath invals=(&inval1,&inval2,&inval3) +
+   func=CUBE +
+    outvals=outvals outcount=outnum
+let $echo="no"
+let difval1=outvals(1)
+let difval2=outvals(2)
+let difval3=outvals(3)
+
+write "********************************"
+write "TEST 9 - CUBE TEST"
+write "number of outputs = &outnum"
+write "cube of 2.0 = &difval1"
+write "cube of 5.0 = &difval2"
+write "cube of 10.0 = &difval3"
+write ""
+write "********************************"
+
+! UNRECOGNIZED FUNCTION
+write ""
+write ""
+write "********************************"
+write "TEST 10 - INVALID FUNCTION TEST (NOOP)"
+write "[TAE-INVSTR] message"
+write ""
+write "********************************"
+write ""
+
+let _onfail="continue"
+let inval1=6
+let $echo="yes"
+tclmath invals=(&inval1) +
+   func=NOOP +
+    outvals=outvals outcount=outnum
+let $echo="no"
+let difval1=outvals(1)
+
+write ""
+write "********************************"
+write "Successful FAILURE TEST"
+write "********************************"
+write ""
+let _onfail="stop"
+
+disable-log
+
+let $echo="no"
+
+end-proc
+

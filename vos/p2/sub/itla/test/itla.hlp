@@ -1,0 +1,33 @@
+1 ITLA
+
+PURPOSE:  Fills a byte array with a value.
+
+FORTRAN CALL:    CALL ITLA(INT, B, N)
+From C, use ANSI C routine memset.
+
+PARAMETERS:
+
+     INT =  A fullword integer containing the input fill value.
+
+     B   =  A byte array, of dimension N, into which the value 
+            INT is to be output.
+  
+     N   =  The number of bytes to fill.
+
+
+2 NOTES
+
+DESCRIPTION
+
+  This FORTRAN routine provides the FORTRAN programmer with a 
+  function to fill a byte array with a value in the range (0,255).
+  If INT is not in the range (0,255) inclusive,ITLA abends with the
+  message 'ITLA: PROGRAM ERR'.
+
+HISTORY
+
+  Original Programmer: H.J. Frieden  06/12/74
+  Converted to Vax by: L.W. Kamp     03/01/83
+  Ported for UNIX by:  S. Pohorsky   10/12/92
+  Current Cog Progr:   S. Pohorsky
+

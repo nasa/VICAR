@@ -1,0 +1,31 @@
+procedure
+refgbl $autousage
+refgbl $echo
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+
+! Generate a standard graphics file
+ibis-gen in.gra nc=4 nr=12 datacol=(1,2) 'ibis-1 'row +
+  data=(1,1,3,3,5,5,100,100, 6,7,8,8,0,0, 6,100,5,5,6,6,0,0)
+ibis-list in.gra gr1dim=4 nr=4
+
+!The IBIS graphics-1 file INPUT.GRA is clipped according to the window
+!coordinates (MINLINE,MAXLINE,MINSAMP,MAXSAMP) and output to OUTPUT.GRA 
+!The 'SKIP' parameter is the graphics dimension minus 2.
+
+polyclip in.gra out.gra   MINLINE=1.5 MINSAMP=1.0 +
+				MAXLINE=99.0 MAXSAMP=300 SKIP=2
+ibis-list out.gra gr1dim=4 nr=4
+
+!In this example the output graphics file is reoriginated so that the
+!output origin is (line,sample)=(1,1) , i.e. (MINLINE-1,MINSAMP-1) is 
+!subtracted from all of the coordinate.
+
+polyclip in.gra out.gra   MINLINE=1.5 MINSAMP=1.0 +
+			MAXLINE=99.0 MAXSAMP=300 SKIP=2 'reorigin
+ibis-list out.gra gr1dim=4 nr=4
+
+end-proc
+

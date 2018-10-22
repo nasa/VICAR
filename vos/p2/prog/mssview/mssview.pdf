@@ -1,0 +1,153 @@
+PROCESS HELP=*
+PARM INP TYPE=STRING
+PARM OUT TYPE=STRING
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL TYPE=INTEGER DEFAULT=1
+PARM SS TYPE=INTEGER DEFAULT=1
+PARM NL TYPE=INTEGER DEFAULT=0
+PARM NS TYPE=INTEGER DEFAULT=0
+PARM MSS TYPE=INTEGER VALID=2:1000
+PARM BANDS TYPE=INTEGER COUNT=2:3 VALID=1:1000
+PARM INCR INTEGER COUNT=0:1 DEFAULT=--
+PARM LINC INTEGER DEFAULT=1
+PARM SINC INTEGER DEFAULT=1
+PARM THRESH REAL DEFAULT=0.
+PARM NLOUT TYPE=INTEGER DEFAULT=256 VALID=150:1000
+PARM NSOUT TYPE=INTEGER DEFAULT=256 VALID=150:1000
+PARM LABELS TYPE=(STRING,16) COUNT=2:3 +
+            DEFAULT=("FIRST BAND", "SECOND BAND", "THIRD BAND")		
+END-PROC
+.TITLE
+VICAR Program "mssview"
+.HELP
+PURPOSE:
+
+"mssview" makes an image that contains a scatterplot graph of two or three
+	bands in an MSS format dataset.  The graph contains the scatterplot
+	in a box in the middle of the image.  Around the sides of the image
+	are labels with the minimum and maximum values and user defined
+	labels.  The scatterplot can plot three dimensions by varying the
+	intensity of the point by the value of the third dimension.
+	Each dimension plotted is automatically scaled to fit.
+
+.PAGE
+EXECUTION EXAMPLES:
+
+mssview  INPUT.MSS  OUTPUT.IMG  MSS=6 BANDS=(3,4) NLOUT=300 NSOUT=400 +
+				LABELS=("RED BAND","IR BAND")
+
+    In this example the input MSS format data set is INPUT.MSS and it is made
+up of 6 bands.  The bands that will be plotted are the third and the fourth
+in the dataset.  The number of lines in the output image will be 300 and the
+number of samples will be 400.
+    The output image is in byte format and the box and the labels have DN
+value 255.  The data points are read in and the minimum and maximum are 
+determined for each band.  The plot is scaled so that all of the points will
+just fit in.  The characters are generated with a 7 by 5 dot matrix.  Larger 
+size images will have multiple height characters.
+
+.PAGE
+mssview  INPUT.MSS  OUTPUT.IMG  MSS=5 BANDS=(1,2,5) 
+
+    In this example, bands 1, 2, and 5 in INPUT.MSS will be plotted with
+band 1 in the x direction, band 2 in the y direction, and band 5 plotted
+as the intensity of the points.  The default output image size of 256 by
+256 will used.  The intensity of the plotted points will range from a DN
+value of 50 to a value of 250.
+
+
+.PAGE
+RESTRICTIONS:
+
+The minimum output image size is 150 by 150 , and the maximum is 1000 by 1000.
+The maximum number of data points that can be plotted is 50,000.
+The maximum label length is 32 characters.
+The maximum line length on the MSS format input dataset is 60,000 samples.
+.page
+HISTORY:
+
+Original Programmer:	Frank Evans	November 1985
+
+Cognizant Programmer:	Frank Evans
+
+Revisions:
+
+   5-SEP-94,  AMS:  (CRI) Made portable for UNIX
+  14-APR-87,  LWK:  added INCR, LINC, SINC, THRESH parameters
+
+.LEVEL1
+.VARIABLE INP
+Input MSS format data
+.VARIABLE OUT
+Output scattergram image
+.VARIABLE SIZE
+VICAR size field
+.VARIABLE SL
+Starting line
+.VARIABLE SS
+Starting sample (per band)
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples (per band)
+.VARIABLE MSS
+Number of bands in MSS
+format input dataset
+.VARIABLE BANDS
+Which bands to use in 
+scatter plot ( 2 or 3 numbers)
+.VARIABLE NLOUT
+Number of lines in output
+.VARIABLE NSOUT
+Number of samples in output
+.VARIABLE LABELS
+The labels associated with each band
+.VARIABLE INCR
+LINC and SINC
+.VARIABLE LINC
+Line increment
+.VARIABLE SINC
+Sample increment
+.VARIABLE THRESH
+DN threshold
+.LEVEL2
+.VARIABLE INP
+Vicar image arranged in MSS format which consists of all of the 
+image bands appended in the sample dimensional.  See program MSS.
+.VARIABLE OUT
+Output scattergram image
+.VARIABLE SIZE
+Standard VICAR size field, except that SS and NS refer to each band
+separately, not to the entire MSS file.
+.VARIABLE SL
+Starting line
+.VARIABLE SS
+Starting sample, in each band separately.
+.VARIABLE NL
+Number of lines.
+.VARIABLE NS
+Number of samples, in each band separately.
+.VARIABLE MSS
+Number of bands in MSS format input dataset. 
+Used to calculate where each band is.
+.VARIABLE BANDS
+Which bands to use in scatter plot. 
+Can plot either 2 or 3 bands.
+.VARIABLE NLOUT
+Number of lines in output scatterplot image
+.VARIABLE NSOUT
+Number of samples in output scatterplot image
+.VARIABLE LABELS
+The labels associated with each band.  Will be
+plotted along each axis.
+.VARIABLE INCR
+This specifies both LINC and SINC, q.v.
+.VARIABLE LINC
+Line increment:  this specifies that every LINC lines will be skipped,
+in order to reduce the number of data points.
+.VARIABLE SINC
+Sample increment:  this specifies that every SINC samples will be skipped,
+in order to reduce the number of data points.
+.VARIABLE THRESH
+If THRESH is specified then all DN values below this value will be ignored.
+.END

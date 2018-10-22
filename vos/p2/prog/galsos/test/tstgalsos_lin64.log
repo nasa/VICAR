@@ -1,0 +1,40 @@
+let $autousage="none"
+galsos /project/test_work/testdata/gll/7213r.img 7213.cal dircal=/p+
+roject/test_work/testdata/gll/ diroff=/project/test_work/testdata/gll/   dirdc=/project/test_work/testdata/gll/ dirblm=/project/tes+
+t_work/testdata/gll/
+Beginning VICAR task galsos
+ GALSOS version 2016-02-13
+Solar range from image label=752771968.0
+
+ 
+              PIC   CAL   DC   BLM
+              ===   ===   ==   ===
+ FILTER         3     3    X     3
+ GAIN           3     X    3     3
+ FRAME-RATE     2     X    2     X
+ 
+ Mission Phase=Phase2
+ Reflectivity per Foot-Lambert = 0.0004
+ Radiance per Foot-Lambert = 0.8107
+ Reflectivity units apply to a solar-illuminated
+ surface at 5.2 AU 
+ Scaling Type:  IOF 
+ Scaling values to be used = 2.0268e+00 
+ Exposure = 9.5833e+01 msec
+ GALSOS replaced 222 pixels by interpolation
+ GALSOS task completed
+f2 (7213.cal /project/test_work/testdata/gll/7213.cal) d func="in1-in2"
+Beginning VICAR task f2
+F2 version 98-Aug-2015
+F2 using hash table lookup
+FUNCTION EVALUATED 3156 TIMES
+hist d 'nohist
+Beginning VICAR task hist
+*** HIST version Aug 10 2015 ***
+
+
+AVERAGE GRAY LEVEL=0.000002       STANDARD DEVIATION=0.002165       NUMBER ELEMENTS=    640000
+MIN. DN=        -1
+MAX. DN=         1
+
+disable-log

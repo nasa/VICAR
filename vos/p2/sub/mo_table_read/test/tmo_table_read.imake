@@ -1,0 +1,23 @@
+/* 
+
+IMAKE file for Test of MIPS routine MO_TABLE_READ
+
+*/
+
+#define PROGRAM tmo_table_read
+
+#define MODULE_LIST tmo_table_read.c
+
+#define MAIN_LANG_C
+#define TEST
+
+#define USES_C
+
+#if UNIX_OS
+#define C_OPTIONS -D SUN_UNIX -D PDS_TOOLBOX
+#endif
+
+#define   LIB_RTL
+#define   LIB_TAE
+#define   LIB_P2SUB  
+#define   LIB_PDS_LABEL

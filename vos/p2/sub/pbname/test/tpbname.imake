@@ -1,0 +1,19 @@
+/* Imake file for Fortran-Test of VICAR subroutine  PBNAME  */
+
+#define PROGRAM tpbname
+
+#define MODULE_LIST tpbname.f  tzpbname.c
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE       
+#define LIB_SPICE
+#define LIB_P2SUB    
+
+/*#define DEBUG		/*  disable on delivery   */
+/*#define LIB_LOCAL	/*  disable on delivery   */

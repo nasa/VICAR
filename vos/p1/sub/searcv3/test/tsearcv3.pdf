@@ -1,0 +1,3 @@
+PROCESS
+PARM INP            TYPE=STRING     COUNT=1:2    
+END-PROC

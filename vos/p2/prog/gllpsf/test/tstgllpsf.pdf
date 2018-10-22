@@ -1,0 +1,118 @@
+procedure
+refgbl $echo
+refgbl $syschar
+body
+local PATH  TYPE=STRING init="wms_test_work:[testdata.gll]"
+let _onfail="continue"
+let $echo="yes"
+
+!!	These test cases correspond to the CLR 
+!!	filter.
+!!
+!!
+gllpsf out=psf.img nl=8 ns=8
+list psf.img
+gllpsf out=psf.img nl=8 ns=8 psf=(1.,0.,2.,2.,0.,10.)
+list psf.img
+!!
+gllpsf out=psf.img nl=16 ns=16
+fft22  inp=psf.img out=otf.img 
+list psf.img
+list otf.img
+!
+!!
+!!	These test cases test other 
+!!	filters.
+!!
+if ($syschar(1)="UNIX")
+  let PATH="/project/test_work/testdata/gll/"
+end-if
+
+# COMMENT OUT THIS SECTION UNTIL GLLFILLIN IS RESTORED (OR 600.FILL FOUND):
+#gllfillin "&PATH"s0202556000.sos 6000.fill 'YES max=2
+#adespike 6000.fill 6000.spk tol=600
+
+adespike "&PATH"s0202556100.sos 6100.spk tol=600
+adespike "&PATH"s0202556200.sos xa tol=400
+adespike xa 6200.spk tol=400
+adespike "&PATH"s0202556245.sos  6245.spk tol=400
+!!
+!!  Add in scattered light correction - Needed to cut out an area the size
+!!   of the power of 2 (128 x 128 in this case) because the missing lines
+!!   threw off the correction in the dark sky area.
+!!
+#copy 6000.spk 6000.soscut (280,320,128,256)
+gllpsf out=psf nl=128 ns=256 filt=GRN
+list psf sinc=26 linc=10
+#fft22  inp=psf out=otf
+#fft22  inp=6000.soscut out=fftpix nl=128 ns=256
+#wiener inp=(fftpix,otf) out=fixfftpix sn=45.
+#fft22 inp=fixfftpix out=6000.scat mode=inverse format=half
+
+copy 6100.spk 6100.soscut (280,320,128,256)
+gllpsf filt=VLT out=psf nl=128 ns=256
+list psf sinc=26 linc=10
+fft22  inp=psf out=otf
+fft22  inp=6100.soscut out=fftpix nl=128 ns=256
+wiener inp=(fftpix,otf) out=fixfftpix sn=45.
+fft22 inp=fixfftpix out=6100.scat mode=inverse format=half
+
+
+copy 6200.spk 6200.soscut (280,320,128,256)
+gllpsf filt=968 out=psf nl=128 ns=256
+list psf sinc=26 linc=10
+fft22  inp=psf out=otf
+fft22  inp=6200.soscut out=fftpix nl=128 ns=256
+wiener inp=(fftpix,otf) out=fixfftpix sn=45.
+fft22  inp=fixfftpix out=6200.scat mode=inverse format=half
+
+
+copy "&PATH"s0202556245.sos 6245.soscut (280,320,128,256)
+gllpsf filt=889 out=psf nl=128 ns=256
+list psf sinc=26 linc=10
+fft22  inp=psf out=otf
+fft22  inp=6245.soscut out=fftpix nl=128 ns=256
+wiener inp=(fftpix,otf) out=fixfftpix sn=45.
+fft22  inp=fixfftpix out=6245.scat mode=inverse format=half
+
+if ($syschar(1)="UNIX")
+  ush rm psf.img            !delete created *.img files.
+  ush rm otf.img 
+  ush rm *soscut     
+  ush rm psf  
+  ush rm fftpix 
+  ush rm otf      
+  ush rm fixfftpix
+  ush rm *spk
+# ush rm *fill
+else 
+  dcl del psf.img;*            !delete created *.img files.
+  dcl del otf.img;* 
+  dcl del *.soscut;*     
+  dcl del psf.*;*  
+  dcl del fftpix.*;* 
+  dcl del otf.*;*      
+  dcl del fixfftpix.*;*
+  dcl del *.spk;*
+# dcl del *.fill;*
+end-if
+  write "The tester should diplay the input and the output from "
+  write "the Ida test as shown below."
+  write "use xwb0"
+  write "vids"
+# write "jdisp /project/test_work/testdata/gll/s0202556000.sos"
+# write "jdisp 6000.scat"	
+  write "jdisp /project/test_work/testdata/gll/s0202556100.sos"
+  write "jdisp 6100.scat"
+  write "jdisp /project/test_work/testdata/gll/s0202556200.sos"
+  write "jdisp 6200.scat"
+  write "jdisp /project/test_work/testdata/gll/s0202556245.sos"
+  write "jdisp 6245.scat"			
+let $echo="no"
+end-proc
+
+
+
+
+
+

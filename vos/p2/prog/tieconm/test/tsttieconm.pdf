@@ -1,0 +1,23 @@
+procedure
+refgbl $echo
+refgbl $autousage
+parm version string def="ibis-1"
+parm org string def="column"
+body
+let _onfail="continue"
+let $autousage="none"
+let $echo="yes"
+tieconm OUT=i.dat, 'GEOMA,TIEP=(1.,1.,2.,2.,1.,100.,2.,200.+
+   100.,1.,200.,2.,+
+   100.,100.,200.,200.),+
+   NAH=1,NAV=1,MINL=1.,MINS=1.,MAXL=100.,MAXS=100.+
+   'MGEOM
+! To test the IBIS file interface "uncomment" the following 6 lines of code:
+!ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+!   data=(1.,1.,2.,2.,1.,100.,2.,200.,+
+!   100.,1.,200.,2.,100.,100.,200.,200.) nc=4 nr=4
+!ibis-list a cols=(1,2,3,4) csize=6
+!tieconm INP=a COLS=(1,2,3,4)  OUT=j.dat +
+!      NAH=1,NAV=1,MINL=1.,MINS=1.,MAXL=100.,MAXS=100. +
+!    'MGEOM
+end-proc

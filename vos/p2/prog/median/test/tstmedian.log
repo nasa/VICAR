@@ -1,0 +1,421 @@
+gausnois out=a.img nl=10 ns=10 seed=7382382
+Beginning VICAR task gausnois
+gausnois version 2016-06-08
+list a.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp     1       3       5       7       9
+   Line
+      1     111 127 110 138 119 161 133 154 108 141
+      2     127 104 105 126 116 113 132 147 123 146
+      3     127 124 124 112 121 164 124 114 129 140
+      4      94 107 146 107 133 116  92 148 118 134
+      5     131 133 148 139 130 131 131 114 143 124
+      6     137 139 132 154 157 151 109 134 114 133
+      7     117 105 148 110 121 143 129 137 142 147
+      8     125 114  98 161 116 135 122 118 147 133
+      9     123 126 126 109 130 136 139 139 122 142
+     10     135 131 128 121 118 118 143 138 124 120
+median inp=a.img out=b.img nlw=3 nsw=3
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp     1       3       5       7       9
+   Line
+      1     111 110 110 116 119 116 132 123 123 108
+      2     124 124 124 119 121 124 133 129 140 129
+      3     107 124 112 121 116 121 124 124 134 129
+      4     124 127 124 130 130 130 124 124 129 129
+      5     133 133 139 139 133 131 131 118 133 124
+      6     133 133 139 139 139 131 131 131 134 142
+      7     117 125 132 132 143 129 134 129 134 142
+      8     117 123 114 121 130 130 136 137 139 142
+      9     126 126 126 121 121 130 136 138 133 124
+     10     126 126 126 126 121 130 136 138 133 124
+median inp=a.img out=b.img 'high nlw=3 nsw=3 dclevel=100. dctran=0.
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp     1       3       5       7       9
+   Line
+      1     100 117 100 122 100 145 101 131  85 133
+      2     103  80  81 107  95  89  99 118  83 117
+      3     120 100 112  91 105 143 100  90  95 111
+      4      70  80 122  77 103  86  68 124  89 105
+      5      98 100 109 100  97 100 100  96 110 100
+      6     104 106  93 115 118 120  78 103  80  91
+      7     100  80 116  78  78 114  95 108 108 105
+      8     108  91  84 140  86 105  86  81 108  91
+      9      97 100 100  88 109 106 103 101  89 118
+     10     109 105 102  95  97  88 107 100  91  96
+median inp=a.img out=b.img perc=20.0 nlw=5 nsw=5
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp     1       3       5       7       9
+   Line
+      1     105 105 111 105 105   0   0   0   0   0
+      2     105 105 107 107 107 112 108  92  92 108
+      3     107 107 110 112 113 114 116 116 118 114
+      4     107 107 112 113 113 114 114 114 114 114
+      5     117 107 112 116 116 114 116 116 114 114
+      6     107 107 110 114 116 116 116 118 118 118
+      7     114 114 116 116 121 118 121 122 122 118
+      8     114 114 116 116 118 118 118 122 122 122
+      9     114 110 114 114 116 118 118 122 122 122
+     10     114 114 114 114 116 118 118 122 122 122
+gausnois out=a.img nl=10 ns=10 seed=7382382 format=half sigma=10.  +
+  mean=-1000
+Beginning VICAR task gausnois
+gausnois version 2016-06-08
+list a.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1     -1010 -1000 -1011  -993 -1005  -979  -996  -983 -1012  -991
+      2     -1000 -1014 -1014 -1001 -1007 -1008  -996  -988 -1003  -988
+      3     -1000 -1001 -1002 -1009 -1003  -976 -1001 -1008  -999  -992
+      4     -1021 -1012  -988 -1012  -996 -1007 -1021  -987 -1005  -995
+      5      -998  -996  -987  -992  -998  -997  -997 -1008  -990 -1002
+      6      -993  -992  -997  -983  -981  -985 -1011  -996 -1008  -996
+      7     -1006 -1014  -987 -1010 -1004  -990  -998  -994  -991  -987
+      8     -1001 -1008 -1018  -978 -1007  -995 -1003 -1006  -987  -996
+      9     -1002 -1000 -1000 -1011  -998  -994  -992  -993 -1003  -990
+     10      -995  -997  -999 -1004 -1005 -1005  -990  -993 -1001 -1004
+median inp=a.img out=b.img nlw=3 nsw=3
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1     -1010 -1011 -1011 -1007 -1001  -996  -983  -988  -988  -991
+      2     -1001 -1002 -1002 -1005 -1003 -1001  -996  -999  -992  -999
+      3     -1012 -1002 -1009 -1003 -1007 -1003 -1001 -1001  -995  -999
+      4     -1001 -1000 -1001  -998  -998  -998 -1001 -1001  -999  -999
+      5      -996  -996  -992  -992  -996  -997  -997 -1005  -996 -1002
+      6      -996  -996  -992  -992  -992  -997  -997  -997  -996  -991
+      7     -1006 -1001  -997  -997  -990  -998  -996  -998  -996  -991
+      8     -1006 -1002 -1008 -1004  -998  -998  -994  -994  -993  -991
+      9     -1000 -1000 -1000 -1004 -1004  -998  -994  -993  -996 -1001
+     10     -1000 -1000 -1000 -1000 -1004  -998  -994  -993  -996 -1001
+median inp=a.img out=b.img 'high nlw=3 nsw=3 dclevel=100. dctran=0.
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1       100   111   100   114    96   117    87   105    76   100
+      2       101    88    88   104    96    93   100   111    89   111
+      3       112   101   107    94   104   127   100    93    96   107
+      4        80    88   113    86   102    91    80   114    94   104
+      5        98   100   105   100    98   100   100    97   106   100
+      6       103   104    95   109   111   112    86   101    88    95
+      7       100    87   110    87    86   108    98   104   105   104
+      8       105    94    90   126    91   103    91    88   106    95
+      9        98   100   100    93   106   104   102   100    93   111
+     10       105   103   101    96    99    93   104   100    95    97
+median inp=a.img out=b.img perc=20.0 nlw=5 nsw=5
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1     -1014 -1014 -1010 -1009 -1008 -1007 -1005  -999 -1001 -1003
+      2     -1014 -1014 -1012 -1012 -1009 -1007 -1007 -1005 -1005 -1005
+      3     -1012 -1012 -1011 -1009 -1008 -1008 -1007 -1007 -1005 -1008
+      4     -1012 -1012 -1009 -1008 -1008 -1008 -1008 -1008 -1008 -1008
+      5     -1006 -1012 -1009 -1007 -1007 -1008 -1007 -1007 -1008 -1008
+      6     -1012 -1012 -1010 -1008 -1007 -1007 -1007 -1006 -1006 -1006
+      7     -1008 -1008 -1007 -1007 -1004 -1006 -1004 -1003 -1003 -1006
+      8     -1008 -1008 -1007 -1007 -1005 -1005 -1005 -1003 -1003 -1003
+      9     -1008 -1010 -1008 -1008 -1007 -1006 -1005 -1003 -1003 -1003
+     10     -1008 -1008 -1008 -1008 -1007 -1006 -1005 -1003 -1003 -1003
+gausnois out=a.img nl=10 ns=10 seed=7382382 format=half sigma=10.  +
+  mean=-1000
+Beginning VICAR task gausnois
+gausnois version 2016-06-08
+list a.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1     -1010 -1000 -1011  -993 -1005  -979  -996  -983 -1012  -991
+      2     -1000 -1014 -1014 -1001 -1007 -1008  -996  -988 -1003  -988
+      3     -1000 -1001 -1002 -1009 -1003  -976 -1001 -1008  -999  -992
+      4     -1021 -1012  -988 -1012  -996 -1007 -1021  -987 -1005  -995
+      5      -998  -996  -987  -992  -998  -997  -997 -1008  -990 -1002
+      6      -993  -992  -997  -983  -981  -985 -1011  -996 -1008  -996
+      7     -1006 -1014  -987 -1010 -1004  -990  -998  -994  -991  -987
+      8     -1001 -1008 -1018  -978 -1007  -995 -1003 -1006  -987  -996
+      9     -1002 -1000 -1000 -1011  -998  -994  -992  -993 -1003  -990
+     10      -995  -997  -999 -1004 -1005 -1005  -990  -993 -1001 -1004
+median inp=a.img out=b.img nlw=3 nsw=3
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1     -1010 -1011 -1011 -1007 -1001  -996  -983  -988  -988  -991
+      2     -1001 -1002 -1002 -1005 -1003 -1001  -996  -999  -992  -999
+      3     -1012 -1002 -1009 -1003 -1007 -1003 -1001 -1001  -995  -999
+      4     -1001 -1000 -1001  -998  -998  -998 -1001 -1001  -999  -999
+      5      -996  -996  -992  -992  -996  -997  -997 -1005  -996 -1002
+      6      -996  -996  -992  -992  -992  -997  -997  -997  -996  -991
+      7     -1006 -1001  -997  -997  -990  -998  -996  -998  -996  -991
+      8     -1006 -1002 -1008 -1004  -998  -998  -994  -994  -993  -991
+      9     -1000 -1000 -1000 -1004 -1004  -998  -994  -993  -996 -1001
+     10     -1000 -1000 -1000 -1000 -1004  -998  -994  -993  -996 -1001
+median inp=a.img out=b.img 'high nlw=3 nsw=3 dclevel=100. dctran=0.
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1       100   111   100   114    96   117    87   105    76   100
+      2       101    88    88   104    96    93   100   111    89   111
+      3       112   101   107    94   104   127   100    93    96   107
+      4        80    88   113    86   102    91    80   114    94   104
+      5        98   100   105   100    98   100   100    97   106   100
+      6       103   104    95   109   111   112    86   101    88    95
+      7       100    87   110    87    86   108    98   104   105   104
+      8       105    94    90   126    91   103    91    88   106    95
+      9        98   100   100    93   106   104   102   100    93   111
+     10       105   103   101    96    99    93   104   100    95    97
+median inp=a.img out=b.img perc=20.0 nlw=5 nsw=5
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1     -1014 -1014 -1010 -1009 -1008 -1007 -1005  -999 -1001 -1003
+      2     -1014 -1014 -1012 -1012 -1009 -1007 -1007 -1005 -1005 -1005
+      3     -1012 -1012 -1011 -1009 -1008 -1008 -1007 -1007 -1005 -1008
+      4     -1012 -1012 -1009 -1008 -1008 -1008 -1008 -1008 -1008 -1008
+      5     -1006 -1012 -1009 -1007 -1007 -1008 -1007 -1007 -1008 -1008
+      6     -1012 -1012 -1010 -1008 -1007 -1007 -1007 -1006 -1006 -1006
+      7     -1008 -1008 -1007 -1007 -1004 -1006 -1004 -1003 -1003 -1006
+      8     -1008 -1008 -1007 -1007 -1005 -1005 -1005 -1003 -1003 -1003
+      9     -1008 -1010 -1008 -1008 -1007 -1006 -1005 -1003 -1003 -1003
+     10     -1008 -1008 -1008 -1008 -1007 -1006 -1005 -1003 -1003 -1003
+gen out=a.img nl=10 ns=10
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+list a.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2   3   4   5   6   7   8   9
+      2       1   2   3   4   5   6   7   8   9  10
+      3       2   3   4   5   6   7   8   9  10  11
+      4       3   4   5   6   7   8   9  10  11  12
+      5       4   5   6   7   8   9  10  11  12  13
+      6       5   6   7   8   9  10  11  12  13  14
+      7       6   7   8   9  10  11  12  13  14  15
+      8       7   8   9  10  11  12  13  14  15  16
+      9       8   9  10  11  12  13  14  15  16  17
+     10       9  10  11  12  13  14  15  16  17  18
+median inp=a.img out=b.img nlw=3 nsw=3
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp     1       3       5       7       9
+   Line
+      1       1   2   3   4   4   5   6   7   8   8
+      2       2   2   3   4   5   6   7   8   9   9
+      3       3   3   4   5   6   7   8   9  10  10
+      4       4   4   5   6   7   8   9  10  11  11
+      5       5   5   6   7   8   9  10  11  12  12
+      6       6   6   7   8   9  10  11  12  13  13
+      7       7   7   8   9  10  11  12  13  14  14
+      8       8   8   9  10  11  12  13  14  15  15
+      9       9   9  10  11  12  13  14  15  16  16
+     10       9   9  10  11  12  13  14  15  16  16
+median inp=a.img out=b.img 'high nlw=3 nsw=3 dclevel=100. dctran=0.
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp     1       3       5       7       9
+   Line
+      1      99  99  99  99 100 100 100 100 100 101
+      2      99 100 100 100 100 100 100 100 100 101
+      3      99 100 100 100 100 100 100 100 100 101
+      4      99 100 100 100 100 100 100 100 100 101
+      5      99 100 100 100 100 100 100 100 100 101
+      6      99 100 100 100 100 100 100 100 100 101
+      7      99 100 100 100 100 100 100 100 100 101
+      8      99 100 100 100 100 100 100 100 100 101
+      9      99 100 100 100 100 100 100 100 100 101
+     10     100 101 101 101 101 101 101 101 101 102
+median inp=a.img out=b.img perc=20.0 nlw=5 nsw=5
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list b.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp     1       3       5       7       9
+   Line
+      1       2   2   2   2   3   0   0   0   0   0
+      2       2   2   2   3   3   4   5   5   6   7
+      3       2   2   2   3   4   5   6   7   8   8
+      4       3   3   3   4   5   6   7   8   9   9
+      5       4   4   4   5   6   7   8   9  10  10
+      6       5   5   5   6   7   8   9  10  11  11
+      7       6   6   6   7   8   9  10  11  12  12
+      8       7   7   7   8   9  10  11  12  13  13
+      9       8   8   8   9  10  11  12  12  13  13
+     10       8   8   8   9  10  11  12  12  13  13
+gausnois out=a1.img nl=10 ns=10 seed=7382382
+Beginning VICAR task gausnois
+gausnois version 2016-06-08
+list a1.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp     1       3       5       7       9
+   Line
+      1     111 127 110 138 119 161 133 154 108 141
+      2     127 104 105 126 116 113 132 147 123 146
+      3     127 124 124 112 121 164 124 114 129 140
+      4      94 107 146 107 133 116  92 148 118 134
+      5     131 133 148 139 130 131 131 114 143 124
+      6     137 139 132 154 157 151 109 134 114 133
+      7     117 105 148 110 121 143 129 137 142 147
+      8     125 114  98 161 116 135 122 118 147 133
+      9     123 126 126 109 130 136 139 139 122 142
+     10     135 131 128 121 118 118 143 138 124 120
+gausnois out=a2.img nl=10 ns=10 seed=7382383
+Beginning VICAR task gausnois
+gausnois version 2016-06-08
+list a2.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+     Samp     1       3       5       7       9
+   Line
+      1     142 111 107 121 136 142 135 113 130 147
+      2     106 148 150 151 159 119 123 156 114 118
+      3      91 124 115 118 136 134 170 119 112 127
+      4     129 136 102 109 115 153 106 112 107 138
+      5     131 123 134  96 100 121  75 112 122 122
+      6     108 123 142 130 136 143 118 134 137 115
+      7     122 141 110 133 142 149 116 149 152 154
+      8     134 150 115 139 110  94 140 134 133 132
+      9     139 154 137 122 109 135 145 132 114 122
+     10     123 140 116 119 145 101 148 120 162 130
+viccub inp=(a1.img,a2.img) out=anb2.img
+Beginning VICAR task viccub
+median inp=anb2.img out=bnb2.img nlw=3 nsw=3
+Beginning VICAR task median
+MEDIAN Aug 18, 2005 GMY
+list bnb2.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ ***********
+ Band =     1
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1     111 110 110 116 119 116 132 123 123 108
+      2     124 124 124 119 121 124 133 129 140 129
+      3     107 124 112 121 116 121 124 124 134 129
+      4     124 127 124 130 130 130 124 124 129 129
+      5     133 133 139 139 133 131 131 118 133 124
+      6     133 133 139 139 139 131 131 131 134 142
+      7     117 125 132 132 143 129 134 129 134 142
+      8     117 123 114 121 130 130 136 137 139 142
+      9     126 126 126 121 121 130 136 138 133 124
+     10     126 126 126 126 121 130 136 138 133 124
+
+
+ Task:GAUSNOIS  User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ Task:MEDIAN    User:wlb       Date_Time:Fri Dec  2 14:40:21 2016
+ ***********
+ Band =     2
+ ***********
+     Samp     1       3       5       7       9
+   Line
+      1     142 142 148 150 142 135 119 114 114 114
+      2     124 115 121 136 136 136 134 123 119 118
+      3     129 124 124 118 134 134 123 114 118 114
+      4     124 124 118 115 118 121 119 112 119 122
+      5     123 129 123 115 121 118 118 112 122 122
+      6     123 123 130 133 133 121 121 122 134 137
+      7     134 123 133 133 136 136 134 134 134 137
+      8     141 137 137 122 133 135 135 134 133 133
+      9     140 137 137 119 119 135 134 134 132 132
+     10     140 139 137 122 119 135 134 134 132 132
+disable-log

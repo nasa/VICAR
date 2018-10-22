@@ -1,0 +1,24 @@
+process help=*
+PARM INP	STRING	COUNT=1
+PARM PIC_OUT	STRING	COUNT=1
+
+!# annot function="Importing and Exporting Data"
+!# annot keywords=(PIC,compress,convert)
+
+end-proc
+.TITLE
+Converts VICAR images to PIC format.
+.LEVEL1
+.VARI INP
+VICAR file of packed compressed images
+.VARI PIC_OUT
+PIC format image file to be converted.
+.LEVEL2
+.VARI INP
+This parameter specifies the complete path name
+of the VICAR format image file of one band to
+be converted to a PIC image.
+.VARI PIC_OUT
+This parameter specifies the complete path name
+of the output PIC image.
+.END

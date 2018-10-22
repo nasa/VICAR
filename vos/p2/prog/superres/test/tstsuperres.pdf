@@ -1,0 +1,33 @@
+procedure
+refgbl $echo
+body
+let $echo="yes"
+!
+copy inp=/project/test_work/testdata/mars/cleveland.vicar +
+ out=a.img sl=1000 ss=1 nl=1026 ns=1026
+size inp=a.img out=b.img zoom=-2 'noin
+copy inp=b.img out=a.img sl=1 ss=1 nl=512 ns=512
+size inp=a.img out=ul.img 'noin zoom=-2
+copy inp=b.img out=a.img sl=1 ss=2 nl=512 ns=512
+size inp=a.img out=ur.img 'noin zoom=-2
+copy inp=b.img out=a.img sl=2 ss=1 nl=512 ns=512
+size inp=a.img out=ll.img 'noin zoom=-2
+copy inp=b.img out=a.img sl=2 ss=2 nl=512 ns=512
+size inp=a.img out=lr.img 'noin zoom=-2
+! create a listoffiles called clevelandlist that looks like:
+! ul.img
+! ur.img
+! ll.img
+! lr.img
+! with an editor. Don't forget the carriage return on the last record.
+register2 inp=clevelandlist out=tiepoints
+superres inp=(clevelandlist,tiepoints) out=sup.img scale=2 resolution=.5 mode=1
+filter2 inp=sup.img out=restored.img nlw=15 nsw=15 mtf=(1.,0.,6.,.35,6.,0.5)
+size inp=ul.img out=bigul.img zoom=2 'noin
+size inp=ul.img out=bigul2.img zoom=2
+copy inp=b.img out=c.img nl=512 ns=512
+concat inp=(c.img,restored.img,bigul.img,bigul2.img) out=a.img ns=1024 perc=.5
+xvd a.img
+!barne_r inp=a.img miplbox=21 primary=42057 account="250302"
+!
+end-proc

@@ -1,0 +1,20 @@
+#define SUBROUTINE tp_qual
+#define MODULE_LIST \
+ TpQualifier.cc TpQualGroup.cc TpQualGroupMgr.cc \
+ TpQualFormatDialog.cc TpQualFormatCmd.cc TpQualFormatValue.cc
+#define MODULE_LIST2 \
+ TpQualFormatCmdInterface.cc TpQualFormatView.cc TpQualFormatSingleView.cc \
+ TpAddIdAsGenQualInterface.cc TpAddCorrParmAsPntQualInterface.cc
+
+#define P2_SUBLIB
+
+#define MAIN_LANG_C_PLUS_PLUS
+#define USES_C_PLUS_PLUS
+#define CCC_TEMPLATES
+
+#define LIB_P2SUB
+#define LIB_GUISUB
+#define LIB_MOTIFAPP
+#define LIB_MOTIF
+#define LIB_XMU
+

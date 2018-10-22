@@ -1,0 +1,29 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM mf    
+
+   To Create the build file give the command:
+
+                % vimake mf                           (Unix)
+
+
+************************************************************************/
+#define PROGRAM mf
+
+#define MODULE_LIST mf.c
+
+#define MAIN_LANG_C
+#define R2LIB
+
+/* Comment this out before delivery.
+#define DEBUG
+*/
+
+#define USES_ANSI_C
+
+#define LIB_CARTO
+#define LIB_TAE
+#define LIB_RTL
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/
+

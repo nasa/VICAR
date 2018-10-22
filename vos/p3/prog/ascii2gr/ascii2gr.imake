@@ -1,0 +1,13 @@
+#define PROGRAM ascii2gr
+
+#define MODULE_LIST ascii2gr.f
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB
+#define R3LIB
+
+#define USES_FORTRAN
+
+#define LIB_P2SUB
+#define LIB_RTL
+#define LIB_TAE

@@ -1,0 +1,641 @@
+process help=*
+ PARM INP         TYPE=STRING          COUNT=(1:10)
+ PARM OUT         TYPE=STRING
+ PARM SIZE        TYPE=INTEGER         COUNT=4          DEFAULT=(1,1,0,0)
+ PARM SL          TYPE=INTEGER         COUNT=1          DEFAULT=1
+ PARM SS          TYPE=INTEGER         COUNT=1          DEFAULT=1
+ PARM NL          TYPE=INTEGER         COUNT=1          DEFAULT=0
+ PARM NS          TYPE=INTEGER         COUNT=1          DEFAULT=0
+ PARM FORMAT	  TYPE=KEYWORD COUNT=0:1 VALID=HALF DEFAULT=--
+ PARM COMP        TYPE=KEYWORD COUNT=0:1 VALID=COMP DEFAULT=--
+ PARM STRETCH     TYPE=INTEGER         COUNT=2          DEFAULT=(0,255)
+ PARM EXPAND      TYPE=INTEGER         DEFAULT=1        VALID=1:4
+ PARM HIST        TYPE=KEYWORD COUNT=0:2 VALID=(HIST,NOPHIST) DEFAULT=--
+ PARM ID          TYPE=KEYWORD COUNT=0:1 VALID=(NOID,LOGO) DEFAULT=--
+ PARM LLOGO       TYPE=INTEGER         VALID=(1:4)      DEFAULT=1
+ PARM RLOGO       TYPE=INTEGER         VALID=(1:4)      DEFAULT=1
+ PARM COLOR       TYPE=KEYWORD COUNT=0:1 VALID=(RED,GREEN,BLUE) DEFAULT=--
+ PARM NROW        TYPE=INTEGER         DEFAULT=1 VALID=(1:9)
+ PARM NCOL        TYPE=INTEGER         DEFAULT=1 VALID=(1:9)
+ PARM HSIZE       TYPE=INTEGER         DEFAULT=100
+ PARM HWIDTH      TYPE=INTEGER valid=(8,16,32,64,128,256) DEFAULT=128
+ PARM TICS        TYPE=INTEGER valid=(2:256)   DEFAULT=16
+ PARM TICL        TYPE=INTEGER valid=(40:256)  DEFAULT=128
+ PARM LOG         TYPE=KEYWORD COUNT=0:1 VALID=LOG DEFAULT=--
+ PARM SPIKES      TYPE=INTEGER         DEFAULT=3
+ PARM BEFORE      TYPE=KEYWORD COUNT=0:1 VALID=BEFORE DEFAULT=--
+ PARM LABELS      TYPE=KEYWORD COUNT=0:8 DEFAULT=-- +
+	VALID=(NOLA,SQUEEZE,LABG,LABP,LABA,LABD,NOHL,NOUL,NOEL)
+ PARM TASK        TYPE=KEYWORD COUNT=0:1 VALID=(TASK,NOTASK) DEFAULT="TASK" 
+ PARM USER        TYPE=KEYWORD COUNT=0:1 VALID=(USER,NOUSER) DEFAULT="NOUSER" 
+ PARM HISTORY     TYPE=KEYWORD COUNT=0:1 VALID=(HISTORY,NOHISTOR) +
+        DEFAULT="HISTORY"  
+ PARM HTITLE      TYPE=(STRING,38)     COUNT=0:1 +
+        DEFAULT=MASKV        
+ PARM IDENT       TYPE=(STRING,8)      COUNT=0:1   DEFAULT=--
+!# parm inp(2-10) hints=default
+ 
+!# annot function="Image Display"
+!# annot keywords=(image,Mark,histogram,label,"optional annotation")
+ END-PROC
+
+.TITLE
+Create an image display for film recording
+.HELP
+PURPOSE:
+
+MASKV creates a display of a B/W image in a format suitable for film recording
+(see program BARNE).  The display consists of the image, bordered by reference
+marks, historgrams, VICAR label information, and other optional annotation.
+
+EXECUTION:
+
+    MASKV  INP=A  OUT=B  userparameters....
+or
+    MASKV  INP=(A,H1,H2,H3,...,H9)  OUT=B
+where
+
+    A is the input image (byte or halfword),
+    B is the output (masked) image (byte),
+    H1, H2, H3,... are up to 9 optional histogram files to be displayed with
+       the image.
+
+If histogram files are included, they must be in an IBIS format as created by
+programs HISTGEN or HICCUP.
+
+.page
+ OPERATION
+
+The MASKV output is a mask suitable for film recording.  The mask consists of
+an image display, up to 9 optional histograms, VICAR labels, grey wedge, and
+optional logos.  For example,
+     MASKV  INP=(GRS.IMG,H1,H2,H3)  OUT=GRS.MSK  'HIST  NCOL=2  'LOGO
+would create a mask with the following general layout:
+
+
+ --------------------------------------  ----------------------------------
+ |                                    |  |           grey wedge           |
+ |                                    |  ----------------------------------
+ |                                    |  ----------------  ----------------
+ |                                    |  |              |  |              |
+ |                                    |  |  histogram   |  |  histogram   |
+ |                                    |  |     H1       |  |     H2       |
+ |               image                |  |              |  |              |
+ |              display               |  ----------------  ----------------
+ |                                    |  ----------------  ----------------
+ |                                    |  |              |  |              |
+ |                                    |  |  histogram   |  |  histogram   |
+ |                                    |  |     H3       |  |  of output   |
+ |                                    |  |              |  |    image     |
+ |                                    |  ----------------  ----------------
+ -------------------------------------- 
+           VICAR2 system label
+           VICAR1 labels
+           VICAR2 history labels
+
+  JPL                 MIPL PIC ID 96/10/08/111223  GMY/GMY059        JPL
+
+
+.page
+IMAGE DISPLAY PARAMETERS:
+
+The displayed image is bordered by reference marks, numbered every 100 pixels
+(200 pixels for large character sizes).
+
+A linear stretch may be applied to the image by specifying the STRETCH
+parameter.  STRETCH=(50,200) will apply a linear transformation to the DNs so
+that 50 DN is output as 0 DN, 200 DN is output as 255 DN, and all DN values
+outside the range are saturated.
+
+Specifying 'COMP will complement the image (reverse the sence of the DNs).
+I.E., 'COMP has the same effect as STRETCH=(255,0).  If the STRETCH parameter
+is also specified, the 'COMP is applied after the stretch.
+
+.page
+HISTOGRAM DISPLAY PARAMETERS:
+
+The 'HIST keyword is required to display histograms.  The histogram of the
+input image, together with up to 9 histograms input via histogram files may
+be displayed.
+
+The NROW and NCOL parameters control how the histograms are arranged in rows
+and columns.  For example,
+    MASKV  (IMG,H1,H2,H3,H4,H5) OUT  'HIST NROW=2 NCOL=3
+causes the histograms to be displayed in 2 rows and 3 columns:
+
+          H1  H2  H3
+          H4  H5  IMG
+
+The mean DN and standard deviation are displayed below the histogram.
+
+If histogram files are supplied, these are displayed first.  The second-to-last
+task in the history label of each histogram file is displayed as the title.
+
+The histogram of the input image is computed AFTER applying any stretch and/or
+COMP parameters.  If 'BEFORE is specified, the histogram is computed after
+applying the stretch, but before applying COMP.  The HTITLE parameter may be
+used to provide a title.  The keyword 'NOPHIST may be used to suppress the
+histogram display of the input image.
+
+HSIZE and HWIDTH specify the length of the frequency and DN axes of the
+histogram (default is 100 x 128).
+
+Specifying 'LOG causes the frequency axis to be displayed using a logrithmic
+scale.
+
+The SPIKES parameter is used to normalize the frequency scale by specifying the
+number of values to saturate.  Saturation is indicated by a "dot" above the
+plotted value.
+
+TICL and TICS specify the DN separation between the long and short tic marks
+along the DN axis (default is 128 and 16).
+
+.page
+VICAR LABEL DISPLAY PARAMETERS:
+
+The VICAR labels are displayed in the following order: (1) VICAR2 system
+label, (2) VICAR1 labels, (3) VICAR2 task and user labels.  The 'NOLA
+keyword suppresses all label displays.
+
+VICAR1 labels are obsolete IBM VICAR labels and are described in the next
+section.
+
+All VICAR2 labels beginning with the keyword TASK are processed, displaying
+the task name and processing parameters.  The keyword 'NOHISTOR will suppress
+the display of processing parameters.  The keyword 'NOTASK will suppress the
+display of all TASK labels completely.
+
+The keyword 'USER will enable the display of user labels.
+
+The keyword 'SQUEEZE will attempt to squeeze the labels together to decrease
+the amount of real estate it takes up on film.
+
+Labels are normally displayed using characters which are a 7 lines by 6 samples
+in size.  The EXPAND=n parameter can be used to magnify the characters by a
+factor of n.  If the character size specified using the EXPAND parameter does
+not allow a full label on one line, the character size will be reduced.
+Note that ALL annotation in the mask is effected by this parameter.
+
+Any label that exceeds 70 characters will be truncated to 70 characters
+on the hard copy.
+
+Finally, the IPL ID and optional logos are displayed.  The ID contains the
+date and time of processing as well as the user id and job name.  The keyword
+'NOID suppresses the IPL ID display.  The keywords 'LOGO, 'LLOGO, and 'RLOGO
+enable the display of both, left, or right logos.
+
+.page
+VICAR1* LABELS:
+
+VICAR1* labels mimic the format of old IBM Vicar labels, and occur only if the
+image was read in from an IBM tape using program CONVIM.  VICAR1 labels consist
+of one or more 72 character labels as in the following example:
+ 
+LAB01 '77                  800 800 800 800 L1       SC'
+LAB02 'C       10 27 81 13:47:26   FFM931           GC'
+LABO3 'IN HALF RANGE 0 1 OUT BYTE RANGE 0 1         PC'
+LAB04 'ZFILL: NLW=1 NSW=1 REPLACE=1                  L'
+
+The first label is the IBM system label which is never displayed by MASKV.
+(MASKV only displays the Vicar2 system label).
+
+VICAR1 labels conform to the following rules:
+  
+If character #72 is a C, then another VICAR1 label line follows:
+If character #72 is an L, it indicates the last label line.
+ 
+the keywords 'LABG, 'LABP, 'LABA, 'LABD, 'NOHL, 'NOUL, and 'NOEL enable or
+suppress the display of one or more types of VICAR1 labels.  Character 71
+of each VICAR1 label identifies the label type:
+
+CHAR.71   TYPE                MASKV ACTION
+ ----------------------------------------------------------------------
+  BLANK   ANY                 Displayed unless "NOUL" specified
+  S       SYSTEM              Never displayed
+  G       HISTORY1            Displayed if "LABG" specified
+  H       HISTORY2            Displayed unless "NOHL" specified
+  P       PARAMETERS          Displayed if "LABP" specified
+  U       USER ANNOTATION     Displayed unless "NOUL" specified
+  A       USER ANNOTATION     Displayed if "LABA" specified
+  E       PROGRAM GENERATED   Displayed unless "NOEL" specified
+           (CHARACTER)
+  D       PROGRAM GENERATED   Displayed if "LABD" specified
+           (NON-CHARACTER)
+
+.page
+ RESTRICTIONS:
+
+ "LAB" followed by any digits is a reserved keyword for Vicar1*
+ history labels (LAB01, LAB02, etc.); see below for further
+ desription.  Any Vicar2 user or program history labels using a
+ keyword of this form will not be displayed by MASKV.
+
+.page
+ EXAMPLE:
+
+ The following text displays a typical Vicar2 label, as output by
+ program LABEL-LIST, and then shows how it will appear in the
+ output of MASKV.
+
+ LABEL-LIST A.DAT
+
+       ********** FILE A.DAT ************
+             2 DIMENSIONAL IMAGE FILE
+             FILE ORGANIZATION IS BSQ
+             PIXELS ARE IN BYTE FORMAT  (VICAR2 SYSTEM LABEL)
+             800 LINES
+             800 SAMPLES PER LINE
+
+-------- TASK:CONVIM -- USER: FFM059 -- WED FEB 6 1:10:00 1985 ---
+LAB01
+'77                  800 800 800 800 L1       SC' (IBM SYSTEM LABEL)
+LAB02
+'C       10 27 81 13:47:26   FFM931           GC' (VICAR1 G CATEGORY LABEL)
+LABO3
+'IN HALF RANGE 0 1 OUT BYTE RANGE 0 1         PC' (VICAR1 P CATEGORY LABEL)
+LAB04
+'ZFILL: NLW=1 NSW=1 REPLACE=1                  L'
+-------- TASK:COPY -- USER: FFM059 -- FRI FEB 6 0:00:00 1985 ---
+COMMENT='THIS IS A TEST FILE'          (VICAR2 HISTORY LABEL)
+COMMENT='HOW ARE YOU'
+
+.page
+The following execution of MASKV will be used:
+
+    maskv A B 'LABP 'NOTASK 'USER 
+
+The labels will be displayed as follows:
+
+       FORMAT=BYTE NS=800 NL=800 TYPE=IMAGE
+       IN HALF RANGE 0 1 OUT BYTE RANGE 0 1 
+       WED FEB 6 1:10:00 1985 USER=FFM059
+       FRI FEB 6 0:00:00 1985 USER=FFM059
+       COMMENT=THIS IS A TEST FILE
+       COMMENT=HOW ARE YOU
+
+.page
+NOTE:  MASKV may allocate more disk space than necessary if there are not many
+labels in the input data.  The user can release the unused blocks by the 
+DCL command "copy" or USH command "cp" after MASKV is completed.
+
+.page
+USING MASKV TO DISPLAY COLOR IMAGES:
+
+The following sequence of executions will create masks of a color triplet:
+
+	   MASKV  RED  MRED  'HIST  'RED
+	   MASKV  GRN  MGRN  'HIST  'GREEN
+	   MASKV  BLU  MBLU  'HIST  'BLUE
+
+The keywords 'RED, 'GREEN, and 'BLUE control the position of the histogram in
+the output display.  'RED will display the histogram in the first row,  'GREEN
+will display the histogram in the second row, and 'BLUE will display the
+histogram in the third row (see NROW parameter).
+
+If 'RED, 'GREEN, and 'BLUE are specified, secondary histogram files should not
+be input (i.e. no H1, H2, etc.), and the parameters NROW and NCOL should not be
+used.
+
+.page
+ History:
+
+ ORIGINAL PROGRAMMER:  John H. Reimer,  10 MAY 1982
+ CONVERTED TO VAX BY:  F. F. Moss,  20 JAN 1984
+ CURRENT COGNIZANT PROGRAMMER: F. F. Moss.
+
+ 08/30/2000 ..AXC....  Removed redundant call to subroutine DATFMT.
+                       Modified subroutines DATFMT & GTPRCS. (AR-104622)
+ 06/30/1998 ..TXH....  Modified outputs to be have 4-digit year dates.
+ 12/12/96   ..OAM....  Fixed code to return the complement of an image 
+                       only when COMP is specified. (FR 89921).
+                       Included valid ranges for HTITLE , TICS and TICL 
+                       in maskv.pdf.  (FR 89868).  
+ 10/10/96   ..OAM....  In HLINE, declared INSTANCES as an array of integers to 
+                       avoid memory overwriting. Included a condition to
+                       handle the case in which NCOL or NROW > number of 
+                       available histograms.(FR89852). Updated help file. 
+ 8/14/96    ..OAM....  Modified the format of the histogram annotations.
+                       Included COMMON statements to keep the value of static
+                       variables after each call of HLINE (FR89844). 
+                       Modified to call ibis_signal_u instead of ibis_signal 
+                       after the open statement (FR89846). 
+                       Included valid values for HWIDTH in the pdf. 
+                       Modified to print none, one or two logos at the time
+                       (FR89845). Modified the control flow of the
+                       program when processing GLL images and NOTASK is 
+                       specified (FR89847).  
+ 8/2/96     ..OAM....  Declared variables REPEAT and INUM using the
+                       COMMON statement to  save their values between
+                       LINTIC calls.  Required to work on the SGIs.(FR89838).
+ 7/19/96    ..0AM....  Modified flt_lab_maskv to be an inteface with 
+                       the subroutine flight_label for Galileo SSI images. 
+                       Corrected Voyager related code to handle text 
+                       wrap around correctly. (FR 89325). 
+ 6/19/96    ..OAM....  Included flt_lab_maskv code to reformat the  
+                       VICAR label information.(FR 89376).
+                       Modified the Fortran bridge of ztext.c to
+                       pass the entire string even if padded with             
+                       blanks on the right. 
+ 3/6/1995           -  AS (CRI) Made portable for UNIX
+ 6/7/1994  FR 85164 -  F. Moss Remove link to DATATRIEVE & VRDI.
+ 6/25/1993 FR 81727 -- M. O'Shaughnessy. Added valid range to EXPAND parm
+	               to prevent too-large text from vanishing from the
+		       NL/NS annotation.
+.LEVEL1
+.VARIABLE INP
+ INPUT DATA SET
+.VARIABLE OUT
+ OUTPUT DATA SET
+.VARIABLE SIZE
+ IMAGE SIZE
+.VARIABLE SL
+ STARTING LINE
+.VARIABLE SS
+ STARTING SAMPLE
+.VARIABLE NL
+ NUMBER OF LINES
+.VARIABLE NS
+ NUMBER OF SAMPLES
+.VARIABLE FORMAT
+ DATA FORMAT IDENTIFIER
+ VALID: HALF
+.VARIABLE COMP
+ COMPLEMENT THE INPUT IMAGE
+ VALID: COMP
+.VARIABLE STRETCH
+ APPLY A LINEAR STRETCH
+ TO THE INPUT IMAGE
+.VARIABLE EXPAND
+ ENLARGE THE CHARACTERS
+ IN THE OUTPUT
+.VARIABLE HIST
+ HISTOGRAMS DISPLAYED
+ VALID: HIST,NOPHIST
+.VARIABLE ID
+ ID'S DISPLAYED
+ VALID: NOID,LOGO
+.VARIABLE LLOGO
+ DISPLAY LOGO ON THE LEFT
+ SIDE IN THE OUTPUT
+.VARIABLE RLOGO
+ DISPLAY LOGO ON THE RIGHT
+ SIDE IN THE OUTPUT
+.VARIABLE COLOR
+ Specifies the color of an
+input image (one of a color
+triplet).
+.VARIABLE NROW
+ NUMBER OF HISTOGRAMS DISPLAYED
+ VERTICALLY
+.VARIABLE NCOL
+ NUMBER OF HISTOGRAMS DISPLAYED
+ HORIZONTALLY
+.VARIABLE HSIZE
+ NUMBER OF LINES TO DISPLAY DN
+ LEVEL FREQUENCIES FOR HISTOGRAM
+.VARIABLE HWIDTH
+ THE WIDTH OF EACH HISTOGRAM
+.VARIABLE TICS
+ THE INTERVAL OF SMALL TIC MARKS
+ ALONG THE HISTOGRAM DN AXIS
+.VARIABLE TICL
+ THE INTERVAL OF LARGE TIC MARKS
+ ALONG THE HISTOGRAM DN AXIS
+.VARIABLE LOG
+ LOGARITHMIC SCALE OF DN LEVEL
+ FREQUENCIES
+ VALID: LOG
+.VARIABLE SPIKES
+ TO SATURATE SOME HIGHEST DN
+ LEVEL FREQUENCIES
+.VARIABLE BEFORE
+ COMPUTE THE HISTOGRAM BEFORE
+ COMPLEMENTING THE IMAGE
+ VALID: BEFORE
+.VARIABLE LABELS
+ VICAR1 LABEL DISPLAY 
+ VALID: NOLA,LABG,LABP,LABA,
+ LABD,NOHL,NOUL,NOEL,SQUEEZE
+ (SPECIFY 0-8)
+.VARIABLE TASK
+ DISPLAY TASK NAME FROM THE
+ VICAR2 LABEL
+.VARIABLE USER
+ DISPLAY USER NAME AND DATE-
+ TIME FROM THE VICAR2 LABEL
+.VARIABLE HISTORY
+ DISPLAY VICAR2 HISTORY
+ LABEL
+.VARIABLE HTITLE
+ HISTOGRAM TITLE
+.VARIABLE IDENT
+ USER-SPECIFIED HARDCOPY
+ IDENTIFIER
+
+.LEVEL2
+.variable inp
+  Ex:  INP=A
+    or INP=(A,H1,H2,H3,...,H9)
+
+Input files, consisting of the input image A, optionally followed by up to 9
+histogram files (H1, H2, H3,...) to be displayed with the image.
+
+If specified, the histogram files must be an IBIS file as created by programs
+HISTGEN or HICCUP.
+
+.variable out
+The output image display.  The file is in byte data format, and is suitable
+for film recording (via program BARNE).
+
+NOTE:  MASKV may allocate more disk space than necessary if there are 
+few labels in the input data. The user can release the unused blocks by the
+DCL command "copy" or USH "cp" after MASKV is completed.
+
+.variable format
+Keyword: valid value = HALF.
+'HALF specifies that the input image is halfword. (Default is a byte)
+
+.variable comp
+COMP specifies that the input image is to be complemented (i.e. the sense of
+light and dark pixels is reversed).  For byte images, for example, 0 dn becomes
+255 dn, 1 dn becomes 254 dn, etc.
+
+.variable stretch
+ STRETCH=(N1,N2) specifies that a linear stretch will be applied to the input
+image so that N1 dn maps to 0 dn and N2 dn maps to 255 dn, and all dn values
+outside this range is saturated.
+
+.variable expand
+EXPAND=N scales the size of displayed annotation by N.  Characters normally have
+a height of 7 lines and a width of 5 samples.  EXPAND=2 would output 14x10
+characters.
+
+NOTE:  To compute how much image area is required to display text, add 2N
+samples spacing between characters and between text lines.
+
+.variable hist
+ Keyword: valid values are HIST and NOPHIST.
+ (Zero, one, or both may be specified)
+
+The 'HIST keyword is required to display histograms.  The histogram of the
+input image, together with up to 9 histograms input via histogram files may
+be displayed.  For example,
+    MASKV  (IMG,H1,H2,H3,H4,H5) OUT  'HIST NROW=2 NCOL=3
+causes the histograms to be displayed in 2 rows and 3 columns:
+
+          H1  H2  H3
+          H4  H5  IMG
+
+The 'NOPHIST keyword suppresses the display of the input image (IMG).
+
+MASKV will compute the histogram of the input image after applying any
+STRETCH or COMP to the image.  If 'BEFORE is specified, the histogram is
+calculated before the COMP is applied.
+
+.variable id
+ Keyword: valid values are NOID and LOGO.
+ (Zero or one may be specified)
+
+.vari NOID 
+ NOID specifies that IPL id labels will not be displayed in the
+ output. (Default is to display them)
+
+.vari LOGO 
+ LOGO specifies that the JPL Logo will be displayed to both sides
+ of the IPL id labels. (Default is not to display the logo)
+
+.variable llogo
+ LLOGO=I1 specifies a left logo. Values for I1 and corresponding
+ logos are:
+                  1 = JPL logo
+                  2 = Mickey Mouse logo
+                  3 = Goddard logo
+                  4 = NASA logo
+ Default is that no logos are displayed
+.variable rlogo
+ RLOGO=I2 is similar to keyword LLOGO except that this keyword
+ specifies a right logo. Default is that no logos are displayed.
+.variable color
+The following sequence of executions will create masks of a color triplet:
+
+	   MASKV  RED  MRED  'HIST  'RED
+	   MASKV  GRN  MGRN  'HIST  'GREEN
+	   MASKV  BLU  MBLU  'HIST  'BLUE
+
+The keywords 'RED, 'GREEN, and 'BLUE control the position of the histogram in
+the output display.  'RED will display the histogram in the first row,  'GREEN
+will display the histogram in the second row, and 'BLUE will display the
+histogram in the third row (see NROW parameter).
+
+If 'RED, 'GREEN, and 'BLUE are specified, secondary histogram files should not
+be input (i.e. no H1, H2, etc.), and the parameters NROW and NCOL should not be
+used.
+.variable nrow
+ NROW=N4 specifies that histograms are to be displayed in N4 rows.
+ (Default is N4 = number of histograms.)
+
+ NCOL * NROW <= NI
+.variable ncol
+ NCOL=N5 specifies that histograms are to be displayed in N5 columns.
+ (Default is N5=1)
+
+ NCOL * NROW <= NI
+.variable hsize
+ HSIZE=N6 specifies that each histograms will use N6 lines to display
+ DN level frequencies. (Default is n6=100)
+.variable hwidth
+ HWIDTH=N7 specifies that each histogram will be N7 samples wide.
+ (Default is N7=128)
+.variable tics
+ TICS=N8 specifies that small tic marks will be drawn every N8 DN
+ along the histogram dn axis.
+ (Default is N8=16)
+.variable ticl
+ TICL=N9 specifies that large tic marks will be drawn every N9 DN
+ along the histogram dn axis and labeled with
+ the corresponding dn value. (Default is N9=128)
+.variable log
+ Keyword: valid value is LOG.
+ 
+ This specifies that logarithmic scaling is to be used in scaling
+ the DN level frequencies.  (Default is to use linear scaling.)
+.variable spikes
+ SPIKES=N11 specifies that the N11 greatest DN level
+ frequencies of each histogram are to be saturated.
+ (Default is N11=3)
+.variable before
+ Keyword: valid value is BEFORE.
+ 
+ This specifies that the histogram of the input image is to be
+ computed prior to complementing the image. This keyword
+ is only applicable if COMP is also specified.
+ 
+ (Default is to compute the histogram after complementing the image)
+.variable labels
+ Keyword: valid values: NOLA,LABG,LABP,LABA,LABD,NOHL,NOUL,NOEL,SQUEEZE.
+ (Zero through eight keywords may be specified)
+
+ This keyword primarily controls display of Vicar1 labels.  For a
+ description of Vicar1 label types and formats, see HELP MASKV.
+
+ NOLA:  Specifies that none of the Vicar1 or Vicar2 labels will be
+ displayed. This keyword works independently of keyword NOID.
+
+ The remaining keywords control the display of Vicar1 label only:
+
+ LABG:  specifies that Vicar1 labels of category 'G' are displayed.
+ LABP:  specifies that Vicar1 labels of category 'P' are displayed. 
+ LABA:  specifies that Vicar1 labels of category 'A' are displayed.
+ LABD:  specifies that Vicar1 labels of category 'D' are displayed. 
+ NOHL:  specifies that Vicar1 labels of category 'H' are not
+   displayed.  Default is to display Vicar1 'H' category labels.
+ NOUL:  specifies that Vicar1 labels of category 'U' are not displayed.
+ NOEL:  specifies that Vicar1 labels of category 'E' are not displayed.
+ SQUEEZE:  specifies that as many Vicar1 labels as possible will be
+ displayed on a single line.  (Default is to display one Vicar1 label
+ per line)
+.VARIABLE TASK
+ If TASK is specified, MASKV searches for all occurrences of
+ keyword 'TASK' in the Vicar2 history labels and then displays
+ the values of 'TASK'.
+ 
+ This parameter does not affect the Vicar1 label display, see
+ parameter LABELS.
+ 
+ TASK is independent of the keywords USER and HISTORY.
+ NOTASK or default supresses the display of the task name.
+.VARIABLE USER
+ If USER is specified, MASKV searches for all occurrences of
+ keywords 'DATETIME' and 'USER' in the Vicar2 history labels
+ and then displays all of their respective values.
+ 
+ This parameter does not affect the Vicar1 label display, see
+ parameter LABELS.
+ 
+ USER is independent of the keywords TASK and HISTORY.
+ NOUSER or default supresses the display of the user name and
+ date-time.
+.VARIABLE HISTORY 
+ If HISTORY is specified, then all Vicar2 history labels will be
+ printed in the order in which they are found, excepting those
+ with keywords 'TASK', 'USER', and 'DATETIME'. 
+ 
+ This parameter does not affect the Vicar1 label display, see
+ parameter LABELS.
+.VARIABLE HTITLE
+ Title for histograms.
+.VARIABLE IDENT
+ This parameter allows the user to supply an identifier for the hardcopy
+ product.  If it is defaulted, the process name is used.
+
+ In the current (August 1985) implementation of TAE/Vicar, the process
+ name of a batch job is of the form "_JOBxxxx1", e.g. _JOB20191.  (The
+ "_" character will be translated to "$" in the hardcopy product.) As
+ this is not very informative, the user will want to supply something
+ using this parameter.  A planned enhancement to TAE will make the 
+ process name be identical to the proc name, i.e., the name of the PDF
+ which was submitted to batch.
+
+ For interactive jobs, the process name under TAE is the userid followed
+ by a "1", e.g. FFM0591.
+.END

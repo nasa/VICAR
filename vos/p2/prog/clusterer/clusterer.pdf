@@ -1,0 +1,52 @@
+PROCESS      HELP=*
+
+PARM INP        TYPE=STRING  COUNT=1
+PARM OUT        TYPE=STRING  COUNT=1:2
+PARM NCLUSTERS  TYPE=INTEGER COUNT=1 DEFAULT=10
+PARM CONVTHRESH TYPE=REAL    COUNT=1 DEFAULT=0
+PARM MAXITER    TYPE=INTEGER COUNT=1 DEFAULT=100
+
+END-PROC
+
+.TITLE
+VICAR/IBIS Program "clusterer"
+.HELP
+PURPOSE
+
+ This program performs K-Means clustering on the input ibis file.  The
+ input file should be the output file from "sampler" program. Output
+ from this program typically is consumed by the "classifier" program.
+
+ ORIGINAL PROGRAMMER:   P. Kim  16 Sep 2011
+
+ REVISIONS:
+ 2016-10-20 WLB - Migrated to MIPL, enhanced test.
+ 2017-08-03 WLB - Removed DEBUG from imake.
+
+.LEVEL1
+.VARIABLE INP
+ Input IBIS file containing
+ sampled data (output from
+ sampler)
+
+.VARIABLE OUT
+ 1. Output IBIS file containing
+ classes.
+ 2. Optional IBIS file
+ containing the classified
+ samples
+
+.VARIABLE NCLUSTERS
+ Number of inital starting
+ clusters.
+
+.VARIABLE CONVTHRESH
+ Threshold that determines
+ whether the algorithm has
+ converged
+
+.VARIABLE MAXITER
+ Number of maximum
+ iterations
+
+.END

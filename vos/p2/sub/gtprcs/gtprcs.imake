@@ -1,0 +1,21 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY gtprcs
+
+   To Create the build file give the command:
+
+	$ vimake gtprcs                     (VMS)
+   or
+	% vimake gtprcs                     (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE gtprcs
+
+#define MODULE_LIST gtprcs.c 
+
+#define USES_ANSI_C
+
+#define P2_SUBLIB
+

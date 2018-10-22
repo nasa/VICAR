@@ -44,6 +44,9 @@
 @ifdef PROJ_MSL
 # Built for:  MSL system
 @endif
+@ifdef PROJ_M2020
+# Built for: M2020 system
+@endif
 @ifdef PROJ_MRO
 # Built for:  MRO system
 @endif
@@ -111,40 +114,50 @@ unsetenv V2TOP_LC
 setenv VICAR_SOLARIS NO_SOLARIS
 if ($?VICCPU != 0) unsetenv VICCPU
 if (-x /bin/uname) then
-   if ("`uname`" == "SunOS") then
-      if ("`uname -r | cut -c1`" == "5") then
-         setenv VICAR_SOLARIS SOLARIS
-         if ("`uname -p`" == "i386") then
-            setenv VICCPU x86-solr
-         else
-            setenv VICCPU sun-solr
-         endif
-      else
-# sun-3 not supported in here - modify if you need it
-         setenv VICCPU sun-4
-      endif
-   endif
-   if ("`uname`" == "IRIX") setenv VICCPU sgi
-   if ("`uname`" == "IRIX64") setenv VICCPU sgi
-   if ("`uname`" == "HP-UX") setenv VICCPU hp-700
-   if ("`uname`" == "OSF1") setenv VICCPU axp-unix
    if ("`uname`" == "Linux") then
       if ("`uname -m`" == "i686") setenv VICCPU x86-linux
       if ("`uname -m`" == "ppc") setenv VICCPU ppc-linux
       if ("`uname -m`" == "alpha") setenv VICCPU axp-linux
       if ("`uname -m`" == "i586") setenv VICCPU x86-linux
       if ("`uname -m`" == "x86_64") setenv VICCPU x86-64-linx
+   else
+      if ("`uname`" == "SunOS") then
+         if ("`uname -r | cut -c1`" == "5") then
+            setenv VICAR_SOLARIS SOLARIS
+            if ("`uname -p`" == "i386") then
+               setenv VICCPU x86-solr
+            else
+               setenv VICCPU sun-solr
+            endif
+         else
+# sun-3 not supported in here - modify if you need it
+            setenv VICCPU sun-4
+         endif
+      endif
+      if ("`uname`" == "IRIX") setenv VICCPU sgi
+      if ("`uname`" == "IRIX64") setenv VICCPU sgi
+      if ("`uname`" == "HP-UX") setenv VICCPU hp-700
+      if ("`uname`" == "OSF1") setenv VICCPU axp-unix
    endif
 endif
 if ($?VICCPU == 0 && -x /usr/bin/uname) then
    if ("`uname`" == "Darwin") then
       if ("`uname -p`" == "powerpc") setenv VICCPU mac-osx
-      if ("`uname -p`" == "i386") setenv VICCPU x86-macosx
+      if ("`uname -p`" == "i386") then
+         setenv VICCPU x86-macosx
+      if ("`uname -m`" == "x86_64") setenv VICCPU mac64-osx
+      endif
    endif
 endif
 
 if ($?VICCPU == 0) then
    setenv VICCPU `cc -I$V2TOP/rtl/inc -E $V2TOP/util/getcpu_cpp.c | sed -e '/^$/d' -e '\%#%d' | tr '[A-Z]"' '[a-z] '`
+endif
+
+#unsetenv V2_FORCE_32
+if ($?V2_FORCE_32 != 0) then
+   if ("$VICCPU" == "x86-64-linx") setenv VICCPU x86-linux
+   if ("$VICCPU" == "mac64-osx") setenv VICCPU x86-macosx
 endif
 #
 #-----------------------------------------------------------------------
@@ -195,7 +208,7 @@ if ($VICCPU == 'hp-700') then
    endif
 endif
 
-if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx') then
+if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx' || $VICCPU == 'mac64-osx') then
    if ($?DYLD_LIBRARY_PATH != 0) then
       setenv LD_LIBRARY_PATH $DYLD_LIBRARY_PATH
    else
@@ -209,8 +222,16 @@ if ($?LD_LIBRARY_PATH != 0) then
       if ($?ACE_ROOT != 0) then
          setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" ${ACE_ROOT}/\*`
       endif
+# Added for RHE7.3 BUILD
+   if ($?ACE_TAO_INSTALL_PREFIX != 0) then
+          setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" ${ACE_TAO_INSTALL_PREFIX}/\*`
+      endif
+#------------------------------------
       if ($?XERCES_C_ROOT != 0) then
          setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" ${XERCES_C_ROOT}/\*`
+      endif
+      if ($?MYSQLCONCPP_LIB != 0) then
+         setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" ${MYSQLCONCPP_LIB}/\*`
       endif
       if ($?FFTWLIB != 0) then
          setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" ${FFTWLIB}/\*`
@@ -230,8 +251,10 @@ if ($?LD_LIBRARY_PATH != 0) then
          setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" /lib`
       endif
    endif
-   if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx') then
+   if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx' || $VICCPU == 'mac64-osx') then
+      setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" /Applications/OpenMotif21/lib`
       setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" /usr/OpenMotif/lib`
+      setenv LD_LIBRARY_PATH `$V2TOP/util/remove_element.csh "$LD_LIBRARY_PATH" /usr/X11/lib/flat_namespace`
    endif
 else
    setenv LD_LIBRARY_PATH
@@ -245,7 +268,7 @@ if ($VICCPU == 'hp-700') then
    endif
 endif
 
-if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx') then
+if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx' || $VICCPU == 'mac64-osx') then
    if ($?LD_LIBRARY_PATH != 0) then
       setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
    else
@@ -322,7 +345,7 @@ setenv	TAE		$V2TOP/tae52
 if ($VICCPU == 'sun-4') then
   setenv TAE		$V2TOP/tae52.sun-4
 endif
-if ($VICCPU == 'axp-unix' || $VICCPU == 'x86-linux' || $VICCPU == 'x86-64-linx' || $VICCPU == 'axp-linux' || $VICCPU == 'ppc-linux' || $VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx') then
+if ($VICCPU == 'axp-unix' || $VICCPU == 'x86-linux' || $VICCPU == 'x86-64-linx' || $VICCPU == 'axp-linux' || $VICCPU == 'ppc-linux' || $VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx' || $VICCPU == 'mac64-osx') then
   setenv TAE		$V2TOP/tae53
 endif
 @else
@@ -468,14 +491,6 @@ setenv P2INC $V2TOP
 setenv P2GENINC $V2TOP
 @endif
 
-@ifdef SS_CRUMBS
-setenv CRUMBS_HOME	$V2TOP/crumbs
-setenv CRUMBS_BIN	$V2TOP/crumbs/bin
-@else
-unsetenv CRUMBS_HOME
-unsetenv CRUMBS_BIN
-@endif
-
 @ifdef SS_DIV
 setenv	DIVSOURCE	$V2TOP/div/prog
 setenv	DIVSUB		$V2TOP/div/sub
@@ -494,22 +509,6 @@ setenv	SIRTFLIB	$V2TOP/sirtf/lib/$VICCPU
 @else
 unsetenv SIRTFSOURCE
 unsetenv SIRTFLIB
-@endif
-
-@ifdef SS_TLM
-setenv	TLMSOURCE	$V2TOP/tlm/prog
-setenv	TLMSUB		$V2TOP/tlm/sub
-setenv	TLMINC		$V2TOP/tlm/inc
-setenv	TLMGEN		$V2TOP/tlm/gen
-setenv  TLMGENINC	$V2TOP/tlm/inc/$VICCPU
-setenv	TLMLIB		$V2TOP/tlm/lib/$VICCPU
-@else
-unsetenv TLMSOURCE
-unsetenv TLMSUB
-setenv TLMINC $V2TOP
-unsetenv TLMGEN
-setenv TLMGENINC $V2TOP
-unsetenv TLMLIB
 @endif
 
 @ifdef SS_UPLINKTOUR
@@ -643,10 +642,16 @@ unsetenv FEI
 setenv	V2JAVA		$V2TOP/java
 setenv	V2HTML		$V2TOP/html
 setenv  V2DOCSOURCE     $V2TOP/docsource
+setenv  V2TEMPLATES	$V2HTML/templates
+setenv  V2XSL		$V2HTML/xsl
+setenv  V2JBIN		$V2HTML/bin
 @else
 unsetenv V2JAVA
 unsetenv V2HTML
 unsetenv V2DOCSOURCE
+unsetenv V2TEMPLATES
+unsetenv V2XSL
+unsetenv V2JBIN
 @endif
 
 @ifdef SS_PY
@@ -701,7 +706,7 @@ unsetenv V2PARAM_FILE
 # define VRDITMP to point at a world-write temp directory thats not on
 # the swap partition, such as /usr/tmp/.  It must include the trailing /.
 #
-if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx') then
+if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx' || $VICCPU == 'mac64-osx') then
   setenv	VRDITMP	/tmp/
 else
   setenv	VRDITMP	/usr/tmp/
@@ -835,7 +840,28 @@ setenv	VRDIDIB			$VRDILIB/xddevice.dib
 @else
 unsetenv VRDIDIB
 @endif
-
+#
+@ifdef SS_CRUMBS
+#----------------------------------------------------------------------
+#
+# This is polygonal meshing software 
+#----------------------------------------------------------------------
+#
+setenv CRUMBS_HOME	$V2TOP/crumbs
+setenv CRUMBS_BIN	$V2TOP/crumbs/bin
+setenv CRUMBS_LIB $V2TOP/crumbs/dev/lib/$VICCPU
+setenv CRUMBS_LIT_LIB $V2TOP/crumbs/litwin/lib/$VICCPU
+setenv CRUMBS_INC $V2TOP/crumbs/dev/include
+setenv CRUMBS_LIT_INC $V2TOP/crumbs/litwin/include
+@else
+unsetenv CRUMBS_HOME
+unsetenv CRUMBS_BIN
+unsetenv CRUMBS_LIB
+unsetenv CRUMBS_LIT_LIB
+unsetenv CRUMBS_INC
+unsetenv CRUMBS_LIT_INC
+@endif
+#
 #-----------------------------------------------------------------------
 #-----------------------------------------------------------------------
 #
@@ -853,7 +879,7 @@ unsetenv VRDIDIB
 # Note that Java is special; V2JDK is NOT relative to these env vars!
 #
 if ($?V2EXTERNAL == 0) then
-   setenv V2EXT $V2TOP/external
+   setenv V2EXT $V2TOP/../external
 else
    setenv V2EXT $V2EXTERNAL
 endif
@@ -889,7 +915,7 @@ if (-d /usr/java) then
 else
    unsetenv V2JDK
 endif
-if ("$VICCPU" == "mac-osx" || "$VICCPU" == "x86-macosx") then
+if ("$VICCPU" == "mac-osx" || "$VICCPU" == "x86-macosx" || "$VICCPU" == "mac64-osx") then
    if (-d /System/Library/Frameworks/JavaVM.framework/Versions/Current) then
       setenv V2JDK /System/Library/Frameworks/JavaVM.framework/Versions/Current
    endif
@@ -899,10 +925,24 @@ if (-d /usr/jdk/instances/jdk1.7.0) then
 setenv V2JDK /usr/jdk/instances/jdk1.7.0
 endif
 endif
-if ("$VICCPU" == "x86-linux" || "$VICCPU" == "x86-64-linx") then
-if (-d /usr/lib/jvm/java-1.7.0) then
-    setenv V2JDK /usr/lib/jvm/java-1.7.0
+if ("$VICCPU" == "x86-linux") then
+     if (-d /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.141-1.b16.el7_3.i386) then
+        setenv V2JDK /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.141-1.b16.el7_3.i386
+     else if (-d /usr/lib/jvm/java-1.7.0-oracle-1.7.0.75-1jpp.2.el7.i386) then
+        setenv V2JDK /usr/lib/jvm/java-1.7.0-oracle-1.7.0.75-1jpp.2.el7.i386
+     else if (-d /usr/lib/jvm/java-1.7.0-oracle.i386) then
+        setenv V2JDK /usr/lib/jvm/java-1.7.0-oracle.i386
+    endif        
+
 endif
+if ("$VICCPU" == "x86-64-linx") then
+     if (-d /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.141-1.b16.el7_3.x86_64) then
+        setenv V2JDK /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.141-1.b16.el7_3.x86_64 
+     else if (-d /usr/lib/jvm/java-1.7.0-oracle-1.7.0.75-1jpp.2.el7.x86_64) then
+        setenv V2JDK /usr/lib/jvm/java-1.7.0-oracle-1.7.0.75-1jpp.2.el7.x86_64
+     else if (-d  /usr/lib/jvm/java-1.7.0-oracle-1.7.0.75.x86_64) then
+        setenv V2JDK  /usr/lib/jvm/java-1.7.0-oracle-1.7.0.75.x86_64
+     endif 
 endif
 #
 #-----------------------------------------------------------------------
@@ -928,7 +968,7 @@ unsetenv V2EXT_JS
 # version (2.2.3) added Feb 21, 2003. It has been enhanced to allow
 # compilation on Suns cc: Forte Developer 7 C 5.4 2002/03/09 and
 # gnus gcc version 2.95.3 20010315 (release). The changes involved
-# fixing nested /**/ comment, and removing embedded ^M inserted perhaps
+# fixing nested C-style comment, and removing embedded ^M inserted perhaps
 # from mixing DOS and UNIX source files. Also, two of the projections,
 # polarst.c and utm.c were slightly corrected/enhanced.
 #
@@ -947,7 +987,7 @@ unsetenv GEOTRANSLIB
 # user-specifed rectangular grid.  
 # Source: http://www.ncl.ucar.edu/Download/ 
 #
-setenv NATGRID_ROOT $V2EXT/Natgrid/v6.1.2/$VICCPU
+setenv NATGRID_ROOT $V2EXT/Natgrid/v6.2.0/$VICCPU
 setenv NATGRID_LIB $NATGRID_ROOT/lib
 setenv NATGRID_INCL $NATGRID_ROOT/include/ncarg
 setenv NATGRID_BIN $NATGRID_ROOT/bin
@@ -1053,6 +1093,17 @@ setenv	TIFFLIB $V2EXT/tiff/v4.0.6/$VICCPU
 @else
 unsetenv TIFFLIB
 @endif
+@ifdef EXT_JPEG
+#-----------------------------------------------------------------------
+#
+# The following defines the JPEG library. It is required by TIFFLIB on
+# some platforms.
+#
+setenv  JPEGLIB $V2EXT/jpeg/v9.2.0/$VICCPU
+#
+@else
+unsetenv JPEGLIB
+@endif
 @ifdef EXT_FFTW
 #-----------------------------------------------------------------------
 #
@@ -1064,6 +1115,36 @@ setenv	FFTWLIB $V2EXT/fftw/v3.3.4/$VICCPU
 #
 @else
 unsetenv FFTWLIB
+@endif
+
+@ifdef EXT_GDAL
+#-----------------------------------------------------------------------
+#
+# The following defines the Geospatial Data Abstraction Library (GDAL).
+# The GDAL library is a translator library for raster and vector
+# geospatial data formats that is released under an X/MIT style Open
+# Source license by the Open Source Geospatial Foundation. As a
+# library, it presents a single raster abstract data model and single
+# vector abstract data model to the calling application for all
+# supported formats. It also comes with a variety of useful command
+# line utilities for data translation and processing.
+#
+setenv	GDALLIB $V2EXT/gdal/v2.2.3/$VICCPU 
+#
+@else
+unsetenv GDALLIB
+@endif
+
+@ifdef EXT_GSL
+#-----------------------------------------------------------------------
+#
+# The following defines the GNU Scientific Library (GSL) library. The
+# GSL library is a free numerical library for C and C++ programmers.
+#
+setenv	GSLLIB $V2EXT/gsl/v2.2.1/$VICCPU 
+#
+@else
+unsetenv GSLLIB
 @endif
 @ifdef EXT_SIMBAD
 #-----------------------------------------------------------------------
@@ -1140,7 +1221,7 @@ unsetenv PGPLOT_DIR
 # the SPICE toolkit tree.  There should be a $SPICEROOT/fortran
 # and/or a $SPICEROOT/c directory containing the appropriate language toolkit.
 #
-if ($VICCPU == 'x86-macosx') then
+if ($VICCPU == 'x86-macosx' || $VICCPU == 'mac64-osx') then
  setenv SPICEROOT	$V2EXT/spice/v65_gfortran423
 else 
  setenv SPICEROOT	$V2EXT/spice/v65_gfortran44
@@ -1165,6 +1246,35 @@ unsetenv SPICEROOT
 unsetenv SPICEUTIL
 unsetenv SPICELIB
 @endif
+#
+# Added for RHEL7.3 BUILD
+#
+@ifdef EXT_OPENSSL
+#-----------------------------------------------------------------------
+#
+# The following defines the location of the OpenSSL library.
+# Contact:
+#
+#
+setenv  OPENSSL        /opt/MIPLossl
+
+if ($VICCPU == 'axp-unix') then
+setenv  OPENSSL        /usr
+endif
+
+if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx' || $VICCPU == 'mac64-osx' || $VICCPU == 'x86-linux' || $VICCPU == 'x86-64-linx') then
+setenv  OPENSSL        /usr
+endif
+
+setenv  OPENSSLINC      $OPENSSL/include
+setenv  OPENSSLOLB      $OPENSSL/lib
+
+#
+@else
+unsetenv OPENSSL
+unsetenv OPENSSLINC
+unsetenv OPENSSLOLB
+@endif
 @ifdef EXT_KERBEROS5
 #-----------------------------------------------------------------------
 #
@@ -1183,7 +1293,7 @@ if ($VICCPU == 'axp-unix') then
 setenv  KERBEROS        $V2PROP/kerberos/v5.1.2.3/$VICCPU
 endif
 
-if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx' || $VICCPU == 'x86-64-linx') then
+if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx' || $VICCPU == 'mac64-osx' || $VICCPU == 'x86-64-linx') then
 setenv	KERBEROS	/usr/
 endif
 
@@ -1224,12 +1334,15 @@ unsetenv KERBEROS4OLB
 # across a range of OS platforms.   ACE can be obtained from under the
 # URL http://siesta.cs.wustl.edu/~schmidt/ACE.html.
 #
-#if ($VICCPU == x86-linux) then
-	setenv ACE_ROOT $V2EXT/ACE_wrappers/v5.6.2/$VICCPU
-#else
-#	setenv ACE_ROOT $V2EXT/ACE_wrappers/v5.3.1e/$VICCPU
-#        setenv ACE_ROOT $V2EXT/ACE_wrappers/v5.6.2/$VICCPU
-#endif
+setenv ACE_TAO_VERSION v6.1.0
+setenv ACE_TAO_INSTALL_PREFIX ${V2EXT}/ACE_wrappers/${ACE_TAO_VERSION}/$VICCPU
+setenv ACE_ROOT ${ACE_TAO_INSTALL_PREFIX}/src
+
+# For Red Hat 5, replace the above 3 lines with the following:
+# setenv ACE_TAO_VERSION v5.6.2
+# setenv ACE_TAO_INSTALL_PREFIX ${V2EXT}/ACE_wrappers/${ACE_TAO_VERSION}/$VICCPU
+# setenv ACE_ROOT ${ACE_TAO_INSTALL_PREFIX}
+
 #
 #-----------------------------------------------------------------------
 #
@@ -1245,6 +1358,13 @@ setenv TAO_ROOT $ACE_ROOT/TAO
 endif
 #
 @else
+#unsetenv ACE_ROOT
+#unsetenv TAO_ROOT
+#
+# Added for RHE7.3 BUILD
+#
+unsetenv ACE_TAO_VERSION
+unsetenv ACE_TAO_INSTALL_PREFIX
 unsetenv ACE_ROOT
 unsetenv TAO_ROOT
 @endif
@@ -1255,7 +1375,11 @@ unsetenv TAO_ROOT
 # library.  The root URL is <http://xml.apache.org/xerces-c>.  There
 # you will find both the downloads and the documentation.
 #
-setenv XERCES_C_ROOT $V2EXT/xerces-c++/v3.0.0/$VICCPU
+setenv XERCES_C_ROOT $V2EXT/xerces-c++/v3.0.0_rhel6/$VICCPU
+
+# For Red Hat 5, replace the above line with the following:
+# setenv XERCES_C_ROOT $V2EXT/xerces-c++/v3.0.0/$VICCPU
+#
 #
 #
 @else
@@ -1365,7 +1489,7 @@ unsetenv MPILIB
 # UNIX-src-HDF4.1r5.tar.gz at <http://hdf.ncsa.uiuc.edu/obtain.html>
 # hdfeos_2_8.zip at <http://hdfeos.gsfc.nasa.gov/hdfeos/softwarelist.cfm>
 #
-setenv HDFLIB $V2EXT/HDF/v4.1r5/$VICCPU/HDF4.1r5/
+setenv HDFLIB $V2EXT/HDF/v4.2.5/$VICCPU/
 setenv HDFEOSLIB $V2EXT/HDF-EOS/v2.8/$VICCPU/hdfeos
 #
 @else
@@ -1468,6 +1592,21 @@ endif
 @else
 unsetenv SUMMITT_HOME
 @endif
+@ifdef EXT_MYSQLCONCPP
+#-----------------------------------------------------------------------
+#
+# Package: MySQL Connector/C++
+# Classification: external
+# Version: 1.1.9
+# Source: https://github.com/mysql/mysql-connector-cpp
+# Description: MySQL Connector/C++ is a library for applications written 
+# in C or C++ that want to communicate with MySQL database servers. 
+#
+setenv MYSQLCONCPP_LIB $V2EXT/mysql-connector-c++/v1.1.9/$VICCPU/
+#
+@else
+unsetenv MYSQLCONCPP_LIB
+@endif
 @ifdef EXT_GNUPLOT
 #-----------------------------------------------------------------------
 #
@@ -1520,6 +1659,71 @@ unsetenv MYSQLLIB
 unsetenv MYSQLINC
 @endif
 #
+
+@ifdef EXT_EIGEN
+#-----------------------------------------------------------------------
+# Package: Eigen
+# Classification: external
+# Version: 3.2.5
+# Source: http://eigen.tuxfamily.org/
+#
+# Eigen is a C++ template library for linear algebra: matrices, vectors,
+# numerical solvers, and related algorithms.  Needed by Ceres.
+# 
+setenv EIGEN_LIB $V2EXT/eigen/v3.2.5/$VICCPU
+@else
+unsetenv EIGEN_LIB
+@endif
+#
+@ifdef EXT_GLOG
+#-----------------------------------------------------------------------
+# Package: GLOG
+# Classification: external
+# Version: 0.3.4
+# Source: https://github.com/google/glog
+#
+# Package glog implements logging analogous to the Google-internal C++
+# INFO/ERROR/V setup. It provides functions Info, Warning, Error, Fatal,
+# plus formatting variants such as Infof. It also provides V-style logging
+# controlled by the -v and -vmodule=file=2 flags.  Needed by Ceres.
+# 
+setenv GLOG_LIB $V2EXT/glog/v0.3.4/$VICCPU
+@else
+unsetenv GLOG_LIB
+@endif
+#
+@ifdef EXT_CERES
+#-----------------------------------------------------------------------
+# Package: CERES
+# Classification: external
+# Version: 1.12.0
+# Source: http://ceres-solver.org/
+#
+# Ceres Solver is an open source C++ library for modeling and solving large,
+# complicated optimization problems. It can be used to solve Non-linear Least
+# Squares problems with bounds constraints and general unconstrained
+# optimization problems. It is a mature, feature rich, and performant library
+# that has been used in production at Google since 2010.
+# 
+setenv CERES_LIB $V2EXT/ceres-solver/v1.12.0/$VICCPU
+@else
+unsetenv CERES_LIB
+@endif
+#
+@ifdef EXT_SIFT
+#----------------------------------------------------------------------
+# Pacakage: SIFT
+# Classification: proprietary
+# Version: 1.0
+# Source: /home/ayoubfra/vicar/mvor/tiepoints/marstie2/finalAsift/siftLib  (mipldevlinux8)
+#
+# This software is based on open source code implementing a patented technology 
+#
+setenv SIFT_LIB $V2PROP/sift/v1.0/$VICCPU
+@else
+unsetenv SIFT_LIB
+@endif
+#
 @ifdef EXT_JNI
 #-----------------------------------------------------------------------
 #
@@ -1540,7 +1744,7 @@ endif
 
 setenv V2JAVA_SYS_INC                   $V2JDK_tmp/include
 
-if ("$VICCPU" == "mac-osx" || "$VICCPU" == "x86-macosx") then
+if ("$VICCPU" == "mac-osx" || "$VICCPU" == "x86-macosx" || $VICCPU == 'mac64-osx') then
     setenv V2JAVA_SYS_INC $V2JDK_tmp/Headers
 else
     setenv V2JAVA_SYS_INC $V2JDK_tmp/include
@@ -1593,7 +1797,7 @@ else
     if ("$VICCPU" == "sgi") then
       setenv V2CALLABLE_JAVA_LIB	$V2JDK_tmp/jre/lib/irix/
     else
-      if ("$VICCPU" == "mac-osx" || "$VICCPU" == "x86-macosx") then
+      if ("$VICCPU" == "mac-osx" || "$VICCPU" == "x86-macosx" || "$VICCPU" == "mac64-osx") then
 	setenv V2CALLABLE_JAVA_LIB	$V2JDK_tmp/../Libraries/
       else
 	if ("$VICCPU" == "x86-64-linx") then
@@ -1627,6 +1831,70 @@ unsetenv V2CALLABLE_JAVA_LIB
 # $J2_XDOCLET: used for ejb_descriptor, build only
 # $J2_J2EESDK: used for ejb_descriptor, build and runtime
 #
+@endif
+@ifdef JEXT_COMMONS_JCS
+#----------------------------------------------------------------------
+#
+# Package: commons-exec
+# Classification: external
+# Version: 2.1 
+# Source: http://commons.apache.org/exec/
+# Description: Apache commons package for executing external processes.
+#
+setenv J2_COMMONS_JCS $V2EXT/commons-jcs/v2.1
+@else
+unsetenv J2_COMMONS_JCS
+@endif
+@ifdef JEXT_MAVEN_ANNOTATIONS
+#----------------------------------------------------------------------
+# 
+# Package: maven annotations 
+# Version: 2.0.1
+# Source: https://mvnrepository.com/artifact/com.google.code.findbugs/annotations/2.0.1
+# Description:The annotations.jar contains multiple annotation classes used 
+# by the FindBugs application. These annotations allow developers to express their 
+# intent so that FindBugs (and other tools) can issue warnings more appropriately. 
+# In order to use annotations, Java version 1.5 or later must be used. 
+#
+setenv J2_MAVEN_ANNOTATIONS $V2EXT/maven/annotations/v2.0.1
+@else
+unsetenv J2_MAVEN_ANNOTATIONS 
+@endif
+@ifdef JEXT_MAVEN_REFLECTIONS
+#----------------------------------------------------------------------
+#
+# Package: maven reflections
+# Version: 0.9.10
+# Source:  https://mvnrepository.com/artifact/org.reflections/reflections/0.9.10 
+# Description: Reflections.jar contains classes that scan the classpath, 
+# index the metadata, and allow applications to query it on runtime. 
+# The classes may save and collect that information for many modules within
+# the project.
+# Using Reflections.jar you can query metadata such as:
+#  - get all subtypes of some type
+#  - get all types/members annotated with some annotation
+#  - get all resources matching a regular expression
+#  - get all methods with specific signature including parameters, 
+#    parameter annotations and return type
+#
+setenv J2_MAVEN_REFLECTIONS $V2EXT/maven/reflections/v0.9.10
+@else
+unsetenv J2_MAVEN_REFLECTIONS
+@endif
+
+@ifdef JEXT_PNGENCODER
+#----------------------------------------------------------------------
+#
+# Package: PngEncoder 
+# Classification: external
+# Version: 2.1 
+# Source: http://objectplanet.com/pngencoder 
+# Description: Lets you encode java based image objects into various PNG images at fantastic# performance compared to other png encoders. 
+# images at fantastic performance compared to other png encoders. 
+#
+setenv J2_PNGENCODER $V2EXT/pngencoder/v2.0.2
+@else
+unsetenv J2_PNGENCODER
 @endif
 @ifdef JEXT_JOPT_SIMPLE
 #-----------------------------------------------------------------------
@@ -1773,41 +2041,6 @@ setenv J2_JAI_IIO $V2EXT/JAI_ImageIO/jai_imageio-1_1
 @else
 unsetenv J2_JAI_IIO
 @endif
-@ifdef JEXT_TREEVOTEE
-#-----------------------------------------------------------------------
-#
-# Package: treevotee 
-# Classification: external
-# Version: v0.9.9p1ee
-# Source: http://w10n.jpl.nasa.gov/juneberry/download/treevotee-0.9.9p1ee.jar 
-# Description:  
-#  The treevotee package implements the Webification (w10n) API.
-#  In the view of w10n, a resource is a tree of nodes and leaves,
-#  which have semantic URLs, accessible through HTTP. By default,
-#  it uses JSON to exchange meta information. Full ReSTful style
-#  request/response are supported.
-#
-setenv J2_TREEVOTEE $V2EXT/treevotee/v0.9.9p1ee
-#
-@else
-unsetenv J2_TREEVOTEE
-@endif
-@ifdef JEXT_JUNAMI
-#-----------------------------------------------------------------------
-#
-# Package: junami
-# Classification: external
-# Version: 0.7.0p1 
-# Source: http://w10n.jpl.nasa.gov/juneberry/download/junami-0.7.0p1.jar
-# Description: Junami helps to normalize file system directories.
-# It is used by Juneberry to webify data products directories. 
-# It is a jar dependency and does not provide any service.
-#
-setenv J2_JUNAMI $V2EXT/junami/v0.7.0p1
-#
-@else
-unsetenv J2_JUNAMI
-@endif
 @ifdef JEXT_LUCENE
 #----------------------------------------------------------------------
 #
@@ -1909,6 +2142,131 @@ setenv J2_ACTIVEMQ $V2EXT/ActiveMQ/v5.1.0
 #
 @else
 unsetenv J2_ACTIVEMQ
+@endif
+@ifdef JEXT_AWS_SDK
+#-----------------------------------------------------------------------
+#
+# Package: Amazon Web Service (AWS) Java SDK
+# Classification: external
+# Version: v1.11.210
+# Source:  http://aws.amazon.com/sdk-for-java/ 
+# Description:
+#  The AWS SDK for Java helps take the complexity out of coding by 
+#  providing Java APIs for many AWS services including Amazon S3,
+#  Amazon EC2, DynamoDB, and more.
+#
+setenv J2_AWS_SDK $V2EXT/aws-java-sdk/v1.11.210
+#
+@else
+unsetenv J2_AWS_SDK
+@endif
+@ifdef JEXT_JACKSON_CORE
+#-----------------------------------------------------------------------
+#
+# Package: Jackson Core Library
+# Classification: external
+# Version: v2.6.7
+# Source:  https://fasterxml.github.io/jackson-core/ 
+# Description:
+#  Core part of Jackson that defines Streaming API as well as basic 
+#  shared abstractions. 
+#
+setenv J2_JACKSON_CORE $V2EXT/jackson-core/v2.6.7
+#
+@else
+unsetenv J2_JACKSON_CORE
+@endif
+@ifdef JEXT_JACKSON_ANNOTATIONS
+#-----------------------------------------------------------------------
+#
+# Package: Jackson Annotations Library
+# Classification: external
+# Version: v2.6.0 
+# Source:  https://github.com/FasterXML/jackson-annotations/wiki 
+# Description:
+#  Core annotations (annotations that only depend on jackson-core) for 
+#  Jackson data processor. 
+#
+setenv J2_JACKSON_ANNOTATIONS  $V2EXT/jackson-annotations/v2.6.0
+#
+@else
+unsetenv J2_JACKSON_ANNOTATIONS 
+@endif
+@ifdef JEXT_JACKSON_DATABIND 
+#-----------------------------------------------------------------------
+#
+# Package: Jackson Databind Library
+# Classification: external
+# Version: v2.6.7.1 
+# Source:  https://github.com/FasterXML/jackson-databind 
+# Description:
+#  This project contains the general-purpose data-binding functionality 
+#  and tree-model for Jackson Data Processor. 
+#
+setenv J2_JACKSON_DATABIND  $V2EXT/jackson-databind/v2.6.7.1
+#
+@else
+unsetenv J2_JACKSON_DATABIND 
+@endif
+@ifdef JEXT_JACKSON_DATAFORMAT_CBOR
+#-----------------------------------------------------------------------
+#
+# Package: Jackson Dataformat CBOR Library
+# Classification: external
+# Version: v2.6.7
+# Source:  http://repo1.maven.org/maven2/com/fasterxml/jackson/dataformat/jackson-dataformat-cbor/ 
+# Description:
+#  This projects contains Jackson extension component for reading and writing 
+#  XML encoded data.  
+#
+setenv J2_JACKSON_DATAFORMAT_CBOR $V2EXT/jackson-dataformat-cbor/v2.6.7
+#
+@else
+unsetenv J2_JACKSON_DATAFORMAT_CBOR
+@endif
+@ifdef JEXT_JODA_TIME  
+#-----------------------------------------------------------------------
+#
+# Package: JODA Time Library
+# Classification: external
+# Version: v2.8.1
+# Source:  https://github.com/JodaOrg/joda-time/releases 
+# Description:
+#  Joda-Time provides a quality replacement for the Java date and time 
+#  classes.  Joda-Time is the de facto standard date and time library for 
+#  Java prior to Java SE 8.  
+#
+setenv J2_JODA_TIME $V2EXT/joda-time/v2.8.1
+#
+@else
+unsetenv J2_JODA_TIME
+@endif
+
+
+
+
+@ifdef JEXT_HTTPCOMP_FOR_AWS  
+#-----------------------------------------------------------------------
+#
+# Package: HttpCore/HttpClient from httpcomponents-client
+# Classification: external
+# Version: v4.5.3
+# Source: https://hc.apache.org/downloads.cgi 
+# Description: HttpClient component of the Apache HttpComponents project. 
+# Note: Will need to revisit.  AWS SDK has dependency on libraries that
+#       happen to exist in HTTPCOMP_CLIENTs set of libs, while the 
+#       current standalone versions of those libraries in Vicar externals
+#       is too old.
+#       But these libs should be separate and not retrieved from another 
+#       client...even tho httpcomp_client is doing what I wanted 
+#       originally with AWSs TPS libs.  Hmmm.  Well, something is 
+#       already broke, and I am taking advantage of it for 
+#       expediency. (nttoole, Oct 20, 2017 - day of a delivery)
+#
+setenv J2_HTTPCOMP_FOR_AWS $V2EXT/httpcomponents-client/v4.5.3/lib
+#
+@else
+unsetenv J2_HTTPCOMP_FOR_AWS
 @endif
 @ifdef JEXT_ORBACUS
 #-----------------------------------------------------------------------
@@ -2526,13 +2884,13 @@ unsetenv J2_JBOSS
 #
 # Package: JOGL (Java Bindings For OpenGL)
 # Classification: external
-# Version: JSR-231 1.1.1 release candidate 8
+# Version: JSR-231 1.1.1, version A.
 # Source: http:/jogl.dev.java.net
 # JOGL provides Java bindings to the native 3D graphics library, OpenGL.
 # It provides full access to the APIs in the OpenGL 2.0 specification
 # as well as nearly all vendor extensions, and integrated with the AWT
-# and Swing widget sets. 
-setenv J2_JOGL $V2EXT/jogl/v1.1.1_rc8/
+# and Swing widget sets.
+setenv J2_JOGL $V2EXT/jogl/v1.1.1a/
 #
 @else
 unsetenv J2_JOGL
@@ -2551,6 +2909,22 @@ setenv J2_JMONKEYENGINE $V2EXT/jmonkeyengine/v3.0/
 #
 @else
 unsetenv J2_JMONKEYENGINE
+@endif
+@ifdef JEXT_JAMA
+#-----------------------------------------------------------------------
+#
+# Package: JAMA (Java Matrix Package)
+# Classification: external
+# Version: 1.0.2 (build 2012-11-09)
+# Source: http://math.nist.gov/javanumerics/jama//
+# JAMA is a basic linear algebra package for Java. It provides user-level 
+# classes for constructing and manipulating real, dense matrices. It is 
+# meant to provide sufficient functionality for routine problems, 
+# packaged in a way that is natural and understandable to non-experts.
+setenv J2_JAMA $V2EXT/jama/v1.0.3/
+# 
+@else
+unsetenv J2_JAMA
 @endif
 @ifdef JEXT_XAMPLE
 #-----------------------------------------------------------------------
@@ -2722,9 +3096,23 @@ unsetenv J2_PROD_TOOLS
 # Description: JSON (JavaScript Object Notation) is a lightweight data-interchange format that is
 # based on a subset of the JavaScript Programming Language.  
 #
-setenv J2_JSON $V2EXT/json/v1.1/
+setenv J2_JSON $V2EXT/json/v20140107
 @else
 unsetenv J2_JSON
+@endif
+@ifdef JEXT_WIS
+#-----------------------------------------------------------------------
+#
+# Package: wis
+# Classification: external
+# Version: v0.3.2
+# Source:  http://sourceforge.com/p/niao
+# Description: wis provides the functionality  of crawling, indexing, and searching webified data.
+#
+setenv J2_WIS $V2EXT/wis/v0.3.2
+#
+@else
+unsetenv J2_WIS
 @endif
 @ifdef JEXT_COMMONS_VFS
 #----------------------------------------------------------------------
@@ -2742,11 +3130,11 @@ unsetenv J2_COMMONS_VFS
 #----------------------------------------------------------------------
 # Package: httpcomponents-client
 # Classification: external
-# Version: v4.2.5
-# Source: http://repo1.maven.org/maven2/org/apache/httpcomponents/h
+# Version: v4.5.3
+# Source: https://hc.apache.org/downloads.cgi 
 # Description: HttpClient component of the Apache HttpComponents project. 
 # 
-setenv J2_HTTPCOMP_CLIENT $V2EXT/httpcomponents-client/v4.2.5/lib
+setenv J2_HTTPCOMP_CLIENT $V2EXT/httpcomponents-client/v4.5.3/lib
 @else
 unsetenv J2_HTTPCOMP_CLIENT
 @endif
@@ -2854,7 +3242,7 @@ unsetenv J2_OODT_PGE
 # Description: This is a dependency for Jeeves, a package that transforms
 # off-line IOS applications/tools into web services.
 #
-setenv J2_SXN $V2EXT/sxn/v0.9.2 
+setenv J2_SXN $V2EXT/sxn/v0.9.3p1
 @else
 unsetenv J2_SXN
 @endif
@@ -3103,7 +3491,7 @@ if ($VICCPU == 'hp-700') then
    endif
 endif
 
-if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx') then
+if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx' || $VICCPU == 'mac64-osx') then
    if ($?DYLD_LIBRARY_PATH != 0) then
       setenv LD_LIBRARY_PATH $DYLD_LIBRARY_PATH
    else
@@ -3119,10 +3507,17 @@ endif
 # less efficient when run this way, but far easier.
    setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${V2OLB}
 @ifdef EXT_ACE_TAO
-   if ($?ACE_ROOT != 0) then
-     setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${ACE_ROOT}/lib
-   endif
+#
+# Added for RHEL 7.3 BUILD
+#
+   if ($?ACE_TAO_INSTALL_PREFIX != 0) then		      
+     setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${ACE_TAO_INSTALL_PREFIX}/lib 
+   endif						
 @endif
+#   if ($?ACE_ROOT != 0) then
+#     setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${ACE_ROOT}/lib
+#   endif
+#@endif
 @ifdef SS_MDMS
    setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${MDMSOLB}
 @endif
@@ -3138,6 +3533,9 @@ endif
 @ifdef EXT_XERCES_CXX
    setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${XERCES_C_ROOT}/lib
 @endif
+@ifdef EXT_MYSQLCONCPP
+   setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${MYSQLCONCPP_LIB}/lib
+@endif
 @ifdef EXT_FFTW
    setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${FFTWLIB}/lib
 @endif
@@ -3151,8 +3549,8 @@ endif
    if ($VICCPU == 'x86-linux' || $VICCPU == 'x86-64-linx') then
       setenv LD_LIBRARY_PATH /usr/lib:/lib:${LD_LIBRARY_PATH}
    endif
-   if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx') then
-      setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:/usr/OpenMotif/lib
+   if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx' || $VICCPU == 'mac64-osx') then
+      setenv LD_LIBRARY_PATH /usr/X11/lib/flat_namespace:${LD_LIBRARY_PATH}:/usr/OpenMotif/lib
    endif
 @ifdef SS_JAVA
    setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${V2HTML}/lib/${VICCPU}
@@ -3169,7 +3567,7 @@ if ($VICCPU == 'hp-700') then
    endif
 endif
 
-if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx') then
+if ($VICCPU == 'mac-osx' || $VICCPU == 'x86-macosx' || $VICCPU == 'mac64-osx') then
    if ($?LD_LIBRARY_PATH != 0) then
       setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
    else
@@ -3198,9 +3596,6 @@ set path = ($path $GUILIB)
 set path = ($path $MDMSLIB)
 @endif
 set path = ($path $V2LIB)
-@ifdef SS_TLM
-set path = ($path $TLMLIB)
-@endif
 @ifdef SS_JAVA
 if ($?V2JDK != 0) then
    set path = ($V2JDK/bin $path)

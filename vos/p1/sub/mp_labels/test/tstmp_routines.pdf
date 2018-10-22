@@ -1,0 +1,1340 @@
+procedure
+refgbl $echo
+refgbl $becho
+body
+let _onfail="continue"
+let $echo="no"
+let $becho="no"
+refgbl $syschar
+
+local pckernel type=string	! variable for p_constants.ker
+
+if ( $syschar(1) = "UNIX" )
+	let pckernel = "/project/spice/ops/p_constants.ker"
+else
+	let pckernel = "SPICEKER:p_constants.ker"
+end-if
+
+write " "
+write "***********************"
+write "*** NOTE TO TESTERS ***"
+write "***********************"
+write " "
+write "The image_lambert.map2 and pov.img must be in your working directory."
+write "These files can be found on the MIPL Unix file server in the"
+write "directory /project/it/testdata/."
+write " "
+write " "
+write " "
+write "***	TEST ONE	***"
+write " "
+write "Test SINUSOIDAL projection with NON-spherical model"
+write "with center longitude of 90 degrees west."
+write "Run this twice, the second time using alternative keywords:"
+write "RESOLUTION (for SCALE), TARGET_BODY (obsolete for TARGET_NAME),"
+write "and PLANETOGRAPHIC (for PLANETODETIC), to demonstrate that these"
+write "are equivalent."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(45.0,45.0,45.0,45.0,45.0)	+
+	LONGITUDES=(90.0,45.0,0.0,-45.0,-90.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOGRAPHIC"	+
+	TARGET="MARS" 		+
+	PROJ="SINUSOIDAL"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6280.0		+
+	SCALE=25.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=90.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+tmp_routines +
+	LATITUDES=(45.0,45.0,45.0,45.0,45.0)	+
+	LONGITUDES=(90.0,45.0,0.0,-45.0,-90.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETODETIC"	+
+	TGTBOD="MARS" 		+
+	PROJ="SINUSOIDAL"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6280.0		+
+	RESOLUTION=4.45408	+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=90.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST TWO	***"
+write " "
+write "Test SINUSOIDAL projection with spherical model"
+write "with center longitude of 270 degrees east and"
+write "a longitude convention of positive east."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(45.0,45.0,45.0,45.0,45.0)	+
+	LONGITUDES=(270.0,315.0,0.0,45.0,90.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="SINUSOIDAL"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6380.0		+
+	SCALE=25.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=270.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST THREE	***"
+write " "
+write "Test SINUSOIDAL projection (same as test two)"
+write "but with projection offsets of 400 by line"
+write "and 400 by sample."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(45.0,45.0,45.0,45.0,45.0)	+
+	LONGITUDES=(270.0,315.0,0.0,45.0,90.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="SINUSOIDAL"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6380.0		+
+	SCALE=25.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=270.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=400.0	+
+	SAMPLE_OFFSET=400.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST FOUR	***"
+write " "
+
+write "Numerical Example for auxiliary"
+write "authalic latitude where"
+write "eccentricity is 0.0822719 . . ."
+write "from USGS Bulletin 1395, p. 263."
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines_verbose +
+	LATITUDES=(40.0)  	+
+	LONGITUDES=(0.0)  	+
+	LL_TYPE="PLANETOGRAPHIC"	+
+	TARGET="MARS" 		+
+	PROJ="SINUSOIDAL"	+
+	A_AXIS=1.0		+
+	B_AXIS=1.0		+
+	C_AXIS=0.9579812	+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST FIVE	***"
+write " "
+write "Test MERCATOR projection with spherical model."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(45.0,45.0,45.0,45.0,45.0)	+
+	LONGITUDES=(270.0,315.0,0.0,45.0,90.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="MERCATOR"		+
+	A_AXIS=1.0		+
+	B_AXIS=1.0		+
+	C_AXIS=1.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST SIX 	***"
+write " "
+
+write "Numerical Example for auxiliary"
+write "conformal latitude where"
+write "eccentricity is 0.0822719 . . ."
+write "from USGS Bulletin 1395, p. 263."
+write " "
+write "Test MERCATOR projection with oblate spheroid model"
+write "in planetodetic latitude. "
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines_verbose +
+	LATITUDES=(45.0) 	+
+	LONGITUDES=(270.0) 	+
+	LL_TYPE="PLANETOGRAPHIC" +
+	TARGET="MARS" 		+
+	PROJ="MERCATOR"		+
+	A_AXIS=1.0		+
+	B_AXIS=1.0		+
+	C_AXIS=0.9579812	+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST SEVEN	***"
+write " "
+
+write "Snyder-defined latitude for a test"
+write "of the subroutine triaxcoef and"
+write "triaxtran with mp_routines."
+write " "
+write "Test MERCATOR projection with triaxial"
+write "ellipsoid model in planetocentric latitude."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_forward +
+	LATITUDES=(30.0)  		+
+	LONGITUDES=(10.0)  		+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="MERCATOR"		+
+	A_AXIS=1.0		+
+	B_AXIS=0.99		+
+	C_AXIS=0.94		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST EIGHT	***"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_forward +
+	LATITUDES=(30.0)  		+
+	LONGITUDES=(10.0)  		+
+	LL_TYPE="SNYDER_DEFINED"	+
+	TARGET="MARS" 		+
+	PROJ="MERCATOR"		+
+	A_AXIS=1.0		+
+	B_AXIS=0.99		+
+	C_AXIS=0.94		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST NINE	***"
+write " "
+
+write " "
+write "Repeat of TEST ONE using FORTRAN test program."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines_f +
+	LATITUDES=(45.0) 	+
+	LONGITUDES=(90.0) 	+
+        LINES=--                         +
+        SAMPLES=--                       +
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="SINUSOIDAL"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6380.0		+
+	SCALE=25.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=90.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST TEN	***"
+write " "
+write " List the label of the image projected in a Lambert Conformal"
+write " Conic projection.  This label is the old-style MAP00X format."
+write " "
+let $echo="yes"
+let $becho="yes"
+label-list image_lambert.map2
+
+let $echo="no"
+let $becho="no"
+write " "
+write " Translate this old-style label to a new MAP VICAR property"
+write " and history label via the program tmp_label."
+write " "
+let $echo="yes"
+let $becho="yes"
+tmp_label image_lambert.map2 image_new_label.img
+
+let $echo="no"
+let $becho="no"
+write " "
+write " List the label of the image projected in a Lambert Conformal"
+write " Conic projection with the new labels. Values in the new MAP"
+write " labels are derived from the old-style label, and should"
+write " agree, except that LINE_- and SAMPLE_PROJECTION_OFFSET are"
+write " defined differently under the new system and should be"
+write " offset from values in the old map labels by a value of 1.0."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+label-list image_new_label.img
+
+let $echo="no"
+let $becho="no"
+
+write " "
+write "***	TEST ELEVEN	***"
+write " "
+write " "
+write "Normal cylindrical test of sphere from"
+write "numerical examples in USGS Paper 1395,"
+write "Appendix A, page 278."
+write " "
+write " sample x should equal 3.343"
+write " line y should equal 0.338"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(35.0)	+
+	LONGITUDES=(80.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="CYLINDRICAL_EQUAL_AREA"		+
+	A_AXIS=1.0		+ 
+	B_AXIS=1.0		+
+	C_AXIS=1.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=285.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=30.0	+
+	PARALLEL_TWO=30.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write " "
+write "***	TEST TWELVE	***"
+write " "
+write "Simple (equidistant) cylindrical test of sphere."
+write " "
+write " sample x should equal 2.2092 and 0.395"
+write " line y should equal 0.389 for both x values"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+
+tmp_routines +
+	LATITUDES=(35.0,35.0)	+
+	LONGITUDES=(80.0,-40.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="SIMPLE_CYLINDRICAL"		+
+	A_AXIS=1.0		+ 
+	B_AXIS=1.0		+
+	C_AXIS=1.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=30.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+write " "
+write " "
+write "***	TEST THIRTEEN	***"
+write " "
+write " Test mpMpo2Buf routine and dump to the computed OM matrix"
+write " calculated from the POINT_PERSPECTIVE image pov.img."
+write " "
+write " NOTE: This test is only valid to test funcationality on"
+write " AXP and VAX systems.  Difference in output will occur on"
+write " the UNIX systems."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_mpo2buf INP=pov.img LATLON=(-35.0,340.0)
+
+let $echo="no"
+let $becho="no"
+write " "
+write " "
+write "*** 	TEST FOURTEEN	***"
+write " "
+write "Oblique Lambert azimuthal equal-area test of sphere."
+write " "
+write " projection origin and center at (lat,lon) = (30,30)"
+write " "
+write " input (lat,lon) of (80,70) should yield (line,samp) of (-.877,.124)"
+write " input (lat,lon) of (20,50) should yield (line,samp) of ( .148,.327)"
+write " "
+let $echo="yes"
+let $becho="yes"
+tmp_routines +
+	LATITUDES=(80.0,20.0)	+
+	LONGITUDES=(70.0,50.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="LAMBERT_AZIMUTHAL"	+
+	A_AXIS=1.0		+
+	B_AXIS=1.0		+
+	C_AXIS=1.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=30.0		+
+	CTR_LAT=30.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST FIFTEEN	***"
+write " "
+write "Test EQUIDISTANT CYLINDRICAL projection with oblate model"
+write " "
+write " Expected results are given below."
+write " "
+write " (Lat,Lon) -> (Line,Sample) -> (Lat',Lon')"
+write " " 
+write " (  85.000,  90.000) -> (-377.527,-399.867) -> (  85.000,  90.000)"
+write " (  75.000,  80.000) -> (-332.856,-355.326) -> (  75.000,  80.000)"
+write " (  65.000,  70.000) -> (-288.208,-310.786) -> (  65.000,  70.000)"
+write " (  55.000,  60.000) -> (-243.598,-266.245) -> (  55.000,  60.000)"
+write " (  45.000,  50.000) -> (-199.033,-221.704) -> (  45.000,  50.000)"
+write " "
+let $echo="yes"
+let $becho="yes"
+tmp_routines +
+	LATITUDES=(85.0,75.0,65.0,55.0,45.0)	+
+	LONGITUDES=(90.0,80.0,70.0,60.0,50.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOGRAPHIC"	+
+	TARGET="MARS" 		+
+	PROJ="EQUIDISTANT"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6370.0		+
+	SCALE=25.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+let $echo="no"
+let $becho="no"
+
+write " "
+write "***	TEST SIXTEEN	***"
+write " "
+write "Test ORTHOGRAPHIC projection with spherical model"
+write "with center latitude/longitude of 0 degrees ."
+write "Non-zero center lat/lon s case is being reviewed "
+write "with modifications in Euler rotations. "
+write "Test case in USGS : (45.0,2.0) -> (6.2977416,180.45365)"
+write "			   (lat,lon)  -> (sample(x),line(y))"
+write "Note that above test is with radii=6380."
+write " "
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(30.0,45.0,75.0,60.0,50.0,40.0,10.0,35.0)	+
+	LONGITUDES=(70.0,2.0,80.0,10.0,30.0,40.0,90.0,75.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="ORTHOGRAPHIC"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6380.0		+
+	SCALE=25.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+
+write " "
+write "***	TEST SEVENTEEN	***"
+write " "
+write "Test ALBERS EQUAL AREA CONIC projection with spherical model"
+write "with center latitude/longitude of 0 degrees , one or two parallels"
+write "Non-zero center lat/lon s case is being reviewed "
+write "with modifications in Euler rotations. "
+write "Test-case USGS: 	(45.0,2.0) -> (6.1273263,187.96771) p_1=35 p_2=65"
+write "		(lat,lon)  -> (sample(x), line(y))  2 parallels (degs)" 
+write " (45.0,2.0) -> (6.4099229,192.81305)  p_1=35 degrees"
+write "Note that above tests are with radii=6380."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(45.0,75.0,60.0,50.0,40.0,35.0)	+
+	LONGITUDES=(2.0,80.0,10.0,30.0,40.0,75.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="ALBERS_TWO_PARALLELS"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6380.0		+
+	SCALE=25.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=35.0	+
+	PARALLEL_TWO=65.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+
+write " "
+write "***	TEST EIGHTEEN	***"
+write " "
+write "Test  LAMBERT conformal conic projection with spherical model"
+write "with center latitude/longitude of 0 degrees,one or two parallels"
+write "Non-zero center lat/lon s case is being reviewed "
+write "with modifications in Euler rotations."
+write "Test cases USGS: (45.0,2.0) -> (6.1115347,221.52138) p_1=35 p_2=65"
+write "		(lat,lon) -> (sample(x), line(y)) 2 parallels degrees"
+write "    (45.0,2.0) -> (6.4002125,210.37762) p_1=35 degrees"
+write " Note that the above tests are with radii=6380."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(30.0,45.0,75.0,60.0,50.0,40.0,35.0)	+
+	LONGITUDES=(110.0,2.0,80.0,10.0,30.0,40.0,75.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="LAMBERT_TWO_PARALLELS"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6380.0		+
+	SCALE=25.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=35.0	+
+	PARALLEL_TWO=65.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+
+write " "
+write "***	TEST NINETEEN	***"
+write " "
+write "Test SINUSOIDAL projection (Authalic) with triaxial"
+write "ellipsoid model in planetocentric latitude."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(40.0)	+
+	LONGITUDES=(20.0)  	+
+	LINES=--		+
+	SAMPLES=--		+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="IDA" 		+
+	PROJ="SINUSOIDAL"	+
+	A_AXIS=1.0		+
+	B_AXIS=0.9		+
+	C_AXIS=0.8		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+
+write " "
+write "***	TEST TWENTY	***"
+write " "
+write "Test PERSPECTIVE projection with point_perspective"
+write "parameters and input (line,sample) values."
+write "Observe the correlation between cent_line,cent_samp values"
+write "and the sub_space_lat, and sub_space_lon values, and the"
+write "input line,sample value"
+write "Model is Spherical, with zero center lat/lon"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=--	+
+	LONGITUDES=--	+
+	LINES=(811.0,400.0,200.0)	+
+	SAMPLES=(3.0,400.0,50.0)	+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="JUPITER"		+
+	PROJ="POINT_PERSPECTIVE"	+
+	A_AXIS=1565.0		+
+	B_AXIS=1565.0		+
+	C_AXIS=1565.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	TGT_DIST=156164.53125	+
+	XYZ=1501.038940429688	+
+	AXIS_LINE=400.0		+
+	AXIS_SAMPLE=400.0	+
+	FOCAL_SCALE=65.61679840087891	+
+	SUB_SPACE_LAT=23.85908317565918	+
+	SUB_SPACE_LON=217.3724365234375 +
+	CENT_LINE=811.0722045898438	+
+	CENT_SAMPLE=3.221923838125	+
+	N_ANGLE=395.91015625		+
+	PCK_PATH=@pckernel
+
+let $echo="no"	
+let $becho="no"
+
+write " "
+write "***	TEST TWENTY-ONE	   ***"
+write " "
+write "Test PERSPECTIVE projection with spherical model"
+write "with center longitude/latitude of 0 "
+write "This test is reverse of Test Twenty, with inputs"
+write "being lat/lon s and output line,sample"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(23.855,58.318,53.026)	+
+	LONGITUDES=(142.614,151.483,110.261)	+
+	LINES=--	+
+	SAMPLES=--	+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="JUPITER" 		+
+	PROJ="POINT_PERSPECTIVE"	+
+	A_AXIS=1565.0		+
+	B_AXIS=1565.0		+
+	C_AXIS=1565.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	TGT_DIST=156164.53125		+
+	XYZ=1501.038940429688		+
+	AXIS_LINE=400.0		+
+	AXIS_SAMPLE=400.0	+
+	FOCAL_SCALE=65.61679840087891	+
+	SUB_SPACE_LAT=23.85908317565918  	+
+	SUB_SPACE_LON=217.3724365234375   +
+	CENT_LINE=811.0722045898438	+
+	CENT_SAMPLE=3.221923838125	+
+	N_ANGLE=395.91015625		+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+
+write " "
+write "***	TEST TWENTY-TWO 	***"
+write " "
+write "Test MERCATOR projection with planet Mars spherical case"
+write "for inclusion of body_long_axis parameter"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_forward +
+	LATITUDES=(40.0)	+
+	LONGITUDES=(20.0)  	+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="MERCATOR"		+
+	A_AXIS=1.0		+
+	B_AXIS=1.0		+
+	C_AXIS=1.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=40.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	LONG_AXIS=105.0  	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+
+write " "
+write "***	TEST TWENTY-THREE	***"
+write " "
+write "Test STEREOGRAPHIC projection (Conformal) with triaxial"
+write "ellipsoid model in planetocentric latitude."
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(35.0)	+
+	LONGITUDES=(75.0)	+
+	LINES=--	+
+	SAMPLES=--	+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="IDA" 		+
+	PROJ="STEREOGRAPHIC"	+
+	A_AXIS=1.0		+
+	B_AXIS=0.9		+
+	C_AXIS=0.8		+
+	SCALE=1.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+let $echo="no"
+let $becho="no"
+
+write " "
+write "***	TEST TWENTY-FOUR	***"
+write " "
+write "Test CYLINDRICAL EQUAL AREA projection with oblate spheroid model"
+write "Test numbers are taken from USGS manual p.281."
+write "Output (sample,line) values for given input (lat,lon) actual are"
+write "(sample,line)=(-332,699.8m;554,248.5m)"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(5.0)	+
+	LONGITUDES=(78.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="CYLINDRICAL_EQUAL_AREA"	+
+	A_AXIS=6378206.4		+
+	B_AXIS=6378206.4		+
+	C_AXIS=6356584.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=75.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=5.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+let $echo="no"
+let $becho="no"
+
+write " "
+write "***	TEST TWENTY-FIVE	***"
+write " "
+write "Test LAMBERT AZIMUTHAL projection with oblate spheroid model"
+write "Test numbers are taken from the USGS manual p.333."
+write "For given input (lat,lon) of (30,110), the actual output"
+write "(line,sample) values are (-1056814.9m, -965932.1m)"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(30.0,45.0,75.0,60.0,50.0,40.0,35.0)	+
+	LONGITUDES=(110.0,2.0,80.0,10.0,30.0,40.0,75.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="LAMBERT_AZIMUTHAL"	+
+	A_AXIS=6378206.4		+
+	B_AXIS=6378206.4		+
+	C_AXIS=6356584.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=100.0		+
+	CTR_LAT=40.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+let $echo="no"
+let $becho="no"
+
+write " "
+write "***	TEST TWENTY-SIX	***"
+write " "
+write "Test STEREOGRAPHIC projection with oblate spheroid model"
+write "Test numbers taken from USGS manual p.313."
+write "For input (lat,lon) of (30,90) the actual output"
+write "(line,sample) is (-1063049.3m, 971630.8m)"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(30.0,45.0,75.0,60.0,50.0,40.0,35.0)	+
+	LONGITUDES=(90.0,2.0,80.0,10.0,30.0,40.0,75.0)	+
+	LINES=--			+
+	SAMPLES=--			+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="STEREOGRAPHIC"	+
+	A_AXIS=6378206.4		+
+	B_AXIS=6378206.4		+
+	C_AXIS=6356584.0		+
+	SCALE=0.9999		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=100.0		+
+	CTR_LAT=40.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST TWENTY-SEVEN      ***"
+write " "
+write "Test that SPACECRAFT_DISTANCE gets automatically converted"
+write "to TARGET_CENTER_DISTANCE and TARGET_BODY to TARGET_NAME,"
+write "and that new MIN/MAX LAT/LONG keywords show up in the MP label."
+let $echo="yes"
+let $becho="yes"
+
+tmp_create out=tst.lab +
+ target_bod=VENUS +
+ focal_len=10 +
+ focal_plan=1000 +
+ north=45 +
+ opt_axis_l=5 +
+ opt_axis_s=5 +
+ planet_center_l=40 +
+ planet_center_s=60 +
+ a_axis =3393.4 +
+ b_axis =3393.4 +
+ c_axis =3393.4 +
+ map_proj=point_persp +
+ positive_lon =west +
+ spacecraft_dist=10000 +
+ minimum_lat=40 +
+ maximum_lat=60 +
+ minimum_lon=145 +
+ maximum_lon=240
+
+size tst.lab tst1.lab zoom=2
+
+label-list tst.lab
+label-list tst1.lab
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST TWENTY-EIGHT      ***"
+write " "
+write "Test routine mpBuf2Mpo, using MP objects created above"
+write "for all projections."
+write "Note that this does not support Albers or Lambert Azimuthal"
+write "projections, and that MAP_SCALE must be specified, not"
+write "MAP_RESOLUTION."
+let $echo="yes"
+let $becho="yes"
+
+tmp_buf2mpo +
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="SINUSOIDAL"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6380.0		+
+	SCALE=25.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=90.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+tmp_buf2mpo +
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="MERCATOR"		+
+	A_AXIS=1.0		+
+	B_AXIS=1.0		+
+	C_AXIS=1.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+tmp_buf2mpo +
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="CYLINDRICAL_EQUAL_AREA"		+
+	A_AXIS=1.0		+ 
+	B_AXIS=1.0		+
+	C_AXIS=1.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=285.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=30.0	+
+	PARALLEL_TWO=30.0	+
+	PCK_PATH=@pckernel
+
+tmp_buf2mpo +
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="SIMPLE_CYLINDRICAL"		+
+	A_AXIS=1.0		+ 
+	B_AXIS=1.0		+
+	C_AXIS=1.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=30.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+tmp_buf2mpo +
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="ORTHOGRAPHIC"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6380.0		+
+	SCALE=25.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+tmp_buf2mpo +
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="MARS" 		+
+	PROJ="LAMBERT_TWO_PARALLELS"	+
+	A_AXIS=6380.0		+
+	B_AXIS=6380.0		+
+	C_AXIS=6380.0		+
+	SCALE=25.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=35.0	+
+	PARALLEL_TWO=65.0	+
+	PCK_PATH=@pckernel
+
+tmp_buf2mpo +
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="JUPITER"		+
+	PROJ="POINT_PERSPECTIVE"	+
+	A_AXIS=1565.0		+
+	B_AXIS=1565.0		+
+	C_AXIS=1565.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	RANGE=156164.53125	+
+	XYZ=1501.038940429688	+
+	AXIS_LINE=400.0		+
+	AXIS_SAMPLE=400.0	+
+	FOCAL_SCALE=65.61679840087891	+
+	SUB_SPACE_LAT=23.85908317565918	+
+	SUB_SPACE_LON=217.3724365234375 +
+	CENT_LINE=811.0722045898438	+
+	CENT_SAMPLE=3.221923838125	+
+	N_ANGLE=395.91015625		+
+	PCK_PATH=@pckernel
+
+tmp_buf2mpo +
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="IDA" 		+
+	PROJ="STEREOGRAPHIC"	+
+	A_AXIS=1.0		+
+	B_AXIS=0.9		+
+	C_AXIS=0.8		+
+	SCALE=1.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST TWENTY-NINE      ***"
+write " "
+write "Test PERSPECTIVE projection with NON-spherical model"
+write "with center longitude/latitude of 0"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(23.855,58.318,53.026)	+
+	LONGITUDES=(142.614,151.483,110.261)	+
+	LINES=--	+
+	SAMPLES=--	+
+	LL_TYPE="PLANETOGRAPHIC"	+
+	TARGET="JUPITER" 		+
+	PROJ="POINT_PERSPECTIVE"	+
+	A_AXIS=1565.0		+
+	B_AXIS=1500.0		+
+	C_AXIS=1465.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	TGT_DIST=156164.53125		+
+	XYZ=1501.038940429688		+
+	AXIS_LINE=400.0		+
+	AXIS_SAMPLE=400.0	+
+	FOCAL_SCALE=65.61679840087891	+
+	SUB_SPACE_LAT=23.85908317565918  	+
+	SUB_SPACE_LON=217.3724365234375   +
+	CENT_LINE=811.0722045898438	+
+	CENT_SAMPLE=3.221923838125	+
+	N_ANGLE=395.91015625		+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST TWENTY-NINE 1/2      ***"
+write " "
+write "Repeat previous test, this time testing FORTRAN bridge"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines_f +
+	LATITUDES=(23.855,58.318,53.026)	+
+	LONGITUDES=(142.614,151.483,110.261)	+
+	LINES=--	+
+	SAMPLES=--	+
+	LL_TYPE="PLANETOGRAPHIC"	+
+	TARGET="JUPITER" 		+
+	PROJ="POINT_PERSPECTIVE"	+
+	A_AXIS=1565.0		+
+	B_AXIS=1500.0		+
+	C_AXIS=1465.0		+
+	SCALE=1.0		+
+	POS_LON_DIR="WEST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	TGT_DIST=156164.53125		+
+	XYZ=1501.038940429688		+
+	AXIS_LINE=400.0		+
+	AXIS_SAMPLE=400.0	+
+	FOCAL_SCALE=65.61679840087891	+
+	SUB_SPACE_LAT=23.85908317565918  	+
+	SUB_SPACE_LON=217.3724365234375   +
+	CENT_LINE=811.0722045898438	+
+	CENT_SAMPLE=3.221923838125	+
+	N_ANGLE=395.91015625		+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+write " "
+write "***	TEST THIRTY 	***"
+write " "
+write "Test SINUSOIDAL projection (Authalic) with triaxial"
+write "ellipsoid model in planetocentric latitude with,"
+write "radii in non-standard order"
+write " "
+let $echo="yes"
+let $becho="yes"
+
+tmp_routines +
+	LATITUDES=(40.0)	+
+	LONGITUDES=(20.0)  	+
+	LINES=--		+
+	SAMPLES=--		+
+	LL_TYPE="PLANETOCENTRIC"	+
+	TARGET="IDA" 		+
+	PROJ="SINUSOIDAL"	+
+	A_AXIS=1.0		+
+	B_AXIS=0.6		+
+	C_AXIS=0.8		+
+	SCALE=1.0		+
+	POS_LON_DIR="EAST"	+
+	SPHERICAL_AZ=0.0	+
+	CARTESIAN_AZ=0.0	+
+	CTR_LON=0.0		+
+	CTR_LAT=0.0		+
+	LINE_OFFSET=0.0		+
+	SAMPLE_OFFSET=0.0	+
+	PARALLEL_ONE=0.0	+
+	PARALLEL_TWO=0.0	+
+	PCK_PATH=@pckernel
+
+let $echo="no"
+let $becho="no"
+
+end-proc

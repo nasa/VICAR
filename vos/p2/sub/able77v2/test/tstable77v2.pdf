@@ -1,0 +1,19 @@
+!****************************************************************************
+! TSTABLE77V2_VMS.PDF, unit test procedure for subroutine ABLE77V2.F.
+!*****************************************************************************
+procedure help=*
+refgbl $echo
+refgbl $syschar
+body
+let _onfail="continue"
+let  $echo="yes"
+WRITE "Testing subroutine ABLE77V2"
+if ($syschar(1) = "VAX_VMS")
+   table77v2 inp=WMS_TEST_WORK:[TESTDATA.MIPL.VGR]f1636832.geo
+   table77v2 inp=WMS_TEST_WORK:[TESTDATA.MIPL.VGR]able77v2.dat
+   !table77v2 inp=dev:[tyr030.able77]mimas1339s1na.geoma
+else 
+   table77v2 inp=/project/it/testdata/mipl/vgr/f1636832.geo
+   table77v2 inp=/project/it/testdata/mipl/vgr/able77v2.dat
+end-if
+end-proc

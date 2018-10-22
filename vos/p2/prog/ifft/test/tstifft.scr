@@ -1,0 +1,65 @@
+! This is a script file to test the program IFFT.  The user
+! must have allocated a display device which has a trackball
+! or mouse tablet before running.
+!
+! To make this test repeatable and verifiable, the POSITION
+! parameter is used to override the position of the trackball
+! position.
+ifft    fileb (t.tmp,o.tmp)
+'vertex
+POSITION=(  50, 175)
+POSITION=(  25, 200)
+POSITION=(  60, 210)
+POSITION=(  75, 150)
+POSITION=(  75, 150)
+
+.pause ! When outline is removed, press <RETURN> to continue.
+wcur=(75,75)
+circle=25
+
+
+.pause ! When outline is removed, press <RETURN> to continue.
+wcur=(150,75)
+rectangl=(50,40)
+
+
+.pause ! When outline is removed, press <RETURN> to continue.
+'exterior
+
+
+'interior
+
+
+slds=100
+wcur=(135,135)
+ssds=100
+
+
+multiply=2.4
+
+
+d=60
+r=60
+
+
+thresh=0.5
+
+
+pcur=(200,200)
+add=45
+
+
+u=80
+l=80
+
+
+'phase
+
+
+'amplitud
+
+
+'rcur
+
+
+'exit

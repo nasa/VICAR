@@ -1,0 +1,20 @@
+/***********************************************************************
+                     IMAKE FILE FOR PROGRAM img2ascii
+
+   To Create the build file give the command:
+
+		$ vimake img2ascii			(VMS)
+   or
+		% vimake img2ascii			(Unix)
+
+************************************************************************/
+#define PROGRAM	img2ascii
+#define R2LIB
+#define MODULE_LIST img2ascii.f
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

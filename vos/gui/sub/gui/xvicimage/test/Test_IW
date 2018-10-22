@@ -1,0 +1,72 @@
+#
+# This is a standard X resource file.  Testers should try different values
+# in here as well as using the on-screen controls.
+#
+# You must make this file available to X.  The easiest way in Unix is to
+# rename the file to "Test_IW" (note the capitalization!) and set the
+# XAPPLRESDIR environment variable to point at the directory it is
+# in (with a trailing slash!).  The easiest way in VMS is to rename the file
+# to "test_iw.dat" and put it in your sys$login directory.
+#
+
+*image.xZoomIn: 1
+*image.xZoomOut: 1
+*image.yZoomIn: 1
+*image.yZoomOut: 1
+*image.tileWidth: 100
+*image.tileHeight: 100
+
+*image.viewHeight: 300
+*image.viewWidth: 300
+
+*image.imageMode: bw
+#*image.colormapPolicy: half
+*image.colorColormapPolicy: Half
+*image.colorDither: ordered
+*image.bwColormapPolicy: Half
+
+*Test_IW.allowShellResize: True
+#*image.navigationType: tab_group
+*image.traversalOn: False
+
+#*image.highlightThickness: 8
+*image.shadowThickness: 8
+
+*image.translations: #augment \n\
+	~Shift<Btn1Down>:		MousePanStart() \n\
+	~Shift<Btn1Motion>:		MousePan() \n\
+	~Shift~Ctrl~Meta<Key>osfLeft:	PanOne(left) \n\
+	~Shift~Ctrl~Meta<Key>osfRight:	PanOne(right) \n\
+	~Shift~Ctrl~Meta<Key>osfUp:	PanOne(up) \n\
+	~Shift~Ctrl~Meta<Key>osfDown:	PanOne(down) \n\
+	Ctrl~Shift~Meta<Key>osfLeft:	PanEdge(left) \n\
+	Ctrl~Shift~Meta<Key>osfRight:	PanEdge(right) \n\
+	Ctrl~Shift~Meta<Key>osfUp:	PanEdge(up) \n\
+	Ctrl~Shift~Meta<Key>osfDown:	PanEdge(down) \n\
+	Shift~Ctrl~Meta<Key>osfLeft:	PanHalfView(left) \n\
+	Shift~Ctrl~Meta<Key>osfRight:	PanHalfView(right) \n\
+	Shift~Ctrl~Meta<Key>osfUp:	PanHalfView(up) \n\
+	Shift~Ctrl~Meta<Key>osfDown:	PanHalfView(down) \n\
+	<Key>osfActivate:		Input("Return hit") \n\
+	<Btn2Down>:			Input("Draw","start") \n\
+	Button2<Key>space:		Input("Draw","mark") \n\
+	<Btn2Motion>:			Input("Draw","drag") \n\
+	<Btn2Up>:			Input("Draw","end") \n\
+	<Key>osfEscape:			CursorMode(toggle) \n\
+	~Shift<Key>grave:		CursorMode(toggle) \n\
+	<Key>asciitilde:		CursorMode(toggle,true) \n\
+	Shift<Key>grave:		CursorMode(toggle,true) \n\
+	<Key>plus:			CursorMode(floating) \n\
+	<Key>minus:			CursorMode(planted) \n\
+	Shift<Motion>:			MoveCursorMouse() \n\
+	<Key>c:				MoveCursorMouse() \n\
+	Shift Ctrl<Key>osfLeft:		MoveCursor(left) \n\
+	Shift Ctrl<Key>osfRight:	MoveCursor(right) \n\
+	Shift Ctrl<Key>osfUp:		MoveCursor(up) \n\
+	Shift Ctrl<Key>osfDown:		MoveCursor(down) \n\
+	Meta<Key>osfLeft:		MoveCursorScreen(left) \n\
+	Meta<Key>osfRight:		MoveCursorScreen(right) \n\
+	Meta<Key>osfUp:			MoveCursorScreen(up) \n\
+	Meta<Key>osfDown:		MoveCursorScreen(down) \n\
+	<Visible>:			Input("VisibilityNotify")
+

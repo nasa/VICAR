@@ -1,0 +1,163 @@
+procedure
+refgbl $echo
+refgbl $syschar
+! Jun 24, 2012 - RJB
+! TEST SCRIPT FOR LAVE
+! tests BYTE, HALF, FULL, REAL images
+!
+! Vicar Programs:
+!       gen list qsar label-list
+!
+! External Programs:
+!   <none>
+! 
+! Parameters:
+!   <none>
+!
+! Requires NO external test data: 
+!
+! Removed VMS checks
+!
+body
+let _onfail="stop"
+let $echo="yes"
+
+enable-log
+
+!
+!   THIS IS A TEST OF PROGRAM LAVE
+!
+!      test LAVE for byte data.
+!
+gen lavea 11 10
+!
+lave lavea lavea1
+list lavea1
+!
+lave lavea lavea2 'vert exclude=0
+list lavea2
+!
+lave lavea lavea3  (6,2,5,7) 'horiz 'image
+list lavea3
+!
+qsar lavea laveb area=(3,3,6,6,100)
+!
+lave laveb laveb1 'stdev
+list laveb1
+!
+lave laveb laveb2 filter=3
+list laveb2
+!
+lave laveb laveb3 filter=3 'highpass
+list laveb3
+!
+gen lavec 1 2048
+!
+lave lavec lavec1 'ais 'vert title="HERE IS SOME DATA PRINTED IN AIS FORMAT"
+list lavec1 (1,1,1,10)
+label-list lavec1
+!
+lave lavec size=(1,1,1,1024) 'ais 'vert title="HERE IS DATA IN AIS FORMAT"
+!
+!
+!      test LAVE for halfword data.
+!
+gen lavea 11 10  'half
+!
+lave lavea lavea1  
+list lavea1
+!
+lave lavea lavea2 'vert exclude=0   
+list lavea2
+!
+lave lavea lavea3  (6,2,5,7) 'horiz 'image  
+list lavea3
+!
+qsar lavea laveb area=(3,3,6,6,100)
+!
+lave laveb laveb1 'stdev  
+list laveb1
+!
+lave laveb laveb2 filter=3  
+list laveb2
+!
+lave laveb laveb3 filter=3 'highpass  
+list laveb3
+!
+gen lavec 1 2048  'half
+!
+lave lavec lavec1 'ais 'vert title="HERE IS SOME DATA PRINTED IN AIS FORMAT" 
+                     
+list lavec1 (1,1,1,10)
+label-list lavec1
+!
+lave lavec size=(1,1,1,1024) 'ais 'vert title="HERE IS DATA IN AIS FORMAT"  
+!
+!      test LAVE for fullword data.
+!
+gen lavea 11 10 'full
+!
+lave lavea lavea1
+list lavea1
+!
+lave lavea lavea2 'vert exclude=0
+list lavea2
+!
+lave lavea lavea3  (6,2,5,7) 'horiz 'image
+list lavea3
+!
+lave lavea laveb1 'stdev
+list laveb1
+!
+lave lavea laveb2 filter=3
+list laveb2
+!
+lave lavea laveb3 filter=3 'highpass
+list laveb3
+!
+gen lavec 1 2048 'full
+!
+lave lavec lavec1 'ais 'vert title="HERE IS SOME DATA PRINTED IN AIS FORMAT"
+list lavec1 (1,1,1,10)
+label-list lavec1
+!
+lave lavec size=(1,1,1,1024) 'ais 'vert title="HERE IS DATA IN AIS FORMAT"
+!
+!      test LAVE for real*4 data.
+!
+gen lavea 11 10 'real
+!
+lave lavea lavea1
+list lavea1
+!
+lave lavea lavea2 'vert exclude=0
+list lavea2
+!
+lave lavea lavea3  (6,2,5,7) 'horiz 'image
+list lavea3
+!
+lave lavea laveb1 'stdev
+list laveb1
+!
+lave lavea laveb2 filter=3
+list laveb2
+!
+lave lavea laveb3 filter=3 'highpass
+list laveb3
+!
+gen lavec 1 2048 'real
+!
+lave lavec lavec1 'ais 'vert title="HERE IS SOME DATA PRINTED IN AIS FORMAT"
+list lavec1 (1,1,1,10)
+label-list lavec1
+!
+lave lavec size=(1,1,1,1024) 'ais 'vert title="HERE IS DATA IN AIS FORMAT"
+!   CLEANUP
+!
+
+disable-log
+
+let $echo="no"
+!
+
+end-proc

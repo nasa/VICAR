@@ -18,34 +18,9 @@ if (-d $V2TOP/tae) then
   cp tae52_changes/help/tm/taefac.msg tae52_changes/help/msg/taefac.msg
 endif
 
-# Create $V2UTIL/x86-macosx directory for Mac Build.
+# Create $V2UTIL/x86-macosx and mac64-osx directories for 32 & 64-bit Mac Builds.
 #if ($VICCPU == "x86-macosx") then
   mkdir util/x86-macosx
+#else if ($VICCPU == "mac64-osx") then
+  mkdir util/mac64-osx
 #endif
-
-#
-# Make various build scripts executable
-#
-
-if (-d $V2TOP/tae) then
-  chmod +x util/fetch_tae53.csh
-  chmod +x util/fetch_tae52.csh
-  chmod +x util/fetch_tae.csh
-endif
-#
-chmod +x util/remove_element.csh
-chmod +x util/fetch_binaries.csh
-chmod +x util/bldcomfiles.csh
-chmod +x util/setup-indep.csh
-chmod +x util/java_build.csh
-chmod +x util/java_build_dir.csh
-chmod +x util/java_build_javadoc.csh
-chmod +x util/java_fetch_externals.csh
-chmod +x util/copy_one_platform_external.csh
-chmod +x util/copy_platform_externals.csh
-chmod +x util/chklog_unix.perl
-
-# Give all of the files read access.
-#
-chmod -R ugo+r $V2TOP
-

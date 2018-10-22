@@ -1,0 +1,57 @@
+procedure
+  refgbl $echo
+  refgbl $SysChar
+body
+
+  Local CASDir Type=String
+  Local GLLDir Type=String
+  Local VGRDir Type=String
+  Local SysPath Type=String
+
+  let $echo="no"
+  If ($SysChar(1)="VAX_VMS")
+    Let CASDir="wms_test_work:[testdata.cassini.cas$i$ss]"
+    Let GLLDir="wms_test_work:[testdata.gll]"
+    Let VGRDir="wms_test_work:[testdata.vgr]"
+    Let SysPath = "vms"
+  Else
+    Let CASDir="/project/test_work/testdata/cassini/casIss/"
+    Let GLLDir="/project/test_work/testdata/gll/"
+    Let VGRDir="/project/test_work/testdata/vgr/"
+    Let SysPath = "unix"
+  End-If
+
+!  write "This test PDF file will produce 2 IBIS file on the current directory."
+!  write "The files will be named moon.tiep and red.tiep"
+
+!  write "===For Galileo, Summation Mode"
+!  write "===Please interactively select tie points with the mouse"
+!  let $echo="yes"
+! MANMATCH inp=(&"GLLDir"summ.sedr, &"GLLDir"summ.over) +
+!          out=summ.tiep project=GLL file=&"SysPath"_summ.list
+! IBIS-LIST summ.tiep
+  let $echo="no"
+
+  write "===For Galileo, Full Frame"
+  write "===Please interactively select tie points with the mouse"
+  let $echo="yes"
+ MANMATCH inp=(&"GLLDir"moon.sedr, &"GLLDir"moon.over) +
+          out=moon.tiep 'OBJECT project=GLL file=&"SysPath"_moon.list
+ IBIS-LIST moon.tiep 
+  let $echo="no"
+
+  write "===For Voyager 2"
+  write "===Please interactively select tie pointes with the mouse"
+  let $echo="yes"
+ MANMATCH inp=(&"VGRDir"red.sedr, &"VGRDir"red.over) project=VGR-2 'object +
+               out=red.tiep 'sedr file=&"SysPath"_red.list
+ IBIS-LIST red.tiep  
+  let $echo="no"
+
+  write "===For Cassini"
+  write "===Please interactively select tie pointes with the mouse"
+  let $echo="yes"
+ MANMATCH inp=(&"CASDir"cassedr.int, &"CASDir"casover.int) +
+          out=casmatch.int 'OBJECT project=cassi file=casimglist.&"SysPath"
+ IBIS-LIST casmatch.int 
+end-proc

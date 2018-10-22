@@ -1,0 +1,17 @@
+/* Imake file for Test of VICAR subroutine TRANV */
+
+#define PROGRAM ttranv
+
+#define MODULE_LIST ttranv.f tztranv.c
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+/*#define LIB_LOCAL	/* remove on delivery */

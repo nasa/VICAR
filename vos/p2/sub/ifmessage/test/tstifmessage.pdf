@@ -1,0 +1,14 @@
+procedure
+refgbl $autousage
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+let $autousage = "no"
+FLAG-ADD NOMESSAGE
+WRITE "NO MESSAGES THE FIRST TIME"
+tifmessage 
+FLAG-DELETE NOMESSAGE
+WRITE "MESSAGES FROM FORTRAN AND C THE SECOND TIME."
+tifmessage
+end-proc

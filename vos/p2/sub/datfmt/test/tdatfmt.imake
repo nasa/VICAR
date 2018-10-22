@@ -1,0 +1,18 @@
+/* Imake file for Test of VICAR subroutine datfmt */
+
+#define PROGRAM tdatfmt
+
+#define MODULE_LIST tdatfmt.f tzdatfmt.c 
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+
+/* #define LIB_LOCAL       /* Comment out upon delivery */
+

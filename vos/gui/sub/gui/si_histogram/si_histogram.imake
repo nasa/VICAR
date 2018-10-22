@@ -1,0 +1,19 @@
+#define SUBROUTINE si_histogram
+#define MODULE_LIST SiHistMenuCmd.cc \
+   SiHistBox.cc SiHistSingleBox.cc SiHistWindow.cc \
+   SiHistBtnInterface.cc \
+   SiHistStat.cc SiHistGraph.cc SiHistAxis.cc \
+   SiHistogram.cc
+
+#define MODULE_LIST2 \
+   SiHistSpikeDialog.cc SiHistSpikeArrowIf.cc \
+   SiImageToHistGlue.cc SiRawHistToStrHistGlue.cc SiLutToStrHistGlue.cc \
+   SiCollectStretchedHist.cc SiCollectHist.cc SiCollectHistBG.cc
+
+#define GUI_SUBLIB
+
+#define USES_C_PLUS_PLUS
+
+#define LIB_GUI
+#define LIB_MOTIF
+#define LIB_MOTIFAPP

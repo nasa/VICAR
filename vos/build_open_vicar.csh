@@ -23,13 +23,12 @@ unalias mv
 unalias cp
 unset noclobber
 
-# Create vicset1 file
-
 # Prep the build
 cd $V2TOP
 util/prep.csh
-util/fetch_tae.csh |& tee fetch_tae.log
-echo "*** Ignore errors related to tae52 above"
+util/fetch_tae53.csh |& tee fetch_tae53.log
+
+# Create vicset1 file
 
 cd $V2TOP
 util/process_project_file.csh vicset1.source PROJ_OS >vicset1.csh
@@ -37,12 +36,11 @@ source $V2TOP/vicset1.csh
 source $V2TOP/vicset2.csh
 
 # Build imake on mac
-if ("$VICCPU" == "x86-macosx") then
+if ("$VICCPU" == "mac64-osx") then
   cd util/imake-x86-macosx
   make -f Makefile
-  cd ..
-  mkdir x86-macosx
-  cp imake-x86-macosx/imake x86-macosx/
+  cd ../
+  cp imake-x86-macosx/imake mac64-osx/
   cd $V2TOP
   source $V2TOP/vicset1.csh
 endif
@@ -71,7 +69,7 @@ echo "**********************************************************"
 echo "*** BUILDING JAVA"
 echo "**********************************************************"
 
-util/java_build.csh |& tee build_java .log
+util/java_build.csh |& tee build_java.log
 
 echo "**********************************************************"
 echo "*** BUILDING VICAR PART 2"

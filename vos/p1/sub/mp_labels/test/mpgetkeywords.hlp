@@ -1,0 +1,92 @@
+1 MIPS SUBROUTINE mpGetKeywords
+
+PURPOSE
+
+The function mpGetKeywords obtains the names of all keywords 
+in the map projection data object for which values have been 
+specified.
+
+2 OPERATION
+
+This function checks internally set bits in the MP software 
+that specify which valid map projection data object keyword
+values have been set by mpSetValues, mp_set_value, and/or
+mp_set_value_str.  It compiles a list of these and returns
+them to the application program.  Note that not all keywords
+are valid for all projections, thus only valid keywords are
+returned.
+
+CALLING SEQUENCE
+
+from C:		status = mpGetKeywords( MP mp, char *keywords, 
+			int *number_of_keyowrds, int *type, 
+			int *class );
+from FORTRAN:	call mp_get_keywords( mp,keywords,
+			number_of_keywords,type,class,status )
+
+Necessary include files from calling routine or program:
+		
+	mp_routines.h for C programs
+	mp_for_defs.fin for FORTRAN programs
+
+INPUT 
+
+mp			(MP type)
+
+A pointer to the MP data structure as returned by mpInit.
+In FORTRAN, this variable is of type REAL*8.  Mp type is defined
+in the include file mp_routines.h.
+
+OUTPUT
+
+keywords		(character array)
+
+One dimensional character array which contains all vaild map 
+projection keywords that are currently set in the map projection 
+data object referenced by the MP argument.
+
+number_of_keywords	(integer)
+
+Pointer to an integer value which gives the number of keyword names
+returned by the function.
+
+type			(integer)
+
+Integer array of codes for the data types of the keywords returned.
+
+		1 is character string;
+		2 is short integer (INTEGER*2);
+		3 is long integer (INTEGER*4);
+		4 is real (REAL*4);
+		5 is double precision (REAL*8).
+
+class		(integer)
+
+Integer array of the class types of the keywords returned.
+Class type of 0 is CORE and 1 is SUPPLEMENTARY.
+
+RETURN
+
+status 		(integer)
+
+Status flag for the operation of the routine. 
+Zero (0) signifies success. Negative one (-1) signifies
+failure.  Error value  -1002 can also be returned, which 
+signifies an internal structure error.
+
+
+3 ENVIRONMENT
+
+Software platforms:	VICAR 11.0 (VMS/UNIX)
+Hardware platforms:	This routine has been tested on
+			DEC Alpha, DEC VAX-VMS, Sun Sparcstation 
+			(Solaris and SunOS), Silicon Graphics (SGI), 
+			and HP-700.
+			No particular hardware requirements.
+
+3 BACKGROUND
+
+Author:			Lucas Kamp (lwk059@ipl.jpl.nasa.gov)
+Cognizant Engineer:	Justin McNeill (jfm059@ipl.jpl.nasa.gov)
+Date written:		October 1993
+Revision history:	Original

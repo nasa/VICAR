@@ -1,0 +1,19 @@
+/* Imake file for Test of VICAR subroutine fpse */
+
+#define PROGRAM tzfpse
+
+#define MODULE_LIST tzfpse.c
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB 
+
+#define USES_FORTRAN
+#define USES_ANSI_C
+#define R2LIB
+#define LIB_RTL
+#define LIB_FORTRAN
+/*#define LIB_LOCAL*/
+
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_MATH77

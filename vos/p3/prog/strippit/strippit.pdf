@@ -1,0 +1,109 @@
+Process help=*
+PARM INP	STRING	COUNT=1:10
+PARM OUT	STRING	COUNT=1
+PARM SIZE	INTEGER	COUNT=4	DEFAULT=(1,1,0,0)
+PARM SL		INTEGER COUNT=1 DEFAULT=1
+PARM SS		INTEGER	COUNT=1	DEFAULT=1
+PARM NL		INTEGER	COUNT=1	DEFAULT=0
+PARM NS		INTEGER	COUNT=1	DEFAULT=0
+PARM STRIPLEN	INTEGER	COUNT=1	DEFAULT=3750
+PARM GAPWIDTH	INTEGER	COUNT=1	DEFAULT=50
+
+End-proc
+ 
+.TITLE
+TAE PROCESS STRIPPIT
+.HELP
+PURPOSE:
+ 
+   STRIPPIT is a TAE process which takes an image and puts it into strips
+of STRIPLEN lines with a spacing of GAPWIDTH number of samples between the
+strips.  It was written to facilitate the formatting of long and skinny
+flight lines for playback.
+ 
+EXECUTION:
+ 
+   The following is the execution statement format for STRIPPIT:
+ 
+		STRIPPIT INP OUT PARAMS
+ 
+   where INP, OUT, and PARAMS are parameters discussed in their respective
+parameter sections. 
+.PAGE
+OPERATION:
+ 
+   STRIPPIT does the seemingly simple task of cutting and pasting long slender
+flight line images into parallel strips in order to format the images for
+playback.  It uses a slightly more complex algorithm than would seem necessary
+because of the inefficiency of non-sequential I/O (especially XVREADing) which
+would slow down the operation considerably.  Instead, a maximum size buffer is
+allocated for the output, and the reading and writing is done on a block by
+block basis, one block being the maximum number of lines by the number of
+strips necessary in the output.
+
+   The two unique parameters (other than SIZE) are STRIPLEN and GAPWIDTH.
+STRIPLEN lets the user select the number of lines of the strips, and GAPWIDTH
+sets the number of samples spacing between the image strips.  The defaults
+are set up for standard TIMS processing.
+
+   This program was written to facilitate the processing of TIMS data, which
+has come in lengths of over 22,000 lines in a single flight line.  It can just
+as well be used by anyone working with long flight lines of AIS, NS001 or other
+airborne sensors, however.
+ 
+ 
+RESTRICTIONS:
+ 
+   As it is currently designed, the output can be in no wider than 10,000
+pixels, and must be byte format.
+
+   The input dataset must be repeated in the INP parameter, once for every
+strip to be output. For example, an image that is divided into 3 segments must
+have the input dataset listed 3 times with the IMP parameter.
+.PAGE 
+EXAMPLES:
+ 
+1) STRIPPIT (INP,INP) OUT
+ 
+2) STRIPPIT (INP,INP,INP,INP) OUT STRIPLEN=2000 GAPWIDTH=20
+ 
+ 
+TIMING:
+ 
+WRITTEN BY:  R. E. Walker     16DEC85
+ 
+COGNIZANT PROGRAMMER:  same
+ 
+REVISION: NEW
+ 
+.LEVEL1
+.VARI INP
+The image file to be cut and
+stripped into segments, listed
+once for each segment.
+.VARI OUT
+Output data set containing image
+file in parallel pieces.
+.VARI SIZE
+Size of input window to be used.
+.VARI SL
+Line at which to begin reading
+input.
+.VARI SS
+Sample at which to begin reading
+input.
+.VARI NL
+The number of lines to be output
+Default is to output entire file
+.VARI NS
+The  number  of  samples  to  be
+output. Default is to do entire
+file.
+.VARI STRIPLEN
+The number of lines to be in the
+stripped output file.
+.VARI GAPWIDTH
+The number of samples to be be-
+tween the individual strips.
+.LEVEL2
+.END

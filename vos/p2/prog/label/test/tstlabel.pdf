@@ -1,0 +1,201 @@
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+!"WMS_TEST_WORK:[TESTDATA.GLL]s0061000300.1"
+body
+let _onfail="continue"
+let $echo="yes"
+let $autousage="none"
+enable-log
+local testfile type=string init="/project/test_work/testdata/gll/s0061000300.1"
+if ($syschar(1) = "VAX_VMS")
+  let testfile = "WMS_TEST_WORK:[TESTDATA.GLL]s0061000300.1"
+end-if
+write "		Test for program LABEL"
+write ""
+write "Make sure file &testfile is available"
+if ($syschar(1) = "VMS")
+  write "Make sure you have specified a VMS-style pathname (default is Unix)"
+end-if
+!
+write ""
+write "Generate a file with some labels first"
+gen t1 10 10  
+insert t1 t2
+stretch t2 t3
+insert t3 t4
+write "Now list out the labels"
+label-list t4 'nousrtim
+!
+write "	-ADD -- add some label items to the existing file (nocopy)"
+label-add t4 items="slope=5.6, time=45 name='No name' mv=(1.2,3.5, 4.6,7.8,9)"
+label-add t4 items="dslope=5.00000012" 
+label-list t4 'hist 'nousrtim
+label-add t4 items="comment='straight data copy' comment(2)='second comment'" task=insert inst=1
+label-list t4 'nousrtim
+label-add t4 items="proj=mercator center=(45,12.7) line=5 samp=5" property=tstmap
+label-add t4 items="scale=10.0" prop=tstmap
+label-list t4 'prop 'nousrtim
+label-add t4 items="red=(1,2,3) green=(4,5,6) blue=(7,8,9)" prop=tstlut
+label-list t4 'nousrtim
+label-add t4 items="red=(11,12,13) green=(14,15,16) blue=(17,18,19)" prop=tstlut instance=2
+label-list t4 'nousrtim
+write " Update existing label"
+label-add t4 items="proj=cylindrical samp=10 longitude=10.5" property=tstmap 'prop 'update
+label-list t4 'nousrtim
+write " Now add items using data copy"
+label-add t4 t5 items="action=('LABEL-ADD', '-- copy option used') long=(1,4,5,6,7,8,9,10)"
+label-list t5 'dump 'nousrtim
+label-add t5 items="long(2)=(2,3)"
+label-add t5 items="red(4)=4 green(4)=7 blue(4)=10" prop=tstlut
+label-list t5 'dump 'pack 'nousrtim
+!
+write " -CONCAT -- Add label sets to other images"
+gen t6
+label-concat (t5,t6)
+label-list t6 'nousrtim
+gen t6
+label-concat (t5,t6) 'prop
+label-list t6 'nousrtim
+gen t6
+label-concat (t5,t6) task=stretch
+label-list t6 'nousrtim
+gen t6
+label-concat (t5,t6) t7 prop=tstlut instance=2
+label-list t7 'nousrtim
+!
+write " -DELETE -- Delete different items"
+label-delete t5 task=insert key=mv element=3 nelement=2
+label-list t5 'hist 'pack 'nousrtim
+label-delete t5 task=insert
+label-list t5 'hist 'nousrtim
+label-delete t5 task=gen key=/ALL
+label-list t5 'nousrtim
+label-delete t5 key=(red,green) prop=tstlut element=1 nelement=1 instnces=2
+label-list t5 'prop 'nousrtim
+label-delete t5 key=(red,green,blue) prop=tstlut element=1 nelement=1
+label-list t5 'prop 'nousrtim
+label-delete t5 t6 key=/all prop=tstmap
+label-list t6 'prop 'nousrtim
+label-delete t6 'property
+label-list t6 'nousrtim
+!
+write " -REPLACE -- Replace specific label items"
+label-repla t4 item="nl=5" 'sys
+label-list t4 'nousrtim
+label-repla t3 t4 "ival=9999" task=gen inst=1
+label-list t4 'nousrtim
+label-repla t5 item="long(5)=(50,60)"
+label-repla t5 item="red(2)=30 green(2)=60" prop=tstlut
+label-repla t5 item="blue(2)=(90,100)" prop=tstlut instance=2
+label-list t5 'pack 'nousrtim
+!
+write " Now make everything single-valued by deleting elements > 1"
+label-delete t5 t6 key=/ALL element=2 nelement=-1 'hist
+label-delete t6 key=/ALL element=2 nelement=-1 'prop
+label-list t6 'nousrtim
+copy t4 t7
+!label-create t7 t4 NL=10 NB=10 NLB=5 NBB=64 'BINARY
+label-list t4 'nousrtim
+write " -REMOVE -- Remove the binary header" 
+label-remove t4 t1 'NOBINHEAD
+write "	attempt to list should be successful" 
+label-list t1 'nousrtim
+write " -REMOVE -- Remove the binary prefix" 
+label-remove t4 t1 'NOBINPREF
+write "	attempt to list should be successful" 
+label-list t1 'nousrtim
+write " -REMOVE -- Remove all the header" 
+label-remove t4 t1
+write "	attempt to list should cause an error"
+label-list t1 'nousrtim
+write " -CREATE -- add a label then list it out"
+label-create t1 t6 nl=10 ns=10 comment="What a slick image"
+label-list t6 'nousrtim
+!
+write " -SWITCH -- gen a different size file then switch the labels"
+gen t1 5 5 linc=10 
+list t1
+label-switch (t5,t1) t2
+list t2
+label-list t2 'nousrtim
+!
+write ""
+write "Generate a 3-D file with some labels first"
+gen t1 10 10 3 'BIL
+copy t1 t7
+!label-create t7 t1 NL=10 NS=10 NB=3 NLB=5 NBB=64 'BINARY
+label-list t1 'nousrtim
+!write " -REMOVE -- Remove the binary header" 
+!label-remove t1 t2 'NOBINHEAD
+write "	attempt to list should be successful" 
+label-list t2 'nousrtim
+write " -REMOVE -- Remove the binary prefix" 
+label-remove t1 t2 'NOBINPREF
+write "	attempt to list should be successful" 
+label-list t2 'nousrtim
+write " -REMOVE -- Remove the binary header and prefix" 
+label-remove t1 t2
+write "	attempt to list should cause an error"
+label-list t2 'nousrtim
+write " -CREATE -- add a label"
+label-create t2 t3 ns=10 nl=10 nb=3 org=BIL
+label-list t3 'nousrtim
+write " -CREATE -- different host formats"
+label-create t2 t3 ns=10 nl=10 nb=3 org=BIL host=VAX-VMS
+label-list t3 'sys 'nousrtim
+label-list t3 'dump 'nousrtim
+label-create t2 t3 ns=10 nl=10 nb=3 org=BIL host=SUN-4
+label-list t3 'sys 'nousrtim
+label-list t3 'dump 'nousrtim
+write " test handling long records. " 
+gen t1 10 200000 
+label-add t1 t4 items="slope=5.6"
+label-list t4 'nousrtim
+!
+write "multi-input option and abend with -LIST"
+label-list (t1 t2 t3 t4) 'nousrtim
+! make sure xxxx doesn't exist
+ush rm xxxx
+write "this should generate an error msg but no abend:"
+label-list (t1 xxxx t3 t4) 'nousrtim
+write "this should generate an abend:"
+label-list xxxx  'nousrtim
+!
+ush rm t1 t2 t3 t4 t5 t6 t7
+!
+label-list "&testfile" 'nousrtim
+label-remove "&testfile" test.nolabel 'BINARY
+write " attempt to list should cause error "
+label-list test.nolabel 'nousrtim
+label-create test.nolabel test.vpds NL=800 NS=800 NLB=2 NBB=200 'BINARY
+label-list test.vpds 'nousrtim
+difpic ("&testfile",test.vpds)
+label-create test.nolabel test.binary nl=800 ns=800 nlb=2 nbb=200 'bin +
+	bhost=vax-vms bltype="tstpds"
+label-list test.binary 'sys 'nousrtim
+label-list test.binary 'dump 'nousrtim
+label-create test.nolabel test.binary nl=800 ns=800 nlb=2 nbb=200 'bin +
+	bhost="vax-vms" brealfmt="vax" bltype="tstpds"
+label-list test.binary 'nousrtim
+label-list test.binary 'dump 'nousrtim
+write "The following commands test the new binary features of LABEL"
+label-add test.vpds test.added items="LIST=(1,2)"
+label-add test.added items="test=binary" prop=tstprop
+label-list test.added 'nousrtim
+difpic (test.vpds,test.added)
+label-del test.added test.deleted keys="LIST" tasks="LABEL"
+label-del test.deleted keys="TEST" prop=tstprop
+label-list test.deleted 'nousrtim
+difpic (test.vpds,test.deleted)
+label-switch (test.added,test.deleted) test.switch
+label-list test.switch 'nousrtim
+difpic (test.vpds,test.switch)
+!
+ush rm test.nolabel test.vpds test.binary test.added test.deleted test.switch
+!
+
+disable-log
+
+end-proc

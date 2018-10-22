@@ -1,0 +1,17 @@
+/* Imake file for VICAR subroutine MSPICE */
+
+#define SUBROUTINE   mspice
+
+#define MODULE_LIST  cltsub.c lclsub.c ms_xdr.c cam_info.c \
+		zms_bridge.c xms_bridge.f
+
+#define USES_FORTRAN
+#define USES_ANSI_C
+
+#define FTN_STRING
+#define P2_SUBLIB
+#define LIB_NETWORK
+
+/* #define DEBUG */ /* Remove before delivery. */
+
+

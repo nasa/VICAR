@@ -47,7 +47,7 @@ sed -e 's/^@/#/' </tmp/tmp_process2.$$ >/tmp/tmp_process3.$$
 
 # Run the C preprocessor.  Support // comments, and pass them through.
 
-cpp -C -P -undef -Usun -Ulinux -I. $defines /tmp/tmp_process3.$$ /tmp/tmp_process4.$$
+cpp -nostdinc -C -P -undef -Usun -Ulinux -I. $defines /tmp/tmp_process3.$$ /tmp/tmp_process4.$$
 
 # Remove any hash from cpp
 

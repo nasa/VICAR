@@ -1,0 +1,109 @@
+procedure
+
+local   afidsroot   type=string count=1
+local   aftestdata  type=string count=1
+
+! Jun 24, 2012 - RJB
+! TEST SCRIPT FOR IMGSTAT
+! tests BYTE, HALF, FULL, REAL images
+!
+! Vicar Programs:
+!       translog copy list f2 fit filter difpic
+!
+! External Programs:
+!   <none> 
+!
+! Parameters:
+!   <none>
+!
+! Requires external test data: 
+!   cartlab or mipl dependent pointers
+!   
+!   To facilitate this test you can define an
+!   environment variable $AFIDS_TESTDATA to point to
+!   that data. The cartlab system does not. In the git archive
+!   on pistol there is softlink to the test data in vdev that
+!   allows this test to pass 
+!
+refgbl $echo
+refgbl $syschar
+
+body
+
+enable-log
+
+let _onfail="stop"
+let $echo="no"
+
+!check to see if mipl or cartlab for certain programs
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
+
+if (afidsroot = "")
+!MIPL
+    ush ln -s /project/test_work/testdata/gll gl 
+else
+!CARTLAB
+    if (aftestdata = "")
+        ush ln -s /raid1/vicar_test_images/testdata/gll gl
+    else
+        ush ln -s $AFIDS_TESTDATA/vicar_test_images/testdata/gll gl
+    end-if
+end-if
+let _onfail="goto rm"
+let $echo="yes"
+
+! TEST 1  - Use a tiny part of the image for most of the test
+!       get mean moment variance and std dev
+copy gl/7500.spk a (105,495,5,5)
+pixstat a mean nlw=5 nsw=5 'mean 'real
+pixstat a mom  nlw=5 nsw=5 'mom  'real
+pixstat a var  nlw=5 nsw=5 'vari 'real
+pixstat a sdev nlw=5 nsw=5 'sdev 'real
+list mean
+list mom
+list var
+list sdev
+
+!Compute var2 = mom - mean**2 and compare with program output
+f2 (mom,mean) var2 func="in1-in2*in2"
+f2 (var,var2) diff func="in1-in2"
+list diff	!Differences should be small
+
+!  Check different output formats
+!
+!  TEST 2 - BYTE
+!
+pixstat a mean nlw=5 nsw=5 'mean 'byte
+list mean
+!
+!  TEST 3 - HALF
+!
+pixstat a mean nlw=5 nsw=5 'mean 'half
+list mean
+!
+!  TEST 4 - FULL
+!
+pixstat a mean nlw=5 nsw=5 'mean 'full
+list mean
+!
+!  TEST 5 - Compare 'MEAN with output from FILTER program
+!
+fit gl/7500.spk a perc=.1 'byte
+pixstat a b nlw=5 nsw=5 'mean
+filter a c nlw=5 nsw=5 weights=(1,1,1,1,1,1,1,1,1)
+difpic (b,c)		!difference should be all zeroes
+let $echo="no"
+write "*************************************"
+write " There should be NO differences"
+write "*************************************"
+write " "
+rm>
+
+disable-log
+
+let $echo="no"
+ush rm gl
+
+end-proc

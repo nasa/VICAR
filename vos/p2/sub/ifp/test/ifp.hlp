@@ -1,0 +1,63 @@
+1 IFP
+
+  IFP - four point interpolation function
+
+  Calling sequence:
+
+      Fortran interface:
+
+            OUT = IFP (X, Y, M, N, BUF, INTERP, HALF)
+
+      C interface:
+
+            out = zifp (x, y, m, n, buf, interp, half)
+
+  Arguments:  
+
+	X,Y        Coordinates of the desired value 
+                   REAL*4 when using Fortran
+                   REAL   when using C
+
+	BUF(M,N)   Input buffer of dimension M,N
+
+                   Note: When using 'C', the memory layout of BUF[M][N]
+                   as provided by the 'C' compiler is different than that
+                   which is provided by the 'FORTRAN' compiler.  Therefore,
+                   the 'C' bridge interface to the 'FORTRTAN' function IFP
+                   translates the memory layout of BUF[M][N] to that which
+                   is compatible with the 'FORTRAN' compiler and which is
+                   required by the 'FORTRAN' function IFP.
+
+	INTERP     = 0: interpolation, = 1: no interpolation
+	HALF       = 0: byte data,     = 1: halfword
+
+
+2 History
+
+  Current Cognizant Programmer: L.W.Kamp
+
+  Removed LIB_LOCAL as per FR85770     (CRI) 7 Mar  1995
+  Made portable for UNIX by: J. Turner (CRI) 1 July 1994
+  Converted to VAX by:       B.Z.Barkan,  Feb. 1985
+  Original Programmer:       W.D.Benton,  28 Dec.1978
+
+  Source Language: Fortran
+  Bridge Language: C   
+
+2 Operation
+
+  Given an input buffer BUF(M,N) and two points X,Y, where X
+  lies in the range (1,...,M) and Y lies in the range (1,...,N),
+  then IFP returns a value interpolated between the values of
+  BUF at the four points in the M/N plane that are closest to
+  X and Y.  Thus, if IX and IY are the integer truncations of
+  X and Y, then the interpolation is between:
+
+   BUF(IX), BUF(IX+1), BUF(IY), BUF(IY+1).
+
+  An inverse-squared-distance weighted interpolation is performed,
+  unless NOIN=1, in which case the value of BUF at the closest of
+  these points is returned.
+
+  The data type of BUF and IFP must be the same and correspond to
+  that specified by HALF.

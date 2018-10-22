@@ -1,0 +1,15 @@
+procedure
+refgbl $echo
+local total type=int
+local next type=int
+body
+let _onfail="continue"
+let $echo="yes"
+cnt tstcnt.dat total next
+disp total
+disp next
+! TEST CASE OF NO RECORDS
+cnt tstcnt2.dat total next
+disp total
+disp next
+end-proc

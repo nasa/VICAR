@@ -1,0 +1,26 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM fft22
+
+   To Create the build file give the command:
+
+		$ vimake fft22			(VMS)
+   or
+		% vimake fft22			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	fft22
+#define R2LIB
+
+#define MODULE_LIST fft22.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

@@ -1,0 +1,151 @@
+process help=*
+ PARM 	INP 	TYPE=STRING
+ PARM 	OUT 	TYPE=STRING 	COUNT=1:2
+ PARM 	SIZE 	TYPE=INTEGER 	COUNT=4 	DEFAULT=(1,1,0,0)
+ PARM 	SL 	TYPE=INTEGER 			DEFAULT=1
+ PARM 	SS 	TYPE=INTEGER 			DEFAULT=1
+ PARM 	NL 	TYPE=INTEGER 			DEFAULT=0
+ PARM 	NS 	TYPE=INTEGER 			DEFAULT=0
+ PARM 	NLW 	TYPE=INTEGER 			DEFAULT=3
+ PARM 	NSW 	TYPE=INTEGER 			DEFAULT=3
+ PARM 	REPLACE TYPE=INTEGER 			DEFAULT=0
+ PARM 	EXCLUDE TYPE=INTEGER 			DEFAULT=-32768
+ PARM 	DENSE	TYPE=KEYWORD	COUNT=(0:1)	DEFAULT=--	VALID="DENSE"
+ PARM   BINARY  TYPE=KEYWORD    VALID=(BINARY,NOBINARY) DEFAULT="NOBINARY"
+ END-PROC
+.TITLE
+ ZFILL
+.HELP
+ PURPOSE:
+      ZFILL uses a window of NLW lines by NSW samples to fill in void areas
+ of an image.  Void areas are assumed to be zero DN, but can be respecified
+ by parameter.  Voids are filled with the mean value of all 'non-void DN'
+ pixels in the window.  A mask showing filled pixels can be generated on 
+ request.
+      The user can select between two algorithms in ZFILL. The results of the
+ algorithms are identical, but computation times vary dramatically. The
+ 'sparse' algorithm is faster if the input image is mostly empty; the 'dense'
+ algorithm is faster if the input image is mostly complete.
+      This program can be run on a BSQ file with 1 band or a BIL file with
+ any number of bands.  The input can either be byte or halfword data.
+
+ RESTRICTION:
+      IF user specifies BINARY keyword, ZFILL will only work on the same 
+ platform and operation systems on which the input image was created.
+
+.PAGE
+ BINARY LABELS PROCESSING:
+      If the user specifies to preserve binary labels, ZFILL will copy the 
+ input image's binary labels and relaying them to the output image without 
+ modifying any part of label's information.
+
+.PAGE
+ EXECUTION:
+
+ Examples
+
+	ZFILL A B 'DENSE
+
+	This command will use the default window (3 by 3) to scan
+	input image A for pixels with value 0.  For each such pixel,
+	the average of the surrounding pixels will be calculated, and 
+	substituted for the original value. The 'dense' algorithm has
+	been chosen, for the input has only a few 0 values to be replaced.
+
+	ZFILL A B REPL=10 EXCL=8
+
+	This command will use the default window (3 by 3) to scan
+	input image A for pixels with value 10.  For each such pixel,
+	the average of the surrounding pixels (excluding those valued 8)
+	will be calculated, and substituted for the original value.
+
+	ZFILL A (B,MSK)  NLW=2  NSW=5
+
+	This command will scan image A for occurrences of 0-valued pixels
+	(zero is the default value for replacement).  These will again
+	be replaced by the averages of the surrounding values.  Note
+	the window size which is specified to be 2 by 5.  Even dimensions
+	are automatically increased to the next odd integer, so the
+	window size which will be actually used is NLW=3, NSW=5.
+	Note that the command above produces an mask showing which
+	pixels were changed; mask pixels have DN 0 if they were changed
+	in the output image, and 255 otherwise.
+
+.PAGE
+
+ OPERATION:
+
+      ZFILL contains two algorithms. In the 'sparse' (default) mode, the 
+  data lines needed for the window of the first pixel are read in and averaged;
+  after this point, as the window moves across the image, the left (and top) 
+  values which move out of the window are subtracted from the accumulating
+  variables, and the new pixels appearing at the bottom and right of the window
+  are added in.  Any time a pixel needs to be replaced, the average may be 
+  easily calculated from these variables.
+      In the 'dense' mode, pixels are checked for replacement first; the
+ replacement value is computed only if needed. The entire window must be 
+ examined to compute the replacement value each time a pixel is replaced.
+      As a rule of thumb, the default (sparse) algorithm is faster if the
+ fraction of pixels to be replaced is more than 2/NSW. The 'dense' algorithm
+ is faster otherwise.
+      When the filling window extends beyond the image (not image window)
+ boundaries, the outside pixels are treated as excluded values.
+
+ WRITTEN BY:  S. Z. Friedman, March 1983
+ COGNIZANT PROGRAMMER:  Ron Alley
+ REVISION:
+
+  1987-07-16 Ron Alley
+  2001-01-24 AXC Added support to preserve binary labels per request by
+                 T. Roatsch from DLR. Added a new keyword in the pdf to 
+                 enable the new capability. Updated test pdf and help 
+                 file.
+  2016-02-12 WLB Added enable/disable-log to tst pdf.
+
+.LEVEL1
+.VARIABLE INP
+ STRING - Input image file
+.VARIABLE OUT
+ STRING - Output image file
+.VARIABLE SIZE
+ INTEGER - Standard VICAR size field
+.VARIABLE SL
+ INTEGER - Starting line
+.VARIABLE SS
+ INTEGER - Starting sample
+.VARIABLE NS
+ INTEGER - Number of lines
+.VARIABLE NL
+ INTEGER - Number of samples
+.VARIABLE NLW
+ INTEGER - Window length
+.VARIABLE NSW
+ INTEGER - Window width
+.VARIABLE REPLACE
+ INTEGER - DN value to replace
+.VARIABLE EXCLUDE
+ INTEGER - DN value to exclude
+.VARIABLE DENSE
+ KEYWORD - Use to fill mostly 
+ complete datasets.
+.KEYWORD - BINARY
+Copy binary labels?
+.LEVEL2
+.VARIABLE NLW
+ The length in lines of the window used to scan the input image.
+.VARIABLE NSW
+ The width in pixels of the window used to scan the input image.
+.VARIABLE REPLACE
+ The value specified by REPL will be replaced with the average of the
+ other pixels within the window.
+.VARIABLE EXCLUDE
+ The value specified by EXCL will be ignored in the calculation of the
+ average of the pixels within a given window.
+.VARIABLE DENSE
+ This invokes an algorithm that is more efficient if the input image has
+ relatively few pixels to be replaced. As a rule of thumb, use the dense
+ algorithm if the fraction of pixels to be replaced is less than 2/NSW.
+.vari BINARY
+This keyword parameter may be used to tell COPY that binary labels
+and prefixes must be copied along with image data.
+.END

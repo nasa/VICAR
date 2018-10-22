@@ -83,7 +83,7 @@ echo "**** CODE GENERATION PHASE OF JAVA BUILD ****"
 echo "*********************************************"
 
 cd $V2JAVA
-foreach tld (jpl com gov one the)
+foreach tld (jpl com)
   find $tld -name test -prune -o -type d -exec $V2UTIL/java_build_dir.csh {} generate \;
 end
 
@@ -95,17 +95,13 @@ echo "**** COMPILE PHASE OF JAVA BUILD ****"
 echo "*************************************"
 
 cd $V2JAVA
-foreach tld (jpl com gov one the)
+foreach tld (jpl com)
   find $tld -name test -prune -o -type d -exec $V2UTIL/java_build_dir.csh {} compile \;
 end
 
 # Now run javadoc on all the generated packages.
 
 $V2UTIL/java_build_javadoc.csh
-
-# Generate doxygen documentation
-
-$V2UTIL/java_build_doxygen_doc.csh
 
 # The build is done...
 

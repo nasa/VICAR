@@ -1,0 +1,11 @@
+/* Imake file for VICAR subroutine intrpa */
+
+#define SUBROUTINE intrpa
+
+#define MODULE_LIST intrpa.f zintrpa.c
+
+#define P2_SUBLIB
+
+#define USES_C
+#define USES_FORTRAN
+#define FTNINC_LIST fortport

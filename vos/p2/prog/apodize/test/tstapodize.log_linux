@@ -1,0 +1,303 @@
+tstapodize
+translog INP=AFIDS_ROOT TRANS=afidsroot
+gen mask87.real nl=700 ns=700 format=real sinc=1.0 linc=0 modulo=8
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+f2 mask87.real out=F87.real format=real function="sin(in1)"
+Beginning VICAR task f2
+F2 version 26-Jul-11
+F2 calculating every pixel
+FUNCTION EVALUATED 490000 TIMES
+cform F87.real F87H  irange=(-1.0,1.0) orange=(0,255) oform=half
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *   127.500+   127.500
+INPUT FORMAT = REAL
+OUTPUT FORMAT = HALF
+CONVERSION COMPLETE
+rotate F87H F87N angle=25 center=(350,350) 'nointerp
+ROTATE2	INP=@INP PDS=ZZPAR SIZE=@SIZE	SL=@SL	SS=@SS	NL=@NL	NS=@NS	 +
+	ANGLE=@ANGLE	NOINTERP=@NOINTERP	 +
+	LINE=@LINE	SAMPLE=@SAMPLE	CENTER=@CENTER
+Beginning VICAR task ROTATE2
+REGION (   1,    1,  700,  700) OF THE INPUT PICTURE IS ROTATED    25.0 DEGREES ABOUT 350.5 , 350.5
+THE CENTER OF ROTATION IN THE OUTPUT PICTURE IS LOCATED AT PIXEL      350.0,   350.0
+IF ($COUNT(OUT) = 0) RETURN
+LGEOM INP=F87H OUT=F87N SIZE=@SIZE NL=@NL NS=@NS  +
+        IDSNAM=@IDSNAM IDSNS=@IDSNS PARMS=ZZPAR
+Beginning VICAR task LGEOM
+END-PROC
+rotate F87H F87I angle=25 center=(350,350)
+ROTATE2	INP=@INP PDS=ZZPAR SIZE=@SIZE	SL=@SL	SS=@SS	NL=@NL	NS=@NS	 +
+	ANGLE=@ANGLE	NOINTERP=@NOINTERP	 +
+	LINE=@LINE	SAMPLE=@SAMPLE	CENTER=@CENTER
+Beginning VICAR task ROTATE2
+REGION (   1,    1,  700,  700) OF THE INPUT PICTURE IS ROTATED    25.0 DEGREES ABOUT 350.5 , 350.5
+THE CENTER OF ROTATION IN THE OUTPUT PICTURE IS LOCATED AT PIXEL      350.0,   350.0
+IF ($COUNT(OUT) = 0) RETURN
+LGEOM INP=F87H OUT=F87I SIZE=@SIZE NL=@NL NS=@NS  +
+        IDSNAM=@IDSNAM IDSNS=@IDSNS PARMS=ZZPAR
+Beginning VICAR task LGEOM
+END-PROC
+copy F87N F87N.rot size=(1,1,400,400)
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+if (afidsroot = "")
+    fft22 F87N.rot xxA mode=forward format=comp
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+    fftflip xxA F87N_fft 'flip
+Beginning VICAR task fftflip
+FFTFLIP version 5-SEP-94
+else
+end-if
+ccomp F87N_fft (F87N_fft.amp,F87N_fft.pha) trans=polar
+Beginning VICAR task ccomp
+CCOMP version 02-MAY-94
+maxmin F87N_fft.amp minival=minval maxival=maxval
+Beginning VICAR task maxmin
+*** maxmin - 06-Jul-2012
+
+Min. value: 0.000000E+00   at  (     7,   167)
+Max. value: 3.276800E+04   at  (     2,   236)
+
+let $echo="no"
+NO APODIZATION on NO-INTERPOLATION
+F87N_fft.amp range = 0 to 32768
+cform F87N_fft.amp F87N_fft.full irange=(3.276800000000e+04,0.000000000000e+00) orange+
+=(32768,0)     oform=full
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     1.000+     0.000
+INPUT FORMAT = REAL
+OUTPUT FORMAT = FULL
+CONVERSION COMPLETE
+cform F87N_fft.full F87N_fft.norm irange=(0,35000) orange=(0,255)
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     0.007+     0.000
+INPUT FORMAT = FULL
+OUTPUT FORMAT = BYTE
+CONVERSION COMPLETE
+copy F87I F87I.rot size=(1,1,400,400)
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+if (afidsroot = "")
+    fft22 F87I.rot xxA mode=forward format=comp
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+    fftflip xxA F87I_fft 'flip
+Beginning VICAR task fftflip
+FFTFLIP version 5-SEP-94
+else
+end-if
+ccomp F87I_fft (F87I_fft.amp,F87I_fft.pha) trans=polar
+Beginning VICAR task ccomp
+CCOMP version 02-MAY-94
+maxmin F87I_fft.amp minival=minval maxival=maxval
+Beginning VICAR task maxmin
+*** maxmin - 06-Jul-2012
+
+Min. value: 0.000000E+00   at  (     2,   272)
+Max. value: 3.276800E+04   at  (    53,   283)
+
+let $echo="no"
+NO APODIZATION on INTERPOLATION
+F87I_fft.amp range = 0 to 32768
+cform F87I_fft.amp F87I_fft.full irange=(3.276800000000e+04,0.000000000000e+00) orange+
+=(32768,0)     oform=full
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     1.000+     0.000
+INPUT FORMAT = REAL
+OUTPUT FORMAT = FULL
+CONVERSION COMPLETE
+cform F87I_fft.full F87I_fft.norm irange=(0,35000) orange=(0,255)
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     0.007+     0.000
+INPUT FORMAT = FULL
+OUTPUT FORMAT = BYTE
+CONVERSION COMPLETE
+apodize F87N.rot F87N33.rot edge=3
+Beginning VICAR task apodize
+APODIZE - 28-Jun-2012
+if (afidsroot = "")
+    fft22 F87N33.rot xxA mode=forward format=comp
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+    fftflip xxA F87N33_fft 'flip
+Beginning VICAR task fftflip
+FFTFLIP version 5-SEP-94
+else
+end-if
+ccomp F87N33_fft (F87N33_fft.amp,F87N33_fft.pha) trans=polar
+Beginning VICAR task ccomp
+CCOMP version 02-MAY-94
+maxmin F87N33_fft.amp minival=minval maxival=maxval
+Beginning VICAR task maxmin
+*** maxmin - 06-Jul-2012
+
+Min. value: 0.000000E+00   at  (     5,    26)
+Max. value: 3.276800E+04   at  (     2,   236)
+
+let $echo="no"
+3x3 APODIZATION on NON-INTERPOLATION
+F87N33_fft.amp range = 0 to 32768
+cform F87N33_fft.amp F87N33_fft.full irange=(3.276800000000e+04,0.000000000000e+00) orange+
+=(32768,0)     oform=full
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     1.000+     0.000
+INPUT FORMAT = REAL
+OUTPUT FORMAT = FULL
+CONVERSION COMPLETE
+cform F87N33_fft.full F87N33_fft.norm irange=(0,35000) orange=(0,255)
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     0.007+     0.000
+INPUT FORMAT = FULL
+OUTPUT FORMAT = BYTE
+CONVERSION COMPLETE
+apodize F87N.rot F87N55.rot edge=5
+Beginning VICAR task apodize
+APODIZE - 28-Jun-2012
+if (afidsroot = "")
+    fft22 F87N55.rot xxA mode=forward format=comp
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+    fftflip xxA F87N55_fft 'flip
+Beginning VICAR task fftflip
+FFTFLIP version 5-SEP-94
+else
+end-if
+ccomp F87N55_fft (F87N55_fft.amp,F87N55_fft.pha) trans=polar
+Beginning VICAR task ccomp
+CCOMP version 02-MAY-94
+maxmin F87N55_fft.amp minival=minval maxival=maxval
+Beginning VICAR task maxmin
+*** maxmin - 06-Jul-2012
+
+Min. value: 0.000000E+00   at  (     1,    83)
+Max. value: 3.276800E+04   at  (     2,   236)
+
+let $echo="no"
+5x5 APODIZATION on NON-INTERPOLATION
+F87N55_fft.amp range = 0 to 32768
+cform F87N55_fft.amp F87N55_fft.full irange=(3.276800000000e+04,0.000000000000e+00) orange+
+=(32768,0)     oform=full
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     1.000+     0.000
+INPUT FORMAT = REAL
+OUTPUT FORMAT = FULL
+CONVERSION COMPLETE
+cform F87N55_fft.full F87N55_fft.norm irange=(0,35000) orange=(0,255)
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     0.007+     0.000
+INPUT FORMAT = FULL
+OUTPUT FORMAT = BYTE
+CONVERSION COMPLETE
+apodize F87I.rot F87I33.rot edge=3
+Beginning VICAR task apodize
+APODIZE - 28-Jun-2012
+if (afidsroot = "")
+    fft22 F87I33.rot xxA mode=forward format=comp
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+    fftflip xxA F87I33_fft 'flip
+Beginning VICAR task fftflip
+FFTFLIP version 5-SEP-94
+else
+end-if
+ccomp F87I33_fft (F87I33_fft.amp,F87I33_fft.pha) trans=polar
+Beginning VICAR task ccomp
+CCOMP version 02-MAY-94
+maxmin F87I33_fft.amp minival=minval maxival=maxval
+Beginning VICAR task maxmin
+*** maxmin - 06-Jul-2012
+
+Min. value: 0.000000E+00   at  (     1,    11)
+Max. value: 3.276800E+04   at  (    53,   283)
+
+let $echo="no"
+3x3 APODIZATION on INTERPOLATION
+F87I33_fft.amp range = 0 to 32768
+cform F87I33_fft.amp F87I33_fft.full irange=(3.276800000000e+04,0.000000000000e+00) orange+
+=(32768,0)     oform=full
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     1.000+     0.000
+INPUT FORMAT = REAL
+OUTPUT FORMAT = FULL
+CONVERSION COMPLETE
+cform F87I33_fft.full F87I33_fft.norm irange=(0,35000) orange=(0,255)
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     0.007+     0.000
+INPUT FORMAT = FULL
+OUTPUT FORMAT = BYTE
+CONVERSION COMPLETE
+apodize F87I.rot F87I55.rot edge=5
+Beginning VICAR task apodize
+APODIZE - 28-Jun-2012
+if (afidsroot = "")
+    fft22 F87I55.rot xxA mode=forward format=comp
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+    fftflip xxA F87I55_fft 'flip
+Beginning VICAR task fftflip
+FFTFLIP version 5-SEP-94
+else
+end-if
+ccomp F87I55_fft (F87I55_fft.amp,F87I55_fft.pha) trans=polar
+Beginning VICAR task ccomp
+CCOMP version 02-MAY-94
+maxmin F87I55_fft.amp minival=minval maxival=maxval
+Beginning VICAR task maxmin
+*** maxmin - 06-Jul-2012
+
+Min. value: 0.000000E+00   at  (     2,   370)
+Max. value: 3.276800E+04   at  (    53,   283)
+
+let $echo="no"
+5x5 APODIZATION on INTERPOLATION
+F87I55_fft.amp range = 0 to 32768
+cform F87I55_fft.amp F87I55_fft.full irange=(3.276800000000e+04,0.000000000000e+00) orange+
+=(32768,0)     oform=full
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     1.000+     0.000
+INPUT FORMAT = REAL
+OUTPUT FORMAT = FULL
+CONVERSION COMPLETE
+cform F87I55_fft.full F87I55_fft.norm irange=(0,35000) orange=(0,255)
+Beginning VICAR task cform
+CFORM VERSION 06-JUN-1998
+OUT = IN *     0.007+     0.000
+INPUT FORMAT = FULL
+OUTPUT FORMAT = BYTE
+CONVERSION COMPLETE
+let $echo="no"
+exit
+slogoff

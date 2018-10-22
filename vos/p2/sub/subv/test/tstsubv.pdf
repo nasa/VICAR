@@ -1,0 +1,16 @@
+
+
+procedure
+refgbl $autousage
+refgbl $echo
+body
+let _onfail="continue"
+let $autousage="none"
+let $echo="yes"
+! This is a test of the subroutine SUBV which subtracts
+! one array from another which may be of different types
+! (byte, halfword, fullword, real, or double
+! precision). The product the two arrays is placed in 
+! the second array at that point.
+tsubv
+end-proc

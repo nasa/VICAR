@@ -1,0 +1,79 @@
+procedure
+refgbl $autousage
+refgbl $echo
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+!
+!  THIS IS A TEST OF PROGRAM HSTRETCH
+!
+!      first work on byte images.
+!
+gen HSTRA NL=10 NS=10 IVAL=0 
+hstretch INP=HSTRA OUT=HSTRAO SIZE=(1,1,10,10) QTABLE=(2 12 17)
+list HSTRAO 'ZEROES
+!
+!     repeat but swap background and foreground using VALUE and BVALUE.
+!
+hstretch INP=HSTRA OUT=HSTRAO1 QTABLE=(2 12 17) VALUE=0 BVALUE=1
+list HSTRAO1 'ZEROES
+!
+!    try SL and SS not equal to 1.
+!
+hstretch INP=HSTRA OUT=HSTRAO2 SIZE=(2,3,8,7) 'BYTE TABLE=(4 10,  10 4)
+list HSTRAO2
+!
+!      now work on halfword images.
+!
+gen HSTRB NL=10 NS=10 IVAL=0 'HALF
+hstretch INP=HSTRB OUT=HSTRBO SIZE=(1,1,10,10) QTABLE=(2 12 17)
+list HSTRBO 'ZEROES
+!
+!     repeat but swap background and foreground using VALUE and BVALUE.
+!
+hstretch INP=HSTRB OUT=HSTRBO1 QTABLE=(2 12 17) VALUE=0 BVALUE=1
+list HSTRBO1 'ZEROES
+!
+!    try SL and SS not equal to 1.
+!
+hstretch INP=HSTRB OUT=HSTRBO2 SIZE=(2,3,8,7) 'HALF TABLE=(4 10,  10 4)
+list HSTRBO2
+!
+!      now try byte input and halfword output. 
+!
+hstretch INP=HSTRA OUT=HSTRCO SIZE=(1,1,10,10) QTABLE=(2 12 17) 'HALF
+list HSTRCO 'ZEROES
+!
+!     repeat but swap background and foreground using VALUE and BVALUE.
+!
+hstretch INP=HSTRA OUT=HSTRCO1 QTABLE=(2 12 17) VALUE=0 BVALUE=1 'HALF
+list HSTRCO1 'ZEROES
+!
+!    try SL and SS not equal to 1.
+!
+hstretch INP=HSTRA OUT=HSTRCO2 SIZE=(2,3,8,7) TABLE=(4 10,  10 4) 'HALF
+list HSTRCO2
+!
+!      now try halfword input and byte output
+!
+hstretch INP=HSTRB OUT=HSTRDO SIZE=(1,1,10,10) QTABLE=(2 12 17) 'BYTE
+list HSTRDO 'ZEROES
+!
+!     repeat but swap background and foreground using VALUE and BVALUE.
+!
+hstretch INP=HSTRB OUT=HSTRDO1 QTABLE=(2 12 17) VALUE=0 BVALUE=1 'BYTE
+list HSTRDO1 'ZEROES
+!
+!    try SL and SS not equal to 1.
+!
+hstretch INP=HSTRB OUT=HSTRDO2 SIZE=(2,3,8,7) TABLE=(4 10,  10 4) 'BYTE
+list HSTRDO2
+!
+!    try hstretch on a bigger halfword image with negative DNs.
+!
+gen HSTRBIG NL=15 NS=1000 'HALF IVAL=-500
+hstretch HSTRBIG HSTRBIGO QTABLE=(-490 0 490)
+list HSTRBIGO
+!
+end-proc

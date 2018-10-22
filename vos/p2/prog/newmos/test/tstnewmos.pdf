@@ -1,0 +1,161 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+refgbl $syschar
+
+LOCAL PATH INIT = "/project/test_work/testdata/mipl/vgr/"
+if ($syschar(1) = "UNIX")
+  ush rm -f geo
+  ush cp /project/test_work/testdata/mipl/vgr/f1636832.geo geo
+else                            ! on Alpha:
+  DCL ASS WMS_TEST_WORK:[TESTDATA.MIPL.VGR]f1636832.geo geo
+  LET PATH = "WMS_TEST_WORK:[TESTDATA.MIPL.VGR]"
+end-if
+write "THIS IS A TEST FOR THE PROGRAM NEWMOS"
+write ""
+let $echo="yes"
+gen A NL=10 NS=10 IVAL=50 LINC=0 SINC=0
+gen B NL=10 NS=10 IVAL=100 LINC=0 SINC=0
+gen C NL=10 NS=10 IVAL=200 LINC=0 SINC=0
+gen AA NL=10 NS=10 IVAL=50 LINC=0 SINC=0  'HALF
+gen BB NL=10 NS=10 IVAL=100 LINC=0 SINC=0 'HALF
+gen CC NL=10 NS=10 IVAL=200 LINC=0 SINC=0 'HALF
+let $echo = "NO"
+write ""
+write "TEST THE OFFSET PARAMETERS"
+write ""
+let $echo="yes"
+newmos (A,B,C) D NL=10 NS=30 LCP=1 SCP=30 PIXL=(1,30,1,20,1,10) INC=1
+list D
+let $echo = "NO"
+write ""
+write "TEST THE PARAM AVERAGE"
+write ""
+let $echo = "yes"
+newmos (A,B) D NL=10 NS=15 LCP=1 SCP=15 PIXL=(1,15,1,10) INC=1 'AVER
+LIST D
+let $echo = "NO"
+write ""
+write "TEST THE PARAM HALF"
+write ""
+let $echo = "yes"
+newmos (AA,BB,CC) E NL=10 NS=30 LCP=1  SCP=15 PIXL=(1,15,1,10,1,5) INC=1 'HALF
+LIST E
+gen A NL=10 NS=10 IVAL=0 
+gen B NL=10 NS=10 IVAL=0
+gen C NL=10 NS=10 IVAL=0
+let $echo="no"
+write ""
+write "TEST THE EDGE DETECTION PARAM THRE"
+write ""
+let $echo="yes"
+newmos (A,B,C) D NL=10 NS=30 LCP=1 SCP=30 PIXL=(1,30,1,20,1,10) INC=1 THRE=10
+list D
+let $echo= "no"
+write ""
+write "TEST THE PARM DCLE"
+write ""
+let $echo="yes"
+newmos (A,B,C) D NL=10 NS=30 LCP=1 SCP=30 PIXL=(1,30,1,20,1,10) INC=1 THRE=10 DCLE=5
+list D
+write ""
+write "TEST THE PARAMETERS MAP2, ADAPT, NOMIN.  SHOULD GET 0 DIFFERENCES"
+write ""
+MAP3 geo cylmap NL=360 NS=500 'CYLI 'VGR1 'HALF SCALE=10. +
+    LINE=100. SAMP=101. LATI=80. LONG=240. 'remote target=io
+MAP3 geo cylmap2 NL=360 NS=500 'CYLI 'VGR1 'HALF SCALE=10. +
+    LINE=0. SAMP=1. LATI=80. LONG=240. 'remote target=io
+newmos (cylmap cylmap2) mos (1 1 800 800) 'ADAPT  THRESH=-32767
+f2 (cylmap mos) DIF FUNC="IN1-IN2"
+hist DIF 'NOHIS
+MAP3 geo cylmap3 NL=360 NS=500 'RECT 'VGR1 'HALF SCALE=10. +
+    LINE=100. SAMP=101. LATI=80. LONG=240. 'remote target=io
+MAP3 geo cylmap4 NL=360 NS=500 'RECT 'VGR1 'HALF SCALE=10. +
+    LINE=0. SAMP=1. LATI=80. LONG=240. 'remote target=io
+newmos (cylmap3 cylmap4) mos1 (1 1 800 800) 'MAP2 LCP=354 SCP=867 +
+        THRESH=-32767
+f2 (cylmap3 mos1) DIF FUNC="IN1-IN2"
+hist DIF 'NOHIS
+
+MAP3 geo cylmap5 NL=360 NS=500 'MERC 'VGR1 'HALF SCALE=10. +
+    LINE=100. SAMP=101. LATI=70. LONG=240. 'remote target=io
+MAP3 geo cylmap6 NL=360 NS=500 'MERC 'VGR1 'HALF SCALE=10. +
+    LINE=0. SAMP=1. LATI=70. LONG=240. 'remote target=io
+newmos (cylmap5 cylmap6) mos2 (1 1 800 800) 'ADAPT 'NOMIN +
+    weight=(1.,1.) THRESH=-32767
+f2 (cylmap5 mos2) DIF FUNC="IN1-IN2"
+hist DIF 'NOHIS
+
+! test SMOOTH keyword -- generate 2 halves of geo image, reduce DNs in one
+! 50%, and then try to smooth overlap area 
+! (overlap area is 50 pixels)
+MAP3 geo cylmap7 NL=360 NS=300 'RECT 'VGR1 'HALF SCALE=10. +
+    LINE=100. SAMP=101. LATI=80. LONG=240. 'remote target=io
+MAP3 geo cylmap8 NL=360 NS=300 'RECT 'VGR1 'HALF SCALE=10. +
+    LINE=100. SAMP=-149. LATI=80. LONG=240. 'remote target=io
+f2 cylmap8 cylmap2x FUNC="0.5*IN1"
+maskmos inp=(cylmap7,cylmap2x) out=(a,b)
+newmos (cylmap7 cylmap2x a b) mos3 (1 1 800 800) +
+        'MAP2 LCP=353 SCP=861 THRESH=-32767 'smooth
+list mos3 INC=40 SL=300 NL=200 NS=800
+
+write "==========================================================="
+write "ADDED TEST FOR PERSPERCTIVE PROJECTION."
+write "==========================================================="
+map3 &"PATH"io.map3 a12.map3  +
+  nl=500 ns=500 scale=10. 'perspect
+map3 &"PATH"io.map3 a20.map3  +
+  nl=500 ns=500 scale=10. 'perspect +
+  north=45. latitude=80. longitud=150. line=200 samp=200
+newmos inp=(a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3, +
+            a12.map3,a20.map3) +
+            out=newmos.out 'adapt 'smooth
+
+!
+! Test 3D Images
+!
+gen A3D NL=10 NS=10 IVAL=50 LINC=0 SINC=0 NB=10
+gen B3D NL=10 NS=10 IVAL=100 LINC=0 SINC=0 NB=10
+gen C3D NL=10 NS=10 IVAL=200 LINC=0 SINC=0 NB=10
+newmos (A3D,B3D,C3D) D3D NL=10 NS=30 LCP=1 SCP=30 PIXL=(1,30,1,20,1,10) INC=1 'AVER
+list D3D
+end-proc

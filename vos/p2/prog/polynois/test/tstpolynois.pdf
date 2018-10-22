@@ -1,0 +1,11 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+write " THIS IS A TEST SCRIPT FOR THE PROGRAM - POLYNOIS"
+polynois flo 256 256 NOISE=(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10)
+hist flo SIZE=(1,1,256,256) FORMAT=BYTE
+end-proc

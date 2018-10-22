@@ -1,0 +1,17 @@
+procedure
+refgbl $echo
+refgbl $syschar
+body
+
+local path1 type=string init="wms_test_work:[testdata.mipl.vgr]"
+local path2 type=string init="wms_test_work:[testdata.mipl.gll]"
+let _onfail="continue"
+let $echo="yes"
+if ($syschar(1) = "UNIX")
+!
+    let path1="/project/it/testdata/mipl/vgr/"
+    let path2="/project/it/testdata/mipl/gll/"
+end-if
+tgetplacon  inp=&"path1"f1636832.geo
+tgetplacon  inp=&"path2"venus.img
+end-proc

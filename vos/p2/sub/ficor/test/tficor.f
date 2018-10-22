@@ -1,0 +1,33 @@
+C  THIS IS A PROGRAM THAT WILL TEST THE FORTRAN CALLABLE PORTION OF THE
+C  TFICOR SUBROUTINE.
+
+	SUBROUTINE TFICOR()
+ 
+        IMPLICIT INTEGER (A-Z)
+        CHARACTER*7200 BUF
+        REAL*4 X(2)
+        CHARACTER*100 MSG
+
+        CALL XVUNIT(INUNIT, 'INP', 1, STATUS,' ')
+        CALL XVOPEN(INUNIT, STATUS, ' ')
+
+        CALL FICOR(INUNIT, BUF, X, 0)
+        WRITE(MSG,100) X(1)
+ 100    FORMAT('Mode = 0: ', E11.4)
+        CALL XVMESSAGE(MSG,' ')
+        CALL XVMESSAGE(' ',' ')
+
+        CALL FICOR(INUNIT, BUF, X, 1)
+        WRITE(MSG,150) X(1)
+ 150    FORMAT('Mode = 1: ', E11.4)
+        CALL XVMESSAGE(MSG,' ')
+        CALL XVMESSAGE(' ',' ')
+
+        CALL FICOR(INUNIT, BUF, X, 2)
+        WRITE(MSG,200) X(1), X(2)
+ 200    FORMAT('Mode = 2: ', 2E11.4)
+        CALL XVMESSAGE(MSG,' ')
+        CALL XVMESSAGE(' ',' ')
+
+        RETURN
+        END

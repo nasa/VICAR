@@ -1,0 +1,234 @@
+process help=*
+PARM INP     TYPE=STRING  COUNT=1:2
+PARM OUT     TYPE=STRING  COUNT=1
+PARM GEOPAR  TYPE=STRING  COUNT=0:1 		  DEFAULT=""
+PARM CAMERA  TYPE=INTEGER COUNT=0:1 VALID=4:8	  DEFAULT=4
+PARM DBUG    TYPE=KEYWORD COUNT=0:1 VALID=DBUG	  DEFAULT=--
+PARM PRINT   TYPE=KEYWORD COUNT=0:1 VALID=PRINT	  DEFAULT=--
+PARM NOIN    TYPE=KEYWORD COUNT=0:1 VALID=NOIN	  DEFAULT=--
+PARM NVER    TYPE=INTEGER COUNT=0:1               DEFAULT=19
+PARM NHOR    TYPE=INTEGER COUNT=0:1               DEFAULT=19
+PARM NLW     TYPE=INTEGER COUNT=0:1               DEFAULT=5
+PARM NSW     TYPE=INTEGER COUNT=0:1               DEFAULT=5
+PARM SIGMA   TYPE=REAL	  COUNT=0:1   		  DEFAULT=1.
+PARM FRAME   TYPE=INTEGER COUNT=0:1   		  DEFAULT=0
+PARM CTHRESH TYPE=REAL    COUNT=0:1		  DEFAULT=.5
+PARM FIT     TYPE=INTEGER COUNT=0:1 VALID=1:8	  DEFAULT=8
+PARM TOLER   TYPE=REAL    COUNT=0:1		  DEFAULT=4.
+END-PROC
+.TITLE
+"reslocvo"
+.HELP
+PURPOSE:
+
+"reslocvo" will locate the reseau on Viking Orbiter images.  The (line,sample)
+coordinates of each reseau mark are output as a reseau location record in a
+MARK format.  The reseau location record may be input to the program RESSAR75
+to cosmetically remove the reseau from the image.  "reslocvo" will optionally 
+generate GEOMA parameters for removing the geometric distortions.
+
+.PAGE
+TAE COMMAND LINE FORMAT
+
+	reslocvo INP=(IMG,NOM) OUT=LOC optional parameters
+where
+	IMG is the input Viking Orbiter image,
+	NOM is an optional input reseau location record containing the
+	  nominal reseau location,
+	and LOC is the output reseau location record.
+
+.PAGE
+OPERATION:
+
+The Viking Orbiter cameras include a reseau pattern consisting of 103 reseau
+marks embedded on the face-plate of the vidicon.  The position of these
+marks will vary from image-to-image due to time, temperature, and scene
+dependent geometric camera distortions.
+
+The location of the reseau requires a set of nominal locations to be
+used as starting values. The nominal locations may be optionally input
+as the second input file.  If the nominals are not input in this way, they
+are retrieved from tables built into the program. 
+
+"reslocvo" will search for each reseau mark in an NHOR x NVER area
+centered about its nominal location.  Each mark is found by using an
+NLW x NSW correlation window. As this window scans over the search area,
+the underlying area is compared with a reseau shape function
+(constant for all the marks) of the form: 
+   	f(x,y) = 255(1 - exp(-(x**2 + y**2)/2s**2)
+For a 9 x 9 window, the shape function is:
+
+	254 254 254 254 254 254 254 254 254 254
+	254 254 254 253 252 253 254 254 254 254
+	254 254 250 234 220 234 250 254 254 254
+	254 253 234 161 100 161 234 253 254 254
+	254 252 220 100   0 100 220 252 254 254
+	254 253 234 161 100 161 234 253 254 254
+	254 254 250 234 220 234 250 254 254 254
+	254 254 254 253 252 253 254 254 254 254
+	254 254 254 254 254 254 254 254 254 254
+
+Let A(i,j) represent the shape function, and B(i,j) be the area of the
+picture being compared. Let uA, uB, tA, tB be the corresponding means and
+standard deviations. The correlation function is a normalized variance of
+the form: 
+     p = (SIGMA(Aij-uA)(Bij-uB))/(N*tA*tB)
+where N = NLW*NSW and the summation is performed over an NLW by NSW
+window. 
+
+Note: Marks near the boundaries of the picture are not located. Coordinates
+for these marks are calculated by interpolating over its nearest neighbors.
+
+If an output parameter file is specified via the GEOPAR parameter, then
+GEOMA parameters are output to this file.  The GEOMA parameters can then
+be input the program GEOMA to remove the geometric distortions.
+
+.PAGE
+EXAMPLE
+
+	reslocvo INP=A OUT=RES GEOPAR=GEOM.PAR
+	ressar75 (A,RES) B
+	geoma B C PARMS=GEOM.PAR
+
+"reslocvo" is used to locate the reseau in the frame stored in data set A. 
+The resulting reseau locations (RES) are input to program RESSAR75 which
+removes the reseau.  GEOMA parameters are also generated (GEOM.PAR) and
+are input to program GEOMA to remove the camera distortions.
+
+RESTRICTIONS:
+
+The constants NLW, NSW, NHOR, NVER must satisfy the following: 
+     1. Each must be odd;
+     2. 6(NSW*NLW+NHOR+NSW) + 4*NHOR*NVER + 2408(NLW+NVER) <= 82414
+        If NLW = NSW and NHOR = NVER, then the following
+        simplified approximate formula may be used:
+                NLW + NVER <= 32
+.page
+TIMING:
+
+The execution time of "reslocvo" is directly proportional to the window and
+search dimensions NLW, NSW, NHOR, NVER. 
+
+WRITTEN BY:                Steve Pohorsky		17 Jan 1985
+COGNIZANT PROGRAMMER:      Gary Yagi
+REVISIONS:
+ 26 May 94  Meredith Cox (CRI) -- Made portable for UNIX 
+ 20 Oct 87  Gary Yagi   -- Added GEOMA parameter output
+ 10 Oct 87  Gary Yagi	-- Parameter processing converted to Vicar2
+ 25 Jun 86  Joel Mosher -- I/O converted to Vicar2
+.LEVEL1
+.VARIABLE INP
+ 1 image file optionally
+ followed by a
+ nominal reseau
+ location record.
+.VARIABLE OUT
+ Reseau location record.
+.VARIABLE GEOPAR
+ STRING--OPTIONAL
+ Output file to contain
+ GEOMA parameters.
+.VARIABLE CAMERA
+ integer - camera serial number
+ override
+.VARIABLE DBUG
+ Keyword - Valid value = DBUG.
+ Causes diagnostics to be
+ printed.
+.VARIABLE PRINT
+ Keyword - Valid value = PRINT
+ Generates listing of reseaus.
+.VARIABLE NOIN
+ Keyword - Valid value =NOIN
+ Suppresses the interpolation
+ of correlation maximum.
+.VARIABLE NVER
+ integer - height of the search
+ area
+.VARIABLE NHOR
+ integer - width of the search
+ area
+.VARIABLE NLW
+ integer - height of correlation
+ area
+.VARIABLE NSW
+ integer - width of the
+ correlation area
+.VARIABLE SIGMA
+ real - standard deviation
+ constant for reseau shape
+ function.
+.VARIABLE FRAME
+ integer - frame number override
+.VARIABLE CTHRESH
+ REAL - Optional -CORRELATION THRESHOLD
+.VARIABLE FIT
+ INTEGER - Optional-SELECT FIT TYPE
+.VARIABLE TOLER
+ REAL - Optional - MAX LOCATION ERROR
+.LEVEL2
+.VARIABLE INP
+One picture file generated by the Viking Orbiter logging program (VOLOG). 
+This frame should be an unprocessed byte image (i.e. No stretching,
+filtering or geom allowed).  This can be followed by a reseau location
+record containing the nominal reseau locations; 
+ .VARIABLE OUT
+A reseau record containing the (LINE,SAMPLE) coordinates for each
+reseau mark. This file contains just 1 line of 824 bytes. The output has a
+VICAR label. 
+.VARIABLE GEOPAR
+Optional output file to contain GEOMA parameters for removing the geometric
+distortions.
+.VARIABLE CAMERA
+Specifies the camera serial number for the input picture.  This
+parameter may be used to override the camera information in the Viking
+Orbiter label.  The valid camera serial numbers are:
+	7=VO-1A		8=VO-2A
+	4=VO-1B		6=VO-2B
+.VARIABLE DBUG
+Causes diagnostic messages to be printed.
+.VARIABLE PRINT
+Causes a listing of the reseau locations to be generated.
+.VARIABLE NOIN
+The program will normally attempt to calculate the reseau locations to
+sub-pixel accuracy.  This keyword suppresses interpolation of the
+correlation maximum.
+.VARIABLE NVER
+ NVER is an integer specifying the height of the search area. (must be
+odd) (Default =19) 
+.VARIABLE NHOR
+ NHOR  is an integer specifying the width of the search area. (must be
+odd) (Default = 19) 
+.VARIABLE NLW
+ NLW is an integer specifying the height of the correlation area. (must be
+odd) (Default = 5) 
+.VARIABLE NSW
+ NSW is an integer specifying the width of the correlation area. (must be
+odd) (Default = 5) 
+.VARIABLE SIGMA
+ SIGMA is a real number specifying the standard deviation constant used in
+the reseau shape function. (Default = 1.0) 
+.VARIABLE FRAME
+ FRAME  is an integer specifying the frame number for the input picture. 
+This parameter will override the frame number in the Viking Orbiter label.
+.VARIABLE CTHRESH
+ A THRESHOLD ON CORRELATION VALUES.
+ Default is CTHRESH=0.5.
+.VARIABLE FIT
+ VALID = 1:8
+ Default is FIT = 8.
+ Specitfies the type of fit to be performed.  Meanings are :
+
+         IFIT  ROTATE SCALE  OFFSET
+          1      0      0      1
+          2      0      1      0
+          3      0      1      1
+          4      1      0      0
+          5      1      0      1
+          6      1      1      0
+          7      1      1      1
+
+.VARIABLE TOLER
+Default is TOLER = 4.0.  Maximum allowed error in calculated location
+relative to  the nominal location. 
+.END

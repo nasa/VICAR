@@ -1,0 +1,24 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!
+! create coefficients but don't update the archive
+tricoef radius=(3399.3,3394.0,3376.4) mlimit=3 nlimit=3 klimit=3
+!
+! create archive and coefficients for planet1
+! test triaxtran subroutine
+! test the ability to read from the archive & compute above test values
+tricoef radius=(1.,.8,.6) 'test planet=planet1 +
+  archive=triaxial_archive.ibis
+!
+! add to the archive coefficients for planet IO
+! test reading radii from SPICE
+tricoef planet=IO +
+  archive=triaxial_archive.ibis
+!
+! replace planet1 with new coefficients 
+tricoef radius=(1.,.9,.8) planet=planet1 mlimit=3 nlimit=3 klimit=3 +
+  archive=triaxial_archive.ibis
+end-proc

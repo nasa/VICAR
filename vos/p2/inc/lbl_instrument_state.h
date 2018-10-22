@@ -52,6 +52,8 @@ extern "C" {
  *========
  * Date		Who		Description
  * ============ =============== =============================================
+ * 2018-01-16   G. Hollins	Added OnboardResponsivity and OnboardColorMatrix
+ * 2017-10-21   B. Deeen	Added CfaType and Venue, BayerMethod
  * 2015-09-24   C. Cheng        Added SHUTTER_CORRECTION_MODE
  * 2003-05-12   H. Lee          Changed SunFindParm to LblApiRealItem_typ
  * 2003-04-18   H. Lee          Changed DetectorToImageRotation to LblApiRealItem_typ
@@ -111,7 +113,7 @@ typedef struct
 	LblApiIntItem_typ		PixelAveragingWidth;
 	LblApiNameItem_typ		SampleBitMethod;
 	LblApiIdItem_typ		SampleBitModeId;
-    LblApiStringItem_typ    ShutterCorrectionMode;
+	LblApiStringItem_typ	ShutterCorrectionMode;
 	LblApiFlagItem_typ		ShutterEffectCorrectionFlag;
 	LblApiIdItem_typ		ShutterModeId;
 	LblApiFlagItem_typ		SunFindFlag;
@@ -125,7 +127,12 @@ typedef struct
 	LblApiRealVectorItem_typ	SunViewDirection;
 	LblApiIntItem_typ		InstrumentTemperatureStatus[LBL_INST_STATE_TEMPS];
 	LblApiIntItem_typ		InstrumentFocusPosition;
-	LblApiNameItem_typ		BayerMode;
+	LblApiNameItem_typ		BayerMode;	// deprecated...
+	LblApiNameItem_typ		CfaType;
+	LblApiNameItem_typ		CfaVenue;
+	LblApiNameItem_typ		BayerMethod;
+	LblApiRealItem_typ		OnboardResponsivity[3];
+	LblApiRealItem_typ		OnboardColorMatrix[9];
 	} LblInstrumentState_typ;
 
 /***  Function prototypes  ***/
@@ -142,3 +149,4 @@ void	LblPrintInstrumentState( LblInstrumentState_typ *);
 #endif
 
 #endif
+

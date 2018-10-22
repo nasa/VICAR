@@ -1,0 +1,52 @@
+procedure
+refgbl $echo
+body
+let $echo="yes"
+!
+! generate asymmetric point spread function
+gen out=x.img nl=64 ns=64 linc=0 sinc=0
+qsar inp=x.img out=y.img area=(1,1,1,7,50,1,7,3,1,50)
+fft22 y.img ffty.img
+!
+! generate an image
+qsar inp=x.img out=z.img area=(32,32,5,5,200)
+fft22 z.img fftz.img
+!
+! blur the image
+wiener inp=(fftz.img,ffty.img) out=ffts.img 'direct
+fft22 inp=ffts.img out=blur.img 'inverse format=half
+!xvd blur.img
+!
+! restore the image
+wiener inp=(ffts.img,ffty.img) out=fftss.img 'wiener
+fft22 inp=fftss.img out=restored.img 'inverse format=half
+!xvd restored.img
+!
+! restoration using symmetric psf approximation.
+wiener inp=(ffts.img,fftz.img) out=fftss.img 'amplitude
+fft22 inp=fftss.img out=symmetricrestoration.img 'inverse format=half
+!xvd symmetricrestoration.img
+!
+! create a restoration kernel
+wiener inp=(ffts.img,fftz.img) out=fftss.img 'ratio
+fft22 inp=fftss.img out=kernel.img 'inverse format=real
+!xvd kernel.img
+!
+! deconvolve with the kernel
+wiener inp=(ffts.img,fftss.img) out=ffts.img 'direct
+fft22 inp=ffts.img out=restwk.img 'inverse format=half
+!xvd restwk.img
+!
+!copy /scr/jjl/color/earth.green out=a.img sl=150 ss=150 nl=512 ns=512
+!fft22 inp=a.img out=ffta.img
+!gen out=x.img nl=512 ns=512 linc=0 sinc=0
+!qsar inp=x.img out=y.img area=(1,1,5,5,50)
+!fft22 y.img ffty.img
+!wiener inp=(ffta.img,ffty.img) out=fftblur.img 'direct
+!fft22 inp=fftblur.img out=blur.img 'inverse
+!wiener inp=(fftblur.img,ffty.img) out=fftrest.img sn=20
+!fft22 inp=fftrest.img out=rest.img 'inverse
+!hist a.img
+!hist blur.img
+!hist rest.img
+end-proc

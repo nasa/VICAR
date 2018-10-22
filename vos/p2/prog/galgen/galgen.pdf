@@ -1,0 +1,545 @@
+PROCESS HELP=*
+  PARM INP	TYPE=STRING   COUNT=1:11
+  PARM OUT	TYPE=STRING   COUNT=1:5
+  PARM DC	TYPE=STRING   COUNT=0:1			DEFAULT=--
+  PARM EDC	TYPE=STRING   COUNT=0:1			DEFAULT=--
+  PARM OFFSETS	TYPE=STRING   COUNT=1
+  PARM GAIN     TYPE=INTEGER  COUNT=0:1  VALID=(10,40,100,400,1400) +
+                                                        DEFAULT=--
+  PARM UNITS    TYPE=KEYWORD  COUNT=0:1  VALID=(RADIANCE,LUMINANC) +     
+                                                        DEFAULT=RADIANCE
+  PARM LIGHT	TYPE=REAL     COUNT=0:1                 DEFAULT=--
+  PARM EXPOSURE	TYPE=REAL     COUNT=0:13		DEFAULT=--
+  PARM SHUTTER	TYPE=INTEGER  COUNT=0:13 VALID=0:31	DEFAULT=--
+  PARM NUMB	TYPE=INTEGER  COUNT=0:13 VALID=1:128	DEFAULT=--
+  PARM EXTEXPO	TYPE=INTEGER  COUNT=0:1  VALID=2:12	DEFAULT=--
+  PARM SCALE	TYPE=REAL     COUNT=0:1			DEFAULT=1.0
+  PARM FIT	TYPE=KEYWORD  VALID=(SLOPE,LINEAR)	DEFAULT=LINEAR
+  PARM FITSCALE	TYPE=REAL     COUNT=0:1			DEFAULT=1.0
+  PARM LFWPT	TYPE=KEYWORD  COUNT=0:1  VALID=LFWPT	DEFAULT=--
+  PARM SKIP	TYPE=INTEGER  COUNT=0:1	 VALID=2:13	DEFAULT=4
+  PARM ERROR	TYPE=REAL     COUNT=2			DEFAULT=(0.05,1)
+  PARM LIST     TYPE=STRING   COUNT=0:1                 DEFAULT=--
+END-PROC
+.TITLE
+VICAR Program GALGEN
+.HELP
+PURPOSE:
+   GALGEN is a VICAR applications program used to generate radiometric
+calibration (slope) and dark current files.  These files are used to radiome-
+trically correct flight images via the program GALSOS (Galileo) or DECAL 
+(Cassini).  The program also generates files containing statistical data 
+measuring the linearity at each pixel.  These latter files may be input 
+to the program BLEMGEN to generate camera blemish files.
+
+   GALGEN was originally specific to the Galileo SSI camera.  It will also
+work for the Cassini ISS camera.  The program assumes a linear light-transfer 
+curve.  See also GLLPFCF.
+
+References: 
+	D-4264  MIPL Software Structural Design for the Instrument
+	        Calibration of GLL SSI Science Processing.
+        tbd     Software Design Document for Instrument Calibration -
+                Cassini ISS
+
+.page
+EXECUTION STATEMENT:
+
+  GALGEN INP=(D1,D2,D3,...,Dn) OUT=(CAL,SAT,ERR,RMS,DC) DC=DC EDC=EDC +
+         <user-params>
+
+     or
+
+  GALGEN INP=D1 LIST=LT.LIST OUT=(CAL,SAT,ERR,RMS,DC) DC=DC EDC=EDC +
+         <user-params>
+
+
+
+  The input frames D1,D2,D3,...,Dn should comprise a light-transfer sequence,
+consisting of not more than 10 images of a featureless, uniformly 
+illuminated target (flat-field frames) in order of increasing exposure.  
+Their filenames may be input to the program in the form of a SRCH-format 
+text file (see program SRCH).  If extended-exposure frames are included 
+in the sequence (Galileo), an extended-dark-current frame (EDC) must be 
+specified.  If multiple frames are taken at any given exposure, they may 
+be summed via program PICSUM and the resulting summed frame input to GALGEN.  
+The inputs may be in byte or 16-bit integer format.
+
+  The output files (CAL,SAT,ERR,RMS,DC) are images in the same format as the
+input flat-field frames (400x400 or 800x800 for Galileo, 256x256, 512x512, or
+1024x1024 for Cassini):
+
+  CAL is the output radiometric slope file (REAL*4),
+  SAT is an output file identifying the low-full-well pixels (16-bit data),
+  ERR is an output file containing the maximum absolute difference (in DN)
+       between the input data samples and the fitted curve (16-bit data),
+  RMS is an output file containing the rms error for the fit (16-bit data),
+  DC is the output dark-current file (linear model only, 16-bit data).
+
+.page
+OPERATION:
+  GALGEN assumes a linear model of the light-transfer function.  For a
+given line-sample coordinate (i,j), the light-transfer function is of the
+form:
+	d(i,j) = c(i,j)e(i) + dc(i,j)		(1)
+
+where e(i) is the exposure at image line i, d(i,j) is the output camera
+signal (DN), and c(i,j) and dc(i,j) are the slope and offset (dark-current)
+terms.
+
+  GALGEN assumes that the intensity of the light source is held constant
+and that the exposure is varied by varying the shutter speed of the camera.
+The exposure e(i) is computed from the light of the light cannon, the commanded
+shutter time t, and the shutter offset to(i):
+
+	e(i) = l*[t - to(i)]			(2)
+
+  For Galileo, the light of the light cannon must be specified via the LIGHT
+parameter, the camera gain state must be specified via the GAIN parameter, and
+the commanded exposure times (in msec) for input frames D1,D2,D3,...,Dn must be
+specified via the EXPOSURE parameter.  Alternatively, the shutter settings may
+be input via the SHUTTER parameter.  The Shutter-Offset File is specified via
+the OFFSET parameter.  
+
+  For Cassini, specifying LIGHT, GAIN, and EXPOSURE is optional (the parameter
+SHUTTER is not used for Cassini).  The values are extracted from the VICAR
+label if the parameters are not given.
+
+  To determine whether LIGHT is in relative foot-lamberts or picoamps,
+sr/nanometer, UNITS is used.  If UNITS=LUMINANC, LIGHT is in relative
+foot-lamberts).  If UNITS=RADIANCE, LIGHT is in picoamps.
+(UNITS should be LUMINANC for Galileo and RADIANCE for Cassini).
+
+  GALGEN operates in two modes.  In the default mode (FIT=LINEAR), GALGEN
+solves for both the slope and offset terms at each pixel position in the
+image by fitting a straight line (via least squares) through the input
+data points (extracted from input files (D1,D2,D3,...).  The inverse of the
+slope (1/c) is output to the radiometric slope file (CAL) and the offset is 
+output to DC.  If FIT=SLOPE is specified, then GALGEN solves for the 
+slope-term only by fitting the input points to the function:
+
+	d(i,j) = c(i,j)e(i) - do(i,j)		(3)
+
+where do(i,j) is extracted from the input dark-current file (DC).  The inverse
+of the slope (1/c) is output to CAL and no DC file is output.
+
+  If the input frames have been pre-processed by PICSUM to sum multiple
+frames, GALGEN will normalize the data by dividing by the picture scale
+(extracted from the picture label) prior to performing the fit.  The picture
+scale may be optionally input via the NUMB parameter.
+
+  For pixels with unsuccessful fits, the CAL file will receive a 0.0, the
+SAT, ERR, and RMS files will receive -1.0 and the DC file will receive 0.
+
+While processing each pixel, if a saturated level is detected, that level
+and all higher levels are ignored.  This saturation value is 255 for Galileo
+and 4095 for Cassini.
+
+.page
+Notes:
+For Slope model, the DC parameter is not required.  The dark-current file
+can be in the input list as the first frame.  This model will subtract
+the first input file from all the others before performing fit.  However,
+it assumes that this first file is a true dark-current, this Slope model should
+yield slope values which go thru the origin.
+
+For Linear model, all input files are fitted without adjustment.  A fifth
+output file is produced which is the best fit offsets associated with the
+output slope values.
+
+.page
+PROGRAM FLOW
+  The processing GALGEN performs can be broken into three distinct
+modules which are processed sequentially.  First all the input and output
+files are opened and prepared for use.  Any input file errors will be
+flagged at this point.  Second, the program parameters will be examined
+and verified with the input files as necessary.  Finally, all specified
+output calibration files will be generated simultaneously line by line.
+As processing progresses, informational messages will be given to keep
+the user apprised of the current processing.
+
+  If there is a program or system failure, it will not be possible to
+recover from a mid-point in the file processing.
+
+.page
+EXTENDED-EXPOSURE DARK-CURRENT CORRECTION FOR GALILEO:
+  If extended-exposure mode frames are included in the light-transfer
+sequence, the EXTEXPO parameter must be used to specify the exposure
+at which the extended-exposure data begins, and an extended-exposure
+dark-current file (EDC) must be specified.  An adjustment is made to
+correct for the difference in dark-current level between extended-exposure
+mode frames and frames taken at the normal exposures.  If SLOPE is
+specified, this adjustment consists of replacing the normal exposure
+dark-current (DC) by the extended-exposure dark-current in equation 3.
+If LINEAR is specified (the default), the extended-exposure dark-current
+is subtracted from all extended-exposure data and the normal dark-current
+is added.
+
+  Sequences which consist entirely of extended-exposure mode data could
+be processed like normal exposure data.  I.e., the extended-exposure
+dark-current should be specified in the DC parameter; the EXTEXPO parameter
+should not be used.
+
+LOW-FULL-WELL-PIXEL TEST:
+  The keyword LFWPT enables the low-full-well-pixel test for automatically
+scanning for low-full-well pixels by checking for non-linearities in the
+input data points (see LFWPT, SKIP, and ERROR parameters).  The SAT file
+contains the DN at full-well for each LFW pixel and 32767 for all good
+pixels.
+
+.page
+RESTRICTIONS:
+
+1.  A maximum of 10 exposure levels (not counting the optiona DC) are
+    allowed.
+
+
+EXAMPLE:
+
+If multiple frames are acquired at each exposure, they may be combined via
+program PICSUM and the resulting summed frames input to GALGEN:
+
+   PICSUM (DC1,DC2,DC3,DC4,DC5) DC	     !Sum dark-current frames
+   PICSUM (A1,A2,A3,A4,A5) A		     !Sum frames at exposure 133.22
+   PICSUM (B1,B2,B3,B4,B5) B		     !Sum frames at exposure 200.0
+   PICSUM (C1,C2,C3,C4) C		     !Sum frames at exposure 266.67
+   PICSUM (D1,D2,D3) D			     !Sum frames at exposure 400.0
+   PICSUM (E1,E2) E			     !Sum frames at exposure 533.33
+   PICSUM (EDC1,EDC2,EDC3) EDC		     !Sum extended-dark-current frames
+					     !Input summed dark-current,
+
+   GALGEN INP=(A,B,C,D,E) + 		     !Exposures
+     OUT=(CAL.GRN,SAT,ERR,RMS,DC.GRN) +	     !Output files
+     DC=DC EDC=EDC			     |Dark-current files
+     EXPO=(133.22,200,266.67,400,533.33) +   !Commanded exposure times (in msec)
+     EXTEXPO=5 LIGHT=3.54 +
+     GAIN=100 +
+     ERROR=(0,20) SKIP=4 +
+     OFFSETS=OFFSETS.DAT
+
+NOTE:  The frames must be input in order of ascending exposure.  The
+exposures, specified by the EXPO parameter, must be given in the same order
+(It is not necessary to specify the exposure for DC or EDC).  EXTEXPO=5
+specifies that the 5th exposure above the dark-current (533.33 msec) is the
+beginning of the extended-exposure data.  All data is in the 100K gain-state.
+
+.page
+PROGRAM HISTORY:
+
+Written by Jean Lorre, 3 Sep 82
+Current cognizant programmer:  Gary Yagi
+Revisions:
+  30 JUN 1997 ...TXH...     added changes made by CCA to the ported version.
+  19 JUN 1997 ...CCA...     stopped use of saturated levels in fits, mod help
+  18 JUN 1997 ...TXH...     ported from VAX/VMS to UNIX and ALPHA/VMS.
+  25 OCT 1995 ...CCA...     more digits in line number printout
+  16 MAY 1995 ...CCA...     Changed lab.lumin to .radiance, added report of
+                            filename if ABLE97 has error, commented out open
+                            of primary input (conflict with frames in list),
+                            changed max list files from 500 to 10.
+  09 Jan 95...J.Yoshimizu...Changed LUMINANC to LIGHT.  Added parameter UNITS.
+  15 Aug 94...J.Yoshimizu...Changed to work on Cassini ISS data.  Took out the
+      			    subroutine SOFFSETS since it was never called.
+      			    Changed LC to LUMINANC.
+  01 Jul 94...A.Scop..(CRI).Made portable for UNIX
+  25 Jan 91...A.Runkle......Added messages to identify processing progression
+                            Split the dark current files into separate
+				parameters
+  20 Nov 88...G.M.Yagi......Fixed processing of summation-mode shutter-offset
+  17 Nov 88...G.M.Yagi......Fixed use of LFW pixel table (FLAGLFWP)
+                      ......Fixed summation-mode LFW pixel table so LFW
+		      ......only at 400K
+  30 Sep 88...G.M.Yagi......Update LFW pixel table (Klaasen 16 Sept 88)
+  28 Apr 88...G.M.Yagi......Minor changes to help file.
+  25 Feb 88...G.M.Yagi......Fix built-in tables for low-full-well pixels.
+  22 Nov 87...G.M.Yagi......Delete quadratic model, change format of files,
+  	                    built-in tables for low-full-well pixels.
+  15 NOV 85...R.A.MORTENSEN.Added shutter OFFSETS parameter.
+  06 APR 85...D.F.STANFILL..Change to DN=f(BRITE).  Added RMS output file
+  24 OCT 84...G.M.YAGI......CONVERSION TO VAX VICAR*2
+  20 APR 84...M.E.MORRILL...REWRITTEN IN VAX FORTRAN VICAR1*
+   3 SEP 82...J.J.LORRE.....INITIAL RELEASE
+.LEVEL1
+.VARIABLE INP
+ STRING--REQUIRED
+ Flat-field & DC images.
+.VARIABLE OUT
+ STRING--REQUIRED
+ 1-5 output images.  
+ OUT=(CAL,SAT,ERR,RMS,DC)
+.VARIABLE DC
+ STRING--OPTIONAL
+ Input Dark-current file
+.VARIABLE EDC
+ STRING--OPTIONAL
+ Extended Dark-current
+.VARIABLE OFFSETS
+ STRING--REQUIRED
+ Specifies Shutter-Offset
+ File.
+.VARIABLE GAIN
+ INTEGER
+ Camera gain state.
+.VARIABLE UNITS
+ KEYWORD
+Specifies whether LIGHT
+is in RADIANCE or
+LUMINANC
+.VARIABLE LIGHT
+ REAL
+ Light cannon level in
+ foot-Lamberts or
+ nanowatts/cm**2/sr/
+ nanometer
+.VARIABLE EXPOSURE
+ REAL
+ Specifies the exposure
+ time (in msec) for each
+ input image (excluding
+ the DC & EDC frames).
+.VARIABLE SHUTTER
+ INTEGER
+ Shutter setting for each
+ input image (excluding
+ the DC & EDC frames).
+.VARIABLE NUMB
+ INTEGER--OPTIONAL
+ Specifies how many
+ images were PICSUMed for
+ each input flat field.
+.VARIABLE EXTEXPO
+ INTEGER--OPTIONAL
+ Specifies input frame
+ at which extended-dark-
+ current correction will
+ be applied.
+.VARIABLE SCALE
+ REAL--OPTIONAL
+ Specifies scale factor
+ for scaling output
+ slopes (CAL).
+.VARIABLE FIT
+ KEYWORD--OPTIONAL 
+ Specifies type of
+ curve fit (SLOPE
+ or LINEAR).
+.VARIABLE FITSCALE
+ REAL--OPTIONAL
+ Specifies scaling applied
+ to MAXERR and RMS outputs.
+.VARIABLE LFWPT
+ KEYWORD--OPTIONAL
+ Enables low-full-well
+ pixel test.
+.VARIABLE SKIP
+ INTEGER--OPTIONAL
+ Specifies number of
+ exposures to skip
+ before applying
+ low-full-well-pixel
+ test.
+.VARIABLE ERROR
+ REAL--OPTIONAL
+ Specifies slope and offset
+ of linear error function
+ applied in low-full-well
+ pixel test.
+.VARIABLE LIST
+ STRING--OPTIONAL
+ SRCH-format file containing
+ the names of the files
+ to be processed.
+.LEVEL2
+.VARIABLE INP
+ STRING--REQUIRED
+	INP=(D1,D2,D3,...,Dn)
+ Inputs are flat-field images in order of increasing exposure.  If multiple
+ frames are acquired at a given exposure, these frames may be combined
+ via PICSUM.
+.VARIABLE OUT
+ STRING--REQUIRED
+	OUT=(CAL,SAT,ERR,RMS,DC)
+ The output files (CAL,SAT,ERR,RMS,DC) are images in the same format as the
+ input flat-field frames (400x400 or 800x800 for Galileo, 256x256, 512x512, or
+ 1024x1024 for Cassini):).  If the keyword  LINEAR is specified (the default),
+ all five outputs are required.  If SLOPE  is specified, then DC should not be
+ specified, and SAT, ERR, and RMS are optional.
+
+ CAL is the Radiometric File, and contains the inverse slope term of the
+ light-transfer function for each pixel position (i,j).  The elements of CAL
+ are REAL*4 values z(i,j) such that:
+	z(i,j) = SCALE/c  for normal pixels (inverse slope term)
+	       = 0.0   for an unsuccessful fit.	
+ 
+ SAT contains the saturation DN value (DNfw) for each low-full-well pixel.
+ The elements of SAT are 16-bit integers s(i,j) such that:
+	s(i,j) = 32767  for normal pixels
+	       = DNfw   for low-full-well pixels
+	       = -1     for an unsuccessful fit.
+ 
+ ERR contains the maximum absolute deviation (Emax) of the input pixels
+ from the fitted light-transfer curve.  The elements of ERR are 16-bit
+ integers f(i,j) such that:
+	f(i,j) = -1           for an unsuccessful fit
+	       = Emax*FSCALE  otherwise.
+ where FSCALE is specified by the FITSCALE parameter (default=1.0).
+ 
+ RMS contains the RMS error (Erms) resulting from the fit.  The elements
+ of RMS are 16-bit integers r(i,j) such that:
+	r(i,j) = -1           for an unsuccessful fit
+	       = Erms*FSCALE  otherwise.
+ where FSCALE is specified by the FITSCALE parameter (default=1.0).
+
+ If the keyword LINEAR is specified, the output Dark-Current File (DC)
+ contains the offset terms (Do) resulting from the fit.  The elements of DC
+ are 16-bit integers d(i,j) such that:
+	d(i,j) = 0  for an unsuccessful fit
+	       = 128*Do  otherwise.
+.VARIABLE DC
+ STRING--OPTIONAL
+ Specifies the input Dark-current file.  This parameter is required when the
+ parameter FIT is equal to SLOPE.
+.VARIABLE EDC
+ STRING--OPTIONAL
+ Specifies the input extended Dark-current file.  This paremter is required
+ when extened exposure flat fields are used in conjuntion with normal exposure
+ flat fields as input.
+ NOTE:  The parameters DC & EXTEXP must also be specified.
+.VARIABLE GAIN
+ INTEGER--REQUIRED for Galileo
+ Specifies camera gain state.  Valid values are 10, 40, 100, 400 for Galileo,
+ 40, 100, 400, 1400 for Cassini.  This parameter must be given for Galileo, but
+ if not given for Cassini is extracted from the VICAR label.
+.VARIABLE UNITS
+ Specifies whether LIGHT is in LUMINANC (Relative-foot-Lamberts ) or RADIANCE
+ (nanowatts/cm**2/sr/nanometer).  UNITS should be LUMINANC for Galileo and
+ RADIANCE for Cassini).
+.VARIABLE LIGHT
+ REAL-REQUIRED for Galileo
+ LIGHT gives the light cannon setting (in foot-lamberts or nanowatts/cm**2/sr/
+ nanometer) at which the flat  field images were exposed (assumed to be
+ constant throughout the sequence).  This parameter must be given for Galileo,
+ but if not given for Cassini is extracted from the VICAR label.
+.VARIABLE EXPOSURE
+ REAL--OPTIONAL
+ Specifies the commanded exposure times (in milliseconds) for each input
+ frame in the light-transfer sequence.  The exposures must be input either
+ via the EXPOSURE or SHUTTER parameter (see below).  Not needed for the
+ DC or EDC input frames.  EXPOSURE or SHUTTER  must be given for Galileo, but
+ if not given for Cassini is extracted from the VICAR label.
+.VARIABLE SHUTTER
+ INTEGER--OPTIONAL
+ This parameter is for Galileo only.   Gives the shutter setting for each flat
+ field input image.  The shutter setting is related to commanded exposure time
+ as follows:
+
+       Shutter          Exposure     | Shutter           Exposure
+       Setting          time (ms)    | Setting           time (ms)
+      -------------------------------|---------------------------------
+         0                 0         |   16                 800
+         1                 4 1/6     |   17                1066 2/3
+         2                 6 1/4     |   18                1600
+         3                 8 1/3     |   19                2133 1/3
+         4                12 1/2     |   20                3200
+         5                16 2/3     |   21                4266 2/3
+         6                25         |   22                6400
+         7                33 1/3     |   23                8533 1/3
+         8                50         |   24               12800
+         9                66 2/3     |   25               17066 2/3
+        10               100         |   26               25600
+        11               133 1/3     |   27               34133 1/3
+        12               200         |   28               51200
+        13               266 2/3     |   29                   0
+        14               400         |   30                   0
+        15               533 1/3     |   31                   0
+
+.VARIABLE NUMB
+ INTEGER--OPTIONAL
+ Specifies the picture scale for each input frame.
+     E.g. NUMB=([Ndc,]N1,N2,N3,...,Nn[,Nedc])
+ If an input frame Di represents multiple frames that have been combined via
+ PICSUM, then Ni should equal the number of frames added together (=1 for
+ single frames).  When either a dark-current (DC) or an extended-dark-current
+ frame (EDC) are specified, then the picture scales: "Ndc" and "Nedc" should
+ be included, as needed.  If NUMB is defaulted, the picture scale is retrieved
+ from the image labels.
+.VARIABLE EXTEXPO
+ INTEGER--OPTIONAL - GALILEO only
+ EXTEXPO specifies the exposure at which the extended-dark-current
+ correction is to be applied.
+    galgen (D1,D2,D3,D4,D5,D6,D7) CAL DC=DC EDC=EDC EXTEXPO=5
+ The correction will be applied here to frames D5, D6, and D7.
+ NOTE:  The parameters DC & EDC must also be specified.
+.VARIABLE SCALE
+ REAL--OPTIONAL--Default=1.0
+ SCALE specifies scaling of the output slope terms.  Instead of outputing
+ 1/c in the slope file, SCALE/C is output.
+.VARIABLE FIT
+ KEYWORD--OPTIONAL--Default=LINEAR
+ FIT specifies whether, while fitting the input data points to the light-
+ transfer curve, to solve for the slope term only (FIT=SLOPE) or to solve
+ for both the slope and offset terms (FIT=LINEAR).
+
+ If FIT=LINEAR is specified, the input data points D1,D2,D3,...,Dn are
+ fitted to the curve:
+		Di = C*Ei + DC
+ where the exposures Ei are computed from the commanded exposure times,
+ light-cannon setting, and shutter-offsets (see EXPOSURE, SHUTTER, LUMINANC, and
+ OFFSET parameters).  The inverses of the resulting slopes (1/C) are output
+ to the Radiometric File (CAL).  The resulting offsets are output to the
+ output dark-current file (DC).  Even though the input DC frame is not used
+ in any calculations, it still must be included as the last input frame.
+
+ If FIT=SLOPE is specified, the input data points D1,D2,D3,...,Dn are fitted
+ to the curve:
+		Di = C*Ei + DC
+ and DC is the input dark-current extracted from the DC parameter.
+ The inverses of the resulting slopes (1/C) are output to the Radiometric File
+ (CAL).
+.VARIABLE FITSCALE
+ REAL--OPTIONAL--Default=1.0
+ Specifies a number (FSCALE) used to scale the maximum residual error (ERR)
+ and rms error (RMS) resulting from the least squares fit.  See OUT parameter
+ for details.
+.VARIABLE LFWPT
+ KEYWORD--OPTIONAL
+ The keyword LFWPT enables the low-full-well-pixel test for automatically
+ scanning for low-full-well pixels by checking for non-linearities in the
+ input data points.  Starting with the first n data points (where n is
+ specified via the SKIP parameter), the points are iteratively included
+ in the fit.  The next point (not yet included) is checked to see if it
+ falls more than a certain distance (determined from the ERROR parameter)
+ below the fitted curve (in units of DN).  If a point is rejected, then
+ all points above this level are also thrown out, and the raw dn of the last
+ pixel used in the fit is placed into the SAT file as a record of the
+ saturated DN level (low-full-well for the CCD).
+
+ If the keyword LFWPT is not specified, then the test is suppressed, and
+ the positions of the low-full-well pixels are retrieved from tables built
+ into the program.
+.VARIABLE SKIP
+ INTEGER--OPTIONAL--Default=4
+ Specifies number of exposures at low end to skip before applying the low
+ full well pixel test.  See LFWPT for details.
+.VARIABLE ERROR
+ REAL--OPTIONAL-Default=(.05,1.)
+      ERROR=(delta1,delta2)
+ The ERROR parameter specifies the error threshold EPS (in DN) as a linear
+ function of the exposure e (in relative-foot-Lambert-msec or picoamp-msec):
+      EPS = delta1*e + delta2
+ The error threshold is applied in the low-full-well-pixel test (see
+ parameter LFWPT).
+.VARIABLE OFFSETS
+ STRING--REQUIRED
+ Specifies the Shutter-Offset File.  The file is generated by program
+ CCDRECIP.
+.VARIABLE LIST
+ STRING--OPTIONAL
+ Specifies the name of the SRCH-format text file containing the names of
+ the input files to be processed.  This is an alternative to listing the 
+ filenames on the command line with the INP parameter.  
+
+ Inputs are flat-field images in order of increasing exposure.  If multiple
+ frames are acquired at a given exposure, these frames may be combined
+ via PICSUM.
+.END

@@ -1,0 +1,103 @@
+process help=*
+PARM OUT TYPE=STRING COUNT=4
+PARM PROPERTY TYPE=KEYWORD VALID=("CONFORMAL","AUTHALIC") +
+  DEFAULT="CONFORMAL"
+PARM NL TYPE=INTEGER COUNT=(0:1) DEFAULT=180
+PARM NS TYPE=INTEGER COUNT=(0:1) DEFAULT=360
+PARM PLANET     TYPE=(STRING,12) COUNT=1 +
+ VALID=("phobos","deimos","gaspra") DEFAULT="phobos"
+PARM ARCHIVE    TYPE=(STRING,80) COUNT=(0:1) +
+   DEFAULT=TRIAXIAL_ARCHIVE.IBIS
+END-PROC
+
+.TITLE
+VICAR program SNYDER
+
+.HELP
+PURPOSE:
+To make images of the centric coordinates resulting from original auxiliary
+coordinates.
+Part of a package of programs including TRICOEF and MAPAUX to map project
+irregularly shaped objects.
+
+EXECUTION:
+snyder out=(lat,lon,dlat,dlon)
+
+where:
+
+lat and lon are maps in rectangular projections the same size and format as
+the input images. These images contain the planetocentric lat and lon
+respectively which map to the conformal or authalic lat and lon of their pixel
+coordinates. ie: the contents are the centric coordinates of the auxiliary
+arguments.
+
+dlat and dlon are images of the displacement of the computed centric 
+coordinates from their initial auxiliary values.
+
+.PAGE
+
+METHOD:
+
+The following steps are executed for every output pixel:
+The auxiliary coordinates are computed from the image location.
+Triaxtran computes the centric locations.
+
+HISTORY:
+Author:  Jean Lorre
+  1998-09-01 - J Lorre - initial version.
+  2017-08-11 - W Bunch - Removed DEBUG from imake.
+
+.LEVEL1
+
+.VARI OUT
+Output images
+LAT (latitude)
+LON (longitude)
+Delta_lat
+Delta_lon
+
+.VARI PROPERTY
+conformal or
+authalic
+
+.VARI NL
+lines in output
+
+.VARI NS
+samples in output
+
+.VARI PLANET
+Planet name
+ 
+.VARI ARCHIVE
+Path name for
+tricoef file.
+
+.LEVEL2
+
+.VARI OUT
+Four outputs: Lat, Lon, Dlat, Dlon
+Lat is the planetocentric latitude at the auxiliary argument location.
+Lon is the planetocentric longitude at the auxiliary argument location.
+Dlat is the latitude shift from auxiliary to centric
+Dlon is the longitude shift from auxiliary to centric
+
+.VARI PROPERTY
+Map property
+CONFORMAL (default)
+AUTHALIC
+
+.VARI NL
+lines in output
+Defaults to the first input image size.
+
+.VARI NS
+samples in output
+Defaults to the first input image size.
+
+.VARI PLANET
+The planet or object name.
+ 
+.VARI ARCHIVE
+Path and filename for the Tricoef coefficient ibis file.
+

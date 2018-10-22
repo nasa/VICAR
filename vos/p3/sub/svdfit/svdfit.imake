@@ -1,0 +1,7 @@
+#define SUBROUTINE svdfit
+
+#define MODULE_LIST svdfit.f
+
+#define P3_SUBLIB
+
+#define USES_FORTRAN

@@ -1,0 +1,398 @@
+===========================================================================
+
+VICAR SUBROUTINE		phoBidiRef
+
+===========================================================================
+
+Purpose:			Returns the value of a bidirectional 
+				reflectance for a given photometric data object 
+				(containing a photometric function) and 
+				illumination geometry.
+
+===========================================================================
+
+Function:			First, the routine calls phoGetFunc, 
+				phoGetKeys and phoGetVal to retrieve the 
+				current bidirectional reflectance and their  
+				associated parameter values.  
+				Next, the routine computes the value of this 
+				bidirectional reflectance for given illumination
+				conditions.  
+				The respective functions are stored as internal 
+				subroutines within phoFunc.
+
+				The filled photometric data object is passed to
+				this routine.  The input of the illumination 
+				conditions is different for the Fortran- and the
+				C-routine:
+				FORTRAN :
+					Two arrays and some "switch"-parameters 
+					are passed to the routine.
+				C :
+					Two PHO_ILLUM unions (containing all 
+					illumination conditions )will be filled 
+					before directly.The union is defined in 
+					pho.h .
+ 
+				phoCorrect accepts four different 
+				representations of the measured illumination 
+				conditions and target ones independently : 
+					a) cosine of the angles of incidence, 
+					   emission, and phase;
+					b) cosine of the angles of incidence, 
+					   and emission in relation to the local 
+					   ellipsoid normal and to the local 
+					   surface narmal, and cosine of phase;
+					c) directions of incidence(directed to 
+					   the planet), emission(directed away 
+					   from the planet) and of ellipsoid 
+					   normal(directed away from the 
+					   planet);
+					d) directions of incidence(directed to 
+					   the planet), emission(directed away 
+					   from the planet) and of ellipsoid 
+					   normal(directed away from the planet) 
+					   and of surface normal (directed back 
+					   from the planet) 
+
+				Supported functions of the bidirectional 
+				reflectance are :
+				1.	Lambert
+				2.	Minnaert
+				3.	Veverka
+				4.	Buratti1
+				5.	Buratti2
+				6.	Buratti3
+				7.	Mosher
+				8.	Irvine
+				9.	Lommel-Seeliger
+				10.	Lumme-Bowell-1981
+				11.	Hapke-1981
+				12.	Hapke-Cook-1981
+				13.	Hapke-1Therm-Henyey-Greenstein-1986
+				14.	Hapke-2Therm-Henyey-Greenstein-1986
+				15.	Hapke-Legendre-Polynom-1986
+				16.   Hapke-Dominique-Coherent-Backscatter-1992
+				17.	Regner-1990
+
+===========================================================================
+
+
+Requirements and Dependencies:
+
+Libraries and subroutines
+required to run routine:	VICAR RTL, phoInit, phoSetFunc, 
+				phoGetFunc, phoGetKeys, phoSetVal, 
+				phoGetVal 
+
+Necessary include files
+for calling routine 
+or program:			pho.h (for C routines )
+				PHO.FIN (for FORTRAN routines )
+
+Other requirements: 		need to run routine phoInit, phoSetFunc, 
+				phoSetVal (or other higher-level 
+				subroutine calling phoSetFunc and 
+				phoSetVal) first
+
+Main programs from which
+subroutine will be called:	general application software and 
+				higher-level subroutines;
+				phoCorrect, phoFunc; 
+				hwphoco;
+				PHOTFIT, PHOTTEST;
+				HWGEOM*, HWORTH*, HWPHOCOE.
+
+===========================================================================
+
+Interfaces: Input / Output Parameters:
+
+Calling Sequence:		
+
+calling from C :	include "pho.h"
+			PHO PHO_DATA;
+			PHO_ILLUM illum;
+			int status;
+			double phoRefVal;
+			...
+			status = phoBidiRef( PHO_DATA, &illum, &phoRefVal );
+
+
+calling from FORTRAN :	INCLUDE 'pho'
+			INTEGER illMode, SunShadow, ViewShadow, 	
+			DOUBLE PRECISION illuArray(*) 
+			DOUBLE PRECISION phoRefVal
+			INTEGER PHO_DATA status
+			...
+			call pho_bidi_ref( PHO_DATA, 
+		+	illMode, SunShadow, ViewShadow,illuArray, 
+		+	phoRefVal, status )
+
+Necessary include files
+from calling routine 
+or program:		pho.h (for C routines )
+			pho.fin ( for FORTRAN routines )
+
+
+
+Parameters:
+	
+Name		Type	In/Out	Description
+	
+
+PHO_DATA	PHO	Input	Address of the photometric 
+				data object
+
+illMode		int	Input	The illMode parameter indicates how 
+				illumination is entered in the routine. 
+				phoCorrect accepts four different 
+				representations of the illumination 
+				conditions : 
+					illEllCos --> case a);
+					illDTMCos --> case b);
+					illEllDir --> case c);
+					illDTMDir --> case d)
+
+
+SunShadow	int	Input	The parameter indicates if the point is 
+				in the "Sun Shadow"
+
+ViewShadow  	int	Input	The parameter indicates if the point is 
+				in the "View Shadow"
+
+
+illuArray   double	Input	These arrays contain the illumination 
+				geometry respectively.  The contence 
+				belongs to the *illMode :
+
+				illEllCos --> case a :
+
+				DOUBLE PRECISION illuArray(3) 
+				DOUBLE PRECISION illuArray(3)
+				illuArray(1)=cos(incidenceAngle) 
+				illuArray(2)=cos(emissionAngle) 
+				illuArray(3)=cos(phaseAngle) 
+
+				illDTMCos --> case b :
+
+				DOUBLE PRECISION illuArray(5) 
+				DOUBLE PRECISION illuArray(5)
+				illuArray(1)=cos(incidenceAngle2Ellips) 
+				illuArray(2)=cos(emissionAngle2Ellips) 
+				illuArray(3)=cos(phaseAngle) 
+				illuArray(4)=cos(incidenceAngle2Surf) 
+				illuArray(5)=cos(emissionAngle2Surface) 
+
+				illEllDir --> case c :
+
+				DOUBLE PRECISION illuArray(9) 
+				DOUBLE PRECISION illuArray(9)
+				illuArray(1)=incidenceDirection(1) 
+				illuArray(2)=incidenceDirection(2) 
+				illuArray(3)=incidenceDirection(3) 
+				illuArray(4)=emissionDirection(1) 
+				illuArray(5)=emissionDirection(2) 
+				illuArray(6)=emissionDirection(2) 
+				illuArray(7)=EllipsNormalDirection(1) 
+				illuArray(8)=EllipsNormalDirection(2) 
+				illuArray(9)=EllipsNormalDirection(3) 
+
+				illDTMDir --> case d :
+
+				DOUBLE PRECISION illuArray(12) 
+				DOUBLE PRECISION illuArray(12)
+				illuArray(1)=incidenceDirection(1) 
+				illuArray(2)=incidenceDirection(2) 
+				illuArray(3)=incidenceDirection(3) 
+				illuArray(4)=emissionDirection(1) 
+				illuArray(5)=emissionDirection(2) 
+				illuArray(6)=emissionDirection(2) 
+				illuArray(7)=EllipsNormalDirection(1) 
+				illuArray(8)=EllipsNormalDirection(2) 
+				illuArray(9)=EllipsNormalDirection(3) 
+				illuArray(10)=SurfNormalDirection(1) 
+				illuArray(11)=SurfNormalDirection(2) 
+				illuArray(12)=SurfNormalDirection(3) 
+
+
+illum	 PHO_ILLUM	Input	These unions contain the illumination 
+				geometry :
+						
+				For all representations of the 
+				illumination geometry one of the makro 
+				illShadow or illNoShadow is to be filled 
+				in the union:
+
+				illum.type.sunshadow=...
+				illum.type.viewshadow=...
+
+				In relation to the case of the 
+				representation of the illumination 
+				geometry :
+
+				illEllCos --> case a) .
+				...
+				double incidAngle2Ellips;
+				double emAngle2Ellips;
+				double phaseAngle;,
+				...
+				illum.mode=illEllCos;
+				illum.cos.inc=cos(incidAngle2Ellips);
+				illum.cos.em=cos(emAngle2Ellips);
+				illum.cos.phas=cos(phaseAngle);
+
+				illDTMCos --> case b) :
+				...
+				double inciAngle2Ellips;
+				double emAngle2Ellips;
+				double inciAngle2Surf;
+				double emAngle2Surf;
+				double phaseAngle;
+				...
+				illum.mode=illDTMCos;
+				illum.cos.inc=cos(inciAngle2Ellips);
+				illum.cos.emw=cos(emAngle2Ellips);
+				illum.cos.phas=cos(phaseAngle);
+				illum.cos.inc_surf=cos(inciAngle2Surf);
+				illum.cos.em_surf=cos(emAngle2Surf);
+
+				illEllDir --> case c) .
+				....
+				double incidDir(3);
+				double emDir(3);
+				double ellDir(3);
+				....
+				illum.mode=illEllDir;
+				memcpy(&(illum.direction.inc), incidDir, 
+				  3*sizeof(double));
+				memcpy(&(illum.direction.em), emDir, 
+				  3*sizeof(double));
+				memcpy(&(illum.direction.ellips), ellDir, 
+				  3*sizeof(double));
+
+				illDTMDir --> case d) .
+				...
+				double incidDir(3);
+				double emDir(3);
+				double ellDir(3);
+				double surfDir(3);
+				...
+				illum.mode=illDTMDir;
+				memcpy(&(illum.direction.inc), incidDir, 
+				  3*sizeof(double));
+				memcpy(&(illum.direction.em), emDir, 
+				  3*sizeof(double));
+				memcpy(&(illum.direction.ellips), ellDir, 
+				  3*sizeof(double));
+				memcpy(&(illum.direction.surf),  surfDir, 
+				 3*sizeof(double));
+
+phoRefVal	double	Output	Value of the bidirectional reflectance
+
+
+status		int	Output	Error status:
+			phoSUCCESS - success
+			phoFAILURE - failed
+			phoFUNC_NOT_SET - failed : 
+				photometric function not set in the PHO
+			phoKEYWD_NOT_SET - failed :
+				one of the required parameter values has 
+				not been set in the PHO
+			phoINVALID_KEYWD - failed :
+				one of the parameter keywords is invalid
+			phoINVALID_ILL_MODE - failed :
+				invalid illMode
+			phoARGUMENT_OUT_OF_RANGE-failed:
+				one of the arguments is out of the valid range
+
+===========================================================================
+
+Background and References:
+
+	2.	M. Minnaert, The reciprocity principle in Lunar photometry,
+			Astrophysical Journal, Vol. 93, No. 2, p. 403-410, 1941
+	3.	Joseph Veverka, J. Goguen, S. Young, J. Elliont, Scattering of 
+			light from particulate surfaces. 
+		I. A laboratory assessment of multiple-scattering effects.
+			Icarus, Vol. 34, p. 406-414
+	4.-6.	Bonnie J. Buratti, Voyager Disk Resolved Photometry of the 
+			Saturnian Satellites,
+			Icarus, Vol. 59, p. 392-405, 1984
+		Bonnie J. Buratti, Joseph Veverka, Voyager Photometry of 
+			Europa,
+			Icarus, Vol. 55, p.93-110, 1983
+		Steven W. Squyres, Joseph Veverka, Voyager Photometry of 
+			Surface Features on Ganymede and Callisto, 
+			Icarus, Vol. 46, p. 137-155,1981
+	7.-8.	old VICAR Photometry programs
+	9.	Bruce Hapke, Theory of Reflectance Spectroscopy, 
+			(Topics in Remote Sensing;3), 
+			Cambridge University Press 1993, p. 199
+	10.	Kari Lume, Edward Bowell, Radiative Transfer in Surfaces of 
+			Atmosphereless Bodies.
+		1. Theory  
+			The Astronomical Journal, Vol. 86, No. 11, 
+			p. 1694-1704, 1981
+		2. Interpretation of Phase Curves, 
+			The  Astronomical Journal, Vol. 86, No. 11, 
+			p. 1705-1721, 1981
+		3. Interpretation of Lunar Photometry, 
+			The  Astronomical Journal, Vol. 87, No. 7, 
+			p. 1076-1082, 1982
+	11.	Bruce Hapke, Bidirectional Reflectance Spectroscopy.
+		1. Theory
+			Journal of Geophysical Research Vol. 86, No.. B4, 
+			p. 3039-3054, 1981
+	12.	Old VICAR Photometry programs
+	13.-15.Bruce Hapke, Bidirectional Reflectance Spectroscopy.
+		3. Correction for Macroscopic Roughness
+			Icarus, Vol. 59, p.41-59, 1984
+		4. The Extinction Coefficient and the Opposition Effect
+			Icarus, Vol. 67, p. 264-280, 1986
+	16.	Deborah Dominique, A Simple Method for Comparing Shadow-Hiding 
+	 		and Coherent Backscatter Models of the Opposition Effect
+			The 24th Annual Meeting of the Division for Planetary 
+			Sciences, 
+			12-16 October 1992, Munich, Germany, 
+			Bulletin of the American Astronomical Society, 
+			Annual Report of the AAS, DPS Abstracts, 
+			DDA/HAD Abstracts, Vol. 24, No. 3, 1992, p.958
+		Bruce Hapke, Coherent Backscatter and the Radar Characteristics 
+			of Outer Planet Satellites,
+			Icarus, Vol. 88, 407-417, 1990
+		Bruce Hapke, Bidirectional Reflectance Spectroscopy.
+		3. Correction for Macroscopic Roughness
+			Icarus, Vol. 59, p.41-59, 1984
+	17.	Peter Regner, Photometric Analysis for the Determination of 
+			Physical and Structural Properties of the Martian 
+			Surface in the Oxia Palus Region, 
+			Thesis University Munich, DLR-FB 90-29, 1990
+
+===========================================================================
+
+Other Information:
+
+Software Platforms:		VICAR 13 / TAE 5.2 
+				(SUN_OS,SUN_SOLARIS,VAX,AXP)
+
+Hardware Platforms:		No particular hardware required;
+				tested on SUN_OS,SUN_SOLARIS,VAX,AXP
+
+Programming Language:		ANSI-C, 
+				ANSI-FORTRAN bridge
+
+Specification by:		Friedel Oschuetz, DLR
+
+Date of specification:		July '94
+
+Cognizant programmer:		Friedel Oschuetz, DLR-NE-PE
+				Institute of Planetary Exploration
+				DLR
+				12484 Berlin (FRG)
+
+
+
+History:			Jan '94, L. Kamp, initial version
+				Jul '94, F. Oschuetz, preliminary version
+
+===========================================================================

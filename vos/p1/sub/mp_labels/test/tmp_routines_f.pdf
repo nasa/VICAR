@@ -1,0 +1,114 @@
+process help=*
+PARM TARGET		STRING	COUNT=0:1       DEFAULT=--
+PARM PROJ		STRING	COUNT=1
+PARM A_AXIS		REAL	COUNT=0:1	DEFAULT=--		
+PARM B_AXIS		REAL	COUNT=0:1	DEFAULT=--
+PARM C_AXIS		REAL	COUNT=0:1	DEFAULT=--
+PARM SCALE		REAL	COUNT=0:1	DEFAULT=--
+PARM RESOLUTION		REAL	COUNT=0:1	DEFAULT=--
+PARM POS_LON_DIR	STRING	COUNT=1
+PARM CTR_LAT		REAL	COUNT=1
+PARM CTR_LON		REAL	COUNT=1
+PARM SPHERICAL_AZ	REAL	COUNT=0:1	DEFAULT=0.0
+PARM CARTESIAN_AZ	REAL	COUNT=0:1	DEFAULT=0.0
+PARM LINE_OFFSET	REAL	COUNT=0:1	DEFAULT=0.0
+PARM SAMPLE_OFFSET	REAL	COUNT=0:1	DEFAULT=0.0
+PARM PARALLEL_ONE	REAL	COUNT=0:1	DEFAULT=--
+PARM PARALLEL_TWO	REAL	COUNT=0:1	DEFAULT=--
+PARM LONG_AXIS		REAL	COUNT=0:1	DEFAULT=--
+PARM TGTBOD		STRING 	COUNT=0:1	DEFAULT=--
+PARM PCK_PATH		STRING 	COUNT=1
+PARM LL_TYPE		STRING  COUNT=1         
+PARM LATITUDES		REAL	COUNT=0:10
+PARM LONGITUDES		REAL	COUNT=0:10
+PARM LINES		REAL	COUNT=0:10
+PARM SAMPLES		REAL	COUNT=0:10
+PARM TGT_DIST		REAL	COUNT=0:1	DEFAULT=--		
+PARM SC_DIST		REAL	COUNT=0:1	DEFAULT=--		
+PARM XYZ		REAL	COUNT=0:1	DEFAULT=--
+PARM AXIS_LINE		REAL	COUNT=0:1	DEFAULT=--
+PARM AXIS_SAMPLE	REAL	COUNT=0:1	DEFAULT=--
+PARM FOCAL_SCALE	REAL	COUNT=0:1	DEFAULT=--
+PARM SUB_SPACE_LAT	REAL	COUNT=0:1	DEFAULT=--
+PARM SUB_SPACE_LON	REAL	COUNT=0:1	DEFAULT=--
+PARM CENT_LINE		REAL	COUNT=0:1	DEFAULT=--
+PARM CENT_SAMPLE	REAL	COUNT=0:1	DEFAULT=--
+PARM N_ANGLE		REAL	COUNT=0:1	DEFAULT=--
+end-proc
+.TITLE
+VICAR program TMP_ROUTINES
+.HELP
+PURPOSE:
+This program is a simple test program for the HWCARTO
+subroutine. It calls zhwgetpar, zhwcarto and mpFree and
+prints the contents of the map projection object after zhwgetpar 
+is called and the transformation results. MP routines are
+embedded in the calls of zhwgetpar and zhwcarto.
+.LEVEL1
+
+.VARI TARGET
+Target body of object for which map projection points will
+be transformed.
+
+.VARI PROJ
+Map projection type requested.
+
+.VARI A_AXIS
+Semimajor axis of target body.
+
+.VARI B_AXIS
+Semiminor axis of target body.
+
+.VARI C_AXIS
+Polar axis of target body.
+
+.VARI SCALE
+Map scale.
+
+.VARI RESOLUTION
+Map resolution.
+
+.VARI POS_LON_DIR
+Positive longitude direction.
+
+.VARI CTR_LAT
+Center latitude
+
+.VARI CTR_LON
+Center longitude
+
+.VARI SPHERICAL_AZ
+Spherical azimuth
+
+.VARI CARTESIAN_AZ
+Cartesian azimuth
+
+.VARI LINE_OFFSET
+Line projection offset
+
+.VARI SAMPLE_OFFSET
+Sample projection offset
+
+.VARI PARALLEL_ONE
+First standard parallel
+
+.VARI PARALLEL_TWO
+Second standard paralel
+
+.VARI LONG_AXIS
+Body long axis offset longitude
+
+.VARI LAT_LON_TYPE
+Type of latitude and longitude as input or to be returned.
+Valid types are 'PLANETOCENTRIC', 'PLANETODETIC', and 'SNYDER-DEFINED'.
+
+.VARI LATITUDES
+Array of planetocentric, planetodetic or Snyder-defined latitudes on
+a target body.
+
+.VARI LONGITUDES
+Array of planetOcentric, planetodetic or Snyder-defined longitudes on
+a target body. NOTE THAT LONGITUDES ARE PLANETODETIC, PLANETOCENTRIC
+OR SNYDER-DEFINED ONLY WITH THE TRIAXIAL ELLIPSOID MODEL.
+
+.END

@@ -1,0 +1,30 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM chkspace
+
+   To Create the build file give the command:
+
+	$ vimake chkspace                     (VMS)
+   or
+	% vimake chkspace                     (Unix)
+
+
+*************************************************************************/
+
+#if VMS_OS
+#define PROGRAM chkspace_vms
+#define MODULE_LIST chkspace_vms.c 
+#define CLEAN_OTHER_LIST chkspace_unix.c
+#else
+#define PROGRAM chkspace_unix
+#define MODULE_LIST chkspace_unix.c
+#define CLEAN_OTHER_LIST chkspace_vms.c
+#endif
+
+#define MAIN_LANG_C
+#define USES_C
+
+#define R2LIB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB

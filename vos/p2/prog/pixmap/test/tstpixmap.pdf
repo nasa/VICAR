@@ -1,0 +1,72 @@
+procedure
+refgbl $echo
+refgbl $autousage
+parm version string def="ibis-2"
+parm org string def="column"
+body
+!let _onfail="continue"
+let $autousage="none"
+let $echo="yes"
+
+! TEST SCRIPT FOR PIXMAP
+
+gen xim0 nl=100 ns=200
+gtgen xim0 xim 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(2,3,0,350807.4,5317081.3,0.0)", +
+          "ModelTiePointTag=(102,83,0,351807.4,5316081.3,0.0)", +
+          "ModelTiePointTag=(2,83,0,350807.4,5316081.3,0.0)", +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+gtlist xim
+
+ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+    nc=4 nr=2 deff="DOUB"
+mf a func=("c1=index*99-98","c2=index*199-198")
+
+ibis-list a 'format
+
+pixmap (a,xim) mapcol=(3,4) pixcol=(1,2) 'pixtomap
+ibis-list a 'format
+
+mf a func=("c1=0","c2=0")
+ibis-list a 'format
+
+pixmap (a,xim) mapcol=(3,4) pixcol=(1,2) 'maptopix
+ibis-list a 'format
+
+! repeat for random points
+
+ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+    nc=4 nr=10 deff="DOUB"
+mf a func=("c1=sqrt(index*17+2763)","c2=sqrt(index*7+3431)")
+mf a func=("c1=mod(c1,0.0001)*1000000","c2=mod(c2,0.0001)*1000000")
+
+ibis-list a 'format
+
+pixmap (a,xim) mapcol=(3,4) pixcol=(1,2) 'pixtomap
+ibis-list a 'format
+
+mf a func=("c1=0","c2=0")
+ibis-list a 'format
+
+pixmap (a,xim) mapcol=(3,4) pixcol=(1,2) 'maptopix
+ibis-list a 'format
+
+
+! test the ignore keyword, same as case above
+
+gen xim0 nl=100 ns=200
+gtgen xim0 xim 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(2,3,0,350807.4,5317081.3,0.0)", +
+          "ModelTiePointTag=(102,83,0,351807.4,5316081.3,0.0)", +
+          "ModelTiePointTag=(2,83,0,350807.4,5316081.3,0.0)", +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+
+ibis-gen a version=&version org=&org  datacol=(1,2,3,4) +
+    nc=4 nr=2 deff="DOUB"
+mf a func=("c1=index*99-98","c2=index*199-198")
+
+pixmap (a,xim) mapcol=(3,4) pixcol=(1,2) 'pixtomap +
+      ignore=(100.0,200.0)
+ibis-list a 'format
+
+end-proc

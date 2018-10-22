@@ -1,0 +1,15 @@
+#define PROGRAM tstfile_no_path
+#define MODULE_LIST tstfile_no_path.c
+
+#define TEST
+
+#define MAIN_LANG_C
+#define USES_ANSI_C
+
+#define LIB_P1SUB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_FORTRAN
+
+/* #define LIB_LOCAL */
+

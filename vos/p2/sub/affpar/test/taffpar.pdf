@@ -1,0 +1,65 @@
+Process help=*
+
+PARM   LNE_IN  TYPE=REAL    COUNT=1  VALID=(-1.0:100000.0)  DEFAULT=750.0
+
+PARM   SMP_IN  TYPE=REAL    COUNT=1  VALID=(-1.0:100000.0)  DEFAULT=750.0
+
+
+END-PROC
+.Title
+ Test program for the affpar function               Version: 1.0.7
+
+
+.HELP
+
+   test program tstaffpar call the function affpar().
+ 
+            function determines coefficients for an affin transformation,
+            and calculates the transformation for a given point.
+                 
+            call sequence:
+                 
+                 st = affpar (lne_in, smp_in,
+                                n,  
+                                lne_0, smp_0, 
+                                lne_1, lne_1, 
+                               &lne_out, &smp_out,
+                                a);
+                    
+                 with:   
+                   IN: 
+                     double     lne_in   = line   coordinate in system 0; which is
+                                           to transfer in the system 1
+                     double     smp_in   = sample coordinate in system 0; which is
+                                           to transfer in the system 1
+                     int        n        = number of the points,
+                     double *   lne_0[i] = line   coordinate vector for system 0,
+                     double *   smp_0[i] = sample coordinate vector for system 0,
+                     double *   lne_1[i] = line   coordinate vector for system 1,
+                     double *   smp_1[i] = sample coordinate vector for system 1,
+                   OUT:
+                     double *   lne_out  = line   coordinate in system 1 of the lne_in
+                                           coordinate (system 0)
+                     double     smp_out  = sample coordinate in system 1 of the lne_in
+                                           coordinate (system 0)
+                     double *   a[i]     = coefficient vector (6 unknown 
+                                           parameters).
+                 return value: 
+                        st = 1 if everything is allright;
+                   else st < 1
+                   
+             the mathematic modell:
+             
+                 lne_1[i] = lne_0[i] * a[0] + smp_0[i] * a[1] + a[2] , 
+                 smp_1[i] = lne_0[i] * a[3] + smp_0[i] * a[4] + a[5] . 
+
+   WRITTEN BY: F.Wewel, DLR     17-Jun-1997
+
+.LEVEL1
+.VARI LNE_IN
+ line coordinate to transform
+.VARI  SMP_IN
+ sample coordinate to transform
+
+
+.End

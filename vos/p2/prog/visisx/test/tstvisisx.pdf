@@ -1,0 +1,84 @@
+procedure
+refgbl $echo
+refgbl $syschar
+body
+let _onfail="continue"
+let $echo="yes"     
+
+enable-log
+
+write "This is the test file for Program VISISX"
+
+gen a.vic 100 100
+label-l a.vic 'nousrtim
+list a.vic (50,50,5,5) 'nousrtim
+visisx a.vic a.isis
+isislab a.isis
+visisx a.isis a1.vic 'tovic
+label-l a1.vic 'nousrtim
+list a1.vic (50,50,5,5) 'nousrtim
+
+gen a.vic 100 100 'half
+label-l a.vic 'nousrtim
+list a.vic (50,50,5,5) 'nousrtim
+visisx a.vic a.isis
+isislab a.isis
+visisx a.isis a1.vic 'tovic
+label-l a1.vic 'nousrtim
+list a1.vic (50,50,5,5) 'nousrtim
+
+gen a.vic 100 100 'full
+label-l a.vic 'nousrtim
+list a.vic (50,50,5,5) 'nousrtim
+visisx a.vic a.isis
+isislab a.isis
+visisx a.isis a1.vic 'tovic
+!label-l a1.vic 'nousrtim
+!list a1.vic (50,50,5,5) 'nousrtim
+
+gen a.vic 100 100 'real
+label-l a.vic 'nousrtim
+list a.vic (50,50,5,5) 'nousrtim
+visisx a.vic a.isis
+isislab a.isis
+visisx a.isis a1.vic 'tovic
+label-l a1.vic 'nousrtim
+list a1.vic (50,50,5,5) 'nousrtim
+
+write " "
+write " Test BIL case with suffix planes"
+write " (For now, only backplanes work in TOISIS mode)"
+write " "
+
+gen a.vic ns=10 nb=14 nl=18 'real 'bil
+label-l a.vic 'nousrtim
+list a.vic binc=5 sinc=2 linc=3 'bsq 'nousrtim
+gen back.vic ns=10 nb=2 nl=18 'real
+list back.vic sinc=2 linc=3 'nousrtim
+visisx a.vic a.isis back=back.vic
+isislab a.isis
+visisx a.isis a1.vic 'tovic back=back1.vic
+label-l a1.vic 'nousrtim
+list a1.vic binc=5 sinc=2 linc=3 'bsq 'nousrtim
+label-l back1.vic 'nousrtim
+list back1.vic sinc=2 linc=3 'nousrtim
+
+! IF SIDE/BOTTOMPLANES ARE ENABLED, REPLACE RELEVANT PARTS OF ABOVE WITH:
+!gen side.vic ns=2 nb=14 nl=18 'real
+!gen back.vic ns=12 nb=2 nl=18 'real
+!gen bott.vic ns=12 nb=16 nl=2 'real
+!list side.vic binc=5 linc=3 'nousrtim
+!list back.vic sinc=3 linc=3 'nousrtim
+!list bott.vic sinc=2 binc=6 'nousrtim
+!visisx a.vic a.isis side=side.vic back=back.vic bott=bott.vic
+!visisx a.isis a1.vic 'tovic back=back1.vic side=side1.vic bott=bott1.vic
+!label-l side1.vic 'nousrtim
+!list side1.vic binc=5 linc=3 'nousrtim
+!label-l back1.vic 'nousrtim
+!list back1.vic sinc=3 linc=3 'nousrtim
+!label-l bott1.vic 'nousrtim
+!list bott1.vic sinc=2 binc=6 'nousrtim
+
+disable-log
+
+end-proc

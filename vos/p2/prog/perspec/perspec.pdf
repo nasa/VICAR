@@ -1,0 +1,139 @@
+PROCESS HELP=*
+ PARM INP      TYPE=(STRING,80)  COUNT=1
+ PARM OUT      TYPE=(STRING,80)  COUNT=0:1 DEFAULT=--
+ PARM ELEV     TYPE=REAL    DEFAULT=0       valid=(0:180)      !30
+ PARM AZIMUTH  TYPE=REAL    DEFAULT=180 valid=(0:360)     !180
+ PARM DISTANCE TYPE=REAL    DEFAULT=0
+ PARM ORIGIN   TYPE=REAL    COUNT=3   DEFAULT=(0,0,0)
+ PARM ZSCALE   TYPE=REAL    DEFAULT=1.0
+ PARM DATAFORM TYPE=(STRING,3)  VALID=(XYZ,YXZ,LSZ) DEFAULT=XYZ
+END-PROC
+
+.TITLE
+VICAR/IBIS Program "perspec"
+.HELP        
+PURPOSE      
+             
+    "perspec" converts 3-D IBIS graphics-1 files into a true 2-D perspective
+3-D IBIS graphics-1 file.
+
+OPERATION
+
+    Perspec allows the user to manipulate the vertices in an IBIS-1 3-D graphics
+file. When a graphics file is constructed the vertices are in a specific coordinate
+system. Program PLTGRAF can be used to plot the object in whatever coordinates
+given in the list. Perspec then allows the IBIS-1 graphics file coordinate system
+to be modified. It also allows the user to adjust the origin and distance as well
+as the angular relationships.
+
+
+PARAMETERS
+
+    INP and OUT are the names of the input and output IBIS files respectively,
+
+    ELEV and AZIMUTH are the angles. 
+
+    ORIGIN is the location of the origin of the perspective. Not the origin
+    of the axes.
+
+    DISTANCE is the location of the observer away from the ORIGIN
+
+    ZSCALE allows the Z-AXIS to be scaled differently from the X- and Y-AXES.
+
+    DATAFORM is how to show the X-, Y- and Z-axes. Normally, X and Y are horizontal
+and Z is vertical.   
+
+IBIS GRAPHICS-1 FILES
+
+    IBIS graphics-1 files are a way to store 2-dimensional or 3-dimensional
+polygonal objects in a file. The file contains a list of the successive vertices
+of the polygons. When the list contains a line of all zeroes then it terminates
+that face of the polygon. In the view of a drawing program it would be a
+"pen-up" command. 
+
+    With the advent of the IBIS-2 format graphics-1 files are deprecated.
+In the new IBIS-2 format graphics-1 can replace that format via an index
+column. In the IBIS-2 context each row is associated with a single vertex,
+and the row order in a column determines the sequence of plotting the
+vertices. A pen-up type command would involve a change of the value in
+the index column. 
+
+
+ 
+.PAGE        
+EXECUTION    
+             
+Examples:    
+             
+perspec inp.gr1 out.gr1 ELEV=30 AZIMUTH=135 DISTANCE=200
+
+perspec inp.gr1 out.gr1 ELEV=30 AZIMUTH=135 DISTANCE=200  ZSCALE=10  ORIGIN=(100,100,10)
+
+.Page
+
+Code extracted from PLOT3D
+
+Original Programmer:    Ray Bambery , 10 Feb 2013            
+             
+Cognizant Programmer:   Ray Bambery
+             
+.LEVEL1      
+.VARIABLE INP
+IBIS 3-D graphics file name.
+.VARIABLE OUT
+ 2-D IBIS graphics file.
+.VARIABLE ELEV
+Observer elevation angle
+in degrees above horizon.
+.VARIABLE AZIMUTH
+Observer azimuthial angle
+in degrees east of north.
+.VARIABLE DISTANCE
+Observer distance from origin
+(in same units as graphics).
+.VARIABLE ORIGIN   
+The view origin (observer looks
+toward origin) in same format
+as 3-D graphics file.
+.VARIABLE ZSCALE
+Divisor to convert scale of
+Z values into X,Y units.
+.VARIABLE DATAFORM 
+3-D data format:
+XYZ for (X,Y,Z)
+YXZ for (Y,X,Z)
+LSZ for (line,sample,Z)
+.LEVEL2      
+.VARIABLE INP
+IBIS 3-D graphics file name.
+.VARIABLE OUT
+If an output file is specified then a perspective transformation will be
+performed and the result output in an 2-D IBIS graphics file.  The output
+is in (X,Y) format.
+.VARIABLE ELEV
+The elevation angle of the observer in degrees above the horizon.
+.VARIABLE AZIMUTH
+The azimuthial angle of the observer in degrees east of north where 
+north is the y direction.  Default is to look from the south (180 degrees).
+.VARIABLE DISTANCE
+The distance of the observer from origin (in same units as graphics file).  
+This controls the amount of perspective. 
+.VARIABLE ORIGIN   
+The 3-D location of the origin toward which the observer looks.  
+In same format as the 3-D graphics file (e.g. XYZ, LSZ).
+.VARIABLE ZSCALE
+Divisor scale factor to convert scale of Z values same scale as the 
+X and Y values.
+.VARIABLE DATAFORM 
+The 3-D graphics-1 file contains triplets of real numbers.  
+The DATAFORM parameter specifies the format of the triplet:  
+XYZ for (X,Y,Z),  YXZ for (Y,X,Z),  LSZ for (line,sample,Z).
+
+.END
+
+
+
+
+
+
+

@@ -1,0 +1,9 @@
+
+#define SUBROUTINE upcase
+
+#define MODULE_LIST upcase.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

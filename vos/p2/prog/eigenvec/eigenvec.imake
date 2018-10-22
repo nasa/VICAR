@@ -1,0 +1,28 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM eigenvec
+
+   To Create the build file give the command:
+
+		$ vimake eigenvec			(VMS)
+   or
+		% vimake eigenvec			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	eigenvec
+#define R2LIB
+
+#define MODULE_LIST eigenvec.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_MATH77
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

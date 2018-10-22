@@ -1,0 +1,133 @@
+procedure option=selftutor help=*
+
+	parm PARAM2_temp	 real count=0:1 			def=1.0
+	parm PARAM3_temp	 real count=0:1 			def=1.1
+	parm PARAM4_temp	 real count=0:1 			def=1.3
+	parm PARAM5_temp	 real count=0:1 			def=1.4
+
+	parm PARAM2	 real count=0:1 	def=--
+	parm PARAM3	 real count=0:1 	def=--
+	parm PARAM4	 real count=0:1 	def=--
+	parm PARAM5	 real count=0:1 	def=--
+
+	PARMSET name=tcommon_func3_sub help=*
+
+		parm PARAM2	 real count=0:1 def=--
+		parm PARAM3	 real count=0:1 def=--
+		parm PARAM4	 real count=0:1 def=--
+		parm PARAM5	 real count=0:1 def=--
+
+	END-PROC
+
+body
+
+	if (_tutor=1)
+
+	  restore-parm tcommon_func3.par
+
+
+	  if ($count(PARAM2)=0)
+	 						let PARAM2_temp=1.0
+	  else
+	 	let PARAM2_temp=&PARAM2
+	  end-if
+
+
+	  if ($count(PARAM3)=0)
+	 						let PARAM3_temp=1.1
+	  else
+	 	let PARAM3_temp=&PARAM3
+	  end-if
+
+
+	  if ($count(PARAM4)=0)
+	 						let PARAM4_temp=1.2
+	  else
+	 	let PARAM4_temp=&PARAM4
+	  end-if
+
+
+	  if ($count(PARAM5)=0)
+	 						let PARAM5_temp=1.3
+	  else
+	 	let PARAM5_temp=&PARAM5
+	  end-if
+
+
+
+	   tutor tcommon_func3_sub 					+
+		|restore=tcommon_func3.par, save=tcommon_func3.par|	+
+		PARAM2=&PARAM2_temp					+
+		PARAM3=&PARAM3_temp					+
+		PARAM4=&PARAM4_temp					+
+		PARAM5=&PARAM5_temp
+
+	   return
+
+	else
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	   write " This program is only intended to be run "
+	   write " as tutor from other programs needs. "
+	   write " "
+	   write "*********************************************************"
+	   write " "
+	end-if
+
+end-proc
+
+.title
+&_PROC 
+
+.help
+
+PURPOSE:
+
+In this PDF, the user is asked for the only parameters needed for the second 
+function FUNC3. 
+
+.page
+PROGRAMMER:
+
+Friedel Oschuetz
+Institute of Planetary Exploration
+DLR
+12484 Berlin (FRG)
+
+HSTORY:
+
+original	F. Oschuetz	Sept.'94
+
+
+.level1
+
+.VARI PARAM2
+parameter 2 
+
+.VARI PARAM3
+parameter 3 
+
+.VARI PARAM4
+parameter 4 
+
+.VARI PARAM5
+parameter 5 
+
+
+
+.level2
+
+.VARI PARAM2
+Parameter 2 accossiated to the function FUNC3.
+
+.VARI PARAM3
+Parameter 3 accossiated to the function FUNC3.
+
+.VARI PARAM4
+Parameter 4 accossiated to the function FUNC3.
+
+.VARI PARAM5
+Parameter 5 accossiated to the function FUNC3.
+
+.end

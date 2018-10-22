@@ -1,0 +1,10 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+POLYGEN OUT=a.dat MDATA=(10. 10. 40. 40. 10 10. 40. 40. 10. 10)
+ibis-list a.dat gr1dim=2 nr=30
+POLYPNT INP=a.dat OUT=pic.dat SIZE=(1 1 60 60) 'PAINT DN=100
+LIST INP=pic.dat SIZE=(10,10,30,17)
+end-proc

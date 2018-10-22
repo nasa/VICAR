@@ -1,0 +1,598 @@
+1  XKNUTH
+
+     XKNUTH, XKNUTH_COMPLEX
+
+     Two routines that provide the ability to dynamically compile
+     and execute FORTRAN IV or C - like expressions (see KNUTH),
+	 using either REAL or COMPLEX arithmetic.
+
+2  CALLING SEQUENCE
+ 
+    FORTRAN:
+	         REAL*4 BUF(300),RESULT
+			 COMPLEX*8 CBUF(150),CRESULT
+			 
+             CALL XKNUTH (BUF,RESULT)
+             CALL XKNUTH_COMPLEX (CBUF,CRESULT)
+
+    C:
+			float buf[300],result,cresult[2];
+            zxknuth(buf,&result);
+			zxknuth_complex(buf,cresult);
+    
+2  ARGUMENTS
+     BUF      is a 300 word(4 bytes each) array which holds the compiled
+              expression and variable values. If XKNUTH_COMPLEX is called,
+			  it contains 300 COMPLEX value-pairs (and was compiled with
+			  KNUTH_COMPLEX).
+
+     RESULT   is a REAL*4 output which is set to the expression value
+              upon return. If XKNUTH_COMPLEX is called, RESULT should
+			  be COMPLEX (or float[2] in C).
+              
+1  KNUTH_LOOKUP
+
+     A routine that provides the ability to compute FORTRAN IV or 
+     C - like expressions and store values in a lookup table (See KNUTH).
+	 It does not handle complex-valued expressions, as does XKNUTH_COMPLEX.
+
+2  CALLING SEQUENCE
+ 
+    FORTRAN:
+             CALL KNUTH_LOOKUP(BUF,TABLE,NUM_INP,FLAGS)
+
+    C:
+             zknuth_lookup(buf,table,num_inp,flags);
+
+    
+2  ARGUMENTS
+
+     BUF      is a 300 word(4 bytes each) array which holds the compiled
+              expression and variable values. BUF must have been compiled
+			  with KNUTH, and not KNUTH_COMPLEX for this code to work.
+
+     TABLE    is a BYTE (unsigned char) output array containing a
+              lookup table for one or two BYTE inputs
+
+     NUM_INP  is an INTEGER*4 input indicating whether the table should
+              be a lookup table for one or two input byte values.
+
+     FLAGS    is an INTEGER containing bit-field flags indicating how
+              knuth_lookup should build the lookup table:
+
+              bit 1: table values should be derived from rounding
+              (bit=1) or truncating (bit=0) the REAL*4 values.
+              bit 2: table is indexed using FORTRAN signed BYTE values
+              (ie, index is -128:127) if bit=1, else index is (0:255).
+
+              For example, FLAGS=3 indicates use of rounding and signed
+              byte values.
+
+1  KNUTH_DUMP
+
+     A routine that provides a symbolic dump ("F2-style") of a buffer of
+     compiled code, executable by knuth (See KNUTH). Note: This code
+	 will not work with a buffer compiled with KNUTH_COMPLEX. However,
+	 since the same compiler module is used for both routines, you
+	 can generate its symbolic dump by passing the original string
+	 to KNUTH, creating a temporary REAL buffer, and then dumping
+	 that buffer instead.
+
+2  CALLING SEQUENCE
+ 
+    FORTRAN:
+             CALL KNUTH_DUMP(BUF)
+
+    C:
+             zknuth_dump(buf);
+
+    
+2  EXAMPLE
+
+   In the code segment:
+
+         REAL*4 BUF(300)
+		 INTEGER*4 IER
+         CALL KNUTH('IN1+20*LINE',BUF,IER)
+         CALL KNUTH_DUMP(BUF) 
+     
+   The subroutine KNUTH_DUMP will output the following
+   sequence (or similar) of operations compiled in the buffer:
+   
+           LOAD  22
+           MUL   19
+           ADD    1
+           RETN   0
+
+1  KNUTH_VAR
+
+    KNUTH_VAR, zknuth_var:
+    
+     A routine that returns the buffer index of a named variable
+     recognized by the expression compiler knuth (See KNUTH). The
+     routines return zero-based or one-based indices for C and
+     FORTRAN arrays, respectively. Special case: If you are using
+	 XKNUTH_COMPLEX operations, then all indices refer to indices
+	 in the COMPLEX array (or in the float[2] array for C).
+
+2  CALLING SEQUENCE
+ 
+    FORTRAN:
+             CALL KNUTH_VAR(NAME,INDEX)
+
+    C:
+             index=zknuth_var(name);
+
+    
+2  ARGUMENTS
+
+     NAME      is a CHARACTER*N (or C-string) ascii string input,
+               specifying the variable name
+               
+     INDEX     is and INTEGER*4 (int) output value, returning
+               the buffer index (or -1 if not recognized). The
+               value ,if valid, will be "zero-based" for C and 
+               "one-based"for FORTRAN arrays.
+
+2  EXAMPLES
+
+3 FORTRAN
+
+     KNUTH_VAR returns a "one-based" index, which will be correct
+     for standard FORTRAN arrays:
+    
+     INTEGER*4 IER,LINEINDEX
+     REAL*4 BUF(300), RESULT
+     CALL KNUTH('IN1+LINE',BUF,IER)
+     CALL KNUTH_VAR('LINE',LINEINDEX) !Gets index of "line"
+     BUF(1) = 2.0
+     BUF(LINEINDEX) = 3.0
+     CALL XKNUTH (BUF,RESULT)
+     
+     < The value of result will be (IN1+LINE) = (2.0 + 3.0) = 5.0 >
+
+3 C-LANGUAGE
+ 
+    zknuth_var returns the correct index for a "zero-based"
+    array in C:
+    
+     {
+         int ier,dn_index,line_index;
+         float buf[300],result;
+         
+         zknuth( "dn % line", buf, &ier);
+         dn_index=zknuth_var("dn");
+         line_index=zknuth_var("line");
+         buf[dn_index] = 10;
+         buf[line_index]=7;   
+         zxknuth( buf, &result);
+         ...
+     }
+    
+     The value of result is = (dn % line) = (10 % 7)  = 3.0.
+
+1  KNUTH
+
+     KNUTH, KNUTH_COMPLEX, XKNUTH, XKNUTH_COMPLEX, KNUTH_LOOKUP, 
+	 KNUTH_VAR, KNUTH_DUMP:
+     
+     A suite of routines that provide the ability to dynamically
+     compile and execute FORTRAN IV or C - like expressions, using
+	 real or complex arithmetic, and then optionally,
+     to store the values into a byte lookup table.
+
+2  CALLING SEQUENCE
+ 
+    FORTRAN:    
+            CALL KNUTH (STRING,BUF,IER)
+            CALL KNUTH_COMPLEX (STRING,BUF,IER)
+
+    C:
+            zknuth(string,buf,&ier);
+            zknuth_complex(string,buf,&ier);
+    
+2  ARGUMENTS
+     STRING   is a CHARACTER*N (char[]) input containing an arithmetic
+               expression in ASCII,optionally ending in '$'.  Need not 
+              be uppercase.
+
+     BUF      is a 300 word(4 bytes each) array which holds the compiled
+              expression and variable values. For KNUTH_COMPLEX this is
+			  an array of 300 COMPLEX*8 (float[2]) values.
+
+     IER      is an INTEGER*4 output which allows for warnings and
+              error codes. IER=1 warns that variables "LINE", "SAMP"
+              or "BAND" were referenced in the compilation.
+              IER=2 indicates a bad function string and IER=3 is an 
+              evaluation error. 0 indicates no warnings or errors.
+
+
+2  OPERATION
+
+      These routines give the ability to dynamically compile and
+    execute FORTRAN and C - like expressions.  The expression is passed to
+    routine KNUTH as a character string and compiled into a buffer area.
+    It is the responsibility of the calling program to place input values
+    (and line,samp,band, if required) into the BUF array. A subsequent call
+    to XKNUTH calculates the value of the expression as a function of its
+    variables. Alternatively, the subroutine KNUTH_LOOKUP will produce a 
+    byte lookup table for one or two byte-valued inputs.
+    
+    The variables are placed in a vector which is part of the buffer area.
+	For KNUTH the vector is REAL*4, while for KNUTH_COMPLEX they are COMPLEX.
+    The arithmetic operation is specified by a FORTRAN or C-like expression
+    which can include the following operators (synonyms connected by an =):
+    
+        + - * / ** unary-
+	LOG   = ALOG    =  LN  (all these = natural (base e) log)
+	LOG10 = ALOG10         (all these = common (base 10) log)
+        SQRT   ABS   AINT = INT
+        SIN    COS  TAN    ASIN  ACOS  ATAN  ATAN2
+        AMAX1 = MAX  AMIN1 = MIN
+        AMOD   MOD .AND.  .OR.  .XOR.  .NOT.
+        .LT.  .LE. .EQ.   .NE.  .GT.  .GE.
+    
+    as well as the following C-operators:
+    
+        &    &&   |    ||    %   ^   !  
+        ==   !=   >=   <=   >   <   >>   <<
+     
+	 (KNUTH_COMPLEX supports all of these except ASIN,ACOS and ATAN).
+	 
+     All operations function as in their respective languages including
+     MIN and MAX, which may now accept two or more arguments. However,
+     for historical reasons the FORTRAN logical operators act bitwise on
+     the 4-byte integer equivalent of the truncated floating point value.
+
+     Note that one must be careful, if using the '&' character, to put a
+     space between it and the next argument, or else the VICAR executive
+     will try to interpret that argument as the name of a VICAR variable.
+     Also, the VICAR executive interprets "&&" as a single '&', so 
+     logical-AND must be doubly-escaped: "7 &&&& 5".
+
+     Historically, KNUTH used a standard technique (see REFERENCES) to
+     convert ordinary  arithmetic expressions into polish notation. Since
+     then the code has been completely rewritten in C as a recursive 
+     expression parser.  The parser performs a certain amount of 
+     optimization, taking advantage of the fact that some operations do 
+     not depend upon argument order (such as +,*,MAX, etc).
+
+     KNUTH recognizes a number of variable names and associates them with
+     certain locations in the BUF array. The following table shows the
+     currently recognized names and the BUF index associated with it:
+     
+            NAME            INDEX
+            ---------       ---------
+            IN1 ... IN50    1 ... 50
+            X1 ... X50      1 ... 50  (where "X" is any letter except
+            DN              1                            i,d,l,s,or b)
+            LINE            *
+            SAMP            *
+            BAND            *
+     
+     The indices marked (*) are implementation dependent; to find which 
+     buffer index is assigned to this or any other variable, use the 
+     KNUTH_VAR subroutine. If the variables LINE, SAMP or BAND are 
+     referenced in the expression, this will be flagged by KNUTH by 
+     setting the IER flag to 1.
+
+     Because of the type of calculations done on images, the routine XKNUTH
+     is designed to never abort regardless of input values.  Illegal 
+     operations result in the generation of a "reasonable" result as 
+     follows: a) divide by zero becomes divide by 1.E-20;  b) log of a
+     negative number becomes log of its absolute value;  c) int() of a
+     number outside the range (-2147483648,2147483647) becomes the closest
+     value in that range (which is that of a 32-bit integer, so any extra
+     precision on a machine where an int has more bits is lost); etc.
+
+     The routine KNUTH quits processing, prints an error message and
+     returns if a syntax error is detected in the expression string.
+     The same holds true for KNUTH_COMPLEX and XKNUTH_COMPLEX, except
+     that some "illegal" operations have meaningful values in the complex
+     domain: for example, the log of a negative number is simply the log
+     of the positive value plus PI*(i), where i is the imaginary square
+     root of (-1).
+
+3  TECHNICAL-DETAILS
+
+4  OVERVIEW
+
+    The knuth subroutine is now basically a FORTRAN bridge to the
+    C - language subroutine zknuth, which is a recursive expression
+    parser and compiler. The bridge routine converts the FORTRAN
+    string to C format and passes it on.
+    
+    The parser first calls the routine initialize_parser,
+    which checks for closed parentheses, converts the string to
+    all UPPERCASE for simplicity, and eliminates any terminating
+    '$' characters (for backwards compatibility).
+    
+    The subroutine then calls the main entry to the recursive parsing
+    loop, called "compile_loop", which parses and compiles the
+    expression string into a register-based binary, executable by the
+    subroutine "xknuth", which is a FORTRAN bridge to the C-language 
+    version zxknuth.
+
+
+4 STACKS/REGISTERS
+
+    Stack-Based  vs. Register-based computations
+    
+    On the machine level of most computers today, computations are
+    performed one step at a time, where each operation is of the form
+    
+                    <OPERATION> <ADDRESSES>
+                    
+    and uses a fixed set of registers, one of which is set as the
+    active register.For example, the machine implementation of
+    "Z=X+Y" may be (in pseudo-assembly):
+    
+                 LOAD X        ; Load value at X into active register
+                 ADD  Y        ; Add value at Y into register
+                 STOR Z        ; Store register value into Z.
+    
+    However, when scanning through a complex math expression,it is
+    often easier to have a way of "putting off for later" 
+    intermediate expressions which are to be combined in the end. 
+    For this purpose a structure called a Stack may be implemented, 
+    which is an area of memory where numbers may
+    be "pushed" on and "popped" off (This is how most hand-held
+    calculators operate -- even the non-Hewlett-Packard type!).
+    
+    For example, the expression:
+    
+            (X*Y) + (Z*W)
+            
+    may be implemented on a stack by:
+    
+            PUSH X            ; stack= X
+            PUSH Y            ; stack= Y  X
+            MULTIPLY          ; stack= (X*Y)
+            PUSH Z            ; stack= Z   (X*Y)
+            PUSH W            ; stack= W   Z   (X*Y)
+            MULTIPLY          ; stack= (W*Z)   (X*Y)
+            ADD               ; stack= (X*Y)+(W*Z)
+    
+
+
+4 PARSING
+    The knuth parser really has two independent parts: a 
+    Stack-based parser and a set of Stack-to-Register 
+    operation converters.
+    
+    The parser is a set of token (such as "(", "*", or ".LT.")
+    handling subroutines, all of which have the general schematic
+    form:
+    
+        HANDLER_Y:
+    
+                Execute HANDLER_X
+                
+                while TOKEN is in HANDLER_Y_TOKENS
+                
+                    Get a new TOKEN
+                    
+                    Execute HANDLER_X
+                    
+                    ( Perform a computational ACTION_Y)
+    
+                end-while
+                
+    If knuth was an expression-evaluation, rather than expression-
+    compiling, subroutine, the ACTION_Y in the schematic above would
+    be something like
+    
+        ACTION_Y = "Take the numbers stored in the stack and perform 
+        the Y_TOKEN operation given by TOKEN"
+        
+    However, since we actually want a register-based "executable"
+    file of operations, the ACTION_Y  subroutines have the form:
+    
+        ACTION_Y = "Take the numbers stored in the stack and generate in
+        the executable buffer the sequence of register commands
+        needed to perform the Y_TOKEN operation given by TOKEN"
+        
+        
+    For the current implementation of KNUTH, here is a table of the 
+    token handlers, (HANDLER_Y), together with their set of
+    HANDLER_Y_TOKENS, and the associated action item ACTION_Y. Each 
+    handler calls the next on the list:
+    
+
+    HANDLER_Y        HANDLER_Y_TOKENS      ACTION_Y      Comments    
+    
+     commas                    ,        Count #args   Handles x,y,z,...
+     logical1        .OR. || .XOR....   binary(op)    Simple logicals
+     logical2        .AND. &&           binary(op)    Higher logicals
+     compares        .LT. < >=...       binary(op)    Comparison ops
+     shifts            >>  <<           binary(op)    bit shift ops
+     arith1            + -              binary(op)    x+y arithmetic
+     arith2            *  /  %          binary(op)    higher arithmetic
+     exponents         **               binary(op)    exponentiation
+     unary_arith       + -              unary(op)     +(x) or -(x)
+     transcend       LN, SIN,SQRT...    unary(op)     transcendentals
+     prefixes        MAX, ATAN2...      multi(op)     any OP(x,y,...)
+     parentheses         ( )            primitive     grouping
+
+    The subroutine "parentheses", in turn, calls commas, starting 
+    the recursion loop.
+    
+    Each handler, before it grabs a token, makes sure that the next 
+    highest handler gets first chance to grab the token before it takes
+    the leftovers. After grabbing all the tokens the handler needs, it
+    calls the action procedure.
+    
+    The action procedures binary, unary, multi and primitive, all 
+    manipulate the stack of stored constants and variables with 
+    various calls to pop() and push(), and also convert the requested
+    operation to an equivalent sequence of register based operations, 
+    using the subroutine stack_to_register(). This routine tries to do 
+    some optimization, by checking the operation requested among its 
+    list of order-independent (commutative) operations, and shuffling 
+    the order of loads.
+    
+    For example, in the expression
+    
+                        X-Y*Z
+                        
+    if the variables will be put into the stack in the order they
+    appear, to implement the register-based operation "-", which is
+    order dependent, some temporary registers must be used, e.g.
+    
+                    LOAD X
+                    STOR W
+                    LOAD Y
+                    MULT Z
+                    STOR Q
+                    LOAD W
+                    SUB  Q
+                    RETN
+                    
+    Even though the (STOR W,LOAD W) commands are not absolutely 
+    necessary, ie:
+    
+                    LOAD Y
+                    MULT Z
+                    STOR Q
+                    LOAD X
+                    SUB  Q
+                    RETN
+                    
+    will also do the job.
+    
+    In addition, the analogous sequence for, say,
+    
+                    X+Y*Z
+                    
+    may take advantage of the commutativity of addition, to become:
+    
+                    LOAD Y
+                    MULT Z
+                    ADD  X
+                    RETN
+                    
+    These are the sequences that are generated by stack_to_register.            
+                
+2  EXAMPLES
+
+3 FORTRAN
+
+    
+     BYTE TABLE(0:255, 0:255), DN   !Note the index starts at 0 !
+     INTEGER*4 IER
+     REAL*4 BUF(300), RESULT
+     CALL KNUTH('IN1+SQRT(IN2)',BUF,IER)
+     BUF(1) = 2.0
+     BUF(2) = 9.0
+     CALL XKNUTH (BUF,RESULT)
+     ...
+     ( The value returned in RESULT will be 2.0 + SQRT(9.0) = 5.0.)
+     
+     CALL KNUTH_LOOKUP(BUF,TABLE,1,0)
+     
+     DN = TABLE( 3, 17)
+     
+     ( The value of DN will be truncate( 3+SQRT(17) ) = 7. )
+
+3 COMPLEX_FORTRAN
+
+     INTEGER*4 IER
+     COMPLEX*8 BUF(300), RESULT
+     CALL KNUTH_COMPLEX('IN1+SQRT(IN2)',BUF,IER)
+     BUF(1) = (2.0,0.0)   !2 + 0i
+     BUF(2) = (-1.0,0.0)  !-1 + 0i
+     CALL XKNUTH_COMPLEX (BUF,RESULT)
+     ...
+     ( The value returned in RESULT will be 2.0 + SQRT(-1) = 2+i)
+
+3 C-LANGUAGE
+ 
+     {
+         int ier;
+         float buf[300],result;
+         
+         zknuth( "dn % x2", buf, &ier);
+         buf[0] = 10; buf[1]=7;        /* DN=buf[0] and x2=buf[1] */
+         zxknuth( buf, &result);
+         zknuth_lookup(buf,
+         ...
+     }
+    
+     The value returned in result is = (10 % 7) = (10 MOD 7 ) = 3.0.
+
+3 COMPLEX-C
+ 
+     {
+         int ier;
+         float buf[300][2],result[2];
+         
+         zknuth_complex( "log(dn) + x2", buf, &ier);
+         buf[0][0] = -1; buf[0][1] = 0;      /* DN=-1 + 0i */
+         buf[0][0] = 2; buf[0][1] = 0;      /* x2=-1 + 0i */
+         zxknuth_complex( buf, result);
+     }
+    
+     The value-pair returned in result is = log(-1)+2 = {2, 3.14159}.
+     
+     
+
+2  TIMING
+
+     Execution time of KNUTH is proportional to the length of the string.
+     Execution time of XKNUTH is proportional to the time it would take
+     compiled code to execute the expression except for an overhead due to 
+     initializing machine instructions.  Thus, expressions involving only 
+     + - * /, etc., are about 2 to 3 times slower, and those involving sin,
+     sqrt, etc., are about 5 times slower.
+
+2  RESTRICTIONS
+
+     The expression must not contain more than 40 constants, 20 variables, 
+     or roughly 80 operations.  Embedded blanks are allowed.
+
+     When performing  arithmetic, KNUTH converts all integer operands to
+     real and executes  single precision floating point computations.  The
+     exception is  .AND., .OR., and .XOR. which operate bitwise on the
+     integer equivalent of the truncated floating point number.  The final 
+     result is converted back to integer by rounding, which is the default.
+     The logical values "TRUE'  and 'FALSE' when produced, are interpreted
+     as 1 and 0 respectively. The .NOT. operator only  operates on the
+     logical values 0 and 1. 
+
+     A subtle consequence of KNUTH converting integers to floating point is
+     that exponentiation does not work as expected for negative values
+     raised to an integer exponent.  This is because they are interpreted
+     as negative values raised to a floating point exponent, which are
+     undefined (not real) values, and so their positive magnitude is
+     returned.  Odd powers can be handled using multiplication and the 
+     next smaller even power. KNUTH_COMPLEX does not have these limitations.
+
+2  REFERENCE
+
+     KNUTH, D.E., "A History of Writing Compilers,"
+     Computers and Automation, December, 1962, pp. 8-18.
+
+     Schildt, H.S., "C: The Complete Reference,", Osborne McGraw-Hill,
+     1987, pp. 547-570.
+     
+2  HISTORY
+
+     KNUTH, XKNUTH
+     Original Programmer: A. L. Zobrist, 1 September 1975
+     Current Cognizant Programmer: A. L. Zobrist
+     Documentation Authors: A. L. Zobrist, N. D. Ritter
+     Revision: 1, (30 July 1984)
+               2, (05 September 1990) version 9.05.90
+                   Error checking of function expanded to include a
+                   double operator check.
+               3, (25 January 1991) version 01.25.91
+                   Clean up for test files corrected.
+               4, (05 August 1991) version 08.05.91
+                   Completely new code in C; UNIX compatible;
+                   recursive parser routines; handles C constructs
+                   and performs optimization on compiles.
+               5, (12 November 1994) version 11.12.94
+                   Added KNUTH_COMPLEX, XKNUTH_COMPLEX for 
+                   complex arithmetic & transcendental operations.
+               12-Oct-2006 -lwk- changed SMALL from 1.e-6 to 1.e-20
+               08-Feb-2007 -lwk- added code to check on the INT function.

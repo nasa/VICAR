@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine  INTERG  */
+
+#define SUBROUTINE  interg
+
+#define MODULE_LIST  interg.f  
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

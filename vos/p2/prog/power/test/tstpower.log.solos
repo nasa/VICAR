@@ -1,0 +1,588 @@
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
+if (afidsroot = "")
+    ush ln -s /project/test_work/testdata/cassini/iss cs
+else
+    if (aftestdata = "")
+    else
+    end-if
+end-if
+let _onfail="goto rm"
+let $echo="no"
+TESTS USING AN IMAGE CONTAINING A ONE CYCLE SINE WAVE OVER 256 SAMPLES
+THE MEAN IS 100 DN AND THE AMPLITUDE (PEAK-TO-PEAK) IN DN IS 200.
+So the first element of the table should be the mean:  100 and the
+max value should be about 200 at a frequency of 1/256 = .0039
+f2 out=A.h size=(1,1,50,256) 'half func="100*(1+sin(3.1415926*samp/128.))"
+Beginning VICAR task f2
+F2 version 26-Jul-11
+F2 calculating every pixel
+FUNCTION EVALUATED 12800 TIMES
+power A.h plotfmt=eps plotout=sin1  scale=30 fmax=.1   +
+    title="TEST 1 - RMS POWER SPECTRUM FOR FILE sin1"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =   50   NS =  256
+    256 POINT TRANSFORM
+   MEAN (DN) = 100.0000
+   SIGMA(DN) =  70.6929
+typetext sin1.asc
+Beginning VICAR task typetext
+  0.0000	   100.000
+  0.0039	   199.948
+  0.0078	     0.000
+  0.0116	     0.032
+  0.0155	     0.000
+  0.0194	     0.203
+  0.0233	     0.000
+  0.0271	     0.160
+  0.0310	     0.000
+  0.0349	     0.111
+  0.0388	     0.000
+  0.0426	     0.023
+  0.0465	     0.000
+  0.0504	     0.063
+  0.0543	     0.000
+  0.0581	     0.079
+  0.0620	     0.000
+  0.0659	     0.155
+  0.0698	     0.000
+  0.0736	     0.017
+  0.0775	     0.000
+  0.0814	     0.075
+  0.0853	     0.000
+  0.0891	     0.015
+  0.0930	     0.000
+  0.0969	     0.081
+  0.1008	     0.000
+  0.1047	     0.206
+  0.1085	     0.000
+  0.1124	     0.199
+  0.1163	     0.000
+  0.1202	     0.121
+  0.1240	     0.000
+  0.1279	     0.128
+  0.1318	     0.000
+  0.1357	     0.015
+  0.1395	     0.000
+  0.1434	     0.098
+  0.1473	     0.000
+  0.1512	     0.179
+  0.1550	     0.000
+  0.1589	     0.003
+  0.1628	     0.000
+  0.1667	     0.204
+  0.1705	     0.000
+  0.1744	     0.028
+  0.1783	     0.000
+  0.1822	     0.017
+  0.1860	     0.000
+  0.1899	     0.120
+  0.1938	     0.000
+  0.1977	     0.076
+  0.2016	     0.000
+  0.2054	     0.034
+  0.2093	     0.000
+  0.2132	     0.018
+  0.2171	     0.000
+  0.2209	     0.093
+  0.2248	     0.000
+  0.2287	     0.051
+  0.2326	     0.000
+  0.2364	     0.113
+  0.2403	     0.000
+  0.2442	     0.108
+  0.2481	     0.000
+  0.2519	     0.079
+  0.2558	     0.000
+  0.2597	     0.041
+  0.2636	     0.000
+  0.2674	     0.013
+  0.2713	     0.000
+  0.2752	     0.107
+  0.2791	     0.000
+  0.2829	     0.046
+  0.2868	     0.000
+  0.2907	     0.106
+  0.2946	     0.000
+  0.2984	     0.120
+  0.3023	     0.000
+  0.3062	     0.036
+  0.3101	     0.000
+  0.3140	     0.035
+  0.3178	     0.000
+  0.3217	     0.254
+  0.3256	     0.000
+  0.3295	     0.083
+  0.3333	     0.000
+  0.3372	     0.105
+  0.3411	     0.000
+  0.3450	     0.076
+  0.3488	     0.000
+  0.3527	     0.110
+  0.3566	     0.000
+  0.3605	     0.061
+  0.3643	     0.000
+  0.3682	     0.073
+  0.3721	     0.000
+  0.3760	     0.028
+  0.3798	     0.000
+  0.3837	     0.254
+  0.3876	     0.000
+  0.3915	     0.174
+  0.3953	     0.000
+  0.3992	     0.182
+  0.4031	     0.000
+  0.4070	     0.034
+  0.4109	     0.000
+  0.4147	     0.025
+  0.4186	     0.000
+  0.4225	     0.075
+  0.4264	     0.000
+  0.4302	     0.099
+  0.4341	     0.000
+  0.4380	     0.033
+  0.4419	     0.000
+  0.4457	     0.170
+  0.4496	     0.000
+  0.4535	     0.099
+  0.4574	     0.000
+  0.4612	     0.030
+  0.4651	     0.000
+  0.4690	     0.068
+  0.4729	     0.000
+  0.4767	     0.081
+  0.4806	     0.000
+  0.4845	     0.001
+  0.4884	     0.000
+  0.4922	     0.004
+  0.4961	     0.000
+    ush gnuplot sin1.eps.gpi
+if (mode = "nobatch" or mode = "inter")
+end-if
+f2 out=A.b1 size=(1,1,50,256) 'byte func="100*(1+sin(3.1415926*samp/128.))"
+Beginning VICAR task f2
+F2 version 26-Jul-11
+F2 calculating every pixel
+FUNCTION EVALUATED 12800 TIMES
+power A.b1  plotout=sin2 scale=30 fmax=.1   +
+    TITLE="TEST 2 - RMS POWER SPECTRUM FOR BYTE FILE sin2"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =   50   NS =  256
+    256 POINT TRANSFORM
+   MEAN (DN) = 100.0000
+   SIGMA(DN) =  70.6929
+typetext sin2.asc
+Beginning VICAR task typetext
+  0.0000	   100.000
+  0.0039	   199.948
+  0.0078	     0.000
+  0.0116	     0.032
+  0.0155	     0.000
+  0.0194	     0.203
+  0.0233	     0.000
+  0.0271	     0.160
+  0.0310	     0.000
+  0.0349	     0.111
+  0.0388	     0.000
+  0.0426	     0.023
+  0.0465	     0.000
+  0.0504	     0.063
+  0.0543	     0.000
+  0.0581	     0.079
+  0.0620	     0.000
+  0.0659	     0.155
+  0.0698	     0.000
+  0.0736	     0.017
+  0.0775	     0.000
+  0.0814	     0.075
+  0.0853	     0.000
+  0.0891	     0.015
+  0.0930	     0.000
+  0.0969	     0.081
+  0.1008	     0.000
+  0.1047	     0.206
+  0.1085	     0.000
+  0.1124	     0.199
+  0.1163	     0.000
+  0.1202	     0.121
+  0.1240	     0.000
+  0.1279	     0.128
+  0.1318	     0.000
+  0.1357	     0.015
+  0.1395	     0.000
+  0.1434	     0.098
+  0.1473	     0.000
+  0.1512	     0.179
+  0.1550	     0.000
+  0.1589	     0.003
+  0.1628	     0.000
+  0.1667	     0.204
+  0.1705	     0.000
+  0.1744	     0.028
+  0.1783	     0.000
+  0.1822	     0.017
+  0.1860	     0.000
+  0.1899	     0.120
+  0.1938	     0.000
+  0.1977	     0.076
+  0.2016	     0.000
+  0.2054	     0.034
+  0.2093	     0.000
+  0.2132	     0.018
+  0.2171	     0.000
+  0.2209	     0.093
+  0.2248	     0.000
+  0.2287	     0.051
+  0.2326	     0.000
+  0.2364	     0.113
+  0.2403	     0.000
+  0.2442	     0.108
+  0.2481	     0.000
+  0.2519	     0.079
+  0.2558	     0.000
+  0.2597	     0.041
+  0.2636	     0.000
+  0.2674	     0.013
+  0.2713	     0.000
+  0.2752	     0.107
+  0.2791	     0.000
+  0.2829	     0.046
+  0.2868	     0.000
+  0.2907	     0.106
+  0.2946	     0.000
+  0.2984	     0.120
+  0.3023	     0.000
+  0.3062	     0.036
+  0.3101	     0.000
+  0.3140	     0.035
+  0.3178	     0.000
+  0.3217	     0.254
+  0.3256	     0.000
+  0.3295	     0.083
+  0.3333	     0.000
+  0.3372	     0.105
+  0.3411	     0.000
+  0.3450	     0.076
+  0.3488	     0.000
+  0.3527	     0.110
+  0.3566	     0.000
+  0.3605	     0.061
+  0.3643	     0.000
+  0.3682	     0.073
+  0.3721	     0.000
+  0.3760	     0.028
+  0.3798	     0.000
+  0.3837	     0.254
+  0.3876	     0.000
+  0.3915	     0.174
+  0.3953	     0.000
+  0.3992	     0.182
+  0.4031	     0.000
+  0.4070	     0.034
+  0.4109	     0.000
+  0.4147	     0.025
+  0.4186	     0.000
+  0.4225	     0.075
+  0.4264	     0.000
+  0.4302	     0.099
+  0.4341	     0.000
+  0.4380	     0.033
+  0.4419	     0.000
+  0.4457	     0.170
+  0.4496	     0.000
+  0.4535	     0.099
+  0.4574	     0.000
+  0.4612	     0.030
+  0.4651	     0.000
+  0.4690	     0.068
+  0.4729	     0.000
+  0.4767	     0.081
+  0.4806	     0.000
+  0.4845	     0.001
+  0.4884	     0.000
+  0.4922	     0.004
+  0.4961	     0.000
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+TRY A SINE WAVE OVER 256 LINES
+f2 out=A.b2 size=(1,1,256,50) 'byte func="100*(1+sin(3.1415926*line/128.))"
+Beginning VICAR task f2
+F2 version 26-Jul-11
+F2 calculating every pixel
+FUNCTION EVALUATED 12800 TIMES
+power A.b2 plotout=sin3 scale=20 fmax=.1  +
+    title="TEST 3 - RMS POWER SPECTRUM FOR BYTE FILE sin3"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  256   NS =   32
+     32 POINT TRANSFORM
+   MEAN (DN) = 100.0000
+   SIGMA(DN) =  70.6929
+typetext sin3.asc
+Beginning VICAR task typetext
+  0.0000	   100.000
+  0.0294	     0.000
+  0.0588	     0.000
+  0.0882	     0.000
+  0.1176	     0.000
+  0.1471	     0.000
+  0.1765	     0.000
+  0.2059	     0.000
+  0.2353	     0.000
+  0.2647	     0.000
+  0.2941	     0.000
+  0.3235	     0.000
+  0.3529	     0.000
+  0.3824	     0.000
+  0.4118	     0.000
+  0.4412	     0.000
+  0.4706	     0.000
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+HALFWORD DATA TESTS on Cassini data
+power cs/sum2.38 (11,11,50,140) plotout=case1   +
+    title="TEST 4 - RMS POWER SPECTRUM FOR HALF FILE sum2.38"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =   11   SS =   11   NL =   50   NS =  128
+    128 POINT TRANSFORM
+   MEAN (DN) = 154.9716
+   SIGMA(DN) =   3.4179
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/sum2.38 (1,1,100,500) plotout=case2 EXPONENT=9 TITLEX="FREQ"   +
+    title="TEST 5 - RMS POWER SPECTRUM FOR HALF FILE sum2.38"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  100   NS =  500
+    512 POINT TRANSFORM
+   MEAN (DN) = 152.2320
+   SIGMA(DN) =   5.1071
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/sum2.38 (1,1,150,64)  EXPONENT=6 FMAX=2.0  +
+    TITLE="TEST 6 - FLORANCE CASE3 RMS POWER SPECTRUM FOR HAF FILE sum2.38"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  150   NS =   64
+     64 POINT TRANSFORM
+   MEAN (DN) = 153.6343
+   SIGMA(DN) =   9.4866
+if (mode = "nobatch" or mode = "inter")
+end-if
+f2 cs/sum2.38 T FUNC="IN1*20."
+Beginning VICAR task f2
+F2 version 26-Jul-11
+F2 using hash table lookup
+FUNCTION EVALUATED 133 TIMES
+power T (1,1,150,64)  EXPONENT=6 FMAX=2.0  DNSCALE=20.  +
+          plotout=case4 TITLE="TEST 7 - FLORANCE CASE4"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  150   NS =   64
+     64 POINT TRANSFORM
+   MEAN (DN) = 153.6343
+   SIGMA(DN) =   9.4866
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/sum2.38 (1,1,120,50) EXPONENT=6 TITLE="TEST 8 - PLOT ONLY - CASE5" plotout=case5
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  120   NS =   50
+     64 POINT TRANSFORM
+   MEAN (DN) = 152.8627
+   SIGMA(DN) =  10.5103
+if (mode = "nobatch" or mode = "inter")
+end-if
+ush rm power.gpi
+power cs/sum2.38 (1,1,120,50)  plotout=case6   +
+    title="TEST 9 - CASE6 RMS POWER SPECTRUM FOR FILE sum2.38"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =  120   NS =   32
+     32 POINT TRANSFORM
+   MEAN (DN) = 151.6779
+   SIGMA(DN) =  12.7927
+typetext case6.asc
+Beginning VICAR task typetext
+  0.0000	   151.678
+  0.0294	     8.568
+  0.0588	     9.138
+  0.0882	     9.161
+  0.1176	     8.661
+  0.1471	     8.746
+  0.1765	     9.059
+  0.2059	     9.084
+  0.2353	     8.957
+  0.2647	     8.831
+  0.2941	     8.955
+  0.3235	     8.869
+  0.3529	     8.841
+  0.3824	     8.739
+  0.4118	     9.127
+  0.4412	     8.929
+  0.4706	     8.859
+if (mode = "nobatch" or mode = "inter")
+end-if
+let $echo="no"
+BYTE DATA TESTS
+label-li cs/grid.byte
+Beginning VICAR task label
+LABEL version 15-Nov-2010
+************************************************************
+ 
+        ************  File cs/grid.byte ************
+                3 dimensional IMAGE file
+                File organization is BSQ
+                Pixels are in BYTE format from a VAX-VMS host
+                1 bands
+                256 lines per band
+                50 samples per line
+                0 lines of binary header
+                0 bytes of binary prefix per line
+---- Task: F2 -- User: SXP812 -- Tue Apr 15 09:35:56 1997 ----
+FUNCTION='100*(1+sin(3.1415926*line/128.))'
+ 
+************************************************************
+power cs/grid.byte (1,1,50,50) EXPONENT=6  TITLE="TEST 10 - BYTE TEST FOR FILE grid.byte"  +
+     plotout=grid0
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =   50   NS =   50
+     64 POINT TRANSFORM
+   MEAN (DN) = 154.9200
+   SIGMA(DN) =  27.7675
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/grid.byte (1,1,50,50) EXPO=6 PLOTOUT=grid1   +
+    title="TEST 11 - RMS POWER SPECTRUN FOR FILE grid.byte"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+   TRANSFORM  SL =    1   SS =    1   NL =   50   NS =   50
+     64 POINT TRANSFORM
+   MEAN (DN) = 154.9200
+   SIGMA(DN) =  27.7675
+typetext grid1.asc
+Beginning VICAR task typetext
+  0.0000	   198.298
+  0.0152	     0.000
+  0.0303	     0.000
+  0.0455	     0.000
+  0.0606	     0.000
+  0.0758	     0.000
+  0.0909	     0.000
+  0.1061	     0.000
+  0.1212	     0.000
+  0.1364	     0.000
+  0.1515	     0.000
+  0.1667	     0.000
+  0.1818	     0.000
+  0.1970	     0.000
+  0.2121	     0.000
+  0.2273	     0.000
+  0.2424	     0.000
+  0.2576	     0.000
+  0.2727	     0.000
+  0.2879	     0.000
+  0.3030	     0.000
+  0.3182	     0.000
+  0.3333	     0.000
+  0.3485	     0.000
+  0.3636	     0.000
+  0.3788	     0.000
+  0.3939	     0.000
+  0.4091	     0.000
+  0.4242	     0.000
+  0.4394	     0.000
+  0.4545	     0.000
+  0.4697	     0.000
+  0.4848	     0.000
+if (mode = "nobatch" or mode = "inter")
+end-if
+power cs/grid.byte (1,1,60,60) EXPO=6 PLOTOUT=grid2   +
+    title="TEST 12 - RMS POWER SPECTRUN FOR FILE grid.byte"
+Beginning VICAR task power
+power - Jul 13, 2013 (64-bit gnuplot) - rjb
+MIPL RMS POWER SPECTRUM
+??W - Number of samples truncated
+   TRANSFORM  SL =    1   SS =    1   NL =   60   NS =   50
+     64 POINT TRANSFORM
+   MEAN (DN) = 162.0500
+   SIGMA(DN) =  29.9519
+typetext grid2.asc
+Beginning VICAR task typetext
+  0.0000	   207.424
+  0.0152	     0.000
+  0.0303	     0.000
+  0.0455	     0.000
+  0.0606	     0.000
+  0.0758	     0.000
+  0.0909	     0.000
+  0.1061	     0.000
+  0.1212	     0.000
+  0.1364	     0.000
+  0.1515	     0.000
+  0.1667	     0.000
+  0.1818	     0.000
+  0.1970	     0.000
+  0.2121	     0.000
+  0.2273	     0.000
+  0.2424	     0.000
+  0.2576	     0.000
+  0.2727	     0.000
+  0.2879	     0.000
+  0.3030	     0.000
+  0.3182	     0.000
+  0.3333	     0.000
+  0.3485	     0.000
+  0.3636	     0.000
+  0.3788	     0.000
+  0.3939	     0.000
+  0.4091	     0.000
+  0.4242	     0.000
+  0.4394	     0.000
+  0.4545	     0.000
+  0.4697	     0.000
+  0.4848	     0.000
+if (mode = "nobatch" or mode = "inter")
+end-if
+ush rm cs
+let $echo="no"

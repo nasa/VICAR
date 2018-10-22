@@ -1,0 +1,386 @@
+PROCESS HELP=*
+ PARM INP      TYPE=STRING  COUNT=(2:3)
+ PARM OUT      TYPE=STRING  COUNT=1
+ PARM PROJECT  TYPE=(STRING,5) COUNT=(0:1) DEFAULT=-- +
+    VALID=("VGR-1","VGR-2","MAR10","MAR-9","VIKOR","GLL  ","CASSI")
+ PARM CAMERA TYPE=INTEGER COUNT=(0:1) DEFAULT=--
+ PARM CORR     TYPE=INTEGER COUNT=2 DEFAULT=(64,64)
+ PARM PFILTER  TYPE=REAL    DEFAULT=0
+ PARM PHASE    TYPE=REAL    DEFAULT=0
+ PARM OFFMAX   TYPE=REAL    DEFAULT=0.8
+ PARM FUNC     TYPE=(STRING,3) DEFAULT=""
+ PARM REDOCORR TYPE=KEYWORD VALID=(REDO,NOREDO) DEFAULT=REDO
+ PARM SUBPIX   TYPE=KEYWORD VALID=(SUBPIX,NOSUBPIX) DEFAULT=NOSUBPIX
+ PARM PRINT    TYPE=KEYWORD VALID=(PRINT,NOPRINT) DEFAULT=PRINT
+ PARM DIR      TYPE=(STRING,80) COUNT=1 DEFAULT=" "
+ PARM OBJECT   TYPE=KEYWORD VALID=(IMAGE,OBJECT) DEFAULT=IMAGE
+ PARM SEDR     TYPE=KEYWORD VALID=(SEDR) DEF=SEDR
+ PARM NTPTS    TYPE=INTEGER COUNT=1 DEFAULT=8 VALID=(4:20)
+ PARM TOLERANC TYPE=REAL COUNT=1 DEFAULT=2.0
+ PARM FILENAME TYPE=(STRING,80) COUNT=(0:1) DEFAULT="NOFILE"
+END-PROC
+
+.TITLE
+VICAR/IBIS Program AUTOMATCH
+
+.HELP
+PURPOSE
+  AUTOMATCH is a program which automatically acquires tiepoints from
+sets of images for the purpose of producing mosaics.
+To obtain a more global view of the entire mosaicking process
+you should look at the procedures in r3lib called:
+MANUAL2.COM for Voyager, and MANUAL4.COM for Galileo. 
+AUTOMATCH replaces MANMATCH in these procedures.
+
+  Automatch is designed to generate tiepoints from sets of images which 
+have been generated in a "burst" of frames where the scale & rotation
+do not differ much between images. Provision is built into 
+the program to compensate for differences between images by projecting
+the correlation areas before correlation. This is limited however
+to scale ranges of at most 2:1 and modest rotations which will
+not confuse the overlap area algorithm. Automatch will NOT
+work well on cases containing the limb.
+
+EXECUTION
+
+For VGR:
+   AUTOMATCH  inp=(sedr.int,over.int,geoma.cor)  out=match.int + 
+                   project=VGR-1 filename=LISTOFFILES
+
+For GLL:
+   automatch inp=(jupsedr.int,jupover.int) out=jupmatch.int +
+         filename=LISTOFFILES project=GLL
+
+.PAGE
+USAGE:
+AUTOMATCH is an batch program which has in the SEDR.INT file
+the FDS or SCET times of all of the frames to inspect along
+with all the navigation for these images.. 
+You must create this file using the program IBISNAV
+
+AUTOMATCH can obtain the names (and thus the locations) of all the
+input files in one of two ways:
+
+(recommended)
+1. By the user specifying the parameter FILENAME which points to
+   a file created by a text editor and which contains the full
+   file names of each input picture in the order of priority, one
+   name per record. This is the same file used in IBISNAV.
+   So, if the first 2 pictures are called scx1:[jjl059]1234567.img
+   and mipldisk:[mipl.gll]venus.img the first two records of
+   FILENAME would contain:
+
+   scx1:[jjl059]1234567.img
+   mipldisk:[mipl.gll]venus.img
+
+(obsolete)
+2. By building each file name by appending to the DIR keyword
+   the integer contained in column 1 of the SEDR.INT file followed
+   by .IMG. You must in this mode name the input pictures
+   accordingly. 
+   For Voyager, column 1 is the FDS times thus the frames must be
+   named the same as their FDS times; ie: 7654321.img is the file
+   name of the image with fds time 7654321. 
+   For Galileo the FDS times are just 1,2,3,4.. so the file names are
+   1.img   2.img etc.
+   So, if DIR=scx1:[jjl059] and SEDR.INT has fds time 1234567 in column
+   one then the built-up name would be:  scx1:[jjl059]1234567.img
+
+The second input file 
+contains the overlap frame pairs to present to the user.
+This file is created by program MOSPLOT.
+
+First input= SEDR.INT produced by program IBISNAV
+Second input= OVER.INT produced by program MOSPLOT
+
+Automatch will perform the following steps:
+
+For each overlap pair:
+1. Compute the overlap area in the right image by projecting the
+   4 corners of the left image into the right image using the SEDR.
+2. Select the correlation size to fit in the overlap area.
+3. Select a row or column (whichever is the longest) through the
+   overlap area and select a number of candidate tiepoint locations
+   in the right image.
+4. Compute the corresponding tiepoint positions in the left image
+   using the SEDR.
+5. Perform correlations.
+6. Fit a 1st order polynomial to the tiepoints.
+7. Iteratively reject all points (one at a time) exceeding a threshold
+   pixel tolerance.
+8. Select the 2 remaining points the furthest apart.
+9. Place these in the output.
+
+NOTE: 
+
+The output file is the same as the file written by MANMATCH. So
+if AUTOMATCH cannot process a certain number of overlap pairs you
+can input the AUTOMATCH output into MANMATCH as the last input file
+and go to the pairs in question to acquire points manually.
+
+Be sure to inspect footprint plots of your mosaic generated by
+MOSPLOT and to edit the overlap file with EDIBIS to delete 
+extraneous & redundant overlaps to save time and later confusion.
+
+At the moment automatch can accept up to 256 image pairs.
+
+.PAGE
+FILE STRUCTURE:
+  The tiepoints file is an IBIS format tabular file. It consists
+of 512 byte records where each column of data is written as
+sequential records until exhausted. The next column begins at the
+start of the next record etc. Record #1 contains the number of points
+per column. All data is real*4 binary.
+
+.LEVEL1
+.VARIABLE INP
+All inputs are IBIS tabular files.
+
+First input= SEDR.INT produced
+ by program IBISNAV
+Second input= OVER.INT produced
+ by program MOSPLOT
+Third input=geoma parameters
+(optional).
+
+.VARIABLE OUT
+The output IBIS tabular file.
+nine columns output:
+col1=first frame number of a pair
+col2=second frame number of a pair
+col3=first frame tiepoint line
+col4=first frame tiepoint sample
+col5=second frame tiepoint line
+col6=second frame tiepoint sample
+col7=1
+col8=1
+col9=1
+
+.VARIABLE PROJECT
+Batch parameter !
+Specifies  the 
+project. 
+
+.VARIABLE CAMERA
+Camera serial no.
+
+.VARIABLE OBJECT
+Causes images to be 
+considered geometrically
+corrected.
+
+.VARIABLE PFILTER
+The power of the FFT high pass
+power law filter. Default 
+is no power filter.
+default is: pfilter=0.0 real
+
+.VARIABLE PHASE
+Degree of phase correlation:
+0 for normal correlation. ( Default ).
+1 for phase correlation
+
+.VARIABLE OFFMAX
+How far off center, correlation
+peak is allowed (0 to 1). 
+If the peak is more than
+OFFMAX*window/2 pixels from 
+the center it is rejected.
+Default is 0.8
+
+.VARIABLE FUNC
+Pixel function before 
+correlation is performed..
+The options are: LOG or EXP.
+DEfault is no funtion performed.
+
+.VARIABLE REDO
+Keyword for redo mode. 
+Valid responses are:
+REDO or NOREDO. 
+The default is REDO.
+Redo specifies that if 
+the first correlation for
+an area has an offset of 
+less than the OFFMAX limit
+but greater than zero 
+the correlation is rerun
+beginning at the new location.
+
+.VARIABLE NTPTS
+The number of 
+tiepoints to collect
+per pair.
+
+.VARIABLE TOLERANC
+The largest
+permitted tiepoint
+residual.
+
+.VARIABLE PRINT
+'NOPRINT to turn off 
+terminal output
+
+.VARIABLE DIR
+Specifies the directory 
+name where all the 
+input files for the
+mosaic reside.
+(obsolete)
+
+.VARIABLE FILENAME
+Specifies a file name 
+which contains the 
+names of all the
+images to be included 
+in the mosaic
+
+.VARIABLE NOPRINT
+To suppress printout 
+about each tiepoint 
+displayed at the terminal
+
+.VARIABLE CORR
+Specifies the correlation size.
+Is not supported now.
+
+.VARIABLE SUBPIX
+Specifies sub-pixel correlation.
+Not tested or supported.
+
+!NOSEDR option currently not supported for testing.
+!.VARIABLE NOSEDR
+!Limits reading of the 
+!navigation file.
+!Is not supported now.
+
+
+.LEVEL2
+.VARIABLE INP
+All inputs are IBIS tabular files.
+
+First input= SEDR.INT produced by program IBISNAV
+  The first column contains the FDS times if the frames to mosaic.
+
+Second input= OVER.INT produced by program MOSPLOT.
+  Columns 1 and 2 contain the frame overlap numbers.
+  Frame pairs are selected from the overlap numbers only.
+
+A geom correction file can be entered as the third input
+if the images are in image space (un geometrically corrected).
+
+.VARIABLE OUT
+The output IBIS tabular file.
+nine columns output:
+col1=first frame number of a pair
+col2=second frame number of a pair
+col3=first frame tiepoint line
+col4=first frame tiepoint sample
+col5=second frame tiepoint line
+col6=second frame tiepoint sample
+col7=1
+col8=1
+col9=1
+
+.VARIABLE PROJECT
+Specifies the project . This is required if
+the images are un-geometrically corrected
+and the project is GLL.
+
+.VARIABLE CAMERA
+Camera serial number.
+Used in reading geoma correction parameters if 
+nominals are to be used.
+Ignored for GLL.
+
+.VARIABLE OBJECT
+Causes images to be considered geometrically corrected.
+The geoma file will be ignored if present.
+
+.VARIABLE PFILTER
+The power of the FFT high pass
+power law filter. Default is no power filter.
+default is: pfilter=0.0 real
+
+.VARIABLE PHASE
+Degree of phase correlation:
+0 for normal correlation. ( Default ).
+1 for phase correlation
+
+.VARIABLE OFFMAX
+How far off center, correlation
+peak is allowed (0 to 1). If the peak is more than
+OFFMAX*window/2 pixels from the center it is rejected.
+Default is 0.8
+
+.VARIABLE FUNC
+Pixel function before correlation is performed..
+The options are: LOG or EXP.
+DEfault is no funtion performed.
+
+.VARIABLE REDO
+Keyword for redo mode. Valid responses are:
+REDO or NOREDO. The default is REDO.
+Redo specifies that if the first correlation for
+an area has an offset of less than the OFFMAX limit
+but greater than zero the correlation is rerun
+beginning at the new location.
+
+.VARIABLE NTPTS
+The number of tiepoints to collect per pair.
+This initial set will be edited (see TOLERANCE) until only
+good points remain. Fewer than 4 good points invalidates
+this image pair.
+
+.VARIABLE TOLERANC
+The largest permitted tiepoint residual.
+All the tiepoints are fitted to a polynomial model of the
+form:
+y1=Ax+By+C   x1=Dx+Ey+F
+Points which disagree with the model by over TOLERANC
+pixels will be rejected (one point rejected per fitting pass)
+until all are within TOLERANC. If fewer than 4 points
+remain the pair is rejected.
+
+.VARIABLE PRINT
+'NOPRINT to turn off terminal output
+
+.VARIABLE DIR
+Optional parameter required only if the FILENAME parameter
+is NOT specified. 
+Specifies the directory name where all the input files for the
+mosaic reside. (obsolete)
+
+.VARIABLE FILENAME
+Optional parameter required only if the DIR keyword is not
+specified.
+Specifies a file name which contains the names of all the
+images to be included in the mosaic, one name per record.
+This file is created by the user with a text editor.
+For example, if the first 2 pictures are called 
+scx1:[jjl059]1234567.img and mipldisk:[mipl.gll]venus.img 
+the first two records of FILENAME would contain:
+
+scx1:[jjl059]1234567.img
+mipldisk:[mipl.gll]venus.img 
+
+.VARIABLE NOPRINT
+To suppress printout 
+about each tiepoint 
+displayed at the terminal
+
+.VARIABLE CORR
+Specifies the correlation size.
+Is not supported now.
+
+.VARIABLE SUBPIX
+Specifies sub-pixel correlation.
+Not tested or supported.
+
+!NOSEDR option currently not supported for testing
+!.VARIABLE NOSEDR
+!Limits reading of the 
+!navigation file.
+!Is not supported now.
+
+.END

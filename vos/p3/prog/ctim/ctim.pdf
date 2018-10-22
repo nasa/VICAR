@@ -1,0 +1,10 @@
+process help=*
+end-proc
+.TITLE
+VICAR program CTIM
+.HELP
+Program to convert between various time systems used by NAIF SPICE.
+
+NOTE: this is not a VICAR program and must be run from the system level.
+It is interactive and should be self-explanatory.
+.end

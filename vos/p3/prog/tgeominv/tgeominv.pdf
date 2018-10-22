@@ -1,0 +1,46 @@
+PROCESS       HELP=*
+PARM INP      TYPE=(STRING,60)
+PARM OUT      TYPE=(STRING,60)
+PARM NLOUT    TYPE=INTEGER
+PARM NSOUT    TYPE=INTEGER
+END-PROC
+.TITLE
+VICAR Program TGEOMINV
+.HELP
+PURPOSE
+      TGEOMINV is a program to produce the inverse transformation map, for
+use by the program TGEOM2.  That is, if the input file to TGEOMINV can be used
+to geometrically correct (register) ImageA to ImageB, then the output file
+from TGEOMINV can be used to register ImageB to ImageA.
+
+
+WRITTEN BY:            Ron Alley, March, 2003
+
+COGNIZANT PROGRAMMER:  Ron Alley
+
+REVISIONS: New
+
+
+.LEVEL1
+.VARIABLE INP
+Rectification dataset
+.VARIABLE OUT
+Inverted rectification dataset
+.VARIABLE NLOUT
+Number of lines output 
+.VARIABLE NSOUT
+Number of samples output 
+.LEVEL2
+.VARIABLE INP
+The input file must be a rectification dataset in the format that is
+output by TGEOM1.
+.VARIABLE OUT
+The output file will be a rectification dataset that is appropriate for
+performing the reverse (master to slave) registration to the one specified
+by the input dataset.  It will have the format that is appropriate for use
+in TGEOM2
+.VARIABLE NLOUT
+Number of lines in the output file
+.VARIABLE NSOUT
+Number of samples in the output file
+.END

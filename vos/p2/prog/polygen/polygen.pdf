@@ -1,0 +1,114 @@
+PROCESS    HELP=*
+PARM OUT TYPE=(STRING,72)
+PARM DATA  TYPE=REAL COUNT=(1:250) DEFAULT=(0,0)
+PARM MDATA TYPE=REAL COUNT=(1:250) DEFAULT=(0,0)
+END-PROC
+.TITLE
+VICAR/IBIS Program POLYGEN
+.HELP
+PURPOSE
+     POLYGEN is an IBIS applications program used to  create 
+     an  IBIS  graphics  file  consisting  of  line  segment 
+     information.   Data  input  is free format and 
+     may be specified as real or integer values.  The output 
+     data  file  will  consist of several  line  and  sample 
+     coordinates suitable for input to any of the IBIS POLY-
+     line  programs.   The size of the output file  will  be 
+     512 samples by n lines.
+
+TAE COMMAND LINE FORMAT
+     POLYGEN OUT=graph PARAMS
+     where
+     OUT                 is an IBIS graphics file.
+     PARAMS              is a standard VICAR parameter field.
+.PAGE
+METHOD                             
+
+     Data  points are processed as they are  entered.   When 
+     the   MDATA   parameter  is  used   data   values   are 
+     interpolated  and  the line string is  terminated  with 
+     0.,0.  When the DATA parameter is used, the data points 
+     are transferred directly to the output file.   No 0.,0. 
+     point is added.  Both parameter keywords and associated 
+     data  may  be  used in a single operation  of  POLYGEN, 
+     however  the keywords DATA and MDATA may  be  specified 
+     only  once each.   If both keywords are specified,  the 
+     data following the DATA keyword is written on the  IBIS 
+     graphics file first.
+.PAGE
+EXAMPLE 1
+
+     POLYGEN OUT=graph DATA=(20,30, 32,33, 40,33, 0,0,+
+                     26,35, 27,35, 0,0,+
+                     16,22, 22,25, 32,25, 32,22, 16,22, 0,0)
+
+     Data  points  are  transferred directly to  the  output 
+     file,  OUT,  in the order in which they are input.   In 
+     this example points are set up as line segment data for 
+     the IBIS POLY-line routines.
+.PAGE
+EXAMPLE 2
+
+     POLYGEN OUT=graph MDATA=(35,70, 46,150,  10,
+                              62,10, 65,36,   18)
+
+     Two  line strings are to be generated in this  example.  
+     The  first line string beginning at line 35 and  sample 
+     70 and ending at line 46 and sample 150 will consist of 
+     10 points.   The second line will consist of 18 points.  
+     Both line strings will be terminated with a 0.,0.  line 
+     and sample point.
+.PAGE
+EXAMPLE 3
+
+     POLYGEN OUT=graph MDATA=(16,12, 38,120, 63),+
+                 DATA=(22,35, 36,75, 0,0, 25,37, 26,82, 0,0)
+
+     In  this  example both keywords  are  specified.   Data 
+     following the DATA keyword are transferred directly  to 
+     the  output file first.   Then a line string consisting 
+     of 62 data points interpolated between line and  sample 
+     points  16,12  and  18,120 follows.   Since  the  MDATA 
+     parameter  has  been  specified,   the  file  will   be 
+     terminated with a 0,0 point.
+.PAGE
+
+WRITTEN BY:                     H. Wilczynski, 15 March 1978
+CURRENT COGNIZANT PROGRAMMER:   Frank Evans
+REVISION:                       2             March 1986
+.LEVEL1
+.VARIABLE OUT
+Output graphics file
+.VARIABLE DATA
+Specifies pairs (L,S) to output
+.VARIABLE MDATA
+Line segment filling option
+.LEVEL2
+.VARIABLE DATA
+     DATA=(L1,S1,L2,S2,    The DATA parameter specifies that 
+           ...,Ln,Sn)      a series of pixel coordinates are 
+                           to be transferred directly to the 
+                           graphics  file.   Any  number  of 
+                           line and sample points may follow 
+                           the DATA parameters.
+.VARIABLE MDATA
+     MDATA=(SL,SS,EL,ES,N) MDATA   specifies  that  a   line 
+                           segment  filling option is to  be 
+                           invoked.   A  line having N total 
+                           points  is interpolated  for  the 
+                           line    segment   beginning    at 
+                           starting  line,  starting  sample 
+                           (SL,SS)   and  ending  at  ending 
+                           line,   ending  sample   (EL,ES).  
+                           SL,SS and EL,ES are the endpoints 
+                           of  the  output  line,   and  N-2 
+                           points  are interpolated between.  
+                           The   line  segment   terminating 
+                           value (0.,0.) is added at the end 
+                           of the line segment, consequently 
+                           n+1  pairs of values are  output.  
+                           Several   line  strings  may   be 
+                           processed     subsequently     by 
+                           repetitions  of  the  five   data 
+                           values.
+

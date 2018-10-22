@@ -1,0 +1,5 @@
+#define SUBROUTINE ibisgr
+#define USES_C
+#define MODULE_LIST ibisgr.c ibisgr_bridge.c
+#define FTN_STRING
+#define P1_SUBLIB

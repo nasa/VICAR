@@ -1,0 +1,61 @@
+process help=*
+PARM OUT TYPE=STRING COUNT=1
+PARM NL TYPE=INTEGER COUNT=(0,1) VALID=(10:502) DEFAULT=502
+PARM NS TYPE=INTEGER COUNT=(0,1) VALID=(10:1002) DEFAULT=1002
+END-PROC
+
+.TITLE
+VICAR program ellipse
+
+.HELP
+PURPOSE:
+To create images of oblate spheroids for testing map projections.
+
+EXECUTION:
+To create an ellipse with a polar to equatorial radius ratio of 1/2.
+ellipse out=a.img nl=500 ns=1000
+
+To test map3 and overlay.
+ellipse out=z.img nl=502 ns=1002
+map3 inp=z.img out=e.img 'noproj 'nosedr +
+  nl=502 ns=1002 scale=1. 'perspect line=251 samp=501 +
+  north=0. latitude=45. longitud=0
+overlay inp=e.img out=f.img dla1=10 dlo1=30
+xvd f.img
+
+METHOD:
+Ellipse draws an ellipse viewed from the equatorial plane from infinity.
+North is up. It is centered in the output image and fills the entire image.
+The background is set to dn=1 and the ellipse is drawn as dn=255.
+Planetocentric latitudes are drawn every 10 degrees.
+An mp perspective projection label is placed on the image where the
+range to the ellipse is 1000 radii.
+The ellipse oblateness is the ratio of nl/ns.
+
+HISTORY:
+2-1-97  J Lorre. 
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+.LEVEL1
+
+.VARI OUT
+Output image
+
+.VARI NL
+Number of lines
+
+.VARI NS
+Number of samples
+
+.LEVEL2
+
+.VARI OUT
+Byte output image.
+
+.VARI NL
+Number of lines in the output image.
+This will be the polar diameter of the drawn ellipse.
+
+.VARI NS
+Number of samples in the output image.
+This will be the equatorial diameter of the drawn ellipse.

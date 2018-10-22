@@ -69,6 +69,7 @@
 #define PPC_LINUX_ARCH	0
 #define MAC_OSX_ARCH	0
 #define X86_MACOSX_ARCH	0
+#define MAC64_OSX_ARCH	0
 #define X86_NT_ARCH	0	/* Simon Hook */
 
 #if VMS_OS
@@ -86,23 +87,26 @@
 #define	DECSTATION_ARCH	1
 #endif
 
+/* The V2_FORCE_32 test is needed only in vimake.  Once we add -m32 to	*/
+/* the compile lines, __x86_64__ is automatically undefined.		*/
 #if defined (__linux__) || defined (linux)
 #if defined (__alpha__) || defined (alpha)
 #undef	AXP_LINUX_ARCH
 #define	AXP_LINUX_ARCH	1
 #else
-#if defined (__i386__) || defined (i386)
+#if defined (__PPC__) || defined (powerpc)
+#undef	PPC_LINUX_ARCH
+#define	PPC_LINUX_ARCH  1
+#else
+#if defined (__i386__) || defined (i386) || defined(V2_FORCE_32)
 #undef	X86_LINUX_ARCH
 #define	X86_LINUX_ARCH	1
-#endif
+#else
 #if defined (__x86_64__)
 #undef	X86_64_LINX_ARCH
 #define	X86_64_LINX_ARCH 1
 #endif
-
-#if defined (__PPC__) || defined (powerpc)
-#undef	PPC_LINUX_ARCH
-#define	PPC_LINUX_ARCH  1
+#endif
 #endif
 #endif
 #endif
@@ -112,13 +116,20 @@
 #define	AXP_UNIX_ARCH	1
 #endif
 
+/* The V2_FORCE_32 test is needed only in vimake.  Once we add -m32 to  */
+/* the compile lines, __x86_64__ is automatically undefined.            */
 #if defined(__APPLE__)
 #if defined(__ppc__)
 #undef	MAC_OSX_ARCH
 #define	MAC_OSX_ARCH	1
 #else
+#if defined(__x86_64__) && !defined(V2_FORCE_32)
+#undef  MAC64_OSX_ARCH
+#define MAC64_OSX_ARCH 1
+#else
 #undef	X86_MACOSX_ARCH
 #define	X86_MACOSX_ARCH	1
+#endif
 #endif
 #endif
 
@@ -188,7 +199,7 @@
 
 /* Error check - Let's make sure that _a single_ OS was selected*/
 
-#if VAX_ARCH+ALPHA_ARCH+SUN3_ARCH+SUN4_ARCH+SUN_SOLARIS_ARCH+X86_SOLARIS_ARCH+ALLIANT_ARCH+DECSTATION_ARCH+CRAY_ARCH+MAC_AUX_ARCH+MAC_MPW_ARCH+SGI_ARCH+TEK_ARCH+HP700_ARCH+AXP_UNIX_ARCH+AXP_LINUX_ARCH+X86_LINUX_ARCH+X86_64_LINX_ARCH+PPC_LINUX_ARCH+MAC_OSX_ARCH+X86_MACOSX_ARCH+X86_NT_ARCH != 1
+#if VAX_ARCH+ALPHA_ARCH+SUN3_ARCH+SUN4_ARCH+SUN_SOLARIS_ARCH+X86_SOLARIS_ARCH+ALLIANT_ARCH+DECSTATION_ARCH+CRAY_ARCH+MAC_AUX_ARCH+MAC_MPW_ARCH+SGI_ARCH+TEK_ARCH+HP700_ARCH+AXP_UNIX_ARCH+AXP_LINUX_ARCH+X86_LINUX_ARCH+X86_64_LINX_ARCH+PPC_LINUX_ARCH+MAC_OSX_ARCH+X86_MACOSX_ARCH+MAC64_OSX_ARCH+X86_NT_ARCH != 1
 Compile Error: *_ARCH either not defined or not defined correctly!!!!!!!!!!!
 #endif
 
@@ -200,7 +211,7 @@ Compile Error: *_ARCH either not defined or not defined correctly!!!!!!!!!!!
 #endif
 
 /* Shortcut for Mac OS X */
-#if MAC_OS_ARCH + X86_MACOSX_ARCH
+#if MAC_OSX_ARCH + X86_MACOSX_ARCH + MAC64_OSX_ARCH
 #define ANY_OSX_ARCH 1
 #else
 #define ANY_OSX_ARCH 0
@@ -367,6 +378,12 @@ Compile Error: *_ARCH either not defined or not defined correctly!!!!!!!!!!!
 
 #if X86_MACOSX_ARCH
 #define NATIVE_HOST_LABEL	"X86-MACOSX"
+#define NATIVE_INTFMT		"LOW"
+#define NATIVE_REALFMT		"RIEEE"
+#endif
+
+#if MAC64_OSX_ARCH
+#define NATIVE_HOST_LABEL	"MAC64-OSX"
 #define NATIVE_INTFMT		"LOW"
 #define NATIVE_REALFMT		"RIEEE"
 #endif

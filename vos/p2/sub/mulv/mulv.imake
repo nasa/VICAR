@@ -1,0 +1,20 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY mulv
+
+   To Create the build file give the command:
+
+	$ vimake mulv                     (VMS)
+   or
+	% vimake mulv                     (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE mulv
+
+#define MODULE_LIST mulv.c
+
+#define P2_SUBLIB
+
+#define USES_C

@@ -1,0 +1,15 @@
+#define  PROGRAM   tsearc_distor
+
+#define MODULE_LIST tsearc_distor.f
+
+#define MAIN_LANG_FORTRAN
+#define R2LIB 
+
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_FORTRAN
+
+#define LIB_LOCAL

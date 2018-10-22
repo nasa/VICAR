@@ -1,0 +1,103 @@
+procedure
+local   afidsroot   type=string count=1
+local   aftestdata  type=string count=1
+local filnam    type=string count=1
+local istape    type=int    count=1
+local tapos     type=int    count=1
+local filenum   type=int    count=1
+
+! Aug 22, 2013 - RJB
+! TEST SCRIPT FOR NXT
+!
+! Vicar Programs:
+!       translog reset 
+!
+! External programs
+!       <none>
+!
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no xvd display
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!           
+!   In batch mode it produces files testx.eps by calling gnuplot
+!       to create the encapsulated postscript file which can be
+!       later viewed with ghostscript or gimp
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
+!            
+! Requires external test data: 
+!   cartlab or mipl dependent pointers
+!
+!   Cartlab defines env var $AFIDS_ROOT, mipl doesn't
+!   The test data in cartlab is on /raid1/test_data 
+!   but in other facilities it might be somewhere else. 
+!   
+!   To facilitate this test you can define an
+!   environment variable $AFIDS_TESTDATA to point to
+!   that data. The cartlab system does not. In the git archive
+!   on pistol there is softlink to the test data in vdev that
+!   allows this test to pass 
+
+refgbl $echo
+
+
+body
+let _onfail="stop"
+
+enable-log
+
+!check to see if mipl or cartlab for test images
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
+if (afidsroot = "")
+!MIPL
+    ush ln -s /project/test_work/testdata/carto ct
+else
+!CARTLAB
+    if (aftestdata = "") 
+        ush ln -s ../test_data/vicar_test_images/testdata/carto ct
+    else
+        ush ln -s $AFIDS_TESTDATA/vicar_test_images/testdata/carto ct
+    end-if
+end-if
+
+let _onfail="goto rm"
+
+let $echo="yes"
+ush cp ct/tstnxt.dat ./
+ush cp ct/file_list.list ./ 
+reset tstnxt.dat 3
+reset file_list.list 1
+loop
+  nxt tstnxt.dat filnam istape tapos filenum
+  if (filnam = "END_OF_FILE") break
+  let $echo="no"
+  write "filnam = &filnam"
+  write "istape = &istape"
+  write "tapos = &tapos"
+  write "filenum = &filenum"
+  let $echo="yes"
+end-loop
+!
+!Now, using default parameters.....
+!
+!To test the fixes for the FR 89371,
+!run this script on the Alphas 
+!and inspect the output file:
+!file_list.list
+!
+  nxt file_list.list
+!
+!To test for AR100461, add the current path in front
+!of input filename, as: /project/it/tih/deliv20.01/ss/nxt/tstnxt.dat
+rm>
+ush rm ct
+
+disable-log
+
+let $echo="no"
+end-proc

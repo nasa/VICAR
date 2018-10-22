@@ -1,0 +1,15 @@
+/* Imake file for Test of VICAR subroutine PPROJ */
+
+#define PROGRAM tpproj
+
+#define MODULE_LIST tpproj.f tzpproj.c
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB 

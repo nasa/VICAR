@@ -1,0 +1,14 @@
+#define PROGRAM gamma
+
+#define MODULE_LIST gamma.cc
+
+#define MAIN_LANG_C_PLUS_PLUS
+#define R2LIB 
+
+#define USES_C_PLUS_PLUS
+
+#define LIB_TAE_NOSHR
+#define LIB_RTL_NOSHR
+#define LIB_P2SUB
+#define LIB_FORTRAN
+#define LIB_XERCES

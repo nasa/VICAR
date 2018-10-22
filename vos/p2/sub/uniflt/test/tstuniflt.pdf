@@ -1,0 +1,7 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+tuniflt
+end-proc

@@ -1,0 +1,102 @@
+procedure
+
+refgbl $echo
+refgbl $becho
+refgbl $syschar
+refgbl $autousage
+
+body
+local dir string
+let $echo="yes"
+let $becho="yes"
+let $autousage="none"
+let _onfail="continue"
+ 
+!CASSINI TEST:
+if ($syschar(1)="UNIX")
+   let dir = "/project/test_work/testdata/cassini/iss/"
+   defcmd-replace typeit "ush cat"
+else
+   let dir = "wms_test_work:[testdata.cassini.iss]"
+   defcmd-replace typeit "dcl type"
+end-if
+
+!---------------------------
+! Make a test light transfer file which has exposure levels of
+! 0,10,20,40 and each input frame was 10,110,210,410 dn respectively.
+! Each level has three frames associated with it.
+ 
+!Set dns to 10 and replicate - set exposure to 0
+f2 inp=&"dir"sum2.1 out=l1.a func=10
+label-rep l1.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=0"
+copy l1.a l1.b
+copy l1.a l1.c
+ 
+!Set dns to 110 and replicate - set exposure to 10
+f2 inp=&"dir"sum2.1 out=l2.a func=110
+label-rep l2.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=10."
+copy l2.a l2.b
+copy l2.a l2.c
+ 
+!Set dns to 210 and replicate - set exposure to 20
+f2 inp=&"dir"sum2.1 out=l3.a func=210
+label-rep l3.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=20."
+copy l3.a l3.b
+copy l3.a l3.c
+ 
+!Set dns to 410 and replicate - set exposure to 40
+f2 inp=&"dir"sum2.1 out=l4.a func=410
+label-rep l4.a 'PROP property="CASSINI-ISS" item="EXPOSURE_DURATION=40."
+copy l4.a l4.b
+copy l4.a l4.c
+ 
+!Create list of the files created
+createfile m2.list
+addtofile m2.list "NEXT FILE=0001"
+addtofile m2.list "l1.a"
+addtofile m2.list "l1.b"
+addtofile m2.list "l1.c"
+addtofile m2.list "l2.a"
+addtofile m2.list "l2.b"
+addtofile m2.list "l2.c"
+addtofile m2.list "l3.a"
+addtofile m2.list "l3.b"
+addtofile m2.list "l3.c"
+addtofile m2.list "l4.a"
+addtofile m2.list "l4.b"
+addtofile m2.list "l4.c"
+reset m2.list 
+typeit m2.list
+ 
+!Initialize Light Transfer File
+ltgen l1.a out=testltf.out list=m2.list 'GRID
+!Make a copy
+copy testltf.out testltf2.out
+ 
+!Fill Light Transfer File with stats
+momgen2 list=m2.list ltfrcp=testltf.out
+ 
+!See if CCDSLOPE is happy with it.
+ccdslope testltf.out mofset=0.0 light=10. rej=0 'SUBDC
+ 
+!Try it with the LTFILE option
+!(but all the radiances are the same except the first one)
+momgen2 list=m2.list ltfrcp=testltf2.out ltfile=lum.tmp
+typeit lum.tmp
+
+if ($syschar(1) = "UNIX")
+   ush rm l1.*
+   ush rm l2.*
+   ush rm l3.*
+   ush rm l4.*
+   ush rm lum.tmp
+   ush rm m2.list
+else
+   dcl del l1.*;*
+   dcl del l2.*;*
+   dcl del l3.*;*
+   dcl del l4.*;*
+   dcl del lum.tmp;*
+   dcl del m2.list;*
+end-if
+END-PROC

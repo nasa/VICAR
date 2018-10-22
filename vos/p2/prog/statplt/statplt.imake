@@ -1,0 +1,24 @@
+/***********************************************************************
+                     IMAKE FILE FOR PROGRAM STATPLT
+
+   To Create the build file give the command:
+
+		$ vimake statplt			(VMS)
+   or
+		% vimake statplt			(Unix)
+************************************************************************/
+#define PROGRAM	statplt
+#define R2LIB
+#define MODULE_LIST statplt.f
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+#define FTN_STRING
+/*
+#define LIB_MOTIF
+*/
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

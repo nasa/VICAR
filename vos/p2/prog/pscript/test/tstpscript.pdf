@@ -1,0 +1,40 @@
+procedure
+refgbl $autousage
+refgbl $syschar
+body
+  local diffcmd string
+  local endcmd string init=" "
+
+  let $autousage="none"
+
+! make sure can handle other than square images
+! We use a size for bw that crashed PSCRIPT, ref FR#83086
+!
+  gen bw nl=1 ns=50
+  gen r nl=8 ns=10 linc=25 sinc=25
+  gen g nl=8 ns=10 linc=0 sinc=25
+  gen b nl=8 ns=10 linc=25 sinc=0
+
+  gen h nl=20 ns=10 'half
+
+  write " --- This procedure generates 3 PostScript text files, called"
+  write " --- bw.pst h.pst, & rgb.pst, which will be compared. with the"
+  write " --- correct-postscript files, called bw.tst, h.tst, & rgb.tst;"
+  write " --- The files should only differ in the Creation Date line."
+
+  pscript bw bw.pst title="Black & White Test Image"
+  pscript h h.pst title=("Subsampled","Halfword","with","Titles") inc=2
+  pscript (r,g,b) rgb.pst title="Color Test Image"
+
+  if ($syschar(1)="UNIX")
+    let diffcmd = "ush diff"
+    let endcmd = " || exit 0"
+  else
+    let diffcmd = "dcl differences"
+  end-if
+
+  &diffcmd bw.pst bw.tst &endcmd
+  &diffcmd h.pst  h.tst &endcmd
+  &diffcmd rgb.pst rgb.tst &endcmd
+
+end-proc

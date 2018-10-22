@@ -1,0 +1,61 @@
+procedure
+refgbl $echo
+refgbl $autousage
+parm mean real def=0.0
+parm sdev real def=1.0
+parm seed real def=9.0
+body
+let $autousage="none"
+!let _onfail="continue"
+let $echo="yes"
+
+goto curr
+
+! add case, special case of adding tiecnvrt-tiepoints, the old
+! mapping should be deleted
+
+gen xxxim1 nl=5 ns=5
+
+gtgen inp=xxxim1 out=xxxim2 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(0,0,0,-110.,34.,0.0)", +
+          "ModelTiePointTag=(0,100,0,-110.,33.,0.0)", +
+          "ModelTiePointTag=(100,0,0,-109.,34.,0.0)", +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+
+label-list xxxim2
+
+! continuing the add case, special case of adding tiecnvrt-tiepoints,
+! the old mapping should be deleted
+
+gtgen inp=xxxim2 out=xxxim3 'add 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(0,0,0,-110.,34.,0.0)", +
+          "ModelTiePointTag=(0,50,0,-110.,33.,0.0)", +
+          "ModelTiePointTag=(50,0,0,-109.,34.,0.0)")
+
+label-list xxxim3
+
+
+! testing vtiff3 conversions, include Bellenger kwds, note that
+! both units keywords are in conflict
+curr>
+
+gen xxxim1 nl=5 ns=5
+
+gtgen inp=xxxim1 out=xxxim2 'tiecnvrt +
+   geotiff=("ModelTiePointTag=(0,0,0,-110.,34.,0.0)", +
+          "ModelTiePointTag=(0,100,0,-110.,33.,0.0)", +
+          "ModelTiePointTag=(100,0,0,-109.,34.,0.0)", +
+          "GeographicTypeGeoKey=4326(GCS_WGS_84)", +
+          "GTModelTypeGeoKey=2(ModelTypeGeographic)", +
+          "ProjLinearUnitsGeoKey=9001(Linear_Meter)", +
+          "GeogAngularUnitsGeoKey=9102(Angular_Degree)", +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+
+gtlist xxxim2
+vtiff3-fromvic xxxim2 xxxim3
+! how to see
+vtiff3-tovic xxxim3 xxxim4
+gtlist xxxim4
+
+
+END-PROC

@@ -1,0 +1,25 @@
+procedure help=*
+refgbl $echo
+local trans	string
+refgbl $syschar
+
+body
+let _onfail="continue"
+let $echo=("yes","no","no")
+tempname tsttempname trans
+disp trans
+if ($syschar(1) = "UNIX")
+  ush /bin/ls >&trans
+else
+  dire/out=&trans
+end-if
+typetext &trans
+tempname-del
+end-proc
+
+.help 
+This is the test procedure for tempname.  It creates a temporary file
+and then does a directory listing to make sure the file is there.
+Then it deletes the temporary file using tempname-del.  The user
+should verify that the temporary file was deleted.
+.end

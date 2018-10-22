@@ -1,0 +1,51 @@
+PROCESS help=*
+PARM POLARTBL	STRING
+END-PROC
+.TITLE
+VICAR PROGRAM fcnpolar
+.HELP
+
+Fcnpolar is a VICAR program that fits a function to a set of data points
+obtained from a polarization test involving the program srchedge.  Fcnpolar
+uses the subroutine metropolis to compute the parameters of the function and
+it outputs the results to the screen.
+
+EXECUTION
+
+	fcnpolar filename
+
+OPERATION
+
+The form of the function is:
+
+	VALUE = A + B * COS(ANGLE - THETA)**2
+
+where A is the level,
+      B is the scale factor, and
+      THETA is an angle in degrees.
+
+VALUE and ANGLE are obtained from the table of data points and the
+parameters A, B, and THETA are calculated using metropolis.
+
+Fcnpolar produces five fits.  Note that the answer= line in the output
+lists A, B, and THETA in that order.  Values for sigma and error are also
+displayed.
+
+PRECISION
+	Some variation in output will occur due to the use of subroutine
+	metropolis, which uses random numbers.  See farenc.pdf and
+	metropolis.pdf for details.
+
+REVISIONS
+	7-97 ...RRD... Made portable for UNIX
+
+.LEVEL1
+.VARIABLE POLARTBL
+ASCII input file of data points.
+.LEVEL2
+.VARIABLE POLARTBL
+STRING
+The file is in the form of a table with columns SCLK, ANGLE(DEG.), AVE_DK_DN, 
+AVE_BR_DN, and RATIO.  The first column is an integer and the rest are floats.
+Note that the first two lines of the file are ignored.
+.END

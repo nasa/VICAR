@@ -37,7 +37,7 @@
 
 /* This table must match xvmaininc.h at all times! */
 
-#define N_HOSTS	25
+#define N_HOSTS	26
 
 static char *host_table[N_HOSTS][3] = {
 		{"VAX-VMS",  "LOW",         "VAX"          },
@@ -61,6 +61,7 @@ static char *host_table[N_HOSTS][3] = {
 		{"PPC-LINUX","HIGH",        "IEEE"         },
 		{"MAC-OSX",  "HIGH",        "IEEE"         },
 		{"X86-MACOSX", "LOW",       "RIEEE"        },
+		{"MAC64-OSX", "LOW",        "RIEEE"        },
 		{"X86-NT",   "LOW",         "RIEEE"        },
 		{"NATIVE",   NATIVE_INTFMT, NATIVE_REALFMT },
 		{"LOCAL",    NATIVE_INTFMT, NATIVE_REALFMT },

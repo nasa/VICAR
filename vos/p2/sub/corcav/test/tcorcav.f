@@ -1,0 +1,77 @@
+C         TEST PROGRAM FOR CORCAV SUBPROGRAM
+      INCLUDE 'VICMAIN_FOR'
+      SUBROUTINE MAIN44
+      DOUBLE PRECISION OM(3,3),RS(3)
+      CHARACTER*560 BUFFER
+C==================================================================
+C  DEFAULT VARIABLES FOR IO
+
+      REQ = 1815.0
+      RPOL = 1815.0
+      FLAT = REQ - RPOL
+
+C  RANDOM VALUES USED IN TEST
+
+      IND = 0
+      XL  = 0.
+      YS  = 0.
+      FOCL = 1500.19 * 84.821
+      RS(1) = -730950.0D0
+      RS(2) = -339690.0D0
+      RS(3) = -1209.3D0
+      OM(1,1) = 0.407057464D0
+      OM(2,1) = 0.112318814D0
+      OM(3,1) = 0.906470418D0
+      OM(1,2) = -0.874813914D0
+      OM(2,2) = -0.237469494D0
+      OM(3,2) = 0.422266245D0
+      OM(1,3) = 0.262687564D0
+      OM(2,3) = -0.964879572D0
+      OM(3,3) = 0.0015943704D0
+      RLAT = -13.8018
+      RLON = 360.0-150.1259
+      CL = 500.0
+      CS = 500.0
+ 
+      CALL XVMESSAGE(' ',' ')
+      CALL XVMESSAGE('LONGITUDE IS EAST ',' ')
+      CALL XVMESSAGE('BEFORE CONVERSION FROM LAT/LONG TO LINE/SAMPLE:',
+     .             ' ')
+      WRITE(BUFFER,100)RLAT,RLON,CL,CS,IND,XL,YS,FLAG,RS,OM,FOCL,
+     1            REQ,FLAT
+      CALL XVMESSAGE(BUFFER(  2: 80),' ')
+      CALL XVMESSAGE(BUFFER( 82:160),' ')
+      CALL XVMESSAGE(BUFFER(162:240),' ')
+      CALL XVMESSAGE(BUFFER(242:320),' ')
+      CALL XVMESSAGE(BUFFER(322:400),' ')
+      CALL XVMESSAGE(BUFFER(402:480),' ')
+      CALL XVMESSAGE(BUFFER(482:560),' ')
+      CALL XVMESSAGE(' ',' ')
+
+      CALL CORCAV(IND,RLAT,RLON,OM,RS,FOCL,REQ,FLAT,XL,YS,
+     1            CL,CS,FLAG)
+      CALL XVMESSAGE('AFTER CONVERSION TO LINE/SAMPLE:',' ')
+      CALL XVMESSAGE('LINE SHOULD BE=614.1, SAMPLE SHOULD BE 614.38',
+     .               ' ')
+      WRITE(BUFFER,100)RLAT,RLON,CL,CS,IND,XL,YS,FLAG,RS,OM,FOCL,
+     1            REQ,FLAT
+      CALL XVMESSAGE(BUFFER(  2: 80),' ')
+      CALL XVMESSAGE(BUFFER( 82:160),' ')
+      CALL XVMESSAGE(BUFFER(162:240),' ')
+      CALL XVMESSAGE(BUFFER(242:320),' ')
+      CALL XVMESSAGE(BUFFER(322:400),' ')
+      CALL XVMESSAGE(BUFFER(402:480),' ')
+      CALL XVMESSAGE(BUFFER(482:560),' ')
+      CALL XVMESSAGE(' ',' ')
+      CALL XVMESSAGE(
+     . 'Repeat test case in C to test C interface: zcorcav', ' ')
+
+      call tzcorcav( OM, RS)
+
+      RETURN
+  100 FORMAT(' RLAT:',F8.2,'E.RLON:',F8.2,4X,'CL:',E11.5,'  CS:',
+     1       E11.5,17X,' IND:',I2,'  LINE:',E12.5,'  SAMPLE:',E12.5,
+     2       '  FLAG:',E11.5,15X,' RS: ',3(E11.5,4X),30X,' OM:',2(
+     3       3(E11.5,4X),35X),3(E11.5,4X),31X,' FOCL:',E11.5,4X,
+     4       'REQ:',E11.5,4X,'FLAT:',E11.5,20X)
+      END

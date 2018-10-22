@@ -1,0 +1,92 @@
+procedure
+refgbl $autousage
+refgbl $echo
+! Jun 24, 2012 - RJB
+! TEST SCRIPT FOR MF     
+! tests IBIS tabular files
+!
+! Vicar Programs:
+!       ibis-gen ibis-list  
+! 
+! parameters:
+!   <none>
+!
+! Requires NO external test data: 
+
+body
+let $autousage="none"
+let $echo="yes"
+let _onfail="stop"
+! Create a new IBIS-2  file, and throw in an ASCII column
+!
+ibis-gen a nc=5 nr=10 format=(FULL,REAL,DOUB,REAL,A4)
+!
+! Test various KNUTH functions with C and FORTRAN constructs
+!
+mf inp=a function=("c1=index","c2 = c1*c1" , "c3 = sin(c1/10)*(c1.LT.5)" )
+ibis-list a
+!
+! Test Column Operations
+mf inp=a function=("c2=#mean(c1)","c3=#sigma(c1)","c4=#min(c1)")
+ibis-list a
+mf inp=a function=("c2=#max(c1)","c3=#first(c1)","c4=#sum(c1)")
+ibis-list a
+mf inp=a function=("c2=#rsum(c1)","c3=#rdiff(c1)")
+ibis-list a
+
+! Create an old IBIS-1  file and test same options
+!
+ibis-gen a nc=5 nr=10 'IBIS-1 'COLUMN
+!
+! Test various KNUTH functions with C and FORTRAN constructs
+!
+mf inp=a function=("c1=index","c2 = c1*c1" , "c3 = sin(c1/10)*(c1.LT.5)" )
+ibis-list a
+!
+! Test Column Operations
+mf inp=a function=("c2=#mean(c1)","c3=#sigma(c1)","c4=#min(c1)")
+ibis-list a
+mf inp=a function=("c2=#max(c1)","c3=#first(c1)","c4=#sum(c1)")
+ibis-list a
+mf inp=a function=("c2=#rsum(c1)","c3=#rdiff(c1)")
+ibis-list a
+
+! Create an old GRAPHICS-1  file and test same options
+! (must use GR1DIM, as dimension is not built-into file)
+!
+ibis-gen a nc=5 nr=10 'IBIS-1 'ROW
+!
+! Test various KNUTH functions with C and FORTRAN constructs
+!
+mf inp=a function=("c1=index","c2 = c1*c1" , "c3 = sin(c1/10)*(c1.LT.5)" ) GR1DIM=5
+ibis-list a GR1DIM=5
+!
+! Test Column Operations
+mf inp=a function=("c2=#mean(c1)","c3=#sigma(c1)","c4=#min(c1)") GR1DIM=5
+ibis-list a GR1DIM=5
+mf inp=a function=("c2=#max(c1)","c3=#first(c1)","c4=#sum(c1)") GR1DIM=5
+ibis-list a GR1DIM=5
+mf inp=a function=("c2=#rsum(c1)","c3=#rdiff(c1)") GR1DIM=5
+ibis-list a GR1DIM=5
+
+!Test new graphics handling, including Xnnn parsing:
+ibis-gen a nc=3 nr=12 'IBIS-1 'ROW datacol=(1,2) +
+  data=(1,1,1,1,0,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,0)
+
+mf inp=a function=("x3=poly*2") GR1DIM=3
+ibis-list a GR1DIM=3 nr=12
+
+mf inp=a function=("x3=AMAX1(x1,x2)+1") GR1DIM=3 'skip
+ibis-list a GR1DIM=3 nr=12
+
+mf inp=a function=("x3=x1+1") GR1DIM=3
+ibis-list a GR1DIM=3 nr=12
+
+mf inp=a function=("x3=INDEX") GR1DIM=3 'skip
+ibis-list a GR1DIM=3 nr=12
+let $echo="no"
+
+! clean up:
+ush rm -f a
+
+end-proc

@@ -1,0 +1,122 @@
+PROCESS HELP=*
+PARM OUT TYPE=STRING  COUNT=1
+END-PROC
+.TITLE
+VICAR program "ringorbs" -- Create Orbital Elements File
+.HELP
+PURPOSE
+
+"ringorbs" creates an Orbital Elements File containing data for each of the
+known planetary ring systems (Jupiter, Saturn, Uranus, and Neptune).  The
+file is input to programs NAV and AMOS, which navigate and track features
+in the ring plane.
+
+EXECUTION
+
+	ringorbs  OUT=OEF.DAT
+
+where OEF is a 4x110 orbital elements file, in VICAR image format (REAL*8).
+
+.page
+ORBITAL ELEMENT FILE FORMAT
+
+The date referred to in the following paragraph is now in the label.
+The first element of each record contain the last update to that record
+(by NAV or AMOS) in YYYYDDD format.  Initially, this contains the file creation
+date.  The date originally was in the format as returned by subroutine OSDATE
+(e.g. "WED JAN 22, 1944"). OSDATE has been replaced with DATFMT and the
+format is the integer version, not the ASCII version.
+
+The four "lines" of the file contain, in order, the orbital elements for
+the rings of Jupiter, Saturn, Uranus, and Neptune.  Each record may be
+read directly into a data structure as in the following FORTRAN example:
+
+    COMMON/OE/DATE,PCONST(4),RINGS(7,15)
+    REAL*8 DATE,PCONST(4),RINGS(7,15),TMPBUF(110)
+    EQUIVALENCE (DATE,TMPBUF),(PCONST,TMPBUF(2)),(RINGS,TMPBUF(6))
+    CALL XVREAD(IUNIT,TMPBUF,STATUS)
+
+The first four data items contain the planet orientation constants ALPHAp,
+DELTAp, THETA, and ZETAZ.  This is followed by the seven orbital elements for
+each ring, SMAA, ECC INCL, OMEGAZ, PIZERO, dOMEGA_dt, and dw_dt.   See the
+help file for program NAV for a description of these constants.
+
+The file contains room for a maximum of 15 rings per planet.  The first ring
+is always a concentric orbit oriented in the planet's equatorial plane.
+The zero-longitude is defined by some standard epoch, as defined below for
+each planet.  All orbital elements are set to zero.
+
+The orbital elements for of the nine known rings of Uranus is due to French,
+and are store in the following order:
+
+        1 = planet              6 = beta ring
+	2 = ring 6		7 = eta ring
+	3 = ring 5		8 = gamma ring
+	4 = ring 4		9 = delta ring
+	5 = alpha ring	       10 = epsilon ring
+
+The zero-longitude for the first ring (planet's equatorial plane) is defined
+to be the intersection between Uranus' and Earth's equator (ascending node)
+on 10 March 1977.
+
+The orbital elements for Saturn's rings are stored in the following order:
+
+        1 = Planet
+        2 = F ring
+        3 = Outer edge Encke gap
+        4 = Cassini inner edge of outer ring
+        5 = Cassini inner edge of 4th outer ring
+        6 = Outer B feature
+        7 = Maxwell gap outer edge
+        8 = Titan gap outer edge
+        9 = Keeler gap outer edge
+       10 = Inner A ring edge
+       11 = Inner B ring edge
+       12 = Mid C ring feature
+       13 = Inner C ring edge 
+
+The zero-longitude is defined to be the intersection between Saturn's and
+Earth's equator (ascending node) at EME 1950.
+
+For Neptune, nine test orbits have been defined (in addition to the standard
+first orbit in the planet's equatorial plane).  The first three have
+polar orbits and the remainder are equitorial or satillites:
+
+        1 = Planet
+	2 =  50000 km (polar)
+	3 = 100000 km (polar)
+	4 = 150000 km (polar)
+        5 =  1989N5 orbit
+	6 =  1989N3
+	7 =  1989N4
+	8 =  1989N2
+	9 =  1989N1
+       10 =  Triton orbit
+       11 =  Nereid orbit
+
+For Neptune, the zero longitude is defined to be the intersection between
+Neptune's equatorial plane (at closest approch) and EME1950.  The OMEGAZ
+of the polar rings is determined by the asending node of Triton's orbital
+plane on Neptune's equatorial plane.
+
+.page
+PROGRAM HISTORY
+
+Original Programmer:	Gary Yagi, 22 Jan 1989
+Current Cognizant Programmer:  Gary Yagi
+Revisions:
+ 17 Mar 89  GMY  Declare INCL as REAL*8
+ 12 Jun 89  VRH  Calculate OMEGAZ for Neptune polar rings
+ 12 Aug 89  VRH  Orbital parameters updated
+  8 May 95  AMS  (CRI) Made portable for UNIX
+    Feb 97  BTC  Changed RA & DEC for Jupiter from 0,0 to realistic values
+ 15 Oct 02  VRH  Synchronize NAV and RINGORBS formats, update docs
+.LEVEL1
+.VARI OUT
+STRING--REQUIRED
+Output Orbital-Elements File
+.LEVEL2
+.VARI OUT
+EX:  ringorbs  OUT=OEF
+  where OEF is a 4x110 orbital element file, in VICAR image format (REAL*8).
+.END

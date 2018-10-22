@@ -1,0 +1,278 @@
+process help=*
+PARM INP          TYPE=STRING       COUNT=(1:2)
+PARM TARGET     TYPE=(STRING,12) COUNT=0:1			DEFAULT=--
+PARM SPICEMODE  TYPE=KEYWORD     COUNT=0:1 VALID=(LOCAL,REMOTE) DEFAULT=--
+PARM CKNAME     TYPE=(STRING,4)  COUNT=1			DEFAULT=DAVI
+PARM CKID       TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM USERID     TYPE=(STRING,3)  COUNT=0:1			DEFAULT=--
+PARM GROUPID    TYPE=(STRING,3)  COUNT=0:1			DEFAULT=--
+PARM INSTITUTE  TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM CDATE      TYPE=(STRING,12) COUNT=1		DEFAULT=000000000000
+PARM REQNUM     TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM PURPOSE    TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM PROGRAM    TYPE=(STRING,6)  COUNT=1			DEFAULT=*NONE*
+PARM SPKID      TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM UPDATE       TYPE=KEYWORD VALID=(UPDATE,NOUPDATE) +
+  DEFAULT=NOUPDATE
+PARM DESTINAT TYPE=(STRING,5) COUNT=(0:1) VALID=("DAVI ","NAV  ", +
+  "FARE ","NAV2 ","NEAR ","SEDR ","NAIF ","AMOS ") DEFAULT=--
+END-PROC
+
+.TITLE
+VICAR2 program SPICE
+
+.HELP
+SPICE lists all the information available on an image from any
+flight project. This includes the SPICE/SEDR and the image labels.
+The program also acts as a test for the following subroutines.
+The output of each will be listed under that routines heading:
+GETPLACON
+GETCAMCON
+GETSPICE
+GETPROJ
+GETGEOM
+GETLABCON
+CONVISOS
+
+PARAMETERS:
+
+SPICEMODE specifies whether local or remote SPICE access is to be used.
+If defaulted, SPICEMODE is set to the value of the logical name (or
+environmental variable) DEFAULTSPICE.
+
+
+PARAMETERS FOR RETRIEVING THE INITIAL CAMERA POINTING:
+
+Initial camera pointing data is first retrieved from predict C kernels or
+from MIPS C kernels.  The following optional parameters permit the user to
+specify where this initial pointing is retrieved:
+
+CKNAME and CKID are alternative ways to specify the C kernel from which camera
+pointing is to be retrieved.  For example, CKNAME=FARE or CKID=M904 specifies
+that the camera pointing should be retrieved from the file MIPS_FARENC.CK.
+The CKID is the unique kernel ID assigned to each C kernel.  When CKID is
+specified, it overrides the CKNAME parameter.  A complete list
+of kernel IDs is located in the ASCII file assigned the logical name (or
+environmental variable) KERNELDB.
+
+
+PARAMETERS FOR STORING THE IMPROVED CAMERA POINTING:
+
+The following optional parameters are used to store provenance information along
+with the improved (C-Smithed) camera pointing computed by the program.  This
+provenance information is stored in the (C kernel) segment identifier for the
+camera pointing data.  In cases where there are several versions of camera
+pointing for an image in a given C kernel, this provenance information can
+later be used to retrieve a specific instance of camera pointing from the
+kernel.
+
+PURPOSE identifies the purpose for creating the camera pointing.
+REQNUM identifies the request number associated with the camera pointing.
+CDATE specifies the date and time the camera pointing was created.
+GROUPID identifies the group which created the camera pointing.
+INSTITUTE identifies the facility which created the camera pointing.
+
+See the level 2 help (via the TAE tutor mode) for further details.
+
+Examples:  'LOCAL CKNAME=NAIF specifies that SPICE data be retrieved from
+          local kernels using camera pointing from predicts or AACS telemetry.
+          Improved camera pointing will later be stored in the local C kernel
+          specific to this program.
+
+           'REMOTE INSTITUTE=DLR USERID=TYR retrieves SPICE data remotely
+          (from MIPS) via the SPICE server.  When improved camera pointing is
+          stored (at MIPS), provenance data regarding the facility (DLR) and
+          user (Thomas Roatsch) who created the data is included.
+ 
+
+EXAMPLE:
+      spice inp=a.img
+.page
+PROGRAM HISTORY:
+Written By: J Lorre			1/9/89
+Cognizant Programmer: J Lorre
+REVISIONS:
+  25 Jun GMY  Adde call to init_spice (70964)
+  29 Jul OAM  Modified to call getspice2 instead of getspice.
+              Included provenance parameters.DFR.
+  15 Oct OAM  Included the CAMERA parameter to CONVISOS calls.
+              FR 89818. 
+.LEVEL1
+.VARI INP
+1.The image to analyze
+2.Geom file
+
+.VARI TARGET
+Optional 12-char string
+Target name (planet,
+  satellite, or asteroid)
+.VARI SPICEMODE
+Optional keyword
+Location of SPICE kernels
+(LOCAL or REMOTE)
+.VARI CKNAME
+Optional 4-char string
+C-kernel name
+.VARI CKID
+Optional 4-char string
+C-kernel ID
+.VARI USERID
+Optional 3-char string
+User who created camera pointing
+.VARI GROUPID
+Optional 3-char string
+Group which created camera pointing
+.VARI INSTITUTE
+Optional 4-char string
+Facility which created camera pointing
+.VARI PURPOSE
+Optional 4-char string
+Purpose for camera pointing
+.VARI PROGRAM
+Optional 6-char string
+Program which created camera pointing
+.VARI SPKID
+Optional 4-char string
+SP kernel for created camera pointing
+.VARI REQNUM
+Optional 4-char string
+IPL request number for created camera pointing
+.VARI CDATE
+Optional 12-char string
+Date and time camera pointing was created
+
+.VARI UPDATE
+To update the SEDR/SPICE
+with subroutine PUTSPICE
+
+.VARI DESTINATION
+The name to be associate 
+with the SEDR/SPICE
+
+
+.LEVEL2
+.VARI INP
+There are up to 2 input files:
+1. The image whose label and spice/sedr to list.
+2. The geom correction file for the first input.
+   The second file is optional. If not included,
+   nominals will be generated.
+
+.VARI UPDATE
+To update the SEDR or SPICE
+Specifies whether subroutine PUTSPICE is to be called.
+The default (NOUPDATE) is to NOT call PUTSPICE.
+Note that the sedr/spice will be updated with the
+source specified by the DESTINATION keyword .
+
+.VARI TARGET
+Ex: TARGET=GANYMEDE specifies that GANYMEDE is the target in the input image.
+
+The TARGET may be a planet, satellite, or asteroid.  If defaulted, the target
+name is extracted from the VICAR label or determined by other TBD means.
+
+A complete list of valid target names is located in the ASCII file assigned
+the logical name (or environmental variable) BODY_IDS.
+
+.VARI SPICEMODE
+SPICEMODE=LOCAL specifies that SPICE data is to be retrieved from local
+SPICE kernels.  SPICEMODE=REMOTE specifies that SPICE data is to be retrieved
+via the SPICE server.  If SPICEMODE is defaulted, the logical name (or
+environmental variable) DEFAULTSPICE is used to determine whether LOCAL or
+REMOTE is used.  Note that if SPICE data is not found in LOCAL or REMOTE mode,
+the other mode is attempted.
+
+.VARI CKNAME
+CKNAME is a four character string specifying the C-kernel to be used:
+
+  CKNAME	C KERNEL
+  --------      -------------
+  DAVI		MIPS_DAVI.CK
+  NAV		MIPS_NAV.CK
+  FARE		MIPS_FARENC.CK
+  NAV2		MIPS_NAV2.CK
+  NEAR		MIPS_NEAR.CK
+  AMOS		MIPS_AMOS.CK
+  NAIF		the best NAIF kernel is used
+
+If defaulted, the kernels are searched in the above order.
+
+.VARI CKID
+CKID is an alternative way to specify the prefered C-kernel (see CKNAME
+parameter):
+
+  CKID	  CKNAME	C KERNEL
+  ----	  --------      -------------
+  M906	  DAVI		MIPS_DAVI.CK
+  M905	  NAV		MIPS_NAV.CK
+  M904	  FARE		MIPS_FARENC.CK
+  M903	  NAV2		MIPS_NAV2.CK
+  M902	  NEAR		MIPS_NEAR.CK
+  M901	  AMOS		MIPS_AMOS.CK
+  varies  NAIF		there are a large number of these files
+
+Ex:  CKID=M901 specifies the four character ID which uniquely identifies the
+     C-kernel MIPS_AMOS.CK.
+
+A complete list of the C-kernel IDs is located in the ASCII file assigned the
+logical name (or environmental variable) KERNELDB.
+
+If specified, CKID overrides the CKNAME parameter.
+
+.VARI USERID
+USERID is a three character string which identifies the user who created the
+camera pointing.
+
+Ex:  USERID=HBM identifies Helen Mortensen as the creator of the camera
+     pointing.
+
+.VARI GROUPID
+GROUPID is a three character string which identifies the group which created the
+camera pointing.
+
+Ex:  GROUPID=040 identifies group 040 as the creator of the camera pointing.
+
+.VARI INSTITUTE
+INSTITUTE is a four character string identifying the facility which created
+the camera pointing.
+
+Ex:  INSTITUTE=MIPS specifies that MIPS created the camera pointing.
+
+.VARI PURPOSE
+PURPOSE is a four character string identifying the purpose of the observation
+or the purpose of processing.  For example,
+  PURPOSE=MOSA identifies the image as part of a mosaic sequence
+  PURPOSE=COLO identifies the image as part of a color sequence
+
+.VARI PROGRAM
+PROGRAM is the first six characters of the program creating the camera pointing.
+
+Ex:  PROGRAM=FARENC specifies that FARENC created the camera pointing.
+
+.VARI SPKID
+SPKID specifies the four character ID which uniquely identifies the
+SP kernel used to create the camera pointing.  The SP-kernel IDs are located
+in the ASCII file assigned the logical name (or environmental variable)
+KERNELDB.
+
+Ex:  SPKID=N015 specifies the SP kernel GLL_LONG_2.BSP
+
+.VARI REQNUM
+REQUNUM is a four character string identifying the IPL request number for
+which the camera pointing was created.
+
+Ex:  REQNUM=3456 identifies (somewhat) request number R123456
+
+.VARI CDATE
+Date and time the camera pointing was created in the form 'YEARMMDDHHMM'.
+
+Ex:  CDATE=199602291200 specifies that the pointing was created at noon
+     on February 29, 1996.
+
+.VARI DESTINAT
+Destination is the name to be associated with the
+SEDR/SPICE as a source when it is updated. Only required if
+the UPDATE keyword is specified.
+
+.end
+

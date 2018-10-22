@@ -1,0 +1,133 @@
+1 PICSCALE
+
+   Compute picture scale, north angle, azimuth angles, and slant range for
+   a selected point in an image.
+
+   FORTRAN Calling Sequence:
+
+         PICSCALE(SBUF,DATA,MP,MPTYPE,SCLAT,SCLON,NL,NS,PBUF,LINE,SAMP)
+
+   where:
+
+       	 REAL*8    SBUF(200)    Buffer returned by subroutine GETSPICE
+         REAL*4    DATA(40)     Array containing image geometry data (see below)
+         INTEGER   MP           Address of Structure created by mpInit(MP)
+         INTEGER   MPTYPE       map projection type
+       	 REAL*8    SCLAT        Subspacecraft planetocentric latitude (degrees)
+       	 REAL*8    SCLON        Subspacecraft planetocentric west-longitude deg
+         INTEGER*4 NL           Number of lines in image
+         INTEGER*4 NS           Number of samples in image
+       	 REAL*4 PBUF(30)        Output array of computed terms (see below)
+         REAL*8    LINE,SAMP    (Output) Coordinates where computation is done
+
+  C Calling Sequence:
+
+        #include "mp_routines.h"
+        zpicscale(sbuf,data,mp,mptype,sclat,sclon,nl,ns,pbuf,&line,&sample);
+  where:
+        double *SBUF;           Buffer returned by subroutine GETSPICE
+        float  *data;           Image geometry data (see below)
+       	MP     *mp              Address of Structure created by mpInit(MP)
+        int     mptype          map projection type
+      	double  sclat;          Subspacecraft planetocentric latitude in degrees
+      	double  sclon;          Subspacecraft planetocentric west-longitude in degrees
+       	int     nl;             Number of lines in image
+        int     ns;             Number of samples in image
+        float  *pbuf;           Output array of computed terms (see below)
+        double *line,*samp;     (Output) Coordinates were computation is done
+
+  The image geometry DATA is only used if the MP array is not valid.  This
+  would occur if the input image label did not contain MP or PERSLAB labels.
+  The contents of DATA should be as follows:
+
+       DATA(1-18)  = OM matrix              
+       DATA(19-24) = RS vector
+       DATA(25) = polar radius (km)            
+       DATA(26) = equatorial radius (km) 
+       DATA(27) = focal length (mm)
+       DATA(28) = optical axis line        
+       DATA(29) = optical axis sample      
+       DATA(30) = scale in pixels/mm.      
+       DATA(31)-DATA(37) = ignored
+       DATA(38) = range to target body (km)
+       DATA(39)-DATA(40) = ignored
+
+  The contents of the output buffer are:
+    PBUF(1) = horizontal picture scale in meters/pixel
+    PBUF(2) = vertical picture scale in meters/pixel
+    PBUF(3) = north angle
+    PBUF(4) = sun azimuth
+    PBUF(5) = spacecraft azimuth
+    PBUF(6) = slant range
+    PBUF(7) = north azimuth
+    PBUF(8) = latitude of surface point where computations are performed
+    PBUF(9) = longitude of surface point where computations are performed
+
+  If an argument cannot be computed, its value is returned as -999.
+
+  NOTE: if MPTYPE is not 7 or 8, or if the projection type is not POINT
+  PERSPECTIVE, then the azimuth angles and slant range cannot be calculated
+  and therefore are not returned ( PBUF(3) - PBUF(6)).
+
+  MPTYPE = 7 for image space (DATA buffer is used)
+         = 8 for object space (DATA buffer is used)
+         = other (MP buffer is used)
+
+2 Operation
+
+  The picture scale, north azimuth, sun azimuth, and spacecraft azimuth
+  are computed and returned along with the line-sample location at which
+  the computations are performed.
+
+  The horizontal and vertical picture scales are determined by computing the
+  distance (in meters) between two adjacent pixels.
+
+  If the image has been map-projected, the center of the image is chosen
+  for the computations.
+
+  If the image has not been projected, it is assumed to be in object-space.
+  The point in the image at which the above values are computed
+  is determined as follows:
+ 
+  (1) If all four corners of the image lie on the target-surface, the center
+      of the image is used.
+  (2) Otherwise, if the planet-center is visible, it is used.
+  (3) Otherwise, the margins of the image are scanned at 20-pixel
+      intervals for a point at highest resolution. 
+
+2 History
+
+  Original Programmer: Gary Yagi, April 10, 1991
+  Current Cognizant Programmer: Gary Yagi
+  Source Language: C
+  Revision history:
+      4 July  91  GMY  Add slant range
+      1 June  91  GMY  Add vertical scale and azimuth angles
+                  93   PDB  Converted from Fortran to 'C' {but not delivered}
+      6 June  94  GAC  Completed porting.  
+      2 Jan   95  JCT  (CRI) Made portable for UNIX
+      5 Feb   96  GMY  Beef up algorithm so that it always returns a scale
+                       (FR 89104)
+      5 May   96  GMY  Get it to work on PERSLAB and MAP3 labels
+     30 May   96  GMY  Delete RPD and DPR functions and call zrpd and zdpr
+                       instead (DFR)
+     31 July  96  GMY  Replaced GETSPICE call with GETSPICE2 in test program
+                       (FR 89172).  Corrected SCAZ calculation.
+     16 Dec   96  OAM  Included subroutines spice2convev and lighting in
+                       picscale.com.
+      1 Nov   97  GMY  Correct computation of azimuth angles (FR 90511)
+                       Add north angle, lat,lon
+     21 Mar   98  GMY  Fixed call to zellipse_inv (AR 9325)
+                       Fixed NORAZ in tzpicscale (AR 9411)
+     04 May   98  RRP  In zpicscale updated the lat and lon calculations 
+                       through psxy2ll to calculate at pcs+0.1 and pcl+0.1.
+                       and the return value of horizontal and vertical scales
+                       are multiplied by 10 to level out the 1/10 step factor.
+                       And updated psll2xy to default rline and
+                       rsamp to -999.0 if call to zpproj is not successful.
+     25 June 1998 TXH  Removed subroutine MATRIXMULT, because it causes 
+                       compilation warnings on VMS.  Since this subroutine 
+                       is not being called by any existing programs, this 
+                       change should have little impact.
+     30 Sept 99   gmy  Check that magnitude of vector dot product is not greater
+                       than 1 before taking arc cos.

@@ -1,0 +1,10 @@
+/* Imake file for VICAR subroutine MWATNA */
+
+#define SUBROUTINE mwatna
+
+#define MODULE_LIST mwatna.f 
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN
+

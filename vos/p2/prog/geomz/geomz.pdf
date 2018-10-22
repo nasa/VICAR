@@ -1,0 +1,245 @@
+process help=*
+ !
+ PARM INP     TYPE=STRING COUNT=1
+ PARM OUT     TYPE=STRING COUNT=1
+ PARM SIZE    TYPE=INTEGER COUNT=0:4 DEFAULT=(1,1,0,0)
+ PARM SL      TYPE=INTEGER COUNT=0:1 DEFAULT=1
+ PARM SS      TYPE=INTEGER COUNT=0:1 DEFAULT=1
+ PARM NL      TYPE=INTEGER COUNT=0:1 DEFAULT=0
+ PARM NS      TYPE=INTEGER COUNT=0:1 DEFAULT=0
+ PARM NAH TYPE=INTEGER,VALID=(1:200) default=1
+ PARM NAV TYPE=INTEGER,VALID=(1:3000) default=1
+ PARM TIEPOINT TYPE=REAL,COUNT=0:600 default=--
+ PARM FIXVAL  TYPE= INTEGER COUNT=(0:1) DEFAULT=--
+ PARM PARMS   TYPE=STRING  COUNT=0:1  DEFAULT=--
+ !
+ END-PROC
+!
+! HELP TEXT FOR "geomz"
+.TITLE
+VICAR PROGRAM "geomz"
+.HELP
+ PURPOSE:
+
+Program "geomz" is a VICAR applications program which is used to 
+perform vertical (brightness or DN) correction of images by a set of
+points specified as parameters or in a parameter data set.
+"geomz" does not perform a geometric transformation (of line and sample 
+coordinates) of the image.
+.PAGE
+ EXECUTION:
+
+"geomz" is designed to be an analog of program "GEOMA".  Its application is
+for vertical (brightness or DN) manipulations of images.  Vertical corrections
+are specified by the user through tiepoints either as parameters or in a 
+parameter file.  (Program "TIECONM" can produce a parameter file for "geomz".)
+The "GEOMA" execution format has been imitated as closely as possible.
+
+The size of the output image is determined by the number of lines and number 
+of samples in the SIZE field if the SIZE field is entered by the user.  If the
+SIZE field is not entered, the output file is the same size as the input file.
+
+The data type of the input image may either be byte or halfword data.
+The data type is obtained from the VICAR label of the input image.
+The output image has the same data format  (byte or halfword) as the input 
+image.  
+.PAGE
+TAE COMMAND LINE FORMAT
+      The following command line formats show the major allowable forms:
+      geomz INP=a OUT=b SIZE=(sl,ss,nl,ns) parameters
+      geomz INP=a OUT=b  SL=sl SS=ss NL=nl NS=ns parameters
+      geomz a b (sl,ss,nl,ns) parameters
+      geomz a b parameters
+      geomz INP=a OUT=b SIZE=(sl,ss,nl,ns) PARMS=c optional parameters
+      geomz INP=a OUT=b  SL=sl SS=ss NL=nl NS=ns PARMS=c optional parameters
+      geomz a b (sl,ss,nl,ns) PARMS=c optional parameters
+      geomz a b PARMS=c optional parameters
+
+       Here 'a' represents the input image file name,
+       'b' represents the output image file name,
+       and 'c' represents the parameter file name.
+.page
+The tiepoint grid must be specified as as set of parameters either in the
+TAE command line or in the parameter file.
+The tiepoint grid is specified using the parameters NAH, NAV, and TIEPOINT.
+
+   NAH=nah  NAV=nav TIEPOINT=( L1,S1,DZ1  L2,S2,DZ2 ... )
+
+nah is the number of grid cells horizontally (across the top in the sample
+direction), nav is the number of grid cells vertically. The grid must be
+evenly-spaced and perfectly rectangular and the rows and columns must be
+perfectly horizontal and vertical respectively. 
+.PAGE
+EXAMPLE
+
+       geomz INP=A OUT=B SIZE=(1,1,500,1000)  NAH=1 NAV=1  FIXVAL=0   +
+             TIEPOINT=(   1,1,10      1,1000, -10 +
+                        500,1,10    500,1000, -10   )
+
+This example cause the input to be changed by a ramp function with the
+leftmost pixels becoming 10 DN brighter and the rightmost pixels becoming
+10 DN dimmer.  Pixels with a 0 value in A are not changed because of the
+FIXVAL parameter.
+.PAGE
+RESTRICTIONS
+1. The input and output images must be byte or halfword data.
+2. The maximum number of pixels per line is 60,000.
+3. The maximum number of tiepoints is 40,000.  (If parameters are used 
+   instead of a parameter file, the limit is 200.)
+4. The maximum value for NAH is 200.
+5. The maximum value for NAV is 3000
+.page
+ OPERATION:
+
+The input picture is transformed pixel by pixel to the output picture by
+adjusting the DN value according to nearby tiepoints.  A four (NAH) by 
+three (NAV) tiepoint grid is illustrated below.  The tiepoints are marked 
+with a '+' character.  The lines show how areas are defined by the grid.
+A pixel within an area is adjusted according to the four tiepoints that
+define the area containing that pixel.  Usually, this is a rectangle 
+containing the pixel; but if the point lies outside the convex hull of the
+grid, then the nearest rectangle is used for adjustment.
+.page
+
+                     |      |      |      
+              +      +      +      +      +  
+                     |      |      |      
+        ------+------+------+------+------+------
+                     |      |      |      
+        ------+------+------+------+------+------
+                     |      |      |      
+              +      +      +      +      +  
+                     |      |      |      
+
+.page
+The DN adjustment is obtained by bilinear interpolation (or extrapolation)
+of the adjustment at the four grid points.  The formula is
+
+     DN (output) = DN (input) + ax + by + cxy + d
+
+where x and y are the pixel coordinates and a,b,c,d are constants chosen
+so that 
+
+    delta DN(k) = ax(k) + by(k) + cx(k)y(k) + d          for k = 1,2,3,4,
+
+where x(k) and y(k) are the coordinate values and delta DN(k) are the DN
+shifts of the four selected tiepoints for the point x,y.
+
+The calculation is performed by a double incrementing scheme.  For a single
+line, the DN increment per pixel is given by  b+cx.  The starting values for
+subsequent lines are incremented by  a+cy.  Thus the full solution is needed
+only at the upper left corner of an area, and all other values are obtained
+by incrementing.
+
+After the delta-DN (DZ) values are added, the resulting DNs are then checked
+for being valid for the data type (byte or halfword) of the image and are
+adjusted if invalid.  For byte data, DNs less than 0 are set to 0, and DNs
+greater than 255 are set to 255.  For halfword data, DNs less than 0 are set to
+0, and DNs greater than 32767 are set to 32767. 
+
+WRITTEN BY:                 Steve Pohorsky                1 May 1986
+
+Original Programmer:        H. Wilczynski                 1 Sep 1977
+
+Cognizant Programmer:       Steve Pohorsky                1 May 1986
+
+Made portable for UNIX      VRU  (CRI)                    8 May 1995
+.LEVEL1
+.VARI INP
+Input file name
+.VARI OUT
+Output file name
+.VARI SIZE
+Standard VICAR Size Field
+.VARI SL
+Starting line for output
+.VARI SS
+Starting sample for output
+.VARI NL
+Number of lines for output
+.VARI NS
+Number of samples for output
+.VARI NAH
+number of grid
+cells horizontally
+.VARI NAV
+number of grid
+cells vertically
+.VARI TIEPOINT
+grid corner tiepoints in
+rows L1,S1,DZ1,L2,...
+.VARI FIXVAL
+a single DN value (optional)
+to be left unchanged by the
+DN transformation.
+.VARI PARMS
+optional parameter file
+.LEVEL2
+.VARI INP
+Input file name.  This parameter is input as:
+     INP=innam
+where "innam" is the input file name.
+.VARI OUT
+Output file name. This parameter is input as:
+     OUT=outnam
+where:
+"outnam" is the output file name.
+.VARI SIZE
+The size field is specified with four arguments,
+     SIZE=(a,b,c,d)
+where:
+a is the starting line number of the output picture.
+b is the starting sample of the output picture.
+c is the number of lines, and
+d is the number of samples
+For example, SIZE=(1,1,40,50)
+would create an output picture of size 40 lines by 50 pixels.
+The size field can be thought of as a window relative to the output
+grid.  The first two values offset the window down and to the right
+causing the features in the image to move up and to the left.
+.VARI SL
+SL can be used to specify the starting line of the output picture.
+This is actually a coordinate relative to the output grid, therefore,
+it offsets the output picture by (SL - 1.)  The default for SL is 1.
+.VARI SS
+SS can be used to specify the starting sample of the output picture.
+This is actually a coordinate relative to the output grid, therefore,
+it offsets the output picture by (SS - 1.)  The default for SS is 1.
+.VARI NL
+NL can be used in conjunction with NS in place of the SIZE
+parameter to specify the size of the output picture.  It simply
+represents the number of lines for output.
+.VARI NS
+NS can be used in conjunction with NS in place of the SIZE
+parameter to specify the size of the output picture.  It simply
+represents the number of samples (pixels) for output.
+.VARI NAH
+the nah is number of grid cells horizontally, the number of tiepoints 
+across is one larger (nah+1).  NAH must be an integer.  The default value is 1.
+.VARI NAV
+the nav is number of grid cells vertically, the number of tiepoints
+vertically is one larger (nav+1).  NAV must be an integer.  The default value 
+is 1.
+.VARI TIEPOINT
+The TIEPOINT keyword and associated numbers specify the mapping of control
+points between output and input pictures.  The numbers which follow this
+keyword are in groups of three, one group for each tiepoint.  The numbers
+may be either integer or real.  The total number of tiepoint numbers must
+be  3*(n+1)*(m+1), where n and m are given by the NAH and NAV parameters.
+Within each group of three numbers describing a tiepoint, the first two
+numbers give the line and sample coordinates of the tiepoint in the input
+picture.  (The SIZE field, SS, SL have no effect on this location.)
+The third value (DZ) specifies the amount of (vertical) shift in the DN
+value at the tiepoint.  A positive value indicates an upward DN shift
+(brighter), and a negative value indicates a downward DN shift (darker).
+The order in which the tiepoints are specified is left to right within
+a horizontal row of tiepoints.  The horizontal rows are ordered from top
+to bottom.  A major difference between "geomz" and GEOMA formats is that
+"geomz" tiepoints must be in an evenly-spaced rectangular grid.
+.VARI FIXVAL
+The default is to transform all DN values. FIXVAL=0 is commonly used to preserve
+the outer background of an image so that mosaicking with THESH=0 can be used.
+.VARI PARMS
+A parameter data set containing the tiepoint parameters.  This file should
+have been written by a program which uses the XVP routines for writing
+parameter data sets, such as "TIECONM".

@@ -1,0 +1,66 @@
+procedure
+refgbl $echo
+body
+let $echo="yes"
+!
+median inp=/project/test_work/testdata/sitod1/test_data/images/moon1.img +
+ out=med1.img nlw=5 nsw=5
+remray inp=( +
+ /project/test_work/testdata/sitod1/test_data/images/moon1.img,med1.img) +
+ out=a.img tol=30
+f2 inp=(/project/test_work/testdata/sitod1/test_data/images/moon1.img, +
+ a.img) out=b.img function="(in1-in2)*40+128"
+xvd b.img
+xvd a.img
+!
+median inp=/home/gmy/rad/europa.img +
+ out=med2.img nlw=5 nsw=5
+remray inp=(/home/gmy/rad/europa.img,med2.img) out=a.img tol=10
+f2 inp=(/home/gmy/rad/europa.img, +
+ a.img) out=b.img function="(in1-in2)*40+128"
+xvd b.img
+xvd a.img
+!
+median inp=/home/gmy/rad/amalthea.img out=med3.img nlw=5 nsw=5
+remray inp=(/home/gmy/rad/amalthea.img,med3.img) out=a.img tol=20
+f2 inp=(/home/gmy/rad/amalthea.img, +
+ a.img) out=b.img function="(in1-in2)*40+128"
+xvd b.img
+xvd a.img
+!
+median inp=/home/gmy/rad/europa2.img out=med3.img nlw=5 nsw=5
+remray inp=(/home/gmy/rad/europa2.img,med3.img) out=a.img tol=20
+f2 inp=(/home/gmy/rad/europa2.img, +
+ a.img) out=b.img function="(in1-in2)*40+128"
+xvd b.img
+xvd a.img
+!
+median inp=/home/gmy/rad/europa3.img out=med3.img nlw=5 nsw=5
+remray inp=(/home/gmy/rad/europa3.img,med3.img) out=a.img tol=20
+f2 inp=(/home/gmy/rad/europa3.img, +
+ a.img) out=b.img function="(in1-in2)*40+128"
+xvd b.img
+xvd a.img
+!
+median inp=/home/gmy/rad/io.img out=med3.img nlw=5 nsw=5
+remray inp=(/home/gmy/rad/io.img,med3.img) out=a.img tol=20
+f2 inp=(/home/gmy/rad/io.img, +
+ a.img) out=b.img function="(in1-in2)*40+128"
+xvd b.img
+xvd a.img
+!
+median inp=/home/gmy/rad/io2.img out=med3.img nlw=5 nsw=5
+remray inp=(/home/gmy/rad/io2.img,med3.img) out=a.img tol=20
+f2 inp=(/home/gmy/rad/io2.img, +
+ a.img) out=b.img function="(in1-in2)*40+128"
+xvd b.img
+xvd a.img
+!
+median inp=/home/gmy/rad/jring.img out=med3.img nlw=5 nsw=5
+remray inp=(/home/gmy/rad/jring.img,med3.img) out=a.img tol=20
+f2 inp=(/home/gmy/rad/jring.img, +
+ a.img) out=b.img function="(in1-in2)*40+128"
+xvd b.img
+xvd a.img 
+!
+end-proc

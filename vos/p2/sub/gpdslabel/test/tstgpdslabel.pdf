@@ -1,0 +1,52 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+
+
+refgbl $syschar
+
+! PCA
+!!!!dcl del scx1:[mipl]tgpdslabel.pca;*
+!!!!dcl assign tstgpdslabel.pcac pcac$init
+!!!!dcl assign tstgpdslabel.pcaa pcaa$init
+!
+!	This is what a DCL TYPE on PDS.FILE should look like.
+!CCSD3ZF000100000001NJPL3IF0PDS200SDFKLJERJTSDJFKJKLJCCSD3ZF000100000001NJPL3IF
+!0PDS200000001 = SFDU_LABEL                                                    
+!/* File format and length */                                                  
+!RECORD_TYPE = FIXED_LENGTH                                                    
+!RECORD_TYPE = FIXED_LENGTH                                                    
+!RECORD_TYPE = (FIXED_LENGTH,FIXED_LENGTH,FIXED_LENGTH,FIXED_LENGTH,           
+!       FIXED_LENGTH)                                                          
+!RECORD_BYTES = (100,100,100,100,100,100,100,100,100,100,100,100,100,          
+!     100,100,100,100,100)                                                     
+!RECORD_BYTES = 1000                                                           
+!DATA_SET_ID = 'GO-V/E-SSI-EDR-E1-V1.0'                                        
+!DATA_SET_ID = ('GO-V/E-SSI-EDR-E1-V1.0','GO-V/E-SSI-EDR-E1-V1.0',             
+!      'GO-V/E-SSI-EDR-E1-V1.0','GO-V/E-SSI-EDR-E1-V1.0',                      
+!      'GO-V/E-SSI-EDR-E1-V1.0','GO-V/E-SSI-EDR-E1-V1.0',                      
+!      'GO-V/E-SSI-EDR-E1-V1.0','GO-V/E-SSI-EDR-E1-V1.0',                      
+!      'GO-V/E-SSI-EDR-E1-V1.0','GO-V/E-SSI-EDR-E1-V1.0',                      
+!      'GO-V/E-SSI-EDR-E1-V1.0','GO-V/E-SSI-EDR-E1-V1.0')                      
+!CURRENT_TIME = "91.203 09:54:02.201"                                          
+!CURRENT_TIME_IN_ENGLISH = "Nineteen hundred ninty-one, day two hundred three,T
+!ime is nine fifty-four and two thousand two hundred and one milliseconds."    
+
+write "Expect warning regarding NUMBER of values for ITEM = RECORD_TYPE"
+
+tgpdslabel out=pds.file
+
+if ($syschar(1) = "VAX_VMS")
+	dcl type pds.file
+else 
+	more  pds.file
+end-if
+
+! PCA
+!!!!!!    dcl pca scx1:[mipl]tgpdslabel.pca
+!!!!!!    dcl type tstgpdslabel.pcatxt
+!!!!!!    dcl del tstgpdslabel.pca*.*
+!!!!!!    dcl del scx1:[mipl]tgpdslabel.pca.*
+end-proc

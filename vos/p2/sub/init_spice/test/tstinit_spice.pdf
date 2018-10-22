@@ -1,0 +1,12 @@
+! Test script for subroutine INIT_SPICE
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+
+tinit_spice
+
+end-proc

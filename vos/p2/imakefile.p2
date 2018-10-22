@@ -2,19 +2,13 @@
 # Imakefile for P2 Subroutines and Applications
 #
 
-all: make_inc make_gen make_sub make_prog 
-
-make_inc:
-	($(CD) inc; $(V2UTIL)/unpack_inc.csh)
-
-make_gen:
-	-($(CD) gen; $(V2UTIL)/bldcomfiles.csh $(R2LIB))
+all: make_sub make_prog 
 
 make_sub:
-	($(CD) sub; $(V2UTIL)/bldcomfiles.csh $(R2LIB)) 
+	($(CD) sub; $(V2UTIL)/bldcomfiles_nounpack.csh $(R2LIB)) 
 
 make_prog: 
-	-($(CD) prog; $(V2UTIL)/bldcomfiles.csh $(R2LIB)) 
+	-($(CD) prog; $(V2UTIL)/bldcomfiles_nounpack.csh $(R2LIB)) 
 	-(cd $(R2LIB); $(V2UTIL)/make_pdf_cache.perl)
 	-($(V2UTIL)/make_html.csh $(R2LIB) index_p2.html)
 

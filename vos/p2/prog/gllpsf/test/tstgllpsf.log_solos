@@ -1,0 +1,413 @@
+tstgllpsf
+gllpsf out=psf.img nl=8 ns=8
+Beginning VICAR task gllpsf
+GLLPSF version 8-MAR-96
+processing filter:  CLEAR
+Normalizing by total weight sum of =   0.99540
+list psf.img
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:11 2011
+     Samp             1           2           3           4           5           6           7           8
+   Line
+      1       5.124E-01   9.845E-02   6.450E-04   3.416E-04   2.210E-04   3.416E-04   6.450E-04   9.845E-02
+      2       9.845E-02   1.895E-02   5.492E-04   3.187E-04   2.111E-04   3.187E-04   5.492E-04   1.895E-02
+      3       6.450E-04   5.492E-04   3.760E-04   2.606E-04   1.831E-04   2.606E-04   3.760E-04   5.492E-04
+      4       3.416E-04   3.187E-04   2.606E-04   2.015E-04   1.507E-04   2.015E-04   2.606E-04   3.187E-04
+      5       2.210E-04   2.111E-04   1.831E-04   1.507E-04   1.243E-04   1.507E-04   1.831E-04   2.111E-04
+      6       3.416E-04   3.187E-04   2.606E-04   2.015E-04   1.507E-04   2.015E-04   2.606E-04   3.187E-04
+      7       6.450E-04   5.492E-04   3.760E-04   2.606E-04   1.831E-04   2.606E-04   3.760E-04   5.492E-04
+      8       9.845E-02   1.895E-02   5.492E-04   3.187E-04   2.111E-04   3.187E-04   5.492E-04   1.895E-02
+gllpsf out=psf.img nl=8 ns=8 psf=(1.,0.,2.,2.,0.,10.)
+Beginning VICAR task gllpsf
+GLLPSF version 8-MAR-96
+Normalizing by total weight sum of = 104.24010
+list psf.img
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:12 2011
+     Samp             1           2           3           4           5           6           7           8
+   Line
+      1       9.593E-03   1.439E-02   1.919E-02   1.679E-02   1.439E-02   1.679E-02   1.919E-02   1.439E-02
+      2       1.439E-02   1.638E-02   1.862E-02   1.640E-02   1.409E-02   1.640E-02   1.862E-02   1.638E-02
+      3       1.919E-02   1.862E-02   1.720E-02   1.534E-02   1.326E-02   1.534E-02   1.720E-02   1.862E-02
+      4       1.679E-02   1.640E-02   1.534E-02   1.381E-02   1.199E-02   1.381E-02   1.534E-02   1.640E-02
+      5       1.439E-02   1.409E-02   1.326E-02   1.199E-02   1.042E-02   1.199E-02   1.326E-02   1.409E-02
+      6       1.679E-02   1.640E-02   1.534E-02   1.381E-02   1.199E-02   1.381E-02   1.534E-02   1.640E-02
+      7       1.919E-02   1.862E-02   1.720E-02   1.534E-02   1.326E-02   1.534E-02   1.720E-02   1.862E-02
+      8       1.439E-02   1.638E-02   1.862E-02   1.640E-02   1.409E-02   1.640E-02   1.862E-02   1.638E-02
+gllpsf out=psf.img nl=16 ns=16
+Beginning VICAR task gllpsf
+GLLPSF version 8-MAR-96
+processing filter:  CLEAR
+Normalizing by total weight sum of =   1.01205
+fft22  inp=psf.img out=otf.img
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+TRANSFORM COMPLETED
+list psf.img
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:12 2011
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       5.039E-01   9.683E-02   6.344E-04   3.360E-04   2.174E-04   1.482E-04   1.087E-04   7.905E-05   5.731E-05   7.905E-05
+      2       9.683E-02   1.864E-02   5.401E-04   3.135E-04   2.076E-04   1.443E-04   1.057E-04   7.722E-05   5.633E-05   7.722E-05
+      3       6.344E-04   5.401E-04   3.699E-04   2.564E-04   1.801E-04   1.330E-04   9.715E-05   7.185E-05   5.342E-05   7.185E-05
+      4       3.360E-04   3.135E-04   2.564E-04   1.982E-04   1.482E-04   1.154E-04   8.597E-05   6.414E-05   4.888E-05   6.414E-05
+      5       2.174E-04   2.076E-04   1.801E-04   1.482E-04   1.223E-04   9.435E-05   7.362E-05   5.633E-05   4.414E-05   5.633E-05
+      6       1.482E-04   1.443E-04   1.330E-04   1.154E-04   9.435E-05   7.722E-05   6.068E-05   4.819E-05   3.833E-05   4.819E-05
+      7       1.087E-04   1.057E-04   9.715E-05   8.597E-05   7.362E-05   6.068E-05   4.964E-05   4.087E-05   3.360E-05   4.087E-05
+      8       7.905E-05   7.722E-05   7.185E-05   6.414E-05   5.633E-05   4.819E-05   4.087E-05   3.439E-05   3.158E-05   3.439E-05
+      9       5.731E-05   5.633E-05   5.342E-05   4.888E-05   4.414E-05   3.833E-05   3.360E-05   3.158E-05   2.679E-05   3.158E-05
+     10       7.905E-05   7.722E-05   7.185E-05   6.414E-05   5.633E-05   4.819E-05   4.087E-05   3.439E-05   3.158E-05   3.439E-05
+     11       1.087E-04   1.057E-04   9.715E-05   8.597E-05   7.362E-05   6.068E-05   4.964E-05   4.087E-05   3.360E-05   4.087E-05
+     12       1.482E-04   1.443E-04   1.330E-04   1.154E-04   9.435E-05   7.722E-05   6.068E-05   4.819E-05   3.833E-05   4.819E-05
+     13       2.174E-04   2.076E-04   1.801E-04   1.482E-04   1.223E-04   9.435E-05   7.362E-05   5.633E-05   4.414E-05   5.633E-05
+     14       3.360E-04   3.135E-04   2.564E-04   1.982E-04   1.482E-04   1.154E-04   8.597E-05   6.414E-05   4.888E-05   6.414E-05
+     15       6.344E-04   5.401E-04   3.699E-04   2.564E-04   1.801E-04   1.330E-04   9.715E-05   7.185E-05   5.342E-05   7.185E-05
+     16       9.683E-02   1.864E-02   5.401E-04   3.135E-04   2.076E-04   1.443E-04   1.057E-04   7.722E-05   5.633E-05   7.722E-05
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:12 2011
+     Samp            11          12          13          14          15          16
+   Line
+      1       1.087E-04   1.482E-04   2.174E-04   3.360E-04   6.344E-04   9.683E-02
+      2       1.057E-04   1.443E-04   2.076E-04   3.135E-04   5.401E-04   1.864E-02
+      3       9.715E-05   1.330E-04   1.801E-04   2.564E-04   3.699E-04   5.401E-04
+      4       8.597E-05   1.154E-04   1.482E-04   1.982E-04   2.564E-04   3.135E-04
+      5       7.362E-05   9.435E-05   1.223E-04   1.482E-04   1.801E-04   2.076E-04
+      6       6.068E-05   7.722E-05   9.435E-05   1.154E-04   1.330E-04   1.443E-04
+      7       4.964E-05   6.068E-05   7.362E-05   8.597E-05   9.715E-05   1.057E-04
+      8       4.087E-05   4.819E-05   5.633E-05   6.414E-05   7.185E-05   7.722E-05
+      9       3.360E-05   3.833E-05   4.414E-05   4.888E-05   5.342E-05   5.633E-05
+     10       4.087E-05   4.819E-05   5.633E-05   6.414E-05   7.185E-05   7.722E-05
+     11       4.964E-05   6.068E-05   7.362E-05   8.597E-05   9.715E-05   1.057E-04
+     12       6.068E-05   7.722E-05   9.435E-05   1.154E-04   1.330E-04   1.443E-04
+     13       7.362E-05   9.435E-05   1.223E-04   1.482E-04   1.801E-04   2.076E-04
+     14       8.597E-05   1.154E-04   1.482E-04   1.982E-04   2.564E-04   3.135E-04
+     15       9.715E-05   1.330E-04   1.801E-04   2.564E-04   3.699E-04   5.401E-04
+     16       1.057E-04   1.443E-04   2.076E-04   3.135E-04   5.401E-04   1.864E-02
+list otf.img
+Beginning VICAR task list
+
+   COMP     samples are interpreted as COMPLEX  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:12 2011
+ Task:FFT22     User:lwk       Date_Time:Thu Mar 17 16:26:13 2011
+     Samp                         1                       2                       3                       4                       5
+   Line
+      1       1.000E+00   0.000E+00   9.563E-01   1.537E-08   8.862E-01   2.235E-08   7.979E-01   1.397E-08   6.951E-01   0.000E+00
+      2       9.563E-01   1.649E-08   9.295E-01   3.020E-08   8.670E-01   3.353E-08   7.807E-01   3.277E-08   6.805E-01   1.108E-08
+      3       8.862E-01   2.247E-08   8.670E-01   3.740E-08   8.125E-01   3.725E-08   7.323E-01   2.948E-08   6.387E-01   1.482E-08
+      4       7.979E-01   1.762E-08   7.807E-01   2.958E-08   7.323E-01   3.713E-08   6.605E-01   3.706E-08   5.762E-01   1.488E-08
+      5       6.951E-01   0.000E+00   6.805E-01   1.119E-08   6.387E-01   1.490E-08   5.762E-01   1.486E-08   5.027E-01   0.000E+00
+      6       5.941E-01  -7.852E-09   5.815E-01   3.653E-09   5.457E-01   7.450E-09   4.923E-01   7.393E-09   4.293E-01  -7.481E-09
+      7       5.085E-01  -3.182E-08   4.978E-01  -2.243E-08   4.671E-01  -1.489E-08   4.212E-01  -1.482E-08   3.671E-01  -2.224E-08
+      8       4.517E-01  -5.206E-08   4.420E-01  -4.281E-08   4.147E-01  -3.332E-08   3.739E-01  -3.320E-08   3.257E-01  -3.686E-08
+      9       4.315E-01   0.000E+00   4.224E-01   5.586E-09   3.964E-01   1.118E-08   3.573E-01   7.457E-09   3.112E-01   0.000E+00
+     10       4.517E-01  -1.578E-08   4.420E-01  -9.303E-09   4.147E-01   6.548E-11   3.739E-01  -7.345E-09   3.257E-01  -1.105E-08
+     11       5.085E-01  -2.247E-08   4.978E-01  -1.310E-08   4.671E-01  -7.443E-09   4.212E-01  -7.395E-09   3.671E-01  -1.482E-08
+     12       5.941E-01  -1.966E-08   5.815E-01  -1.145E-08   5.457E-01  -6.366E-11   4.923E-01  -8.185E-11   4.293E-01  -1.500E-08
+     13       6.951E-01   0.000E+00   6.805E-01   1.119E-08   6.387E-01   1.490E-08   5.762E-01   1.486E-08   5.027E-01   0.000E+00
+     14       7.979E-01   7.148E-09   7.807E-01   2.230E-08   7.323E-01   2.974E-08   6.605E-01   1.477E-08   5.762E-01   7.446E-09
+     15       8.862E-01   3.182E-08   8.670E-01   4.857E-08   8.125E-01   4.469E-08   7.323E-01   3.693E-08   6.387E-01   2.224E-08
+     16       9.563E-01   5.409E-08   9.295E-01   6.768E-08   8.670E-01   7.449E-08   7.807E-01   6.628E-08   6.805E-01   3.698E-08
+
+   COMP     samples are interpreted as COMPLEX  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:12 2011
+ Task:FFT22     User:lwk       Date_Time:Thu Mar 17 16:26:13 2011
+     Samp                         6                       7                       8                       9                      10
+   Line
+      1       5.941E-01  -1.537E-08   5.085E-01  -2.980E-08   4.517E-01  -5.122E-08   4.315E-01   0.000E+00   4.517E-01  -1.444E-08
+      2       5.815E-01   3.429E-09   4.978E-01  -1.863E-08   4.420E-01  -4.011E-08   4.224E-01   6.567E-09   4.420E-01  -7.049E-09
+      3       5.457E-01   7.305E-09   4.671E-01  -1.491E-08   4.147E-01  -3.693E-08   3.964E-01   7.524E-09   4.147E-01  -7.305E-09
+      4       4.923E-01  -1.073E-10   4.212E-01  -7.576E-09   3.739E-01  -2.994E-08   3.573E-01   1.125E-08   3.739E-01  -2.237E-10
+      5       4.293E-01  -7.465E-09   3.671E-01  -2.235E-08   3.257E-01  -3.721E-08   3.112E-01   0.000E+00   3.257E-01  -1.116E-08
+      6       3.664E-01  -1.494E-08   3.131E-01  -2.608E-08   2.775E-01  -3.731E-08   2.650E-01  -7.459E-09   2.775E-01  -1.870E-08
+      7       3.131E-01  -2.227E-08   2.673E-01  -3.352E-08   2.367E-01  -4.105E-08   2.259E-01  -1.314E-08   2.367E-01  -2.243E-08
+      8       2.775E-01  -3.693E-08   2.367E-01  -4.450E-08   2.093E-01  -4.840E-08   1.998E-01  -2.269E-08   2.093E-01  -3.164E-08
+      9       2.650E-01  -3.723E-09   2.259E-01  -1.490E-08   1.998E-01  -2.236E-08   1.906E-01   0.000E+00   1.998E-01  -5.590E-09
+     10       2.775E-01  -1.107E-08   2.367E-01  -2.601E-08   2.093E-01  -2.979E-08   1.998E-01  -6.619E-09   2.093E-01  -1.303E-08
+     11       3.131E-01  -1.484E-08   2.673E-01  -2.607E-08   2.367E-01  -3.545E-08   2.259E-01  -7.524E-09   2.367E-01  -1.682E-08
+     12       3.664E-01  -2.242E-08   3.131E-01  -3.359E-08   2.775E-01  -4.123E-08   2.650E-01  -1.113E-08   2.775E-01  -1.890E-08
+     13       4.293E-01  -7.465E-09   3.671E-01  -2.235E-08   3.257E-01  -3.721E-08   3.112E-01   0.000E+00   3.257E-01  -1.116E-08
+     14       4.923E-01   7.397E-09   4.212E-01  -2.241E-08   3.739E-01  -3.723E-08   3.573E-01   7.512E-09   3.739E-01  -7.504E-09
+     15       5.457E-01   1.476E-08   4.671E-01  -7.460E-09   4.147E-01  -3.321E-08   3.964E-01   1.314E-08   4.147E-01  -3.580E-09
+     16       5.815E-01   2.204E-08   4.978E-01  -7.469E-09   4.420E-01  -2.499E-08   4.224E-01   2.257E-08   4.420E-01   8.073E-09
+
+   COMP     samples are interpreted as COMPLEX  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:12 2011
+ Task:FFT22     User:lwk       Date_Time:Thu Mar 17 16:26:13 2011
+     Samp                        11                      12                      13                      14                      15
+   Line
+      1       5.085E-01  -2.235E-08   5.941E-01  -1.583E-08   6.951E-01   0.000E+00   7.979E-01   1.444E-08   8.862E-01   2.980E-08
+      2       4.978E-01  -1.118E-08   5.815E-01  -1.194E-08   6.805E-01   1.108E-08   7.807E-01   1.833E-08   8.670E-01   4.098E-08
+      3       4.671E-01  -7.458E-09   5.457E-01  -3.203E-10   6.387E-01   1.482E-08   7.323E-01   2.221E-08   8.125E-01   4.470E-08
+      4       4.212E-01  -7.576E-09   4.923E-01  -7.645E-09   5.762E-01   1.488E-08   6.605E-01   2.970E-08   7.323E-01   3.713E-08
+      5       3.671E-01  -1.490E-08   4.293E-01  -1.494E-08   5.027E-01   0.000E+00   5.762E-01   7.436E-09   6.387E-01   2.235E-08
+      6       3.131E-01  -2.235E-08   3.664E-01  -2.241E-08   4.293E-01  -7.481E-09   4.923E-01  -4.275E-11   5.457E-01   1.117E-08
+      7       2.673E-01  -2.979E-08   3.131E-01  -2.973E-08   3.671E-01  -2.224E-08   4.212E-01  -2.227E-08   4.671E-01  -1.117E-08
+      8       2.367E-01  -4.077E-08   2.775E-01  -4.065E-08   3.257E-01  -3.686E-08   3.739E-01  -3.693E-08   4.147E-01  -2.959E-08
+      9       2.259E-01  -1.118E-08   2.650E-01  -7.444E-09   3.112E-01   0.000E+00   3.573E-01   3.727E-09   3.964E-01   1.490E-08
+     10       2.367E-01  -2.229E-08   2.775E-01  -1.480E-08   3.257E-01  -1.105E-08   3.739E-01  -1.107E-08   4.147E-01   3.791E-09
+     11       2.673E-01  -2.234E-08   3.131E-01  -2.230E-08   3.671E-01  -1.482E-08   4.212E-01  -1.484E-08   4.671E-01  -3.718E-09
+     12       3.131E-01  -2.987E-08   3.664E-01  -2.988E-08   4.293E-01  -1.500E-08   4.923E-01  -7.518E-09   5.457E-01   3.662E-09
+     13       3.671E-01  -1.490E-08   4.293E-01  -1.494E-08   5.027E-01   0.000E+00   5.762E-01   7.436E-09   6.387E-01   2.235E-08
+     14       4.212E-01  -1.496E-08   4.923E-01  -1.264E-10   5.762E-01   7.446E-09   6.605E-01   7.397E-09   7.323E-01   3.719E-08
+     15       4.671E-01  -8.924E-12   5.457E-01   7.130E-09   6.387E-01   2.224E-08   7.323E-01   2.966E-08   8.125E-01   5.215E-08
+     16       4.978E-01  -1.819E-11   5.815E-01   6.676E-09   6.805E-01   3.698E-08   7.807E-01   5.184E-08   8.670E-01   8.194E-08
+
+   COMP     samples are interpreted as COMPLEX  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:12 2011
+ Task:FFT22     User:lwk       Date_Time:Thu Mar 17 16:26:13 2011
+     Samp                        16
+   Line
+      1       9.563E-01   5.309E-08
+      2       9.295E-01   6.420E-08
+      3       8.670E-01   6.738E-08
+      4       7.807E-01   5.947E-08
+      5       6.805E-01   3.730E-08
+      6       5.815E-01   2.229E-08
+      7       4.978E-01  -3.802E-09
+      8       4.420E-01  -2.605E-08
+      9       4.224E-01   2.235E-08
+     10       4.420E-01   7.461E-09
+     11       4.978E-01   5.533E-09
+     12       5.815E-01   1.092E-08
+     13       6.805E-01   3.730E-08
+     14       7.807E-01   5.217E-08
+     15       8.670E-01   7.855E-08
+     16       9.295E-01   1.017E-07
+if ($syschar(1)="UNIX")
+  let PATH="/project/test_work/testdata/gll/"
+end-if
+adespike "/project/test_work/testdata/gll/"s0202556100.sos 6100.spk tol=600
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST            0
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST                0
+adespike "/project/test_work/testdata/gll/"s0202556200.sos xa tol=400
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST            1
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST                9
+adespike xa 6200.spk tol=400
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST            1
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST                0
+adespike "/project/test_work/testdata/gll/"s0202556245.sos  6245.spk tol=400
+Beginning VICAR task adespike
+ADESPIKE version 21-JUL-95
+    TOTAL NUMBER OF PIXELS CORRECTED USING ADJACENT SCAN LINE TEST            2
+    TOTAL NUMBER OF PIXELS CORRECTED USING SAME SCAN LINE TEST                3
+gllpsf out=psf nl=128 ns=256 filt=GRN
+Beginning VICAR task gllpsf
+GLLPSF version 8-MAR-96
+processing filter:  GRN
+Normalizing by total weight sum of =   1.14139
+list psf sinc=26 linc=10
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:16 2011
+     Samp             1          27          53          79         105         131         157         183         209         235
+   Line
+      1       7.310E-01   3.429E-06   5.523E-07   2.256E-07   1.588E-07   1.390E-07   1.624E-07   2.437E-07   7.291E-07   4.422E-06
+     11       8.934E-06   3.004E-06   5.316E-07   2.227E-07   1.584E-07   1.386E-07   1.620E-07   2.406E-07   6.603E-07   3.835E-06
+     21       4.873E-06   2.201E-06   4.718E-07   2.152E-07   1.571E-07   1.375E-07   1.606E-07   2.317E-07   5.523E-07   2.756E-06
+     31       2.707E-06   1.291E-06   3.786E-07   2.069E-07   1.550E-07   1.358E-07   1.585E-07   2.173E-07   4.526E-07   1.516E-06
+     41       1.263E-06   7.487E-07   3.133E-07   1.958E-07   1.521E-07   1.354E-07   1.555E-07   2.054E-07   3.499E-07   8.860E-07
+     51       5.956E-07   4.579E-07   2.520E-07   1.823E-07   1.485E-07   1.354E-07   1.518E-07   1.914E-07   2.698E-07   4.954E-07
+     61       3.790E-07   3.158E-07   2.193E-07   1.667E-07   1.443E-07   1.354E-07   1.474E-07   1.752E-07   2.308E-07   3.332E-07
+     71       4.223E-07   3.372E-07   2.261E-07   1.700E-07   1.452E-07   1.354E-07   1.484E-07   1.786E-07   2.378E-07   3.552E-07
+     81       7.291E-07   4.962E-07   2.582E-07   1.852E-07   1.493E-07   1.354E-07   1.526E-07   1.944E-07   2.865E-07   5.349E-07
+     91       1.444E-06   8.598E-07   3.273E-07   1.983E-07   1.528E-07   1.354E-07   1.561E-07   2.080E-07   3.647E-07   1.002E-06
+    101       2.978E-06   1.425E-06   3.994E-07   2.088E-07   1.555E-07   1.362E-07   1.590E-07   2.205E-07   4.750E-07   1.785E-06
+    111       5.414E-06   2.414E-06   4.867E-07   2.164E-07   1.574E-07   1.378E-07   1.610E-07   2.339E-07   5.682E-07   2.940E-06
+    121       1.083E-05   3.122E-06   5.390E-07   2.238E-07   1.585E-07   1.387E-07   1.621E-07   2.417E-07   6.849E-07   4.040E-06
+copy 6100.spk 6100.soscut (280,320,128,256)
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+gllpsf filt=VLT out=psf nl=128 ns=256
+Beginning VICAR task gllpsf
+GLLPSF version 8-MAR-96
+processing filter:  VLT
+Normalizing by total weight sum of =   1.25280
+list psf sinc=26 linc=10
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:17 2011
+     Samp             1          27          53          79         105         131         157         183         209         235
+   Line
+      1       8.222E-01   2.466E-06   8.419E-07   3.256E-07   1.842E-07   1.381E-07   1.973E-07   3.683E-07   9.866E-07   3.124E-06
+     11       1.069E-05   2.232E-06   8.121E-07   3.188E-07   1.826E-07   1.375E-07   1.957E-07   3.611E-07   9.442E-07   2.686E-06
+     21       3.618E-06   1.743E-06   7.259E-07   3.008E-07   1.779E-07   1.355E-07   1.908E-07   3.400E-07   8.419E-07   2.017E-06
+     31       1.973E-06   1.340E-06   5.914E-07   2.807E-07   1.702E-07   1.323E-07   1.828E-07   3.058E-07   6.981E-07   1.463E-06
+     41       1.315E-06   9.986E-07   4.906E-07   2.538E-07   1.621E-07   1.297E-07   1.720E-07   2.771E-07   5.471E-07   1.083E-06
+     51       9.044E-07   7.058E-07   3.882E-07   2.275E-07   1.556E-07   1.270E-07   1.615E-07   2.430E-07   4.235E-07   7.599E-07
+     61       5.920E-07   4.944E-07   3.106E-07   2.039E-07   1.479E-07   1.237E-07   1.535E-07   2.168E-07   3.380E-07   5.213E-07
+     71       6.544E-07   5.275E-07   3.267E-07   2.088E-07   1.495E-07   1.244E-07   1.552E-07   2.219E-07   3.546E-07   5.552E-07
+     81       9.866E-07   7.610E-07   4.029E-07   2.319E-07   1.570E-07   1.276E-07   1.629E-07   2.502E-07   4.494E-07   8.169E-07
+     91       1.398E-06   1.067E-06   5.123E-07   2.597E-07   1.632E-07   1.302E-07   1.744E-07   2.832E-07   5.699E-07   1.155E-06
+    101       2.220E-06   1.398E-06   6.213E-07   2.853E-07   1.720E-07   1.331E-07   1.847E-07   3.136E-07   7.304E-07   1.512E-06
+    111       4.275E-06   1.840E-06   7.473E-07   3.039E-07   1.791E-07   1.360E-07   1.920E-07   3.453E-07   8.649E-07   2.185E-06
+    121       1.480E-05   2.285E-06   8.228E-07   3.212E-07   1.832E-07   1.377E-07   1.963E-07   3.637E-07   9.594E-07   2.859E-06
+fft22  inp=psf out=otf
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+fft22  inp=6100.soscut out=fftpix nl=128 ns=256
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+wiener inp=(fftpix,otf) out=fixfftpix sn=45.
+Beginning VICAR task wiener
+WIENER version Nov 1996
+fft22 inp=fixfftpix out=6100.scat mode=inverse format=half
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+INVERSE TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+copy 6200.spk 6200.soscut (280,320,128,256)
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+gllpsf filt=968 out=psf nl=128 ns=256
+Beginning VICAR task gllpsf
+GLLPSF version 8-MAR-96
+processing filter:  968
+Normalizing by total weight sum of =   1.20655
+list psf sinc=26 linc=10
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:21 2011
+     Samp             1          27          53          79         105         131         157         183         209         235
+   Line
+      1       3.329E-01   7.683E-06   1.178E-06   7.888E-07   4.678E-07   3.278E-07   4.951E-07   8.639E-07   1.400E-06   1.195E-05
+     11       6.488E-05   6.317E-06   1.170E-06   7.768E-07   4.645E-07   3.258E-07   4.917E-07   8.513E-07   1.294E-06   9.249E-06
+     21       1.537E-05   3.892E-06   1.146E-06   7.432E-07   4.548E-07   3.197E-07   4.816E-07   8.141E-07   1.178E-06   5.174E-06
+     31       5.037E-06   2.271E-06   1.109E-06   6.964E-07   4.389E-07   3.098E-07   4.651E-07   7.541E-07   1.139E-06   2.697E-06
+     41       2.220E-06   1.430E-06   1.014E-06   6.336E-07   4.171E-07   3.054E-07   4.425E-07   6.879E-07   1.067E-06   1.641E-06
+     51       1.195E-06   1.141E-06   8.989E-07   5.704E-07   3.900E-07   3.026E-07   4.145E-07   6.082E-07   9.508E-07   1.156E-06
+     61       1.110E-06   1.018E-06   7.625E-07   5.114E-07   3.582E-07   2.992E-07   3.816E-07   5.436E-07   8.106E-07   1.043E-06
+     71       1.127E-06   1.049E-06   7.907E-07   5.238E-07   3.648E-07   2.999E-07   3.886E-07   5.564E-07   8.398E-07   1.075E-06
+     81       1.400E-06   1.156E-06   9.246E-07   5.813E-07   3.958E-07   3.032E-07   4.205E-07   6.252E-07   9.752E-07   1.171E-06
+     91       2.561E-06   1.600E-06   1.035E-06   6.473E-07   4.219E-07   3.060E-07   4.475E-07   7.023E-07   1.089E-06   1.819E-06
+    101       6.232E-06   2.525E-06   1.118E-06   7.071E-07   4.425E-07   3.121E-07   4.689E-07   7.678E-07   1.148E-06   3.003E-06
+    111       1.878E-05   4.259E-06   1.152E-06   7.505E-07   4.573E-07   3.213E-07   4.842E-07   8.234E-07   1.184E-06   5.941E-06
+    121       1.024E-04   6.708E-06   1.173E-06   7.811E-07   4.657E-07   3.265E-07   4.929E-07   8.558E-07   1.332E-06   1.040E-05
+fft22  inp=psf out=otf
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+fft22  inp=6200.soscut out=fftpix nl=128 ns=256
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+wiener inp=(fftpix,otf) out=fixfftpix sn=45.
+Beginning VICAR task wiener
+WIENER version Nov 1996
+fft22  inp=fixfftpix out=6200.scat mode=inverse format=half
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+INVERSE TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+copy "/project/test_work/testdata/gll/"s0202556245.sos 6245.soscut (280,320,128,256)
+Beginning VICAR task copy
+ COPY VERSION 12-JUL-1993
+gllpsf filt=889 out=psf nl=128 ns=256
+Beginning VICAR task gllpsf
+GLLPSF version 8-MAR-96
+processing filter:  889
+Normalizing by total weight sum of =   1.09793
+list psf sinc=26 linc=10
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GLLPSF    User:lwk       Date_Time:Thu Mar 17 16:26:24 2011
+     Samp             1          27          53          79         105         131         157         183         209         235
+   Line
+      1       2.908E-01   4.034E-06   1.216E-06   4.090E-07   2.233E-07   1.670E-07   2.345E-07   4.766E-07   1.445E-06   5.816E-06
+     11       3.190E-05   3.431E-06   1.169E-06   3.982E-07   2.219E-07   1.662E-07   2.331E-07   4.652E-07   1.377E-06   4.707E-06
+     21       7.411E-06   2.645E-06   1.035E-06   3.708E-07   2.179E-07   1.640E-07   2.290E-07   4.317E-07   1.216E-06   3.052E-06
+     31       3.002E-06   1.998E-06   8.246E-07   3.451E-07   2.113E-07   1.604E-07   2.221E-07   3.778E-07   9.912E-07   2.233E-06
+     41       1.970E-06   1.464E-06   6.678E-07   3.106E-07   2.024E-07   1.574E-07   2.129E-07   3.405E-07   7.557E-07   1.599E-06
+     51       1.313E-06   1.003E-06   5.080E-07   2.759E-07   1.912E-07   1.543E-07   2.013E-07   2.967E-07   5.635E-07   1.088E-06
+     61       8.256E-07   6.738E-07   3.854E-07   2.435E-07   1.781E-07   1.505E-07   1.878E-07   2.612E-07   4.287E-07   7.156E-07
+     71       9.231E-07   7.253E-07   4.108E-07   2.503E-07   1.808E-07   1.513E-07   1.906E-07   2.682E-07   4.549E-07   7.684E-07
+     81       1.445E-06   1.089E-06   5.312E-07   2.819E-07   1.936E-07   1.549E-07   2.038E-07   3.060E-07   6.037E-07   1.177E-06
+     91       2.158E-06   1.573E-06   7.016E-07   3.181E-07   2.043E-07   1.580E-07   2.149E-07   3.483E-07   7.912E-07   1.713E-06
+    101       3.377E-06   2.138E-06   8.714E-07   3.510E-07   2.129E-07   1.612E-07   2.237E-07   3.901E-07   1.042E-06   2.382E-06
+    111       9.381E-06   2.791E-06   1.068E-06   3.748E-07   2.189E-07   1.646E-07   2.300E-07   4.401E-07   1.252E-06   3.297E-06
+    121       5.441E-05   3.676E-06   1.186E-06   4.021E-07   2.224E-07   1.665E-07   2.336E-07   4.693E-07   1.401E-06   5.061E-06
+fft22  inp=psf out=otf
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+fft22  inp=6245.soscut out=fftpix nl=128 ns=256
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+FORWARD TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+wiener inp=(fftpix,otf) out=fixfftpix sn=45.
+Beginning VICAR task wiener
+WIENER version Nov 1996
+fft22  inp=fixfftpix out=6245.scat mode=inverse format=half
+Beginning VICAR task fft22
+FFT22 version 1-JUL-94
+INVERSE TRANSFORM
+USING SCRATCH FILE: /tmp/fft2scrx.lwk
+TRANSFORM COMPLETED
+if ($syschar(1)="UNIX")
+  ush rm psf.img
+  ush rm otf.img
+  ush rm *soscut
+  ush rm psf
+  ush rm fftpix
+  ush rm otf
+  ush rm fixfftpix
+  ush rm *spk
+else
+end-if
+  write "The tester should diplay the input and the output from "
+The tester should diplay the input and the output from 
+  write "the Ida test as shown below."
+the Ida test as shown below.
+  write "use xwb0"
+use xwb0
+  write "vids"
+vids
+  write "jdisp /project/test_work/testdata/gll/s0202556100.sos"
+jdisp /project/test_work/testdata/gll/s0202556100.sos
+  write "jdisp 6100.scat"
+jdisp 6100.scat
+  write "jdisp /project/test_work/testdata/gll/s0202556200.sos"
+jdisp /project/test_work/testdata/gll/s0202556200.sos
+  write "jdisp 6200.scat"
+jdisp 6200.scat
+  write "jdisp /project/test_work/testdata/gll/s0202556245.sos"
+jdisp /project/test_work/testdata/gll/s0202556245.sos
+  write "jdisp 6245.scat"
+jdisp 6245.scat
+let $echo="no"
+exit
+slogoff

@@ -1,0 +1,116 @@
+process help=*
+PARM INP TYPE=STRING COUNT=2
+PARM OUT TYPE=STRING COUNT=1
+PARM TOL TYPE=REAL COUNT=(0:1) DEFAULT=20
+PARM GAIN1 TYPE=REAL COUNT=(0:1) DEFAULT=--
+PARM GAIN2 TYPE=REAL COUNT=(0:1) DEFAULT=--
+END-PROC
+
+.TITLE
+VICAR program REMRAY
+
+.HELP
+PURPOSE:
+Remray removes small artifacts such as cosmic ray or high energy charged 
+particle tracks from images. The artifacts are always assumed to be brighter 
+than the true image intensities.
+Remray can remove small clusters of pixels which Remnoise cannot handle.
+
+EXECUTION:
+median inp=image out=median nlw=5 nsw=5
+remray inp=(image,median) out=smooth tol=20
+
+METHOD:
+An input image has dn values of DN.
+A model for the background is taken from the median image.
+An activity measure is computed from the medians as the absolute value of
+a derivative filter whose kernel is
+-1 -1 -1
+-1  8 -1
+-1 -1 -1 
+If DN-median exceeds GAIN1*(the median) + GAIN2*(the activity)
+the pixel is reset to the median average over a 3 by 3 area..
+
+The algorithm is as follows for each pixel:
+1. Select a 3 by 3 window of DN(i,j).
+2. Subtract the median window MED(i,j)
+   HP(i,j)=DN(i,j)-MED(i,j)
+3. Compute an activity measure A from:
+the absolute value of a derivative filter whose kernel is
+-1 -1 -1
+-1  8 -1
+-1 -1 -1 
+6. If(HP(2,2) > GAIN1*MED(2,2) + GAIN2*A) then 
+    DN(2,2)= the 3 by 3 median average.
+   ( the (2,2) refers to the central pixel in the 3 by 3 window).
+
+If the GAIN1 and GAIN2 factors are defaulted they are computed from TOL. To do
+this remray computes histograms of the median intensity and the activity and
+selects the upper few percent values. Then..
+GAIN1=TOL/(max dn of medians)
+GAIN2=TOL/(max activity of medians).
+
+
+HISTORY:
+3-1-99  J Lorre. 
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+.LEVEL1
+.VARI INP
+1. Input image.
+2. Median image
+   nlw=nsw=3 or
+   nlw=nsw=5 or
+   whatever works. 
+
+.VARI OUT
+output image.
+
+.VARI TOL
+Tolerance threshold.
+
+.VARI GAIN1
+Intensity gain factor.
+(default is to compute
+it from TOL.)
+
+.VARI GAIN2
+Activity gain factor.
+(default is to compute
+it from TOL.)
+
+.LEVEL2
+.VARI INP
+1. Input image.
+2. Median image generated with a 3 by 3 or a 5 by 5 filter.
+   The filter size should exceed the artifact size by a factor of 2.
+
+.VARI OUT
+output image with artifacts removed.
+
+.VARI TOL
+Tolerance threshold. Defaults to 20.
+Used to automatically set the GAIN1 and GAIN2 keywords if they are not 
+specified.
+
+.VARI GAIN1
+Intensity gain factor. 
+Used to compute a threshold proportional to the local median.
+The default is to compute it from TOL and the maximum dn in the image:
+GAIN1=TOL/(max dn of medians)
+Pixels are changed if their median values exceed  a total 
+threshold composed of
+GAIN1*median + GAIN2*activity.
+
+.VARI GAIN2
+Activity gain factor.
+Used to compute a threshold proportional to the unevenness of the local scene.
+The default is to compute it from TOL and the maximum activity in the image:
+GAIN2=TOL/(max activity of medians).
+Activity is the absolute value of a derivative filter:
+-1 -1 -1
+-1  8 -1
+-1 -1 -1
+Pixels are changed if their median values exceed  a total 
+threshold composed of
+GAIN1*median + GAIN2*activity.

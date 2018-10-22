@@ -1,0 +1,30 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM username
+
+   To Create the build file give the command:
+
+	$ vimake username                     (VMS)
+   or
+	% vimake username                     (Unix)
+
+
+*************************************************************************/
+
+#if VMS_OS
+#define PROGRAM username_vms
+#define MODULE_LIST username_vms.c 
+#define CLEAN_OTHER_LIST username_unix.c
+#else
+#define PROGRAM username_unix
+#define MODULE_LIST username_unix.c
+#define CLEAN_OTHER_LIST username_vms.c
+#endif
+
+#define MAIN_LANG_C
+#define USES_C
+
+#define R2LIB
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB

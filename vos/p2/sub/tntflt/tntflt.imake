@@ -1,0 +1,10 @@
+/* Imake file for VICAR subroutine tntflt */
+
+#define SUBROUTINE tntflt
+
+#define MODULE_LIST tntflt.f
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN
+#define FTNINC_LIST fortport

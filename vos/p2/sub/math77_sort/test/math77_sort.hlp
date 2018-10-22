@@ -1,0 +1,71 @@
+1 math77_sort
+
+  MATH77_SORT consists of C bridges to the FORTRAN sort routines contained in
+  the MATH77 library:
+
+	FORTRAN routine			C bridge
+
+	ISORT(BUF,M,N)			zisort(buf,m,n);
+        SSORT(SBUF,M,N)		        zssort(sbuf,m,n);
+	DSORT(DBUF,M,N)			zdsort(dbuf,m,n);
+
+	ISORTP(BUF,M,N,PTR)		zisortp(buf,m,n,ptr);
+	SSORTP(SBUF,M,N,PTR)		zssortp(sbuf,m,n,ptr);
+	DSORTP(DBUF,M,N,PTR)		zdsortp(dbuf,m,n,ptr);
+
+  The MATH77 routines sort array elements M thru N in ascending order.  The
+  MATH77 library also includes routines CSORT and CSORTP for sorting character
+  strings, but the C bridges for these are not included here.
+
+  You must include the following in your imake file if you use any of the
+  MATH77 routines:
+
+	#define LIB_MATH77 
+
+
+2 Calling MATH77 Sort Routines From FORTRAN:
+
+	INTEGER*4 BUF(K)
+	REAL*4 SBUF(K)
+	REAL*8 DBUF(K)
+
+	CALL ISORT(BUF,M,N)		CALL ISORTP(BUF,M,N,PTR)
+        CALL SSORT(SBUF,M,N)		CALL SSORTP(SBUF,M,N,PTR)
+	CALL DSORT(DBUF,M,N)		CALL DSORTP(DBUF,M,N,PTR)
+
+  For ISORTP, etc., the first argument is left unaltered and the sorted
+  ordering is returned in the PTR array.  To sort the array, an additional
+  step is required:
+
+        CALL ISORTP(BUF,1,N,PTR)
+        DO I=1,N
+           BUF2[I] = BUF(PTR(I));
+        ENDDO
+
+
+2 Calling MATH77 Sort Routines From C:
+
+	int buf[k],ptr[k];
+	short hbuf[k],hptr[k];
+	float sbuf[k];
+	double dbuf[k];
+
+	zisort(buf,m,n);	zisortp(buf,m,n,ptr);
+        zssort(sbuf,m,n);	zssortp(sbuf,m,n,ptr);
+	zdsort(dbuf,m,n);	zdsortp(dbuf,m,n,ptr);
+
+  To sort an array when using routine zisortp, zssortp, or zdsortp, an
+  additional step is required:
+
+        zisortp(buf,1,n,ptr);
+        for (i=0; i<n; i++) buf2[i]=buf[ptr[i]-1];
+
+
+2 HISTORY
+
+Written by: Gary Yagi, May 4, 2001
+Current Cognizant Programmer: Gary Yagi
+Source Language: C
+Revision history:
+
+04 May 01  GMY  Initial release

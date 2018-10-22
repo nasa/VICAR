@@ -1,0 +1,801 @@
+process help=*
+ 
+PARM INP      TYPE=STRING  COUNT=(0:1)                DEFAULT=--
+PARM OUT      TYPE=STRING  COUNT=(0:1)                DEFAULT=--
+PARM SIZE     TYPE=INTEGER COUNT=(0:4)                DEFAULT=(1,1,0,0)
+PARM TABLE    TYPE=STRING  COUNT=(0:1)                DEFAULT=--
+PARM COLUMNS  TYPE=KEYWORD COUNT=(0:1) VALID=(COLHDR,NOCOLHDR) DEFAULT=COLHDR
+PARM PLOTOUT  TYPE=STRING  COUNT=(0:1)                DEFAULT="none"
+PARM PLOTPROF TYPE=STRING  COUNT=(0:1)                DEFAULT="none"
+PARM PLOTFMT  TYPE=STRING  COUNT=(0:1) VALID=(GNUPLOT,EPS)   DEFAULT="GNUPLOT"
+PARM PROFTAB  TYPE=STRING  COUNT=(0:1)                DEFAULT="none"
+PARM SINCTST  TYPE=KEYWORD COUNT=(0:1) VALID=SINCTST  DEFAULT=--
+PARM NOISE    TYPE=INTEGER COUNT=(0:1)                DEFAULT=3
+PARM REFLECT  TYPE=KEYWORD COUNT=(0:1) VALID=REFLECT  DEFAULT=--
+PARM MEAN     TYPE=KEYWORD COUNT=(0:1) VALID=MEAN     DEFAULT=--
+PARM NONORMAL TYPE=KEYWORD COUNT=(0:1) VALID=NONORMAL DEFAULT=--
+PARM INTERVAL TYPE=REAL    COUNT=(0:1) VALID=(0:9999.99)  DEFAULT=1.0
+PARM ESF      TYPE=REAL    COUNT=(0:512)              DEFAULT=--
+PARM LSF      TYPE=REAL    COUNT=(0:512)              DEFAULT=--
+PARM PZOOM    TYPE=REAL    COUNT=(0:1) VALID=(0:9999.99)  DEFAULT=--
+PARM PHASE    TYPE=KEYWORD COUNT=(0:1) VALID=(PHASE,NOPHASE) DEFAULT=PHASE
+PARM NOPRINT  TYPE=KEYWORD COUNT=(0:1) VALID=NOPRINT  DEFAULT=--
+PARM DIAG     TYPE=KEYWORD COUNT=(0:1) VALID=DIAG     DEFAULT=--
+
+PARM NORANGLE TYPE=REAL    COUNT=(0:1)                DEFAULT=0.0
+PARM GSD      TYPE=REAL    COUNT=(0:1)                  DEFAULT=0.0
+PARM ALTITUDE TYPE=REAL    COUNT=(0:1)                  DEFAULT=0.0
+local dummy   TYPE=REAL    COUNT=(0:1)
+local idum    TYPE=INTEGER COUNT=(0:1)
+local strdum  TYPE=STRING  COUNT=(0:1)
+PARM PSFRAD   TYPE=NAME    DEFAULT=dummy
+PARM PSFDEG   TYPE=NAME    DEFAULT=dummy
+PARM PIXRAD   TYPE=NAME    DEFAULT=dummy
+PARM PIXDEG   TYPE=NAME    DEFAULT=dummy
+PARM PSFPIX   TYPE=NAME    DEFAULT=idum
+PARM PSFFORM  TYPE=NAME    DEFAULT=strdum
+PARM LSFMIN   TYPE=NAME    DEFAULT=idum
+PARM LSFMAX   TYPE=NAME    DEFAULT=idum
+!PARM NODISP   TYPE=KEYWORD COUNT=(0:1) VALID=NODISP   DEFAULT=--
+END-PROC
+.TITLE
+VICAR program OTF1
+   
+   Input an Edge Spread Function, Line Spread Function (or
+   one direction of a Point Spread Function) to obtain the 
+   Optical Transfer Function (amplitude and phase) of an
+   optical system.
+.HELP
+ 
+PURPOSE:
+ 
+   OTF1 is a VICAR applications program which performs one-dimensional
+Fast Fourier Transformations in order to compute Optical Transfer
+Functions (OTF) from degraded edges in images or from either a tabulated
+real function, or a line spread function using parameter inputs. 
+
+OTF1 is able to compute the entire optical transfer function (not just 
+the MTF) from digital images with greater accuracy and ease than other
+methods available. This technique for computing imaging system MTF's is 
+preferable to previously used techniques which involved imaging of sine
+wave targets.
+.page
+OPERATION - INPUTS
+
+There are three methods to input data to otf1 and one other internal
+test call which requires no input data.
+
+   The first way to input data is an image containing an edge spread
+function. That data may have been derived from mathematical considerations
+or maybe excised from a test target, shaded buildings, or planet limbs. 
+All that is required is an image (INP) containing shapes such as (1) and (2).
+
+
+
+          xxx                                      xxx
+             x                                    x
+              x                                  x
+               x                                x
+                x                              x
+                 x                            x
+                  xxxx                    xxxx
+             (1)                                (2)
+ 
+
+   The second method is to put in one line of DNs from an edge spread function
+derived from data or mathematical considerations. In that case, You enter
+data into the ESF parameter. You may enter the data in either of the (1) or
+(2) forms. You may enter up to 512 values. (If you have the patience).
+
+   In the third method you can enter one line of DNs of a line spread function. 
+In that case, you enter the DN values into the LSF parameter. Again you may
+enter up to 512 values. The entries are in floating point format although
+they are processed to produce integer values.
+
+   Finally, there is an internal self-test which requires no input, but is
+invoked with the SINCTST keyword parameter. SINCTST creates a SINC function 
+and branches to the LSF processor.
+
+  Only one type of input is allowed. If you were to enter multiple inputs
+then the program would execute only one of them in the order SINCTST, ESF, 
+LSF and INP.
+.page
+OPERATION - OUTPUTS
+
+   After processing, the program provides output of the Fourier Transform
+in terms of frequency, amplitude and phase or frequency, real part of FFT
+and imaginary part of FFT. If the user inputs the PHASE=NOPHASE
+parameter you can omit the phase although internally it still computes it.
+Recall, that the amplitude of the FFT is known as the modulation transfer 
+function (MTF).
+
+   The OUTPUTS of the final product can be produced in 3 forms. The first
+is specified by the OUT parameter which is a vicar image consisting of
+3 lines 124 samples long. The image is in REAL format. The first line
+of the image is the frequency (cycles/pixel), the second line is the
+the real part of the FFT and the third line is the imaginary part of
+the FFT. The phase line is always included even if PHASE=NOPHASE was 
+specified.
+
+    The second type output is the TABLE parameter. This table is the
+Modulation Transfer Function and consists of either two or three
+ascii columns. When it is 3 columns it gives:
+
+        Col 1 FREQUENCY        Col 2  AMPLITUDE        Col 3  PHASE
+
+When it is two columns it is
+
+        Col 1 FREQUENCY        Col 2  AMPLITUDE
+
+Column 3 is not given when the PHASE=NOPHASE is specified. One other
+parameter controls whether a column heading is created. That parameter i
+is COLUMNS=(COLHDR,NOCOLHDR). By default the header
+("# FREQUENCY  AMPLITUDE   PHASE") is written as the first
+record of the table. When you choose COLUMNS=NOCOLHDR it is not. Note
+the leading # character allows certain plotting programs to ignore
+suxch entries.
+
+   Note that these products are only 124 data points long. Internally, the
+ESF and PSF data are resampled  to 256 steps from whatever sample size is 
+given in the input. Thus, 16 pixels, or whatever, will be expanded to 256.
+However, due sampling theory the fourier transform is truncated at
+spatial frequencies above 0.484 cycles per sample. This gives a symmeterical
+FFT of 247 samples out of 256. What is given in the OUT, TABLE, PLOTOUT
+is only the right (124 steps) half of the Fourier transform (if viewed 
+as having the DC at the center). To get the output translated to the way we
+are used to seeing it, you need to reflect the image or table about the
+center point to get the full 247 sample spectrum from 1.0 cycles/sample 
+to 0.484 cycles/sample in separate Vicar steps.
+
+   See PLOTOUT discussion below
+
+    The other types of output come from the PLOTOUT and PLOTPROF parameters.
+PLOTOUT displays the data in the OUT or TABLE files on an x,y plot using
+the gnuplot package. PLOTOUT produces a file of gnuplot commands as shown
+with a .gpi file extension.  It also produces a file with the .gpi.dat
+extension. This is the data used for the plot using command in the gpi file.
+It happens to be same data as in the TABLE parameter (without the column 
+headers), but since it can't be guaranteed that the user will create a
+table, it creates its own.   
+
+   The PLOTPROF parameter allows the user to display intermediate product
+in the processing steps from ESF to the fourier transform in pixel space,
+i.e., in the size of the ESF or LSF input pixels, not in the resampled 
+256 step mode.
+
+.page
+OPERATION - INTERNALS
+
+    In short, what is done is to convert
+
+  edge spread function --> line spread function --> Modulation Transfer Function
+                  by differentiation          by  FFT
+
+
+    The edge spread function can be defined as the integral of one dimensional
+pointspread functions. That is
+
+                ESF(x) = Integral of (LSF(x) dx)
+
+                        d
+                LSF(x)  -- [ESF(x)]
+                        dx
+
+  See: http://calval.cr.usgs.gov/JACIE_files/JACIE04/files/1Helde10.pdf for
+  the Quickbird Satellite.
+
+    Internally, the program takes in an ESF or LSF and increases it in size 
+to 256 samples. Thus, any ESF of small sample size will be resampled up to 256.
+In this way, the output LSF (unidirectional PS) which may be either in the
+line or sample direction in the original image can be combined with another
+LSF in the orthogal direction to give a 2-D PSF.
+
+The 2-D fft can be created from this and then convolved with a 256x256 image.
+This represents the optical system blurring. Here convolution is multipling 
+the 2 FFT's together.
+ 
+   To aid in the preparation of filter weights for MTF enhancement, a provision
+has been added to output the Real and Imaginary Fourier Transform components.
+The output is 3 lines of 124 samples of Real*4 numbers organized as 
+Line 1 [Frequency] 
+Line 2 [Real Part of FFT],
+Line 3 [Imaginary Part of FFT]
+
+from 1.0 cycles/sample to 0.484 cycles/sample.
+The output does not extend beyond 0.484 cycles/sample due to
+limitations of the Sampling Theorem used for LSF resampling (see last para-
+graph of Method below).
+
+
+.page
+ EXECUTION:
+ 
+   OTF1 INP  OUT  PLOTOUT  PARAMS
+ 
+ where: INP is an optional input image. 
+ 
+        OUT is an optional output file with fourier transform data.
+ 
+        PLOTOUT is an optional plot of the output in gnuplot instructions (gpi).
+ 
+        PARMS are optional parameters, which are described below and
+             under Tutor.
+.page
+METHOD:
+ 
+   The data are normally in an input image and are processed line by line.
+Each line is left adjusted into an array of dimension equal to the smallest
+power of two which contain an entire input line. The data is then different-
+iated to produce a Line Spread Function (LSF). For direct input of a Line
+Spread Function, the parameters LSF is followed by the LSF values (Real*4).
+Processing will commence with the LSF ready for fillin to the nearest power
+of two using the MEAN, REFLECT, or FILLIN parameters. For direct input of
+a theortical "real" edge or mathematical function, the parameter ESF is
+followed by a string of values (Real*4) and will be processed as thought it
+was a real one-line image input. SINCTST will cause a SINC function to be
+formed and processed as though it were the LSF of an edge.
+ 
+  The Maximum point in the LSF is located and the LSF truncated to 30 points
+on either side of the LSF Maximum. If there are less than 30 points to either
+side the option exists to fill in extra points by replecating the LSF mean,
+by reflection, or with zeros. This LSF is then left justified and the Sampling
+Theorem applied to produce a 256 point power spectrum. In addition the
+resampled LSF is folded about the maximum, with points from the maximum to the
+upper end placed from i=1 to the midpoint, and points from the maximum to the
+lower end placed from near the midpoint to 1=256. This array is then in the
+proper form upon which the subroutine FFTT can be used to perform an inverse
+transform. The real and imaginary components of the transform for each line
+are accumulated element by element, and these operations continued until all
+the image lines have been processed. From the accumulated real and imaginary
+transform components the following are computed and printed.
+.page
+   Given a complex FT element "a+ib" the output will consist of:
+ 
+(1) The spatial frequency in cycles/pixel.
+(2) The actual frequency in cycles/unit of time (INTERVAL).
+(3) a=Real part of FT.
+(4) b=Imaginary part of FT.
+(5) SQRT(a**2+b**2)=The amplitude of the FT. This is also the MTF if the
+    input data is an LSF.
+(6) (a**2+b**2)=The power spectrum or intensity of the FT.
+(7) The Normalized amplitude of the MTF which will be plotted.
+(8) ACRTAN(b/a)=The phase angle Omega of the FT measured in radians
+    which will also be plotted
+(9) W=Omega/2*pi*F=The displacement in the same units as INTERVAL
+    (the default of which is samples) of each sine wave component in
+    the image from its true position in the object being imaged. F is
+    in units of 1/INTERVAL. This quantity is meaningful if the input
+    data is an LSF and if OTF has been specified.
+.page
+If PLOTOUT was specified the Normalized MTF Amplitude and Phase are processed
+into an output file containing gnuplot instructions (gpi).
+In this case the terminal screen plot is disabled.
+ 
+The default is to generate a display of the pertinent on the terminal screen
+components of the OTF in a crude but rapidly analyzable format. Each
+curve's data points are represented by a letter with the following code:
+ 
+   A   Amplitude of the FT
+   R   Real portion of the FT
+   I   Imaginary portion of the FT
+   W   Wavelength shift of the FT.
+.page
+The FT is computed from
+ 
+           N-1
+    FT =SUM    [DATA *Exp(-2*PI*inm/N)]                   (1)
+           n=0      n
+ 
+where N is the data string length and  0<m<(N-1).
+ 
+   The OTF section of the program is designed to generate an LSF positioned
+in such a way as to eliminate both the effects of sampling and the bias
+introduced into the phase OMEGA due to the arbitrary positioning of the LSF
+data in the input array. Users of FFTT have been forced to obtain clean
+OTF's by using symmetrical LSF's positoned half at the beginning of the
+data string and half at the end. This was inconvenient and impossible if
+the LSF was asymmetrical. In the latter event all they could do was settle
+for the MTF, never knowing what the OTF was like. In a situation where the
+OTF has gone negative, the MTF is dangerous to use as a restoration function
+because it will boost the negative amplitudes the wrong way. The OTF allows
+the user to visualize the scrambling of spatial frequencies which occur when
+the LSF is asymmetrical, and also to see the sign of the OTF (given by the
+real part of the FT).
+ 
+   There are two problems associated with generating unbiased OTF's. They
+can be solved simultaneously by use of the Sampling Theorem. If the LSF is
+computed from a degraded edge composed of digital data, it is clear that
+(particularly for narrow LSF's) the position of the sampled points is going
+to influence the symmetry of the LSF. Clearly, trying to dissect several
+LSF's into two halves (each different) and store them at opposite ends of
+the data string before the FT operation, is going to produce different OTF's
+each time. Because the data is band limited, at least at the Nyquist Frequency,
+the MTF's generated in the above case will all be about the same. The problem
+is to eliminate the effects of sampling. The Sampling Theorem is used by OTF1
+to resample the acquired LSF about its center of weight. At this point, if the
+LSF is asymmetrical, the effect is real.
+.page
+   In computing the weight center of the LSF a first moments algorithm is
+used:
+ 
+              n=N                  n=N
+    CENTER=SUM   [(n-1)*DATA ]/ SUM   [DATA ]               (2)
+              n=1           n      n=1     n
+ 
+The Data are then resampled about the CENTER position using
+ 
+            n=+INF
+    INT =SUM      [DATA *((SIN(x-n)*PI)/((x-n)*PI))]          (3)
+       x    n=-INF     n
+ 
+where x is some integer distance away from CENTER. The data can then be
+split about the located center and positioned properly in the array to be
+transformed.
+ 
+   The use of many LSF's to produce one OTF is done by averaging the
+transform components. Averaging MTF's (if that's what you want) can be
+erroneous because even OTF's, which are in reality positive, can be
+caused to go negative if one of the LSF's is afflicted with noise. Since
+the MTF is the modulus of the OTF, the MTF is always positive. Great care
+should be taken in inspecting the LSF's computed from pictures before the
+resampling step to be sure they look decent. Averaged runs of 50 or more
+LSF's should yield OTF's which are accurate to within a few percent. This
+is an order of magnitude better than the sine wave methods used in the past.
+ 
+   Because the Sampling Theorem summation limits must be finite (in this
+case +/- 128) the theorem is blind to the spatial frequencies above 0.484
+cycles per sample. The OTF values above this frequency are best obtained
+by extrapolating from values below 0.484 to the Nyquest limit.
+.page
+OUTPUTS
+
+OUT      =  An image of the special format. It is a REAL vicar image of 3
+            lines each 124 samples long; line 1 is frequency, Line 2
+            is amplitude (normalized or unnormalized depending on
+            the NONORMAL parameter), Line 3 is the phase.
+PLOTOUT  =  A plot of 1-D FFT amplitude and phase (256 points) 
+
+PLOTPROF =  A plot of the profiles of ESF, LSF and FFT in pixel space
+
+TABLE    =  An ascii table of half of FFT of 2 or 3 columns. When 3 columns it gives
+            Col 1 FREQUENCY        Col 2  AMPLITUDE        Col 3  PHASE
+
+PROFTAB   =  An ascii table of the PROF in pixel space
+
+
+
+
+.page
+ PARAMETERS
+     INP        Optional - Input is an image containing an object with an 
+                edge spread profile      
+     OUT        Optional - A vicar image of special format of the 
+                Frequency, Amplitude and Phase 
+     SIZE       Optional - Extract out of the image an area containing 
+                an edge spread profile. Only when INP is specified.
+                It is the usual vicar size parameter, SL, SS, NL, and NS.
+     TABLE      Output an ASCII table of the data in the in plotout,
+                Frequency
+     PROFTAB    Output an ascii table containing the profiles of LSF, ESF 
+                and Fourier Transform in pixel space 
+     COLUMNS    Add or omit column headers on the output TABLE
+     DIAG       Optional - Printout internal diagnostic data - Mostly is
+                used for debugging. Also used for especially noisy images.
+     SINCTST    Optional - Perform an internal test utilizing the sinc 
+                function. Ignores INP, LSF or ESF
+     NOISE      Allowable noise level in LSF for finding end points, in 
+                units of sigma. Default is 3 sigma 
+     PLOTOUT    Output a file containing gnuplot instructions to display,
+                the otf in normalize amplitude [0,1} vs. cycles/pixel 
+     PLOTPROF   Output a file containing the intermediate results on the
+                data entered either in INP,ESF or LSF
+     REFLECT    When padding data internally to compute the FFT
+     MEAN       Fill in by replecating mean LSF
+     NONORMAL   Do not normalize (scale DNs from 0 to 1.0) in the LSF, 
+                i.e., Keep the LSF in DN values.
+     NOPRINT    Do not print out the data on the screen which is sent to the
+                OUT file.
+     INTERVAL   Value < 1.0. The amount of reduction in the size of the 
+                cycles/pixel to display on the x-axis. 0.5 means one-half.
+     ESF        Input one line of edge spread data. Up to 256 samples.
+                Ignores INP, SINCTST, and LSF.
+     LSF        Input one line of line spread data. Up to 256 samples.
+                Ignores INP, SINCTST and ESF.
+     PZOOM      Phase Zoom -  Zoom the vertical axis of the phase part of the
+                plot by this factor
+     PHASE      Omit the display of phase on the PLOTOUT or OUT file.
+     NORANGLE   Angle from north, in degrees - eastward rotation is postive, 
+                westward is negative.
+                This is an angle with respect to image coordinates. Not earth 
+                coordinates. This program does not access geotiff information.
+
+  The following two inputs are required in order to obtain values for the 
+                output TCL variables:
+     GSD        Input a ground sample distance, in meters, for computing the 
+                LSF in radians and degrees,
+     ALTITUDE   Input the altitude of the spacecraft in meters.
+
+    The following output TCL variables require entries in ALTITUDE and GSD.
+     PSFRAD     Output the psf in radians along the angle specified in NORANGLE
+     PSFDEG     Output the psf in degrees along the angle specified in NORANGLE
+     PIXRAD     Output the pixel size in radians 
+     PIXDEG     Output the pixel size in degrees
+     PSFPIX     Size of the lsf (psf) in pixels.
+     LSFFORM    LSF NORMAL or NONORMAL, normalized or not normalized
+     LSFMAX     LSF max value in pixel space
+     LSFMIN     LSF min value in pixel space           
+
+.page
+.PAGE
+PLOT OUTPUTS
+
+    The other types of output come from the PLOTOUT and PLOTPROF parameters.
+PLOTOUT displays the data in the OUT or TABLE files on an x,y plot using
+the gnuplot package. PLOTOUT produces a file of gnuplot commands as shown
+with a .gpi file extension.  Another file with an .asc extension is createid
+containing columns of data that are displayed by the gpi file.
+It happens to be same data as in the TABLE parameter (without the column
+headers), but since it can't be guaranteed that the user will create a
+table, it creates its own.
+
+   The PLOTPROF parameter allows the user to display intermediate product
+in the processing steps from ESF to the fourier transform in pixel space,
+i.e., in the size of the ESF or LSF input pixels, not in the resampled
+256 step mode.
+
+   The PLOTFMT parameter allows the user to generate a postscript file of
+the output for use in documentation by choosing PLOTFMT=EPS. The default
+is to generate a gnuplot interactive display.
+
+.PAGE
+
+  PLOT NAMING CONVENTIONS
+
+  The user should enter only the parent file name without an extension
+  for the PLOTOUT parameter.  The program will supply the extensions.
+
+  For example, if the user has an input file of indata.dat and  PLOTOUT=outplot
+  then for the interactive plot the following files are produced:
+
+     outplot.gpi
+     outplot.asc
+
+  The first file is the gnuplot instruction file and the second is the
+  data file used by gnuplot.
+
+  If the user wanted an encapsulate postscript file with PLOTFMT=eps
+  then the following files are produced:
+
+     outplot.eps.gpi
+     outplot.asc
+
+  Remember entering the following command gives the eps file, outplot.eps
+  ush gnuplot outplot.eps.gpi
+
+  If you move the gpi file to another directory, you must also move the
+  input data file, indata.dat.asc to the same directory.
+
+  Note that the gpi file produced by this program has the name of the
+  input file embedded in the plot command inside the gpi file, e.g..
+
+  plot  'outplot.asc' u  1: 9 t .......
+
+.PAGE
+USING GNUPLOT
+
+
+  INTERACTIVE:
+
+    This program uses the gnuplot package for its plots. Gnuplot is a
+  separate package from Vicar and is not actually invoked inside this
+  program.  Instead this program creates a template of gnuplot commands
+  which are written out as a separate file. The plot is then viewed after
+  exiting this program. The file has the extension .gpi. You view
+  the plot by issuing the following command in the vicar shell.
+
+  ush gnuplot output.gpi
+
+  or external to vicar as
+
+  gnuplot output.gpi
+
+    After viewing the data, you close the plot by clicking the mouse anywhere
+  except on the top bar of the plot. Clicking on the top bar allows you
+  to move the plot to any convenient place on the terminal screen.  (While
+  the plot is displayed you cannot enter any commands to the vicar shell).
+
+  The data to be plotted by gnuplot is read from a separate file, created
+  by this program, which contains columns of data in ascii text.
+  File naming conventions are discussed in the OUTPUT section, but in this
+  case that file extension will be .asc.
+
+  It is possible to keep the plot alive for comparison purposes by issuing
+  the following command.
+
+  ush gnuplot --persist output.gpi
+  (You will be able to enter commamds to the vicar shell after clicking on
+  the mouse on the plot).
+
+  Note: This program creates multiple output plots per run. You bring up each plot
+  panel sequentially. You close each plot by clicking the mouse on any
+  portion of the plot.
+
+  HARDCOPY:
+
+  This program also allows you to create a hardcopy encapsulated postscript
+  plot suitable for publications. This file can be viewed with ghostscript
+  or gimp. The encapsulated postscript file is not created by this program
+  by by the gnuplot program from a gpi file made especially for this purpose.
+  this file has the extension, eps.gpi. You create the hardcopy plot via
+  the following command
+
+  ush gnuplot output.eps.gpi
+
+  This creates the eps file output.eps. You can view this file by
+
+  ush gimp output.eps
+
+.PAGE
+    DEVELOPER Note:
+
+    This program used to link to the XRT plot library -lxrt. Calls to
+  that library were mitigated through a Calcomp conversion library,
+  xrtps located in the p2 subroutine library. With the conversion to
+  gnuplot, neither of these packages are used.
+
+
+
+.page
+ RESTRICTIONS:
+ 
+  1. Input picture record size <= 2048 samples.
+ 
+  2. LSF or DATA input elements <= 256.
+
+  3. BYTE and HALF images and values only
+.page
+ PROGRAM HISTORY:
+
+  1974-05-16 J. LORRE   - ORIGINAL RELEASE.
+  1975-03-10 J. LORRE   - RE-RELEASE.
+  1975-06-27 D. HASS    - CONVERSION TO 360/OS.
+  1982-12-10 E. KORSMO  - PRINTRONIX PLOT PACKAGE ADDED.
+  1983-02-02 E. KORMSO  - REVISION TO PRINTRONIX PLOTING.
+  1984-11-06 M. MORRILL - CONVERTED TO VAX-VICAR*2.
+  1984-12-06 M. MORRILL - CODE MODIFIED TO CONFORM TO THEORY FROM
+                          R.NATHAN AND TO REMOVE FILTER OPERATIONS.
+  1985-04-17 M. MORRILL - MINOR FIXES TO ADD QUANTITAVE ESTIMATE OF
+                          OTF CURVE.
+  1985-04-30 M. MORRILL - SAMPLING THEOREM "BUGS"
+  1985-05-02 M. MORRILL - REMOVE VAX/FFT FACTOR OF 2 & CLEAN UP
+                          NORMALIZATIONS
+  1985-05-06 M. MORRILL - ADD OUTPUT FOR F.T. COMP.
+  1985-11-15 F. MOSS    - 1.modify the plot for phase angle (the axis
+                          range from -1 to 1 instead of from -3 to 3) 
+                          2.add a new param "PZOOM" so the user can 
+                          either zoom up (PZOOM >1.) or zoom down 
+                          (PZOOM <1.) the phase angle
+  1987-05-07 F. MOSS    - 1.modify the code to handle size field
+                          correctly 2.modify output's XVOPEN and 
+                          XVWRIT calling parameters 3.put "NONORMAL" 
+                          keyword in the source if the input is a line 
+                          spread function
+  1988-08-11 F. MOSS    - 1.Add warning message for the line without
+                          edge. 2.Fourier Transform will not apply to 
+                          the line without edge. 3.Print out the total 
+                          number of lines processed. 4.Fix the bug to 
+                          avoid calling XVWRIT if there is no output 
+                          required. (FR 35605)
+           ? J. Lorre   - Scaling of phase plots.
+  1994-02-23 C. Avis    - 1.Add tabular output, property label support,
+                          2.Improved test and help files.
+  1995-06-27 C. AVIS    - Modified test file to use perfect ramp case
+  1995-06-28 C. AVIS    - Added header to ASCII table output
+  1995-09-28 C. AVIS    - Added option for no Phase to table
+  1997-08-05 T. Huang   - Ported from VAX/VMS to UNIX and ALPHA/VMS. 
+                          Combined the changes made by C. Avis with 
+                          the existing MIPS version of OTF1. Fixed 
+                          problems caused by subroutine FFTT, by reducing
+                          the precision in calculation with imaginary 
+                          part of a complex number for PHASE. (REF: fr90520)
+  2010-02-09 L. Kamp    - Bug fixes in code.  Added text to help file to
+                          make it clear that 'NODISP is required to save 
+                          plots and updated Test proc accordingly. Removed 
+                          Cassini test from proc since the file is missing; 
+                          added some other tests of NOISE parameter.
+  2012-10-30 R. Bambery - Rewritten to use gnuplot instead of the
+                          XRT. Graphics package. Removed NODISP parameter.
+  2012-11-16 R. Bambery - Add parameters PLOTPSF, PLOTFMT, PSFTAB,
+                          NORANGLE, GSD, ALTITUDE. Changed PLOT to PLOTOUT 
+                          DATA to ESF.
+  2012-12-10 R. Bambery - Remodularization of internals
+  2013-01-01 R. Bambery - Documentation changes
+  2013-01-02 R. Bambery - Fixed problems in do_psfplot and logic of main44
+  2013-02-13 R. Bambery - Updated documentation
+  2013-07-12 R. Bambery - Make naming conventions consistent. Separate
+                          TABLE data from plot ascii table
+  2013-07-13 R. Bambery - Adjusted eps format to more readable
+                          fonts. Remove vestiges of debug statements
+  2015-08-10 W. Bunch   - replaced xqout call with xvqout call to pass
+                          out vars to shell vicar
+ 
+CURRENT COGNIZANT PROGRAMMER:  Ray Bambery
+ 
+.LEVEL1
+.VARIABLE INP
+ An input image.
+.VARIABLE OUT
+ Output of Real and
+ Imaginary Fourier
+ Transform components.
+.VARIABLE SIZE
+ INTEGER-OPTIONAL
+ SL,SS,NL,NS
+.VARIABLE ESF
+ REAL-OPTIONAL
+ Real numbers of which the FT
+ will be taken.
+.VARIABLE LSF
+ REAL-OPTIONAL
+ Up to 256 elements from which
+ the OTF will be determined.
+.VARIABLE TABLE
+ STRING-OPTIONAL
+ File to receive tabular output.
+ In ASCII, not IBIS.
+.VARIABLE COLUMNS
+ keyword - OPTIONAL
+ Specifies whether to write
+ column headers in the
+ ASCII TABLE.
+.VARIABLE PROFTAB
+ STRING-OPTIONAL
+ Output an ascii table 
+containing the profiles
+of ESF, LSF and FFT
+.VARIABLE PLOTOUT
+ STRING-OPTIONAL
+ Turns on PLOT of Amplitude
+ and phase.
+.VARIABLE PLOTPROF
+ STRING-OPTIONAL
+ Turns on PLOT of ESF
+ and LSF of intermediate
+ products.
+.VARIABLE PLOTFMT
+ STRING-OPTIONAL
+ Plot data with Gnuplot
+ or in EPS format. For both
+ PLOTOUT and PLOTPROF.
+.VARIABLE DIAG
+ KEYWORD-OPTIONAL
+ diaganostic printout.
+.VARIABLE SINCTST
+ KEYWORD-OPTIONAL
+ Creates SINC function
+ and branches to LSF processing.
+.VARIABLE NOISE
+ INTEGER-OPTIONAL
+ Allowable noise level in LSF.
+.VARIABLE REFLECT
+ KEYWORD-OPTIONAL
+ Reflects data about last
+ input point.
+.VARIABLE MEAN
+ KEYWORD-OPTIONAL
+ Causes missing data to be set
+ to mean of input data.
+.VARIABLE NONORMAL
+ KEYWORD-OPTIONAL
+ Do not normalize LSF.
+.VARIABLE NOPRINT
+ KEYWORD-OPTIONAL
+ Do not print full tabular
+ output.
+.VARIABLE INTERVAL
+ REAL-OPTIONAL
+ interval between
+ data points.
+.VARIABLE PZOOM
+ REAL-OPTIONAL
+ Scaling factor for phase
+ in plots.
+.VARIABLE PHASE
+ keyword - optional
+ Specifies whether to print
+ the Phase to the Ascii table
+ or on plot.
+ or not.
+ 
+.LEVEL2
+.VARIABLE INP
+ An input image  which the user wishes to Fourier Transform.
+ The FT will be taken of each line and the components then averaged.
+ Restriction on input record length is that it not exceed 2048 samples.
+ 
+ If no input image is specified, data may be specified through the
+ ESF  or LSF parameters.  If no data are specified, OFT1 will run an
+ internal sinc-function test case.
+.VARIABLE OUT
+ Optional output of Real and Imaginary Fourier Transform components.
+ Output is 124 triplets of Real*4 numbers organized as:
+   [Frequency,Real,Imaginary],
+ from 1.0 cycles/sample to 0.484 cycles/sample.
+.VARIABLE SIZE
+ INTEGER-OPTIONAL
+ Specifies the SL,SS,NL,NS of the image for which the FT will be taken
+ of each line separately and then the transforms will be averaged.
+.VARIABLE ESF
+ REAL-OPTIONAL
+ Inputs a string of real arguments which one desires to take the FT of.
+ This is limited to 256 elements.
+.VARIABLE LSF
+ REAL-OPTIONAL
+ Input string of real Line Spread Function values for which an OTF is
+ desired. This is limited to 256 element.
+.VARIABLE PLOTOUT
+ STRING-OPTIONAL
+ Specifies the filename to receive the output gnuplot instructions.
+.VARIABLE PLOTPROF
+ STRING-OPTIONAL
+ Turns on PLOT of ESF, LSF and FFT of intermediate products.
+.VARIABLE PLOTFMT
+ STRING-OPTIONAL
+ Plot data with Gnuplot or in EPS format. For both PLOTOUT and PLOTPSF.
+.VARIABLE DIAG
+ KEYWORD-OPTIONAL
+ Turns on diaganostic printout.
+.VARIABLE SINCTST
+ KEYWORD-OPTIONAL
+ Creates SINC function and branches to LSF processing.
+.VARIABLE NOISE
+ INTEGER-OPTIONAL
+ Specifies allowable noise level in LSF for finding end points.
+.VARIABLE REFLECT
+ KEYWORD-OPTIONAL
+ Cauese the input data to be reflected about the last input data
+ point in order to fill in unspecified locations. The program must
+ eventually have a data string which is a power of 2 in length. The
+ default is to fill with zeros.
+.VARIABLE MEAN
+ KEYWORD-OPTIONAL
+ Causes missing data to be set equal to the mean of input data.
+ Default is to fill with zeros.
+.VARIABLE NONORMAL
+ KEYWORD-OPTIONAL
+ Causes the data to not be normalized so that its sum is unity.
+ Default is to normalize the input LSF.
+.VARIABLE NOPRINT
+ KEYWORD-OPTIONAL
+ Suppresses the printout of the full tabular listing.  This listing
+ normally includes FOR EACH POINT IN FREQUENCY:
+ CYCLES/SAMPLE, FREQUENCY, REAL, IMAGINARY, INTENSITY, AMPLITUDE,
+ PHASE and WAVELENGTH SHIFT.
+ The default is to print the table.
+.VARIABLE INTERVAL
+ REAL-OPTIONAL
+ Defines the time interval between data points. Default is 1.0 and defines
+ the frequency in cycles per sample.
+.VARIABLE PZOOM
+ REAL-OPTIONAL
+ Specifies the scale factor used to plot the phase values so that the
+ values are easier to read on the plot.
+ The scale factor will be printed on the plot
+ (e.g., PHASE (RAD) MULTIPLY *   2.00  if PZOOM =2.0)
+.VARIABLE TABLE
+ STRING-OPTIONAL
+ Specifies the name of a file to receive tabular output.  This file
+ contains ASCII text in tab-delimited form.  The columns of the table
+ contain Frequency, Amplitude and Phase.
+.VARIABLE COLUMNS
+ keyword - OPTIONAL
+ Specifies whether to include column headers in the ASCII TABLE.
+ COLHDR specifies to include the headers.  NOCOLHDR specifies no headers.
+ The headers are "FREQUENCY", "AMPLITUDE" and "PHASE".
+ Default is to put headers in the table.
+.VARIABLE PHASE
+ keyword - OPTIONAL - Valid=(phase,nophase)
+ Specifies whether to include a column for Phase in the ASCII table.
+ Frequency and Amplitude are always included.  Default is to include it.
+.end
+

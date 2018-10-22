@@ -54,7 +54,13 @@ typedef struct 			/* VAX-dependent string descriptor	*/
 #define BRIDGE1_NAME(A) A	/* names of top bridge routines		*/
 #define BRIDGE2_NAME(A) NAME2(A,_r) 	/*names of lower bridge routines*/
 #else
+/* GFORTRAN (thus GCC) 7 defines the length as size_t rather than int */
+#if defined(__GNUC__) && (__GNUC__ > 6)
+#include <stddef.h>
+#define STRLEN size_t
+#else
 #define STRLEN TAEINT
+#endif
 #define GETLEN(A) A
 #define FOR_NAME(A) NAME2(A,_)
 #define BRIDGE1_NAME(A) NAME2(A,_)

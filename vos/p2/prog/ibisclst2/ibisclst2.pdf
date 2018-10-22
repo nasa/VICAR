@@ -1,0 +1,74 @@
+process help=*
+parm inp string
+parm distance real
+parm xcol integer
+parm ycol integer
+parm clustcol integer
+end-proc
+.TITLE
+VICAR PROGRAM "IBISCLST2"
+.HELP
+PURPOSE:
+
+"IBISCLST2" is a VICAR applications program that reads an IBIS file
+containing (x, y) points and calculates clusters for them. Cluster
+membership means that a point is within a specified radial distance
+from at least one of the other cluster members.
+
+The input file must include the (x, y) point position and an extra
+column for storing the cluster ID. The position values are read from
+the input IBIS file as double-precision floats. The cluster ID is an
+integer, but is written as a double-precision float.
+
+.PAGE
+EXECUTION:
+
+    IBISCLST2 INP=IFILE DISTANCE=DIST XCOL=X YCOL=Y CLUSTCOL=CLST
+
+where
+
+    INP  is the input IBIS file that will be modified
+    DIST is the maximum point-cluster distance
+    X    is the column of point x-values
+    Y    is the column of point y-values
+    CLST is the column for storing the cluster ID
+
+.PAGE
+PERFORMANCE:
+
+The clustering algorithm calculates distances between point pairs
+until cluster membership is discovered, possibly calculating all
+point pairs when there are no multi-point clusters. So the 
+complexity is O(n^2).
+
+.PAGE
+WRITTEN BY:  W. Bunch 2016-06-06
+
+COGNIZANT PROGRAMMER: W. Bunch
+
+REVISIONS:  
+    2016-06-06 WLB - Initial version.
+    2016-06-16 WLB - Changed input IBIS types to DOUB.
+
+.LEVEL1
+.VARI INP
+Input/output IBIS file.
+.VARI DISTANCE
+Maximum point-cluster distance.
+.VARI XCOL
+IBIS x-value column.
+.VARI YCOL
+IBIS y-value column.
+.VARI CLSTCOL
+IBIS cluster ID column.
+.LEVEL2
+.VARI INP
+Input IBIS file, also used for output.
+.VARI DISTANCE
+Maximum point-cluster distance (double-precision).
+.VARI XCOL
+IBIS file column holding point x values (double-precision).
+.VARI YCOL
+IBIS file column holding point y values (double-precision).
+.VARI CLSTCOL
+IBIS file column receiving cluster IDs (integer).

@@ -1,0 +1,89 @@
+C
+C   REVISION HISTORY
+C
+C     8-26-83  ASM MODIFIED FOR VAX CONVERSION 
+C     8-10-84  SP  CONVERTED TO USE VICAR2 CALLS.
+C     8-10-84  SP  CHANGED TO HANDLE SL NOT EQUAL TO 1.
+C     8-10-84  SP  CHANGED TO HANDLE UP TO 50 INPUT FILES.
+      INCLUDE 'VICMAIN_FOR'
+C**********************************************************************
+C
+C     'MSS'   PICTURE INTERLEAVING PROGRAM
+C     MSS will put up to 50 input images side-by-side, left-to-right.
+C
+      SUBROUTINE MAIN44
+      EXTERNAL WORK
+      INTEGER IDSN(50), OUTFILE 
+      INTEGER NS(50),LOC(50)
+      LOGICAL*1 QSIZE
+      CHARACTER*80 BUF
+C============START OF EXECUTABLE CODE==========================
+
+      CALL XVPCNT( 'INP', NIN )
+      IF (NIN.GT.30) THEN
+	 CALL XVMESSAGE(' ** MAXIMUM # INPUT FILES = 50',' ')
+	 CALL ABEND
+      ENDIF
+
+C  OPEN DATA SETS AND GET LENGTH OF LINE FOR EACH FILE.
+      DO I = 1,NIN
+         CALL XVUNIT( IDSN(I), 'INP', I, IND, 0 )
+         CALL XVOPEN( IDSN(I), IND, 'OPEN_ACT','SA','IO_ACT','SA', 0)
+         CALL XVGET( IDSN(I), IND, 'NS', NS(I), 0)
+      END DO
+
+      CALL XVGET( IDSN(1), IND, 'PIX_SIZE', IPIXSIZE, 0)
+      CALL XVSIZE( ISL, ISSAMP, NL, NS1, NLL, NSL)
+      QSIZE = NS1 .NE. NSL
+C
+C     COMPUTE OUTPUT LINE LENGTH
+C
+      N = 1
+      NSO = 0
+
+      DO 100 I=1,NIN
+        IF (QSIZE)   NS(I)=NS1
+        LOC(I) = N
+        N = N+NS(I)*IPIXSIZE
+        NSO = NSO + NS(I)
+  100 CONTINUE
+
+C   OPEN OUTPUT FILE
+
+      CALL XVUNIT( OUTFILE, 'OUT', 1, IND, 0)
+      CALL XVOPEN(OUTFILE,IND,'OP','WRITE','U_NL',NL,'U_NS',NSO,
+     +		  'OPEN_ACT','SA','IO_ACT','SA','U_NB',1,0)
+C
+C     REPORT NSO,NIN AND CALL STACKA
+C
+      WRITE (BUF,200) NIN
+  200 FORMAT(' ** OUTPUT CONTAINS',I3,' INTERLEAVED DATA SETS **')
+      CALL XVMESSAGE(BUF,' ')
+      WRITE (BUF,300) NSO
+  300 FORMAT(' ** ACTUAL OUTPUT RECORD LENGTH',I6,' SAMPLES **')
+      CALL XVMESSAGE(BUF,' ')
+      CALL STACKA(12,WORK,1,N,NL,NIN,NBYT,NS,LOC,IDSN,ISL,ISSAMP,
+     .            OUTFILE)
+      RETURN
+      END
+C**********************************************************************
+      SUBROUTINE WORK(OUT,NN,NL,NIN,NBYT,NS,LOC,IDSN,ISL,ISSAMP,OUTFILE)
+      INTEGER NS(NIN),LOC(NIN),IDSN(NIN)
+      LOGICAL*1 OUT(*)
+C
+      IF(NN .LT. NBYT) GO TO 800
+C
+      DO I= ISL, ISL + NL - 1
+          DO J=1,NIN
+              CALL XVREAD( IDSN(J), OUT( LOC(J) ), IND, 'LINE', I,
+     .                'SAMP', ISSAMP, 'NSAMPS', NS(J), 0)
+          END DO
+          CALL XVWRIT( OUTFILE, OUT, IND, 0)
+      END DO
+      RETURN
+C
+  800 CONTINUE
+      CALL XVMESSAGE(' NOT ENOUGH SPACE FOR STACKA BUFFERS',' ')
+      CALL ABEND
+      RETURN
+      END

@@ -1,0 +1,21 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+
+! use MER Pancam images:
+correlate1d inp=(/project/test_work/testdata/mer/l.img +
+ /project/test_work/testdata/mer/r.img) +
+ out=(ldis.img,sdis.img) geom=(6,80) quality=.7 nsw=41
+
+! show distribution of offsets:
+hist ldis.img nlin=17 lim=(0 1024)
+hist sdis.img nlin=17 lim=(0 1024)
+
+! this was the command that JJL had:
+!correlate1d inp=(mer.ll,mer.rr) out=(ldis.img,sdis.img) geom=(6,80) +
+!quality=.7 nsw=41
+
+let $echo="no"
+end-proc

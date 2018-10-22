@@ -1,0 +1,21 @@
+/* Imake file for Test of VICAR subroutine GETSPICE2 */
+#define PROGRAM tgetspice2
+#define MODULE_LIST tgetspice2.f tzgetspice2.c
+#define MAIN_LANG_FORTRAN
+#define TEST
+#define USES_FORTRAN
+#define USES_ANSI_C
+#define FTN_STRING
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_FORTRAN
+#define LIB_P2SUB 
+#define LIB_SPICE
+#define LIB_MATH77
+#define LIB_NETWORK
+
+/*********
+#define DEBUG
+#define LIB_LOCAL
+*********/
+

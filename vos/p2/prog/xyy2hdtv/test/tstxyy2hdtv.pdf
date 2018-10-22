@@ -1,0 +1,23 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!
+spectoxyy inp=( +
+  /project/test_work/testdata/gll/earth.red,  +
+  /project/test_work/testdata/gll/earth.grn, +
+  /project/test_work/testdata/gll/earth.blu) +
+         out=(x.img,y.img,yy.img,hist.img) mode=reflect +
+         convert=(.00392,.00392,.00392) lamda=(660,560,430) illumin=sun
+xyy2hdtv inp=(x.img,y.img,yy.img) out=(r.img,g.img,b.img)
+xvd inp=(+
+  /project/test_work/testdata/gll/earth.red,  +
+  /project/test_work/testdata/gll/earth.grn, +
+  /project/test_work/testdata/gll/earth.blu)
+xvd inp=(r.img,g.img,b.img)
+!
+xyy2hdtv out=(r.img,g.img,b.img) 'macbeth
+xvd inp=(r.img,g.img,b.img)
+!
+end-proc

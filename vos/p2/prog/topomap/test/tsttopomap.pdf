@@ -1,0 +1,25 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!
+gausnois out=a.img nl=200 ns=200
+lgeom inp=a.img out=b.img nah=1 nav=1 tiep=( +
+ 1,1,1,1, 1,200,5,195, 200,1,195,5, 200,200,200,200)
+tracker3 inp=(a.img,b.img) out=mark.img nlw=15 nsw=15 grid=5 +
+ nlarea=27 nsarea=27
+dvector inp=(a.img,mark.img) out=vector.img
+xvd vector.img
+topomap inp=(a.img,mark.img) out=dtm.img
+xvd dtm.img
+! 
+!tracker3 inp=(I25-I27.stereo.red.vic,I25-I27.stereo.blu.vic) +
+!  out=mark.img nlw=35 nsw=35 nlarea=41 nsarea=41 quality=0.3 +
+!  'zero grid=3
+!dvector inp=(I25-I27.stereo.red.vic,mark.img) out=vector.img exag=2.
+!xvd vector.img
+!topomap inp=(I25-I27.stereo.red.vic,mark.img) out=dtm.img
+!xvd dtm.img
+!
+end-proc

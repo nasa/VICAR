@@ -1,0 +1,392 @@
+procedure
+parm    mode    type=string count=(0:1) valid=(batch,nobatch,inter) default=batch
+refgbl $echo
+! Oct 13, 2012 - RJB
+! TEST SCRIPT FOR QPLOT2
+! tests BYTE, HALF, FULL, REAL images
+!
+! Vicar Programs:
+!       gen list mss tran  
+!
+! External programs
+!       gnuplot 4.6 or greater
+! 
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no display but creates .eps files
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!
+!   In batch mode it produces files testx.eps by calling gnuplot
+!       to create the encapsulated postscript file which can be
+!       later viewed with ghostscript or gimp
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
+!
+! External test data: 
+!       <none>
+!
+! Output:
+!   GENed test data sets, .gpi and .eps files and intermediate 
+!       tmp* files 
+!  the *.gpi data produced by qplot2 are gnuplot scripts
+!
+body
+let _onfail="stop"
+let $echo="yes"
+!BYTE DATA SETS
+gen inp1 nl=20 ns=20
+gen inp1a nl=40 ns=40 linc=2 sinc=2
+gen inp2 nl=20 ns=20 linc=10 sinc=10
+gen inp3 nl=128 ns=128 linc=5 sinc=5
+!
+! one file, one line in sample direction - Just defaults
+! remember proc=(dsrn, sl,ss,el,es)
+!TEST 1 - default plotout, no .eps file
+qplot2 inp1 proc=(1, 1,1,1,20) title=("QPLOT2 TEST 1") 
+!  
+if (mode = "nobatch" or mode = "inter") 
+    ush gnuplot qplot.gpi
+end-if
+! 
+!one file, one line in line direction - Large TITLE font
+!
+!TEST 2
+qplot2 inp1 proc=(1, 1,20,20,20) title=("QPLOT2 TEST 2") +
+    labelsiz=14 plotout=test2
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test2.gpi
+!else
+!    ush gnuplot test22.gpi
+end-if
+!
+! one file, one line slanted at 45 degrees - Just defaults
+!TEST 3  - SLANT
+qplot2 inp1 proc=(1, 1,1,20,20) title=("QPLOT2 TEST 3") +
+    plotout=test3
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test3.gpi
+end-if
+
+!TEST 4  - SLANT
+qplot2 inp1 proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 4 - SLANT PROFILE") +
+    xtitle=("DN Position") ytitle=("DN Value") plotout=test4
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test4.gpi
+end-if
+
+!TEST 5  - SLANT - SCALED
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 5 - SLANT PROFILE") +
+    xtitle=("DN Position") ytitle=("DN Value") +
+    xscale=(1,40) yscale=(1,255) plotout=test5
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test5.gpi
+end-if
+
+!TEST 6  - SLANT PROFILES OF 3 LINES ON ONE IMAGE
+qplot2 inp1a proc=(1, 1,1,20,20, 1, 3,3,13,13, 1, 12,12,1,1)  +
+   title=("QPLOT2 TEST 6 - SLANT PROFILES OF 3 LINES") +
+   xtitle=("DN Position") ytitle=("DN Value") +
+   xscale=(1,50) yscale=(1,255) plotout=test6
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test6.gpi
+end-if
+!
+!TEST 7  - SLANT - SMALL GRAPH
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 7 - SLANT PROFILE") +
+   xtitle=("DN Position") ytitle=("DN Value") +
+   xscale=(1,30) yscale=(1,100) xlength=4 ylength=3 labelsiz=8 +
+    plotout=test7
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test7.gpi
+end-if
+
+!
+!TEST 8  - SLANT
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 8 - SLANT PROFILE") +
+   xtitle=("DN Position") ytitle=("Normalized DN Value") +
+   norm="norm" plotout=test8
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test8.gpi
+end-if
+
+!
+!TEST 9  - SLANT
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 9 - SLANT PROFILE") +
+   xtitle=("Relative DN Position") ytitle=("DN Value") +
+   tics="notics" plotout=test9
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test9.gpi
+end-if
+
+!
+!TEST 10  - SLANT
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 10 - SLANT PROFILE - RDS=20") +
+   xtitle=("Relative DN Position") ytitle=("DN Value") +
+    rds=20.0 plotout=test10
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test10.gpi
+end-if
+
+!
+!TEST 11  - SLANT
+qplot2 inp1a proc=(1, 1,1,20,20)  title=("QPLOT2 TEST 11 - SLANT PROFILE - RDS=-5") +
+   xtitle=("Relative DN Position") ytitle=("DN Value") +
+    rds=-5.0 plotout=test11
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test11.gpi
+end-if
+
+
+let $echo="no"
+write "Multiple lines on one band"
+let $echo="yes"
+!TEST 12 - SLANT
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) +
+   title=("QPLOT2 TEST 12 - 2 Files - same ranges") +
+    plotout=test12
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test12.gpi
+end-if
+
+!TEST 13  - SLANT
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) +
+    title=("QPLOT2 TEST 13 - 2 files - Scaling") +
+    xscale=(1,40) yscale=(1,255)  plotout=test13
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test13.gpi
+end-if
+
+!TEST 14 - SLANT
+qplot2 (inp1,inp2) proc=(1,1,1,20,20, 2,1,1,20,20) +
+    title=("QPLOT2 TEST 14 - 2 files - smaller scale") +
+    xscale=(1,25) yscale=(1,50) plotout=test14
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test14.gpi
+end-if
+
+!TEST 15 
+qplot2 (inp2,inp3) proc=(1,1,1,20,20, 2,50,50,70,70) +
+    title=("QPLOT2 TEST 15 - 2 files - different ranges") +
+    xscale=(1,25) yscale=(1,255) plotout=test15
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test15.gpi
+end-if
+
+
+!TEST 16
+qplot2 (inp1,inp2,inp3) proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70) +
+        title=("QPLOT2 TEST 16 - 3 files - different ranges") plotout=test16
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test16.gpi
+end-if
+
+!
+!TEST 17 - ONE SLANT LINE ON EACH OF FOUR IMAGES - make eps image
+qplot2 (inp1,inp2,inp3,inp1a)  title=("QPLOT2 TEST 17 - Four Images")  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
+    plotout=test17
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test17.gpi
+end-if
+! 
+!        plotout="qplot1.psf"
+!    displace=5
+
+gen half1 nl=20 ns=20 linc=20 modulo=32767 format=half
+gen half1b nl=20 ns=20 linc=20 modulo=32767 format=half
+gen half1a nl=40 ns=40 linc=200 sinc=2 ival=20 modulo=2048 format=half
+gen half2 nl=20 ns=20 linc=100 sinc=10 ival=44 modulo=3096 format=half
+gen half3 nl=128 ns=128 linc=50 sinc=5 ival=75 modulo=1024 format=half
+!
+let $echo="no"
+write "HALF WORD data sets"
+let $echo="yes"
+!TEST 18
+qplot2 (half1,half2,half3,half1a) title=("QPLOT2 TEST 18 - HALF") +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
+    plotout=test18
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test18.gpi
+end-if
+
+!
+!TEST 19
+qplot2 (half1,half1b) proc=(1,1,1,20,20, 2,1,1,20,20) +
+    title=("QPLOT2 TEST 19 - HALF - LINE 2 displaced by 5 upward") +
+    displace=5 plotout=test19
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test19.gpi
+end-if
+
+gen full1 nl=20 ns=20 linc=30 modulo=512 format=full
+gen full1b nl=20 ns=20 linc=20 modulo=32767 format=full
+gen full1a nl=40 ns=40 linc=100 sinc=2 ival=20 modulo=2048 format=full
+gen full2 nl=20 ns=20 linc=100 sinc=10 ival=44 modulo=3096 format=full
+gen full3 nl=128 ns=128 linc=50 sinc=5 ival=75 modulo=1024 format=full
+let $echo="no"
+write "FULL WORD data sets"
+let $echo="yes"
+!TEST 20
+qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 20 - FULL WORD") +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
+    plotout=test20
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test20.gpi
+end-if
+!TEST 21
+qplot2 (full1,full2,full3,full1a) title=("QPLOT2 TEST 21 - FULL - Y-scale") +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
+    yscale=(0,5000.) plotout=test21
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test21.gpi
+end-if
+
+gen real1 nl=20 ns=20 linc=30 modulo=512 format=real
+gen real1b nl=20 ns=20 linc=20 modulo=32767 format=real
+gen real1a nl=40 ns=40 linc=100 sinc=2 ival=20 modulo=2048 format=real
+gen real2 nl=20 ns=20 linc=100 sinc=10 ival=44 modulo=3096 format=real
+gen real3 nl=128 ns=128 linc=50 sinc=5 ival=75 modulo=1024 format=real
+let $echo="no"
+write "REAL data sets"
+let $echo="yes"
+!TEST 22
+qplot2 (real1,real2,real3,real1a) title=("QPLOT2 TEST 22 - REAL") +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
+    plotout=test22
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test22.gpi
+end-if
+
+let $echo="no"
+write "MIXED data sets"
+let $echo="yes"
+!TEST 23
+! should get warning that:
+! Plot needs to be taller for all labels to print
+qplot2 (inp1,half2,full3,real1a)  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
+    title=("QPLOT TEST 23 -MIXED Data Types - BYTE,HALF,FULL,REAL") +
+    plotout=test23
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test23.gpi
+end-if
+! TEST 24 
+! Remove warning by eliminating labels
+qplot2 (inp1,half2,full3,real1a)  +
+    proc=(1,1,1,20,20, 2,1,1,20,20, 3,50,50,70,70, 4,1,1,20,20) +
+    title=("QPLOT TEST 24 -MIXED Data Types - BYTE,HALF,FULL,REAL") +
+    nolabel=nolabel plotout=test24
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test24.gpi
+end-if
+
+gen b1 nl=50 ns=50
+gen b2 nl=50 ns=50 ival=5 linc=1 sinc=1
+gen b3 nl=50 ns=50 ival=20 linc=2 sinc=2
+gen b4 nl=50 ns=50 ival=40 linc=3 sinc=3
+
+gen b5 nl=50 ns=50 ival=100 linc=3 sinc=3
+mss (b1,b2,b3,b4) out=mss4a 
+mss (b5,b2,b3,b4) out=mss4b
+
+tran mss4a spec4a outorg=bsq nbands=4
+let $echo="no"
+write "MSS data sets"
+let $echo="yes"
+!
+!TEST 25 - 1 line on 1st channel of a 4 band MSS image
+qplot2 mss4a proc=(1,1,1,20,20) nchan=2 +
+    title=("QPLOT2 TEST 25 - One Line from Channel 1 - MSS Data") +
+    plotout=test25
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test25.gpi
+end-if
+
+!TEST 26 - 1 pixel in spectral plot
+qplot2 mss4a sproc=(10,10) nchan=4 +
+    title=("QPLOT2 TEST 26 - Spectral Plot - Pixel (10,10)") +
+    plotout=test26
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test26.gpi
+end-if
+
+!TSET 27 - Spectral Plot for 4 points on MSS image
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4 +
+    title=("QPLOT2 TEST 27 - Spectral Plot on MSS image - 4 points") +
+    plotout=test27
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test27.gpi
+end-if
+
+!TEST 28 - Spectral plot for 4 points on MSS image only first
+! 3 channels
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=3 +
+    title=("QPLOT2 TEST 28 - Spectral Plot 3 channels on MSS image") +
+    plotout=test28
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test28.gpi
+end-if
+
+let $echo="no"
+write "MULTIBAND images  - should FAIL"
+let $echo="yes"
+
+
+!TEST - failure of 4-band bsq image 
+let _onfail="continue"
+qplot2 spec4a sproc=(10,10,10,11,11,10,11,11) nchan=4 +
+    title=("QPLOT2 TEST 29 - Spectral Plot on Multiband image")
+let _onfail="stop"
+
+let $echo="no"
+write "Test eps output"
+let $echo="yes"
+!TEST 28 - default name - qplot.eps
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4 +
+    title=("QPLOT2 TEST 29X - Spectral Plot on MSS image") +
+    plotout="yes" plotfmt="eps"
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot qplot.gpi
+end-if
+ush gnuplot qplot.eps.gpi
+
+!TEST 29 - provide name for eps file
+qplot2 mss4a sproc=(10,10,10,11,11,10,11,11) nchan=4 +
+    title=("QPLOT2 TEST 30 - Spectral Plot on MSS image") +
+    plotout="test30" plotfmt="eps"
+
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot test30.gpi
+end-if
+ush gnuplot test30.eps.gpi
+
+let $echo="no"
+end-proc

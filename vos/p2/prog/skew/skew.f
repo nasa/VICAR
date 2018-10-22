@@ -1,0 +1,83 @@
+	INCLUDE 'VICMAIN_FOR'
+	SUBROUTINE MAIN44
+	REAL*4 V(2,900),P(6)
+
+	CALL XVUNIT(IU,'INP',1,IST,' ')
+	CALL XVOPEN(IU,IST,' ')
+	CALL XVREAD(IU,V,IST,' ')
+	CALL XVCLOSE(IU,IST,' ')
+	CALL XVPARM('NROW',NR,ICNT,IDEF,0)
+	CALL XVPARM('NCOL',NC,ICNT,IDEF,0)
+C	CL = V(1,NR*NC/2+1)
+C	CS = V(2,NR*NC/2+1)
+
+	CALL XVPARM('OFFSET',P,ICNT,IDEF,0)
+	IF (ICNT .EQ. 2) THEN
+		A = 1
+		B = 0
+		C = 0
+		D = 1
+		E = P(1)
+		F = P(2)
+	END IF
+	CALL XVPARM('ROTOFF',P,ICNT,IDEF,0)
+	IF (ICNT .EQ. 3) THEN
+		PR = 3.1415926*P(3)/180.
+		ST = SIN(PR)
+		CT = COS(PR)
+		A = CT
+		B = -ST
+		C = ST
+		D = CT
+		E = P(1)
+		F = P(2)
+	END IF
+	CALL XVPARM('SCALEOFF',P,ICNT,IDEF,0)
+	IF (ICNT .EQ. 3) THEN
+		A = P(3)
+		B = 0
+		C = 0
+		D = P(3)
+		E = P(1)
+		F = P(2)
+	END IF
+	CALL XVPARM('SRO',P,ICNT,IDEF,0)
+	IF (ICNT .EQ. 4) THEN
+		PR = 3.1415926*P(3)/180.
+		ST = SIN(PR)
+		CT = COS(PR)
+		A = P(4)*CT
+		B = -P(4)*ST
+		C = P(4)*ST
+		D = P(4)*CT
+		E = P(1)
+		F = P(2)
+	END IF
+	CALL XVPARM('UNC',P,ICNT,IDEF,0)
+	IF (ICNT .EQ. 6) THEN
+		A = P(1)
+		B = P(2)
+		C = P(3)
+		D = P(4)
+		E = P(5)
+		F = P(6)
+	END IF
+
+	PRINT 1, A,B,E
+	PRINT 1, C,D,F
+1	FORMAT(3(5X,F12.4))
+
+	DO 10 I=1,900
+	VL = V(1,I)
+	VS = V(2,I)
+	V(1,I) = A*VL + B*VS + E
+10	V(2,I) = C*VL + D*VS + F
+
+	CALL XVUNIT(IO,'OUT',1,IST,' ')
+	CALL XVOPEN(IO,IST,'OP','WRITE',' ')
+	CALL XVWRIT(IO,V,IST,' ')
+	CALL XVCLOSE(IO,IST,' ')
+
+C	CALL PGRID(V,NR,NC,DUM,0)
+	RETURN
+	END

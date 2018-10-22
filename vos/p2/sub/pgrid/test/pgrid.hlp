@@ -1,0 +1,26 @@
+1 PGRID
+
+        Subroutine to print out grid coordinate information.
+
+  Calling Sequence: 
+		CALL PGRID(X,NR,NC,TRIX,MODE)
+
+  Arguments:
+		X  (input): Array containing grid coordinate information.
+		NR (input): Number of rows to be written out.
+		NC (input): Number of coordinates to be written in a row.
+		TRIX (input): Array containing halfword data to be printed.
+		MODE (input): 0 or 1, determines whether TRIX is to be printed.
+		
+2 History
+
+  Original Programmer: ...<NAME & DATE>
+  Current Cognizant Programmer: Damon D. Knight		SEP 3, 1993 
+  Source Language: Fortran
+  Ported to Unix: Damon D. Knight SEP 3, 1993
+
+3 Operation
+
+	PGRID takes the  coordiate points in X and out puts them by the row
+    and column specified, with 20 being the max possible per row.
+

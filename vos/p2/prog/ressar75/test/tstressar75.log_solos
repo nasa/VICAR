@@ -1,0 +1,265 @@
+tstressar75
+ Test for VICAR program RESSAR75
+ 
+refgbl $syschar
+local PATH TYPE=STRING
+if ($syschar(1)="VAX_VMS")
+else
+  let path="/project/test_work/testdata/vo/"
+end-if
+reslocvo /project/test_work/testdata/vo/408b25.img res
+Beginning VICAR task reslocvo
+RESLOCVO version 01-JULY-94
+NLW= 5 NSW= 5 NHOR=19 NVER=19 INTERP=1
+TOT BUF=       57117
+MINIMUM CORRELATION VALUE=    0.55715299
+AVERAGE VALUE=      0.69429654
+RMS=  2.33
+RESEAU MARK  13 HAD THE LARGEST RESIDUE OF  4.5 PIXELS ( 131.4,  83.3) NOM=( 133.5,  79.3)
+MARK  13 CHANGED TO ( 131.7,  82.6)
+RMS=  2.32
+RESEAU MARK   1 HAD THE LARGEST RESIDUE OF  4.2 PIXELS (   2.3,  22.1) NOM=(   4.3,  18.4)
+MARK   1 CHANGED TO (   2.4,  21.9)
+RMS=  2.31
+RESEAU MARK   2 HAD THE LARGEST RESIDUE OF  4.2 PIXELS (   5.6, 140.5) NOM=(   7.8, 136.9)
+MARK   2 CHANGED TO (   5.8, 140.2)
+RMS=  2.30
+RESEAU MARK   1 HAD THE LARGEST RESIDUE OF  4.0 PIXELS (   2.4,  21.9) NOM=(   4.3,  18.4)
+RESLOCVO task completed
+list /project/test_work/testdata/vo/408b25.img (131,196,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+     Samp   196     198     200     202     204
+   Line
+    131      50  52  54  56  56  54  56  54  52  56
+    132      52  58  58  60  58  56  54  54  52  56
+    133      54  52  50  42  30  30  38  48  50  54
+    134      54  50  38  16   0   0  12  34  44  48
+    135      56  50  34   8   0   0   0  24  40  46
+    136      54  48  36  14   0   0   6  30  44  48
+    137      50  52  50  46  38  34  36  42  46  48
+    138      52  52  54  54  50  50  48  48  48  46
+    139      52  52  50  52  52  52  52  48  48  52
+    140      52  52  54  50  48  48  48  48  50  48
+list /project/test_work/testdata/vo/408b25.img (381,485,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+     Samp   485     487     489     491     493
+   Line
+    381      54  54  52  54  52  52  52  52  52  52
+    382      52  56  54  52  54  50  52  54  52  54
+    383      56  52  54  56  54  54  54  54  54  54
+    384      54  56  54  54  54  52  54  54  52  52
+    385      52  52  54  54  54  54  54  52  56  50
+    386      54  54  54  54  54  52  54  54  54  50
+    387      54  52  52  54  52  56  50  52  54  52
+    388      52  50  56  52  52  52  52  56  52  54
+    389      50  52  54  54  52  54  54  54  52  52
+    390      52  52  52  52  50  54  54  54  52  52
+ressar75 (/project/test_work/testdata/vo/408b25.img,res) a came=4 'keepblem
+Beginning VICAR task ressar75
+RESSAR75 version April 6, 1997
+TOTAL # CORRECTED PIXELS =           7180
+RESSAR75 task completed
+list a (131,196,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:RESSAR75  User:lwk       Date_Time:Wed Dec 21 14:12:14 2011
+     Samp   196     198     200     202     204
+   Line
+    131      50  52  52  52  52  52  52  52  52  56
+    132      52  52  52  52  52  52  52  52  52  56
+    133      53  52  52  52  52  51  51  51  51  54
+    134      53  52  52  52  51  51  51  50  49  48
+    135      52  52  52  51  51  51  50  49  48  46
+    136      52  52  52  51  51  51  50  49  48  48
+    137      50  51  51  51  51  51  50  48  46  48
+    138      52  52  51  51  51  51  50  48  48  46
+    139      52  52  50  52  52  52  52  48  48  52
+    140      52  52  54  50  48  48  48  48  50  48
+list a (381,485,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:RESSAR75  User:lwk       Date_Time:Wed Dec 21 14:12:14 2011
+     Samp   485     487     489     491     493
+   Line
+    381      54  54  52  54  52  52  52  52  52  52
+    382      52  56  54  52  54  50  52  54  52  54
+    383      56  52  54  56  54  54  54  54  54  54
+    384      54  56  54  54  54  52  54  54  52  52
+    385      52  52  54  54  54  54  54  52  56  50
+    386      54  54  54  54  54  52  54  54  54  50
+    387      54  52  52  54  52  56  50  52  54  52
+    388      52  50  56  52  52  52  52  56  52  54
+    389      50  52  54  54  52  54  54  54  52  52
+    390      52  52  52  52  50  54  54  54  52  52
+ressar75 (/project/test_work/testdata/vo/408b25.img,res) a came=4
+Beginning VICAR task ressar75
+RESSAR75 version April 6, 1997
+TOTAL # CORRECTED PIXELS =           7780
+RESSAR75 task completed
+list a (131,196,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:RESSAR75  User:lwk       Date_Time:Wed Dec 21 14:12:15 2011
+     Samp   196     198     200     202     204
+   Line
+    131      50  52  52  52  52  52  52  52  52  56
+    132      52  52  52  52  52  52  52  52  52  56
+    133      53  52  52  52  52  51  51  51  51  54
+    134      53  52  52  52  51  51  51  50  49  48
+    135      52  52  52  51  51  51  50  49  48  46
+    136      52  52  52  51  51  51  50  49  48  48
+    137      50  51  51  51  51  51  50  48  46  48
+    138      52  52  51  51  51  51  50  48  48  46
+    139      52  52  50  52  52  52  52  48  48  52
+    140      52  52  54  50  48  48  48  48  50  48
+list a (381,485,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:RESSAR75  User:lwk       Date_Time:Wed Dec 21 14:12:15 2011
+     Samp   485     487     489     491     493
+   Line
+    381      54  54  52  54  52  52  52  52  52  52
+    382      52  56  54  53  52  50  52  54  52  54
+    383      56  54  54  53  53  53  54  54  54  54
+    384      54  54  54  53  53  53  54  54  52  52
+    385      52  53  53  53  53  53  54  52  56  50
+    386      54  54  53  53  53  52  54  54  54  50
+    387      54  52  52  54  52  56  50  52  54  52
+    388      52  50  56  52  52  52  52  56  52  54
+    389      50  52  54  54  52  54  54  54  52  52
+    390      52  52  52  52  50  54  54  54  52  52
+ressar75 (/project/test_work/testdata/vo/408b25.img,res) a came=4 center=(331,537,10) 'keepblem
+Beginning VICAR task ressar75
+RESSAR75 version April 6, 1997
+TOTAL # CORRECTED PIXELS =           7476
+RESSAR75 task completed
+list a (131,196,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:RESSAR75  User:lwk       Date_Time:Wed Dec 21 14:12:16 2011
+     Samp   196     198     200     202     204
+   Line
+    131      50  52  52  52  52  52  52  52  52  56
+    132      52  52  52  52  52  52  52  52  52  56
+    133      53  52  52  52  52  51  51  51  51  54
+    134      53  52  52  52  51  51  51  50  49  48
+    135      52  52  52  51  51  51  50  49  48  46
+    136      52  52  52  51  51  51  50  49  48  48
+    137      50  51  51  51  51  51  50  48  46  48
+    138      52  52  51  51  51  51  50  48  48  46
+    139      52  52  50  52  52  52  52  48  48  52
+    140      52  52  54  50  48  48  48  48  50  48
+list /project/test_work/testdata/vo/408b25.img (321,527,20,18)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+     Samp   527     529     531     533     535     537     539     541     543
+   Line
+    321      54  56  56  54  54  58  56  54  58  58  58  60  58  56  56  58  60  60
+    322      60  56  56  58  56  60  58  56  54  56  54  58  56  56  56  56  58  58
+    323      54  58  54  56  56  56  58  58  58  58  54  58  58  56  56  56  58  58
+    324      58  56  54  56  58  56  58  56  58  60  56  58  58  58  58  56  58  56
+    325      58  56  54  54  56  54  58  60  56  56  56  56  58  58  56  56  58  54
+    326      54  58  56  56  54  56  56  56  56  54  54  56  56  56  56  56  54  56
+    327      58  56  58  54  54  56  58  56  54  58  58  54  56  56  56  58  56  56
+    328      58  56  54  58  56  58  56  56  56  54  58  58  58  56  56  58  58  56
+    329      58  58  56  58  58  56  58  56  56  54  56  54  54  54  56  56  58  58
+    330      56  58  56  58  58  58  58  56  58  56  56  56  58  58  58  56  56  56
+    331      58  56  58  56  56  56  56  56  56  54  58  56  58  56  56  58  58  58
+    332      58  58  54  58  58  56  58  54  54  58  58  56  58  56  58  58  58  56
+    333      58  56  58  58  56  56  56  58  58  54  56  56  56  56  56  56  58  58
+    334      58  54  58  58  58  58  58  58  58  56  58  58  58  56  56  56  56  58
+    335      58  54  56  56  58  58  58  56  60  58  54  56  56  56  58  56  56  58
+    336      56  56  56  54  58  56  58  56  56  54  58  56  56  54  56  56  56  56
+    337      56  56  58  58  54  54  58  58  58  60  58  56  58  54  58  54  56  56
+    338      58  56  56  58  56  58  56  56  56  56  56  58  58  56  56  54  56  58
+    339      56  58  58  56  56  54  58  54  58  58  58  58  58  58  58  54  54  54
+    340      56  56  58  56  56  54  54  58  58  58  58  56  56  58  56  56  54  54
+list a (321,527,20,18)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:RESSAR75  User:lwk       Date_Time:Wed Dec 21 14:12:16 2011
+     Samp   527     529     531     533     535     537     539     541     543
+   Line
+    321      54  56  56  54  54  58  56  54  58  58  58  60  58  56  56  58  60  60
+    322      60  56  56  58  56  60  58  57  57  58  58  58  58  57  56  56  58  58
+    323      54  58  54  56  56  57  58  57  57  57  57  57  57  57  56  57  58  58
+    324      58  56  54  56  56  57  57  57  57  57  57  57  57  57  57  57  57  56
+    325      58  56  54  56  56  57  57  57  57  57  57  57  57  57  57  57  57  57
+    326      54  58  56  56  56  56  57  57  57  57  57  57  57  57  57  56  56  56
+    327      58  56  56  56  56  56  57  57  57  57  57  57  57  57  56  56  56  56
+    328      58  57  57  56  56  57  57  57  57  57  57  57  57  56  56  56  56  56
+    329      58  57  57  57  57  57  57  57  57  57  57  57  56  56  56  56  56  56
+    330      56  57  57  57  57  57  57  57  56  56  56  56  56  56  56  56  56  56
+    331      58  57  57  57  57  57  56  56  56  56  56  56  56  56  56  56  56  56
+    332      58  57  57  57  56  56  56  56  56  56  56  56  56  56  56  56  56  56
+    333      58  56  56  56  56  56  56  56  56  56  56  56  56  56  56  56  56  56
+    334      58  54  55  56  56  56  56  56  56  56  56  56  56  56  56  56  56  56
+    335      58  54  55  56  56  56  56  56  56  56  56  56  56  56  56  56  56  56
+    336      56  56  56  57  56  56  56  56  56  56  56  56  56  56  56  56  56  56
+    337      56  56  58  57  57  56  56  56  56  56  56  56  56  56  56  56  56  56
+    338      58  56  56  58  57  56  56  56  56  56  56  56  56  56  55  55  56  58
+    339      56  58  58  56  56  55  56  56  57  56  56  56  56  56  55  54  54  54
+    340      56  56  58  56  56  54  54  58  57  56  56  56  56  56  56  56  54  54
+ressar75 (/project/test_work/testdata/vo/408b25.img,res) a came=4 'keepres
+Beginning VICAR task ressar75
+RESSAR75 version April 6, 1997
+TOTAL # CORRECTED PIXELS =            600
+RESSAR75 task completed
+list a (131,196,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:RESSAR75  User:lwk       Date_Time:Wed Dec 21 14:12:17 2011
+     Samp   196     198     200     202     204
+   Line
+    131      50  52  54  56  56  54  56  54  52  56
+    132      52  58  58  60  58  56  54  54  52  56
+    133      54  52  50  42  30  30  38  48  50  54
+    134      54  50  38  16   0   0  12  34  44  48
+    135      56  50  34   8   0   0   0  24  40  46
+    136      54  48  36  14   0   0   6  30  44  48
+    137      50  52  50  46  38  34  36  42  46  48
+    138      52  52  54  54  50  50  48  48  48  46
+    139      52  52  50  52  52  52  52  48  48  52
+    140      52  52  54  50  48  48  48  48  50  48
+list a (381,485,10,10)
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:RESSAR75  User:lwk       Date_Time:Wed Dec 21 14:12:17 2011
+     Samp   485     487     489     491     493
+   Line
+    381      54  54  52  54  52  52  52  52  52  52
+    382      52  56  54  53  52  50  52  54  52  54
+    383      56  54  54  53  53  53  54  54  54  54
+    384      54  54  54  53  53  53  54  54  52  52
+    385      52  53  53  53  53  53  54  52  56  50
+    386      54  54  53  53  53  52  54  54  54  50
+    387      54  52  52  54  52  56  50  52  54  52
+    388      52  50  56  52  52  52  52  56  52  54
+    389      50  52  54  54  52  54  54  54  52  52
+    390      52  52  52  52  50  54  54  54  52  52
+end-proc
+exit
+slogoff
+if ($RUNTYPE = "INTERACTIVE")
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+else
+  if ($syschar(1) = "VAX_VMS")
+  end-if
+end-if
+ulogoff
+END-PROC
+END-PROC

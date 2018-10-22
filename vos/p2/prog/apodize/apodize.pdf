@@ -1,0 +1,97 @@
+process help=*
+PARM INP TYPE=STRING
+PARM OUT TYPE=STRING
+PARM SIZE TYPE=INTEGER COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL TYPE=INTEGER DEFAULT=1
+PARM SS TYPE=INTEGER DEFAULT=1
+PARM SB TYPE=INTEGER DEFAULT=1
+PARM NL TYPE=INTEGER DEFAULT=0
+PARM NS TYPE=INTEGER DEFAULT=0
+PARM NB TYPE=INTEGER DEFAULT=0
+PARM EDGE TYPE=INTEGER DEFAULT=10
+END-PROC
+.TITLE
+"APODIZE"
+.HELP
+PURPOSE:
+"apodize" modifies picture borders so that the Fourier transform of the
+picture will be free of spikes through the zero-frequency axis, allowing
+filters to operate without ringing on the picture peripheries.
+
+ 
+EXECUTION:
+
+Examples
+
+apodize IN OUT
+
+This command will perform the operation on input image IN, sending the output
+to image OUT.  The input image is assumed to be in byte format; a ten-pixel
+border will be used. 
+
+apodize IN OUT EDGE=3
+
+This command is similar, but a three-pixel border is used.
+.page
+OPERATION:
+The Fourier transform considers the input picture to really be an infinite
+mosaic (checkerboard) of identical pictures.  If the picture borders do not
+match but cause abrupt DN displacement, this information is included in the
+transform as a broad response on a line through DC both vertically and
+horizontally.  When restoration filters are applied, this information (which
+has not partaken of the image degradation in question) is altered.  The inverse
+Fourier transform no longer contains the information needed to represent a
+clean picture border and ringing is the result. 
+
+"apodize" fits a sine wave across the picture border so that abrupt transitions
+in the mosaic become continuous.  The EDGE parameter controls the wavelength
+such that lambda = 4 * EDGE.  All information within the border strip is lost. 
+
+.page
+RESTRICTIONS
+
+Max image size is 8192 in samples
+
+.page
+HISTORY
+
+WRITTEN BY:  J. J. Lorre, 20 May 1974
+COGNIZANT PROGRAMMER:  R. J. Bambery
+
+REVISIONS:  
+
+    1 July 1994     A. Scop (CRI)   Made portable for UNIX
+    16 Sept 2003    N. Toole        Enabled for 3D images
+    19 Apr 2011     R. J. Bambery   Made internal format REAL
+                                    Now works with BYTE, HALF, FULL, REAL    
+    28 Jun 2012     R. J. Bambery   Removed <tab> in front of continuation
+                                    lines to make backward compatible with
+                                    32-bit Linux gfortran 4.2.1, otherwise
+                                    compatible 64-bit Linux gfortran 4.6.3
+    18 Oct 2012     L.W.Kamp  Trimmed some lines to make <72 characters for Solaris
+.LEVEL1
+.VARIABLE INP
+STRING - Input image file
+.VARIABLE OUT
+STRING - Output image file
+.VARIABLE SIZE
+INTEGER - Standard VICAR size field
+.VARIABLE SL
+INTEGER - Starting line
+.VARIABLE SS
+INTEGER - Starting sample
+.VARIABLE SB
+INTEGER - Starting band
+.VARIABLE NS
+INTEGER - Number of lines
+.VARIABLE NL
+INTEGER - Number of samples
+.VARIABLE NB
+INTEGER - Number of bands
+.VARIABLE EDGE
+INTEGER - Border width
+.LEVEL2
+.VARIABLE EDGE
+EDGE is an integer specifying the pixel-width of the border within the picture
+the user wishes to modify. 
+.END

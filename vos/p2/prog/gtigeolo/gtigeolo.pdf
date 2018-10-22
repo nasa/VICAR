@@ -1,0 +1,137 @@
+process help=*
+local DUMREAL    TYPE=REAL
+local DUMSTRING  TYPE=STRING
+parm inp      type=string  default=""
+parm n1       type=name    default="DUMREAL"
+parm n2       type=name    default="DUMREAL"
+parm n3       type=name    default="DUMREAL"
+parm n4       type=name    default="DUMREAL"
+parm e1       type=name    default="DUMREAL"
+parm e2       type=name    default="DUMREAL"
+parm e3       type=name    default="DUMREAL"
+parm e4       type=name    default="DUMREAL"
+parm n1inp    type=real    default=-999.
+parm n2inp    type=real    default=-999.
+parm n3inp    type=real    default=-999.
+parm n4inp    type=real    default=-999.
+parm e1inp    type=real    default=-999.
+parm e2inp    type=real    default=-999.
+parm e3inp    type=real    default=-999.
+parm e4inp    type=real    default=-999.
+parm out      type=name    default="DUMSTRING"
+
+END-PROC
+.TITLE
+gtigeolo - parses a MIL-STD-2500 image header IGEOLO field 
+           string and puts north east data in TAE
+           TCL variable also inputs north east data and 
+           puts it into a TAE TCL variable.
+
+.HELP
+PURPOSE:
+1) Parses a particular string for northing easting coordinates.
+
+"ddmmssNdddmmssEddmmssNdddmmssEddmmssNdddmmssEddmmssNdddmmssE"
+
+where dd or ddd is degrees, mm is minutes, and ss is
+seconds.  The N and E are characters identifying north
+or east.  The values are computed as
+
+  dd+mm/60+ss/3600
+
+and returned in tcl variables.
+
+The n1 and e1 refers the first coordinates in the string
+and n4, e4 refers to the last coordinates in the string.
+
+2) Accepts input of n1inp, n2inp, ... , n4inp, e1inp,
+e2inp, ... , e4inp, converts the inputs from degrees
+to minutes and outputs a string in the form:
+
+"ddmmssNdddmmssEddmmssNdddmmssEddmmssNdddmmssEddmmssNdddmmssE"
+
+EXECUTION:
+
+Examples
+
+gtigeolo
+ inp="343214N1105258E343208N1110441E342220N1110443E342222N1105251E"
+ n1=tclreal1 n2=tclreal2 n3=tclreal3 n4=tclreal4 e1=tclreal5
+ e2=tclreal6 e3=tclreal7 e4=tclreal8
+
+          returns the north and east values into the
+          tcl variables.
+
+gtigeolo n1inp=-3.437277777778e+01 n2inp=-3.453555555556e+01
+         n3inp=-3.933333333333e+01 n4inp=-3.950000000000e+01 
+         e1inp=1.108808333333e+02 e2inp=1.110780555556e+02
+         e3inp=8.433333333333e+01 e4inp=8.450000000000e+01
+         out=tclstr
+
+          returns the degrees minutes seconds into the
+          tclstr string variables.
+
+OPERATION:
+gtigeolo does not use VICAR I/O.
+
+ TIMING: 
+
+As fast as C can parse a string.  
+
+ ORIGINAL PROGRAMMER:    P. Kim              27 Apr 2009
+ COGNIZANT PROGRAMMER:   P. Kim              27 Apr 2009
+ 
+ REVISION HISTORY
+  2009-04-27 PK - Initial version
+  2010-03-01 PK - Added reverse functionality  
+  2017-05-31 WLB - Migrated to MIPL.
+  2017-08-08 WLB - Removed DEBUG from imake.
+
+.LEVEL1
+.variable inp
+Ascii input string in degree
+ minutes seconds
+.variable n1
+TCL TCL name without &, gets
+the first north degree
+.variable n2
+TCL TCL name without &, gets
+the second north degree
+.variable n3
+TCL TCL name without &, gets
+the third north degree
+.variable n4
+TCL TCL name without &, gets
+the fourth north degree
+.variable e1
+TCL TCL name without &, gets
+the first east degree
+.variable e2
+TCL TCL name without &, gets
+the second east degree
+.variable e3
+TCL TCL name without &, gets
+the third east degree
+.variable e4
+TCL TCL name without &, gets
+the fourth east degree
+.variable n1inp
+Real input for n1 in degrees
+.variable n2inp
+Real input for n2 in degrees
+.variable n3inp
+Real input for n3 in degrees
+.variable n4inp
+Real input for n4 in degrees
+.variable e1inp
+Real input for e1 in degrees
+.variable e2inp
+Real input for e2 in degrees
+.variable e3inp
+Real input for e3 in degrees
+.variable e4inp
+Real input for e4 in degrees
+.variable out
+Ascii output string as
+ degrees minutes seconds
+.END

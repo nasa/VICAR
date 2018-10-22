@@ -1,0 +1,310 @@
+gen ba.img 4 3
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen bb.img 4 2 ival=20
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen bc.img 4 4 ival=40
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtmss (ba.img, bb.img, bc.img) bd.img
+Beginning VICAR task gtmss
+gtmss version 2015-09-10
+list bd.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTMSS     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2  20  21  40  41  42  43
+      2       1   2   3  21  22  41  42  43  44
+      3       2   3   4  22  23  42  43  44  45
+      4       3   4   5  23  24  43  44  45  46
+gtmss (ba.img, bb.img, bc.img) bd.img SIZE=(1,1,2,3)
+Beginning VICAR task gtmss
+gtmss version 2015-09-10
+list bd.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTMSS     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp     1       3       5       7
+   Line
+      1       0   1   2  20  21  40  41  42
+      2       1   2   3  21  22  41  42  43
+gtmss (ba.img, bb.img, bc.img) bd.img SIZE=(1,1,6,6)
+Beginning VICAR task gtmss
+gtmss version 2015-09-10
+list bd.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTMSS     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp     1       3       5       7       9
+   Line
+      1       0   1   2  20  21  40  41  42  43
+      2       1   2   3  21  22  41  42  43  44
+      3       2   3   4  22  23  42  43  44  45
+      4       3   4   5  23  24  43  44  45  46
+gtmss (ba.img, bb.img, bc.img) be.img SIZE=(2,2,2,1)
+Beginning VICAR task gtmss
+gtmss version 2015-09-10
+list be.img
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTMSS     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp     1       3
+   Line
+      1       2  22  42
+      2       3  23  43
+gen ha.img 10 10 'HALF
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen hb.img 10 8  'HALF ival=20
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen hc.img 10 10 'HALF ival=40
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtmss (ha.img, hb.img, hc.img) hd.img
+Beginning VICAR task gtmss
+gtmss version 2015-09-10
+list hd.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTMSS     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+      1         0     1     2     3     4     5     6     7     8     9    20    21    22    23    24
+      2         1     2     3     4     5     6     7     8     9    10    21    22    23    24    25
+      3         2     3     4     5     6     7     8     9    10    11    22    23    24    25    26
+      4         3     4     5     6     7     8     9    10    11    12    23    24    25    26    27
+      5         4     5     6     7     8     9    10    11    12    13    24    25    26    27    28
+      6         5     6     7     8     9    10    11    12    13    14    25    26    27    28    29
+      7         6     7     8     9    10    11    12    13    14    15    26    27    28    29    30
+      8         7     8     9    10    11    12    13    14    15    16    27    28    29    30    31
+      9         8     9    10    11    12    13    14    15    16    17    28    29    30    31    32
+     10         9    10    11    12    13    14    15    16    17    18    29    30    31    32    33
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTMSS     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp      16    17    18    19    20    21    22    23    24    25    26    27    28
+   Line
+      1        25    26    27    40    41    42    43    44    45    46    47    48    49
+      2        26    27    28    41    42    43    44    45    46    47    48    49    50
+      3        27    28    29    42    43    44    45    46    47    48    49    50    51
+      4        28    29    30    43    44    45    46    47    48    49    50    51    52
+      5        29    30    31    44    45    46    47    48    49    50    51    52    53
+      6        30    31    32    45    46    47    48    49    50    51    52    53    54
+      7        31    32    33    46    47    48    49    50    51    52    53    54    55
+      8        32    33    34    47    48    49    50    51    52    53    54    55    56
+      9        33    34    35    48    49    50    51    52    53    54    55    56    57
+     10        34    35    36    49    50    51    52    53    54    55    56    57    58
+gtmss (ha.img, hb.img, hc.img) he.img SIZE=(2,3,8,5)
+Beginning VICAR task gtmss
+gtmss version 2015-09-10
+list he.img
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTMSS     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+      1         3     4     5     6     7    23    24    25    26    27    43    44    45    46    47
+      2         4     5     6     7     8    24    25    26    27    28    44    45    46    47    48
+      3         5     6     7     8     9    25    26    27    28    29    45    46    47    48    49
+      4         6     7     8     9    10    26    27    28    29    30    46    47    48    49    50
+      5         7     8     9    10    11    27    28    29    30    31    47    48    49    50    51
+      6         8     9    10    11    12    28    29    30    31    32    48    49    50    51    52
+      7         9    10    11    12    13    29    30    31    32    33    49    50    51    52    53
+      8        10    11    12    13    14    30    31    32    33    34    50    51    52    53    54
+gen ra.img 4 3 'REAL4
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen rb.img 4 2  'REAL4 ival=20
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen rc.img 4 3 'REAL4 ival=40
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtmss (ra.img, rb.img, rc.img) rd.img
+Beginning VICAR task gtmss
+gtmss version 2015-09-10
+list rd.img
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTMSS     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp             1           2           3           4           5           6           7           8
+   Line
+      1       0.000E+00   1.000E+00   2.000E+00   2.000E+01   2.100E+01   4.000E+01   4.100E+01   4.200E+01
+      2       1.000E+00   2.000E+00   3.000E+00   2.100E+01   2.200E+01   4.100E+01   4.200E+01   4.300E+01
+      3       2.000E+00   3.000E+00   4.000E+00   2.200E+01   2.300E+01   4.200E+01   4.300E+01   4.400E+01
+      4       3.000E+00   4.000E+00   5.000E+00   2.300E+01   2.400E+01   4.300E+01   4.400E+01   4.500E+01
+gtmss (ra.img, rb.img, rc.img) re.img SIZE=(2,2,2,1)
+Beginning VICAR task gtmss
+gtmss version 2015-09-10
+list re.img 'REAL4
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTMSS     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp             1           2           3
+   Line
+      1       2.000E+00   2.200E+01   4.200E+01
+      2       3.000E+00   2.300E+01   4.300E+01
+gen xxxim1 nl=5 ns=3
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtgen inp=xxxim1 out=xxxim2 'tiecnvrt  +
+   geotiff=("ModelTiePointTag=(2,3,0,30000.,17000.,0.0)",  +
+          "ModelTiePointTag=(202,103,0,31000.,16000.,0.0)",  +
+          "ModelTiePointTag=(202,3,0,31000.,17000.,0.0)",  +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+Beginning VICAR task gtgen
+gtgen version Fri Jan 11 2008
+gtlist xxxim2
+Beginning VICAR task gtlist
+gtlist version Wed Jan  2 2008
+gen xxxim3 nl=5 ns=2
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtgen inp=xxxim3 out=xxxim4 'tiecnvrt  +
+   geotiff=("ModelTiePointTag=(-1,3,0,30000.,17000.,0.0)",  +
+          "ModelTiePointTag=(199,103,0,31000.,16000.,0.0)",  +
+          "ModelTiePointTag=(199,3,0,31000.,17000.,0.0)",  +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+Beginning VICAR task gtgen
+gtgen version Fri Jan 11 2008
+gtlist xxxim4
+Beginning VICAR task gtlist
+gtlist version Wed Jan  2 2008
+gtmss (xxxim2,xxxim4) xxxim5
+Beginning VICAR task gtmss
+gtmss version 2015-09-10
+gtlist xxxim5
+Beginning VICAR task gtlist
+gtlist version Wed Jan  2 2008
+gen xxxim1 nl=5 ns=4
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtgen inp=xxxim1 out=xxxim2 'tiecnvrt  +
+   geotiff=("ModelTiePointTag=(2,3,0,500000.,1700000.,0.0)",  +
+          "ModelTiePointTag=(202,103,0,501000.,1600000.,0.0)",  +
+          "ModelTiePointTag=(202,3,0,501000.,1700000.,0.0)",  +
+          "ProjectedCSTypeGeoKey=32637(PCS_WGS84_UTM_zone_37N)",  +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+Beginning VICAR task gtgen
+gtgen version Fri Jan 11 2008
+gtlist xxxim2
+Beginning VICAR task gtlist
+gtlist version Wed Jan  2 2008
+gen xxxim3 nl=5 ns=2
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtgen inp=xxxim3 out=xxxim4 'tiecnvrt  +
+   geotiff=("ModelTiePointTag=(-1,3,0,500000.,1700000.,0.0)",  +
+          "ModelTiePointTag=(199,103,0,501000.,1600000.,0.0)",  +
+          "ModelTiePointTag=(199,3,0,501000.,1700000.,0.0)",  +
+          "ProjectedCSTypeGeoKey=32637(PCS_WGS84_UTM_zone_37N)",  +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+Beginning VICAR task gtgen
+gtgen version Fri Jan 11 2008
+gtlist xxxim4
+Beginning VICAR task gtlist
+gtlist version Wed Jan  2 2008
+gtmss (xxxim2,xxxim4) xxxim5 'overlap1
+Beginning VICAR task gtmss
+gtmss version 2015-09-10
+gtlist xxxim5
+Beginning VICAR task gtlist
+gtlist version Wed Jan  2 2008
+list xxxim2
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTGEN     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp     1       3
+   Line
+      1       0   1   2   3
+      2       1   2   3   4
+      3       2   3   4   5
+      4       3   4   5   6
+      5       4   5   6   7
+list xxxim4
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTGEN     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp     1
+   Line
+      1       0   1
+      2       1   2
+      3       2   3
+      4       3   4
+      5       4   5
+list xxxim5
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+ Task:GTMSS     User:wlb       Date_Time:Fri Jan  8 13:05:23 2016
+     Samp     1       3       5
+   Line
+      1       0   1   2   0   1
+      2       1   2   3   1   2
+      3       2   3   4   2   3
+      4       3   4   5   3   4
+      5       4   5   6   4   5
+gen xxxim1 nl=5 ns=3
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtgen inp=xxxim1 out=xxxim2 'tiecnvrt  +
+   geotiff=("ModelTiePointTag=(2,3,0,30000.,17000.,0.0)",  +
+          "ModelTiePointTag=(202,103,0,31000.,16000.,0.0)",  +
+          "ModelTiePointTag=(202,3,0,31000.,17000.,0.0)",  +
+          "GTRasterTypeGeoKey=1(RasterPixelIsArea)")
+Beginning VICAR task gtgen
+gtgen version Fri Jan 11 2008
+gtlist xxxim2
+Beginning VICAR task gtlist
+gtlist version Wed Jan  2 2008
+gen xxxim3 nl=5 ns=2
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtmss (xxxim2,xxxim3) xxxim4 'nomapck
+Beginning VICAR task gtmss
+gtmss version 2015-09-10
+gtlist xxxim4
+Beginning VICAR task gtlist
+gtlist version Wed Jan  2 2008
+disable-log

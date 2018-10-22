@@ -1,0 +1,29 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM interloc
+
+   To Create the build file give the command:
+
+		$ vimake interloc			(VMS)
+   or
+		% vimake interloc			(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	interloc
+#define R2LIB
+
+#define MODULE_LIST interloc.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_VRDI
+
+#define FTNINC_LIST fortport
+/************************* End of Imake file ***************************/

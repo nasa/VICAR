@@ -1,0 +1,13 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+!THIS IS A TEST FILE FOR OLDGEOMA2IBIS, a program that only runs under VMS.
+DCL ASS WMS_TEST_WORK:[TESTDATA.MIPL.VGR]F1636832.GPR GEO
+LIST GEO (1,1,1,8) 'HEX
+LIST GEO (1,10,1,8) 
+OLDGEOMA2IBIS GEO I
+LABEL-LIST I    !CHECK NAH,NAV MATCH  HEX VALUES (AFTER CONVERSION TO DECIMAL)
+IBIS-LIST  I
+end-proc

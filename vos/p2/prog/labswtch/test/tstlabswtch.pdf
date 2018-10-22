@@ -1,0 +1,33 @@
+procedure
+refgbl $autousage
+refgbl $echo
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+write " "
+write " The Test Data are handled for both VMS and UNIX in this PDF."
+write " At present (Sep 1994), in order to run the program, the"
+write " following data files MUST be copied to the LOCAL directory"
+write " where the program resides:"
+write "                              OLD     NEW (VMS or UNIX execution)"
+write "  MIPLDISK:[MIPL.VGR]F1636832.GEO ==> F1636832.GEO"
+write " "
+write " This UNIX restriction on the data will be changed eventually."
+write " "
+write " "
+write "prepare some files for the test"
+gen B nl=10 ns=10
+write "list label of F1636832.GEO and B"
+label-list (F1636832.GEO,B)
+write "Put the label of F1636832.GEO on the data of B and call it C"
+labswtch (F1636832.GEO,B) C
+write "The image should have labels from an IO picture and with a format"
+write "of byte, nl=10 ns=10 and a 10 by 10 byte image"
+label-list C
+list C 
+write "Now do the same but copy only part of the image"
+labswtch (F1636832.GEO,B) C SIZE=(5,5,5,5)
+label-list C
+list C
+END-PROC

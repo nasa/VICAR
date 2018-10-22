@@ -1,0 +1,8 @@
+Procedure help=*
+Refgbl $echo
+refgbl $autousage
+Body
+let $echo="no"
+write  "Test of subroutine lspfit"
+tlspfit
+End-proc

@@ -1,0 +1,150 @@
+procedure help=*
+
+PARM PCA     KEYWORD VALID=(PCA,NOPCA) DEFAULT=NOPCA
+
+refgbl $syschar
+refgbl $echo
+refgbl $autousage
+body      
+let _onfail="continue"
+let $echo="yes"
+let $autousage="none"
+
+local FILES STRING COUNT=0:100
+
+!make sure debug is off
+flag-del debug
+
+!create test files
+gen TEST01.IMG 5 5
+
+if ($syschar(1) = "VAX_VMS")
+  dcl copy TEST01.IMG TEST02.IMG
+  dcl copy TEST01.IMG TEST03.IMG 
+  dcl copy TEST01.IMG TEST03.IMG
+  dcl create/dir [.tstwildcard]
+  dcl copy TEST01.IMG [.tstwildcard]TEST01.IMG
+  dcl copy TEST01.IMG [.tstwildcard]TEST02.IMG
+else
+  ush cp TEST01.IMG TEST02.IMG
+  ush cp TEST01.IMG TEST03.IMG
+  ush mkdir tstwildcard
+  ush cp TEST01.IMG tstwildcard
+  ush cp TEST02.IMG tstwildcard 
+end-if
+
+if (PCA="PCA") flag-add debug
+
+if ($syschar(1) = "VAX_VMS")
+  wildcard TEST*.IMG FILES
+  disp FILES
+!'FILES' should include:
+!      [dir]TEST01.IMG;1, [dir]TEST02.IMG;1, [dir]TEST03.IMG;2
+!where [dir] is the current default directory
+
+  wildcard TEST03.* FILES
+  disp FILES
+!'FILES' should include:
+!   [dir]TEST03.IMG;2 
+!where [dir] is the current default directory
+
+  wildcard TEST03.*;* FILES
+  disp FILES
+!'FILES' should include:
+!   [dir]TEST03.IMG;2, [dir]TEST03.IMG;1
+!where [dir] is the current default directory
+
+  wildcard [.*wildcard]*.*;* FILES
+  disp FILES
+!'FILES' should include:
+!   [dir.tstwildcard]TEST01.IMG;1, [dir.tstwildcard]TEST02.IMG;1
+!where [dir] is the current default directory
+
+else
+  wildcard inp='TEST*.IMG' loc=FILES n=50
+!  wildcard TEST*.IMG FILES
+  disp FILES
+!'FILES' should include:
+!      [dir]TEST01.IMG, [dir]TEST02.IMG, [dir]TEST03.IMG
+!where [dir] is the current default directory
+
+  wildcard inp='TEST03.*' loc=FILES
+  disp FILES
+!'FILES' should include:
+!   [dir]TEST03.IMG 
+!where [dir] is the current default directory
+
+  wildcard inp='TEST02.*' loc=FILES na=5 di='./tstwildcard'
+  disp FILES
+!'FILES' should include:
+!   [dir]TEST03.IMG
+!where [dir] is the current default directory
+
+  wildcard inp='*.*' loc=FILES na=5 di='./*wildcard'
+  disp FILES
+!'FILES' should include:
+!   [dir/tstwildcard/TEST01.IMG, [dir/tstwildcard/TEST02.IMG
+!where [dir] is the current default directory
+end-if
+!***************************
+! clean-up
+!***************************
+flag-del debug
+
+if ($syschar(1) = "VAX_VMS")
+  dcl del/log TEST01.IMG;*
+  dcl del/log TEST02.IMG;*
+  dcl del/log TEST03.IMG;*
+  dcl del/log [.tstwildcard]TEST01.IMG;*
+  dcl del/log [.tstwildcard]TEST02.IMG;*
+  dcl set prot=O:RWED tstwildcard.dir
+  dcl del/log tstwildcard.dir;*
+else
+  ush rm TEST01.IMG
+  ush rm TEST02.IMG
+  ush rm TEST03.IMG
+  ush rm tstwildcard/TEST01.IMG
+  ush rm tstwildcard/TEST02.IMG
+  ush rmdir tstwildcard
+end-if
+
+
+END-PROC
+.title
+tstwildcard -- Test PDF for wildcard
+.help
+
+	Test procedure:
+		1) create test files
+		2) use wildcard to find files
+
+	wildcard is used four times to test the use of the wildcard asterisk
+	in the four possible fields (or parts of fields):
+		directory:*.extension;version
+		directory:filename.*;version
+		directory:filename.extension;*
+		*:*.*;version
+        The durectory defaults to the current directory.
+	Note that when version is not wildcarded, the most recent version
+	(i.e. highest version number) should be returned.
+.page
+
+		Validation of Test
+
+	After each execution of wildcard, the contents of variable FILES
+	is displayed. Assuming no files existed in the current directory
+	with the same names as the test files, FILES should contain those
+	filenames specified after each test part.
+.page
+
+		PCA option
+
+	This test can be run with PCA assuming wildcard was compiled and
+	linked with the PCA option. To run the test with PCA use:
+  		VICAR>tstwildcard 'PCA
+.level1
+.variable pca
+Keyword specifying whether
+or not to exercise PCA
+data collection during test
+.end

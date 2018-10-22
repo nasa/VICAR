@@ -1,0 +1,505 @@
+ process help=*
+ ! pdf for PROGRAM F2
+ PARM INP TYPE=STRING   DEFAULT=--  COUNT=0:18 
+ PARM OUT TYPE=STRING               COUNT=1
+ PARM SIZE TYPE=INTEGER DEFAULT=--  COUNT=0:4
+ PARM BANDS TYPE=INTEGER DEFAULT=-- COUNT=0:2 
+ PARM SL TYPE=INTEGER   DEFAULT=--  COUNT=0:1
+ PARM SS TYPE=INTEGER   DEFAULT=--  COUNT=0:1
+ PARM NL TYPE=INTEGER   DEFAULT=--  COUNT=0:1
+ PARM NS TYPE=INTEGER   DEFAULT=--  COUNT=0:1
+ PARM SB TYPE=INTEGER	DEFAULT=--  COUNT=0:1
+ PARM NB TYPE=INTEGER	DEFAULT=--  COUNT=0:1
+ PARM ORG TYPE=STRING   DEFAULT=--  COUNT=0:1 VALID=(BSQ,BIL,BIP)
+ PARM FORMAT KEYWORD  VALID=(BYTE,HALF,FULL,REAL) DEFAULT=-- COUNT=0:1
+ PARM FUNCTION TYPE=STRING       DEFAULT="IN1"
+ PARM FU2      TYPE=STRING       DEFAULT=""
+ PARM FU3      TYPE=STRING       DEFAULT=""
+ PARM FU4      TYPE=STRING       DEFAULT=""
+ PARM TRUNC    TYPE=KEYWORD      DEFAULT=-- COUNT=0:1 VALID=TRUNC
+ PARM EXCLUDE  TYPE=REAL         DEFAULT=-- COUNT=0:20
+ PARM LIMITS   TYPE=REAL         DEFAULT=-- COUNT=(0,2)
+ PARM REPLACE  TYPE=REAL         DEFAULT=-- COUNT=0:1
+ PARM DUMPCODE TYPE=KEYWORD VALID=(DUMP,NODUMP) DEFAULT=NODUMP
+ END-PROC
+!# ANNOT ICON = f2
+!# parm inp(3-18) hints=default
+.TITLE
+ PROGRAM F2
+.HELP
+ PURPOSE:
+
+ F2 allows general arithmetic operations to be performed on one to
+ eighteen input images in either byte, halfword, fullword integer
+ or fullword real formats (or any combination of these types).
+ It now allows for arithmetic operations between three dimensional input files
+ and can produce a three dimensional output.  All data organizations, BSQ, BIL,
+ and BIP, are supported.  
+ The arithmetic operation is specified by a FORTRAN or C-like expression
+ which can include the following operators (synonyms connected by an =):
+    
+        + - * / ** unary-
+	LOG   = ALOG    =  LN  (all these = natural (base e) log)
+	LOG10 = ALOG10         (all these = common (base 10) log)
+        SQRT   ABS   AINT = INT
+        SIN    COS  TAN    ASIN  ACOS  ATAN  ATAN2
+        AMAX1 = MAX  AMIN1 = MIN
+        AMOD   MOD .AND.  .OR.  .XOR.  .NOT.
+        .LT.  .LE. .EQ.   .NE.  .GT.  .GE.
+
+ as well as the following C-operators:
+
+  &    &&   |    ||    %   ^   !  
+  ==   !=   >=   <=   >   <   >>   <<
+
+ Operands to F2 can be :
+	
+	integers
+	floating point numbers
+	IN1	IN2	IN3	IN4  ...  IN18
+	LINE 	SAMP    BAND
+
+ The function string can include constants, including constants expressed
+ in floating point notation. The string can also include TCL variable 
+ references. 
+
+ The function string length is limited to 250 characters.
+ However, the fu2, fu3, and fu4 parameters can be used for longer functions.
+ The contents of function, fu2, fu3, and fu4 are concatenated. The fu2, fu3,
+ and fu4 parameters also are limited to 250 characters each. The limit is
+ based on TAE's MAXSTRSIZ value of 250 in taeconf.inp. Adding more fu
+ extensions to function is possible, e.g. fu5, fu6, ... However, MAXCODE in
+ knuth.com may need to be lengthened as the length of compiled code 
+ increases with increasing function string length.
+	
+ F2 can operate on zero inputs to generate an output using the
+ operands LINE, SAMP, and BAND.
+.page	
+ The current version of F2 has the following improvements over the 
+ original (1976) version:
+
+	1.  Allows up to 18 input files
+	2.  Handles byte, halfword, fullword, or real input data files,
+	    and allows mixed format cases.
+	3.  Significant runtime speedups due to byte lookup tables
+	    and implementation of new Vicar2 I/O.
+        4.  Function string parameter expanded to a maximum of 250 characters.
+	5.  Exclude, limits, and replace parameter provided.
+	6.  New KNUTH subroutines allow for C-Language constructs.
+	7.  Unix-Compatible byte-order independent operation.
+.page
+ F2 performs arithmetic operations on image files.  The program
+ uses two library routines, KNUTH and XKNUTH, to compile and
+ execute FORTRAN or C-like expressions entered by the parameters in the
+ FUNCTION expression such as:
+ 	
+  ((IN1+IN2)*(AINT(ALOG10(IN1*IN2**2))+3.14+IN1/22)+4*(LINE.EQ.SAMP)
+ or:
+  ((in1 + in2) % (3*(line!=samp))) << 3 
+
+ IN1 is an element from the first input and IN2 is the corresponding 
+ element from the second input. KNUTH compiles the expression into 
+ instructions executable by XKNUTH. The expression is applied to the
+ pixels from  each input in XKNUTH to produce the output picture.  When
+ performing  arithmetic, F2 converts all integer operands to real and
+ executes  single precision floating point computations.  The exceptions
+ are  the logical operators .AND.(&), .OR.(|), .XOR.(^), as well as the
+ shift operators (>>) and (<<), all of which operate bitwise
+ on  the 4-byte integer equivalent to the  truncated  floating point 
+ number.  The final result from XKNUTH is converted back to integer by
+ rounding,  which is  the default, or by truncation if 'TRUNC is specified.
+ The logical values  'TRUE'  and  'FALSE' 
+ when produced, are  interpreted as 1 and 0  respectively.  The logical NOT 
+ operates only on the  values 0 and 1.
+
+ Because of the type of calculations done on images, the routine XKNUTH
+ is designed to never abort regardless of input values.  Illegal 
+ operations result in the generation of a "reasonable" result as 
+ follows: a) divide by zero causes divide by 1.E-6;  b) log of a
+ negative number causes log its absolute value, etc.  The routine KNUTH 
+ quits processing, prints an error message and returns if a syntax 
+ error is detected in the expression string.  
+
+ To conserve time, repetitive  executions of "F2" are  stored  as a 
+ lookup table.  In the  cases  where both input and output are byte
+ data,  the table is  construced  as a straight lookup initialized with
+ every  possible  combination of  IN1  and IN2 from 1 to 256.  The table
+ is  referenced by  indexing  the  array  using the concatenation of IN1
+ and  IN2 to create  an index  number to  the vector table.  Table is 
+ dimensioned 65536 to accommodate any possible combination of 256 x 256.
+ For more information see KNUTH_LOOKUP.
+
+ In cases which either the input or output is halfword data or  the
+ inputs are small byte files, a hashing table is constructed.  The
+ equation is then executed each time it encounters a unique
+ combination of IN1 and IN2.  A key points to the storage location 
+ of the results of XKNUTH.  The key is then determined by the 
+ remainder of concatenating the two variables and dividing by 
+ 10909.  In case the key must be checked for a match of the 
+ concatenation of IN1 and IN2 which was stored. If no key is  found,
+ a solution is calculated and a concatenation of the result  of the
+ XKNUTH calculation, IN1 and IN2 is stored. In cases which  the key
+ points to an erroneous combination of IN1 and IN2, the  new values
+ and the new key are stored. 
+
+ If the operands LINE, SAMP, or BAND are used, no table is used and the
+ formula is evaluated at every pixel. This option is also used on
+ images involving fullword or real*4 length input or output, and 
+ with multiple input files (3+). 
+
+ Parameters SL, SS, SB, NL, NS, NB allow the user to specify a certain
+ area or volume of the input files for which the function will be evaluated.
+ Alternatively the SIZE and BANDS parameters may be used.
+.page
+	
+ KNUTH compiles the function expression into instructions that XKNUTH
+ can execute.  For example, the expression "IN1*10+IN2" will be
+ decomposed as
+			LOAD 1
+			MULT 22
+			ADD  2
+			RETN 0
+
+ The IN1 thru IN18 are stored in location 1 thru 18, LINE, SAMP, and BAND
+ are stored in later locations. Space is also separately reserved
+ in the executable buffer for static constants, temporary registers
+ and executable code. For more information, see KNUTH and XKNUTH.
+.page
+
+ EXECUTION:
+    The following is the execution statement for F2:
+        f2 INP  OUT  PARAMS
+ where INP, OUT, and PARAMS are parameters discussed in their respective 
+ parameter section in tutor mode.
+
+ EXAMPLES:
+
+    gen A 10 10 'BYTE
+    gen B 10 10 'BYTE
+    gen H 10 10 'HALF
+    gen F 10 10 'FULL
+    gen R 10 10 'REAL4
+	
+    f2 INP=(A,B) OUT=C FUNCTION="IN2/4 + (ALOG10(IN1/IN2+3))**2"
+ 
+ This example uses the default format specification for
+ input and output.  The input files are A and B, the output is
+ file C.
+ 
+    f2 A C 'HALF FUNCTION="3.3*ALOG(IN1)"
+	
+ This example has only one input.   Output is halfword.
+ 
+    f2 (R,H) C FUNCTION="MAX(IN1,IN2)"
+ 
+ This example has mixed input real and halfword.  The output is in real
+ format.
+	
+    f2 (A,B) C FUNCTION="IN1.OR.IN2"
+	
+ The bitwise logical OR of A and B becomes C. This operation may also
+ be performed using the function "in1|in2", using C-Language for
+ bitwise-or.
+	
+    f2 out=c size=(1,1,100,100) nb=100 'half function="line.eq.samp.eq.band"
+	
+ Produces a 100 x 100 x 100 halfword image with a diagonal in 3D of ones in a
+ space of zeros.  In general, logical operators produce 0 for FALSE and 1 for 
+ TRUE.
+.page
+  
+ RESTRICTIONS:
+	
+The program is restricted to lines of length 600,000 pixels (byte format)
+300,000 pixels (halfword format), or 150,000 pixels (real or fullword format).
+
+The expression must not contain more than 30 constants, 20 variables, 
+or roughly 80 operations.  Embedded blanks are allowed.
+The expression is case insensitive.
+
+If any of the input images have a (3-D) file organization other than BSQ,
+then all of the input images must have the same file organization.
+
+OPERATIONS:
+
+When performing  arithmetic, F2 converts all integer
+operands to real and executes  single precision floating point
+computations.  The exception is  .AND., .OR., .XOR.,>> and << which
+operate on the binary equivalent of the  truncated floating
+point number.  The final result from XKNUTH is converted back to integer by
+rounding, which is the default, or by truncation if 'TRUNC is specified.
+The logical values "TRUE'  and 'FALSE' 
+when produced, are interpreted as 1 and 0 respectively.
+The logical NOT operates only on the logical values 0 and 1. 
+A subtle consequence of converting integers to floating point is
+that exponentiation does not work as expected for negative values
+raised to an integer exponent.  This is because they are interpreted
+as the absolute value raised to a floating point exponent.
+Users should use ABS before exponentiation for even powers.  
+Odd powers can be handled using multiplication and the next smaller 
+even power.
+
+All operations now operate as in standard FORTRAN and C, including
+MIN and MAX. When using the C operations "&" and "&&" recall that
+VICAR interprets "&name" as a dereference operator on the variable
+"name", so for bitwise AND put a space between args, e.g. "in1 & in2".
+For logical AND you must actually use "in1 &&&& in2", because VICAR
+interprets "&&" as an escaped single ampersand. When in doubt, use
+the command .AND. instead.
+.PAGE
+
+ PRECISION: 
+  The precision of values in fullword output images is limited to six
+significant digits because F2 converts all numeric values to real format
+before performing computations.  The variation in fullword values that
+can be expected on different MIPS-supported machines shall not differ by 
+more than 1 in six significant digits.  
+
+Note that for operations that fail when the input is zero, e.g., Divide,
+Log, Tan, subroutine KNUTH imposes a minimum value of 1.0E-20, to which
+any number falling below this limit is converted.  This limit can be
+changed by changing the constant SMALL in the module knuth.h, which is
+in the file knuth.com, currently in the VICAR P1 subroutine source
+library.
+.PAGE
+
+ TIMING: 
+  The following CPU times for a few F2 cases were obtained on a 
+VAX 8650 (MIPL3) in July 1992.  
+                                                CPU Time
+gen f2a 2000 2000 'real
+gen f2b 2000 2000 'real
+f2 (f2a,f2b) x func="(in1+ in2)/2"              187s
+f2 (f2a,f2b) x func="in1+3.7e+05 * in2"         171s
+!
+gen f2a 2000 2000 'byte
+gen f2b 2000 2000 'byte
+f2 (f2a,f2b) x                                   13.7s
+
+For the case of a single BYTE or HALFWORD image, using program STRETCH
+with the FUNCTION parameter is at least twice as fast on the VAX as using 
+the more general F2 program.
+
+
+ WRITTEN BY: 	A. L. ZOBRIST		18 FEBRUARY 1976
+
+ COGNIZANT PROGRAMMER: W. Bunch 2015-08-03
+
+ REVISIONS:
+  1990-12-04 JFM - LIMITS with invalid REPLACE parameter handled
+                   differently.
+  1992-02-09 NDR - Upgraded for Unix, C - constructs
+  1992-04-29 NDR - Moved some routines to KNUTH module.
+  1993-02-25 SP  - Merged in the capabilities to handle 3D images from
+                   F2_3D.
+  1993-03-19 SP  - Corrected initialization of hash table.
+  1993-08-24 NDR - Fixed "Goto jumps into IF Block" warning. REF
+                   FR#83013.
+  1994-02-04 NDR - Fixed Improper handling of 'LINE','SAMP' arguments
+                   when SL != 1. Ref. FR#81717.
+  2006-09-22 ALZ - Fixed EXCLUDE case when floating output type hard
+                   to recreate case but see code comment with initials
+                   "alz" below Ref. AR#112949.
+  2006-09-22 ALZ - Fixed hash table case for two halfword inputs where
+                   the second input has negative values. see comments
+                   with initials "alz" below Ref. AR#112949.
+  2006-09-22 ALZ - The third fix for this AR is going to be in
+                   subroutine XKNUTH Ref. AR#112949.
+  2006-11-28 LWK - Initialize INDEX_L/S/B in GET_FUNCTION
+  2008-03-11 LWK - For cube files, check that all have same ORG
+
+  2011-06-10 RJB - Fixes for linux gcc4.4 compiler, increased func
+                   Char variable to char*512. merged RJB's Jan 10 2008 
+                   changes on Solaris with LWK's version
+  2011-06-24 RJB - Fixed format overrun when pixels >= 10 Gpixels
+  2011-07-22 LWK - Hash table fails when both inputs = -32768, added
+                   special code for that case.
+  2015-08-03 WLB - Added parms fu2, fu3, fu4 to extend the possible
+                   length of function strings.
+
+.LEVEL1
+.VARIABLE INP
+ 0:18 INPUT DATA SETS
+.VARIABLE OUT
+ THE OUTPUT DATA SET
+.VARIABLE SIZE
+ 4 INTEGERS - OPTIONAL
+ A STANDARD VICAR SIZE FIELD
+.vari bands
+(Optional) Window into input
+in band dimension
+.VARIABLE SL
+ INTEGER - OPTIONAL
+ STARTING LINE
+.VARIABLE SS
+ INTEGER - OPTIONAL
+ - STARTING SAMPLE
+.VARIABLE NL
+ INTEGER - OPTIONAL
+ - NUMBER OF LINES
+.VARIABLE NS
+ INTEGER - OPTIONAL
+ - NUMBER OF SAMPLES
+.VARIABLE SB
+(OPTIONAL) STARTING BAND
+.VARIABLE NB
+(OPTIONAL) NUMBER OF BANDS
+.VARIABLE ORG
+(OPTIONAL) IMAGE ORGANIZATION
+.VARIABLE FORMAT
+ OUTPUT PIXEL FORMAT
+ VALID: BYTE, HALF, FULL, REAL
+.VARIABLE FUNCTION
+ STRING - A FUNCTION TO BE
+ APPLIED TO INPUT (<=250 CHARS)
+.VARIABLE FU2
+ STRING - A STRING TO APPEND TO
+ PARAMETER FUNCTION (<=250 CHARS)
+.VARIABLE FU3
+ STRING - A STRING TO APPEND TO
+ PARAMETER FUNCTION (<=250 CHARS)
+.VARIABLE FU4
+ STRING - A STRING TO APPEND TO
+ PARAMETER FUNCTION (<=250 CHARS)
+.VARIABLE TRUNC
+ THE RESULT WILL BE TRUNCATED
+.VARIABLE EXCLUDE
+ ARRAY OF VALUES TO BE 
+ EXCLUDED FROM FUNCTION
+ EVALUATION.	
+.VARIABLE LIMITS
+ RANGE OF VALUES TO BE
+ INCLUDED IN FUNCTION
+ EVALUATION.
+.VARIABLE REPLACE
+ VALUE TO BE PLACED IN
+ OUTPUT FILE WHEN INPUT
+ VALUE IS AN EXCLUDED 
+ VALUE OR IS OUTSIDE OF
+ LIMITS.
+.VARIABLE DUMPCODE
+ DO A SYMBOLIC DUMP OF THE
+ COMPILED CODE ?
+.LEVEL2
+.VARIABLE INP
+ INPut data sets in byte, I*2, I*4, or REAL*4 format.  The format of the
+ input files is taken from its label.  There may be 0 to 18 input data sets.
+.VARIABLE OUT
+ OUTput data set in byte, I*2, I*4, or REAL*4 format. Primary input format
+ is assumed if FORMAT is not specified
+.VARIABLE SIZE
+ (Starting Line, Starting Sample, Number of Lines, Number of Samples)
+ The standard vicar size field. SIZE gives the area of operation on inputs
+ and defines the size of the output.  If larger than any of the inputs,
+ its values are reduced to the minimum line or sample of the inputs.
+ The SIZE parameter takes precedence over SS, SL, NS, NL.  If it is not
+ given (default case), then it gets the information from the first input
+ file label.
+.vari bands
+The bands parameter determines the bands in the input
+files to be processed. It is specified
+as (SB,NB), where
+	SB is the starting band
+	NB is the number of bands to be copied
+(Default is all bands in image.)
+.VARILABLE SL
+ Starting Line - Alternate method of specifying the first SIZE parameter value
+.VARIABLE SS
+ Starting Sample - Alternate method of specifying the first SIZE param value
+.VARIABLE NL
+ Number of Lines - Alternate method of specifying the first SIZE param value
+.VARIABLE NS
+ Number of Samples - Alternate method of specifying the first SIZE param value
+.VARIABLE SB
+Starting Band of window - Can not be defined in SIZE parameter. (Default is
+first band in image.)
+.VARIABLE NB
+Number of Bands of window - Can not be defined in SIZE parameter.  (Default is
+number of bands in image.)
+.VARIABLE ORG
+Image organization for output image when zero input images.  If omitted, output
+image will be BSQ.  Has no effect if there ARE input images.
+.VARIABLE FORMAT
+ Valid values: BYTE, HALF, FULL, REAL.
+ These values correspond to the following data formats:
+ byte (BYTE), integer*2 (HALF), integer*4 (FULL), real*4 (REAL).
+ This parameter specifies the data format of the output file(s).
+ Default is primary input format.
+.VARIABLE FUNCTION
+ Specifies a function to be applied to the input data set.
+ The function, in the form of a FORTRAN or C like expression, to be
+ applied to the input data set(s) to produce the output data
+ set.  The default expression is "IN1".
+ The function string can include constants, including constants expressed
+ in floating point notation.  The string can also include TCL variable
+ references. The function string length is limited to 250 characters.
+ However, the fu2, fu3, and fu4 parameters can be used for longer functions.
+ The contents of function, fu2, fu3, and fu4 are concatenated. The fu2, fu3,
+ and fu4 parameters also are limited to 250 characters each. The limit is
+ based on TAE's MAXSTRSIZ value of 250 in taeconf.inp. Adding more fu
+ extensions to function is possible, e.g. fu5, fu6, ... However, MAXCODE in
+ knuth.com may need to be lengthened as the length of compiled code 
+ increases with increasing function string length.
+.VARIABLE FU2
+ A string to append to parameter FUNCTION (<=250 CHARS). See FUNCTION for
+ details.
+.VARIABLE FU3
+ A string to append to parameter FUNCTION (<=250 CHARS). See FUNCTION for
+ details.
+.VARIABLE FU4
+ A string to append to parameter FUNCTION (<=250 CHARS). See FUNCTION for
+ details.
+.VARIABLE TRUNC
+ Specifies that the results of the calculation will be truncated.
+ Default is that results will be rounded.  This keyword is
+ inoperative if real*4 output is specified.
+.VARIABLE EXCLUDE
+ Array of values to be excluded from function evaluation.  Up to twenty (20)
+ values can be specified.  If any one of the specified values are encountered
+ in the inputs, that pixel is not evaluated by the function and the replace-
+ ment value specified by the REPLACE parameter is placed in the output pixel.
+ If the REPLACE parameter is not specified, the first excluded value among the 
+ input pixels is used as the output pixel.
+.VARIABLE LIMITS
+ This is the user defined range of values to be included in function evaluation.
+ If values fall outside of this range, the REPLACE parameter value is placed on 
+ the output pixel.  If REPLACE is not specified, the lower limit of the range 
+ is used.  If the REPLACE value is outside the valid data range, e.g. -54000 for
+ halfword data, then the closest valid data value is used in the replacement.
+ If the limits are beyond the valid range of the input data, the extremes of the
+ input data values are used, e.g. LIMITS=(-5,240) for byte data yields true 
+ limits of (0,240).
+.VARIABLE REPLACE
+ Value to be placed in output file when input value is an excluded value or is 
+ outside the user specified limits.  REPLACE's value must be within the valid
+ data range of the input file.  If the input file is byte, REPLACE can be any
+ value between (0,255), inclusive.  If a REPLACE is outside this range, the
+ closest valid data value is chosen, e.g. REPLACE=-40000 for halfword data
+ yields a REPLACE=-32768.
+.VARIABLE DUMPCODE
+ Activating the keyword 'DUMP tells F2 to display the symbolic output of 
+ the compiled code produced by the expression-compiler subroutine KNUTH.
+ Its purpose is primarily diagnostic, and allows the examination of the
+ way that KNUTH has interpreted the user's input function.
+
+ For example, the command
+
+        f2 INP=(F1,F2) OUT=X FUNCTION="IN1+SQRT(IN2)" 'DUMP
+
+ will output something like:
+
+	Beginning VICAR task F2
+	   SQRT   2
+	   ADD    1
+	   RETN   0
+	   ...
+
+ Which reads: load the SQRT of register 2 (IN2) into the active 
+ register (which is index 0), then ADD the value of register 1 (IN1)
+ to it and RETurnN the value in the active register 0 -- which is
+ indeed the requested operation.
+
+ Formerly, F2 always displayed this code dump, but this was sometimes
+ inconvienient with long, complex expressions whose dump might require
+ 80 or more output lines in a log file.
+.END

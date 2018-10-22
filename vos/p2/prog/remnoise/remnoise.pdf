@@ -1,0 +1,85 @@
+process help=*
+PARM INP TYPE=STRING COUNT=(1:2)
+PARM OUT TYPE=STRING COUNT=1
+PARM TOL TYPE=REAL COUNT=(0:1) DEFAULT=30.0
+PARM FACTOR TYPE=REAL COUNT=(0:1) DEFAULT=0.5
+END-PROC
+
+.TITLE
+VICAR program REMTOL
+
+.HELP
+PURPOSE:
+Remnoise removes small artifacts, like bit errors, from images.
+At low error rates it performs the same as ADESPIKE. Performance is superior
+to ADESPIKE at bit error rates over one in 500.
+
+EXECUTION:
+remnoise inp=image out=cleaned tol=30.0
+
+Note:
+The TOL parameter is somewhat sensitive to bit error rate and very sensitive to
+the image itself. To tune it take a typical image of interest without noise
+and run the following test with RATE=the expected bit error rate:
+
+addnoise inp=image out=a.img gain=30 rate=100
+remnoise inp=a.img out=b.img tol=10 factor=.5
+f2 inp=(image,b.img) out=c.img function="in1-in2+100"
+hist inp=c.img 'nohist
+
+repeatedly changing TOL each time until the standard deviation listed by hist is 
+a minimum.
+
+The FACTOR parameter is insensitive to bit error rate.
+
+METHOD:
+1. A 3 by 3 pixel box is centered on each pixel of dn J.
+2. A median is computed taking each consecutive 3 pixels going around the box.
+   This makes 8 median values I.
+   I1 I2 I3
+   I4    I5
+   I6 I7 I8
+3. A surface is interpolated using I1-I8
+   The model is: M=sum(I/R)/sum(1/R) where R is the distance of I from the
+   center (1 or 1.414).
+4. An activity measure A is computed from:
+   A=(|I1-I8|+|I3-I6|+|I2-I7|+|I4-I5|)/4
+5. If abs(J-M) > TOL+FACTOR*A then  J=M
+
+HISTORY:
+1-1-99  J Lorre. 
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+.LEVEL1
+.VARI INP
+1. Input image.
+2. Standard deviation 
+   image (optional).
+
+.VARI OUT
+output image.
+
+.VARI TOL
+Fixed noise threshold.
+
+.VARI FACTOR
+Scaling factor for
+the activity measure.
+
+.LEVEL2
+.VARI INP
+1. Input image (required).
+2. Standard deviation image (optional).
+
+.VARI OUT
+output image with noise removed.
+
+.VARI TOL
+Fixed noise threshold term TOL.
+Pixels are changed if their dn values differ from the interpolated model
+by over TOL+FACTOR*A where A is the activity measure.
+
+.VARI FACTOR
+The scale factor used to compute a positionally dependent noise threshold. 
+Pixels are changed if their dn values differ from the interpolated model
+by over TOL+FACTOR*A where A is the activity measure.

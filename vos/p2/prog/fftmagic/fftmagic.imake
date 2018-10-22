@@ -1,0 +1,27 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR PROGRAM fftmagic
+
+   To Create the build file give the command:
+
+		$ vimake fftmagic		(VMS)
+   or
+		% vimake fftmagic		(Unix)
+
+
+************************************************************************/
+
+
+#define PROGRAM	fftmagic
+#define R2LIB
+
+#define MODULE_LIST fftmagic.f
+
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define FTNINC_LIST fortport
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

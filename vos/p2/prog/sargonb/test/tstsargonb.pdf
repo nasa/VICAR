@@ -1,0 +1,224 @@
+procedure
+refgbl $echo
+refgbl $autousage
+refgbl $syschar
+! Dec 19, 2012 - RJB
+! TEST SCRIPT FOR SARGONB
+! tests BYTE, HALF, FULL and REAL images
+!
+! Vicar Programs:
+!       gen list insect  
+!
+! External programs
+!       <none>
+!
+! Parameters:
+!       <none>
+!
+! Requires NO external test data: 
+
+body
+enable-log
+
+let $autousage="none"
+let _onfail="stop"
+
+let $echo="no"
+write " "
+write " BYTE IMAGES  *****************"
+write " "
+let $echo="yes"
+
+!This is a test of SARGONB
+!First, we will test all functions on byte data
+!generate and show the input data
+gen a.img NL=12 NS=15
+list INP=a.img
+
+! Test 1 - Function : MULT=2  (Should double all DNs in the area)
+sargonb a.img b.img MULT 2 (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test 2 - Function : DIV=2    (Should half all DNs in the area)
+sargonb a.img b.img DIVIDE 2 (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test 3 - Function : ADD=50   (Should increase DN values in area by 50)
+sargonb a.img b.img ADD 50 (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test 4 - Function : SUB=5   (Should decrease DN values in area by 5)
+sargonb a.img b.img SUBTRACT 5 (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test 5 - Function : SET=255  (Should SET area to uniform 255 DN)
+sargonb a.img b.img SETTO 255 (1,10,9,10,9,11,1,11)
+list INP=b.img
+
+! Test 6 - Function : ZERO  (Should ZERO out the area)
+sargonb b.img c.img ZERO VERT1=(1,7,9,7,9,8,1,8)
+list INP=c.img
+let $echo="no"
+write " "
+write " BYTE INTERP Options *****************"
+write " "
+let $echo="yes"
+! Test 7  - Function : INTERPOLATE  (Should INTERP for values within area)
+sargonb c.img b.img INTERP (200,100) (5,5, 8,8, 5,10, 5,13, 2,8)
+list INP=b.img
+
+! Test 8 - Subfunction : MIN=1 MAX=254 (Should IGNORE values outside this range 
+!while interpolating.)
+sargonb c.img b.img INTERP (200,100,1,254) (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test  9 - Subfunction : PERC=60 (Should get APPROX same interpolation as with
+!PERC=100 but using fewer points)
+sargonb c.img b.img INTERP (200,60) (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test 10 - Subfunction : RADI=2 (Should INTERP using only border points within 
+!2 pixels of this pixel)
+sargonb c.img b.img INTERP (2,100) (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+let $echo="no"
+write " "
+write " HALF IMAGES *****************"
+write " "
+let $echo="yes"
+
+!Now, do same stuff with HALFWORD data
+gen NL=12 NS=15 'HALF OUT=hen.img
+list INP=hen.img
+
+! Test 11 - Function : MULT=2  (Should double all DNs in the area)
+sargonb hen.img hb.img MULT 2 (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test 12 - Function : DIV=2    (Should half all DNs in the area)
+sargonb hen.img hb.img DIVIDE 2 (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test 13 - Function : ADD=50   (should increase DN values in area by 50)
+sargonb hen.img hb.img ADD 50 (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test 14 - Function : SUB=50   (Should decrease DN values in area by 50)
+sargonb hen.img hb.img SUBTRACT 50 (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test 15 - Function : SET=255  (Should SET area to uniform 255 DN)
+sargonb hen.img hb.img SETTO 255 (1,10,9,10,9,11,1,11)
+list INP=b.img
+
+! Test 16 - Function : ZERO  (Should ZERO out the area)
+sargonb hb.img c.img ZERO VERT1=(1,7,9,7,9,8,1,8)
+list INP=c.img
+let $echo="no"
+write " "
+write " HALF INTERP Options *****************"
+write " "
+let $echo="yes"
+
+! Test 17 - Function : INTERPOLATE  (Should INTERP for values within area)
+sargonb c.img b.img INTERP (200,100) (5,5, 8,8, 5,10, 5,13, 2,8)
+list INP=b.img
+
+! Test 18 - Subfunction : MIN=1 MAX=254 (Should ignore values outside this range 
+!while interpolating)
+sargonb c.img b.img INTERP (200,100,1,254) (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test 19 - Subfunction : PERC=60 (Should get approx same interpolation as with
+!PERC=100 but using fewer points)
+sargonb c.img b.img INTERP (200,60) (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+
+! Test 20 - Subfunction : RADI=2 (Should INTERP using only border points within 
+!2 pixels of this pixel)
+sargonb c.img b.img INTERP (2,100) (5,5,8,8,5,10,5,13,2,8)
+list INP=b.img
+let $echo="no"
+write " "
+write " MULTIPLE POLYGONS  Options *****************"
+write " "
+let $echo="yes"
+
+! Test 21 - Finally, test the new feature "multiple polygons"
+gen a.img 100 100 IVAL=120 LINC=0 SINC=0
+sargonb a.img b.img ADD 10 (2,2,2,10,10,10,10,2) +
+   MULT 2 (81,12,81,20,90,20,90,12)+
+   divide 3 (21,21,21,25,30,25,30,21) SETTO 250 (31,42,31,47,41,47,41,42)+
+   zero -- (51,51,51,55,55,55,55,51)
+
+list b.img (2,2,9,9)
+list b.img (81,12,10,9)
+list b.img (21,21,10,5)
+list b.img (31,42,11,6)
+list b.img (51,51,5,5)
+let $echo="no"
+let _onfail="continue"
+write "******** The following step should ABEND *********"
+let $echo="yes"
+! Test 22 - AR9897 on divide-by-zero error.  This case will generate an ABEND
+sargonb b.img z.img DIVIDE 0 (21,21,21,25,30,25,30,21)
+let _onfail="stop"
+!
+let $echo="no"
+write " "
+write " CONTINUE --- A more Complicated example"
+write "   on 512x512 image - insecting quadrants"
+write "   on BYTE, HALF, FULL and REAL data"
+write " "
+let $echo="yes"
+gen A 512 512  LINC=1 SINC=3 FORMAT=BYTE
+gen B 256 256  LINC=1 SINC=-2 ival=200 FORMAT=BYTE
+gen C 256 256  LINC=1 SINC=5 ival=10 FORMAT=BYTE modulo=112
+
+!                     (B,B,  B,  B,A,  A)
+insect (A,B) W insect=(1,1,256,256,1,257)
+insect (W,C) X insect=(1,1,256,256,257,1)
+! Test 23 - Complicated example 
+sargonb X  B1 func1=setto const1=255 vert1=(255,255,257,255,257,257,255,257)
+list B1 (251,251,10,10)
+
+
+gen A 512 512  LINC=1 SINC=3 FORMAT=HALF
+gen B 256 256  LINC=1 SINC=-2 ival=500 FORMAT=HALF
+gen C 256 256  LINC=1 SINC=5 ival=20 FORMAT=HALF modulo=412
+
+!                     (B,B,  B,  B,A,  A)
+insect (A,B) W insect=(1,1,256,256,1,257)
+insect (W,C) X insect=(1,1,256,256,257,1)
+! Test 24 - 
+sargonb X  B2 func1=setto const1=2000 vert1=(255,255,257,255,257,257,255,257)
+list B2 (251,251,10,10)
+
+gen A 512 512  LINC=1 SINC=3 FORMAT=FULL
+gen B 256 256  LINC=1 SINC=-2 ival=500 FORMAT=FULL
+gen C 256 256  LINC=1 SINC=5 ival=20 FORMAT=FULL modulo=412
+
+!                     (B,B,  B,  B,A,  A)
+insect (A,B) W insect=(1,1,256,256,1,257)
+insect (W,C) X insect=(1,1,256,256,257,1)
+! Test 25 - 
+sargonb X  B3  func1=setto const1=10000 vert1=(255,255,257,255,257,257,255,257)
+list B3 (251,251,10,10)
+
+gen A 512 512  LINC=1 SINC=3 FORMAT=REAL
+gen B 256 256  LINC=1 SINC=-2 ival=500 FORMAT=REAL
+gen C 256 256  LINC=1 SINC=5 ival=20 FORMAT=REAL modulo=412
+
+!                     (B,B,  B,  B,A,  A)
+insect (A,B) W insect=(1,1,256,256,1,257)
+insect (W,C) X insect=(1,1,256,256,257,1)
+! Test 26 - 
+sargonb X  B4  func1=setto const1=10000 vert1=(255,255,257,255,257,257,255,257)
+list B4 (251,251,10,10)
+
+
+let $echo="no"
+
+disable-log
+end-proc
+

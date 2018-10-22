@@ -1,0 +1,43 @@
+PROCESS HELP=*
+PARM INP    TYPE=STRING COUNT=1
+PARM OUT    TYPE=STRING COUNT=1
+END-PROC
+.TITLE
+VICAR2 program ddd2vic
+            
+.HELP
+PURPOSE:
+
+ddd2vic is a VICAR2 applications program which is used to convert Mars Global
+Surveyor "ddd" formatted data into VICAR formatted data.  Information about the 
+file which is held in the ddd header is placed in the "PROPERTY" region of the
+VICAR header.
+.page 
+EXECUTION STATEMENT:
+		  ddd2vic in out 
+
+OPERATION:
+ddd2vic first reads and parses the "ddd" header, extracting number of lines and
+samples as well as other useful information. The data is then moved from the
+"ddd" to VICAR file.  Finally, the VICAR header is updated with the information
+removed from the "ddd" header.
+WRITTEN BY: Steve Levoe ( original perl script )
+            Barbara McGuffie - Vicar code
+
+COGNIZANT PROGRAMMER: Barbara McGuffie
+
+REVISION:  1.0 -- Original Version
+
+.LEVEL1
+.VARI INP
+The input MGS 
+"ddd" data set.
+.VARI OUT
+Output VICAR 
+data set.
+.LEVEL2 
+.END 
+.VARI INP
+The input MGS "ddd" data set.
+.VARI OUT
+Output VICAR data set.

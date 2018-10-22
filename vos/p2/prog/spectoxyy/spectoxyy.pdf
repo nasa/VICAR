@@ -1,0 +1,202 @@
+process help=*
+
+parm INP	count=3:10
+parm OUT	count=3:4
+parm CONVERT	type=real count=0:10 default=--
+parm LAMDA	type=real count=0:10
+parm SOURCE	type=real count=0:41 default=--
+parm ILLUMIN	type=keyword valid=("D65","SUN") default="SUN"
+parm MODE       type=keyword valid=("RADIANCE","REFLECT") default="RADIANCE"
+parm RANGE      type=real valid=(.1:100.) default=1.0
+end-proc
+
+.title
+VICAR2 program "spectoxyy"
+
+.help
+PURPOSE
+Spectoxyy converts up to 10 registered multispectral images taken through
+narrow band filters and either in units of spectral radiance or in
+units of spectral reflectance and converts these into three images
+representing x and y chromaticity coordinates and Y tristimulus.
+
+EXECUTION EXAMPLES:
+spectoxyy inp=(in1,in2,in3,in4) out=(x,y,Y) +
+  convert=(.0001,.0001,.0001,.0001) lamda=(460,540,590,630) +
+  illumin=SUN mode=REFLECT
+or
+spectoxyy inp=(in1,in2,in3,in4) out=(x,y,Y,hist) +
+  convert=(1.,1.,1.,1.) lamda=(460,540,590,630) +
+  illumin=D65 mode=RADIANCE
+
+Note: "hist" is a 2 dimensional histogram of the chromaticity space.
+The x and y axes pass through (0,0) and the diagonal passes through 
+(0,1) and (1,0). The enclosed triangle contains the valid chromaticity
+space. Each pixel or bin contains the log of the accumulated counts
+falling on that location. Horizontal is x and vertical is y.
+
+WRITTEN BY: 		J Lorre 5/23/96
+
+THEORY:
+
+Colorimetric units of xyY are obtainable from an input spectrum by
+integrating the spectrum with color matching functions. 
+
+If S is the radiance spectrum of the target,
+   R is the reflectance spectrum of the target,
+   I is the illuminating spectrum,
+   Cx is the x color matching function, 
+   Cy is the y color matching function, 
+   Cz is the z color matching function, 
+
+then one can compute tristimulus values Tx,Ty,Tz from:
+   Tx=k*sum(S*Cx) radiance
+   Ty=k*sum(S*Cy)
+   Tz=k*sum(S*Cz)
+or
+   Tx=k*sum(R*I*Cx) reflectance
+   Ty=k*sum(R*I*Cy)
+   Tz=k*sum(R*I*Cz)
+
+where k=100/sum(I*Cy)
+
+Then x=Tx/(Tx+Ty+Tz)
+     y=Ty/(Tx+Ty+Tz)
+     Y=Ty
+
+I is corrected for the distance of the target (RANGE keyword) from the sun
+by dividing it by 1/(RANGE*RANGE), RANGE is in AU.
+Notice that in reflectance mode the sun distance is ignored.
+
+ILLUMINANTS:
+
+You have a choice of two illuminants. These are:
+1. D65 which represents a 
+daylight spectrum on Earth with direct filtered sunlight and blue sky
+scattering, and 
+2. Unfiltered sunlight above the Earth's atmosphere.
+
+With these you can reconstruct the color of a scene as it appears on Mars or
+as it would appear on Earth (even if it isn't).
+
+IMPLEMENTATION:
+
+The program steps are as follows:
+
+1. Reorder the input files into ascending wavelength order.
+2. For each pixel:
+3.	Compute the second derivative spline coefficients for interpolation.
+4.	Loop on wavelength from 380 to 780 nm by 10 nm intervals.
+5.		Interpolate spectrum amplitude.
+6.		Integrate spectrum with color matching functions.
+7.	Get x,y,Y
+8.	Update 2-d chromaticity space histogram (option).
+9. Write log of histogram.
+
+Warning 1: There is no colorimetric absolute for Y tristimulus value.
+Data typically ranges from 0 to 100, 100 being for a perfect Lambertian
+surface. Calibrated devices expect
+to see Y on the order of 10 to 90 or so. If your outputs for Y are wildly
+far from this (like 20000 or .0003) then the display device cannot 
+represent them. You can adjust your output using the CONVERT parameters, the
+RANGE parameter, or just multiply the Y image by a constant. 
+
+Warning 2: This program takes the highly unusual step of adjusting the D65
+spectrum to match the solar spectrum above the atmosphere at the 780 nm
+point. This is to help to get reasonable Y tristimulus values in the radiance
+mode should you wish to use D65.
+
+.level1
+.vari INP
+input image files
+(3 to 10)
+
+.vari OUT
+output image files
+(3 to 4)
+
+.vari CONVERT
+input image conversion factors
+for radiance or reflectance.
+Defaults to 1.0
+
+.vari LAMDA
+Wavelength of input
+images in nanometers.
+(ie: 556. for example)
+
+.vari ILLUMIN
+Illumination source
+"D65" or "SUN"
+Defaults to SUN
+
+.vari MODE
+Input image data.
+"REFLECT" or "RADIANCE"
+Defaults to RADIANCE
+
+.vari RANGE
+Range to the sun in AU.
+Defaults to 1
+Ignored in reflectance
+mode.
+
+.vari SOURCE
+Illumination source
+spectrum. Override
+of ILLUMIN options.
+
+.level2
+.vari INP
+INP = (input1,...,inputN), where the inputs are up to ten 
+images in spectral radiance or spectral reflectance.  
+The images must have been taken
+with different filters and must all be the same size.
+
+.vari OUT
+Three output images in REAL format representing:
+1. x chromaticity
+2. y chromaticity
+3. Y tristimulus
+There is an optional fourth output file containing a 2-d histogram of
+the chromaticity space. 
+
+.vari CONVERT
+Input image conversion factors for radiance or reflectance.
+The input images are multiplied by these factors to convert them into
+whatever units the software requires.
+For reflectance images the software requires data from 0.0 to 1.0.
+For radiance images the software requires data should be in units of 
+Watts/meter**2/micron/srteradian and
+should be numbers around 200 at 500 nanometers, if at an Earth distance.
+CONVERT defaults to 1.0 for all inputs.
+
+.vari LAMDA
+Wavelength of the input images in nanometers.
+(ie: 556. for example)
+
+.vari ILLUMIN
+Illumination source. Options are: "D65" or "SUN"
+D65 represents daylight at average phase angles under the Earth's
+atmosphere, including direst sunlight and blue sky scattering.
+D65 is normalized to 100 at 560 nm.
+SUN represents unfiltered sunlight above the Earth's atmosphere.
+Defaults to SUN
+
+.vari MODE
+Input image data units. Options are: "REFLECT" or "RADIANCE"
+Defaults to RADIANCE
+
+.vari RANGE
+Range to the sun in AU.
+Defaults to 1
+Ignored in reflectance mode.
+Used to correct the illuminant ( D65 or SUN but not SOURCE) for the distance
+to the sun in radiance mode only.
+
+.vari SOURCE
+Illumination source spectrum. One can override the provided  ILLUMIN options
+with ones own spectrum. There must be 41 values beginning at 380 nm and 
+ending at 780 nm.
+
+.end

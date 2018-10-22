@@ -1,0 +1,17 @@
+/***********************************************************************
+                     IMAKE FILE FOR PROGRAM camparam
+   To Create the build file give the command:
+		$ vimake camparam			(VMS)
+   or
+		% vimake camparam			(Unix)
+************************************************************************/
+#define PROGRAM	camparam
+#define R2LIB
+#define MODULE_LIST camparam.f
+#define MAIN_LANG_FORTRAN
+#define USES_FORTRAN
+#define LIB_MATH77
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+/************************* End of Imake file ***************************/

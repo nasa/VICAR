@@ -1,0 +1,51 @@
+process help=*
+PARM INP	TYPE = STRING   COUNT=1
+PARM OUT	TYPE = STRING   COUNT=1
+
+!# annot function="Vicar Data Conversion"
+!# annot keywords=(Mark,IBIS,tiepoint,file,format)
+END-PROC
+
+.TITLE
+Converts tiepoints from Mark to IBIS format or vice-versa
+
+.HELP
+PURPOSE:
+Converts between tiepoint file formats.
+If the input is an ibis file it converts it to a mark file.
+If the input is a mark file it converts it to an ibis file.
+
+EXECUTION:
+
+markibis may be executed in the following manner:
+
+                TRACKER3 INP=(LEFT,RIGHT) OUT=A
+		MARKIBIS INP=A OUT=B
+
+.PAGE
+OPERATION:
+If the mark file is ordered as:
+left_line,left_samp,right_line_right_samp  ( as produced by tracker3 )
+then the ibis file is ordered as:
+column 1= right_line                       ( as required for geoming from
+column 2= right_samp                         left image to right image )
+column 3= left_line
+column 4= left_samp
+
+.PAGE
+HISTORY:
+
+ORIGINALLY WRITTEN BY: J Lorre 11/1/95
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+.LEVEL1
+.VARI INP
+STRING-input dataset.
+.VARI OUT
+STRING-output dataset.
+
+.LEVEL2
+.VARI INP
+STRING-input dataset.
+.VARI OUT
+STRING-output dataset.

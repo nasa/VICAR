@@ -1,0 +1,101 @@
+process help=*
+  PARM INP  	(STRING,40)		COUNT=2
+  PARM OUT  	(STRING,40)
+  PARM SIZE 	INTEGER DEFAULT=--	COUNT=0:4 
+  PARM BANDS 	INTEGER DEFAULT=--	COUNT=0:2 
+  PARM SL 	INTEGER DEFAULT=1
+  PARM SS 	INTEGER DEFAULT=1
+  PARM SB 	INTEGER DEFAULT=1
+  PARM NL 	INTEGER DEFAULT=0
+  PARM NS 	INTEGER DEFAULT=0
+  PARM NB 	INTEGER DEFAULT=0
+  PARM INGAIN   REAL	DEFAULT=1.0
+  PARM OUTGAIN	REAL	DEFAULT=1.0
+END-PROC
+.HELP
+      GAINOFF is a program to apply differing gains and offsets to the various
+channels of multispectral data.  It accepts as input images of BSQ or BIL 
+format, and data types BYTE, HALF, FULL, or REAL.  Regardless of input format,
+the output will be in BIL format.
+      The gains and offsets for each channel are supplied through a second 
+input dataset, which is an ASCII (non-VICAR) file.  This ASCII file should be a
+table of numbers at least 3 columns wide, and have one row of numbers for each
+band to be processed. The gain values are taken from column 2 and the offset
+values are taken from column 3.  All other columns and any headers or annotation
+in the file is ignored. Row 1 of the file provides the gain and offset for the
+first band processed, Row 2 provides for the second band and so on.
+      In addition, the parameters INGAIN and OUTGAIN may be used to adjust the 
+values of all pixels, regardless of band.  INGAIN is multiplied to all input
+pixels prior to the spectral gain, and may be used to compensate for mismatched
+units.  OUTGAIN is multiplied to all pixels just prior to output, and may be
+used to rescale the data over the desired output range.
+.LEVEL1
+.VARIABLE INP
+Input image, gain/offset file
+.VARIABLE OUT
+Output image file name
+.VARIABLE SIZE
+Window into input
+.VARIABLE BANDS
+Window into input
+in band dimension
+.VARIABLE SL
+Starting line
+= size(1)
+.VARIABLE SS
+Starting sample
+= size(2)
+.VARIABLE SB
+Starting band
+= bands(1)
+.VARIABLE NL
+Number of lines
+= size(3)
+.VARIABLE NS
+Number of samples
+= size(4)
+.VARIABLE NB
+Number of bands
+= bands(2)
+.VARIABLE INGAIN
+Gain applied prior to
+spectral gains/offsets
+.VARIABLE OUTGAIN
+Gain applied after
+spectral gains/offsets
+.LEVEL2
+.VARIABLE INP
+The first file is the image file, in VICAR format. It may be either in BSQ or
+BIL organization, and BYTE, HALF, FULL, or REAL format.
+
+The second file must be an ASCII file of three columns of numbers. The second
+column will be used as the spectral gain, and the third column used as the
+spectral offset. The first column is ignored. The ASCII file may contain headers
+and annotation, and must have the same number of rows of numbers as the number
+of bands to be processed.
+.VARIABLE OUT
+Name of the output image file. The output file will be in BIL format, 
+regardless of the format of the input image.
+.VARIABLE SIZE
+The size parameter determines the boundaries in the input
+file from which the computation is to take place.  It is specified
+as  (SL,SS,NL,NS), where
+	SL is the starting line 
+	SS is the starting sample
+	NL is the number of lines to be copied
+	NS is the number of samples (pixels) in each line
+.VARIABLE BANDS
+The bands parameter determines the bands in the input
+file from which the computation is to take place.  It is specified
+as (SB,NB), where
+	SB is the starting band
+	NB is the number of bands to be copied
+.VARIABLE INGAIN
+INGAIN is a value multiplied to all input pixels prior to the application of
+individual gains.  It may be used to get the units of the image to match the
+units of the gains.
+.VARIABLE OUTGAIN
+OUTGAIN is a value multiplied to all pixels immediately prior to output. It
+may be used to rescale the data into a reasonable range for byte or halfword 
+output.
+.END

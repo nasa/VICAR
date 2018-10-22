@@ -1,0 +1,389 @@
+1 FPSE
+
+  FPSE is a Fortran and C subroutine library package that emulates the 
+  Floating Point Systems (FPS) subroutine library for the AP-120B Array 
+  Processor. It is provided for programs calling the FPS library when the 
+  Array Processor is not available.
+
+  
+2 Members
+
+  The Fortran subroutines and their respective C-Bridge interfaces are 
+  described as follows: 
+ 
+  1.  Subroutine APINIT
+
+      Fortran interface:
+
+        call apinit()
+
+      C interface:  
+
+        void zapinit();
+  
+
+  2.  Subroutine APWD
+
+      Fortran interface:
+
+        call apwd()
+
+      C interface:  
+
+        void zapwd();
+  
+
+  3.  Subroutine APGET
+
+      Move N elements from APMEM starting at specified offset OFFS to array 
+      BUF, reformatting as specified by type.
+ 
+      Fortran interface:
+
+        call apget (buf, offs, n, type)
+
+      C interface:  
+
+        void zapget (buf, offs, n, type);
+  
+      Where:
+        buf     = Local buffer to receive data 
+        offs    = Offset into memory array APMEM
+        n       = Number of elements
+	TYPE    = 0: in/out = I*4 (then use VPK8, VFIX32)
+	          1: in = I*4, out = I*2 ( then use VFIX)
+	          2: in/out = R*4
+	          3: in/out = R*4 (ignore "IBM format")
+
+
+  4.  Subroutine APPUT
+
+      Move N elements from array BUF to APMEM starting at specified offset 
+      OFFS into array APMEM, reformatting as specified by type.
+      
+      Fortran interface:
+
+        call apput (buf, offs, n, type)
+
+      C interface:  
+
+        void zapput (buf, offs, n, type);
+  
+      Where:
+        buf     = Local buffer to be moved to array APMEM
+        offs    = Offset into memory array APMEM
+        n       = Number of elements
+	TYPE    = 0: in/out = I*4 (then use VPK8, VFIX32)
+	          1: in = I*4, out = I*2 ( then use VFIX)
+	          2: in/out = R*4
+	          3: in/out = R*4 (ignore "IBM format")
+
+	
+  5.  Subroutine CONV
+
+      Correlate or convolve arrays A and B to obtain C:
+           C(mK) = SUM (A((m+q)I) * B(qJ), from q = 1 to N2, for m = 1,...,N1
+      Note that A, B, and C are offsets in APMEM.
+      If I & J have the same sign, the operation is correlation, else it
+      is convolution.
+      
+      Fortran interface:
+
+        call conv (a, i, b, j, c, k, n1, n2)
+
+      C interface:  
+
+        void zconv (a, i, b, j, c, k, n1, n2);
+  
+      Where:
+        a       = Offset array A in APMEM
+        b       = Offset array B in APMEM
+        c       = Offset array c in APMEM
+        i       = Increment for array A
+        j       = Increment for arrau B
+        k       = Increment for array C
+        n1      = Iteration loop count for array A
+        n2      = Iteration loop count for array B
+
+
+  5.  Subroutine HIST
+
+
+      Generate the histogram of an array starting in APMEM at offset A, 
+      increment = I, with limits AMAX, AMIN, and put the results in  
+      APMEM at offset C.
+ 
+      Fortran interface:
+
+	call hist (a, i, c, n, nb, amax, amin)
+
+      C interface:  
+
+	void zhist (a, i, c, n, nb, amax, amin);
+  
+      Where:
+        a       = Offset array A for which the histogram is being created
+        c       = Offset array C to receive results of histogram
+        i       = Increment for array A
+        n       = Increment for array C
+       nb       = Binwidth
+     amax       = Limit amax
+     amin       = Limit amin
+
+
+  6.  Subroutine MMUL32
+
+
+      Matrix multiply arrays A and B to obtain C
+ 
+      Fortran interface:
+
+	call mmul32 ( a, i, b, j, c, k, mc, nc, na)
+
+      C interface:  
+
+        void zmmul32 ( a, i, b, j, c, k, mc, nc, na);
+  
+      Where:
+        a       = Offset array A 
+        b       = Offset array B
+        c       = Offset array C 
+        i       = Offset A ... increment for array A
+        j       = Offset A ... increment for array B
+        k       = Offset A ... increment for array C
+
+  7.  Subroutine VADDEM
+
+      Add arrays A and B to obtain C:
+           C(mK) = A(mI) + B(mJ), m = 0,...,N-1
+      Note that A, B, and C are offsets in APMEM.
+ 
+      Fortran interface:
+
+	call vaddem  (a, i, b, j, c, k, n)
+
+      C interface:  
+
+        void zvaddem  (a, i, b, j, c, k, n);
+  
+      Where:
+        a       = Offset array A 
+        b       = Offset array B
+        c       = Offset array C 
+        i       = Increment for array A
+        j       = Increment for array B
+        k       = Increment for array C
+        n       = Number of elements
+
+  8.  Subroutine VCLIP
+
+      Move array A to D, clipping it to the range (B - C):
+           D(mK) = B	if A(mI) < B		m = 0,...,N-1
+           A(mI) 	if B <= A(mI) < C
+           C	        if C <= A(mI)
+      Note that A, B, C, and D are offsets in APMEM.
+ 
+      Fortran interface:
+
+	call vclip (a, i, b, c, d, k, n)
+
+      C interface:  
+
+        void zclip (a, i, b, c, d, k, n);
+
+      Where:
+        a       = Offset array A 
+        b       = Offset array B
+        c       = Offset array C 
+        d       = Offset array D 
+        i       = Increment for array A
+        k       = Increment for array D
+        n       = Number of elements
+
+
+  9.  Subroutine VCLR
+
+      Clears an array starting at C, increment = K.
+ 
+
+      Fortran interface:
+
+	call vclr (c, k, n)
+
+      C interface:  
+
+        void zvclr (c, k, n);
+  
+
+ 10.  Subroutine VFIX
+
+      Convert elements from Floating-point to Integer:
+            C(mK) = FIX( A(mI)), m = 0,...,N-1
+      Note that C and A are offsets in APMEM.
+ 
+      Fortran interface:
+
+	call vfix (a, i, c, k, n)
+
+      C interface:  
+
+        void zvfix (a, i, c, k, n);
+
+      Where:
+        a       = Offset array A 
+        c       = Offset array C 
+        i       = Increment for array A
+        k       = Increment for array C
+        n       = Number of elements
+
+
+ 11.  Subroutine VFLT
+
+      Convert elements from Integer to Floating-point:
+              C(mK) = FLOAT( A(mI)), m = 0,...,N-1
+      Note that C and A are offsets in APMEM.
+
+ 
+      Fortran interface:
+
+	call vflt (a, i, c, k, n)
+
+      C interface:  
+
+        void zvflt (a, i, c, k, n);
+  
+
+      Where:
+        a       = Offset array A 
+        c       = Offset array C 
+        i       = Increment for array A
+        k       = Increment for array C
+        n       = Number of elements
+
+
+ 12.  Subroutine VMOV
+
+      Move array A to C:
+      C(mK) = A(mI) 
+      Note that A and C are offsets in APMEM.
+
+ 
+      Fortran interface:
+
+	call vmov (a, i, c, k, n)
+
+      C interface:  
+
+        void zvmov (a, i, c, k, n);
+  
+      Where:
+        a       = Offset array A 
+        c       = Offset array C 
+        i       = Increment for array A
+        k       = Increment for array C
+        n       = Number of elements
+
+
+ 13.  Subroutine VPK8
+
+      Packs lo-order byte (unsigned) from 4 words of A into each word of C.
+
+ 
+      Fortran interface:
+
+	call vpk8 (a, i, c, k, n)
+
+      C interface:  
+
+        void zvvpk8 (a, i, c, k, n);
+  
+
+ 14.  Subroutine VSADD
+
+      Add array A and scalar B to obtain C:
+         C(mK) = A(mI) + B,	m = 0,...,N-1
+      Note that A, B, and C are offsets in APMEM.
+
+      Fortran interface:
+
+	call vsadd (a, i, b, c, k, n)
+
+      C interface:  
+
+        void zvsadd (a, i, b, c, k, n);
+  
+      Where:
+        a       = Offset array A 
+        b       = Offset address for scaler B
+        c       = Offset array C 
+        i       = Increment for array A
+        k       = Increment for array C
+        n       = Number of elements
+
+ 15.  Subroutine VSMUL
+
+      Multiply array A and scalar B to obtain C:
+          C(mK) = A(mI) * B, m = 0,...,N-1
+      Note that A, B, and C are offsets in APMEM.
+ 
+      Fortran interface:
+
+	call vsmul( a, i, b, c, k, n)
+
+      C interface:  
+
+        void zvsmul( a, i, b, c, k, n);
+  
+      Where:
+        a       = Offset array A 
+        b       = Offset address for scaler B
+        c       = Offset array C 
+        i       = Increment for array A
+        k       = Increment for array C
+        n       = Number of elements
+
+
+ 16.  Subroutine VUP8
+
+      Unpack 4 bytes (unsigned) from each word of A into 4 words of C.
+      Note that A, B, and C are offsets in APMEM.
+
+ 
+      Fortran interface:
+
+	call vup8( a, i, c, k, n)
+
+      C interface:  
+
+        void zvup8( a, i, c, k, n);
+  
+      Where:
+        a       = Offset array A 
+        c       = Offset array C 
+        i       = Increment for array A
+        k       = Increment for array C
+        n       = Number of elements
+
+2 Documentation
+
+  For complete documentation, see the FPS manuals.
+
+2 History
+
+  Original Programmer: L. W. Kamp, 9 August 1984
+  Current Cognizant Programmer: L. W. Kamp
+  FPSE Source Language: Fortran
+
+ 2 Jan. 1995                 Made portable for UNIX (CRI)    
+ 			     ZFPSE Bridge Source Language: C
+
+ 27 January 1995 ... SP      Changed the name VADD to VADDEM because of
+                             name conflict with SPICE.  
+
+ 28 Feb. 1996 ... FFM        Delete the unused variable string to avoid
+                             conflict with rtl routine string. (FR 89182). 
+
+ 11 Oct 1996  ... BAM        Increased buffer size to 1000000 to accommodate
+                             larger arrays and to obsolete array size as a 
+                             function of the array processor memory
+

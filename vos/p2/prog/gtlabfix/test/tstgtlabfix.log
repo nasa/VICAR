@@ -1,0 +1,67 @@
+gen xxxim1 nl=1 ns=1
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gtgenup inp=xxxim1  +
+   geotiff=("PCSCitationGeoKey=""Updating xxxim1""",  +
+            "GTRasterTypeGeoKey=1(RasterPixelIsArea)",  +
+            "RPC_FIELD1720=-0.135637E-7")
+Beginning VICAR task gtgenup
+gtgenup version 2015-10-15
+label-list xxxim1
+Beginning VICAR task label
+LABEL version 2017-03-30
+************************************************************
+ 
+        ************  File xxxim1 ************
+                3 dimensional IMAGE file
+                File organization is BSQ
+                Pixels are in BYTE format from a X86-64-LIN host
+                1 bands
+                1 lines per band
+                1 samples per line
+                0 lines of binary header
+                0 bytes of binary prefix per line
+---- Property: GEOTIFF ----
+PCSCITATIONGEOKEY='"Updating xxxim1"'
+GTRASTERTYPEGEOKEY='1(RasterPixelIsArea)'
+RPC_FIELD1720='-0.135637E-7'
+---- Task: GEN -- User: wlb -- Wed May 31 18:07:52 2017 ----
+IVAL=0.0
+SINC=1.0
+LINC=1.0
+BINC=1.0
+MODULO=0.0
+ 
+************************************************************
+gtlabfix inp=xxxim1 property="GeoTIFF"
+Beginning VICAR task gtlabfix
+gtlabfix version 2017-05-31
+label-list xxxim1
+Beginning VICAR task label
+LABEL version 2017-03-30
+************************************************************
+ 
+        ************  File xxxim1 ************
+                3 dimensional IMAGE file
+                File organization is BSQ
+                Pixels are in BYTE format from a X86-64-LIN host
+                1 bands
+                1 lines per band
+                1 samples per line
+                0 lines of binary header
+                0 bytes of binary prefix per line
+---- Property: GEOTIFF ----
+PCSCITATIONGEOKEY='"Updating xxxim1"'
+GTRASTERTYPEGEOKEY='1(RasterPixelIsArea)'
+RPC_FIELD1720='-0.000000013563700'
+---- Task: GEN -- User: wlb -- Wed May 31 18:07:52 2017 ----
+IVAL=0.0
+SINC=1.0
+LINC=1.0
+BINC=1.0
+MODULO=0.0
+ 
+************************************************************
+ush rm xxxim1
+disable-log

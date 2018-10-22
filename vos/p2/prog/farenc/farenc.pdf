@@ -1,0 +1,1187 @@
+process help=*
+PARM INP       TYPE=STRING  COUNT=(1:2)
+PARM OUT       TYPE=STRING  COUNT=(0:3)                       DEFAULT=--
+PARM SIZE      TYPE=INTEGER COUNT=4                           DEFAULT=(1,1,0,0)
+PARM SL        TYPE=INTEGER                                   DEFAULT=1
+PARM SS        TYPE=INTEGER                                   DEFAULT=1
+PARM NL        TYPE=INTEGER                                   DEFAULT=0
+PARM NS        TYPE=INTEGER                                   DEFAULT=0
+PARM PLANET    TYPE=(STRING,12) COUNT=0:1 DEFAULT=--
+PARM RANGE     TYPE=REAL    COUNT=(0:1) VALID=(0:999999999)   DEFAULT=--
+PARM INITCEN   TYPE=REAL    COUNT=(0,2) VALID=(1:32767)       DEFAULT=--
+PARM BEGIN     TYPE=REAL COUNT=0:1 VALID=(10.:100.)           DEFAULT=80.
+PARM RESCALE   TYPE=REAL    COUNT=0:1                         DEFAULT=--
+PARM FORMAT    TYPE=KEYWORD COUNT=0:1 VALID=(BYTE,HALF)       DEFAULT=--
+PARM DNTHRESH  TYPE=INTEGER COUNT=0:1                         DEFAULT=--
+PARM ACTIVITY  TYPE=INTEGER                                   DEFAULT=55
+PARM DISTANCE  TYPE=INTEGER                                   DEFAULT=10
+PARM HEIGHT    TYPE=REAL                                      DEFAULT=.6
+PARM BELOW     TYPE=INTEGER COUNT=0:1                         DEFAULT=--
+PARM AUTO      TYPE=KEYWORD COUNT=0:1 VALID=AUTO              DEFAULT=--
+PARM FRACTION  TYPE=REAL                                      DEFAULT=0.0
+PARM OFFSET    TYPE=INTEGER COUNT=0:1                         DEFAULT=--
+PARM PERCENT   TYPE=REAL                                      DEFAULT=.2
+PARM LINC      TYPE=INTEGER                                   DEFAULT=5
+PARM CLUSTER   TYPE=INTEGER COUNT=2                           DEFAULT=(30,24)
+PARM AREA      TYPE=INTEGER COUNT=(0,4)                       DEFAULT=--
+PARM MEDIAN    TYPE=INTEGER COUNT=0:1                         DEFAULT=--
+PARM LCIRCLE   TYPE=KEYWORD COUNT=0:1 VALID=LCIRCLE           DEFAULT=--
+PARM SIGACT    TYPE=REAL                                      DEFAULT=2.5
+PARM SIGMA     TYPE=REAL              VALID=(.01:9999)        DEFAULT=1.7
+PARM TOLERANC  TYPE=REAL                                      DEFAULT=1.0
+PARM SUNANGLE  TYPE=REAL    COUNT=0:1 VALID=(-360:360)        DEFAULT=--
+PARM PRINT     TYPE=KEYWORD COUNT=0:1 VALID=PRINT             DEFAULT=--
+PARM MAXNUM    TYPE=INTEGER                                   DEFAULT=10
+PARM FDS       TYPE=INTEGER COUNT=0:1                         DEFAULT=--
+PARM SERNO     TYPE=INTEGER COUNT=0:1                         DEFAULT=--
+PARM CENTER    TYPE=REAL    COUNT=(0,2)                       DEFAULT=--
+PARM UPDATE    TYPE=KEYWORD COUNT=0:1 VALID=UPDATE            DEFAULT=--
+PARM NOSEDR    TYPE=KEYWORD COUNT=0:1 VALID=NOSEDR            DEFAULT=--
+PARM NORANGLE  TYPE=REAL    COUNT=0:1 VALID=(-360:360)                         DEFAULT=--
+PARM ANGLE     TYPE=REAL    COUNT=0:1 VALID=(-360:360)                         DEFAULT=--
+PARM SMAA      TYPE=REAL    COUNT=0:1 VALID=(1:999999)                         DEFAULT=--
+PARM SMIA      TYPE=REAL    COUNT=0:1 VALID=(1:999999)                         DEFAULT=--
+PARM FOCL      TYPE=REAL    COUNT=0:1 VALID=(.0001:999999)                         DEFAULT=--
+PARM FOCAL     TYPE=REAL    COUNT=0:1 VALID=(.0001:999999)                         DEFAULT=--
+PARM PUTNORTH  TYPE=REAL    COUNT=0:1 VALID=(-360:360 )                         DEFAULT=--
+PARM SCALE     TYPE=REAL    COUNT=0:1 VALID=(.0001:9999)                         DEFAULT=--
+PARM PSCALE    TYPE=REAL    COUNT=0:1 VALID=(.0001:9999)                         DEFAULT=--
+PARM RADIUS    TYPE=REAL    COUNT=0:1 VALID=(.01:750000)                         DEFAULT=--
+PARM REQUATOR  TYPE=REAL    COUNT=0:1 VALID=(.01:750000)                         DEFAULT=--
+PARM RPOLE     TYPE=REAL    COUNT=0:1 VALID=(.01:750000)                         DEFAULT=--
+PARM FAR       TYPE=REAL    COUNT=0:1 VALID=(.1:9999999999)                         DEFAULT=--
+PARM RMAG      TYPE=REAL    COUNT=0:1 VALID=(.1:9999999999)                         DEFAULT=--
+PARM SLATITUD  TYPE=REAL    COUNT=0:1 VALID=(-90:90)          DEFAULT=--
+PARM LATITUDE  TYPE=REAL    COUNT=0:1 VALID=(-90:90)          DEFAULT=--
+PARM LONGITUD  TYPE=REAL    COUNT=0:1 VALID=(-360:360)        DEFAULT=--
+PARM SOLAR     TYPE=REAL    COUNT=(0,2) VALID=(-360:360 )     DEFAULT=--
+PARM RING      TYPE=REAL                VALID=(0:600000)      DEFAULT=0.0
+!!!PARM SEDRSRC   TYPE=(STRING,4) COUNT=0:1 +  !replaced by CKNAME
+!!!VALID=("FARE","NEAR","NAV ","NAV2","DAVI","SEDR","NAIF")  DEFAULT="DAVI"
+PARM TARGET     TYPE=(STRING,12) COUNT=0:1			DEFAULT=--
+PARM SPICEMODE  TYPE=KEYWORD     COUNT=0:1 VALID=(LOCAL,REMOTE) DEFAULT=--
+PARM CKNAME     TYPE=(STRING,4)  COUNT=1			DEFAULT=DAVI
+PARM CKID       TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM INSTITUTE  TYPE=(STRING,4)  COUNT=0:1			DEFAULT=--
+PARM PURPOSE    TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM REQNUM     TYPE=(STRING,4)  COUNT=1			DEFAULT=NONE
+PARM CDATE      TYPE=(STRING,12) COUNT=1		DEFAULT=000000000000
+PARM GROUPID    TYPE=(STRING,3)  COUNT=0:1			DEFAULT=--
+LOCAL (DUM1,DUM2) REAL
+PARM PCL       TYPE=NAME    DEFAULT=DUM1
+PARM PCS       TYPE=NAME    DEFAULT=DUM2
+END-PROC
+.TITLE
+  "farenc"
+.HELP
+ PURPOSE:
+ "farenc" is a Vicar program to determine the center of a target body
+ presenting part of its limb in a picture.  The orientation
+ and lighting geometry of the target body can be made constraints.
+ The program has 4 main modes. These are:
+ 
+ 1. Determining constraints from the SEDR or from parameters.
+    Constraints determine the shape,size,and orientation of the limb.
+ 2. Locating candidate limb points.
+ 3. Fitting these points to a conic.
+ 4. Generating GEOM parameters, 
+    Updating the SPICE/SEDR OM matrix, and
+    Writing the planet center to a file (if the input is a perspective
+    projection with a map3 label)
+
+ Three limb fitting functions are available:
+
+              1. An unconstrained circle
+              2. A constrained circle
+              3. A constrained ellipse
+
+.PAGE
+LOCAL AND REMOTE SPICE ACCESS:
+
+FARENC accesses SPICE data either locally or via the MIPS SPICE server.
+Currently (Jan 2002) SPICE data is available for Cassini, GLL, and
+VGR (at Jupiter only).  For images without SPICE data, parameters may be used
+to specify the target geometry.
+
+SPICEMODE specifies whether local or remote SPICE access is to be used.
+If defaulted, SPICEMODE is set to the value of the logical name (or
+environmental variable) DEFAULTSPICE.
+
+
+PARAMETERS FOR RETRIEVING THE INITIAL CAMERA POINTING:
+
+Initial camera pointing data is first retrieved from predict C kernels or
+from MIPS C kernels.  The following optional parameters permit the user to
+specify where this initial pointing is retrieved:
+
+CKNAME and CKID are alternative ways to specify the C kernel from which camera
+pointing is to be retrieved.  For example, CKNAME=FARE or CKID=M904 specifies
+that the camera pointing should be retrieved from the file MIPS_FARENC.CK.
+The CKID is the unique kernel ID assigned to each C kernel.  When CKID is
+specified, it overrides the CKNAME parameter.  A complete list
+of kernel IDs is located in the ASCII file assigned the logical name (or
+environmental variable) KERNELDB.
+
+
+PARAMETERS FOR STORING THE IMPROVED CAMERA POINTING:
+
+The following optional parameters are used to store provenance information along
+with the improved (C-Smithed) camera pointing computed by the program.  This
+provenance information is stored in the (C kernel) segment identifier for the
+camera pointing data.  In cases where there are several versions of camera
+pointing for an image in a given C kernel, this provenance information can
+later be used to retrieve a specific instance of camera pointing from the
+kernel.
+
+PURPOSE identifies the purpose for creating the camera pointing.
+REQNUM identifies the request number associated with the camera pointing.
+CDATE specifies the date and time the camera pointing was created.
+GROUPID identifies the group which created the camera pointing.
+INSTITUTE identifies the facility which created the camera pointing.
+
+See the level 2 help (via the TAE tutor mode) for further details.
+
+Examples:  'LOCAL CKNAME=NAIF specifies that SPICE data be retrieved from
+          local kernels using camera pointing from predicts or AACS telemetry.
+          Improved camera pointing will later be stored in the local C kernel
+          specific to this program.
+
+           'REMOTE INSTITUTE=DLR USERID=TYR retrieves SPICE data remotely
+          (from MIPS) via the SPICE server.  When improved camera pointing is
+          stored (at MIPS), provenance data regarding the facility (DLR) and
+          user (Thomas Roatsch) who created the data is included.
+
+.PAGE
+
+ "farenc" determines limb points by computing a value called
+ activity.  Activity is defined as the sum of the absolute
+ values of the differences between the DN's of opposite
+ sides of a 3 by 3 pixel box, i.e.:
+
+          --- --- ---
+         | 1 | 2 | 3 |
+          --- --- ---
+         | 4 | 5 | 6 |    |DN1 - DN9| + |DN3 - DN7| = Activity
+          --- --- ---
+         | 7 | 8 | 9 |
+          --- --- ---
+.PAGE
+ Points having the highest activity lie along the limb of a
+ target body.  If ACTI is the activity threshold and DNTH is the DN
+ threshold ( As applied to DN in the above figure) then the
+ tests required for a point to be accepted as a limb candidate are:
+
+       1. DN5 >= DNTH
+       2. |DN2 - DN8| + |DN4 - DN6| >= ACTI
+       3. |DN1 - DN9| + |DN3 - DN7| >= ACTI
+       4. MIN (DN1,DN2,DN3,DN4,DN6,DN7,DN8,DN9) <= BELOW
+       5. The direction of the planet center obtained from:
+         atan2(dn1+dn2+dn3-dn7-dn8-dn9,dn3+dn6+dn9-dn1-dn4-dn7)
+          must be within 90 degrees of the sun illumination 
+          direction.
+.PAGE
+ For each line and column, two limb candidate points are chosen.
+ These points must be the two largest activity values in that
+ dimension which:
+
+       1. are more than or equal to DIST pixels apart.
+       2. form a ratio of smallest/largest activity at least
+           equal to HEIGHT.
+
+ Points are then removed which fail to have sufficient numbers
+ of neighbors, implying that they are isolated events.
+
+.PAGE
+ Limb fitting is performed in two stages. First an initial fit is
+ made using simulated annealing. Then a least squares fit is performed
+ which permits iterative point rejection until all the points
+ lie within TOLERANCE.
+ 
+ 1. Simulated annealing. This is a complex method which treats
+    the problem like a thermodynamic cooling system and whose
+    object is to cool the system into the lowest energy state.
+    The lowest state corresponds to the minimum residual fit
+    error for the limb points.
+
+ 2. Iterative least squares fit.
+    Each cycle rejects values which depart from the
+    mean error by more than +/-SIGMA * THETA, until all values fall
+    within computed radius +/-TOLE.
+
+.PAGE
+ If an oblate spheroid is imaged from a distance less than about
+ 20 diameters and if the oblateness is greater than about 5%,
+ the center of the target body may not coincide acceptably with the
+ center of the projected ellipse.  An approximate solution to
+ the problem ( assuming the projected shape is an ellipse )
+ which provides an additive offset to the computed ellipse
+ center to give the true target body center is provided by "farenc".
+ This correction is not made to the ellipse center, but is
+ only printed along with the ellipse center.  A target body whose
+ oblateness is 10%, viewed from two diameters at a subspace-
+ craft latitude of +/-45 degrees will suffer a target body center
+ discrepancy error from that of the ellipse center of about
+ 1% of the ellipse major axis.
+
+ Unless data specific to the constrained ellipse or circle
+ has been provided, "farenc" will compute only the general
+ circle.  Unless 'NOSEDR is specified,
+ data for the constrained fit will be obtained from the SEDR
+ or SPICE.  User specified parameters will over-
+ ride the equivalent SEDR values.
+
+ If a reseau or GEOMA data has been provided, the ellipse
+ and circle centers will be computed in object space by
+ first transforming all of the limb points to object space.
+.page
+ The principal output file is a dataset containing GEOMA parameters.
+ (This file must always be the LAST output.)  This data set can be
+ input to GEOMA to geometrically correct and translate the target body
+ such that the center of the target body will lie at NL/2.0, NS/2.0.
+ This data set could also be input to other programs as a
+ geometric correction data set.  These other programs such
+ as "photfunc", "photcat", "photcal" and "map2" must have "farenc"
+ modes for determining the OM matrix (the camera to picture
+ body rotation matrix).  The object space target body center
+ will be NL/2.0,NS/2.0 by default.
+.PAGE
+EXECUTION:
+
+ "farenc" may be executed using the following format:
+
+    farenc INP=(IN,GEOM) OUT=(CURVE,POINTS,G) SIZE=(SL,SS,NL,NS) PARAMS
+
+  where PARAMS represents parameters such as those that follow.
+
+SUGGESTED EXECUTION FORMAT:
+   farenc inp=(in,geom) out=g 'auto
+
+Note: If the input image has a map3 perspective label placed there by
+      the "perslab" program "farenc" will ignore the sedr/spice and
+      will write the planet center to an output file called: FARENC.POS
+      This file is a Vicar image, has 1 line & 2 samples with the
+      real values line,sample. See test file for example using
+      Space Telescope project imagery.
+
+ The following parameters perform editing operations on the
+ initial set of limb points in order to reject spurious points
+ from the final least squares fit:
+
+   	SIGACT  SIGMA  TOLERANCE   SUNANGLE  PRINT   MAXNUM
+
+ For additional information type help followed by the parameter name.
+
+.PAGE
+ The following parameters control the nature of the geometric
+ transformation parameters ouput in data set "G".
+
+       GEOM              RESCALE
+
+ For additional information type HELP followed by the parameter name.
+
+.PAGE
+ The following parameters allow the constrained ellipse to be
+ used provided that either of the two sets of parameters which follow
+ are completely specified.  In the first case the center of the
+ projected ellipse will be computed but not the correction from
+ ellipse center to oblate spheroid target body center ( they can disagree ).
+ If SEDR data are available, the values for SET #II will be
+ automatically computed. If data from the SEDR are not desired or available
+ the 'NOSEDR keyword should be used. The default is to read the
+ SEDR (Image Catalog).
+
+ SET #I
+    NORANGLE or ANGLE       SMAA              SMIA
+
+ SET #II
+          NOSEDR
+    NORANGLE or ANGLE FOCL or FOCAL SCALE  RADIUS
+    REQUATOR    RPOLE FAR   RMAG  SLAT   LATI  RING
+    LATI  LONG    SOLAR  PLANET
+
+ For additional information type HELP followed by the parameter name.
+.page
+ Program Operation Under Annealing Step.
+
+ Each of the three functions (general circle, constrained circle &
+ constrained ellipse) is allowed 6 attempts to bring N % of the
+ limb points within 1 pixel of mean radial error. If all six
+ attempts fail the smallest residual case is selected.
+ The residual returned & printed will be either:
+ 1. The mean radial error if N % of points are within 1 pixel of 
+    the fit.
+ 2. The mean error + (smaa/5)/ (# points selected within 50 
+    pixels radial error)
+ For each attempted fit N becomes: 80,70,60,50,40,and 30 %.   
+
+ The annealing cost or objective function to be minimized is:
+ (if n= total # pts, m=# points within smaa/5 radial error,
+  k=# points within 3 pixels radial error, sumdr=sum radial
+  residuals)
+
+  if(k > N% of n)then cost=sumdr/k
+  else if(m > 0)then cost=sumdr/m + (smaa/5)/m
+  else cost=sumdr/n + 1
+
+  The cost function is designed to punish for poor fits
+  yet reward for including more points. It's a tradeoff.
+.PAGE
+
+ PRECISION: 
+  Some differences in intermediate results such as shown below might
+occur between successive runs of FARENC:
+*****************
+No  convergence,residual=  22.380320
+
+Constrained annealing circle fit object space:
+Line of center=  282.28452
+Samp of center=  410.81024
+Radial fit mean residual=  22.374784
+******
+No  convergence,residual=  22.374847
+
+Constrained annealing circle fit object space:
+Line of center=  282.29230
+Samp of center=  410.80789
+Radial fit mean residual=  22.374775
+******************
+  The differences above come from the first stage of the planet center
+computation (with subroutine METROPOLIS).  This stage uses random numbers
+in searching for the planet center location which best agrees with the points
+found on the planet limb.  Because of the random numbers, the results of the
+first stage vary slightly from run to run.
+  The second stage of the planet center computation, the least squares
+solution, refines the results of the first stage and produces line and sample
+coordinates that agree well from run to run and machine to machine.  The
+"Sigma of Radius Errors" and the "Largest Radius Error" often will vary
+slightly for different machine types.
+  In the test log for FARENC, there can be slight differences in output from
+program GEOMA for different machine types.  Likewise, there are slight
+differences in output for different machine types when FARENC is run on an
+image written by program GEOMA.  This is due to round-off building up over
+multiple processing steps.
+
+Also, updates to the SPICE kernels may cause differences in the section showing
+FINAL DATA FROM SEDR and PARAMETERS.
+
+.page
+PROGRAM HISTORY:
+
+ WRITTEN BY: J. J. Lorre         December 1, 1976
+ CONVERTED TO VAX BY:  Joel Mosher,  23 Aug. 1983
+ COGNIZANT PROGRAMMER: J. J. Lorre
+ REVISIONS:
+  1/25/81 -JAM-UPDATE VGR SEDR WITH OM MATRIX AND RS VECTOR
+  1/22/82 -JAM- REPLACE WATONA WITH MWATNA
+  9/29/82 -JAM- PUT BACK IN MESSAGE FOR NUMBER OF POINTS USED
+  10/6/82 -JAM- PUT IN CHANGE TO RESET 'OFFSET' WHEN AUTO IS USED
+  10/9/82 -JAM- PUT IN NEW FIX FOR OFFSET USING # PIXELS ON PLANET
+  10/15/82 -JAM- PUT IN CODE TO SAVE GEOMA PARAMETERS
+  10/25/82 -JAM- REPLACE CALL TO SEDR79 WITH GETCDR
+  10/31/82 -JAM- FIX CONVERSION BACK TO GEN. ELLIPSE IN IMAGE SPACE
+  2/21/83 -JAM- REPLACE CALLS TO R4SORT WITH RBSORT
+  8/17/83 -JAM- REPLACE CALLS TO RBSORT WITH R4SORT
+  5/10/84 -CCA- DEL LABEL IO & SYS000 TO COMPUTE PLANET CENTER AND RADIUS
+  11 Feb. 1985  - L.W.Kamp -  Get radii from PBDATA, fixed bug in IG
+                array size, removed parm INTERACT, added parm FRACTION,
+                cleaned up code.
+  4/12/85 -JAM- CONVERT TO VICAR2
+  5/9/85  -JAM- PUT IN 'NOSEDR KEYWORD
+  5/12/85 -jam- make "nogeom" the default
+  10/24/85 -CCA- FIXED OVERFLOW BUG IN LSQING, COMMENTED OUT NEW AUTO CODE
+  86-2-11 -LWK- replaced hard-coded radii by call to PBDATA; also
+                used PBDATA for TARGET parameter;
+                fixed overflow of IG;  removed parm INTERACT;
+                removed subs CURSOR, WATONA, PRNT2, RESO;
+                removed DSRNSE, NOGEOM(always=1); changed COUNT of INP to 2;
+                revised treatment of parameter defaults;
+                restored JJL's AUTO code, controlled by new parm FRACTION.
+ 9/29/87 JJL 1. Introduced Metropolis annealing function.
+             2. Introduced terminator rejection based on Sobel edge
+                direction relative to the sun.
+             3. Changed excess point truncation to alternate point selection.
+ 01 Oct 1987 -  J. J. Lorre - extensive modifications:
+                 1. Selection of points only on solar illuminated limb
+                    by computing the angle of the local edge.
+                 2. Introduction of annealing code to avoid
+                    instabilities in least squares routines when
+                    bad data is present. 'OLD keyword.
+ 5/9/88  -FFM-  Incorporate 'SEDRSRC keyword
+ 10 Jun 1988 -  G.Yagi - fix determination of planet from ERT.
+ 10 Jun 1988 -  G.Yagi - fix test of ABLE77V2 indicator.
+ 1/10/90  JJL   Converted to project independent subroutines.
+ 2/1/93  jjl  Placed annealing and least squares methods in sequence.
+ 15 Aug 93 jjl  Accepts map3 perspective input label.
+ 15 APR 94 CCA  Add output to TCL variables PCL, PCS
+ 10 Jul 95  ams  (CRI) Made portable for UNIX
+ 11 Sep 95  gmy Changed GETSPICE call to use remote SPICE server (FR 85898)
+ 27 Mar 96  SP  Changed parameters and method for obtaining SPICE data according
+                to new method specified by Gary Yagi using GETSPICE2/PUTSPICE2
+                instead of GETSPICE/PUTSPICE.  Old parameter SEDRSRC is replaced
+                by parameter CKNAME.       (Note that
+                the ported version does not support a second input file.)
+                Also added some VALID range checks in PDF for extreme value
+                handling.
+ 12 jun 96  SP   Add code to distinguish between OBJECT SPACE and IMAGE SPACE.
+                 (IMAGE space is raw image.  Object space is corrected for
+                 camera geometric distortion.)  This corrects an error for GLL
+                 where coordinates of limb points not converted to OBJECT
+                 SPACE for calculations of planet center.
+ 22 Jul 96  SP   Upgraded to handle IBIS tiepoint files and other mission
+                 besides GLL (allow second input file).  Put back in CCA's
+                 option for outputting planet center to TCL variables.
+                 JJL made a major fix to correct first stage (METROPOLIS)
+                 computation of planet center.
+ 18 Aug 96 lwk  Fixed bugs in the case of Point Perspective input label;
+		added support for NIMS labels (subsolar point)
+ 20 Dec 01 GMY  Add Cassini capability (CR 7953-MIPS).  Major changes to
+                test script.
+ 20 Jul 05 lwk  Added another check in LSQP to prevent infinite loop when a matrix
+                element becomes zero
+
+.LEVEL1
+
+.VARIABLE INP
+ STRING- Input image;
+ (optional:) GEOM file.
+
+.VARIABLE OUT
+ STRING _ Output files:
+ (optional:) CURVE, POINTS, GEOMA
+
+.VARIABLE SIZE
+ 4 INTEGERS - VICAR size field
+
+.VARIABLE SL
+ INTEGER - Starting line 
+
+.VARIABLE SS
+ INTEGER - Starting sample
+
+.VARIABLE NL
+ INTEGER - Number of lines
+
+.VARIABLE NS
+ INTEGER - Number of samples
+
+.VARIABLE FORMAT
+ KEYWORD - ('HALF or 'BYTE)
+ Halfword or byte format
+
+.VARIABLE NOSEDR
+ KEYWORD - The SEDR is
+   not to be read
+
+.VARIABLE RANGE
+Real- uncertainty in
+SPICE planet center
+
+.VARIABLE INITCEN
+Real, 2 values:
+initial line,samp
+of planet center
+
+.VARIABLE FDS
+  Integer picture number.
+
+.VARIABLE SERNO
+  Integer
+  camera serial number
+
+.VARIABLE CENTER
+ 2 integers for line and
+ sample of planet center 
+ in output file.
+
+.VARIABLE PUTNORTH
+ real value of direction
+ of north in output.
+
+.VARIABLE DNTHRESH
+ INTEGER - Lower pixel DN 
+ THRESHOLD.
+
+.VARIABLE ACTIVITY
+ INTEGER - Lower threshold for
+ ACTIVITY level.
+
+.VARIABLE DISTANCE
+ INTEGER - Distance between
+ maximum activity value pixels.
+
+.VARIABLE HEIGHT
+ REAL - acceptable ratio of
+ maximum activity values.
+
+.VARIABLE BELOW
+ INTEGER - Upper pixel value
+ limit to be considered.
+
+.VARIABLE AUTO
+ KEYWORD  - ('AUTO)-
+Sets ACTIVITY keyword
+Sets DNTHRESH keyword
+Sets BELOW keyword
+ automatically.
+
+.VARI FRACTION
+ REAL - Fraction of target body
+ in the image
+
+.VARIABLE OFFSET
+ INTEGER - Dark Current offset.
+
+.VARIABLE PERCENT
+ REAL - Bypass percent of top
+ of histogram.
+
+.VARIABLE LINC
+ INTEGER - Interval between
+ lines to be read for histogram.
+
+.VARIABLE CLUSTER
+ 2 INTEGERS - Halfwidth of box,
+ minimum number of limb points
+
+.VARIABLE AREA
+ 4 INTEGERS - Field to be
+ searched for limb SL,SS,NL,NS
+
+.VARIABLE MEDIAN
+ ODD INTEGER - Filter width
+
+.VARIABLE LCIRCLE
+ KEYWORD - ('LCIRCLE)-Chooses
+ candidates from row and
+ column extremes.
+
+.VARIABLE SIGACT
+ REAL - Maximum deviation from
+ mean activity level
+
+.VARIABLE SIGMA
+ REAL - Upper limit of last
+ least squares fit error.
+
+.VARIABLE TOLERANC
+ REAL - Tolerance for least
+ square radius from limb.
+
+.VARIABLE SUNANGLE
+ REAL - Direction of sun in
+ degrees.
+
+.VARIABLE PRINT
+ STRING - Prints line, sample
+ and radial error.
+
+.VARIABLE MAXNUM
+ INTEGER - Maximum points on a
+ line to be used for a fit.
+
+.VARIABLE RESCALE
+ REAL - Ratio of the diameter
+ to smallest picture dimension
+
+.VARIABLE UPDATE
+ KEYWORD - Update SEDR
+
+.VARIABLE NORANGLE
+ REAL - Rotation angle of
+ minor axis from north.
+
+.VARIABLE ANGLE
+ REAL - Rotation angle of
+ minor axis from north.
+
+.VARIABLE SMAA
+ REAL - Semimajor axis of the
+ ellipse in pixels.
+
+.VARIABLE SMIA
+ REAL - Semiminor axis of the
+ ellipse in pixels.
+
+.VARIABLE FOCL
+ REAL - Camera focal length
+ in millimeters.
+
+.VARIABLE FOCAL
+ REAL - Camera focal length
+ in millimeters.
+
+.VARIABLE SCALE
+ REAL - Scale in pixels/mm.
+ of the picture.
+
+.VARIABLE PSCALE
+ REAL - Number of pixels/mm.
+ in the camera focal plane.
+
+.VARIABLE RADIUS
+ REAL - Radius of target body in
+ kilometers.
+
+.VARIABLE PLANET
+ KEYWORD - Sets target body
+ radii.
+
+.VARIABLE BEGIN
+Initial percentage
+of points required
+to fit function.
+
+.VARIABLE REQUATOR
+ REAL - target body equatorial
+ radius in kilometers.
+
+.VARIABLE RPOLE
+ REAL - target body polar
+ radius in kilometers.
+
+.VARIABLE FAR
+ REAL - Kilometers between
+ the target body and spacecraft.
+
+.VARIABLE RMAG
+ REAL - Kilometers between the
+ target body and spacecraft.
+
+.VARIABLE SLATITUD
+ REAL - Geocentric latitude of
+ the subspacecraft point.
+
+.VARIABLE LATITUDE
+ REAL - Geocentric latitude of
+ the subspacecraft point.
+
+.VARIABLE LONGITUD
+ REAL - Geocentric longitude of
+ the subspacecraft point.
+
+.VARIABLE SOLAR
+ 2 REALS - Solar subspacecraft
+ point, latitude, longitude.
+
+.VARIABLE RING
+ REAL - Radius of Saturns's
+ ring.
+
+.VARI TARGET
+Optional 12-char string
+Target name (planet,
+  satellite, or asteroid)
+.VARI SPICEMODE
+Optional keyword
+Location of SPICE kernels
+(LOCAL or REMOTE)
+.VARI CKNAME
+Optional 4-char string
+C-kernel name
+.VARI CKID
+Optional 4-char string
+C-kernel ID
+.VARI INSTITUTE
+Optional 4-char string
+Facility which created camera pointing
+.VARI PURPOSE
+Optional 4-char string
+Purpose for camera pointing
+.VARI REQNUM
+Optional 4-char string
+IPL request number for created camera pointing
+.VARI CDATE
+Optional 12-char string
+Date and time camera pointing was created
+.VARI GROUPID
+Optional 3-char string
+Group storing camera pointing
+
+.VARIABLE PCL
+ NAME--OPTIONAL
+ Specifies the name of a
+ TCL variable to contain the
+ derived planet center line.
+
+.VARIABLE PCS
+ NAME--OPTIONAL
+ Specifies the name of a
+ TCL variable to contain the
+ derived planet center sample.
+.LEVEL2
+
+.VARIABLE INP
+ 1 or 2 input files.
+
+       The required first file is an input picture containing the
+       target body. The maximum size is 1400 by 1400.
+
+       The optional second file (IBIS tiepoint format) contains GEOMA
+       parameters for geometrically correcting the input picture. 
+
+.VARIABLE OUT
+ 0-3 Output Files:
+
+ The LAST output file contains GEOMA parameters which the user can use
+ as a secondary input to GEOMA (along with the input image to FARENC) to
+ produce an image with the target body centered on NL/2.,NS/2.
+ This file will have the format of an IBIS tiepoint file  and will contain the 
+ GEOM parameters necessary to translate the picture to the center of the 
+ output picture.  If the second input is provided, geometric correction
+ will be included in the translation. Since for GLL project there are
+ no reseaus the geometric correction is included for all inputs
+ not already corrected.
+ (See parameter GEOM)
+
+ In addition 2 optional output files may be specified: CURVE and POINTS:
+
+   CURVE must be the first output data set, if it is desired.  It is the
+   size of the input picture, and displays all of the limb fitted curves
+   superimposed on the target body.
+
+   POINTS must be the the second output data set, if it is desired.  It
+   is a byte image the size of the input picture containing a display of
+   all limb points. 
+   All limb points used in the fitting are in black.
+   All candidate limb points not used in the fit are in white.
+
+Note: If the input image has a map3 perspective label placed there by
+      the PERSLAB program Farenc will ignore the sedr/spice and
+      will write the planet center to an output file called: FARENC.POS
+      This file is a Vicar image, has 1 line & 2 samples with the
+      real values line,sample.
+
+.VARIABLE SIZE
+ 4 INTEGERS - A Vicar SIZE field which is ignored unless the GEOM
+ is specified, then Number-of-lines and Number-of-samples refer
+ to the size of the output file containing the translated image.
+
+.VARIABLE SL
+ INTEGER - Starting line in the input file to be processed
+
+.VARIABLE SS
+ INTEGER - Starting sample in the input file to be processed
+
+.VARIABLE NL
+ INTEGER - Number of lines in the input file to be processed
+
+.VARIABLE NS
+ INTEGER - Number of samples in the input file to be processed
+
+.VARIABLE FORMAT
+ ('HALF or 'BYTE) - Specifies the Input picture, the Curve data set
+  and the GEOMed image are to be in halfword or byte format.
+  Default is to read the format parameter in the VICAR label.
+
+.VARIABLE NOSEDR
+   A keyword which specifies that SEDR file information is to be ignored.
+   The default is to read the SEDR file.
+
+.VARIABLE RANGE
+  The maximum permitted error in the SPICE/SEDR location of the
+  planet center in pixels.  This range is used to restrict farenc
+  in it's search for the planet center from the predicted SPICE
+  planet center location. Default is 400 for VGR and 250 for GLL.
+  If no sedr/spice available it defaults to the picture size.
+  Range is the diameter of the error circle.
+  Does not apply if an unconstrained circle is used.
+
+.VARIABLE INITCEN
+Real, 2 values representing the initial line,samp location of the
+planet center. The default is to consult the sedr/spice. If no
+sedr/spice is available this will default to the image center.
+Ignored for the unconstrained circle. This is an object space coordinate.
+Example: initcen=(256.,256.)  
+
+
+.VARIABLE DNTHRESH
+ INTEGER - All pixels whose DN's are less than DNTHRESH will
+ be ignored.  No activity value will be computed for such
+ pixels and they will never be considered as a potential
+ target body limb position.
+ Default is DNTHRESH = 30 for byte and 200 for halfword.
+ See AUTO keyword.
+
+.VARIABLE ACTIVITY
+ INTEGER - All pixels whose activity value is less than
+ ACTIVITY will be ignored.
+ If 'AUTO keyword is NOT used: Default is ACTIVITY = 55.
+ See AUTO keyword.
+
+.VARIABLE DISTANCE
+ INTEGER - Each column and row through out the picture is
+ searched for two maximum activity values.  The values must be
+ at least DISTANCE apart.  If no two acceptable values occur
+ at a separation of at least DISTANCE pixels, the value with
+ the least activity measure will be discarded. This value is
+ used to assure both sides of the target body are represented.
+ Default is DISTANCE = 10
+
+.VARIABLE HEIGHT
+ REAL - The maximum accepted ratio between the activity
+ values of the second and first maximum on each line and
+ column.  A HEIGHT of 1 would indicate that the second largest
+ value must be at least equal to the largest value.
+ This would virtually preclude a second value.
+ Default is HEIGHT = 0.60.
+
+.VARIABLE BELOW
+ At least one of the
+ adjacent 8 pixels must lie at or below the value BELOW.
+ To use this parameter the value of BELOW must be above
+ the dark current.
+ Default is 30 for byte and 200 for halfword pictures. 
+ See AUTO keyword.
+
+.VARIABLE AUTO
+ 'AUTO - 
+ AUTOmatically resets ACTIVITY
+ AUTOmatically resets DNTHRESH
+ AUTOmatically resets BELOW
+ depending on the maximum DN in the picture.  The maximum
+ DN is determined by computing a certain percentage of the
+ way down from the top of the histogram (See PERCENT).
+ If this value is MAXDN then the following defaults are
+ evaluated:
+
+       ACTIVITY = (MAXDN-OFFSET)/7 
+       DNTHRESH = (MAXDN-OFFSET)/7+OFFSET
+       BELOW    = (MAXDN-OFFSET)/7+OFFSET
+
+ Parameters override all defaults and auto values.
+ For the case of halfword pictures, DN
+ values above 14000 will be truncated to 14000.
+
+.vari FRACTION
+ This parameter is a user-supplied estimate of the fraction of the
+ target body that is contained in the image.  It is only used in the
+ AUTO algorithm (see parameter AUTO), in estimating the lowest DN
+ on the planet.  Its most reliable usage is when the entire planet is
+ in view, in which case the user would specify FRACTION=1.0 in order
+ to enable this algorithm.  (Estimating the fraction of a partially
+ covered target body may lead to erroneous results, and should be
+ done with care.)
+
+ Note that the default value of 0.0 does NOT mean that by default
+ the target body is 100% off the image, but merely serves to disable
+ this algorithm:  by default, the AUTO algorithm will not attempt to
+ take account of the size of the target body in the image.
+
+.VARIABLE OFFSET
+ INTEGER _ Specified when a Dark Current OFFSET has been
+ added to the picture. The offset is used only in computing
+ the new ACTIVITY value in the AUTO mode.
+ Default is OFFSET = 0.
+
+.VARIABLE PERCENT
+ REAL - The PERCENTage to bypass at the top of the histogram
+ for AUTO.
+ Default is 0.20.
+ NOTE PERCENT is ignored if AUTO is not specified.
+
+.VARIABLE LINC
+ INTEGER - The interval between lines to be read for computing
+ the AUTO histogram.
+ Default is 5.
+ LINC is ignored if AUTO is not specified.
+
+.VARIABLE CLUSTER
+ 2 INTEGERS - (C1,C2) -  The half-width of a box in pixels (C1) and
+ the minimum number of limb points to be contained within the box(C2).
+ For each candidate limb point, a check is made of the number of
+ other points lying within a box of dimension 2*C1 pixels centered at the
+ point. If the number is less than C2, the point in question is
+ rejected from the set of possible limb points.  Rejected points
+ do not appear as white on the points display data set of FARENC.
+ Default is C1 = 30, C2 = 24. ( C1 > C2)
+
+.VARIABLE AREA
+ 4 INTEGERS - (Starting-Line, Starting-Sample, Number-of-Lines,
+ Number-of-Samples) - The search for candidate limb points will only
+ be performed within the specified area.
+ Default is to search the entire image.  Points located will be with
+ respect to L=1, S=1.
+
+.VARIABLE MEDIAN
+ ODD INTEGER - The filter width.  If specified , each picture line
+ will be low pass filtered. The median filter has the advantage of
+ passing unchanged all samples which are monotonic within MEDIAN pixels
+ Default is to perform no filtering.
+
+.VARIABLE LCIRCLE
+ KEYWORD - ('LCIRCLE) - Causes the candidate limb points to be
+ selected from the extremum ends of each row and column, i.e., the
+ furthest left and right on the line and the furthest top and bottom
+ on the column.  LCIRCLE is to be used with RING.
+
+.VARIABLE SIGACT
+ REAL - One pass is made through the initial set of potential
+ limb points in order to reject all values of activity which
+ deviate from the mean activity by more than SIGACT activity.
+ Default is SIGACT = 2.5.
+
+.VARIABLE SIGMA
+ REAL - In order to eliminate spurious points the program will iterate,
+ each time rejecting points which give an error in radius from the
+ last least squares fit of a circle by more than +/-SIGMA * sigma where
+ sigma is the standard deviation of all the errors.  The process ceases
+ when all points lie within +/- TOLERANCE.
+ Default is SIGMA = 1.70.
+
+.VARIABLE TOLERANC
+ REAL - A final solution for the target body center and radius requires all
+ points on the limb must lie within +/-TOLERANCE of a least square radi
+ (see operation)
+ Default is TOLERANCE = 1.0.
+
+.VARIABLE SUNANGLE
+ REAL - The direction of the sun in degrees measured about the target body
+ center clockwise from up.  If SEDR is available SUNANGLE will be
+ computed automatically.  SUNANGLE allows FARENC to reject terminator
+ points for low phase angles.
+
+.VARIABLE PRINT
+ KEYWORD - ('PRINT) - Causes a listing of line, sample and radial
+ error of all points which were used to compute the target body center.
+
+.VARIABLE MAXNUM
+ INTEGER - The maximum number at points on any video line which
+ can be usd in the line fit .  This eliminates the use of a bad
+ line in the fit.
+ Default is MAXNUM = 10.
+
+.VARIABLE RESCALE
+ REAL - Specifies the ratio of the desired target body diameter
+ (major axis) in pixels to the smallest picture dimension
+ (obtained from the size field).  RESCALE provides a
+ magnification effect if GEOM is also specified.
+ Default is no magnification.
+ NOTE: if rescale > 1 the planet will exceed the picture size !
+
+.VARIABLE UPDATE
+ KEYWORD - Specifies that the SPICE kernel/SEDR data will
+ be updated.
+
+.VARIABLE NORANGLE
+ REAL - Specifies the rotation angle ( in degrees ) of the minor
+ axis of the ellipse measured clockwise from up about the ellipse
+ center.
+    Or the north angle of the projected spin axis of the target body
+ into the picture measured clockwise from up about the target body
+ center in degrees.
+
+.VARIABLE ANGLE
+ REAL - Specifies the rotation angle ( in degrees ) of the minor
+ axis of the ellipse measured clockwise from up about the ellipse
+ center.
+    Or the north angle of the projected spin axis of the target body
+ into the picture measured clockwise from up about the target body
+ center in degrees.
+
+.VARIABLE SMAA
+ REAL - Specifies the semimajor axis of the ellipse in the picture
+ in pixels.
+
+.VARIABLE SMIA
+ REAL - The semiminor axis of the ellipse in the picture in pixels.
+
+.VARIABLE FOCL
+ REAL - The camera focal length in millimeters.
+
+.VARIABLE FOCAL
+ REAL - The camera focal length in millimeters.
+
+.VARIABLE SCALE
+ REAL - The scale in pixels/mm. of the picture.
+
+.VARIABLE PSCALE
+ REAL - The number of pixels per millimeter in the camera focal plane.
+
+.VARIABLE RADIUS
+ REAL - The polar and equatorial radius of the target body in kilometers
+
+.VARIABLE REQUATOR
+ REAL - The target body equatorial radius in kilometers.
+
+.VARIABLE RPOLE
+ REAL - The target body polar radius in kilometers.
+
+.VARIABLE FAR
+ REAL - The distance between the target body center and the spacecraft
+ measured in kilometers.
+ Default is -400.
+
+.VARIABLE RMAG
+ REAL - The distance between the target body center and the spacecraft
+ measured in kilometers.
+ Default is -400.
+
+.VARIABLE SLATIUD
+ REAL - the geocentric latitude of the subspacecraft point in degrees.
+
+.VARIABLE LATITUDE
+ REAL - the geocentric latitude of the subspacecraft point in degrees.
+
+.VARIABLE RING
+ REAL - The radius of Saturn's ring (km).  If RING is specified,
+ REQUATOR and RPOLAR are unnecessary.  This causes a fit to be
+ made to the ring rather than to the target body. (see LCIRCLE)
+
+.VARIABLE LONGITUD
+ REAL - The geocentric longitude of the subspacecraft point in degrees.
+
+.VARIABLE SOLAR
+ 2 REALS - (Solar-Latitude, Solar-Longitude) - Subsolar latitude and
+ longitude.
+
+.VARIABLE PLANET
+ KEYWORD - This parameter selects the name of a solar system object.
+ Specification of any of these keywords sets the polar and
+ equatorial radii to the values currently stored in the Vicar
+ subroutine GETPLACON.  (The values returned are in km.)
+
+ The program default values indicating "no data available" are:
+            Polar radius = Equatorial radius = -400.0 km.
+
+.VARIABLE BEGIN
+Percentage of the initial limb candidate points required to fall
+within 1 pixel of the limb fit function (circle or ellipse).
+Only used in the 'NEW mode of FARENC (as opposed to 'OLD mode).
+If this condition fails then the program reduces the percentage
+by 10 percent and tries the fit all over again. Eventually the percentage 
+may get down from BEGIN to 10 percent, the lowest permitted percentage.
+If there still is no solution the solution for the smallest
+residual is returned.
+Defaults to 80 percent.
+
+.VARIABLE FDS
+ FDS=integer overrides the FDS number in the input image label.
+
+.VARIABLE SERNO
+ SERNO=integer overrides the camera serial number in the input image label.
+
+.VARIABLE CENTER
+ CENTER=(line,sample) causes the center of the target in the output image
+ to be set to the specified coordinates. The default is to put the center
+ at the center of the output image.
+
+.VARIABLE PUTNORTH
+ PUTNORTH=(real) causes the pole of the target body in the output image
+ to be rotated to the PUTNORTH position. The coordinates are clockwise 
+ from up.
+ The pole must be positioned such
+ that the total rotation is < 45 degrees
+  PUTNORTH=0. puts the pole vertical in the output image.
+
+.VARI TARGET
+Ex: TARGET=GANYMEDE specifies that GANYMEDE is the target in the input image.
+
+The TARGET may be a planet, satellite, or asteroid.  A complete list of valid
+target names is located in the ASCII file assigned the logical name (or
+environmental variable) BODY_IDS.
+If defaulted, the target is retrieved from the VICAR label or other TBD means.
+
+.VARI SPICEMODE
+SPICEMODE=LOCAL specifies that SPICE data is to be accessed from local
+SPICE kernels.  SPICEMODE=REMOTE specifies that SPICE data is to be accessed
+via the SPICE server.  If SPICEMODE is defaulted, the logical name (or
+environmental variable) DEFAULTSPICE is used to determine whether LOCAL or
+REMOTE is used.
+
+Note that if SPICE data is not found in LOCAL or REMOTE mode, the other mode
+is attempted in order to retrieve SPICE data.  However, when improved camera
+pointing data is stored, only the specified or default mode is used.
+
+.VARI CKNAME
+CKNAME is a four character string specifying the C-kernel to be used in reading
+camera pointing data:
+
+  CKNAME	C KERNEL
+  --------      -------------
+  DAVI		MIPS_DAVI.CK
+  NAV		MIPS_NAV.CK
+  FARE		MIPS_FARENC.CK
+  NAV2		MIPS_NAV2.CK
+  NEAR		MIPS_NEAR.CK
+  AMOS		MIPS_AMOS.CK
+  NAIF		the best NAIF kernel is used
+
+If defaulted, the kernels are searched in the above order.
+
+.VARI CKID
+CKID is an alternative way to specify the prefered C-kernel for reading
+camera pointing data (see CKNAME parameter):
+
+  CKID	  CKNAME	C KERNEL
+  ----	  --------      -------------
+  M906	  DAVI		MIPS_DAVI.CK
+  M905	  NAV		MIPS_NAV.CK
+  M904	  FARE		MIPS_FARENC.CK
+  M903	  NAV2		MIPS_NAV2.CK
+  M902	  NEAR		MIPS_NEAR.CK
+  M901	  AMOS		MIPS_AMOS.CK
+  varies  NAIF		there are a large number of these files
+
+Ex:  CKID=M901 specifies the four character ID which uniquely identifies the
+     C-kernel MIPS_AMOS.CK.
+
+A complete list of the C-kernel IDs is located in the ASCII file assigned the
+logical name (or environmental variable) KERNELDB.
+
+If specified, CKID overrides the CKNAME parameter.
+
+.VARI INSTITUTE
+INSTITUTE is a four character string identifying the facility which creates
+the improved (C-Smithed) camera pointing.  If defaulted, the value of the
+logical name (or environmental variable) VICAR_SITE is used.
+
+Ex:  INSTITUTE=ASU identifies ASU as the creator of the improved camera
+     pointing.
+
+.VARI PURPOSE
+PURPOSE is a four character string identifying the purpose of the observation
+or the purpose of processing.  For example,
+  PURPOSE=MOSA identifies the image as part of a mosaic sequence
+  PURPOSE=COLO identifies the image as part of a color sequence
+
+.VARI REQNUM
+REQUNUM is a four character string identifying the IPL request number for
+which the camera pointing was created.  REQNUM must contain exactly 4 digits.
+
+Ex:  REQNUM=0123 identifies (somewhat) request number R000123
+
+.VARI CDATE
+Date and time the camera pointing was created in the form 'YEARMMDDHHMM'.
+The date string must contain exactly 12 digits.
+
+Ex:  CDATE=199602291200 specifies that the pointing was created at noon
+     on February 29, 1996.
+
+If defaulted, the current date and time is used.
+
+.VARI GROUPID
+GROUPID is a three character string which identifies the group of the user
+running this program to store improved camera pointing.  (The user ID is
+automatically determined by the program).
+
+Ex:  GROUPID=040 identifies group 040 as the creator of the camera pointing.
+
+On VMS, this parameter is ignored since the program automatically determines
+the group ID of the current user.
+
+If GROUPID is defaulted on Unix, the program uses the value of the
+environmental variable GROUPID.  Note that GROUPID is not a system-defined
+variable, and should be defined in your .cshrc as in the following example:
+
+Ex:  setenv GROUPID 040
+
+.VARIABLE PCL
+ NAME--OPTIONAL
+ Specifies the name of a TCL variable to contain the derived planet 
+ center line.
+
+.VARIABLE PCS
+ NAME--OPTIONAL
+ Specifies the name of a TCL variable to contain the derived planet 
+ center sample.
+.END

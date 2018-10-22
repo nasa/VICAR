@@ -1,0 +1,6 @@
+#define SUBROUTINE affpar
+#define MODULE_LIST affpar.c
+
+#define P2_SUBLIB
+
+#define USES_ANSI_C

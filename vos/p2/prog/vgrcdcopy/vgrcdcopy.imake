@@ -1,0 +1,14 @@
+#define PROGRAM vgrcdcopy
+#define MODULE_LIST vgrcdcopy.c decomp.c vgrcdlabgen.c trans_eng_hdr.c
+
+#define INCLUDE_LIST  engrhdr.h gcfdata.h linesfx.h vgrsubcom.h \
+ uengrhdr.h ugcfdata.h uvgrsubcom.h
+
+#define MAIN_LANG_C
+#define USES_ANSI_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_FORTRAN
+/*#define DEBUG	/* remove on delivery */

@@ -1,0 +1,145 @@
+procedure               !TSTCCDNOISE
+parm    mode    type=keyword count=(0:1) valid=(batch,nobatch,inter) default=inter
+! Feb 18, 2013 - RJB
+! TEST SCRIPT FOR TSTCCDNOISE
+! tests HALF images
+!
+! Vicar Programs:
+!       hist flot ltgen momgen
+!
+! External programs
+!       gnuplot 4.6.x 
+!       gimp or ghostview for eps file
+!
+! Parameters:
+!   mode - method for processing: 
+!       1) batch provides no display
+!       2) interactive or nobatch is used for display requiring
+!       user interaction. 
+!           
+!   In batch mode it produces files testx.gpi by default, which can be
+!       viewed by running gnuplot.  If plotfmt=eps is specified, then
+!       it produces files testx.eps.gpi, which are converted to testx.eps
+!       files by calling gnuplot.  The .eps files can be viewed with
+!       ghostview or gimp.
+!   In interactive or nobatch mode gnuplot is called with a window
+!       manager for X11. The gnuplot display is killed by
+!       a mouse click anywhere on the plot panel
+!            
+!
+! Requires NO external test data: 
+!
+!  NOTE: The original xrt graph package had the X-axis data plotted wrong
+!        The lowest X value was always 0. It gave a bend in the plot.
+!        The lowest X should have always had a value ne 0
+!
+refgbl $autousage
+refgbl $echo
+refgbl $syschar
+body
+let $autousage="none"
+let _onfail="stop"
+let $echo="yes"
+
+if ($syschar(1)="UNIX")
+   defcmd-replace typeit "ush cat"
+else
+   defcmd-replace typeit "dcl type"
+end-if
+ 
+!=========================================================
+!TRY TO MAKE NOISE IMAGES AT DN=0 SIGMA=0
+!                            DN=100 SIGMA=SQRT(10)
+!                            DN=1000 SIGMA=SQRT(100)
+!THIS SHOULD YIELD SYS GAIN CONST K=10 AND READ NOISE=0
+!
+!GAUSNOIS APPARENTLY NEEDS THE MEAN PARAMETER TO BE .5 MORE THAN DESIRED
+!gen d1.img nl=500 ns=500 ival=0 linc=0 sinc=0 'half
+!hist d1.img 'nohist
+!copy d1.img d2.img
+gausnois d1.img mean=10.5 sigma=1.023  nl=500 ns=500 form=half seed=82651
+hist d1.img 'nohist
+flot d1.img d2.img 'coun
+
+
+gausnois a1.img mean=100.5 sigma=3.1623 nl=500 ns=500 form=half seed=987654
+hist a1.img 'nohist
+flot a1.img a2.img 'coun
+gausnois b1.img mean=1000.5 sigma=10 nl=500 ns=500 form=half seed=876543
+hist b1.img 'nohist
+flot b1.img b2.img 'coun
+ltgen a1.img ltf1.dat 'grid ni=2 exp=(0,10,20)  !CREATE LTF
+momgen (d1.img,d2.img) ltf1.dat  exp=0                    !LOAD LTF
+momgen (a1.img,a2.img) ltf1.dat  exp=10                   !LOAD LTF
+momgen (b1.img,b2.img) ltf1.dat  exp=20                   !LOAD LTF
+
+! TEST 1 - NO Plot
+! GAIN CONSTANT SHOULD = 10  READ NOISE SHOULD = 0
+ccdnoise ltf1.dat table=gain1.tbl reject=0
+typeit gain1.tbl
+
+! TEST 2 - 5 Plots - No rejection Criteria - DEBUG
+! SHOW ALL SUBAREAS
+! GAIN CONSTANT SHOULD = 10  READ NOISE SHOULD = 0
+ccdnoise ltf1.dat table=gain2.tbl plot=gain2 reject=0 'dbug
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot gain2.gpi
+end-if
+! TEST 3 - 5 Plots - ALLOW REJECTION OF BAD DATA
+!  Reject bad system gain
+ccdnoise ltf1.dat table=gain3.tbl plot=gain3 reject=1 
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot gain3.gpi
+end-if
+
+! TEST 4 - 5 Plots - ALLOW REJECTION OF BAD DATA
+!  Reject bad noise floor
+ccdnoise ltf1.dat table=gain4.tbl plot=gain4 reject=2
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot gain4.gpi
+end-if
+
+! TEST 5 - 5 Plots - ALLOW REJECTION OF BAD DATA
+!  Reject either
+ccdnoise ltf1.dat table=gain5.tbl plot=gain5 reject=3
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot gain5.gpi
+end-if
+
+! TEST 6 - 5 Plots - output a mark data set 
+ccdnoise ltf1.dat out=mark.dat table=gain6.tbl plot=gain6  
+if (mode = "nobatch" or mode = "inter")
+    ush gnuplot gain6.gpi
+end-if
+
+! TEST 7 - 5 Plots - in encapsulated postscript format 
+ccdnoise ltf1.dat  table=gain7.tbl plot=gain7 +
+    plotfmt=eps
+ush gnuplot gain7.eps.gpi
+!if (mode = "nobatch" or mode = "inter")
+!   ush gimp gain7.eps
+! no 'gimp' on mipl
+! on Solaris, ghostview can be used to display gain7.eps,
+!   ush ghostview gain7.eps
+! on Linux, there doesn't seem to be any tool to do this!
+! just show that file was created:
+   ush ls gain7.eps
+!end-if
+
+!No tests for LIMIT or EXTEXPO
+
+! clean up
+ush rm -f gain*.gpi
+ush rm -f gain*.eps
+ush rm -f gain*.asc
+ush rm -f gain*.tbl
+ush rm -f a?.img
+ush rm -f b?.img
+ush rm -f d?.img
+ush rm -f mark.dat
+ush rm -f ltf1.dat
+
+let $echo="no"
+end-proc
+ 
+

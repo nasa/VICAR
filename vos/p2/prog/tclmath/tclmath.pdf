@@ -1,0 +1,45 @@
+process help=*
+local out type=real count=20
+local numout type=integer count=1
+parm invals type=real count=(0:20) default=--
+parm func type=string +
+	valid=(AVERAGE,SQROOT,NATLOG,LN,LOG,LOG10,EXP,SQUARE,CUBE)
+parm outvals type=name default=out
+parm outcount type=name default=numout
+end-proc
+.title
+ tclmath - program to carry out math functions on tcl real variables
+
+.help
+purpose
+	A routine to perform math operations on tcl variables.
+
+	AVERAGE, SQROOT, SQUARE, CUBE, NATLOG, LOG, and  EXP
+
+    LN and NATLOG are the same
+    LOG and LOG10 are the same
+
+
+
+HISTORY
+
+    1996-03-13 R.J. Bambery - Initial release
+    2010-01-30 R.J.Bambery - Found compatible with 64-bit afids Build 793 Linux, MacOSX (both Intel/PowerPC)
+    2010-03-16 R.J. Bambery - Made 64-bit clean for chkstat routine
+    2010-08-12 R.J. Bambery - Fixed truncation error on version
+    2011-05-05 R.J. Bambery - Added internal function check Added LN, LOG10 checks
+    2013-09-16 R.J. Bambery - Renamed tclmath which describes its function better
+    2016-06-09 W.L. Bunch - Migrated to MIPL.
+
+.level1
+.variable invals
+ Up to 20 real variables
+.variable func
+ the function (AVERAGE,
+ SQROOT,NATLOG,LN,LOG,
+ LOG10,EXP,SQUARE,CUBE)
+.variable outvals
+ up to 20 answers
+.variable outcount
+ number of outputs
+.end

@@ -1,0 +1,133 @@
+1 ITIEPOINT
+
+    Module ITIEPOINT contains subroutines for reading and writing IBIS-2
+    tiepoint files:
+
+      IREAD_TIEPOINTS reads the tiepoint data from an IBIS2 file.
+      This includes opening and closing the file.
+
+      IWRITE_TIEPOINTS writes the tiepoint data to an IBIS2 file.
+      This includes opening and closing the file.
+
+    In the most common case,
+      the TIEPOINTS array defines a geometric transformation which is applied
+      to the input image to produce the output image.  The transformation is 
+      defined via a grid of tiepoints.  The convention (see HELP for programs
+      GEOMA and TIEPARM) is that there are NAV+1 rows of tiepoints in the grid,
+      with NAH+1 tiepoints in each row.  ("row" here means a horizontally 
+      arranged set of points in an image.) 
+      
+    In the other case the tiepoints are not constrained to form a grid.
+      In this case NAH and NAV are 0 and the number of points to be written
+      is specified in NPTS.
+    
+    The IBIS tiepoint file will have one record (IBIS row) per tiepoint.
+      For the case of COLCOUNT = 4, IBIS columns 1 and 2 will contain the line
+      sample coordinates of the tiepoint in the output image.  IBIS columns
+      3 and 4 will contain the line and sample coordinates of the tiepoint in
+      the input image.
+                4 IS THE ONLY VALUE CURRENTLY SUPPORTED FOR COLCOUNT.
+      
+2  CALLING SEQUENCE
+
+  FORTRAN Calling Sequence:  CALL IREAD_TIEPOINTS(UNIT,NAH,NAV,MAXPTS,
+                                                  TIEPOINTS,COLCOUNT)
+  C Calling Sequence:        ziread_tiepoints(unit,&nah,&nav,maxpts,
+                                              tiepoints,colcount);
+    Note the & for nah and nav, denoting the passing by address.
+
+  FORTRAN Calling Sequence:  CALL IWRITE_TIEPOINTS(UNIT,NAH,NAV,NPTS,
+                                                   TIEPOINTS,COLCOUNT)
+  C Calling Sequence:        ziwrite_tiepoints(unit,nah,nav,npts,
+                                               tiepoints,colcount);
+
+  For either routine, ABEND is called if an error occurs.  The calling routine 
+  should call XVUNIT before either routine, but the file should be closed
+  when either routine is called.
+
+2  ARGUMENTS
+
+  IREAD_TIEPOINTS
+
+      UNIT        VICAR unit number of IBIS file.  (input, integer)
+                  (unit, maxpts, and colcount are passed by value
+                  for ziread_tiepoints.)
+
+      NAH         For gridded sets of tiepoints, there are NAH+1 tiepoints for
+                  each row of tiepoints in the grid.  For non-gridded sets of
+                  tiepoints, NAH is set to 0.      (output, integer)
+                  (nah and nav are passed by address for ziread_tiepoints.)
+      NAV         For gridded sets of tiepoints, there are NAV+1
+                  rows of tiepoints in the grid.  For non-gridded sets of
+                  tiepoints, NAV is set to the number of tiepoints in the
+                  file, independent of MAXPTS.     (output, integer)
+      MAXPTS      The maximum number of tiepoints that will be read into
+                  the TIEPOINTS array.  (There are COLCOUNT array elements
+                  per tiepoint.)                   (input, integer)
+      TIEPOINTS   The tiepoint values read from the IBIS file.
+                  (There are COLCOUNT array elements per tiepoint.)     
+                                                    (output, real array)
+                  The declaration is
+                  REAL TIEPOINTS(nnn), where nnn >= MAXPTS*COLCOUNT,
+                  or for ziread_tiepoints,
+                  float *tiepoints;
+
+      COLCOUNT    The number of data values per tiepoint = the number of
+                  IBIS columns per tiepoint.  In the TIEPOINTS array, there 
+                  are COLCOUNT array elements
+                  per tiepoint.)                   (input, integer)
+                4 IS THE ONLY VALUE CURRENTLY SUPPORTED FOR COLCOUNT.
+
+  IWRITE_TIEPOINTS
+
+      UNIT        VICAR unit number of IBIS file.  (input, integer)
+                  (unit, nah, nav, npts, and colcount are passed by value
+                  for ziwrite_tiepoints.)
+
+      NAH         For gridded sets of tiepoints, there are NAH+1 tiepoints for
+                  each row of tiepoints in the grid.  For non-gridded sets of
+                  tiepoints, NAH is set to 0.      (input, integer)
+      NAV         For gridded sets of tiepoints, there are NAV+1
+                  rows of tiepoints in the grid.  For non-gridded sets of
+                  tiepoints, NAV is set to 0.      (input, integer)
+      NPTS        The number of tiepoints that will be written from
+                  the TIEPOINTS array.  (There are COLCOUNT array elements
+                  per tiepoint.)                   (input, integer)
+      TIEPOINTS   The tiepoint values written to the IBIS file.
+                  (There are COLCOUNT array elements per tiepoint.)     
+                                                    (input, real array)
+                  The declaration is
+                  REAL TIEPOINTS(nnn), where nnn >= NPTS*COLCOUNT,
+                  or for ziwrite_tiepoints,
+                  float *tiepoints;
+
+      COLCOUNT    The number of data values per tiepoint = the number of
+                  IBIS columns per tiepoint.  In the TIEPOINTS array, there 
+                  are COLCOUNT array elements
+                  per tiepoint.)                   (input, integer)
+                4 IS THE ONLY VALUE CURRENTLY SUPPORTED FOR COLCOUNT.
+
+2  HISTORY
+
+      Original Programmer: Steve Pohorsky     July 1995
+      Current Cognizant Programmer: Steve Pohorsky
+      Source Language: Fortran
+
+ Revision History
+  7-95  ...SP.... Initial release is portable (VMS and UNIX).
+ 12-96  ...SP.... Added C bridges for initial routines.
+2  OPERATION
+
+ IREAD_TIEPOINTS tries to read from the property label the values for
+ NUMBER_OF_AREAS_HORIZONTAL and NUMBER_OF_AREAS_VERTICAL.  If both are
+ found, the routine assumes that the IBIS file holds a gridded set of
+ tiepoints.  Otherwise the routine assumes the set is non-gridded, returning
+ 0 for NAH and the number of rows in the file for NAV.
+ The initial release assumes that the tiepoint data is in IBIS columns 1-4.
+
+ If NAH*NAV is not 0, IWRITE_TIEPOINTS assumes that the TIEPOINTS array holds 
+ a gridded set of (NAH+1)*(NAV+1) tiepoints.  Otherwise the routine assumes 
+ the set is a non-gridded set of NPTS tiepoints.  For gridded tiepoint sets, 
+ the routine writes to the property label the values for
+ NUMBER_OF_AREAS_HORIZONTAL and NUMBER_OF_AREAS_VERTICAL.  
+ The initial release assumes that the tiepoint data is in IBIS columns 1-4.

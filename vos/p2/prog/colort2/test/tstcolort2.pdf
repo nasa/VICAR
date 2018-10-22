@@ -1,0 +1,485 @@
+Procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage = "none"
+let _onfail="continue"
+
+enable-log
+
+! Test of program colort2
+let $echo="yes"
+
+write "HSI case"
+
+write " byte data"
+
+gen BL 17 289 LINC=15 SINC=0 IVAL=0
+gen GR 17 289 LINC=0 SINC=15 IVAL=0
+gen R 1 17 SINC=15 IVAL=0
+size R RD (1,1,17,289) 'NOIN
+
+write " first, compare with COLORT"
+
+colort (BL GR RD) (H S I) TO=HSI
+colort2 (BL GR RD) (H2 S2 I2) TO=HSI
+f2 (H H2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S S2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I I2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort (H S I) (BL0 GR0 RD0) FROM=HSI
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=HSI
+f2 (BL0 BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR0 GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD0 RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+f2 (BL BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " halfword data"
+
+write " first, compare with byte data"
+
+cform BL BLH 'half so=(1 0)
+cform GR GRH 'half so=(1 0)
+cform RD RDH 'half so=(1 0)
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=HSI maxval=255
+f2 (H2 H) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S2 S) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I2 I) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=HSI
+f2 (BL2 BL0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR2 GR0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD2 RD0) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+gen BLH 17 289 LINC=15 SINC=0 IVAL=0 'half
+gen GRH 17 289 LINC=0 SINC=15 IVAL=0 'half
+gen RH 1 17 SINC=15 IVAL=0 'half
+size RH RDH (1,1,17,289) 'NOIN
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=HSI maxval=4320
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=HSI
+f2 (BLH BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GRH GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RDH RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write "fullword data"
+
+write " first, compare with byte data"
+
+cform BL BLH 'full so=(1 0)
+cform GR GRH 'full so=(1 0)
+cform RD RDH 'full so=(1 0)
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=HSI maxval=255
+f2 (H2 H) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S2 S) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I2 I) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=HSI
+f2 (BL2 BL0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR2 GR0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD2 RD0) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+gen BLH 17 289 LINC=15 SINC=0 IVAL=0 'full
+gen GRH 17 289 LINC=0 SINC=15 IVAL=0 'full
+gen RH 1 17 SINC=15 IVAL=0 'full
+size RH RDH (1,1,17,289) 'NOIN
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=HSI maxval=4320
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=HSI
+f2 (BLH BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GRH GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RDH RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write "real*4 data"
+
+write " first, compare with byte data"
+
+cform BL BLH 'real so=(1 0)
+cform GR GRH 'real so=(1 0)
+cform RD RDH 'real so=(1 0)
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=HSI maxval=255
+f2 (H2 H) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S2 S) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I2 I) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=HSI
+f2 (BL2 BL0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR2 GR0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD2 RD0) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+gen BLH 17 289 LINC=15 SINC=0 IVAL=0 'real
+gen GRH 17 289 LINC=0 SINC=15 IVAL=0 'real
+gen RH 1 17 SINC=15 IVAL=0 'real
+size RH RDH (1,1,17,289) 'NOIN
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=HSI maxval=4320
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=HSI
+f2 (BLH BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GRH GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RDH RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write "HSR case"
+
+write " byte data"
+
+gen BL 17 289 LINC=15 SINC=0 IVAL=0
+gen GR 17 289 LINC=0 SINC=15 IVAL=0
+gen R 1 17 SINC=15 IVAL=0
+size R RD (1,1,17,289) 'NOIN
+
+write " first, compare with COLORT"
+
+colort (BL GR RD) (H S I) TO=hsr
+colort2 (BL GR RD) (H2 S2 I2) TO=hsr
+f2 (H H2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S S2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I I2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort (H S I) (BL0 GR0 RD0) FROM=hsr
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=hsr
+f2 (BL0 BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR0 GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD0 RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+f2 (BL BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " halfword data"
+
+write " first, compare with byte data"
+
+cform BL BLH 'half so=(1 0)
+cform GR GRH 'half so=(1 0)
+cform RD RDH 'half so=(1 0)
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=hsr maxval=255
+f2 (H2 H) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S2 S) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I2 I) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=hsr
+f2 (BL2 BL0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR2 GR0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD2 RD0) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+gen BLH 17 289 LINC=15 SINC=0 IVAL=0 'half
+gen GRH 17 289 LINC=0 SINC=15 IVAL=0 'half
+gen RH 1 17 SINC=15 IVAL=0 'half
+size RH RDH (1,1,17,289) 'NOIN
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=hsr maxval=4320
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=hsr
+f2 (BLH BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GRH GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RDH RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write "fullword data"
+
+write " first, compare with byte data"
+
+cform BL BLH 'full so=(1 0)
+cform GR GRH 'full so=(1 0)
+cform RD RDH 'full so=(1 0)
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=hsr maxval=255
+f2 (H2 H) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S2 S) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I2 I) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=hsr
+f2 (BL2 BL0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR2 GR0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD2 RD0) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+gen BLH 17 289 LINC=15 SINC=0 IVAL=0 'full
+gen GRH 17 289 LINC=0 SINC=15 IVAL=0 'full
+gen RH 1 17 SINC=15 IVAL=0 'full
+size RH RDH (1,1,17,289) 'NOIN
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=hsr maxval=4320
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=hsr
+f2 (BLH BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GRH GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RDH RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write "real*4 data"
+
+write " first, compare with byte data"
+
+cform BL BLH 'real so=(1 0)
+cform GR GRH 'real so=(1 0)
+cform RD RDH 'real so=(1 0)
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=hsr maxval=255
+f2 (H2 H) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S2 S) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I2 I) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=hsr
+f2 (BL2 BL0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR2 GR0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD2 RD0) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+gen BLH 17 289 LINC=15 SINC=0 IVAL=0 'real
+gen GRH 17 289 LINC=0 SINC=15 IVAL=0 'real
+gen RH 1 17 SINC=15 IVAL=0 'real
+size RH RDH (1,1,17,289) 'NOIN
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=hsr maxval=4320
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=hsr
+f2 (BLH BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GRH GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RDH RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write "SPH case"
+
+write " byte data"
+
+gen BL 17 289 LINC=15 SINC=0 IVAL=0
+gen GR 17 289 LINC=0 SINC=15 IVAL=0
+gen R 1 17 SINC=15 IVAL=0
+size R RD (1,1,17,289) 'NOIN
+
+write " first, compare with COLORT"
+
+colort (BL GR RD) (H S I) TO=sph
+colort2 (BL GR RD) (H2 S2 I2) TO=sph
+f2 (H H2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S S2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I I2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort (H S I) (BL0 GR0 RD0) FROM=sph
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=sph
+f2 (BL0 BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR0 GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD0 RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+f2 (BL BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " halfword data"
+
+write " first, compare with byte data"
+
+cform BL BLH 'half so=(1 0)
+cform GR GRH 'half so=(1 0)
+cform RD RDH 'half so=(1 0)
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=sph maxval=255
+f2 (H2 H) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S2 S) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I2 I) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=sph
+f2 (BL2 BL0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR2 GR0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD2 RD0) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+gen BLH 17 289 LINC=15 SINC=0 IVAL=0 'half
+gen GRH 17 289 LINC=0 SINC=15 IVAL=0 'half
+gen RH 1 17 SINC=15 IVAL=0 'half
+size RH RDH (1,1,17,289) 'NOIN
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=sph maxval=4320
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=sph
+f2 (BLH BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GRH GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RDH RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write "fullword data"
+
+write " first, compare with byte data"
+
+cform BL BLH 'full so=(1 0)
+cform GR GRH 'full so=(1 0)
+cform RD RDH 'full so=(1 0)
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=sph maxval=255
+f2 (H2 H) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S2 S) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I2 I) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=sph
+f2 (BL2 BL0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR2 GR0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD2 RD0) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+gen BLH 17 289 LINC=15 SINC=0 IVAL=0 'full
+gen GRH 17 289 LINC=0 SINC=15 IVAL=0 'full
+gen RH 1 17 SINC=15 IVAL=0 'full
+size RH RDH (1,1,17,289) 'NOIN
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=sph maxval=4320
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=sph
+f2 (BLH BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GRH GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RDH RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write "real*4 data"
+
+write " first, compare with byte data"
+
+cform BL BLH 'real so=(1 0)
+cform GR GRH 'real so=(1 0)
+cform RD RDH 'real so=(1 0)
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=sph maxval=255
+f2 (H2 H) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (S2 S) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (I2 I) d FUNC=IN1-IN2+100
+hist d 'nohis 
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=sph
+f2 (BL2 BL0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GR2 GR0) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RD2 RD0) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+write " compare with starting files"
+
+gen BLH 17 289 LINC=15 SINC=0 IVAL=0 'real
+gen GRH 17 289 LINC=0 SINC=15 IVAL=0 'real
+gen RH 1 17 SINC=15 IVAL=0 'real
+size RH RDH (1,1,17,289) 'NOIN
+colort2 (BLH GRH RDH) (H2 S2 I2) TO=HSI maxval=4320
+colort2 (H2 S2 I2) (BL2 GR2 RD2) FROM=HSI
+f2 (BLH BL2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (GRH GR2) d FUNC=IN1-IN2+100
+hist d 'nohis
+f2 (RDH RD2) d FUNC=IN1-IN2+100
+hist d 'nohis 
+
+! clean up
+
+ush rm -f BL
+ush rm -f BL2
+ush rm -f BL0
+ush rm -f BLH
+ush rm -f GR
+ush rm -f GR2
+ush rm -f GR0
+ush rm -f GRH
+ush rm -f R
+ush rm -f R4
+ush rm -f RD
+ush rm -f RH
+ush rm -f RD0
+ush rm -f RD2
+ush rm -f RDH
+ush rm -f H
+ush rm -f H2
+ush rm -f I
+ush rm -f I2
+ush rm -f S
+ush rm -f S2
+ush rm -f d
+
+disable-log
+
+Let $Echo="NO"
+End-proc

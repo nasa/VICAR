@@ -1,0 +1,181 @@
+process help=*
+PARM INP    STRING      COUNT=1
+PARM OUT    STRING      COUNT=1
+PARM SIZE   INTEGER     COUNT=4 DEFAULT=(1,1,0,0)
+PARM SL     INTEGER     COUNT=1 DEFAULT=1
+PARM SS     INTEGER     COUNT=1 DEFAULT=1
+PARM NL     INTEGER     COUNT=1 DEFAULT=0
+PARM NS     INTEGER     COUNT=1 DEFAULT=0
+PARM AREA   INTEGER     COUNT=4 
+PARM SHIFT  KEYWORD     VALID=(SHIFT,NOSHIFT) DEFAULT=SHIFT
+local neg   INTEGER     INITIAL=0
+PARM NEGATIVE  NAME     DEFAULT=neg
+
+END-PROC
+.TITLE
+VICAR Program "psf"
+.HELP
+PURPOSE
+
+Determine point spread function from image
+
+OPERATION
+
+This program copies a point spread function (PSF) contained in the
+input image to an output image in a format suitable for the production
+of the optical transfer function (OTF) by program "fft22".  The
+program was designed to be used in the procedure "restore", which deconvolves
+the point spread function from an image, but can also be used in stand-
+alone mode.
+
+The input image is normally a star or the output of an appropriate test target
+from a camera test.
+
+The AREA parameter restricts where in the image the psf object occurs. For
+example, if the PSF is from a starfield there may be other stars in the field
+you wish to ignore. Similarly the output from a camera calibration test target
+may have a border or other types of targets in the field.
+.page
+EXECUTION FORMAT:
+
+  psf  IN  OUT  SIZE  AREA  SHIFT
+
+where:	IN	is the input image.
+	OUT	is the output point spread function.
+	SIZE	is the size of the output file, and should be
+		  the same dimension as the image to which the
+		  OTF will be applied.
+	AREA	is a required parameter defining the location of
+		  the point spread function in the input image.
+	SHIFT   is an optional parameter determining whether the
+		  PSF area will be allowed to shift in the input. SHIFT
+          is like what FFTFLIP does for FFTs.
+.page
+METHOD
+
+First, the program determines the mean of the DNs lying on the border
+of the region defined by the AREA parameter.  This mean is used as the
+background DN value.  The subimage of size determined by AREA minus the
+background value is the PSF.
+
+Next, the program determines the centroid of the PSF.  The subimage is
+quartered about the pixel closest to the centroid and is copied into
+the four corners of the output data set.  (This process is intended to
+eliminate translation of an image when deconvolved with the point spread
+function, although subpixel translations will still be present.)  The
+rest of the output file is left empty (0 DN).  
+
+The program works with BYTE, HALF, FULL and REAL formats. Its output
+format is the same as the input.  
+
+It warns you if negative numbers are found in the image. If so, it
+returns a value of 1 in the NEGATIVE return parameter.
+
+RESTRICTIONS
+
+    For REAL images negative values are converted to 0. So centroid is
+only computed from positive values. If it is important, you may convert 
+images with negative values to all positive by MAXMIN and F2 before
+processing with PSF.
+
+.page
+HISTORY:
+
+Written by:  J.J.Lorre,  1 Jan. 1978
+Current Cognizant Programmer:  Ray Bambery
+Revisions:
+  1985-03-29 L.W.Kamp - Converted to VAX
+  1995-01-02 A.Scop (CRI) - Made portable for UNIX
+  2012-12-29 RJB - Fixes for 64-bit Linux under gfortran 4.7.2
+  2013-08-24 Ray Bambery - Fixed crash when used with BYTE images
+                Got message with BYTE images:
+    *** glibc detected *** /data/rjb/ada/src/psf: free(): invalid next size (fast): 0x00000000011deeb0 ***
+    ======= Backtrace: =========
+    /lib64/libc.so.6[0x36e8275916]
+                Program now accepts BYTE, HALF, FULL and REAL images
+                Added NEGATIVE return parameter.
+  2016-06-08 Walt Bunch - Migrated to MIPL.
+
+.LEVEL1
+.vari INP
+Input image
+.vari OUT
+Output PSF
+.vari SIZE
+Size of output file.
+ = (SL,SS,NL,NS)
+.vari SL
+Starting line
+(always 1)
+.VARI SS
+Starting sample
+(always 1)
+.VARIABLE NL
+Number of Lines
+.VARIABLE NS
+Number of samples
+.vari AREA
+Area containing PSF.
+.VARI SHIFT
+Shift PSF about new
+centroid?
+.VARI NEGATIVE
+A return parameter. If 1 then
+negative numbers were found in
+image.
+.LEVEL2
+.vari INP
+INP is the name of the image file from which the PSF will be extracted,
+using the AREA parameter.
+.vari OUT
+OUT is the name of the output file into which the properly formatted PSF
+will be written.
+.vari SIZE
+SIZE is the standard Vicar2 parameter containing:
+ 
+  (Starting Line, Starting Sample, Number of Lines, Number of Samples)
+ 
+Note that in this program it refers only to the output file, and therefore
+the first two elements are ignored.  This parameter is included only for
+unformity in Vicar2 application program interface.
+.vari SL
+See HELP SIZE.
+.vari SS
+See HELP SIZE.
+.VARIABLE NL
+NL specifies the size of the image in the line direction, i.e., the
+number of lines in the image.
+.VARIABLE NS
+NS specifies the size of the image in the sample direction, i.e.,
+the number of pixels per line in the image.
+.vari AREA
+AREA specifies the area in the input file (INP) from which the PSF will be
+extracted, after subtraction of the background DN value.  It has the
+same structure as the SIZE parameter, i.e.:
+ 
+  (Starting Line, Starting Sample, Number of Lines, Number of Samples).
+ 
+Note that the last two elements should be less than or equal to the
+corresponding elements in SIZE (or NL and NS) for meaningful results.
+
+If NOSHIFT is specified, then the final PSF will remain strictly inside
+this area after determination of the centroid.  Otherwise, the final
+PSF will be of the same size as specified by AREA, but centered on the
+centroid of the function.
+.vari SHIFT
+This parameter controls whether the PSF will be allowed to shift outside
+the area specified by the AREA parameter after determination of its
+centroid.
+
+If SHIFT is specified, then the final PSF will be of the size specified 
+by the AREA parameter, but centered on the centroid of the function. (If
+part falls outside the image, the size is reduced accordingly.)  This is
+the normal choice when the user does know the exact location of the PSF
+in the input.
+
+If NOSHIFT is specified, then the area of the PSF remains that specified
+by AREA, but the quartering is done about the centroid, so that the four
+quarters may be unequal.  This choice is useful if the location of the
+PSF in the input is accurately known and it is important that data
+outside this area be excluded.
+.END

@@ -1,0 +1,98 @@
+process help=*
+PARM INP	TYPE = STRING
+PARM OUT	TYPE = STRING 	          DEFAULT = MINFILT
+PARM SIZE	TYPE = INTEGER 	COUNT=0:4 DEFAULT=--
+#PARM ONL	TYPE = INTEGER  COUNT=0:1 DEFAULT=--
+#PARM ONS    TYPE = INTEGER  COUNT=0:1 DEFAULT=--
+PARM NLW    TYPE = INTEGER  COUNT=1	  DEFAULT = 3
+PARM NSW    TYPE = INTEGER	COUNT=1	  DEFAULT = 3
+END-PROC
+.TITLE
+VICAR program MINFILT.
+
+.HELP
+PURPOSE:
+Selects the minimum DN within a rectangular convolution window for
+images in BYTE, HALF, FULL or REAL formats.
+
+.PAGE
+EXECUTION:
+
+MINFILT may be executed in the following manner:
+
+		MINFILT INP=A OUT=B SIZE=(SL,SS,NL,NS) PARAMS
+
+where INP, OUT, SIZE, AND PARAMS are parameters and are explained in their
+respective parameter section.
+
+.PAGE
+OPERATION:
+
+MINFILT finds the local minimum value of a rectangular window centered at
+each pixel in an image. 
+The program takes advantage of the fact that if the minimum of an area
+was not in the left column then the next area to the right (one 
+pixel over) need only be checked in the right column.
+
+EXAMPLE:
+
+	 MINFILT INP=A OUT=B NLW=5 NSW=7
+  The window is 5 lines by 7 samples.
+
+.PAGE
+HISTORY:
+
+ORIGINALLY WRITTEN BY: J Lorre 1/30/93
+COGNIZANT PROGRAMMER:  Ray Bambery
+
+    May 18, 2011 - Ray Bambery - Mods for gcc4.4.4 64-bit and
+                    add FULL and REAL data types, changed 
+                    confusing NL & NS parms to ONL and ONS since
+                    they refer to output file
+
+    09-Jan-2013 -lwk- ONL and ONS commented out, since the code does
+                      not use them.  (NL,NS are supposed to be alternatives
+                      to the SIZE parameter.)
+
+.LEVEL1
+.VARI INP
+STRING-input dataset.
+.VARI OUT
+STRING-output dataset.
+.VARI SIZE
+4 INTEGERS-VICAR size field,
+(SL,SS,NL,NS).
+.VARI ONL
+INTEGER-number of lines in
+output file.
+.VARI ONS
+INTEGER-Number of samples in
+output file.
+.VARI NLW
+INTEGER-Size of filter kernel
+in lines.
+.VARI NSW
+INTEGER-Size of filter kernel
+in samples.
+.LEVEL2
+.VARI INP
+STRING - INP=A where A is the input dataset name.
+.VARI OUT
+STRING - OUT=B where B is the output dataset name.
+.VARI SIZE
+4 INTEGERS - SIZE=(SL,SS,NL,NS) where SL is the starting line, SS is the
+ starting sample, NL is the number of lines in the input dataset and NS
+ is the number of samples in the input dataset. (SIZE is usually defined
+ as SIZE=(1,1,NL,NS)). Default is taken from the VICAR label within the
+ program.
+.VARI ONL
+INTEGER - NL=N1 where is N1 is the number of lines in the output dataset.
+.VARI ONS
+INTEGER - NS=N1 where is N1 is the number of samples in the output dataset.
+.VARI NLW
+INTEGER - NLW=I1 where I1 is an integer and specifies the size of the filter
+ kernel in lines. Default is NLW=3.
+.VARI NSW
+INTEGER - NSW=I2 where I2 is an integer and specifies the size of the filter
+ kernel in samples. Default is NSW=3.
+.END

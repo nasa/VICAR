@@ -1,0 +1,72 @@
+procedure help=*
+PARM INP     TYPE=(STRING,60)
+PARM OUT     TYPE=(STRING,60)
+PARM SIZE    TYPE=INTEGER    COUNT=4                      DEFAULT=(1,1,0,0)
+PARM SL	     TYPE=INTEGER   				  DEFAULT=1
+PARM SS	     TYPE=INTEGER				  DEFAULT=1
+PARM NL      TYPE=INTEGER				  DEFAULT=0
+PARM NS      TYPE=INTEGER				  DEFAULT=0
+BODY
+
+COPY @INP SCRASTIRADX @SIZE @SL @SS @NL @NS SB=1 NB=1
+F2 SCRASTIRADX SCRASTIRAD10 FUNC="MAX(0,6.882*(IN1-1))"
+
+COPY @INP SCRASTIRADX @SIZE @SL @SS @NL @NS SB=2 NB=1
+F2 SCRASTIRADX SCRASTIRAD11 FUNC="MAX(0,6.780*(IN1-1))"
+
+COPY @INP SCRASTIRADX @SIZE @SL @SS @NL @NS SB=3 NB=1
+F2 SCRASTIRADX SCRASTIRAD12 FUNC="MAX(0,6.590*(IN1-1))"
+
+COPY @INP SCRASTIRADX @SIZE @SL @SS @NL @NS SB=4 NB=1
+F2 SCRASTIRADX SCRASTIRAD13 FUNC="MAX(0,5.693*(IN1-1))"
+
+COPY @INP SCRASTIRADX @SIZE @SL @SS @NL @NS SB=5 NB=1
+F2 SCRASTIRADX SCRASTIRAD14 FUNC="MAX(0,5.225*(IN1-1))"
+
+TRAN (SCRASTIRAD10,SCRASTIRAD11,SCRASTIRAD12,SCRASTIRAD13,SCRASTIRAD14) +
+   @OUT 'BSQ
+
+ush rm -f SCRASTIRAD*
+END-PROC
+.TITLE
+	Procedure ASTIRAD
+.HELP
+PURPOSE:
+ASTIRAD takes as input the 5 ASTER TIR channels Level 1B data (radiance at
+sensor) and applies the appropriate gains and offsets to convert to 
+radiance in units of milliWatts per square meter per steradian per 
+micrometer.
+
+OPERATION:
+ASTIRAD uses the VICAR programs COPY and F2 to first copy out each individual
+channel, then apply that channel's rescaling values to arrive at the proper
+units. Once all channels have been converted, the VICAR program TRAN is used
+to recombine the channels into a single BSQ organized dataset. Finally,
+all scratch datasets are deleted.
+
+.LEVEL1
+.VARIABLE INP
+input data set
+.VARIABLE OUT
+output data set
+.VARIABLE SIZE
+The standard Vicar size
+ field (sl,ss,nl,ns)
+.VARIABLE SL
+Starting line
+.VARIABLE SS
+Starting sample
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples
+.LEVEL2
+.VARIABLE INP
+Input dataset containing raw ASTER 1B TIR radiance at sensor data.
+.VARIABLE OUT
+Output dataset containing ASTER 1B TIR radiance at sensor data, in units of
+milliWatts per square meter per steradian per micrometer.
+.VARIABLE SIZE
+The standard Vicar size field ( starting_line, starting_sample, 
+number_of_lines, number_of_samples).
+.END

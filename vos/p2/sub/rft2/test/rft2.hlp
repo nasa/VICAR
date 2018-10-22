@@ -1,0 +1,342 @@
+1  RFT2
+
+     RFT2 computes a transform of a doubly-subscripted array of real numbers
+     or an inverse transform whose result is such an array.  The transform
+     is similar to a Fourier transform except that the redundant Fourier 
+     coefficients resulting from the fact that the data are real are not
+     computed nor is space provided for them in the transform format.  This 
+     results in nearly a factor of two savings in space requirements and
+     also a savings in computer time as compared with a complex Fourier
+     transform.
+
+2  CALLING SEQUENCE
+
+     FORTRAN calling sequence and parameters:
+      
+         call rft2(matrix,nl,ns,invflag,status)
+
+     Where:
+	 real*4    matrix   - 2D matrix to be transformed     (input/output)
+         integer*4 nl       - number of lines in the matrix   (input)
+         integer*4 ns       - number of samples in the matrix (input)
+         integer*4 invflag  - Flag:			      (input)
+				1 for forward transform 
+                               -1 for inverse transform
+         integer*4 status   - Operational status:
+                              1 : success
+		             -3 : the dimension of the input matrix in the
+                                  real direction, isn't even.
+                             -2 : one of the square-free factors of the 
+                                  matrix dimensions is too large.
+                             -1 : one of the dimensions of the input matrix
+                                  has too large a prime factor.
+
+
+               
+    C calling sequence and parameters:
+
+         rft2(matrix,nl,ns,invflag,status);
+
+     Where:
+       	 float matrix;   - 2D matrix to be transformed     (input/output)
+         int   nl;       - number of lines in the matrix   (input)
+         int   ns;       - number of samples in the matrix (input)
+         int   invflag;  - Flag:			   (input)
+				1 for forward transform 
+                               -1 for inverse transform
+         int   status;   - Operational status:
+                              1 : success
+		             -3 : the dimension of the input matrix in the
+                                  real direction, isn't even.
+                             -2 : one of the square-free factors of the 
+                                  matrix dimensions is too large.
+                             -1 : one of the dimensions of the input matrix
+                                  has too large a prime factor.
+
+
+                             * * *
+
+     The array dimensions required for an m-line, n-sample transform are 
+     provided in Fortran with
+
+                 REAL A(n,m+2).
+
+     The number of lines, m, must be even.  To compute the transform
+
+                 CALL RFT2(A,M,N,1,STATUS).
+
+     The initial content of the last two lines is immaterial.  In the
+     resulting transform, adjacent pairs of real lines may be considered
+     to be single lines of complex numbers with their real parts
+     appearing in the first line of the pair and corresponding imaginary
+     parts in the second.   The first and last complex lines correspond
+     to vertical dc and maximum frequency and exhibit conjugate symmetry
+     in the sample direction.  The whole may be viewed as the upper half
+     of the full complex Fourier transform with dc in the upper left
+     corner.
+
+     To compute the inverse transform of an array initially in this format
+     (conjugate symmetry in first and last complex lines),
+
+                 CALL RFT2(A,M,N,-1,STATUS).
+
+     The resulting array of real numbers fills the first m lines of A.
+     The last two lines of A should be ignored.  Scaling is such that the 
+     successive use of the two transforms multiplies everything by 2.m.n.
+
+     In both the forward and the inverse cases, the alternate returns are
+     caused by various problems with factoring M or N.
+
+2  HISTORY
+
+     Original Programmer: John E. Kreznar
+     Current Cognizant Programmer: John E. Krezner
+     Source Language: Fortran, C for the C-bridge
+     Revision: New,          15 April 1977
+               Port to UNIX, 8 June 1993, M. O'Shaughnessy
+
+2  OPERATION
+
+
+     RFT2 uses existing general purpose mixed-radix fast Fourier transform
+     routines RCSFFT and REALTR.  The reader is directed to the documenta-
+     tion for these subroutines for details such as range of acceptable
+     line and sample counts and dependence of timing on these values.
+
+     Given the general purpose tools RCSFFT and REALTR, completing the 
+     description of RFT@ is largely a matter of defining data formats.
+     The subscript conventions used to describe these formats are as
+     follows:
+
+        o  When using a subscript (x,y) in an algebraic expression, we
+           associate the first component, x, with line number increasing 
+           downward and the second, y, with sample number increasing to 
+           the right.  This provides a right-handed coordinate system
+           which is consistent with image processing practice.
+
+        o  It is image processing convention that, when an image is
+           stored on a secondary storage medium such as disk or tape,
+           consecutive locations on the secondary medium are occupied
+           by consecutive samples in a given line of the image, with
+           consecutive lines following one another.  From a performance
+           point of view, it is essential to preserve the adjacency of
+           samples within a line in the main store representatin of
+           images as well, at least in arrays that are used as input/
+           output buffers.  This means that if Fortran double subscript-
+           ing is used to address such an array, sample must correspond
+           to the first Fortran subscript and line to the second because
+           of the USA Standard Array Element Successor Function of 
+           Fortran.  This places the Fortran subscripts in the opposite
+           order from the "right-handed" convention above.
+
+        o  Finally, in Fourier-transform work, it is most natural to con-
+           sider the subscript of an n-element array as ranging over 
+           0,1,2,...,n-1.  However, USA Standard Fortran requires that
+           Fortran subscripts be positive, thereby excluding zero.
+           Therefore, a consistent difference of 1 occurs in this document
+           between subscripts appearing in Fortran expressions and the
+           corresponding subscripts appearing elsewhere.
+
+3 MATHEMATICAL_DEFINITION
+
+      The function of RFT2 may be defined as follows.  Let m and n be the 
+      number of lines and samples, respectively, in the signal (image)
+      array.  m must be even and, in addition, both m and n must meet
+      the factorability criteria defined in the "restrictions" paragraph.
+
+      Let {f(jk)},j=0,1,2,...,m-1;k=0,1,2,...,n-1 be the signal (image)
+      array and {g(jk)},j=0,1,2,...,m/2; k=0,1,...,n-1 be the transform
+      array.  Each f(jk) is a real number and each g(jk) is a complex
+      number.  Note that the number of lines in {g} is one-half that
+      in {f}, plus one.
+
+      The forward transform
+
+                     CALL RFT2(f,m,n,1,&x,&y,&x)
+
+      causes f to overlaid by g, where
+
+                    m-1    n-1
+                    _____  _____
+         g(jk) = 2  \      \     f(pq)exp( 2(PI)ijp/m + 2(PI)ikq/n ).
+                    /____  /____ 
+                    p=0    q=0
+
+      Note that the first and last lines of g exhibit conjugate symmetry 
+      in the sample direction, i.e.,
+                       
+         g(0k) = g*(0,n-k),k=1,2,...,n-1; g(00) = g*(00)
+      and                                                                 
+         g(m/2,k) = g*(m/2),(n-k),k=1,2,...,n-1; g*(m/2,0) = g*(m/2,0).
+
+      For any m/2 - 1 xn complex array g having conjugate symmetry in the 
+      first and last lines, the inverse transform 
+
+                           CALL RFT2(g,m,n,-1,&x,&y,&z)
+                                
+      causes g to e overlaid by f, where
+
+                    m 
+                    - _ 1
+                    2       n-1
+                    -----   -----
+          f(jk) =   \       \        g(pq)exp( -2(PI)ijp/m - 2(PI)ikq/n )
+                    /____   /____
+                    p=0     q=0
+
+      
+                 m-1     n-1
+                 -----   -----                   
+              +  \       \       g*(m-p,q)exp( -2(PI)ijp/m + 2(PI)ikq/n )
+                 /____   /____  
+                     m   q=0
+                 p = -
+                     2
+                  
+       f is real.  If g was obtained by taking the forward RFT2 transform 
+       of an array F, then scaling is such that
+
+                 f = 2mnF
+
+3 ERROR_RETURNS
+
+       The significance of the three error returns, &x, &y,and &z, is the
+       same in both the forward and inverse cases.  Control is tranferred
+       to the corresponding statement numbers in the caller's program as
+       follows:
+
+              x - A prime factor of m or n exceeds 23;
+
+              y - The square-free portion of m/2 or n has two or more
+                  factors and exceeds 210, or, the number of prime factors
+                  of m/2 or n exceeds 208;
+
+              z - m is odd.
+
+3 TRANSFORM_FORMAT
+
+       The following array illustrates the signal and transform formats,
+       i.e., the arrangement of the elements in memory, for the case m=4,
+       n=3.  Each square corresponds to one machine word.  The four 
+       notations in each square are:
+
+         Corner                    Definition
+       __________               ________________
+
+       Upper Left              Signal array element
+       Upper Right             Transform array element
+       Lower Left              Fortran double subscript (dimensions = 3,6)
+       Lower Right             Fortran single subscript
+
+        ____________________________________________________
+        | f(00)  Rea(00) | f(01)  Rea(01) | f(02)  Rea(02) |
+        |                |                |                |
+        |   11        1  |   21        2  |   31        3  |
+        |________________|________________|________________|
+        | f(10)  Img(00) | f(11)  Img(01) | f(12)  Img(02) |
+        |                |                |                |
+        |   12        4  |   22        5  |   32        6  |
+        |________________|________________|________________|
+        | f(20)  Rea(10) | f(21)  Rea(11) | f(22)  Rea(12) |
+        |                |                |                |
+        |   13        7  |   23        8  |   33        9  |
+        |________________|________________|________________|
+        | f(30)  Img(10) | f(31)  Img(11) | f(32)  Img(12) |
+        |                |                |                |
+        |   14       10  |   24       11  |   34       12  |
+        |________________|________________|________________|
+        | ----   Rea(20) | ----   Rea(21) | ----   Rea(22) |
+        |                |                |                |
+        |   15       13  |   25       14  |   35       15  |
+        |________________|________________|________________|
+        | ----   Img(20) | ----   Img(21) | ----   Img(22) |
+        |           (=0) |                |                |
+        |   16       16  |   26       17  |   36       18  |
+        |________________|________________|________________|
+
+       (It might be noted that there is at least one natural fromat that
+       might have been used instead.  Roughly stated, the alternative
+       format has the role of line and sample reversed so that the left
+       half, rather than the upper half, of the full complex transform
+       is retained.  This format has the advantage that the real and 
+       imaginary parts of each complex element of the transform are ad-
+       jacent in memory, thereby enabling the complex number to be refer-
+       enced as such.  It has the disadvantage however, that the extra
+       space required for the transform is not added on at the end, but
+       requires two extra words in each line; this difference of two,
+       unlike that in the line direction, can not be suppressed and will
+       propagate up to the highest level routine utilizing the array, at
+       each stage triggering mental gymnastics and probably, arithmetic
+       performed on the array dimensions.  In addition to these clear
+       pros and cons, two other tradoffs occur which are a priori neutral:
+       First, the "even restriction" shifts from the line direction to
+       the sample direction.  Second, the storage required for the RFT2
+       format is n(m+2) while that required for the alternative is
+       m(n+2); if m and n are not equal, the total space requirement is 
+       different.)
+
+       (RFT2 is a very small piece of code.  The user interested in the
+       alternative format should have little trouble coding it up for
+       himself, using RFT2 as a guide.)
+
+3 TIMING
+
+       For other than the smallest values of m or n, the bulk of the time
+       spent by RFT2 is in RCSFFT, with small amounts also going to REALTR.
+       In both the froward and inverse modes, RFT2 makes n calls to RCSFFT
+       with RCSFFT N=m/2, m/2 calls on RCSFFT with RCSFFT N=n, and n calls
+       on REALTR with REALTR N=m/2.  The timings for RCSFFT and REALTR may 
+       be obtained from the related document.  The time for RCSFFT may be 
+       roughly approximated as 20 micro sec X n.sum(n(i)), where the n(i)
+       are the prime factors of n.  Thus both m and n should be highly 
+       composite numbers if possible.
+
+3 RESTRICTIONS
+             
+       The number of lines, m, must be even.  In addition, both (m/2) and n
+       must meet the restrictions of RCSFFT.  The are that no prime factor
+       may exceed 23, that if the square-free portion has two or more
+       factors, it may not exceed 210, and that the number of prime factors
+       may not exceed 208.  The RCSFFT restrictions may be relaxed by
+       changing certain array sizes and recompiling; see the document.
+
+3 EXAMPLE
+
+       The following subroutine computs the cyclic convolution of F and X
+       and saves the result in X:
+
+			SUBROUTINE CONV2(F,X,M,N,*)
+			DIMENSION F(N,M),X(N,M)
+			CALL RFT2(F,M,N,1,*3,*4,*5)
+			CALL RFT2(X,M,N,1)
+			M2 = M+2
+			S = 1. / (4*M*N)
+			DO 2 J = 2,M2,2
+			DO 1 K = 1,N
+ 
+		   C  REPLACE ONE COMPLEX ELEMENT OF THE TRANSFORM OF
+
+		   C  X WITH THE APPROPRIATELY SCALED PRODUCT OF CORRESPONDING
+
+		   C  ELEMENTS OF F AND X. . .
+
+				T	= S*(F(K,J-1)*X(K,J-1) - F(K,J)*X(K,J))
+				X(K+J)  = S*(F(K,J-1)*X(K,J) + F(K,J)*X(K,J-1))
+				X(K,J-1)=T
+			1	CONTINUE
+			2	CONTINUE	
+				CALL RFT2 (X,M,N,-1)
+				RETURN
+			3	CONTINUE
+			4	CONTINUE
+			5	CONTINUE
+				RETURN 1
+				END
+
+       This subroutine was coded up as an exercise and compared against a 
+       "brute-force" convolution routine, also in Fortran, using 64x64
+       arrays.  The RMS difference in the answers was less than 10E-5 times
+       the RMS of the element values.  The brute-force routine took 71.77
+       CPU seconds; CONV2 took 1.07 CPU seconds.
+
+

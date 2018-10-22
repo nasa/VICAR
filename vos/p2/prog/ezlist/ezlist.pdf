@@ -1,0 +1,104 @@
+PROCESS HELP=*
+    PARM INP    TYPE=STRING
+    PARM OUT    TYPE=STRING      DEFAULT=""
+    PARM FORMAT TYPE=(STRING,80) COUNT=0:1 DEFAULT=--
+    PARM WIDTH  TYPE=KEYWORD COUNT=1 VALID=(W132,W80) DEFAULT=W80
+    PARM DOTS   TYPE=KEYWORD VALID=(FLOATING,INTEGER) DEFAULT=FLOATING
+
+!# annot function="VICAR Pixel Listings and Plots"
+!# annot keywords=(LIST,ASCII,EZ)
+
+END-PROC
+.TITLE
+Similar to LIST, but output may be an ASCII text file
+.HELP
+PURPOSE
+    EZLIST lists the contents of VICAR image files to ASCII text files.
+    It is similar to LIST but the output may go to a text file and it 
+    contains no headers at all.  Thus the ASCII output file is EZ (easy)
+    for other programs to read.
+
+EXECUTION
+
+  ezlist I D.LIS FORMAT="(F8.3,2X)" 'W132 'INTEGER
+       (Output goes to file named D.LIS.)
+  ezlist I
+       (Output goes to terminal screen.)
+
+OPERATION
+   The output floating point format can be specifed with the FORMAT parameter.
+Each data element will have this format applied.  
+This parameter is a string with a FORTRAN format specification (any legal
+FORTRAN format specification is allowed).  The default format is F9.2,2X
+which allows seven columns to be displayed (seven values per 80 character line.)
+
+    If the trailing decimal point for a (Fn.0) format is not desired 
+then the 'INTEGER keyword should be used.  This changes all decimal points
+(periods) that are followed by a space into a space.  This is the way to
+get the "integer" appearance for BYTE, HALF, or FULL data.
+
+EZLIST supports all VICAR data formats.  All data is converted internally
+to REAL format when it is read.
+
+Each line of the file is converted to one line of output.  The output
+file record length is approximately the FORMAT field with (plus spacing)
+times the number of samples.
+If no output file is specified, the output is written to the terminal screen
+with lines TRUNCATED based on the WIDTH parameter.
+
+RESTRICTIONS:
+ 1.  The maximum number of samples in the input file is 1024.
+ 2.  The SIZE field is not supported.  (If you want it, see Cognizant.)
+     To run EZLIST on a window of a file, use COPY to copy the window to
+     a temporary file.
+
+Original Programmer:   C. Avis  5/94
+
+Cognizant Programmer:   C. Avis  5/94
+
+.LEVEL1
+.VARIABLE INP
+The input VICAR file.
+.VARIABLE OUT
+An (optional) output
+file for the data.
+.VARIABLE FORMAT
+The FORTRAN floating point
+format (e.g. "(F10.3,2X)")
+.VARIABLE WIDTH
+Specifies the width of the
+terminal output in chars/line.
+.VARIABLE DOTS
+Specifies to change decimal 
+points followed by spaces to 
+spaces.
+.LEVEL2
+.VARIABLE INP
+STRING
+The input VICAR file.
+.VARIABLE OUT
+STRING - OPTIONAL
+An output non-VICAR ASCII file for the data.
+.VARIABLE FORMAT
+STRING
+The FORTRAN format statement syntax for the output (e.g. "(F10.3,2x)").
+Only the floating point format syntax and 'x' syntax is allowed. 
+No embedded blanks allowed in the string entered for this parameter.
+EACH DATA ELEMENT WILL HAVE THIS FORMAT APPLIED.  That is, whatever the
+user enters for FORMAT will be converted to NS(FORMAT) before processing
+the records (where NS is the number of samples per line).
+Examples:
+	FORMAT="(F5.2)"
+	FORMAT="F5.2"
+	FORMAT="(2X,F5.2)"
+.VARIABLE WIDTH
+KEYWORD
+Specification of the width of the terminal output.  File output is not
+affected.
+ W80 for 80 chars/line (default)
+ W132 for 132 chars/line.
+.VARIABLE DOTS
+KEYWORD
+ INTEGER to change decimal points followed by spaces to spaces.
+ FLOATING to leave unchanged- default.
+.END

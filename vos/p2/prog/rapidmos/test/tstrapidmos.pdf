@@ -1,0 +1,32 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+  gen A0  NL=50 NS=60 LINC=0 SINC=0 IVAL=110
+
+!  FIRST TEST DEFAULT CASE, AMOUNTING TO A SIMPLE COPY.
+
+  rapidmos A0 A1
+!                    SHOULD GET 0 DIFFERENCES.
+  difpic (A0,A1)
+
+  gen B0  NL=55 NS=65 LINC=0 SINC=0 IVAL=120
+  gen C0  NL=60 NS=65 LINC=0 SINC=0 IVAL=130
+  gen D0  NL=60 NS=70 LINC=0 SINC=0 IVAL=140
+  tieconm OUT=TIEP  NAH=10 NAV=10    'MGEOM  +
+	  TIEPOINT=(40,20,1,1, 110,60,100,1, 20,110,1,100, 80,120,100,100)
+  lgeom A0  A  PARMS=TIEP  SIZE=(1,1,100,100) 'NOIZ
+  lgeom B0  B  PARMS=TIEP  SIZE=(1,1,100,100) 'NOIZ
+  lgeom C0  C  PARMS=TIEP  SIZE=(1,1,100,100) 'NOIZ
+  lgeom D0  D  PARMS=TIEP  SIZE=(1,1,100,100) 'NOIZ
+  fastmos (A,B,C,D)  F   SIZE=(1,1,120,200) +
+			OFF1=(-10,20) OFF2=(-30,60) OFF3=(20,30) OFF4=(10,70)
+  rapidmos (A,B,C,D) R   SIZE=(1,1,120,200) +
+			OFF=(-10,20, -30,60, 20,30, 10,70)
+  f2 (F,R) D  FUNCTION="IN1-IN2+128"
+  write "The following HIST should show the difference image to be all DN 128"
+  hist D  'NOHIST
+end-proc

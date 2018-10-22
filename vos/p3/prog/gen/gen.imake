@@ -1,0 +1,12 @@
+#define PROGRAM gen
+
+#define MODULE_LIST gen.c
+
+#define MAIN_LANG_C
+#define R2LIB
+
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+

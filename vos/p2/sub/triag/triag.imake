@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine  TRIAG   */
+
+#define SUBROUTINE  triag
+
+#define MODULE_LIST  triag.f  
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN

@@ -1,0 +1,27 @@
+
+1 DSNID    
+
+  Routine to return the DSN Source Station ID # and station name
+  given its code as extracted from the GCF block.  Called by MIPL
+  Real-Time Subsystem and VEDR.
+
+  Reference: 820-13 (OPS-6-6 for Mark III and OPS-6-8 for Mark IV)
+	     1839-10 A-13.
+
+  CALLING SEQUENCE:
+	status = zdsnid( icode , mark3_id , mark4_id , station_name)
+
+	int 	icode, 
+		mark3_id,
+		mark4_id,
+		status;
+	char   	station_name[12];
+
+
+         where....
+
+	icode is the input DSN source code as extracted from the GCF block,
+	mark3_id is the Mark III DSN source station ID # (=0 if unknown),
+	mark4_id is the Mark  IV DSN source station ID # (=0 if unknown), and
+	station_name is the station name (in ASCII) blank filled at the left.
+	status is 1 if station_name exists for icode

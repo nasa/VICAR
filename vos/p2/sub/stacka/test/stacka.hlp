@@ -1,0 +1,67 @@
+1 STACKA
+
+  Subroutine to provide run-time buffer allocation (dynamic memory
+  allocation) for Fortran-type subroutine calls.
+
+  Calling Sequence:
+
+    CALL STACKA(numargs,subname,N,L1,...,LN,A1,...,AM)
+
+   Its effect is to execute the equivalent of the following Fortran call:
+
+    CALL subname(ARRAY1,L1,...,ARRAYN,LN,A1,...,AM)
+
+  Arguments: 
+    numargs = total number of arguments other than numargs = N+M+2.  This 
+              must be <= 27.
+    subname = Subroutine name; declared EXTERNAL in the calling program.
+    N = Number of arrays to create (dynamically allocate).  1 <= N <= 25.
+    L1, ..., LN = N array lengths in bytes.  If the 
+          value of any LN is less 1, then it is changed to 1, and therefore
+          it must be passed via a variable rather than as a constant.
+          Therefore, do not attempt to have the constant 0 as a length
+          argument in the call to STACKA.  (This feature is there to
+          prevent adjustable array dimension errors.)
+    A1, ...,AM  = M variables to pass along to subname routine.  Can be
+                  scalars or arrays of any type but CHARACTER.
+   
+    numargs, N, and L1,..., LN are INTEGER*4.
+
+2 History
+
+  Original VICAR Programmer:  J. B. Seidman,  24 June 1974
+  Rewritten for VAX by:  L. W. Kamp,  June 1981
+  Rewritten in C by ASU with modifications by Ron Alley and Steve Pohorsky
+  Current Cognizant Programmer:  S. Pohorsky
+  Source Language: C
+
+2 Operation
+
+  The effect of executing the above call to STACKA is equivalent to calling
+  the following Fortran subroutine:
+
+    SUBROUTINE subname( ARRAY1, L1, ..., ARRAYN, LN, A1, ..., AM )
+    INTEGER*4 L1, ...,L1
+    BYTE ARRAY1(L1), ..., ARRAYN(LN)
+
+    .... [rest of subroutine]
+
+  This subroutine has 2N+M arguments, of which the first 2N are variable-
+  length array names and their lengths.
+
+  NOTE: This version will ALWAYS allocate the requested amount of VIRTUAL
+  memory, unless the requested amount is not available, in which case it
+  calls ABEND.  Thus its only purpose is to allow program buffer sizes to be 
+  determined at run time, to avoid hard-coding length limitations into a
+  program.  The memory will be freed automatically when routine subname
+  finishes.
+
+2 Method
+
+  First, STACKA allocates space for the arrays requested
+  using the C routine "calloc".  When the memory has been allocated, the
+  requested subroutine is called.
+
+  Upon return from the called subroutine, STACKA deallocates the virtual
+  memory it had previously allocated, using the C routine "free".
+

@@ -1,0 +1,92 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+enable-log
+
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+!
+! Create a polygon consisting of a cube with a diamond to one side; this
+! is an attempt to make a shape that will have a recognizable orientation.
+ibis-gen cube.pic NC=3 NR=26 'IBIS-1 'ROW DATACOL=(1,2,3) +
+    data=(1,1,1, 1,51,1, 51,51,1, 51,1,1, 1,1,1, 1,1,51, +
+    1,51,51, 51,51,51, 51,1,51, 1,1,51, 0,0,0, 1,51,1, 1,51,51, 0,0,0, +
+    51,51,1, 51,51,51, 0,0,0, 51,1,1, 51,1,51, 0,0,0, +
+    36,41,26, 41,41,36, 36,41,46, 31,41,36, 36,41,26, 0,0,0)
+!
+    perspec cube.pic cube_perspective azimuth=0 elev=30 distance=100 origin=(26,26,26)
+    perspec cube.pic cube_perspective1 azimuth=0 elev=30 distance=1000 origin=(26,26,26)
+    perspec cube.pic cube_perspective2 azimuth=90 elev=30 distance=1000 origin=(26,26,26)
+    perspec cube.pic cube_perspective3 azimuth=0 elev=60 distance=1000 origin=(26,26,26)
+
+
+plot3d cube.pic title="A" plot="p3da"  ! minimal perspective, diamond in upper-right corner
+
+pltgraf cube_perspective  title="B via PLTGRAF - Az=0 elev=30" DIM=3 dataform="YX" direct=BR PLOT="pg1"
+pltgraf cube_perspective1 title="B via PLTGRAF - Az=0 elev=30" DIM=3 dataform="XY" direct=BR PLOT="pg2"
+pltgraf cube_perspective2 title="B via PLTGRAF - Az=90 elev=30" DIM=3 direct=TR PLOT="pg3"
+pltgraf cube_perspective3 title="B via PLTGRAF - Az=0 elev=60" DIM=3 direct=TR PLOT="pg4"
+
+plot3d cube_perspective title="B" origin=(26,26,26) distance=100  plot="p3db1" 
+
+end-proc
+! Plot the cube default style to the printer and to an output file
+!!!! plotting print		! plot to printronix printer
+plot3d cube title="A" plot="p3da"  ! minimal perspective, diamond in upper-right corner
+plot3d cube cube_perspective title="B" 
+ibis-list cube_perspective NC=3 NR=26 GR1DIM=3
+pltgraf cube_perspective title="B via PLTGRAF" DIM=3 PLOT="p3db"
+!
+! Float around the cube, using the center of the cube as the origin
+plot3d cube title="C" origin=(26,26,26) distance=1000 plot="p3dc" ! zoom in
+plot3d cube title="D" origin=(26,26,26) distance=100 plot="p3dd"  ! zoom in
+plot3d cube title="E" origin=(26,26,26) distance=100 +
+    azimuth=90 plot="p3de"	! circle to right
+plot3d cube title="F" origin=(26,26,26) distance=100 +
+    azimuth=30 elev=60 plot="p3df"	! right & up
+plot3d cube title="G" origin=(26,26,26) distance=40 +
+    azimuth=0 elev=0 plot="p3dg"	! right,in,down
+plot3d cube title="H" origin=(26,26,26) distance=100 +
+    azimuth=360 elev=90 plot="p3dh"	! above
+plot3d cube title="I" origin=(26,26,26) distance=100 +
+    azimuth=360 elev=-90 plot="p3di"	! below
+!
+! Squeeze the cube from top to bottom (half size)
+plot3d cube title="J" origin=(26,26,26) distance=100 zscale=2 plot="p3dj"
+!
+! Try a small paper version of the above (about 1 inch wide & half-inch high)
+plot3d cube title="K" origin=(26,26,26) distance=100 zscale=2 scale=50 +
+    plot="p3dk"
+!
+! Again, but shifted to the right 2 inches and up 1 inch
+plot3d cube title="L" origin=(26,26,26) distance=100 zscale=2 +
+    scale=50 plotoffs=(2,1) plot="p3dl"
+!
+! Repeat "K", but specifying a bounding box size rather than a plot scale
+! factor. Plot should be 1 inch high & wide, not counting annotation.
+plot3d cube title="M" origin=(26,26,26) distance=100 zscale=2 plotsize=1 +
+    plot="p3dm"
+! Make zscale larger than life (use autoscaling for plot)
+plot3d cube title="N" origin=(26,26,26) distance=100 zscale=0.5 plot="p3dn"
+!
+! 10-unit axis & no title
+plot3d cube axis=10 azimuth=20 plot="p3do"
+!
+! Again, but without parameter values or a bounding box as well
+plot3d cube axis=10 azimuth=20 'noparm 'nobox plot="p3dp"
+!
+! Switch pens (can't see results on Printronix, however)
+plot3d cube title="O" pen=5 plot="p3dq"
+!
+! Manipulate the program's interpretation of the data format
+plot3d cube title="P: xyz" dataform=xyz	plot="p3dr" ! should be same as default (A)
+plot3d cube title="P: yxz" dataform=yxz plot="p3ds"
+plot3d cube title="P: lsz" dataform=lsz plot="p3dt"
+!
+! Print the plots
+!!!! dcl print/nofeed/delete printronx.plt;*
+!
+disable-log
+end-proc

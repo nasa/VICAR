@@ -1,0 +1,378 @@
+                Version 5C/16C
+
+      ***********************************************************
+      *                                                         *
+      * VICAR Supervisor version 5C, TAE V5.2                   *
+      *   Debugger is now supported on all platforms            *
+      *   USAGE command now implemented under Unix              *
+      *                                                         *
+      * VRDI and VIDS now support X-windows and Unix            *
+      * New X-windows display program: xvd (for all but VAX/VMS)*
+      *                                                         *
+      * VICAR Run-Time Library version 16C                      *
+      *   '+' form of temp filename now avail. on all platforms *
+      *   ANSI C now fully supported                            *
+      *                                                         *
+      * See B.Deen(RGD059) with problems                        *
+      *                                                         *
+      ***********************************************************
+
+  --- Type NUT for the New User Tutorial ---
+
+  --- Type MENU for a menu of available applications ---
+
+Test BYTE images
+gen A NL= 10 NS=10 linc=0 sinc=0 ival=1
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen B NL=5 NS=5 linc=0 sinc=0 ival=128
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+let $echo="no"
+PUT B INTO A STARTING AT (5,5)
+insect (A,B) C insect=(1,1,5,5,5,5)
+Beginning VICAR task insect
+INSECT version 7 Jan 2013 (64-bit) - rjb
+let $echo="no"
+LIST RESULTING IMAGE
+list C 'zero
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+ Task:INSECT    User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+     Samp     1       3       5       7       9
+   Line
+      1       1   1   1   1   1   1   1   1   1   1
+      2       1   1   1   1   1   1   1   1   1   1
+      3       1   1   1   1   1   1   1   1   1   1
+      4       1   1   1   1   1   1   1   1   1   1
+      5       1   1   1   1 128 128 128 128 128   1
+      6       1   1   1   1 128 128 128 128 128   1
+      7       1   1   1   1 128 128 128 128 128   1
+      8       1   1   1   1 128 128 128 128 128   1
+      9       1   1   1   1 128 128 128 128 128   1
+     10       1   1   1   1   1   1   1   1   1   1
+let $echo="no"
+PUT B INTO A STARTING AT (15,15)
+insect (A,B) C sl=1  ss=1 nl=20 ns=20  insect=(1,1,5,5,15,15)
+Beginning VICAR task insect
+INSECT version 7 Jan 2013 (64-bit) - rjb
+let $echo="no"
+LIST RESULTING IMAGE
+list C 'zero
+Beginning VICAR task list
+
+   BYTE     samples are interpreted as   BYTE   data
+ Task:GEN       User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+ Task:INSECT    User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+     Samp     1       3       5       7       9      11      13      15      17      19
+   Line
+      1       1   1   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
+      2       1   1   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
+      3       1   1   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
+      4       1   1   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
+      5       1   1   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
+      6       1   1   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
+      7       1   1   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
+      8       1   1   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
+      9       1   1   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
+     10       1   1   1   1   1   1   1   1   1   1   0   0   0   0   0   0   0   0   0   0
+     11       0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     12       0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     13       0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     14       0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+     15       0   0   0   0   0   0   0   0   0   0   0   0   0   0 128 128 128 128 128   0
+     16       0   0   0   0   0   0   0   0   0   0   0   0   0   0 128 128 128 128 128   0
+     17       0   0   0   0   0   0   0   0   0   0   0   0   0   0 128 128 128 128 128   0
+     18       0   0   0   0   0   0   0   0   0   0   0   0   0   0 128 128 128 128 128   0
+     19       0   0   0   0   0   0   0   0   0   0   0   0   0   0 128 128 128 128 128   0
+     20       0   0   0   0   0   0   0   0   0   0   0   0   0   0 128 128 128 128 128   0
+let $echo="no"
+ 
+TEST HALF IMAGES
+ 
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+PUT B1 INTO A1 STARTING AT (5,5)
+insect (A1,B1) C1 insect=(1,1,5,5,5,5)
+Beginning VICAR task insect
+INSECT version 7 Jan 2013 (64-bit) - rjb
+let $echo="no"
+LIST RESULTING IMAGE
+list C1 'zero
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+ Task:INSECT    User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+     Samp       1     2     3     4     5     6     7     8     9    10
+   Line
+      1        10    10    10    10    10    10    10    10    10    10
+      2        10    10    10    10    10    10    10    10    10    10
+      3        10    10    10    10    10    10    10    10    10    10
+      4        10    10    10    10    10    10    10    10    10    10
+      5        10    10    10    10  5000  5000  5000  5000  5000    10
+      6        10    10    10    10  5000  5000  5000  5000  5000    10
+      7        10    10    10    10  5000  5000  5000  5000  5000    10
+      8        10    10    10    10  5000  5000  5000  5000  5000    10
+      9        10    10    10    10  5000  5000  5000  5000  5000    10
+     10        10    10    10    10    10    10    10    10    10    10
+let $echo="no"
+PUT B1 INTO A1 STARTING AT (15,15)
+insect (A1,B1) C1 sl=1  ss=1 nl=20 ns=20  insect=(1,1,5,5,15,15)
+Beginning VICAR task insect
+INSECT version 7 Jan 2013 (64-bit) - rjb
+let $echo="no"
+LIST RESULTING IMAGE
+list C1 'zero
+Beginning VICAR task list
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+ Task:INSECT    User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+     Samp       1     2     3     4     5     6     7     8     9    10    11    12    13    14    15
+   Line
+      1        10    10    10    10    10    10    10    10    10    10     0     0     0     0     0
+      2        10    10    10    10    10    10    10    10    10    10     0     0     0     0     0
+      3        10    10    10    10    10    10    10    10    10    10     0     0     0     0     0
+      4        10    10    10    10    10    10    10    10    10    10     0     0     0     0     0
+      5        10    10    10    10    10    10    10    10    10    10     0     0     0     0     0
+      6        10    10    10    10    10    10    10    10    10    10     0     0     0     0     0
+      7        10    10    10    10    10    10    10    10    10    10     0     0     0     0     0
+      8        10    10    10    10    10    10    10    10    10    10     0     0     0     0     0
+      9        10    10    10    10    10    10    10    10    10    10     0     0     0     0     0
+     10        10    10    10    10    10    10    10    10    10    10     0     0     0     0     0
+     11         0     0     0     0     0     0     0     0     0     0     0     0     0     0     0
+     12         0     0     0     0     0     0     0     0     0     0     0     0     0     0     0
+     13         0     0     0     0     0     0     0     0     0     0     0     0     0     0     0
+     14         0     0     0     0     0     0     0     0     0     0     0     0     0     0     0
+     15         0     0     0     0     0     0     0     0     0     0     0     0     0     0  5000
+     16         0     0     0     0     0     0     0     0     0     0     0     0     0     0  5000
+     17         0     0     0     0     0     0     0     0     0     0     0     0     0     0  5000
+     18         0     0     0     0     0     0     0     0     0     0     0     0     0     0  5000
+     19         0     0     0     0     0     0     0     0     0     0     0     0     0     0  5000
+     20         0     0     0     0     0     0     0     0     0     0     0     0     0     0  5000
+
+   HALF     samples are interpreted as HALFWORD data
+ Task:GEN       User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+ Task:INSECT    User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+     Samp      16    17    18    19    20
+   Line
+      1         0     0     0     0     0
+      2         0     0     0     0     0
+      3         0     0     0     0     0
+      4         0     0     0     0     0
+      5         0     0     0     0     0
+      6         0     0     0     0     0
+      7         0     0     0     0     0
+      8         0     0     0     0     0
+      9         0     0     0     0     0
+     10         0     0     0     0     0
+     11         0     0     0     0     0
+     12         0     0     0     0     0
+     13         0     0     0     0     0
+     14         0     0     0     0     0
+     15      5000  5000  5000  5000     0
+     16      5000  5000  5000  5000     0
+     17      5000  5000  5000  5000     0
+     18      5000  5000  5000  5000     0
+     19      5000  5000  5000  5000     0
+     20      5000  5000  5000  5000     0
+let $echo="no"
+ 
+TEST FULL IMAGES
+ 
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+PUT B2 INTO A2 STARTING AT (5,5)
+insect (A2,B2) C2 insect=(1,1,5,5,5,5)
+Beginning VICAR task insect
+INSECT version 7 Jan 2013 (64-bit) - rjb
+let $echo="no"
+LIST RESULTING IMAGE
+list C2 'zero
+Beginning VICAR task list
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+ Task:INSECT    User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      2           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      3           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      4           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      5           1000       1000       1000       1000      15000      15000      15000      15000      15000       1000
+      6           1000       1000       1000       1000      15000      15000      15000      15000      15000       1000
+      7           1000       1000       1000       1000      15000      15000      15000      15000      15000       1000
+      8           1000       1000       1000       1000      15000      15000      15000      15000      15000       1000
+      9           1000       1000       1000       1000      15000      15000      15000      15000      15000       1000
+     10           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+let $echo="no"
+PUT B2 INTO A2 STARTING AT (15,15)
+insect (A2,B2) C2 sl=1  ss=1 nl=20 ns=20  insect=(1,1,5,5,15,15)
+Beginning VICAR task insect
+INSECT version 7 Jan 2013 (64-bit) - rjb
+let $echo="no"
+LIST RESULTING IMAGE
+list C2 'zero
+Beginning VICAR task list
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+ Task:INSECT    User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+     Samp            1          2          3          4          5          6          7          8          9         10
+   Line
+      1           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      2           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      3           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      4           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      5           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      6           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      7           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      8           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+      9           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+     10           1000       1000       1000       1000       1000       1000       1000       1000       1000       1000
+     11              0          0          0          0          0          0          0          0          0          0
+     12              0          0          0          0          0          0          0          0          0          0
+     13              0          0          0          0          0          0          0          0          0          0
+     14              0          0          0          0          0          0          0          0          0          0
+     15              0          0          0          0          0          0          0          0          0          0
+     16              0          0          0          0          0          0          0          0          0          0
+     17              0          0          0          0          0          0          0          0          0          0
+     18              0          0          0          0          0          0          0          0          0          0
+     19              0          0          0          0          0          0          0          0          0          0
+     20              0          0          0          0          0          0          0          0          0          0
+
+   FULL     samples are interpreted as FULLWORD data
+ Task:GEN       User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+ Task:INSECT    User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+     Samp           11         12         13         14         15         16         17         18         19         20
+   Line
+      1              0          0          0          0          0          0          0          0          0          0
+      2              0          0          0          0          0          0          0          0          0          0
+      3              0          0          0          0          0          0          0          0          0          0
+      4              0          0          0          0          0          0          0          0          0          0
+      5              0          0          0          0          0          0          0          0          0          0
+      6              0          0          0          0          0          0          0          0          0          0
+      7              0          0          0          0          0          0          0          0          0          0
+      8              0          0          0          0          0          0          0          0          0          0
+      9              0          0          0          0          0          0          0          0          0          0
+     10              0          0          0          0          0          0          0          0          0          0
+     11              0          0          0          0          0          0          0          0          0          0
+     12              0          0          0          0          0          0          0          0          0          0
+     13              0          0          0          0          0          0          0          0          0          0
+     14              0          0          0          0          0          0          0          0          0          0
+     15              0          0          0          0      15000      15000      15000      15000      15000          0
+     16              0          0          0          0      15000      15000      15000      15000      15000          0
+     17              0          0          0          0      15000      15000      15000      15000      15000          0
+     18              0          0          0          0      15000      15000      15000      15000      15000          0
+     19              0          0          0          0      15000      15000      15000      15000      15000          0
+     20              0          0          0          0      15000      15000      15000      15000      15000          0
+let $echo="no"
+ 
+TEST REAL IMAGES
+ 
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+PUT B3 INTO A3 STARTING AT (5,5)
+insect (A3,B3) C3 insect=(1,1,5,5,5,5)
+Beginning VICAR task insect
+INSECT version 7 Jan 2013 (64-bit) - rjb
+let $echo="no"
+LIST RESULTING IMAGE
+list C3 'zero
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+ Task:INSECT    User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      2       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      3       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      4       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      5       1.013E+03   1.013E+03   1.013E+03   1.013E+03   2.512E+04   2.512E+04   2.512E+04   2.512E+04   2.512E+04   1.013E+03
+      6       1.013E+03   1.013E+03   1.013E+03   1.013E+03   2.512E+04   2.512E+04   2.512E+04   2.512E+04   2.512E+04   1.013E+03
+      7       1.013E+03   1.013E+03   1.013E+03   1.013E+03   2.512E+04   2.512E+04   2.512E+04   2.512E+04   2.512E+04   1.013E+03
+      8       1.013E+03   1.013E+03   1.013E+03   1.013E+03   2.512E+04   2.512E+04   2.512E+04   2.512E+04   2.512E+04   1.013E+03
+      9       1.013E+03   1.013E+03   1.013E+03   1.013E+03   2.512E+04   2.512E+04   2.512E+04   2.512E+04   2.512E+04   1.013E+03
+     10       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+let $echo="no"
+PUT B2 INTO A2 STARTING AT (15,15)
+insect (A3,B3) C3 sl=1  ss=1 nl=20 ns=20  insect=(1,1,5,5,15,15)
+Beginning VICAR task insect
+INSECT version 7 Jan 2013 (64-bit) - rjb
+let $echo="no"
+LIST RESULTING IMAGE
+list C3 'zero
+Beginning VICAR task list
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+ Task:INSECT    User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+     Samp             1           2           3           4           5           6           7           8           9          10
+   Line
+      1       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      2       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      3       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      4       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      5       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      6       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      7       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      8       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+      9       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+     10       1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03   1.013E+03
+     11       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     12       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     13       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     14       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     15       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     16       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     17       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     18       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     19       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     20       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+
+   REAL     samples are interpreted as  REAL*4  data
+ Task:GEN       User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+ Task:INSECT    User:wlb       Date_Time:Wed Mar 18 16:35:47 2015
+     Samp            11          12          13          14          15          16          17          18          19          20
+   Line
+      1       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+      2       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+      3       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+      4       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+      5       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+      6       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+      7       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+      8       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+      9       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     10       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     11       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     12       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     13       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     14       0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00   0.000E+00
+     15       0.000E+00   0.000E+00   0.000E+00   0.000E+00   2.512E+04   2.512E+04   2.512E+04   2.512E+04   2.512E+04   0.000E+00
+     16       0.000E+00   0.000E+00   0.000E+00   0.000E+00   2.512E+04   2.512E+04   2.512E+04   2.512E+04   2.512E+04   0.000E+00
+     17       0.000E+00   0.000E+00   0.000E+00   0.000E+00   2.512E+04   2.512E+04   2.512E+04   2.512E+04   2.512E+04   0.000E+00
+     18       0.000E+00   0.000E+00   0.000E+00   0.000E+00   2.512E+04   2.512E+04   2.512E+04   2.512E+04   2.512E+04   0.000E+00
+     19       0.000E+00   0.000E+00   0.000E+00   0.000E+00   2.512E+04   2.512E+04   2.512E+04   2.512E+04   2.512E+04   0.000E+00
+     20       0.000E+00   0.000E+00   0.000E+00   0.000E+00   2.512E+04   2.512E+04   2.512E+04   2.512E+04   2.512E+04   0.000E+00
+let $echo="no"

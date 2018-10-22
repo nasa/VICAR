@@ -1,0 +1,137 @@
+PROCESS       HELP=*
+PARM INP TYPE=(STRING)
+PARM INDCOL TYPE=INTEGER COUNT=1:20 
+PARM DEPCOL TYPE=INTEGER COUNT=1:5 
+PARM SOLCOL TYPE=INTEGER COUNT=1:5 DEFAULT=0
+PARM RESCOL TYPE=INTEGER COUNT=1:5 DEFAULT=0
+PARM CONCOL TYPE=INTEGER DEFAULT=1
+PARM NOPRINT TYPE=KEYWORD COUNT=0:1 VALID=(--,NOPRINT) DEFAULT=--
+END-PROC
+.TITLE
+VICAR/IBIS Program "ibislsq"
+.HELP
+PURPOSE
+
+   "ibislsq" performs least squares fits on data in an IBIS interface
+(tabular) file.  The solutions and/or residuals can be placed in 
+specified columns of the file.  The solutions can also be output
+to the terminal.  Multiple fits can be done on different parts of
+one file.
+
+
+EXECUTION
+
+     ibislsq INP=DATA.INT  INDCOL=(1,2,3) DEPCOL=(4,5) CONCOL=7 +
+	     SOLCOL=(10,11) RESCOL=(8,9)  'NOPRINT
+
+    This example shows the use of all of the parameters.  The input
+file, DATA.INT, is an IBIS interface file.  The data for the independent
+variables are in columns (1,2,3), and the data for the dependent 
+variables are in columns (4,5).  The control column is used for
+multiple fits to be done in one run.  The least square fits are done 
+on sets of rows; a new set is started whenever the value in the control 
+column changes.  If no control column is specified then one fit
+is done on the whole file.  The SOLCOL and RESCOL parameters specify
+in which columns, of the input file, the results will be put.  If either
+or both are not specified then they will not be output.  There must be
+as many solution columns and residual columns as there are dependent 
+columns.  The data in the residual columns correspond one-to-one with
+the data in the dependent columns.  The solution is put out in the
+first N rows of the SOLCOL columns, where N is the number of independent
+columns; the rest of the rows in the set are filled with zeros.   Normally
+the solution for each set is printed to the terminal, but this can 
+be turned off with the 'NOPRINT keyword.
+
+    The length of each set should, of course, be longer than the
+number of independent variables (columns).  If it is not then the
+least squares fit will not be called and values of -999.0 will be
+put out for the solution.  If some columns of the independent data
+are dependent then the error MATRIX RANK TOO SMALL be be printed,
+and -999.0's will be put out for the solution.  If there is no
+solution then zeros will be put out for the residuals.
+
+
+
+EXAMPLES
+
+   Suppose that columns 1 and 2 contain points (x,y) in a plane 
+   and  column  7 contains a function  f(x,y).   The  following 
+   sequence  will perform a quadratic least squares fit  h(x,y) 
+   and place the residuals in column 8.
+
+   mf INP=A FUNCTION=("C3=C1*C1","C4=C2*C2","C5=C1*C2","C6=1")
+   ibislsq INP=A INDCOL=(1,2,3,4,5,6) DEPCOL=7 RESCOL=8
+
+
+RESTRICTIONS
+
+The maximum number of independent columns (variables) is 20.
+The maximum number of dependent columns (variables) is 5.
+The maximum length of any set is 5000.
+The maximum column length of the file is 10000.
+Interface files are assumed to have 40 or less columns.
+
+
+
+WRITTEN BY:            K. F. Evans	April 1986
+
+COGNIZANT PROGRAMMER:  K. F. Evans
+
+REVISION:  A. Scop (CRI) 2 Jan. 1995  Made portable for UNIX
+
+
+.LEVEL1
+.VARIABLE INP
+ Input IBIS interface file
+.VARIABLE INDCOL
+ Independent variable columns
+.VARIABLE DEPCOL
+ Dependent variable columns
+.VARIABLE SOLCOL
+ Solutions columns
+.VARIABLE RESCOL
+ Residuals columns
+.VARIABLE CONCOL
+ Control column
+.VARIABLE NOPRINT
+Keyword to suppress printout
+
+.LEVEL2
+.VARIABLE INP
+   INP=file           Input IBIS interface file
+.VARIABLE INDCOL
+   INDCOL=(N1,...,Nk) The   integers   N1,...,Nk  specify   the 
+                      columns  which contain the data  for  the 
+                      independent variables.  Each row contains 
+                      one data point.
+
+.VARIABLE DEPCOL
+   DEPCOL=(M1,...,Ml) The   integers   M1,...,Ml  specify   the 
+                      columns  which contain the data  for  the 
+                      dependent variables.  Each row contains 
+                      one data point.
+
+.VARIABLE SOLCOL
+   SOLCOL=(S1,...,Sl) The integers  S1,...,Sl specify columns 
+                      which receive the solution coefficients 
+                      corresponding to the dependent variables.
+		      The first k rows contain the solutions for
+		      the corresponding k independent columns.
+		      If this parameter is omitted, then the  
+		      solution is not stored.
+.VARIABLE RESCOL
+   RESCOL=(R1,...,Rl) The  integers  R1,...,Rl specify columns 
+                      which  receive the residuals corresponding 
+		      to the dependent variables for each data
+		      point.  If this parameter is omitted,  
+		      then no residuals are stored.
+.VARIABLE CONCOL
+   CONCOL=C           The integer C specifies a control column 
+                      which produces a separate fit for each 
+                      group of identical numbers in the control 
+                      column.  If this keyword is omitted, then 
+                      the whole file is DGELGd in one least 
+                      squares fit.
+.VARIABLE NOPRINT
+    'NOPRINT	      Keyword to suppress printout of solution.
+.END

@@ -1,0 +1,256 @@
+process help=*
+ !
+ PARM INP         TYPE=STRING COUNT=(0:2) DEFAULT=--
+ PARM OUT         TYPE=STRING COUNT=(0:1) DEFAULT=--
+ PARM GEOTIFF     TYPE=STRING COUNT=(0:100) DEFAULT=--
+ PARM ADD         TYPE=KEYWORD COUNT=(0:1) VALID=ADD DEFAULT=--
+ PARM TIECNVRT    TYPE=KEYWORD COUNT=(0:1) VALID=TIECNVRT DEFAULT=--
+ PARM RECTFIT     TYPE=KEYWORD COUNT=(0:1) VALID=RECTFIT DEFAULT=--
+!
+ END-PROC
+!
+! HELP TEXT FOR GTGEN
+.TITLE
+GTGEN - Program for creating a VICAR GeoTIFF label file.
+.HELP
+PURPOSE
+     GTGEN is a VICAR applications program which creates a GeoTIFF
+     label from parameter input.  This label can be used as a reference
+     for numerous VICAR/IBIS operations such as mapping a graphics
+     data set or an image.  The label can be examined with the 
+     routine GTLIST, including calculated information such as location
+     of corner points and pixel size.  The label is coded as a
+     part of the state VICAR label.  It can be inserted into an IBIS
+     file for graphics or tabular data with routine GTIBIS (not
+     available yet).
+     
+     A special feature of GTGEN is that a three tiepoint set of
+     parameters can be converted into a tiepoint-scale or tiepoint-
+     transformation-matrix format of GeoTIFF label.  Often, the
+     three tiepoints are known or are easier to work with than the
+     internal formats of GeoTIFF.  This feature is invoked by the
+     keyword TIECNVRT.  If the three tiepoints are not exactly
+     rectilinear (which can be proven by using GTLIST on the result)
+     and a rectilinear mapping is desired, then the keyword RECTFIT
+     can be used to give a best fit (in the least-squares sense)
+     that is rectilinear.
+     
+     If a VICAR file is created with the GEOTIFF parameter but no
+     input data sets, then it will be a 1 x 1 image (one pixel)
+     that serves mainly as the holder of the GeoTIFF label.  It 
+     would also be useful for the 'COVERINP parameter of VICAR
+     program GTSIZE or GTWARP.
+     
+     GTGEN has six modes of operation, so read the help for 
+     parameter INP to determine your case.
+     
+CALL
+     gtgen INP OUT '(QUALIFIERS) GEOTIFF
+  WHERE:
+     INP            is the input data set (may be none, one, or two).
+     OUT            is the output data set (may be none, or one).
+     QUALIFIERS     consist of any of the following keywords:
+          ADD           add the geotiff parameters to an existing label
+          TIECNVRT      convert three tiepoint input to tiepoint-scale-
+                        model format to indicate that image is mapped
+     GEOTIFF        are tag-value pairs that become geotiff parms in
+                    the label; each is formatted tag=value.
+OR
+     gtgen (INP1,INP2) OUT
+  WHERE:
+     INP1           is a VICAR input data set(s).
+     INP2           is a VICAR input data set that has a GeoTIFF
+                    label in its state label area.
+     OUT            is a VICAR output data set that will be a copy
+                    of the first data set with an inserted GeoTIFF
+                    label from the second data set.
+     
+    
+OPERATION
+
+For the normal case of creating a label from parameters,
+GTGEN processes the input string pairs, turning each into a
+GeoTIFF tag-value pair.
+
+The parameter uses only the string format.  Numbers are presented as
+strings.  Vectors are presented as a string containing symbols (,,).
+etc.  Double quotes must be doubled inside the TAE double quotes
+(see example below).  Parenthetical documentation can be added as
+part of the strings.
+
+The format is flattened out for VICAR label purposes.  The higher
+level descriptors such as GeoKeyDirectoryTag are not used in the
+vicar table.  They are restored when an external GeoTIFF label is
+created.   The following example is taken from 3.1.1 of the 
+GeoTIFF Format Specification REv 1 (see references).
+
+geotiff=("ModelTiePointTag=(0,0,0,350807.4,5316081.3,0.0)",+
+"ModelPixelScaleTag=(100.0,100.0,0.0)",+
+"GTModelTypeGeoKey=1(ModelTypeProjected)",+
+"GTRasterTypeGeoKey=1(RasterPixelIsArea)",+
+"ProjectedCSTypeGeoKey=32660(PCS_WGS84-UTM-zone_60N)",+
+"PCSCitationGeoKey=""UTM Zone 60 N with WGS84""")
+
+For the case of two input files, no parameters are allowed.  The 
+program simply places the ascii file key=value pairs into the
+VICAR state area.  Multiple occurrences of keys become vectors
+in the VICAR state area (since repeats of keys are disallowed).
+
+For the update case of one input, no output data sets... the
+geotiff parameter is processed in update mode into the primary
+input.  This is the fastest way to process large data sets.
+
+PERFORMANCE
+
+Less than 1 second, except for the case where an output file is
+written.  Then the time is mostly copying the output data set.
+
+.PAGE
+RESTRICTIONS
+------------
+
+Only 100 parameter pairs can be input.  For more, use repeated
+calls to GTGEN with the 'ADD parameter after the first call. 
+
+REFERENCES
+
+     Ritter, N., Ruth, M. "GeoTIFF Format Specification, Revision 1.0",
+     JPL Cartographic Applications Group.
+     
+.PAGE
+Original Programmer: A. L. Zobrist, 4 Aug. 1999
+Current Cognizant Programmer: B. A. McGuffie
+Revisions:
+  Fri Fri Jan 11 2008 wlb switched to USES_ANSI_C AND LIB_CARTO; misc cleanup
+
+.LEVEL1
+.VARI INP
+Input file name(s)
+There are six cases:
+1.  1 output, no add
+2.  1 input, 1 output, no add
+3.  1 input, 1 output, add
+4.  2 input, 1 output
+5.  1 input, 0 output (update)
+6.  1 input, 0 output (update), add
+(see help level 2)
+.VARI OUT
+output file name
+.VARI GEOTIFF
+Key-value pairs expressed
+as one string per pair
+.VARI ADD
+The key-value pairs are
+added to an existing file
+.VARI TIECNVRT
+Three tiepoints in the 
+parameters are converted to
+tiepoint-scale-model
+.VARI RECTFIT
+Used with TIECNVRT; gives the
+rectilinear mapping that best
+approximates the tiepoints
+.LEVEL2
+.VARI INP
+There are five cases to consider:
+1.  single output file, no add.
+2.  single input, single output file, no add.
+3.  single input, single output file, add.
+4.  two input, single output file.
+5.  one input, no output (update case)
+6.  one input, no output (update case), add
+
+The first case will create a VICAR file from the parameters with
+NL=1 NS=1 (i.e., a single pixel).  This is handy as a holder of a
+GeoTIFF label.  If a file exists already, it will be erased.
+
+The second case will put the parameters into the state label of a VICAR
+image file.  If any state parameters exist, THEY WILL BE ERASED.  This
+erasure includes ALL state labels, whether GeoTIFF related or not.
+
+The third case will add the parameters into the state label of a VICAR
+image file.  If any state parameters exist, they are kept.  A special
+case for TIECNVRT, an existing mapping will be deleted since it doesn't
+make sense to have two mappings.
+
+The fourth case will put the GeoTIFF state labels of the second
+VICAR input to the state label area of a VICAR image.  If any state
+parameters exist, THEY WILL BE ERASED.  This erasure includes ALL
+state labels, whether GeoTIFF related or not.
+
+The fifth case will put the parameters into the state label of a VICAR
+image file.  If any state parameters exist, they are deleted.  This case
+uses update on the vicar label and is the fastest method for large files.
+
+The sixth case will add the parameters into the state label of a VICAR
+image file.  If any state parameters exist, they are kept.  This case
+uses update on the vicar label and is the fastest method for large files.
+
+.VARI OUT
+The output will be a copy of the first input image with a GeoTIFF
+label inserted from the parameters or the second input image.
+
+If there is no first input, then the output will be a 1 x 1 image
+containing the GeoTIFF label from the parameters.  The GeoTIFF label
+will be in the state area of the image.
+.VARI GEOTIFF
+The key-value pairs are expressed as "key=value".  Double quotes
+must be doubled inside the TAE double quotes (see example below).
+Parenthetical documentation can be added as part of the strings.
+
+The format is flattened out for VICAR label purposes.  The higher
+level descriptors such as GeoKeyDirectoryTag are not used in the
+vicar table.  They are restored when an external GeoTIFF label is
+created.   The following example is taken from 3.1.1 of the 
+GeoTIFF Format Specification REv 1 (see references).
+
+geotiff=("ModelTiePointTag=(0,0,0,350807.4,5316081.3,0.0)",+
+"ModelPixelScaleTag=(100.0,100.0,0.0)",+
+"GTModelTypeGeoKey=1(ModelTypeProjected)",+
+"GTRasterTypeGeoKey=1(RasterPixelIsArea)",+
+"ProjectedCSTypeGeoKey=32660(PCS_WGS84-UTM-zone_60N)",+
+"PCSCitationGeoKey=""UTM Zone 60 N with WGS84""")
+
+.VARI ADD
+Add can only be used in the single input cases.
+.VARI TIECNVRT
+The GeoTIFF standard implies that a mapped image can be represented
+by a single tiepoint and a scale.  Actually, the scale can include
+negative values to indicate that the image storage is "flipped" from
+the VICAR order (starting at the top left of the image and running
+along the top in sample order, then down in line order), or a matrix
+indicating that the image is rotated in addition.  These 
+representations are very hard for the user to set up, so this
+keyword will convert a simpler set of three tiepoints into a
+tiepoint-scale-model format, using the model matrix only if needed
+(i.e., the simplest format is decided automatically by GTGEN).
+
+Only the first tiepoint is kept, and only the first three are used
+to calculate.  TIECNVRT cannot be used with the ADD keyword.
+
+As an example, a DMA DTED can be input (without disturbing its
+lines and samples format) by the following tiepoints:
+
+        "ModelTiePointTag=(0,0,0,121.0,25.0,0.0)"
+        "ModelTiePointTag=(1200,0,0,121.0,26.0,0.0)"
+        "ModelTiePointTag=(0,1200,0,122.0,25.0,0.0)"
+
+DMA DTED also uses RasterPixelIsPoint, and has the rotation diagram
+
+        369
+        258
+        147
+        
+where 123 is the first line, 456 is the second line, etc.
+.VARI RECTFIT
+The cross terms are simply set to zero.  That is, 
+
+       north   =   a * line  +  b * sample  + c
+       east    =   d * line  +  e * sample  + f
+
+either (a,c) is set to (0,0) or (b,d) is.  For a rectilinear
+image, one of these pairs should be zero, but approximations
+or rounding in the tiepoints cause one of the pairs to be small 
+numbers close to zero.  Which pair is a function of the rotation
+of the image.
+.END

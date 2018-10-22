@@ -262,6 +262,10 @@ public final class PDSLabelToDOM {
       if (sv.length > 1) {          
           value = sv[1].trim();
       }
+      
+      if (line.trim().startsWith( "^STRUCTURE")) {
+          if (debug) System.out.println("^STRUCTURE *****************************");
+      }
        
       // the test for END_GROUP etc must use trim() because sometimes the String may be indented since it is inside something else
       // can I do:
@@ -373,10 +377,13 @@ public final class PDSLabelToDOM {
               
               key = key.replaceFirst("^\\s*","");
               key = key.replaceFirst("(\\s+)$",""); 
+              key = key.replaceAll("\"",""); 
               
               value = sv[0];
               value = value.replaceFirst("^\\s*","");
               value = value.replaceFirst("(\\s+)$",""); 
+              
+              value = value.replaceAll("\"",""); 
               /****
               if (debug) {
                   _output.println("<?xml version=\"1.0\"?>");
@@ -415,10 +422,12 @@ public final class PDSLabelToDOM {
               
               key = key.replaceFirst("^\\s*","");
               key = key.replaceFirst("(\\s+)$",""); 
+              key = key.replaceAll("\"","");
               
               value = sv[0];
               value = value.replaceFirst("^\\s*","");
               value = value.replaceFirst("(\\s+)$",""); 
+              value = value.replaceAll("\"",""); 
         
               if (debug) {
                   _output.println("<?xml version=\"1.0\"?>");
@@ -468,6 +477,30 @@ public final class PDSLabelToDOM {
           
               
           String quoted = "false";
+          
+          if (value.startsWith("[")) {
+              if (debug) {
+                  System.out.println(lineCt+") ProcessLine line startsWith [ >"+line);
+              }
+          } else if (value.startsWith("{")) {
+              if (debug) {
+                  System.out.println(lineCt+") ProcessLine line startsWith { >"+line);
+              }
+          }
+          
+          if (value.endsWith("]")) {
+              if (debug) {
+                  System.out.println(lineCt+") ProcessLine line endsWith ] >"+line);
+              }
+          } else if (value.endsWith("}")) {
+              if (debug) {
+                  System.out.println(lineCt+") ProcessLine line endsWith } >"+line);
+              }
+          } else if (value.endsWith(")")) {
+              if (debug) {
+                  System.out.println(lineCt+") ProcessLine line endsWith ) >"+line);
+              }
+          }
           
           // cases
           // if (value.startsWith("(") ) {
@@ -1029,6 +1062,9 @@ public final class PDSLabelToDOM {
     boolean inQuote = false;
     boolean inValue = false;
     boolean inParen = false;
+    boolean inBrace = false;
+    boolean inBracket = false;
+    
     int level = 0;
     
     Element element = null;
@@ -1074,6 +1110,17 @@ public final class PDSLabelToDOM {
      Pattern keywordSpaceEqualsValueLineP = Pattern.compile("[A-Z_0-9]+\\s+=\\s+\\p{Print}+");
      Pattern keywordSpaceEqualsLineP      = Pattern.compile("[A-Z_0-9]+\\s+=");
      
+     // it is possible to have KEYWORD= I was only looking for KEYWORD = VALUE or KEYWORD =
+     //  pattern for 0 or more space chars
+     /**
+     Pattern keywordNoSpaceEqualsValueLineP = Pattern.compile("[A-Z_0-9]+\\s+=\\s+\\p{Print}+");
+     Pattern keywordNoSpaceEqualsLineP      = Pattern.compile("[A-Z_0-9]+\\s+=");
+     **/
+     // matches 0 or more spaces between the KEYWORD = VALUE
+     // value can be on another line
+     Pattern keywordEqualsValueLineP = Pattern.compile("[A-Z_0-9]+\\s*=\\s*\\p{Print}+");
+     Pattern keywordEqualsLineP      = Pattern.compile("[A-Z_0-9]+\\s*=");
+     
      // this is the only thing on the line
      // Pattern commentLineP = Pattern.compile("^/\\*\\S+\\*/$");
      Pattern commentLineP = Pattern.compile("^/\\*\\p{Print}+\\*/$");
@@ -1085,6 +1132,8 @@ public final class PDSLabelToDOM {
      String pq2 = "\"\\s*\\)";
      Pattern endParenSpaceQuoteP = Pattern.compile(pq2);
      
+     
+     
      String qcq = "\"\\s*,\\s*\"";
      Pattern quoteCommaQuoteP = Pattern.compile(qcq);
      
@@ -1094,6 +1143,7 @@ public final class PDSLabelToDOM {
      Matcher nonEmptyLineM, commentM, pdsVersionIdM, odlVersionIdM;
      Matcher openParenSpaceQuoteM, endParenSpaceQuoteM, quoteCommaQuoteM;
      Matcher keywordSpaceEqualsLineM, keywordSpaceEqualsValueLineM, commentLineM ;
+     Matcher keywordEqualsLineM, keywordEqualsValueLineM;
       
       /***
        reorganize the parser
@@ -1153,6 +1203,9 @@ public final class PDSLabelToDOM {
           commentLineM = commentLineP.matcher(trLine);
           keywordSpaceEqualsLineM = keywordSpaceEqualsLineP.matcher(trLine);
           keywordSpaceEqualsValueLineM = keywordSpaceEqualsValueLineP.matcher(trLine);
+          
+          keywordEqualsLineM = keywordEqualsLineP.matcher(trLine);
+          keywordEqualsValueLineM = keywordEqualsValueLineP.matcher(trLine);
           if (nonEmptyLineM.find()) {
         	                    
                   // if (trLine.equals("END")) {
@@ -1234,6 +1287,44 @@ public final class PDSLabelToDOM {
                       // start a new line
                       collectedLine = trLine;
                       inValue = false;
+                  } else if (keywordEqualsValueLineM.find()) {
+                      
+                	  int qCt = countStrInStr("\"", trLine);
+                	  int qCt2 = countStrInStr("\"", collectedLine);
+                	  if (debug) { 
+                		  System.out.println(lineCt+")  ####### keywordEqualsValue qCt="+qCt+" qCt2="+qCt2+"  inValue = "+inValue+"  trLine >"+trLine+"<"); 
+                		  System.out.println(lineCt+")  ####### keywordEqualsValue collectedLine ="+collectedLine+"<"); 
+                		  }
+               	                 	 
+                	  if (inValue) {
+                		  // trLine is a key and the start of a value
+                		  // process the previous line
+                		  collectedLine = joinLines(collectedLine, trLine);
+                	  } else {
+                		  nodeLevelHM = processLine(collectedLine, lineCt, nodeLevelHM);
+                		  collectedLine = trLine;
+                	  }
+                      
+                	  qCt = countStrInStr("\"", trLine);
+                	  qCt2 = countStrInStr("\"", collectedLine);
+                	  if (debug) { 
+                		  System.out.println(lineCt+")  ####### keywordEqualsValue qCt="+qCt+" qCt2="+qCt2+"  ");
+                	  }
+                      if (qCt2 == 1 ) {
+                		  inValue = true;
+                	  } else {
+                      	inValue = false; 
+                	  }
+                	                       
+                  } 
+                  else if (keywordEqualsLineM.find()) {
+                      
+                	  if (debug) { System.out.println(lineCt+")  ####### keywordEquals trLine >"+trLine+"<"); }
+                      // the previous line is complete
+                      nodeLevelHM = processLine(collectedLine, lineCt, nodeLevelHM);
+                      // start a new line
+                      collectedLine = trLine;
+                      inValue = false;
                   } 
                   else {			
                       
@@ -1249,11 +1340,34 @@ public final class PDSLabelToDOM {
                       int firstParenIndex = collectedLine.indexOf('(');
                       int lastParenIndex = collectedLine.lastIndexOf(')');
                       
+                      // add brackets [] and braces {} these may be used in the same way as parens ()
+                      int startBracketCt = countStrInStr("[", collectedLine);
+                      int endBracketCt = countStrInStr("]", collectedLine);
+                      
+                      int firstBracketIndex = collectedLine.indexOf('[');
+                      int lastBracketIndex = collectedLine.lastIndexOf(']');
+                      
+                      int startBraceCt = countStrInStr("{", collectedLine);
+                      int endBraceCt = countStrInStr("}", collectedLine);
+                      
+                      int firstBraceIndex = collectedLine.indexOf('{');
+                      int lastBraceIndex = collectedLine.lastIndexOf('}');
+                      
                 	  int qCt = countStrInStr("\"", collectedLine);
                       if (debug) { 
                     	  System.out.println(lineCt+")  startParenCt = "+startParenCt+"   endParenCt = "+endParenCt+"  qCt = "+qCt); 
                     	  System.out.println(lineCt+")  firstParenIndex = "+firstParenIndex+"   firstQuoteIndex = "+firstQuoteIndex+" "); 
                     	  System.out.println(lineCt+")  lastParenIndex = "+lastParenIndex+"   lastQuoteIndex = "+lastQuoteIndex+" "); 
+                    	  
+                    	  
+                    	  System.out.println(lineCt+")  startBracketCt = "+startBracketCt+"   endBracketCt = "+endBracketCt+"  qCt = "+qCt); 
+                    	  System.out.println(lineCt+")  firstBracketIndex = "+firstBracketIndex+"   firstQuoteIndex = "+firstQuoteIndex+" "); 
+                    	  System.out.println(lineCt+")  lastBracketIndex = "+lastBracketIndex+"   lastQuoteIndex = "+lastQuoteIndex+" "); 
+                    	  
+                    	  System.out.println(lineCt+")  startBraceCt = "+startBraceCt+"   endBraceCt = "+endBraceCt+"  qCt = "+qCt); 
+                    	  System.out.println(lineCt+")  firstBraceIndex = "+firstBraceIndex+"   firstQuoteIndex = "+firstQuoteIndex+" "); 
+                    	  System.out.println(lineCt+")  lastBraceIndex = "+lastBraceIndex+"   lastQuoteIndex = "+lastQuoteIndex+" ");
+                    	  
                     	  System.out.println(lineCt+")  >"+trLine+"<"); 
                     	  System.out.println(lineCt+")  >"+collectedLine+"<");                     	  
                     	  }
@@ -1264,7 +1378,29 @@ public final class PDSLabelToDOM {
                     	  // start a new line
                     	  collectedLine = "";
                     	  inValue = false;
+                      } else if (endBraceCt == 1) {
+                    	  nodeLevelHM = processLine(collectedLine, lineCt, nodeLevelHM);
+                    	  // start a new line
+                    	  collectedLine = "";
+                    	  inValue = false;
+                      } else if (endBracketCt == 1) {
+                    	  nodeLevelHM = processLine(collectedLine, lineCt, nodeLevelHM);
+                    	  // start a new line
+                    	  collectedLine = "";
+                    	  inValue = false;
                       } else if (startParenCt == 0 && qCt == 2) {
+                    	  // closed the quote and no parens
+                    	  nodeLevelHM = processLine(collectedLine, lineCt, nodeLevelHM);
+                    	  // start a new line
+                    	  collectedLine = "";
+                    	  inValue = false;
+                      } else if (startBraceCt == 0 && qCt == 2) {
+                    	  // closed the quote and no parens
+                    	  nodeLevelHM = processLine(collectedLine, lineCt, nodeLevelHM);
+                    	  // start a new line
+                    	  collectedLine = "";
+                    	  inValue = false;
+                      } else if (startBracketCt == 0 && qCt == 2) {
                     	  // closed the quote and no parens
                     	  nodeLevelHM = processLine(collectedLine, lineCt, nodeLevelHM);
                     	  // start a new line
@@ -1277,7 +1413,21 @@ public final class PDSLabelToDOM {
                     		  System.out.println(lineCt+") PARENS INSIDE OF ALL QUOTES ################################");   
                     		  System.out.println(lineCt+")  >"+collectedLine+"<"); 
                     	  }
-                  	  } else {
+                  	  } else if (qCt == 2 && (startBraceCt > 0 && endBraceCt > 0 && 
+		              		  		firstBraceIndex>firstQuoteIndex && lastBraceIndex<lastQuoteIndex)) {
+		              	  // Braces inside of quotes. Could call processLine here. Should be terminated by the next line read 
+		              	  if (debug) { 
+		              		  System.out.println(lineCt+") BRACE INSIDE OF ALL QUOTES ################################");   
+		              		  System.out.println(lineCt+")  >"+collectedLine+"<"); 
+		              	  }
+                  	} else if (qCt == 2 && (startBracketCt > 0 && endBracketCt > 0 && 
+              		  		firstBracketIndex>firstQuoteIndex && lastBracketIndex<lastQuoteIndex)) {
+		              	  // Braces inside of quotes. Could call processLine here. Should be terminated by the next line read 
+		              	  if (debug) { 
+		              		  System.out.println(lineCt+") BRACKET INSIDE OF ALL QUOTES ################################");   
+		              		  System.out.println(lineCt+")  >"+collectedLine+"<"); 
+		              	  }
+            	      } else {
                     	  inValue = true; 
                       }
                   }
@@ -1382,11 +1532,28 @@ public final class PDSLabelToDOM {
      String qcq = "\"\\s*,\\s*\"";
      Pattern quoteCommaQuoteP = Pattern.compile(qcq);
      
+     // same idea for brace and bracket
+     String brkq1 = "\\[\\s*\"";
+     Pattern openBracketSpaceQuoteP = Pattern.compile(brkq1);
+     
+     String brkq2 = "\"\\s*\\]";
+     Pattern endBracketSpaceQuoteP = Pattern.compile(brkq2);
+     
+     String brcq1 = "\\[\\s*\"";
+     Pattern openBraceSpaceQuoteP = Pattern.compile(brcq1);
+     
+     String brcq2 = "\"\\s*\\]";
+     Pattern endBraceSpaceQuoteP = Pattern.compile(brcq2);
+     
+     
+     
      // replace String p = "\\(\\s+\""; 
      
      // create a bunch of Matchers 
      Matcher nonEmptyLineM, commentM, pdsVersionIdM, odlVersionIdM;
      Matcher openParenSpaceQuoteM, endParenSpaceQuoteM, quoteCommaQuoteM;
+     Matcher openBraceSpaceQuoteM, endBraceSpaceQuoteM;
+     Matcher openBracketSpaceQuoteM, endBracketSpaceQuoteM;
      Matcher keywordSpaceEqualsLineM, keywordSpaceEqualsValueLineM, commentLineM ;
       
       /***
@@ -1654,6 +1821,9 @@ public final class PDSLabelToDOM {
                     keepReading = true;
                     s = "";
                     strim = "";
+                    
+                    // do the same idea for brace and bracket
+                    // do something to capture quote??
 		                   
                     StringBuffer sb=new StringBuffer();
                     // we don't have the complete value, it is on more than one line
@@ -1705,6 +1875,7 @@ public final class PDSLabelToDOM {
 	               // go till we find the end backet, then parse it up
 	               // check for multivalue separated by a comma
 	               // check if the ( is first char in this string or inside of a quote
+                   // also now need to check for { and [
 	               else if (v1.indexOf("(") != -1) {
 	                    	// just commas with no quotes OR
 	                    	// "," may also be " , " (spaces between comma and quotes)
@@ -1818,6 +1989,7 @@ public final class PDSLabelToDOM {
 	                		
 	               inValue = false; 
 	               // if (value.indexOf("\"") != -1) {
+	               // also check for { [
 	              if (value.indexOf("(") != -1) {
 	               	if (useSubitem == false) {
 	               		if (debug) {
@@ -1839,9 +2011,7 @@ public final class PDSLabelToDOM {
 	                	if (useUnitsAttribute && !units.equals("")) {
 	                		element.setAttribute(unitsTag,units);
 	                	}	
-	               			
 	               		
-	                
 	                	// no subitems, just use the backeted value quotes and all     
 	                	Text text = (Text) _document.createTextNode(value);	                        
 	                	element.appendChild(text);
@@ -1851,7 +2021,6 @@ public final class PDSLabelToDOM {
                             System.out.println(lineCt+")"+level+">appendChild  key="+key+" value="+value+"<  ( subitem = false");
                         }
                         
-                        
 	               	}
 	               	else { // useSubitems == TRUE
 	               	// remove the brackets
@@ -1859,6 +2028,7 @@ public final class PDSLabelToDOM {
 		               		System.out.println("     useSubitem = "+useSubitem);
 	               		}
 	               	// should only remove start and end () and only if they are not inside of quotes
+	               	// do same for { [
 	               	value = value.replaceFirst("\\(","");
 	               	value = value.replaceFirst("\\)","");
 	               	
@@ -1918,7 +2088,7 @@ public final class PDSLabelToDOM {
                        }
 	               
 	               	               		
-	               }
+	               } // end of if (value.indexOf("(") != -1) {
 	               
 	               // single value with quotes
 	               else if (v1.indexOf("\"") != -1) {

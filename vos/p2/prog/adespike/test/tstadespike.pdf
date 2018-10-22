@@ -1,0 +1,142 @@
+Procedure
+refgbl $echo
+refgbl $autousage
+Body
+let $autousage="none"
+Let _onfail="continue"
+
+local dirg string initial="/project/test_work/testdata/sitod1/test_data/images/"
+local dirv string initial="/project/test_work/testdata/mipl/vgr/"
+
+Write " "
+refgbl $syschar
+!
+Let $echo="yes"
+! test of program ADESPIKE
+! BYTE data:
+!
+gen a 10 10 IVAL=100 LINC=2 SINC=0
+sargonb a c ZERO 0 (6,5,6,7,7,5)
+insert c b LINE=8 DN=130 'TRUNC
+list b
+adespike b c TOL=10 'print
+list c
+!
+! line fill mode
+!
+sargonb a d ZERO 0 (6,1,5,5,6,10,7,6)
+list d
+adespike d e 
+list e
+!
+! parameter BITS:
+!
+adespike d e BITS=3
+list e
+! HALF data:
+gen h 10 20 IVAL=100 LINC=2 SINC=0 'HALF
+sargonb h f ZERO 0 (6,1,5,5,6,10,7,6)
+adespike f g 
+list g
+! Parameter DN:
+adespike f g DN=1234
+list g
+! parameter BITS with HALF data:
+adespike f g BITS=11
+list g
+!
+!  Test on byte image with binary headers:
+!
+adespike &"dirv"e2575251.6 vgrdespike.fil
+list &"dirv"e2575251.6 (201,21,10,10)
+list vgrdespike.fil (201,21,10,10)
+!
+!      Test REDR   (8-21-1991   WPL)
+!
+!   BADLABEL first to create REDR,  followed by  Adespike
+! (this test had to be removed as pgm. badlabels is no longer in P2
+! 2010-05-11 lwk)
+!badlabels &"dirg"s0061509700.1 redr.1 ENTROPY=NO
+!label-list  |stdout=before.vic| redr.1
+!  
+!   Run ADESPIKE  on REDR
+!
+!gedrlist |stdout=before.bin| redr.1 'bad
+!adespike  redr.1  redr.2  
+!gedrlist |stdout=after.bin| redr.2 'bad
+!
+!if ($syschar(1) = "VAX_VMS")
+!   dcl diff before.bin after.bin /output=diff.bin
+!else
+!   ush diff before.bin after.bin >diff.bin
+!end-if
+!
+!label-list  |stdout=after.vic| redr.2
+!
+!if ($syschar(1) = "VAX_VMS")
+!   dcl diff before.vic after.vic /output=diff.vic
+!else
+!   ush diff before.vic after.vic >diff.vic
+!end-if
+!
+!      Test EDR   
+!
+! As of March 1995, the call to galsos will not work on ANDES because
+! it is not ported on that platform.  To test adespike on andes, the
+! following should be commented out and the output file should be used
+! from the wasatch (or any other platform) run.
+!
+!if ($syschar(1) = "VAX_VMS")
+!    galsos redr.1 galsos_out_edr.1 dir="dev:[gmy059.cal]"  +
+!           offset=calibration.so 'nocheck cal=vlt100.cal   +
+!           dc=2f30.dc blem=vlt2f.blm solrange=108208799.
+!else
+!    galsos redr.1 galsos_out_edr.1 dir="/home/gmy/cal"    +
+!           offset=calibration.so 'nocheck cal=vlt100.cal  +
+!           dc=2f30.dc blem=vlt2f.blm solrange=108208799.
+!end-if
+!
+!label-list  |stdout=before.vic| galsos_out_edr.1
+!  
+!   Run ADESPIKE  on REDR
+!
+!gedrlist |stdout=before.bin| galsos_out_edr.1 'bad
+!adespike  galsos_out_edr.1  edr.2 tol=600
+!gedrlist |stdout=after.bin| edr.2 'bad
+!
+!if ($syschar(1) = "VAX_VMS")
+!   dcl diff before.bin after.bin /output=diff1.bin
+!else
+!   ush diff before.bin after.bin >diff1.bin
+!end-if
+!
+!label-list  |stdout=after.vic| edr.2
+!
+!if ($syschar(1) = "VAX_VMS")
+!   dcl diff before.vic after.vic /output=diff1.vic
+!else
+!   ush diff before.vic after.vic >diff1.vic
+!end-if
+!
+if ($syschar(1) = "VAX_VMS")
+   dcl delete *.z*;*
+   dcl delete vgrdespike.fil;*
+   dcl delete redr*.*;*
+   dcl delete edr*.*;*
+else
+   ush rm a
+   ush rm b
+   ush rm c
+   ush rm d
+   ush rm e
+   ush rm f
+   ush rm g
+   ush rm h
+   ush rm vgrdespike.fil
+!   ush rm redr*.*
+!   ush rm edr*.*
+end-if
+!
+Let $Echo="NO"
+End-proc
+

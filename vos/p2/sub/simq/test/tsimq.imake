@@ -1,0 +1,13 @@
+#define PROGRAM tsimq
+
+#define MODULE_LIST tsimq.c
+
+#define TEST
+
+#define MAIN_LANG_FORTRAN
+#define USES_ANSI_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB
+#define LIB_MATH77

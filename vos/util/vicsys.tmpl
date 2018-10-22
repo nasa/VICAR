@@ -131,10 +131,17 @@ RANLIB	= ranlib
 #define ANSI_CC_MACRO gcc
 #define CCC_MACRO g++
 #endif
-#if X86_64_LINX_ARCH + X86_LINUX_ARCH 
-#define CC_MACRO gcc44
-#define ANSI_CC_MACRO gcc44
-#define CCC_MACRO g++44
+#if X86_64_LINX_ARCH 
+/* For Red Hat 5 use gcc44/g++44 on the next 3 lines */
+#define CC_MACRO gcc
+#define ANSI_CC_MACRO gcc
+#define CCC_MACRO g++
+#endif
+#if X86_LINUX_ARCH 
+/* For Red Hat 5 use gcc44/g++44 on the next 3 lines */
+#define CC_MACRO gcc -m32
+#define ANSI_CC_MACRO gcc -m32
+#define CCC_MACRO g++ -m32
 #endif
 #if AXP_LINUX_ARCH
 #define CC_MACRO gcc -fno-builtin
@@ -142,9 +149,15 @@ RANLIB	= ranlib
 #define CCC_MACRO g++
 #endif
 #if ANY_OSX_ARCH
+#if MAC64_OSX_ARCH
+#define CC_MACRO gcc -m64 -ansi -Wno-return-type
+#define ANSI_CC_MACRO gcc -m64 -ansi -Wno-return-type
+#define CCC_MACRO g++
+#else
 #define CC_MACRO gcc -m32 -ansi -Wno-return-type
 #define ANSI_CC_MACRO gcc -m32 -ansi -Wno-return-type
 #define CCC_MACRO g++ -m32
+#endif
 #endif
 #ifndef CC_MACRO
 #define CC_MACRO cc
@@ -274,9 +287,13 @@ X11INC  = -I/usr/X11R5/include
 X11INC  = -I/usr/X11R6/include
 #else
 #if ANY_OSX_ARCH
-X11INC  = -I/usr/X11R6/include -I//usr/OpenMotif/include
+#if MAC_OSX_ARCH        /* old PPC build using Apple's X11 */
+X11INC  = -I/usr/X11R6/include -I/usr/OpenMotif/include
+#else                   /* newer x86 build using XQuartz X11 */
+X11INC  = -I/opt/X11/include -I/Applications/OpenMotif21/include
+#endif
 #else
-X11INC	=
+X11INC        =
 #endif
 #endif
 #endif
@@ -303,9 +320,13 @@ X11LIB  = -L/usr/dt/lib -L/usr/openwin/lib -lXm -lXt -lX11 -lgen
 X11LIB = -L/usr/X11R6/lib -lXm -lXp -lXext -lXt -lX11
 #else
 #if ANY_OSX_ARCH
-X11LIB = -L/usr/X11R6/lib -L//usr/OpenMotif/lib -lXm -lXp -lXext -lXt -lX11 -force_flat_namespace
+#if MAC_OSX_ARCH        /* old PPC build using Apple's X11 */
+X11LIB = -L/usr/X11R6/lib -L/usr/OpenMotif/lib -lXm -lXp -lXext -lXt -lX11 -force_flat_namespace
+#else                   /* newer x86 build using XQuartz X11 */
+X11LIB = -L/opt/X11/lib -L/Applications/OpenMotif21/lib -lXm -lXp -lXext -lXt -lX11 -force_flat_namespace
+#endif
 #else
-X11LIB	= -lXm -lXt -lX11
+X11LIB        = -lXm -lXt -lX11
 #endif
 #endif
 #endif
@@ -324,7 +345,11 @@ VSYSIMAKE = imake -D__sparc -DSOLARIS -T$$V2UTIL/vicsys.tmpl -I$$V2INC
 VSYSIMAKE = imake -DSOLARIS -T$$V2UTIL/vicsys.tmpl -I$$V2INC
 #endif
 #else
+#if X86_LINUX_ARCH + MAC_OSX_ARCH + X86_MACOSX_ARCH
+VSYSIMAKE = imake -DV2_FORCE_32 -T$$V2UTIL/vicsys.tmpl -I$$V2INC
+#else
 VSYSIMAKE = imake -T$$V2UTIL/vicsys.tmpl -I$$V2INC
+#endif
 #endif
 CP	= cp
 CD	= cd
@@ -348,15 +373,25 @@ MSGBLD	= $$TAEPDF/msgbld
 #if MAC_AUX_ARCH
 #define FC_MACRO ftn
 #endif
-#if ANY_LINUX_ARCH
-#if X86_64_LINX_ARCH + X86_LINUX_ARCH 
-#define FC_MACRO gfortran44 -fno-second-underscore -std=legacy -ffixed-line-length-none -fno-range-check
+#if ANY_LINUX_ARCH 
+#if X86_64_LINX_ARCH 
+/* For Red Hat 5 use gfortran44 below */
+#define FC_MACRO gfortran -fno-second-underscore -std=legacy -ffixed-line-length-none -fno-range-check
+#else 
+#if X86_LINUX_ARCH
+/* For Red Hat 5 use gfortran44 below */
+#define FC_MACRO gfortran -m32 -fno-second-underscore -std=legacy -ffixed-line-length-none -fno-range-check
 #else
 #define FC_MACRO gfortran -fno-second-underscore -std=legacy -ffixed-line-length-none -fno-range-check
 #endif
 #endif
+#endif
 #if ANY_OSX_ARCH
+#if MAC64_OSX_ARCH
+#define FC_MACRO gfortran -m64 -fno-second-underscore -std=legacy -ffixed-line-length-none -fno-range-check
+#else
 #define FC_MACRO gfortran -m32 -fno-second-underscore -std=legacy -ffixed-line-length-none -fno-range-check
+#endif
 #endif
 #ifndef FC_MACRO
 #define FC_MACRO f77

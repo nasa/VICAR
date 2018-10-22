@@ -1,0 +1,35 @@
+procedure
+refgbl $echo
+refgbl $autousage
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+! TEST SCRIPT FOR THE PROGRAM MORPH
+gausnois out=a.img nl=305 ns=305
+copy a.img left.img nl=300 ns=300
+copy a.img right.img sl=5 ss=3 nl=300 ns=300
+tracker3 inp=(left.img,right.img) out=mark.img +
+  grid=100 nlw=11 nsw=11 nlarea=21 nsarea=21 'print 
+gen out=b.img nl=305 ns=305 ival=10 linc=0 sinc=0
+qsar inp=b.img out=a.img area=(150,150,5,5,200)
+copy a.img l.img nl=300 ns=300
+copy a.img r.img sl=5 ss=3 nl=300 ns=300
+morph inp=(l.img,r.img,mark.img) +
+   inc=25 npts=5 frames=2 name=morph
+list inp=l.img sl=143 ss=143 nl=15 ns=15
+list inp=r.img sl=143 ss=143 nl=15 ns=15
+list inp=morph1.img sl=143 ss=143 nl=15 ns=15
+list inp=morph2.img sl=143 ss=143 nl=15 ns=15
+morph inp=(l.img,r.img,mark.img) +
+   inc=25 npts=5 frames=2 name=morph start=2
+list inp=morph2.img sl=143 ss=143 nl=15 ns=15
+gen out=r.img nl=300 ns=300
+morph inp=(l.img,r.img,mark.img) +
+   inc=25 npts=5 frames=2 name=morph start=2 'leftonly
+list inp=morph2.img sl=143 ss=143 nl=15 ns=15
+stretch inp=l.img out=ll.img linear=(5,260)
+morph inp=(ll.img,r.img,mark.img) +
+   inc=25 npts=5 frames=2 name=morph start=2 'leftonly
+list inp=morph2.img sl=143 ss=143 nl=15 ns=15
+end-proc

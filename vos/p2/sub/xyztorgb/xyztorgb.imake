@@ -1,0 +1,9 @@
+/* Imake file for VICAR subroutine xyztorgb   */
+
+#define SUBROUTINE  xyztorgb
+
+#define MODULE_LIST  xyztorgb.c  
+
+#define P2_SUBLIB
+
+#define USES_C

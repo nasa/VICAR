@@ -1,0 +1,132 @@
+process help=*
+PARM INP TYPE=STRING COUNT=(3:10)
+PARM OUT TYPE=STRING COUNT=3
+PARM COLORS TYPE=REAL COUNT=(0:500) DEFAULT=--
+PARM WEIGHTS TYPE=REAL COUNT=(0:50) DEFAULT=--
+PARM MACBETH TYPE=REAL COUNT=(0,8) DEFAULT=--
+END-PROC
+
+.TITLE
+VICAR program DNTOXYY
+
+.HELP
+PURPOSE:
+To generate xyY images (chromaticity x and y and tristimulus Y) from
+unknown input multispectral imagery where the scenes contain known
+colors. Use this program if the images are not in radiance units or
+the bands are outside the visible or of unknown wavelength. If you
+know these things then use spectoxyy instead. Once xyY images exist 
+they can be converted to rgb for a particular device using xyytospec
+or xyy2hdtv.
+
+METHOD:
+This method solves for a linear relation between input dn and XYY
+tristimulus values. You specify the xyY's and dn's of special colors in the
+scene and a solution is made for the C's from the simultaneous
+equations:
+X(color1)=C1*dn(color1,band1)+C2*dn(color1,band2),...
+X(color2)=C1*dn(color2,band1)+C2*dn(color2,band2),...
+..etc..
+This is done three times once for X, then Y, and then Z.
+Once the C's are known you can substitute any input dn's to derive
+the corresponding tristimulus values XYZ. The XYZ's are converted to
+xyY's and written out.
+
+All color data are input either after the keyword COLORS or after the
+keyword MACBETH. These are the only mechanisms for inputting colors. Each time
+you use these keywords the program writes a color calibration file called:
+color_calibration.txt. Once this file exists you can cause the program to
+read it for processing other images by running dntoxyy without any parameters.
+See the example below.
+
+WARNING: If you read a color calibration file your images must retain the same
+order and gains as the images from which the file was created.
+
+EXECUTION:
+
+To process images and to create a calibration file:
+
+dntoxyy inp=(band1,band2,...bandn) out=(x,y,Y) colors=(...)
+xyy2hdtv inp=(x,y,Y) out=(r,g,b)
+or
+dntoxyy inp=(band1,band2,...bandn) out=(x,y,Y) macbeth=(...)
+xyy2hdtv inp=(x,y,Y) out=(r,g,b)
+
+To process images using an existing calibration file:
+
+dntoxyy inp=(band1,band2,...bandn) out=(x,y,Y)
+xyy2hdtv inp=(x,y,Y) out=(r,g,b)
+
+.PAGE
+
+METHOD:
+HISTORY:
+5-1-2001 J Lorre. 
+COGNIZANT PROGRAMMER:  Jean Lorre
+
+.LEVEL1
+.VARI INP
+N input images
+
+.VARI OUT
+3 Output images
+
+.VARI COLORS
+Color coordinates
+and dn values.
+
+.VARI WEIGHTS
+Priorities of the
+colors.
+
+.VARI MACBETH
+Location of
+macbeth chart.
+
+.LEVEL2
+.VARI INP
+Up to 10 multispectral registered input images.
+
+.VARI OUT
+Three Output REAL images in the order:
+x    x chromaticity.
+y    y chromaticity.
+Y    Y tristimulus.
+
+.VARI COLORS
+(Only required to create a new color calibration file.)
+Colors of the known reference colors.
+We list here all data for all the reference colors strung out in a long
+list from color 1 to color M. Each color must contain (in this order):
+1. x chromaticity in D65 (0 to 1.0).
+2. y chromaticity in D65.(0 to 1.0).
+3. Y tristimulus in D65. (0 to 100.0).
+4. DN of this color in input image 1.
+5. DN of this color in input image 2.   
+6. .....etc....
+ . DN of this color in last input image.
+Repeat above for each reference color.
+The number of reference colors must exceed the number of input images by 
+at least 1. If COLORS is specified the MACBETH keyword is not required.
+
+.VARI WEIGHTS
+(Optional)
+A table of the weights (priorities) of each color for the least squares fit.
+The default is 1.0 for each color. If WEIGHTS is specified you must list a
+weight for each color. If MACBETH is specified there are 24 colors.
+
+.VARI MACBETH
+(Only required to create a new color calibration file.)
+The image location of the macbeth chart.
+There are 8 input numbers in the order line,sample,line,sample,...
+These are, in input order, the image coordinates of the centers of the upper
+left, upper right, lower left, & lower right patches on the macbeth color
+chart. The chart is oriented with the gray row at the bottom.
+ With this information the program will go to the images and extract the
+dn values for each of the 24 macbeth color patches. The program already knows
+the Macbeth D65 colors. If MACBETH is specified the COLORS keyword is not
+required.
+NOTE: The coordinates are the image locations of the CENTERS of the corner 
+patches.
+
+

@@ -1,0 +1,28 @@
+1 RECTPATCH
+  For simple cylindrical projection, returns line of equator, longitude
+of sample 1.
+
+  FORTRAN Calling Sequence: 
+
+  CALL RECTPATCH(RDATA)
+
+     where:
+
+  RDATA is 40 word real*4 array containing geometry data as specified in
+  subroutine CONVEV.  Elements 1,2,3 and 6 will be changed.
+2 History
+  Original Programmer: Joel Mosher 19-APR-1986
+  Current Cognizant Programmer: Steve Pohorsky
+  Source Language: FORTRAN
+  Ported to UNIX: Steve Pohorsky
+
+  REVISION HISTORY
+    2-4-93   SP   Minor cleanup: Changed (RLON.gE.360.0001) to (RLON .GT. 360.0)
+                  and changed 3.14159265358 to 3.141592653589793D0
+2 Operation
+ RECTPATCH uses data in RDATA to calculate line of equator and longitude of 
+ sample 1.  Elements 1,2,3 and 6 will be changed accordingly.
+
+ RECTPATCH is intended for use only on rectangular projections, so if 
+ RDATA(39) is not 10, then it returns without any processing.  (Please note that
+ RDATA(39) is stored in INTEGER format and thus is not equal to 10.0.)

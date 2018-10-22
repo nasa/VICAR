@@ -1,0 +1,170 @@
+PROCESS help=*
+  PARM INP     TYPE=(STRING,40) COUNT=0:1  DEFAULT=--
+  PARM OUT     TYPE=(STRING,40) COUNT=0:1  DEFAULT=--
+  PARM MODE    TYPE=KEYWORD     COUNT=1    DEFAULT=TOPARM VALID=(TOPARM,TOIBIS)
+  PARM COLS    TYPE=INTEGER COUNT=3:5 DEFAULT=(1,2,3,4)
+  PARM NCOL    TYPE=INTEGER COUNT=0:1 DEFAULT=--
+  PARM MINL    TYPE=REAL    COUNT=1 DEFAULT=1
+  PARM MAXL    TYPE=REAL    COUNT=1 DEFAULT=512
+  PARM MINS    TYPE=REAL    COUNT=1 DEFAULT=1
+  PARM MAXS    TYPE=REAL    COUNT=1 DEFAULT=512
+  PARM NAV     TYPE=INTEGER COUNT=1 DEFAULT=20
+  PARM NAH     TYPE=INTEGER COUNT=1 DEFAULT=20
+  PARM TIEPOINT TYPE=REAL   COUNT=0:600 DEFAULT=--
+  PARM PARMS   TYPE=STRING  COUNT=0:1  DEFAULT=--
+END-PROC
+.TITLE
+VICAR/IBIS Program tieparm
+.HELP
+PURPOSE
+
+    tieparm has two modes, the default mode (TOPARM) and the TOIBIS mode.
+In default mode tieparm takes tiepoints in an IBIS interface (tabular) file
+and outputs them in a parameter dataset form for TIECONM
+and the geometrical correction programs.  Geometrical tiepoints
+(4 values), delta Z (3 values) tiepoints, or geometrical tiepoints with
+delta Zs (5 values) may be transfered.
+    In TOIBIS mode, tieparm converts a tiepoint parameter dataset into an
+IBIS interface (tabular) file.
+.page
+EXECUTION
+
+  TOPARM is the default mode.  In default mode, there is an IBIS interface file
+as input and a parameter dataset as output.  
+
+  In  TOIBIS mode there is an input parameter data set specified via the PARMS 
+parameter (unless NAH, NAV, and TIEPOINT are specified on the command line.)
+There is also an output IBIS interface file.  The IBIS interface file is
+specified using the OUT parameter if a new file is to be written.  It is
+specified using the INP parameter if an existing file is to be written into.
+
+tieparm can be used to produce a parameter data set for program MZGEOM.
+This is illustrated in one of the following examples.
+.PAGE
+ EXAMPLES: 
+
+tieparm INP=TIEPOINTS.INT OUT=TIEPOINTS.PDS  NAH=20 NAV=15 COLS=(1,2,5,6)
+
+This example, which uses all of the parameters in default (TOPARM) mode
+will read the tiepoints (new line, new sample, old line, old sample) from
+columns 1, 2, 5, and 6 from the interface file.  The default
+columns are 1, 2, 3, and 4.
+
+
+tieparm INP=TIEPOINTS.INT OUT=TIEPOINTS.PDS  NAH=12 NAV=10 COLS=(1,2,4)
+
+This example shows how to transfer DN values tiepoints for TIECONM and
+GEOMZ.  The tiepoints are in the form (line, sample, delta Z).
+.PAGE
+tieparm  PARMS=TIEM.PAR  OUT=TIEM.INT NCOL=7 'TOIBIS
+tieparm  PARMS=TIEG.PAR  INP=TIEM.INT COLS=(5,6,7) 'TOIBIS
+tieparm  INP=TIEM.INT  OUT=TIEMZ.PAR NAH=1 NAV=1 COLS=(1,2,3,4,7) 'TOPARM
+
+In this example tieparm is used to combine a parameter dataset for MGEOM
+(TIEM.PAR) and a parameter dataset for GEOMZ (TIEG.PAR) to produce  a parameter
+dataset for MZGEOM (TIEMZ.PAR).  The tiepoint locations in the parameter
+dataset for GEOMZ must match the new line and sample tiepoint locations in the
+parameter dataset for MGEOM. 
+.page
+RESTRICTIONS
+
+    The maximum number of tiepoints is 40,000.
+
+
+
+Original Programmer:     Leo Bynum         February 1985
+
+Ported to UNIX by:	 Randy Schenk (CRI) May 1995
+
+Cognizant Programmer:    Frank Evans
+
+
+.LEVEL1
+.VARI INP
+IBIS interface file name (input)
+.VARI OUT
+Parameter data set name (output)
+or IBIS interface file name for
+TOIBIS mode.
+.VARI MODE
+Enter 'TOPARM to convert an IBIS
+interface file to a parameter
+dataset.  Enter 'TOIBIS to 
+convert a parameter dataset to an
+IBIS interface file.
+.VARI COLS
+Columns of the interface file
+to be used for newline, newsample,
+oldline, and oldsample;
+or line, sample, delta Z;
+or newline, newsample,
+oldline, oldsample, and delta Z.
+.VARI NCOL
+Number of columns in IBIS 
+interface file (TOIBIS mode).
+.VARI NAV
+Number of areas vertical.
+Default is 20.
+.VARI NAH
+Number of areas horizontal.
+Default is 20.
+.VARI TIEPOINT
+Tiepoint coordinates.
+.VARI PARMS
+optional parameter file.
+.VARI MINL
+Dummy parameter
+.VARI MAXL
+Dummy parameter
+.VARI MINS
+Dummy parameter
+.VARI MAXS
+Dummy parameter
+
+.LEVEL2
+.VARI INP
+Input file name.  This parameter is input as:
+     INP=innam
+where "innam" is the input file name.
+.VARI OUT
+Output file name. This parameter is input as:
+     OUT=outnam
+where:
+"outnam" is the output file name.
+.VARI MODE
+  TOPARM is the default mode.  In default mode, there is an IBIS interface file
+as input and a parameter dataset as output.  
+
+  In  TOIBIS mode there is an input parameter data set specified via the PARMS 
+parameter (unless NAH, NAV, and TIEPOINT are specified on the command line.)
+There is also an output IBIS interface file.  The IBIS interface file is
+specified using the OUT parameter if a new file is to be written.  It is
+specified using the INP parameter if an existing file is to be written into.
+.VARI COLS
+The default columns in default (TOPARM) mode are 1,2,3,4.
+The default columns in  TOIBIS mode are 1,2,3,4
+.VARI NCOL
+NCOL specifies the number of columns to be contained in a new IBIS interface
+file produced in TOIBIS mode.  The default for NCOL is the highest column
+number specified for the COLS parameter.  
+.VARI NAH
+The nah is number of grid cells horizontally, the number of tiepoints 
+across is one larger (nah+1).  NAH must be an integer.  The default value is 20.
+.VARI NAV
+The nav is number of grid cells vertically, the number of tiepoints
+vertically is one larger (nav+1).  NAV must be an integer.  The default value 
+is 20.
+.VARI TIEPOINT
+The TIEPOINT keyword and associated numbers specify the mapping of control
+points between output and input pictures.  The numbers which follow this
+keyword are in groups of 3, 4, or 5, one group for each tiepoint.  The numbers
+may be either integer or real.  The total number of tiepoint numbers must
+be  3,4,or 5 times the desired number of tiepoints.
+The order in which the tiepoints are specified is left to right within
+a horizontal row of tiepoints.  The horizontal rows are ordered from top
+to bottom.
+.VARI PARMS
+A parameter data set containing the tiepoint parameters.  This file should
+have been written by a program which uses the XVP routines for writing
+parameter data sets, such as TIECONM.
+.end

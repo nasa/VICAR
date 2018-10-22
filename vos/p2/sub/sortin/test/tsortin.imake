@@ -1,0 +1,16 @@
+/* Imake file for Test of VICAR subroutine sortin */
+
+#define PROGRAM tsortin
+
+#define MODULE_LIST tsortin.f tzsortin.c
+
+#define MAIN_LANG_FORTRAN
+#define TEST
+
+#define USES_FORTRAN
+#define USES_C
+
+#define LIB_RTL
+#define LIB_TAE
+#define LIB_P2SUB 
+/* #define LIB_LOCAL */

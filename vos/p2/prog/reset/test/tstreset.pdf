@@ -1,0 +1,21 @@
+procedure
+refgbl $echo
+refgbl $syschar
+body
+let _onfail="continue"
+let $echo="yes"
+if ($syschar(1) = "UNIX")
+  ush cat tstreset.dat
+  reset tstreset.dat 3
+  ush cat tstreset.dat
+  reset tstreset.dat
+  ush cat tstreset.dat
+else
+  dcl type tstreset.dat
+  reset tstreset.dat 3
+  dcl type tstreset.dat
+  reset tstreset.dat
+  dcl type tstreset.dat
+end-if
+let $echo="no"
+end-proc

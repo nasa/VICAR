@@ -1,0 +1,191 @@
+gen r nl=256 ns=256 sinc=1
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen g nl=256 ns=256 sinc=2
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen b nl=256 ns=256 sinc=3
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+rgb2ish inp=(r,g,b) out=(i,s,h)
+Beginning VICAR task rgb2ish
+rgb2ish version 2016-09-12
+rgb2ish inp=(i,s,h) out=(rr,gg,bb) reverse=1
+Beginning VICAR task rgb2ish
+rgb2ish version 2016-09-12
+difpic inp=(r,rr) out=rdif
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ AVE VAL OF POS DIFFS=  1.66363
+ NUMBER OF POS DIFF=      25252
+ AVE VAL OF NEG DIFFS= -1.06175
+ NUMBER OF NEG DIFFS=5198
+ TOTAL NUMBER OF DIFFERENT PIXELS=      30450
+ AVE VAL OF DIFFS= 0.556808
+ % DIFF PIXELS=  46.4630
+hist rdif
+Beginning VICAR task hist
+*** HIST version Aug 10 2015 ***
+
+Bin Width =        1.0
+          0    40284   **************************************************  1
+          1    19921   **************************************************  2
+          2     4488   ***********
+          3      801   **
+        255*      42
+
+AVERAGE GRAY LEVEL=0.641022
+STANDARD DEVIATION=6.476844
+NUMBER ELEMENTS=     65536
+MIN. DN=         0
+MAX. DN=       255
+
+difpic inp=(g,gg) out=gdif
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ AVE VAL OF POS DIFFS=  1.72308
+ NUMBER OF POS DIFF=      48224
+ AVE VAL OF NEG DIFFS= -1.16519
+ NUMBER OF NEG DIFFS=5545
+ TOTAL NUMBER OF DIFFERENT PIXELS=      53769
+ AVE VAL OF DIFFS=  1.16933
+ % DIFF PIXELS=  82.0450
+hist gdif
+Beginning VICAR task hist
+*** HIST version Aug 10 2015 ***
+
+Bin Width =        1.0
+          0    17312   **************************************************  2
+          1    43706   **************************************************  1
+          2     4350   ************
+          3       48
+        253*       2
+        254       52
+        255       66
+
+AVERAGE GRAY LEVEL=1.267914
+STANDARD DEVIATION=10.86098
+NUMBER ELEMENTS=     65536
+MIN. DN=         0
+MAX. DN=       255
+
+difpic inp=(b,bb) out=bdif
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ AVE VAL OF POS DIFFS=  1.66672
+ NUMBER OF POS DIFF=      25381
+ AVE VAL OF NEG DIFFS= -1.06246
+ NUMBER OF NEG DIFFS=5107
+ TOTAL NUMBER OF DIFFERENT PIXELS=      30488
+ AVE VAL OF DIFFS= 0.562698
+ % DIFF PIXELS=  46.5210
+hist bdif
+Beginning VICAR task hist
+*** HIST version Aug 10 2015 ***
+
+Bin Width =        1.0
+          0    40155   **************************************************  1
+          1    19922   **************************************************  2
+          2     4580   ***********
+          3      837   **
+        255*      42
+
+AVERAGE GRAY LEVEL=0.645493
+STANDARD DEVIATION=6.477216
+NUMBER ELEMENTS=     65536
+MIN. DN=         0
+MAX. DN=       255
+
+ush rm -f r g b rr gg bb i s h rdif gdif bdif
+gen r nl=256 ns=256 sinc=10 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen g nl=256 ns=256 sinc=20 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+gen b nl=256 ns=256 sinc=30 format=half
+Beginning VICAR task gen
+GEN Version 6
+GEN task completed
+rgb2ish inp=(r,g,b) out=(i,s,h)
+Beginning VICAR task rgb2ish
+rgb2ish version 2016-09-12
+rgb2ish inp=(i,s,h) out=(rr,gg,bb) reverse=1
+Beginning VICAR task rgb2ish
+rgb2ish version 2016-09-12
+difpic inp=(r,rr) out=rdif
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ AVE VAL OF POS DIFFS=  1.00000
+ NUMBER OF POS DIFF=      32776
+ NUMBER OF NEG DIFFS=   0
+ TOTAL NUMBER OF DIFFERENT PIXELS=      32776
+ AVE VAL OF DIFFS= 0.500122
+ % DIFF PIXELS=  50.0122
+hist rdif
+Beginning VICAR task hist
+*** HIST version Aug 10 2015 ***
+
+Bin Width =        1.0
+          0    32760   **************************************************  2
+          1    32776   **************************************************  1
+
+AVERAGE GRAY LEVEL=0.500122
+STANDARD DEVIATION=0.500000
+NUMBER ELEMENTS=     65536
+MIN. DN=         0
+MAX. DN=         1
+
+difpic inp=(g,gg) out=gdif
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ AVE VAL OF POS DIFFS=  1.00000
+ NUMBER OF POS DIFF=      65535
+ NUMBER OF NEG DIFFS=   0
+ TOTAL NUMBER OF DIFFERENT PIXELS=      65535
+ AVE VAL OF DIFFS= 0.999985
+ % DIFF PIXELS=  99.9985
+hist gdif
+Beginning VICAR task hist
+*** HIST version Aug 10 2015 ***
+
+Bin Width =        1.0
+          0        1   **************************************************  2
+          1    65535   **************************************************  1
+
+AVERAGE GRAY LEVEL=0.999985
+STANDARD DEVIATION=0.003906
+NUMBER ELEMENTS=     65536
+MIN. DN=         0
+MAX. DN=         1
+
+difpic inp=(b,bb) out=bdif
+Beginning VICAR task difpic
+DIFPIC version 06Oct11
+ AVE VAL OF POS DIFFS=  1.00000
+ NUMBER OF POS DIFF=3328
+ NUMBER OF NEG DIFFS=   0
+ TOTAL NUMBER OF DIFFERENT PIXELS=3328
+ AVE VAL OF DIFFS= 0.507813E-01
+ % DIFF PIXELS=  5.07813
+hist bdif
+Beginning VICAR task hist
+*** HIST version Aug 10 2015 ***
+
+Bin Width =        1.0
+          0    62208   **************************************************  1
+          1     3328   **************************************************  2
+
+AVERAGE GRAY LEVEL=0.050781
+STANDARD DEVIATION=0.219551
+NUMBER ELEMENTS=     65536
+MIN. DN=         0
+MAX. DN=         1
+
+ush rm -f r g b rr gg bb i s h rdif gdif bdif
+disable-log

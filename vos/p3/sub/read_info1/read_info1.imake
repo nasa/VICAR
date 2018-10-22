@@ -1,0 +1,9 @@
+
+#define SUBROUTINE read_info1
+
+#define MODULE_LIST read_info1.c
+
+#define P3_SUBLIB
+
+#define USES_C
+

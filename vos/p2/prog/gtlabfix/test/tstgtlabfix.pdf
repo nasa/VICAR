@@ -1,0 +1,36 @@
+procedure
+refgbl $echo
+parm version string def="ibis-1"
+parm org string def="column"
+body
+!let _onfail="continue"
+let $echo="yes"
+
+enable-log
+
+!   TEST SCRIPT FOR GTLABFIX
+
+! Gen an image
+gen xxxim1 nl=1 ns=1
+
+! Add some GeoTIFF parms from command line
+gtgenup inp=xxxim1 +
+   geotiff=("PCSCitationGeoKey=""Updating xxxim1""", +
+            "GTRasterTypeGeoKey=1(RasterPixelIsArea)", +
+            "RPC_FIELD1720=-0.135637E-7")
+
+! Verify the GeoTIFF parms
+label-list xxxim1
+
+! fix the exponent value
+
+gtlabfix inp=xxxim1 property="GeoTIFF"
+
+! Verify the GeoTIFF parms
+label-list xxxim1
+
+ush rm xxxim1
+
+disable-log
+
+end-proc

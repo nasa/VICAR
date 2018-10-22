@@ -1,0 +1,81 @@
+procedure
+local   afidsroot   type=string count=1
+local   aftestdata  type=string count=1
+
+! Aug 28, 2013 - RJB
+! TEST SCRIPT FOR AGGRG2 
+! Vicar Programs:
+!   translog ibis-gen ibis-list acopin
+!
+! Parameters:
+!   <none>
+!
+! Requires external test data: 
+!   cartlab or mipl dependent pointers
+!
+!   Cartlab defines env var $AFIDS_ROOT, mipl doesn't
+!   The test data in cartlab is on /raid1/test_data 
+!   but in other facilities it might be somewhere else. 
+!   
+!   To facilitate this test you can define an
+!   environment variable $AFIDS_TESTDATA to point to
+!   that data. The cartlab system does not. In the git archive
+!   on pistol there is softlink to the test data in vdev that
+!   allows this test to pass 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+refgbl $autousage
+refgbl $echo
+body
+let $autousage="none"
+let _onfail="stop"
+!check to see if mipl or cartlab for test images
+!cartlab defines env var $AFIDS_ROOT, mipl doesm't
+translog INP=AFIDS_ROOT TRANS=afidsroot
+translog INP=AFIDS_TESTDATA TRANS=aftestdata
+if (afidsroot = "")
+!MIPL
+    ush ln -s /project/test_work/testdata/carto ct
+else
+!CARTLAB
+    if (aftestdata = "")
+        ush ln -s /raid1/vicar_test_images/testdata/carto ct
+    else 
+        ush ln -s $AFIDS_TESTDATA/vicar_test_images/testdata/carto ct
+    end-if
+end-if
+let _onfail="goto rm"
+
+let $echo="yes"
+
+
+! test max default on all columns
+
+ibis-gen xxxagg1 nc=5 nr=5 datacol=(1,2,3,4,5) +
+    data=(1,2,3,4,5,1,12,13,7,4,1,5,4,3,15,2,8,4,6,15,2,2,17,9,5)
+aggrg2 xxxagg1 xxxaggo1 AGCOL=1
+ibis-list xxxagg1
+ibis-list xxxaggo1
+
+! test sum and maxarea functions
+
+ibis-gen xxxagg2 nc=5 nr=5 datacol=(1,2,3,4,5) +
+    format=("REAL","DOUB","DOUB","DOUB","DOUB") +
+    data=(1,2,3,4,5,1,12,13,7,4,1,5,4,3,15,2,8,4,6,15,2,2,17,9,5)
+aggrg2 xxxagg2 xxxaggo2 AGCOL=1 AREA=4 BYAR=(2,3) SUMCOL=(5)
+ibis-list xxxagg2
+ibis-list xxxaggo2
+
+! case showing mix of types
+
+ibis-gen xxxa nc=2 nr=1 format=("A5","A5","A5","A5","A5","DOUB")
+acopin (ct/aggrg2.dat,xxxa) cols=(1,2,3,4,5,6) lead_rm=2
+aggrg2 xxxa xxxa2 AGCOL=1 AREA=4 BYAR=(2,3) SUMCOL=6
+ibis-list xxxa 'format
+ibis-list xxxa2 'format
+
+rm>
+let $echo="no"
+ush rm ct
+end-proc

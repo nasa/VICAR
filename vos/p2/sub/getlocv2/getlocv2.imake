@@ -1,0 +1,24 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR VICAR SUBROUTINE GETLOCV2
+
+   To Create the build file give the command:
+
+		$ vimake getlocv2			(VMS)
+   or
+		% vimake getlocv2			(Unix)
+
+
+************************************************************************/
+
+
+#define SUBROUTINE getlocv2
+
+#define MODULE_LIST getlocv2.f
+
+#define P2_SUBLIB
+
+#define USES_FORTRAN
+
+#define FTNINC_LIST fortport
+/************************* End of Imake file ***************************/

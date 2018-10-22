@@ -1,0 +1,24 @@
+There are 2 test programs included for this module:
+	tst_data_disk
+    &	tst_data_socket
+
+'tst_data_disk' is basically an disk file copy program.  It will copy any disk
+file and print how many 128-byte reads it took to copy the file.  This test
+verifies the Source and Sink capabilities of the base 'Data' class as well as
+the 'Disk' subclasses.
+
+'tst_data_disk' can be though of as the old string and cup telephone.  This
+program must be executed two times simultaneously.  In one instance, the
+program acts as a server, creating an attachable socket.  The second instance
+will be the client and attaches to the server socket.  The server version
+is started by passing a positive port number as the only parameter.  This
+port number should be larger than 2048 so it does not conflict with system
+port numbers.  It is still possible that the specified port number is being
+used, so verify that the server version is ready to accept the client before
+proceeding.  The client version is started by passing a negative port number,
+the same value (but negative) as was specified for the server, and a host
+name where the server is running.
+
+Once the 'plumbing' is connected, the client instance will prompt for a
+message to send to the server.  After it is entered, the client sends it to the
+server, which ackowledges the message, afterwich both instances quit.

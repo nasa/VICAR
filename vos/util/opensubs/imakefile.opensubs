@@ -5,13 +5,13 @@
 all: make_opensubs
 
 make_p1sub:
-	($(CD) $(P1SUB); $(V2UTIL)/bldcomfiles.csh $(R1LIB))
+	($(CD) $(P1SUB); $(V2UTIL)/bldcomfiles_nounpack.csh $(R1LIB))
 make_p2sub:
-	($(CD) $(P2SUB); $(V2UTIL)/bldcomfiles.csh $(R2LIB))
+	($(CD) $(P2SUB); $(V2UTIL)/bldcomfiles_nounpack.csh $(R2LIB))
 make_p3sub:
-	($(CD) $(P3SUB); $(V2UTIL)/bldcomfiles.csh $(R3LIB))
+	($(CD) $(P3SUB); $(V2UTIL)/bldcomfiles_nounpack.csh $(R3LIB))
 make_opensubs: 
-	-($(CD) $(P1SUB); $(V2UTIL)/bldcomfiles.csh $(R1LIB)) 
-	-($(CD) $(GUISUB)/gui; $(V2UTIL)/bldcomfiles.csh $(GUILIB))
-	-($(CD) $(P2SUB); $(V2UTIL)/bldcomfiles.csh $(R2LIB))
-	-($(CD) $(P3SUB); $(V2UTIL)/bldcomfiles.csh $(R3LIB))	
+	-($(CD) $(P1SUB); $(V2UTIL)/bldcomfiles_nounpack.csh $(R1LIB)) 
+	-($(CD) $(GUISUB)/gui; $(V2UTIL)/bldcomfiles_nounpack.csh $(GUILIB))
+	-($(CD) $(P2SUB); $(V2UTIL)/bldcomfiles_nounpack.csh $(R2LIB))
+	-($(CD) $(P3SUB); $(V2UTIL)/bldcomfiles_nounpack.csh $(R3LIB))	

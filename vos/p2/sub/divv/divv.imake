@@ -1,0 +1,20 @@
+/***********************************************************************
+
+                     IMAKE FILE FOR SUBROUTINE LIBRARY divv
+
+   To Create the build file give the command:
+
+	$ vimake divv                     (VMS)
+   or
+	% vimake divv                     (Unix)
+
+
+*************************************************************************/
+
+#define SUBROUTINE divv
+
+#define MODULE_LIST divv.c
+
+#define P2_SUBLIB
+
+#define USES_C

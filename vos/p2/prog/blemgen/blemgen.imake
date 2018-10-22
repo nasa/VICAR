@@ -1,0 +1,17 @@
+#define PROGRAM  blemgen
+
+#define MODULE_LIST blemgen.c
+
+#define MAIN_LANG_C
+#define TEST
+#define USES_FORTRAN 
+#define USES_C
+#define R2LIB 
+#define LIB_RTL
+#define LIB_FORTRAN
+#define FTN_STRING 
+
+
+#define LIB_TAE
+#define LIB_P2SUB
+

@@ -1,0 +1,421 @@
+process help=*
+PARM INP 	STRING  COUNT=1
+PARM OUT	STRING  COUNT=1
+PARM TOUT	STRING  DEFAULT="HIST.TST"
+PARM LIMITS     INTEGER DEFAULT=-- COUNT=0:2
+PARM RLIMIT     REAL    DEFAULT=-- COUNT=0:1
+PARM SINC	INTEGER DEFAULT=1
+PARM LINC	INTEGER DEFAULT=1
+PARM BINC	INTEGER DEFAULT=1
+PARM EXCLUDE	KEYWORD VALID=(EXCLUDE,NOEXCLUDE) DEFAULT=NOEXCLUDE
+PARM FORMAT	KEYWORD VALID=(BYTE,HALF) DEFAULT=BYTE
+PARM SL		INTEGER DEFAULT=1 
+PARM SS      	INTEGER DEFAULT=1 
+PARM SB      	INTEGER DEFAULT=1 
+PARM NL      	INTEGER DEFAULT=-- count=0:1
+PARM NS      	INTEGER DEFAULT=-- count=0:1
+PARM NB      	INTEGER DEFAULT=-- count=0:1
+PARM OUT_NS 	INTEGER DEFAULT=512
+PARM OUT_NL 	INTEGER DEFAULT=512
+PARM REPLIC     KEYWORD VALID=(REPLICATE,NOREP) DEFAULT=NOREP
+PARM DN		KEYWORD VALID=(DN,IOF,RAD) count=0:1 DEFAULT=--
+PARM BREAK_UM   REAL    DEFAULT=0.0
+PARM LOG	KEYWORD VALID=(LOG,NOLOG)	DEFAULT=LOG
+PARM TEST	KEYWORD VALID=(TEST,NOTEST)	DEFAULT=NOTEST
+END-PROC
+.title 
+VICAR PROGRAM HIST2D
+.help
+PURPOSE and OUTPUT FILE DESCRIPTION
+
+HIST2D will generate a two-dimensional histogram file from a VICAR file of 
+three dimensions. The two-dimensional histogram file has as its Y-axis (lines) 
+the range of DN values of the input file or such values scaled for radiance or 
+reflectance, I/F, and as its X-axis (samples) the input's band numbers.  Thus 
+each line of the histogram file represents the frequency of a data number (DN) 
+through all the bands of the input file.  A sample slice through all the lines 
+of the histogram file represents a one-dimensional histogram for a band of the 
+input file. Please note the values of the Y-axis decrease from their maximum to
+zero as file line number increases. Band number of the X-axis increases as file
+sample number increases.  This provides a common origin for both DN or scaled
+DN value and band dimensions.
+.page
+OUTPUT FILE DESCRIPTION continued 
+  
+The frequencies of each band's histogram are represented by the pixels or data 
+numbers (DNs) of the file, corresponding to the number of occurrences of DN, I/F
+or radiance values in the input file. Histogram data numbers have a range of 
+either (0,255) or (0,32767), depending on the output data format specified by 
+the user.  Frequencies are normalized to 255 for byte output format and 32767 
+for halfword output format.
+.page
+EXECUTION
+
+To execute the program HIST2D, the following syntax should be used:
+
+	HIST2D   INP   OUT   user-parameters
+
+where INP is the three-dimensional (3-D) VICAR format file used to generate the 
+two-dimensional (2-D) histogram output file, OUT.  
+
+.page
+USER PARAMETERS - SUMMARY
+
+User parameters consist of the histogram range (LIMITS), format of output data 
+(FORMAT), input file windowing parameters (SL,SS,SB,NL,NS,NB), incrementing 
+values for various input file dimensions to speed execution of histogram 
+(SINC,LINC,BINC), a parameter to exclude or include the input file data number 
+value of 0 in the histogram range (EXCLUDE), parameters to control the output 
+size (OUT_NL,OUT_NS), a parameter to replicate sample values (band numbers) 
+to fit in the vertical dimension (REPLICATE), a parameter to define the y-axis
+scale of the two-dimensional histogram (DN, IOF, RAD) and a parameter to take
+the logarithm of the two-dimensional histogram values to increase resolution
+(LOG).
+.page
+USER PARAMETERS
+
+LIMITS
+
+This allows the user to restrict the data values of the input file used to 
+generate the two-dimensional histogram output file.  Valid limits for byte
+input data should be between (0,255).  Valid limits for halfword input data
+should be between (-32768,32767).  Defaults: (0,255) for byte; (0,32767 for 
+halfword; (-32752,32767 for halfword of calibration type RADIANCE or IOF,
+which correspond to the ISIS "Special Values" range.
+
+The range specified by the limits parameter is then mapped into the number of
+output lines in the file, such that an output file of 512 lines with limits
+(-32768,32767) would map 32768 values into 512 discrete units.  DN values 
+between -32768 and 0 are accumulated for each band's histogram and added to the
+zero (0) DN value frequency of the respective histogram.
+
+RLIMIT
+
+This sets a lower limit to valid floating point (REAL*4) data, which can be
+useful for treating ISIS data which assigns the lower end of the range to
+"special values".  Note that this is platform-dependent;  the default
+(0xFF7FFFFA) is for IEEE floating point.
+
+.page
+USER PARAMETERS continued
+
+FORMAT 
+
+Allows the user to specify an output file of data type byte (BYTE) or halfword
+(HALF).  The default is BYTE.
+
+SINC, LINC, BINC
+
+Sample, line, and band increments are used to control the amount of the input 
+image file used in the calculation of the two-dimensional histogram.  The
+default for all incrementations is one (1).
+
+.page
+USER PARAMETERS continued
+
+SL,SS,SB,NL,NS,NB
+
+Starting line, starting sample, starting band, number of lines, number of 
+samples and number of bands are used to control what portion of the image file
+is used to compute the two-dimensional histogram.  The default is for all 
+starting values to be one (1) and the number of (NL, NS, NB) values are the
+values obtained by XVGET of the input file.
+
+OUT_NL, OUT_NS
+
+These control the output file (two-dimensional histogram) dimensions of 
+number of lines and of samples.  OUT_NS should not be smaller than the
+number of bands specified for the window of the input file bands. The
+defaults are OUT_NL=512 and OUT_NS=512.
+
+.page
+USER PARAMETERS continued
+
+DN, IOF, RAD
+
+The output file's y-axis may be scaled in raw DN, IOF or radiance (RAD).
+If RAD or IOF is specified, the following label items must be found 
+in the history labels of the input file: "CAL_TYPE='RAD'", "RAD_CONV",
+"RAD_BASE", and "SOLAR_F".  These items make possible the conversion 
+between DN and radiance and IOF.  Radiance and Solar Flux must be provided 
+in units of uWATT/cm**2/micron/steradian.  The default keyword is DN.
+.page
+USER PARAMETERS continued
+
+LOG,NOLOG
+
+This keyword controls whether or not the logarithm is taken of the DN's of the
+output file, the two-dimensional histogram.  Default keyword is LOG.
+
+TEST, NOTEST
+
+These keywords control whether or not a test histogram file and screen display 
+are produced which are used for verification of the correct operation of the 
+program.  This option is for the software developers' and testers' use.  The 
+following are output to screen: band number at which maximum DN occurs in 
+histogram plot; scale of the Y-axis in terms of DN per pixel; scale of 
+histogram file's DN to histogram's frequency axis.
+.page
+EXECUTION EXAMPLES
+
+VICAR> HIST2D  IO_LIMB.IMG  IO_LIMB.HST  FORMAT=HALF LIMITS=(123,3000)
+
+The above example takes input file IO_LIMB.IMG and generates a 2-D histogram 
+file, IO_LIMB.HST, of data format HALF.  Data numbers -32768 to 122 and 3000 to 
+32767 are not included in the generation of the histogram.  In this case the
+resolution of the Y-axis will be (0,4096).  HIST2D follows HICCUP.COM handling 
+of halfword inputs, except negative halfword values are included in the scaling
+of the output.  A convenient maximum value for the Y-axis is chosen based on 
+the maximum DN value found in the input file which happens to be less than the 
+upper value of the user specified LIMITS parameter.  IF THE LOWER LIMIT IS LESS
+THAN ZERO, the absolute value of that lower LIMIT is added into the maximum.
+This maximum is always a multiple of 256 in the DN mode of operation.  Please 
+note that DN 0 is not always the Y-axis origin for halfword data; the origin
+is the lower LIMIT value.  LIMIT defaults are (0,255) for byte; (0,32767) for
+halfword data; and (-32752,32767) for halfword data of calibration type RADIANCE
+or IOF.
+.page
+EXECUTION EXAMPLES (continued)
+
+VICAR> HIST2D  JUPITER_LIMB.IMG  JUPITER_LIMB.HST  'EXCLUDE SL=20 SS=120 NB=201
+
+This example takes input file JUPITER_LIMB.IMG and generates a 2-D histogram
+file, JUPITER_LIMB.HST, of default data format BYTE.  If the input file is
+of data format BYTE, the histogram range of bin DNs is (1,255) because of the
+EXCLUDE parameter.  Byte data allows the user specified range endpoints to be 
+mapped to 0 and 511 on the Y-axis of the two dimensional histogram.  The bin 
+size is 255/512 or 0.498, thus mapping the 255 values into 512 bins.   
+Finally, HIST2D, because of "SL=20 SS=120", ignores the first 19 lines and 
+first 119 samples of each band of the input file JUPITER_LIMB.IMG.  Also, due
+to "NS=201", only bands 1 through 201 are included in the processing.  
+.page
+VICAR LABELS OF 2-D HISTOGRAM FILE
+
+In order to provide the necessary information to a display routine or mask 
+program, a number of VICAR label items are added to the histogram file.  These 
+items include the input file data number (DN) range of the histogram (LIMITS - 
+revised depending on the EXCLUDE parameter value), the incrementing values of 
+the input file dimensions (INC_LSB - LSB is an acronym for line, sample, band), 
+the input file windowing parameters (WINDOW - array of SL,SS,SB,NL,NS,NB), and 
+the input file name of HIST2D (INP_FILE).  MAXDN is also a label item which
+describes the DN, IOF, or RAD value that represents the maximum pixel value
+of the y-axis of the two histogram.  All these label items provide sufficient 
+information to properly display the two-dimensional histogram.
+.page
+POSSIBLE ERROR CONDITIONS
+
+The program HIST2D does not accept two-dimensional files as inputs.  That is to
+say that input files must have at least two bands to be processed; otherwise the
+program aborts.  Also, input files must be of data format BYTE or HALF.  Other 
+forms of input will result in a program abort.  
+.page
+BIN CALCULATION
+
+For the users' benefit, the following formula is used to calculate the appro-
+priate bin in which a byte input file data number (DN) will fall.
+
+	BIN_size = [UPPER_limit - LOWER_limit + 1] / OUT_NL
+
+	BIN 	 = [INPUT_data_number - LOWER_limit] / BIN_size
+
+where 	UPPER_limit is the upper limit of the histogram range (units - DN),
+	LOWER_limit is the lower limit of the histogram range (units - DN),
+	OUT_NL is the number of lines in the histogram file (default is 512),
+	BIN_size is the size of the bin (units - DN),
+	INPUT_data_number is the data number to be placed in a bin, and
+	BIN is the bin number of the INPUT_data_number (0,511).
+.page
+HISTORY
+
+Written by: Justin F. McNeill, November 1989
+Cognizant Programmer: L.W.Kamp
+Revisions: 
+
+	Nov.1993	Fixed default lower LIMITS of -32752 for RAD/IOF case
+			PCA stuff removed (LWK)
+
+	May 1992	Corrected upper limit of NIMS special values to 
+			-32752.
+	
+	Feb 1992	Program will handle merged mosaic cubes with or
+			without per-band scaling. Interface with NIMSMASK
+			(MAXDN) corrected. Test option added for
+			development purposes. Histogram calculation for
+			byte and halfword simplified. PCA added. (JFM)
+									     
+	Sept 1991	Changed NELEMENTS to NELEMENT in XLGET per new Vicar 
+			exec; removed SUN_D check from RAD case. (LWK)	     
+									     
+	June 1991	Per band radiance offset and scaling implemented.    
+
+	Oct  1990   	RAD_BASE offset for conversion of DN to IOF or RAD   
+			added in calculations. Test script revised.	     
+									     
+	Sept 1990   	Code added to prevent division by zero. FR 63252     
+
+	Aug  1990 	Window label item revised to be (SL,SS,SB,NL,NS,NB). 
+		   	DN and LOG parameters added to help and tutor.       
+			Samplewidth problem corrected and negative halfword  
+			data properly handled.	Ref. FRs 63221 & 63222	     
+			Improved error checking of user parameters.          
+			Revised test script.				     
+			Solar flux units changed to WATT/CM**CM/MICRON/STER  
+									     
+	July 1990	Handling of IOF and RAD y-axis scales is provided.   
+								             
+	June 1990	Addition of output size parameters OUT_NL & OUT_NS;  
+			write output file such that band and DN dimensions   
+			have a common origin; provide parameter to provide   
+			for replication of band samples to fit in 512 samples.
+.LEVEL1
+.VARI INP
+Input image file name
+.VARI OUT
+2D Histogram file name
+.VARI TOUT
+Test output file name
+.VARI LIMITS
+Histogram range of input DNs
+.VARI RLIMIT
+Lower histogram range of input
+data if floating-point
+(NOTE: the default is specific
+to IEEE!)
+.VARI EXCLUDE
+Variable to exclude DN 0 
+from input
+.VARI FORMAT
+Data format of histogram DNs
+.VARI SINC
+Increment through input file 
+by SINC number of samples
+.VARI LINC
+Increment through input file 
+by LINC number of lines
+.VARI BINC
+Increment through input file 
+by BINC number of bands
+.VARI SL
+Starting line of input file
+.VARI SS
+Starting sample of input file
+.VARI SB
+Starting band of input file
+.VARI NL
+Number of lines to be used 
+of input file
+.VARI NS
+Number of samples to be used 
+of input file
+.VARI NB
+Number of bands to be used 
+of input file
+.VARI OUT_NL
+Number of desired lines in 
+output; default is 512.
+.VARI OUT_NS
+Number of desired samples in 
+output; default is 512.
+.VARI REPLIC
+Keyword to replicate the number
+of bands to fit within 512.
+.VARI DN
+Keyword to control the y-axis or
+DN scale of the two-dimensional
+histogram.
+.VARI LOG
+Keyword to specify that the 
+logarithm be applied to the 
+histogram.
+.VARI TEST
+Keyword to specify that test
+option for correct program
+output is specified.
+.VARI BREAK_UM
+Wavelength below which Radiance
+is divided by Solar Flux
+.LEVEL2
+.VARI INP
+The file name of the three-dimensional input file used to generate the histogram
+.VARI OUT
+The two-dimensional histogram file name generated by this program
+.VARI TOUT
+The test file output generated by this program is a histogram of the band con-
+taining the greatest DN value. The default name for this output is HIST.TST.
+This file is of the same format as HISTGEN output and should be used for com-
+parison to HISTGEN output. 
+.VARI LIMITS
+Histogram bin range in data number units (DNs).  Defaults are (0,255) for byte 
+data; (0,32767) for halfword data; and (-32752,32767) for halfword data of 
+calibration type RADIANCE or IOF.
+.VARI RLIMIT
+This sets a lower limit to valid floating point (REAL*4) data, which can be
+useful for treating ISIS data which assigns the lower end of the range to
+"special values".  Note that this is platform-dependent;  the default
+(0xFF7FFFFA) is for IEEE floating point.
+.VARI EXCLUDE
+Variable to exclude DN 0, or -32768 for LIMITS=(-32768,upper_value),of 3-D input
+file from histogram bin range.  Default value is not to exclude DN 0 from 
+histogram processing.
+.VARI FORMAT
+Data format - byte or half - of two-dimensional histogram file.  
+Default value is BYTE.
+.VARI SINC
+Increment through input file by SINC number of samples to speed histogram
+generation.  Default value is 1.
+.VARI LINC
+Increment through input file by LINC number of lines to speed histogram 
+generation.  Default value is 1.
+.VARI BINC
+Increment through input file by BINC number of bands to speed histogram 
+generation.  Default value is 1.
+.VARI SL
+Window parameter of input file; first line of input file to be included in the
+processing of the histogram.  Default value is 1.
+.VARI SS
+Window parameter of input file; first sample of input file to be included in the
+processing of the histogram.  Default value is 1.
+.VARI SB
+Window parameter of input file; first band of input file to be included in the
+processing of the histogram.  Default value is 1.
+.VARI NL
+Number of lines of input file to be used in the processing of the histogram.
+Default value is the number of lines in VICAR label of input file.
+.VARI NS
+Number of samples of input file to be used in the processing of the histogram.
+Default value is the number of samples in VICAR label of input file.
+.VARI NB
+Number of bands of input file to be used in the processing of the histogram.
+Default value is the number of bands in VICAR label of input file.
+.VARI OUT_NL
+Number of desired lines in output. Default is 512.
+.VARI OUT_NS
+Number of desired samples in output. Default is 512.
+.VARI REPLIC
+Keyword to replicate the number of bands to fit within 512. The default is
+not to replicate, 'NOREP.
+.VARI DN
+Keyword to control the y-axis or DN scale of the two-dimensional histogram.
+Possible y-axis scales are radiance in units uWatt/m**2/micron/steradian 
+(RAD), Bidirectional Reflectance (Radiance / SolarFlux) (IOF), or raw DN 
+(DN).  Default is DN.
+.VARI LOG
+Keyword to specify that the logarithm be applied to the histogram.  This
+allows for a greater range of frequencies to be displayed, thus increasing
+resolution of the histogram frequencies.  Valid keywords are LOG and NOLOG.
+LOG is the default.
+.VARI TEST
+This keyword controls whether output files and screen displays are printed 
+which are used for verification of the correct operation of the program.  This
+option is for the software developers' and testers' use.  The following are
+output to screen: band number at which maximum DN occurs in histogram plot; 
+scale of the Y-axis in terms of DN per pixel; scale of histogram file's DN to 
+histogram's frequency axis.  An output histogram is also generated and is 
+specified by the parameter TOUT.  It is the histogram of the band at which 
+maximum DN of all bands occurs.
+.VARI BREAK_UM
+Wavelength (in microns) below which Radiance is divided by Solar Flux when
+displaying the histogram.  This can prevent the long-wavelength end of the
+histogram for cool bodies illuminated by sunlight from being overwhelmed by
+the bright shorter wavelengths.
+.end

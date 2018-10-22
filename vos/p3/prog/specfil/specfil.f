@@ -1,0 +1,91 @@
+	INCLUDE 'VICMAIN_FOR'
+	SUBROUTINE MAIN44
+C
+	REAL BUF(33000),OUT(33000),RAW(10000),FLT(10000)
+	CHARACTER*4 FORMAT
+	CHARACTER*3 ORG
+C						   open datasets, get parameters
+	CALL XVUNIT(INUNIT,'INP',1,ISTAT,' ')
+	CALL XVOPEN(INUNIT,ISTAT,'OPEN_ACT','SA','IO_ACT','SA',
+     +		    'U_FORMAT','REAL',' ')
+	CALL XVSIZE(ISL,ISS,NL,NS,NLIN,NSIN)
+	CALL XVBANDS(ISB,NB,NBIN)
+	IEL = ISL+NL-1
+	IES = ISS+NS-1
+	IEB = ISB+NB-1
+	CALL XVGET(INUNIT,ISTAT,'FORMAT',FORMAT,'ORG',ORG,' ')
+	CALL XVPARM('WEIGHTS',NWTS,ICNT,IDEF,0)
+	IF (NWTS .EQ. 2*(NWTS/2) ) NWTS=NWTS+1 		! force NWTS to be odd
+C
+	IF (NBIN.EQ.1) THEN					! MSS format
+	    CALL XVPARM('MSS',NCHAN,ICNT,IDEF,0)
+	    IF (NCHAN.EQ.1) THEN
+		CALL XVMESSAGE(
+     +	       ' The number is bands must be specified for MSS format',
+     +		' ')
+		CALL ABEND
+	    ENDIF
+	    NSCHAN = NSIN/NCHAN
+	    IF (NS.EQ.NSIN) NS=NS/NCHAN
+	    IES = ISS+NS-1
+	    IF (NB.EQ.1) NB=NCHAN
+	    IOFF = NSCHAN*(ISB-1)
+	    CALL XVUNIT(IOUTUNIT,'OUT',1,ISTAT,' ')
+	    CALL XVOPEN(IOUTUNIT,ISTAT,'OPEN_ACT','SA','IO_ACT','SA',
+     +			'OP','WRITE','U_NL',NL,'U_NS',NS*NB,
+     +			'U_FORMAT','REAL','O_FORMAT',FORMAT,' ')
+C
+	    DO I=ISL,IEL
+		CALL XVREAD(INUNIT,BUF,ISTAT,'LINE',I,' ')
+		K = 1
+		DO J=ISS,IES
+		    CALL MVE(7,NB,BUF(IOFF+J),RAW,NSCHAN,1)
+		    CALL UNIFLT(7,NB,RAW,FLT,NWTS)
+		    CALL MVE(7,NB,FLT,OUT(K),1,NS)
+		    K = K+1
+		END DO
+		CALL XVWRIT(IOUTUNIT,OUT,ISTAT,' ')
+	    END DO
+	ELSE
+C
+	    IF (ORG.EQ.'BSQ') THEN
+		ORG='BIL'
+		CALL XVMESSAGE(
+     +		 ' NOTE: File organization has been changed to BIL',' ')
+	    END IF
+	    CALL XVUNIT(IOUTUNIT,'OUT',1,ISTAT,' ')
+	    CALL XVOPEN(IOUTUNIT,ISTAT,'OPEN_ACT','SA','IO_ACT','SA',
+     +		    'OP','WRITE','U_NL',NL,'U_NS',NS,'U_NB',NB,
+     +		    'U_FORMAT','REAL','O_FORMAT',FORMAT,'U_ORG',ORG,' ')
+	    IF (ORG.EQ.'BIP') THEN				    ! BIP format
+		DO I=ISL,IEL
+		    DO J=ISS,IES
+			CALL XVREAD(INUNIT,RAW,ISTAT,'LINE',I,'SAMP',J,
+     +				    'BAND',ISB,'NBANDS',NB,' ')
+			CALL UNIFLT(7,NB,RAW,FLT,NWTS)
+			CALL XVWRIT(IOUTUNIT,FLT,ISTAT,' ')
+		    END DO
+		END DO
+	    ELSE 					     ! BIL or BSQ format
+		DO I=ISL,IEL
+		    N = 1
+		    DO J=ISB,IEB
+			CALL XVREAD(INUNIT,BUF(N),ISTAT,'LINE',I,
+     +				    'SAMP',ISS,'BAND',J,'NSAMPS',NS,' ')
+			N = N+NS
+		    END DO
+		    DO J=1,NS
+			CALL MVE(7,NB,BUF(J),RAW,NS,1)
+			CALL UNIFLT(7,NB,RAW,FLT,NWTS)
+			CALL MVE(7,NB,FLT,OUT(J),1,NS)
+		    END DO
+		    N = 1
+		    DO J=1,NB
+			CALL XVWRIT(IOUTUNIT,OUT(N),ISTAT,' ')
+			N = N+NS
+		    END DO
+		END DO
+	    END IF
+	END IF
+	RETURN
+	END

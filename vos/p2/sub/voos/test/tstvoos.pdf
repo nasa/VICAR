@@ -1,0 +1,20 @@
+!****************************************************************************
+! TSTVOOS.PDF, unit test procedure for subroutine VOOS.F
+!
+!THIS IS A TEST OF MODULE VOOS
+! note to testers:  Due to rounding practices, the fortran output might 
+!                   differ amongst the VAX, SGI, SUN, and HP operating systems.
+!                   However a difference of 1 in the last digit of a floating
+!                   point number is acceptable.
+!****************************************************************************
+procedure help=*
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="yes"
+
+tvoos
+
+end-proc
+.title TSTVOOS.PDF - unit test for subroutine VOOS
+.end

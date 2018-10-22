@@ -1,0 +1,44 @@
+procedure
+
+refgbl $echo
+refgbl $syschar
+LOCAL GDIR TYPE=STRING
+LOCAL CDIR TYPE=STRING
+LOCAL PIC TYPE=STRING
+
+body
+
+let _onfail="continue"
+let $echo="yes"     
+
+enable-log
+
+LET GDIR = "/project/test_work/testdata/gll/"
+LET CDIR = "/project/test_work/testdata/cassini/vims/"
+
+! list the label for a NIMS qube, exercising the OPTION parameter:
+LET PIC = "&GDIR"//"venus.qub"
+ISISLAB &PIC 'both
+ISISLAB &PIC 'label
+ISISLAB &PIC 'history
+
+! try it for non-NIMS qubes:
+
+! Cassini:
+LET PIC = "&CDIR"//"1294648727.013-154945" 
+ISISLAB &PIC 
+
+! cube from USGS Flagstaff:
+LET PIC = "&GDIR"//"EUROPA_SINU.CUB" 
+ISISLAB &PIC 
+
+! and for a NIMS EDR:
+! first remove VICAR label, preserving binary headers which
+! contain PDS label ...
+LET PIC = "&GDIR"//"g7jnfea15003a.15"
+label-remove &PIC edr1 'bin
+ISISLAB edr1
+
+disable-log
+
+end-proc

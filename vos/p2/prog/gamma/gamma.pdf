@@ -1,0 +1,117 @@
+process help=*
+PARM INP TYPE=STRING COUNT=1
+PARM OUT TYPE=STRING COUNT=1
+PARM MODE TYPE=KEYWORD VALID=("SRGB", "EXPONENT") DEFAULT=EXPONENT
+PARM GAMMA TYPE=REAL COUNT=(0:1) DEFAULT=2.2
+PARM FORMAT TYPE=KEYWORD VALID=(BYTE,HALF,FULL,REAL,DOUB) DEFAULT=BYTE
+PARM MAX_IN TYPE=REAL COUNT=(0:1) DEFAULT=--
+PARM MAX_OUT TYPE=REAL COUNT=(0:1) DEFAULT=--
+PARM INVERSE TYPE=KEYWORD VALID=INVERSE COUNT=(0:1) DEFAULT=--
+END-PROC
+
+.TITLE
+VICAR program GAMMA
+
+.HELP
+PURPOSE:
+
+Perform gamma correction to the input image. The program provides two gamma 
+correction modes: sRGB and simple. sRGB gamma correction mode is implemented 
+based on the specification of sRGB, and simple gamma correction mode is 
+implemented based on pure exponential function. See method section for more 
+details. The input is a 1-band or 3-band image in BYTE, HALF, and REAL (not 
+fully tested) format. The output is a 1-band or 3-band image in BYTE format. 
+The exponent value is required for simple gamma correction.
+
+EXECUTION:
+
+1) sRGB gamma correction:
+   GAMMA INP=linear_srgb.vic OUT=srgb.vic -srgb
+
+2) Simple gamma correction:
+   GAMMA INP=linear_wrgb.vic OUT=wrgb.vic
+
+.PAGE
+METHOD:
+1) sRGB gamma correction:
+This is implemented based on the specification of sRGB. The constant values 
+used are all defined in the specification. The detailed algorithm is shown
+below. The srgb gamma correction requires a 3-band input as it is not 
+meaningful to be applied on 1-band images.
+
+    If RL, GL, BL are less than or equal to 0.0031308
+        R = 12.92 * RL
+        G = 12.92 * GL
+        B = 12.92 * BL
+
+    If RL, GL, BL are greater than 0.0031308
+        R = 1.055 * RL^(1/2.4) - 0.055
+        G = 1.055 * GL^(1/2.4) - 0.055 
+        B = 1.055 * BL^(1/2.4) - 0.055
+
+    where RL, GL, and BL are linear RGB values. 
+
+2) simple gamma correction:
+This is implemented based on the pure exponential functionis listed below.
+
+    If 1-band input
+        I = I^exponent
+ 
+    If 3-band input
+        R = RL^exponent
+        G = GL^exponent
+        B = BL^exponent
+
+    where I is the intensity value; RL, GL, and BL are linear RGB values.
+
+
+
+.PAGE:
+HISTORY:
+28-Mar-2018  Steven Lu  Initial delivery
+COGNIZANT PROGRAMMER:  
+
+.LEVEL1
+.VARI INP
+Input image.
+
+.VARI OUT
+Output image.
+
+.VARI MODE 
+Gamma correction mode.
+
+.VARI GAMMA 
+Exponent value for gamma correction.
+
+.VARI INVERSE
+Enable inverse gamma correction.
+TODO: sRGB inverse gamma correction is not implemented yet!!
+
+.LEVEL2
+.VARI INP
+A 1-band or 3-band input image in BYTE, HALF, or REAL format. If sRGB gamma 
+correction mode (-srgb, see MODE for more information) is enabled, the 
+input must be a 3-band image. 
+
+.VARI OUT
+A 1-band or 3-band output image in BYTE format. If sRGB gamma correction mode
+(-srgb, see MODE for more information) is enabled, the output will be a
+3-band image.
+
+.VARI MODE
+Defines gamma correction mode. Different gamma correciton methods will be 
+enabled based on the color space of the input image. If the input image is sRGB,
+then specifying -srgb will enable srgb gamma correction. If the input image is 
+not srgb, then specifying -exponent will enable simple gamma correction. See 
+method section for detailed information.
+
+.VARI GAMMA 
+Defines the exponent value for gamma correction. This parameter is not needed
+for srgb gamma correction, but is required for simple gamma correction. See 
+method section for detailed information.
+
+.VARI INVERSE
+Enable inverse gamma correction. If it is enabled, the program will perform 
+inverse gamma correction.
+TODO: sRGB inverse gamma correction is not implemented yet!!

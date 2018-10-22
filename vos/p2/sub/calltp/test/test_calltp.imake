@@ -1,0 +1,16 @@
+#define PROGRAM test_calltp
+#define MODULE_LIST test_calltp.c
+
+#define TEST
+/* #define DEBUG */
+
+#define MAIN_LANG_C
+#define USES_ANSI_C
+
+#define LIB_P2SUB
+#define LIB_P1SUB
+#define LIB_RTL
+#define LIB_TAE
+
+/* #define LIB_LOCAL */
+

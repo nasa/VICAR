@@ -62,6 +62,8 @@
 #define EXT_MPI
 #define EXT_XERCES_CXX
 #define EXT_INVENTOR
+#define EXT_CERES	/* for marsnav2 */
+#define	EXT_SIFT
 #endif
 
 #ifdef PROD_PIG
@@ -111,6 +113,7 @@
 #define EXT_ACE_TAO
 #define EXT_KERBEROS4
 #define EXT_KERBEROS5
+#define EXT_OPENSSL
 #endif
 
 #if defined(PROD_PWDSERVER) || defined(PROD_PWDSERVER_CLIENT)
@@ -130,7 +133,10 @@
 #define SS_P2SUB
 #define EXT_GNUPLOT
 #define EXT_TIFF
+#define EXT_JPEG
 #define EXT_FFTW
+#define EXT_GDAL
+#define EXT_GSL
 #endif
 
 #ifdef SS_P3PROG
@@ -186,6 +192,8 @@
 #define PROD_TLM_JavaCore
 #define PROD_JavaVicarIO
 #define JEXT_EJB
+#define JEXT_MAVEN_ANNOTATIONS
+#define JEXT_MAVEN_REFLECTIONS
 #endif
 
 #ifdef PROD_MIS
@@ -198,6 +206,8 @@
 #define SS_JAVA
 #define PROD_Marsviewer
 #define PROD_JUNEBERRY
+#define JEXT_COMMONS_JCS
+#define JEXT_PNGENCODER
 #endif
 
 
@@ -209,13 +219,25 @@
 #define PROD_JADIS
 #define JEXT_COMMON_LOGGING	/* PHX only */
 #define JEXT_LOG4J		/* PHX only */
-#define JEXT_HTTPCORE		/* w10n stuff here and below */
-#define JEXT_HTTPCLIENT
+//#define JEXT_HTTPCORE		//HTTPCOMP_FOR_AWS has newer version /* w10n stuff here and below */
+//#define JEXT_HTTPCLIENT   //HTTPCOMP_FOR_AWS has newer version 
 #define JEXT_COMMON_CODEC
 #define JEXT_JSON_SIMPLE
 #define JEXT_JMONKEYENGINE
+#define JEXT_AWS_SDK            /* AWS Java SDK, it has its own TPS which are TODO for now */
+#define JEXT_JACKSON_CORE       /* Start of AWS TPS's... */
+#define JEXT_JACKSON_ANNOTATIONS
+#define JEXT_JACKSON_DATABIND
+#define JEXT_JACKSON_DATAFORMAT_CBOR
+#define JEXT_JODA_TIME           
+#define JEXT_HTTPCOMP_FOR_AWS   /* ...End of AWS TPS's. */
 #endif
 
+#ifdef PROD_JPIG
+#define SS_JAVA
+#define PROD_JavaVicarIO
+#define JEXT_JAMA
+#endif
 
 #ifdef PROD_PLACES
 #define SS_JAVA
@@ -301,10 +323,12 @@
 #endif
 
 #ifdef PROD_WEBIFICATION
+#define JEXT_HTTPCOMP_CLIENT
 #define PROD_JUNEBERRY
 #define PROD_COTINGA
 #define PROD_PASSEPARTOUT
 #define PROD_JEEVES
+#define JEXT_WIS
 #define EXT_JS	/* placeholder until javascript product is named */
 #define SS_JS	/* placeholder until javascript product is named */
 #endif
@@ -314,7 +338,6 @@
 #define PROD_JavaVicarIO
 #define JEXT_JSON_SIMPLE
 #define JEXT_TREEVOTEE
-#define	JEXT_JUNAMI
 #define JEXT_LOG4J
 #define JEXT_SLF4J
 #define JEXT_EHCACHE
@@ -327,13 +350,13 @@
 
 #ifdef PROD_COTINGA
 #define SS_JAVA
+#define JEXT_WIS
 #define JEXT_COMMON_CODEC
 #define JEXT_COMMON_LOGGING
 #define JEXT_HTTPCLIENT
 #define JEXT_HTTPCORE
 #define JEXT_SON_SIMPLE
 #define JEXT_LUCENE
-#define JEXT_TREEVOTEE
 #define JEXT_RESTLET
 #endif
 
@@ -418,6 +441,11 @@
 #define SS_JAVA
 #define JEXT_LOG4J
 #define JEXT_COMMON_LOGGING
+#endif
+
+#ifdef PROD_TLM_2020
+#define PROD_MARS_SURFACE
+#define EXT_MYSQLCONCPP
 #endif
 
 #ifdef PROD_TLM_MRO
@@ -547,11 +575,11 @@
 #define JEXT_COMMONS_VFS
 #define JEXT_COMMON_LOGGING
 *Added for Vicar Open Source 3/21/16
-*#define JEXT_PDS4_TOOLS
+#define JEXT_PDS4_TOOLS
 *Added for Vicar Open Source 3/22/16
-*#define JEXT_PDS_GENERATE_TOOL
+#define JEXT_PDS_GENERATE_TOOL
 *Added for Vicar Open Source 3/23/16
-*#define JEXT_PROD_TOOLS
+#define JEXT_PROD_TOOLS
 #endif
 
 #ifdef PROD_JadeDisplay
@@ -745,3 +773,9 @@
 #ifdef JEXT_IVOAFITS
 #define JEXT_NOM_TAM_FITS
 #endif
+
+#ifdef EXT_CERES
+#define EXT_EIGEN
+#define EXT_GLOG
+#endif
+

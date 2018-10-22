@@ -1,0 +1,238 @@
+PROCEDURE
+  REFGBL $ECHO
+  REFGBL $SYSCHAR
+  PARM INP TYPE=STRING COUNT=(0:1) DEFAULT=--
+BODY
+
+  LET _ONFAIL="CONTINUE"
+  LET $ECHO="NO"
+
+  LOCAL MGLL TYPE=STRING INIT="/project/test_work/testdata/mipl/gll/"
+  LOCAL MVGR TYPE=STRING INIT="/project/test_work/testdata/mipl/vgr/"
+
+  LOCAL DLAT REAL COUNT=(0:80)
+  LOCAL DLON REAL COUNT=(0:80)
+
+  LOCAL IDATA1 REAL
+  LOCAL IDATA2 REAL
+  LOCAL IDATA3 REAL
+  LOCAL IDATA4 REAL
+
+  LOCAL ODATA1 REAL
+  LOCAL ODATA2 REAL
+  LOCAL ODATA3 REAL
+  LOCAL ODATA4 REAL
+  LOCAL ODATA5 REAL
+  LOCAL ODATA6 REAL
+
+  IF ($SYSCHAR(1)="VAX_VMS")
+    LET MGLL = "wms_test_work:[testdata.mipl.gll]"
+    LET MVGR = "wms_test_work:[testdata.mipl.vgr]"
+    DCL SELCAT O
+  ELSE
+    ush setenv SELCAT o; source /usr/local/share/selcat.csh
+  END-IF
+  
+  WRITE ""
+  WRITE ""
+  WRITE "-------------------------------------------------------------"
+  WRITE "|-----------------------------------------------------------|"
+  WRITE "|-----------------------------------------------------------|"
+  WRITE "|---------------------TEST CASE 1---------------------------|" 
+  WRITE "|-----------------------------------------------------------|"
+  WRITE "|-----------------------------------------------------------|"
+  WRITE "-------------------------------------------------------------"
+  WRITE ""
+  WRITE ""
+  
+  WRITE "-------------------------------------------------------------"
+  WRITE "|TEST 1 : INITIALIZE INPUT DATA                             |"
+  WRITE "-------------------------------------------------------------"
+
+  LET $ECHO="YES"
+  LET IDATA1=400.0
+  LET IDATA2=500.0
+  LET IDATA3=600.0
+  LET $ECHO="NO"
+
+  WRITE "-------------------------------------------------------------"
+  WRITE "|TEST 1 : ON THE ORIGINAL IMAGE USING GLLPHOT.              |"
+  WRITE "|         RESULTS FOR HERE SHOULD MATCH RESULTS FROM MAPCOORD |"
+  WRITE "|         RUN.                                              |"
+  WRITE "|Note added 12-Mar-2010 (LWK):  GLLPHOT has been obsoleted, |"
+  WRITE "|so its output can no longer be used as a benchmark.  Tests |"
+  WRITE "|will have to use logs of previous runs of this proc.       |"
+  WRITE "-------------------------------------------------------------"
+  
+  LET $ECHO="YES"
+# GLLPHOT INP=&"MGLL"earth1.img COORDIN=(&IDATA1,&IDATA1) 'LINESAMP
+# GLLPHOT INP=&"MGLL"earth1.img COORDIN=(&IDATA2,&IDATA2) 'LINESAMP
+# GLLPHOT INP=&"MGLL"earth1.img COORDIN=(&IDATA3,&IDATA3) 'LINESAMP
+  MAPCOORD INP=&"MGLL"earth1.img +
+     COORDIN=(&IDATA1,&IDATA1,&IDATA2,&IDATA2,&IDATA3,&IDATA3) +
+     OUT_LAT=DLAT OUT_LON=DLON
+  LET $ECHO="NO"
+  
+  WRITE "-------------------------------------------------------------"
+  WRITE "|TEST 1 : NOW ADD MAP PROJECTION LABEL TO THE INPUT.        |"
+  WRITE "|         THERE IS NO PROJECTION DONE. ONLY A LABEL WILL BE |"
+  WRITE "|         ADDED.                                            |"
+  WRITE "-------------------------------------------------------------"
+  
+  LET $ECHO="YES"
+  PERSLAB INP=&"MGLL"earth1.img OUT=earth1_map.img
+  LET $ECHO="NO"
+  
+  WRITE "-------------------------------------------------------------"
+  WRITE "|TEST 1 : NOW RUN MAPCOORD ON THE OUTPUT IMAGE.               |"
+  WRITE "-------------------------------------------------------------"
+  
+  LET $ECHO="YES"
+  MAPCOORD INP=earth1_map.img +
+     COORDIN=(&IDATA1,&IDATA1,&IDATA2,&IDATA2,&IDATA3,&IDATA3) +
+     OUT_LAT=DLAT OUT_LON=DLON
+  LET $ECHO="NO"
+
+  LET ODATA1=DLAT(1)
+  LET ODATA2=DLON(1)
+  LET ODATA3=DLAT(2)
+  LET ODATA4=DLON(2)
+  LET ODATA5=DLAT(3)
+  LET ODATA6=DLON(3)
+  
+  WRITE "-------------------------------------------------------------"
+  WRITE "|TEST 1 : NOW CHECK TO SEE IF WE GET SAME LINE SAMPLE WHEN  |"
+  WRITE "|         GIVEN THE SAME LAT LON FROM THE PREVIOUS INPUT.   |"
+  WRITE "-------------------------------------------------------------"
+  
+  LET $ECHO="YES"
+  MAPCOORD INP=earth1_map.img COORDTYPE=LATLON +
+     COORDIN=(&ODATA1,&ODATA2,&ODATA3,&ODATA4,&ODATA5,&ODATA6) +
+     OUT_LAT=DLAT OUT_LON=DLON
+  LET $ECHO="NO"
+
+  LET ODATA1=DLAT(1)
+  LET ODATA2=DLON(1)
+  LET ODATA3=DLAT(2)
+  LET ODATA4=DLON(2)
+  LET ODATA5=DLAT(3)
+  LET ODATA6=DLON(3)
+
+  IF (ODATA1 <> IDATA1)
+    WRITE "MISMATCH &ODATA1 &IDATA1"
+  END-IF
+  IF (ODATA2 <> IDATA1)
+    WRITE "MISMATCH &ODATA2 &IDATA1"
+  END-IF
+  IF (ODATA3 <> IDATA2)
+    WRITE "MISMATCH &ODATA3 &IDATA2"
+  END-IF
+  IF (ODATA4 <> IDATA2)
+    WRITE "MISMATCH &ODATA4 &IDATA2"
+  END-IF
+  IF (ODATA5 <> IDATA3)
+    WRITE "MISMATCH &ODATA5 &IDATA3"
+  END-IF
+  IF (ODATA6 <> IDATA3)
+    WRITE "MISMATCH &ODATA6 &IDATA3"
+  END-IF
+
+  WRITE "-------------------------------------------------------------"
+  WRITE "|TEST 2 : Voyaager image-space test                         |"
+  WRITE "-------------------------------------------------------------"
+
+  MAPCOORD INP=&"MVGR"f1636832.raw TARGET=IO +
+     COORDIN=(&IDATA1,&IDATA1,&IDATA2,&IDATA2,&IDATA3,&IDATA3) +
+     OUT_LAT=DLAT OUT_LON=DLON
+  
+  WRITE ""
+  WRITE ""
+  WRITE "-------------------------------------------------------------"
+  WRITE "|-----------------------------------------------------------|"
+  WRITE "|-----------------------------------------------------------|"
+  WRITE "|---------------------TEST CASE 3---------------------------|" 
+  WRITE "|-----------------------------------------------------------|"
+  WRITE "|-----------------------------------------------------------|"
+  WRITE "-------------------------------------------------------------"
+  WRITE ""
+  WRITE ""
+
+  WRITE "-------------------------------------------------------------"
+  WRITE "|TEST 3 : INITIALIZE INPUT DATA                             |"
+  WRITE "-------------------------------------------------------------"
+
+  LET $ECHO="YES"
+  LET IDATA1=825.0
+  LET IDATA2=867.0
+  LET IDATA3=897.0
+  LET IDATA4=672.0
+  LET $ECHO="NO"
+
+  WRITE "-------------------------------------------------------------"
+  WRITE "|TEST 3 : USE A MOSAIC IMAGE AS NEXT TEST.                  |"
+  WRITE "|   THE IMAGE 4600.byt AND 4605.byt ARE USED TO CREATE      |"
+  WRITE "|   e6global.nmos. I HAVE ARBITRARILY PICKED POINTS OFF     |"
+  WRITE "|   e6global.nmos, THAT I THOUGHT ARE SOMEWHAT RECOGNIZABLE |"
+  WRITE "|   ON 460 IMAGES AND THAT IS THE REASON WHY THE LONGITUDE  |"
+  WRITE "|   IS LITTLE OFF.                                          |"
+  WRITE "-------------------------------------------------------------"
+  
+  LET $ECHO="YES"
+# GLLPHOT INP=&"MGLL"4600.byt COORDIN=(195,398) 'LINESAMP
+# GLLPHOT INP=&"MGLL"4605.byt COORDIN=(230,240) 'LINESAMP
+  LET $ECHO="NO"
+  
+  WRITE "-------------------------------------------------------------"
+  WRITE "|TEST 3 : MAPCOORD ON THE POINTS THAT I THINK MATCH WHEN    |"
+  WRITE "|         GIVEN A VISUAL TEST.                              |"
+  WRITE "-------------------------------------------------------------"
+  
+  LET $ECHO="YES"
+  MAPCOORD INP=&"MGLL"e6global.nmos COORDIN=(&IDATA1,&IDATA2,&IDATA3,&IDATA4) +
+     OUT_LAT=DLAT OUT_LON=DLON
+  LET $ECHO="NO"
+
+  LET ODATA1=DLAT(1)
+  LET ODATA2=DLON(1)
+  LET ODATA3=DLAT(2)
+  LET ODATA4=DLON(2)
+  
+  WRITE "-------------------------------------------------------------"
+  WRITE "|TEST 3 : NOW CHECK TO SEE IF WE GET SAME LINE SAMPLE WHEN  |"
+  WRITE "|         GIVEN THE SAME LAT LON FROM THE PREVIOUS INPUT.   |"
+  WRITE "-------------------------------------------------------------"
+
+  LET $ECHO="YES"
+  MAPCOORD INP=&"MGLL"e6global.nmos COORDTYPE=LATLON +
+     COORDIN=(&ODATA1,&ODATA2,&ODATA3,&ODATA4) +
+     OUT_LAT=DLAT OUT_LON=DLON
+  LET $ECHO="NO"
+
+  LET ODATA1=DLAT(1)
+  LET ODATA2=DLON(1)
+  LET ODATA3=DLAT(2)
+  LET ODATA4=DLON(2)
+
+  IF (ODATA1 <> IDATA1)
+    WRITE "MISMATCH &ODATA1 &IDATA1"
+  END-IF
+  IF (ODATA2 <> IDATA2)
+    WRITE "MISMATCH &ODATA2 &IDATA2"
+  END-IF
+  IF (ODATA3 <> IDATA3)
+    WRITE "MISMATCH &ODATA3 &IDATA3"
+  END-IF
+  IF (ODATA4 <> IDATA4)
+    WRITE "MISMATCH &ODATA4 &IDATA4"
+  END-IF
+
+  WRITE "-------------------------------------------------------------"
+  WRITE "|REMOVING IMAGES CREATED INTERMEDIATELY                     |"
+  WRITE "-------------------------------------------------------------"
+  
+  IF ($SYSCHAR(1)="VAX_VMS")
+    DCL DEL EARTH1_MAP.IMG;*
+  ELSE
+    USH rm earth1_map.img
+  END-IF
+END-PROC

@@ -1,0 +1,27 @@
+procedure
+refgbl $echo
+body
+let _onfail="continue"
+let $echo="no"
+refgbl $syschar
+
+! basic test:
+tgetenv_vic_c
+tgetenv_vic_f
+
+! check different logical name tables in VMS
+if ( $syschar(1) = "UNIX" ) return
+
+! set up a process logical name that duplicates an existing system one:
+dcl assign random_string clue$history
+tgetenv_vic_f
+
+! assign multiple logical names:
+dcl assign string1,string2 clue$history
+tgetenv_vic_f
+
+! clean up the logical name we borrowed ...
+dcl deassign clue$history
+
+let $echo="no"
+end-proc

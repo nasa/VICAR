@@ -1,0 +1,82 @@
+PROCESS HELP=*
+  PARM INP   STRING   COUNT=0:50   DEFAULT=--
+  PARM TBL   STRING   COUNT=1
+  PARM LIST  STRING   COUNT=0:1    DEFAULT=--
+  PARM LS    INTEGER  COUNT=2                   VALID=(1:1024)
+END-PROC
+.TITLE
+VICAR Program signal
+.HELP
+PURPOSE:
+   Signal is a VICAR applications program which outputs the signal of a specific
+pixel from a set of flat-field image.  The exposure and signal is output into
+an ASCII text file.  If the input images are PICSUM'd, then the value of the
+pixel specified by LS is divided by the PISCALE value that is in the VICAR
+label.  If there is no PICSCALE value, then the input is assumed not to be
+PICSUM'd.
+
+This program was written for the Cassini ISS camera and expects that the
+flat-field images have a valid Cassini label.
+
+.page
+EXECUTION STATEMENT:
+
+  SIGNAL INP=(D1,D2,D3,...,Dn) TBL=SIGNAL.TBL LS=(100,201)
+
+     or
+
+  SIGNAL LIST=FILENAME.LIST TBL=SIGNAL.TBL LS=(100,201)
+
+The flat-field filenames may be input to the program in the form of a
+SRCH-format text file (see program NXT).  The output TBL produces a
+tab-delimited ASCII text file containing EXPOSURE and SIGNAL.
+
+.page
+RESTRICTIONS:
+
+1.  A maximum of 50 exposure levels are allowed.
+
+.page
+PROGRAM HISTORY:
+
+Written by Jan Yoshimizu, 17 Nov 95
+Current cognizant programmer:  Jan Yoshimizu
+Revisions:
+   28 JUL 97  RRD  Made portable for UNIX
+		   Made computation of signal float division
+   17 NOV 95  JRY  Initial release
+
+.LEVEL1
+.VARIABLE INP
+ STRING-OPTIONAL
+ Flat-field & DC images.
+.VARIABLE TBL
+ STRING--REQUIRED
+ ASCII text output file
+.VARIABLE LIST
+ STRING--OPTIONAL
+ SRCH-format file containing
+ the names of the files
+ to be processed.
+.VARIABLE LS
+ STRING--REQUIRED
+Line and sample for which
+you want the signal
+.LEVEL2
+.VARIABLE INP
+ STRING--OPTIONAL
+	INP=(D1,D2,D3,...,Dn)
+ Inputs are flat-field images which may have been PICSUM'd.
+.VARIABLE TBL
+ STRING--REQUIRED
+ The output ASCII text file which contains the exposure and signal of the
+ specified pixel.
+.VARIABLE LIST
+ STRING--OPTIONAL
+ Specifies the name of the SRCH-format text file containing the names of
+ the input files to be processed.  This is an alternative to listing the 
+ filenames with the INP parameter.  
+.VARIABLE LS
+ STRING--REQUIRED
+ The line and sample of the pixel whose exposure and signal is output.
+.END

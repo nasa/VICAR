@@ -1,0 +1,56 @@
+1 TIECHV
+
+       TIECHV checks the validity of tiepoints used in the TIEPOINTS
+   mode of MAP2 and other programs. Points can be converted to object
+   space using GEOMAV.
+
+2  CALLING SEQUENCE
+
+   FORTRAN calling sequence and parameters:
+
+      CALL TIECHV(IND,ITYPE,PAR,NPOINT,CONV)
+
+   where...
+
+      IND      0=normal return                           integer
+      ITYPE    0=no distortion correction                integer
+               1= perform distortion correction          integer
+      PAR      tiepoint parameter buffer 
+               in order of line,sample,lat,long,...      real*4
+      NPOINT   number of points                          integer
+      CONV(*)  GEOMA parameters to be used by TRITRA     integer*4
+               for geometric correction of image space
+               tiepoints
+               The GEOMA parameters are in the format:
+               conv(1)='NAH '
+               conv(2)='    '
+               conv(3)=value (value of 'NAH',number of horizontal areas)
+               conv(4)='NAV '
+               conv(5)='    '
+               conv(6)=value (value of 'NAV',number of vertical areas)
+               conv(7)='TIEP'
+               conv(8)='    '
+               conv(9)=   beginning of GEOMA tiepoint parameters
+
+   C calling sequence and parameters:
+
+      tiechv(ind,itype,par,npoint,conv)
+
+   similarly...
+
+	int ind;
+	int itype;
+	float par;
+	int npoint;
+	int conv;
+               
+2  HISTORY
+
+      Ported to UNIX: T. L. Truong, 13 July 1993	
+      Original Programmer: J. J. Lorre, 16 June 1977
+      Current Cognizant Programmer: Joel Mosher
+      Source Language: Fortran
+      Latest Revision: VICAR1* 16-FEB-1985
+
+
+

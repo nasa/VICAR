@@ -1,0 +1,126 @@
+!
+! ZFILL TEST SCRIPT
+!
+procedure
+refgbl $autousage
+refgbl $syschar
+refgbl $echo
+body
+let $autousage="none"
+let _onfail="continue"
+let $echo="yes"
+
+enable-log
+
+local PATH TYPE=STRING 
+
+#if ($SYSCHAR(1)="VAX_VMS")
+#  let PATH = "WMS_TEST_WORK:[TESTDATA.GLL]"
+#  dcl del diff.out;*
+#  dcl del test*.img*
+#else
+  let PATH = "/project/test_work/testdata/gll/"
+  ush unalias rm
+#  ush rm -f diff?.out
+  ush rm -f test*.img*
+#end-if
+
+!
+!cellgen OUT=C1515 NL=15 NS=15 CSIZE=5
+genthis OUT=C1515 NL=15 NS=15 DN=(1,1,1,1,1,2,2,2,2,2,3,3,3,3,3, +
+                                  1,1,1,1,1,2,2,2,2,2,3,3,3,3,3, +
+                                  1,1,1,1,1,2,2,2,2,2,3,3,3,3,3, +
+                                  1,1,1,1,1,2,2,2,2,2,3,3,3,3,3, +
+                                  1,1,1,1,1,2,2,2,2,2,3,3,3,3,3, +
+                                  4,4,4,4,4,5,5,5,5,5,6,6,6,6,6, +
+                                  4,4,4,4,4,5,5,5,5,5,6,6,6,6,6, +
+                                  4,4,4,4,4,5,5,5,5,5,6,6,6,6,6, +
+                                  4,4,4,4,4,5,5,5,5,5,6,6,6,6,6, +
+                                  4,4,4,4,4,5,5,5,5,5,6,6,6,6,6, +
+                                  7,7,7,7,7,8,8,8,8,8,9,9,9,9,9, +
+                                  7,7,7,7,7,8,8,8,8,8,9,9,9,9,9, +
+                                  7,7,7,7,7,8,8,8,8,8,9,9,9,9,9, +
+                                  7,7,7,7,7,8,8,8,8,8,9,9,9,9,9, +
+                                  7,7,7,7,7,8,8,8,8,8,9,9,9,9,9)
+!
+zfill C1515 OUT 
+list OUT
+zfill C1515 OUT REPL=5 
+list OUT
+zfill C1515 OUT REPL=1 
+list OUT
+zfill C1515 OUT REPL=6 
+list OUT
+zfill C1515 OUT REPL=5 'DENSE
+list OUT
+zfill C1515 OUT NSW=3 NLW=3 REPL=5
+list OUT
+zfill C1515 OUT NSW=5 NLW=5 REPL=5
+list OUT
+zfill C1515 OUT NSW=5 NLW=5 REPL=5 EXCL=2
+list OUT
+zfill C1515 OUT NSW=7 NLW=6 REPL=5
+list OUT
+zfill C1515 OUT NSW=7 NLW=6 REPL=5 EXCL=2
+list OUT
+zfill C1515 OUT NSW=1 NLW=5 REPL=5
+list OUT
+zfill C1515 OUT NSW=5 NLW=1 REPL=5
+list OUT
+zfill C1515 OUT REPL=257 'DENSE
+list OUT
+zfill C1515 (OUT,MSK) REPL=6
+list OUT
+list MSK
+zfill C1515 (OUT,MSK) REPL=6 NSW=5 NLW=5
+list OUT
+list MSK
+zfill C1515 OUT REPL=5 SIZE=(5,5,4,4)
+list OUT
+zfill C1515 OUT REPL=5 SIZE=(4,4,7,7)
+list OUT
+!
+let $echo="no"
+write ""
+write ""
+write "***********************************************"
+write "*      TEST CASE COMPARING BINARY LABELS      *"
+write "*                                             *"
+write "*      There shouldn't be any difference      *"
+write "*    between input and output binary lables.  *"
+write "*                                             *"
+write "***********************************************"
+
+let $echo="yes"
+ adespike inp=&"PATH"s0539939965.r out=test1.img
+ zfill inp=test1.img out=test2.img 'bin
+#gedrlist|stdout=in.out| test1.img nlh=800
+#gedrlist|stdout=out.out| test2.img nlh=800
+# (LWK - 15Mar2010) GEDRLIST has been obsoleted, replace with:
+ label-remove test1.img test3.img 'bin
+ label-create test3.img test1.img nl=829 ns=1000
+ label-remove test2.img test3.img 'bin
+ label-create test3.img test2.img nl=829 ns=1000
+ difpic (test1.img test2.img) size=(1 1 12 1000) 'mod
+ difpic (test1.img test2.img) size=(30 1 800 200) 'mod
+let $echo="no"
+write "*****************************************************"
+write "* There should be 0 differences in the above tests. *"
+write "*****************************************************"
+#if ($SYSCHAR(1)="VAX_VMS")
+#    dcl diff/out=diff.out in.out out.out
+#else
+#    ush diff in.out out.out >diff.out
+#end-if
+
+#write ""
+#write "****************************************************"
+#write "* Files diff1 & diff2.out should contain no entry. *"
+#write "****************************************************"
+#let $echo="yes"
+# typetext diff1.out
+# typetext diff2.out
+#let $echo="no"
+
+disable-log
+end-proc

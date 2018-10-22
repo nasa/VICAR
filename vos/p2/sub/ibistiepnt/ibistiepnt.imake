@@ -1,0 +1,13 @@
+/* Imake file for VICAR subroutine ibistiepnt */
+
+#define SUBROUTINE   ibistiepnt
+
+#define MODULE_LIST  ibistiepnt.c
+
+#define P2_SUBLIB
+
+#define USES_ANSI_C
+ 
+#define LIB_RTL
+#define LIB_TAE
+

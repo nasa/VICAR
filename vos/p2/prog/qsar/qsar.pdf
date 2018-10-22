@@ -1,0 +1,166 @@
+process help=*
+!  FILE NAMES      
+!
+PARM INP     TYPE=STRING   COUNT=1
+PARM OUT     TYPE=STRING   COUNT=1
+PARM SIZE    TYPE=INTEGER  COUNT=4       DEFAULT=(1,1,0,0)
+PARM SL      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM SS      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM SB      TYPE=INTEGER  COUNT=1       DEFAULT=1
+PARM NL      TYPE=INTEGER  COUNT=1       DEFAULT=0
+PARM NS      TYPE=INTEGER  COUNT=1       DEFAULT=0
+PARM NB      TYPE=INTEGER  COUNT=1       DEFAULT=0
+PARM AREA    TYPE=INTEGER  COUNT=(5:600) DEFAULT=(0,0,0,0,0) 
+!
+END-PROC
+.TITLE
+qsar
+.HELP
+ PURPOSE:
+
+Program qsar is used to add or subtract values from the data numbers in
+rectangular sections of an image.  For each rectangle, the user specifies
+the size and position of the rectangle and the (positive or negative) value
+to be added to the data numbers of points in that rectangle.  qsar performs
+the addition and writes the resulting image to an output file.  qsar is 
+primarily used to correct flaws in images or, in conjunction with program GEN,
+to generate test images.
+.PAGE
+ EXECUTION:
+
+The input image may either be byte or halfword data.  The position of the 
+rectangles are specified relative to the full input image.
+
+The maximum number of rectangles that can be specified for qsar is limited
+by the TAE executive.  As of this writing the limit is 120 rectangles.
+If no rectangles are specified, qsar copies the image without making any
+changes.  For each rectangle specified, the program adds the specified
+value to the data numbers of the points of that rectangle. The resulting
+data numbers are then checked for being valid for the data type (byte or
+halfword) of the image and are adjusted if invalid.  For byte data,
+data numbers less than 0 are set to 0, and data numbers greater than 255
+are set to 255.  For halfword data, data numbers less than -32768 are set to 
+-32768, and data numbers greater than 32767 are set to 32767.  Rectangles
+are allowed to overlap.  For points in more than one rectangle, the additions
+are performed in the order they are entered by the user, and adjustments
+required for validity are applied after each addition.
+
+The output image has the same data format  (byte or halfword) as the input 
+image.  
+.PAGE
+TAE COMMAND LINE FORMAT
+      The following command line formats show the major allowable forms:
+      qsar INP=a OUT=b SIZE=(sl,ss,nl,ns) optional parameters
+      qsar INP=a OUT=b  SL=sl SS=ss NL=nl NS=ns optional parameters
+      qsar a b (sl,ss,nl,ns) optional parameters
+      qsar a b optional parameters
+
+       Here 'a' represents the input image file name, and
+       'b' represents the output image file name.
+.PAGE
+EXAMPLES
+
+1.    GEN A NL=250 NS=250 IVAL=0 LINC=0 SINC=0
+      qsar INP=A OUT=B AREA=( 1   1  250   50   50     +
+                              1  51  250   50  100     +
+                              1 101  250   50  150     +
+                              1 151  250   50  200     +
+                              1 201  250   50  250       )
+
+      In this example the output file B is a 250x250 byte image
+      consisting of five vertical strips of different shades of gray.
+.PAGE
+2.    GEN QSARE NL=10 NS=10 'HALF
+      qsar INP=QSARE OUT=QSAREO SIZE=(2,3,8,7) FORMAT=HALF AREA=(4,6,3,1,100)
+
+      In this example the output file QSAREO is a halfword image that has
+      eight lines with seven pixels per line.  Data numbers for a three line
+      by 1 pixel rectangle are incremented by 100.
+.PAGE
+RESTRICTIONS
+1. The input and output images must be byte or halfword data.
+2. The maximum number of pixels per line is 64000.
+3. The maximum number of rectangles that can be specified is 120, as of this
+   writing.
+
+ WRITTEN BY:             Steve Pohorsky              24 Oct 1983
+
+ COGNIZANT PROGRAMMER:   Joel Mosher                 29 May 1980
+
+ REVISION:  
+  1975-06-27 DAH - Changes for conversion to 360/os
+  1979-07-25 JBS - Max line length to 4000 bytes
+  1980-06-05 JAM - Add halfword option
+  1983-10    SP - Corrected program to not store variable int into ibuf
+    array when the value of int had not been set properly ( i.e. when loop
+    index k was not in range.); Modified program so that starting pixel
+    value in the area parameter refers to position in input image even
+    when the starting sample in the size field is not 1. (the starting
+    line value in the area parameter already was set to refer to the
+    position in input image even when the starting line in the size field
+    is not 1.); Changed label processing of output file to always include
+    correct data format in label; Changed half parameter to
+    format=half/byte so user can override label when label says half;
+    Changed label processing of input file by using labelc to find the
+    data format and using format in label as default; Increased maximum
+    line size to 64000 pixels; Converted from ibm vicar version:
+    miscellaneous cleanup.
+  1985-07    JHR - Converted to vicar2
+  1994-04    CRI - MSTP s/w conversion (vicar porting)
+  2003-09-08 NTT - Enabled for 3d images
+  2009-03-23 Smyth - Make compatible with macosx/linux
+  2010-02-14 R. J. Bambery - Change iun to iunit to fix 
+    [vic2-noschun] **! undefined unit: call xvunit first in tststretch.pdf 
+    unit test
+
+.LEVEL1
+.VARIABLE INP
+Input file name
+.VARIABLE OUT
+Output file name
+.VARIABLE SIZE
+Standard Vicar size field:
+  (SL,SS,NL,NS)
+You can enter SL,SS,NL,
+and NS together as SIZE, OR
+enter the SL,SS,NL, and NS
+parameters separately.
+By default, the entire input
+image is used if these
+parameters are not entered.
+.VARIABLE SL
+Starting line number
+.VARIABLE SS
+Starting sample number
+.VARIABLE SB
+Starting band number
+.VARIABLE NL
+Number of lines
+.VARIABLE NS
+Number of samples
+.VARIABLE NB
+Number of bands
+.VARIABLE AREA
+Specifies the rectangles and the
+values to be added to data 
+numbers.
+.LEVEL2
+.VARIABLE AREA
+The values entered for the AREA parameter are entered in groups of five.
+Each group corresponds to a rectangle.  The meaning of the values in each
+group is as follows.
+
+  First value  - starting line number of the rectangle.
+  Second value - starting pixel number of the rectangle. 
+  Third value  - number of lines in the rectangle.
+  Fourth value - number of pixels per line in the rectangle.  
+  Fifth value  - the integer value to be added to the data numbers for points 
+                 in the rectangle.  For byte data, this value should be in the
+                 range -255 to 255.  For halfword data, this value should be 
+                 in the range -65535 to 65535.
+
+The maximum number of rectangles that can be specified for qsar is limited
+by the TAE executive.  As of this writing the limit is 120 rectangles.
+If no rectangles are specified, qsar copies the image without making any
+changes.  
+.END

@@ -1,0 +1,13 @@
+PROCESS HELP=*
+
+parm INP 	string 	count=0:1 default=--
+parm LATLON 	real 	count=2
+
+END-PROC
+
+.TITLE
+VICAR Program TMP_MPO2BUF
+.HELP
+
+ Test of mpMpo2Buf routine in mp_routines.com.
+.END

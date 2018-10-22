@@ -1,0 +1,25 @@
+1  Subroutine  get_ssi_ph2_prefix
+
+     Calling Sequence:   get_ssi_ph2_prefix (unit, line, dest)
+
+2  Argument 
+
+   unit:  Unit #,  Input
+   line:  Line #,  Input
+   dest:  Prefix   buffer, Output
+
+2  Operation 
+
+   Subroutine get_ssi_ph2_prefix reads & loads the binary prefix of a GLL SSI 
+   line record(for Phase II).The parameter "unit" refers to the INPUT file 
+   unit #, and "line" is the line # of the file to be read.  The input file 
+   must be open prior to the get_ssi_ph2_prefix calling.
+
+2  History
+
+   Original Programmer:  F. Moss  Aug-1994
+   Source Language:      C (MSTP  Portable)
+   Program History:
+    27 Jan 98  GMY  Switched from C compiler to ANSI C (package=signedchar).
+                    Fixed two bugs in test program.
+    09 Feb 98  GMY  Moved test image to WMS.
