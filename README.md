@@ -75,7 +75,7 @@ Pre-built VICAR binaries are available at https://github.com/nasa/VICAR/releases
 * Main VICAR source code:  [Click to download](https://github.com/nasa/VICAR/tarball/master)
 * Linux 32-bit externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v3.0/vicar_open_ext_x86-linux_3.0.tar.gz)
 * Linux 64-bit externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v3.0/vicar_open_ext_x86-64-linx_3.0.tar.gz)
-* Mac OS X externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v3.0/vicar_open_ext_x86-mac64-osx_3.0.tar.gz)
+* Mac OS X externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v3.0/vicar_open_ext_mac64-osx_3.0.tar.gz)
 * Solaris externals:  [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v3.0/vicar_open_ext_sun-solr_3.0.tar.gz)
 * All externals (don't get unless you know you need this): [Click to download](http://www-mipl.jpl.nasa.gov/vicar_os/v3.0/vicar_open_ext_3.0.tar.gz)
 
