@@ -1,4 +1,0 @@
-process
-parm char keyword valid=(CHAR,C,CCHAR) count=0:1 default=--
-end-proc
-

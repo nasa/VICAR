@@ -1,6 +1,0 @@
-      common/cpts/npts,lpt(2,500),rpt(2,500)
-      common/cpts/lpt_os(2,500),rpt_os(2,500),lpt0(2,500)
-      common/cpts/zl(500),zr(500),cmax(500),u(500),v(500)
-      integer npts
-      real*4 lpt,rpt,lpt_os,rpt_os,lpt0,zl,zr,cmax,u,v
-

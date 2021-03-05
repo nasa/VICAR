@@ -1,4 +1,0 @@
-select count (*) from ssiraw
-go
-select "This is only a test"
-go

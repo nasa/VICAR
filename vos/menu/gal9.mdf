@@ -1,9 +1,0 @@
-.Title
-[4mGALILEO  - SYSTEM TEST Menu[0m               (page 1 of 1)
-.Proc VGEDR
-[1mVGEDR[0m    - Reads the Galileo data tape created by VGSDR and converts
-           it to the VICAR image file format on magnetic tape.
-.Proc VGSDR
-[1mVGSDR[0m    - Converts Galileo System Data Records into VICAR image
-           format. Output can be read by VGEDR.
-.End

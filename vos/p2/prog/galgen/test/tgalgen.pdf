@@ -1,3 +1,0 @@
-process help=*
-PARM OUT TYPE=STRING COUNT=9
-END-PROC

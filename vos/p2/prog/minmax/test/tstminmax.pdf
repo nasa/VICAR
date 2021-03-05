@@ -1,9 +1,0 @@
-procedure
-refgbl $echo
-body
-let _onfail="continue"
-let $echo="yes"
-!TEST FILE FOR TESTING MINMAX.FOR
-!CALLS THE TEST PROGRAM TMINMAX
-tminmax
-end-proc

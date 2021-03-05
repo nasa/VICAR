@@ -1,7 +1,0 @@
-#define SUBROUTINE axispts2
-
-#define MODULE_LIST axispts2.f
-
-#define P3_SUBLIB
-
-#define USES_FORTRAN

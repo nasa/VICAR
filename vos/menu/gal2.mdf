@@ -1,9 +1,0 @@
-.Title
-[4mGALILEO  - BLEMISH REMOVAL Menu[0m                      (page 1 of 1)
-.Proc BLEMGEN
-[1mBLEMGEN[0m  - Generates Blemish Definition File for input to GALSOS,
-           from the output of GALGEN.
-.Proc BLEMPIC 
-[1mBLEMPIC[0m  - Creates images of the permanent blemishes, low full-well
-           pixels and total blemishes in the BLEMGEN blemish file.
-.End

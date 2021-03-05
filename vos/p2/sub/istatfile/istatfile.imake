@@ -1,7 +1,0 @@
-#define SUBROUTINE istatfile
-
-#define P2_SUBLIB
-#define USES_ANSI_C
-#define FTN_STRING
-
-#define MODULE_LIST istatfile.c 

@@ -1,9 +1,0 @@
-
-#define SUBROUTINE get_space
-
-#define MODULE_LIST get_space.c
-
-#define P3_SUBLIB
-
-#define USES_C
-

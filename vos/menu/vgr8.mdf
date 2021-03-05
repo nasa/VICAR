@@ -1,8 +1,0 @@
-.Title
-[4mVOYAGER  - LABEL PASSING & INFORMATION Menu[0m           (page 1 of 1)
-.Proc CAMPARAM
-[1mCAMPARAM[0m  - Returns into local variables info from a Voyager image
-            label.
-.Proc IMLIST
-[1mIMLIST[0m    - Prints the picture summary of a raw Voyager image file.
-.End

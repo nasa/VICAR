@@ -1,7 +1,0 @@
-#define SUBROUTINE planck
-
-#define MODULE_LIST planck.f
-
-#define P3_SUBLIB
-
-#define USES_FORTRAN

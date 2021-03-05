@@ -1,5 +1,0 @@
-machine null_machine:local:null
-
-compute_module xvd:xvd:null_machine:
-	INPUT ~VICARFILE_1D Filename:
-	ParamBox=xvd;icon=xvd

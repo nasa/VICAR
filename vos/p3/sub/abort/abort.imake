@@ -1,7 +1,0 @@
-#define SUBROUTINE abort
-
-#define MODULE_LIST abort.f
-
-#define P3_SUBLIB
-
-#define USES_FORTRAN

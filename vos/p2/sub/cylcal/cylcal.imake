@@ -1,9 +1,0 @@
-/* Imake file for VICAR subroutine cylcal */
-
-#define SUBROUTINE cylcal
-
-#define MODULE_LIST cylcal.f
-
-#define P2_SUBLIB
-
-#define USES_FORTRAN

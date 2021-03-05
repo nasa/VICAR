@@ -1,8 +1,0 @@
-#define PROCEDURE xvd_save_script
-
-#define MODULE_LIST xvd_save_script.sh
-
-#define USES_SH
-
-#define GUILIB
-

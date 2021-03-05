@@ -1,9 +1,0 @@
-#define SUBROUTINE simq
-
-#define MODULE_LIST simq.f zsimq.c
-
-#define MAIN_LANG_FORTRAN
-#define USES_FORTRAN
-#define USES_ANSI_C
-
-#define P2_SUBLIB

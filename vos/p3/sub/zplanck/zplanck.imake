@@ -1,9 +1,0 @@
-
-#define SUBROUTINE zplanck
-
-#define MODULE_LIST zplanck.c
-
-#define P3_SUBLIB
-
-#define USES_C
-

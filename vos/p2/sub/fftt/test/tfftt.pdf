@@ -1,6 +1,0 @@
-!*****************************************************************************
-! TFFTT.PDF - pdf for test program TFFTT.F for the subroutine FFTT
-!*****************************************************************************
-process
-parm inp string
-end-proc

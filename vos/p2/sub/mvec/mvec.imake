@@ -1,7 +1,0 @@
-#define SUBROUTINE mvec
-
-#define MODULE_LIST mvec.c
-
-#define P2_SUBLIB
-#define USES_ANSI_C
-

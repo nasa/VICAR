@@ -1,8 +1,0 @@
-procedure
-refgbl $echo
-body
-let _onfail="continue"
-let $echo="yes"
-!THIS IS A TEST OF MODULE CMPR   (FUNCTION)
-tcmpr
-end-proc

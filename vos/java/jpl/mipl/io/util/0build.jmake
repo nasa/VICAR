@@ -1,3 +1,0 @@
-jar_file = vicario.jar
-# services_files = (javax.xml.parsers.DocumentBuilderFactory,javax.xml.transform.TransformerFactory,javax.xml.xpath.XPathFactory)
-extra_jar_files = (pds4_namespaces.txt, log4j.properties)

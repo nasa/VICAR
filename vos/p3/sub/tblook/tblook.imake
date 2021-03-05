@@ -1,9 +1,0 @@
-
-#define SUBROUTINE tblook
-
-#define MODULE_LIST tblook.c
-
-#define P3_SUBLIB
-
-#define USES_C
-

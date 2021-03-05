@@ -1,9 +1,0 @@
-
-#define SUBROUTINE newmve
-
-#define MODULE_LIST newmve.c
-
-#define P3_SUBLIB
-
-#define USES_C
-

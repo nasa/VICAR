@@ -1,3 +1,0 @@
-process help=*
-PARM INP TYPE=STRING COUNT=2
-end-proc

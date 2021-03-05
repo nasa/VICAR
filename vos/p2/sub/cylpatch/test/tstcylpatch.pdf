@@ -1,9 +1,0 @@
-procedure
-refgbl $echo
-refgbl $autousage
-body
-let _onfail="continue"
-let $echo="yes"
-let $autousage="none"
-tcylpatch
-end-proc

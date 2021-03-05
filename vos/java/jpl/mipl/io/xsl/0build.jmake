@@ -1,4 +1,0 @@
-jar_file = vicario.jar
-extra_jar_files = *.xsl
-no_java = 1
-

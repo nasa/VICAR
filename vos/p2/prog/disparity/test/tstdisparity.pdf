@@ -1,9 +1,0 @@
-procedure
-refgbl $echo
-body
-let _onfail="continue"
-let $echo="yes"
-!
-disparity inp=(c3_c5_ldis.img,c3_c5_sdis.img) out=dtm.img
-!
-end-proc

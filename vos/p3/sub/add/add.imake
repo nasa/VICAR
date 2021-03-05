@@ -1,9 +1,0 @@
-
-#define SUBROUTINE add
-
-#define MODULE_LIST add.c
-
-#define P3_SUBLIB
-
-#define USES_C
-

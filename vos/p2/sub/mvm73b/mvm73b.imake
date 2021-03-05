@@ -1,9 +1,0 @@
-/* Imake file for VICAR subroutine MVM73B  */
-
-#define SUBROUTINE  mvm73b
-
-#define MODULE_LIST  mvm73b.f  
-
-#define P2_SUBLIB
-
-#define USES_FORTRAN

@@ -1,9 +1,0 @@
-
-#define SUBROUTINE nr_csubs
-
-#define MODULE_LIST nr_csubs.c
-
-#define P3_SUBLIB
-
-#define USES_C
-

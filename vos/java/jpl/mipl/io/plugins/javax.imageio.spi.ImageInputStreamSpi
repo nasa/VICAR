@@ -1,3 +1,0 @@
-# @(#)javax.imageio.spi.ImageInputStreamSpi	1.3 00/10/25
-com.sun.imageio.spi.FileImageInputStreamSpi
-com.sun.imageio.spi.InputStreamImageInputStreamSpi

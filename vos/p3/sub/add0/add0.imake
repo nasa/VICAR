@@ -1,7 +1,0 @@
-#define SUBROUTINE add0
-
-#define MODULE_LIST add0.f
-
-#define P3_SUBLIB
-
-#define USES_FORTRAN

@@ -1,7 +1,0 @@
-#define SUBROUTINE txtsubs
-
-#define MODULE_LIST txtsubs.c
-
-#define P2_SUBLIB
-
-#define USES_C

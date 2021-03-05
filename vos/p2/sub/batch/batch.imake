@@ -1,7 +1,0 @@
-#define SUBROUTINE batch
-
-#define MODULE_LIST batch.c
-
-#define USES_C
-
-#define P2_SUBLIB

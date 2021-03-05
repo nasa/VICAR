@@ -1,7 +1,0 @@
-Procedure
-Refgbl $echo
-Body
-Let _onfail="continue"
-Let $echo="yes"
-TCHKSTAT
-End-proc

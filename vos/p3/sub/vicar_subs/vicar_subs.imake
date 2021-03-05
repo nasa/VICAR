@@ -1,9 +1,0 @@
-
-#define SUBROUTINE vicar_subs
-
-#define MODULE_LIST vicar_subs.c
-
-#define P3_SUBLIB
-
-#define USES_C
-

@@ -1,9 +1,0 @@
-/* Imake file for VICAR subroutine mercpatch */
-
-#define SUBROUTINE mercpatch
-
-#define MODULE_LIST mercpatch.f
-
-#define P2_SUBLIB
-
-#define USES_FORTRAN

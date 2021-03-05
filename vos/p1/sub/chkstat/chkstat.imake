@@ -1,9 +1,0 @@
-/* Imake file for VICAR subroutine CHKSTAT  */
-
-#define SUBROUTINE  chkstat
-
-#define MODULE_LIST chkstat.f  
-
-#define P1_SUBLIB
-
-#define USES_FORTRAN

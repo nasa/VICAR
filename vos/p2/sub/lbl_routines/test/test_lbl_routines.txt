@@ -1,6 +1,0 @@
-command.txt
-del_Apr_29_2011.txt
-lbl_delivery_May_31_2011.txt
-modifications.txt
-test.txt
-test_lbl_routines.txt

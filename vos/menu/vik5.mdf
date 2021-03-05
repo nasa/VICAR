@@ -1,6 +1,0 @@
-.Title
-[4mVIKING - MISSING LINES/PIXELS Menu[0m                    (page 1 of 1)
-.Proc DROPOUT
-[1mDROPOUT[0m  - Locates and repairs missing lines and pixels in Viking
-           Orbiter images by interpolating over the missing data.
-.END

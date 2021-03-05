@@ -1,7 +1,0 @@
-.Title
-[4mVIKING - SEDR CATALOG Menu[0m                            (page 1 of 1)
-.Proc VOSDRIBIS
-[1mVOSDRIBIS[0m  - IBIS program extracting certain items of info from each 
-             Viking Orbiter record in the SEDR image catalog, placing them 
-             in a tabular file.
-.END

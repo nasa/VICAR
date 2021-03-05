@@ -1,8 +1,0 @@
-! Test SAO star catalog w/Cassini image
-NAV w1364364259.2 SPICEMODE=REMOTE TARGET=SATURN SAO=/project/test_work/testdata/mipl/vgr/sao_idl.str
-'star
-stretch=(15,40)
-'exit
-'exit
-'n
-

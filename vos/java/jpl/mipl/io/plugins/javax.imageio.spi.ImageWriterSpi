@@ -1,6 +1,0 @@
-# @(#)javax.imageio.spi.ImageWriterSpi	1.1 00/10/25
-# com.sun.imageio.plugins.png.PNGImageWriterSpi
- jpl.mipl.io.plugins.VicarImageWriterSpi
- jpl.mipl.io.plugins.PDSImageWriterSpi
-# Commented out PDS4 reference for the Vicar Open Source System 3/30/16
-# jpl.mipl.io.plugins.PDS4ImageWriterSpi

@@ -1,8 +1,0 @@
-! Test of C-bridges for MATH77 sort subroutines 
-procedure
-refgbl $echo
-body
-let _onfail="continue"
-let $echo="yes"
-tmath77_sort
-end-proc

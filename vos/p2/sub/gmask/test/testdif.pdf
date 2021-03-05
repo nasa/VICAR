@@ -1,4 +1,0 @@
-process
-parm inp (string,40) count=(0:5)
-parm out (string,40)
-end-proc

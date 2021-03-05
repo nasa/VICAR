@@ -1,9 +1,0 @@
-/* Imake file for VICAR subroutine REALTR*/
-
-#define SUBROUTINE  realtr
-
-#define MODULE_LIST  realtr.f  
-
-#define P2_SUBLIB
-
-#define USES_FORTRAN

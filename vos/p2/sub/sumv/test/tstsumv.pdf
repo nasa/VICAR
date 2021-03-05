@@ -1,7 +1,0 @@
-procedure
-refgbl $echo
-body
-let _onfail="continue"
-let $echo="yes"
-tsumv
-end-proc

@@ -1,6 +1,0 @@
-!*****************************************************************************
-! TVOLABV2.PDF - pdf for test program TVOLABV2.F for the subroutine VOLABV2
-!*****************************************************************************
-PROCESS
-parm inp type=string
-END-PROC

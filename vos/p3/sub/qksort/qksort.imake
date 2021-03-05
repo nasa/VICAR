@@ -1,9 +1,0 @@
-
-#define SUBROUTINE qksort
-
-#define MODULE_LIST qksort.c
-
-#define P3_SUBLIB
-
-#define USES_C
-

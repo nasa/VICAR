@@ -1,8 +1,0 @@
-Procedure
-Refgbl $Echo
-Body
-Let  _onfail="continue"
-Let  $Echo="Yes"
-TGETRES             
-Let  $Echo="No"
-End-proc

@@ -1,8 +1,0 @@
-#define SUBROUTINE getinput
-
-#define MODULE_LIST getinput.c
-
-#define USES_C
-
-#define P2_SUBLIB
-#define LIB_RTL

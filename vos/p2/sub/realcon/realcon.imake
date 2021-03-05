@@ -1,9 +1,0 @@
-/* Imake file for VICAR subroutine realcon */
-
-#define SUBROUTINE realcon
-
-#define MODULE_LIST realcon.f
-
-#define P2_SUBLIB
-
-#define USES_FORTRAN

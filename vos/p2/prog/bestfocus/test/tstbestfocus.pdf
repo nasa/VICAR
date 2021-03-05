@@ -1,9 +1,0 @@
-procedure
-refgbl $echo
-body
-let _onfail="continue"
-let $echo="yes"
-!
-bestfocus inp=(f1.img,f2.img,f3.img,f4.img) out=(f.img,topo.img) 'inverse
-!
-end-proc

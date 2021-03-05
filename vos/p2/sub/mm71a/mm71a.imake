@@ -1,9 +1,0 @@
-/* Imake file for VICAR subroutine MM71A  */
-
-#define SUBROUTINE  mm71a
-
-#define MODULE_LIST  mm71a.f  
-
-#define P2_SUBLIB
-
-#define USES_FORTRAN

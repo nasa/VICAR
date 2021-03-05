@@ -1,9 +1,0 @@
-      common/dev/idev,vid,g,tb,nld,nsd,izoom,v1,v2,v3,izoom1,izoom2
-      common/dev/ilow(2), ihigh(2)
-      common/dev/zoom,zoom1,zoom2
-      common/dev/stbl(256,2)
-      integer idev,vid,g,tb,nld,nsd,izoom,v1,v2,v3
-      integer izoom1, izoom2, ilow, ihigh
-      logical*1 stbl
-      real*4 zoom,zoom1,zoom2
-

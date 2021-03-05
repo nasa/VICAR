@@ -1,7 +1,0 @@
-#define SUBROUTINE timssubs
-
-#define MODULE_LIST timssubs.f
-
-#define P3_SUBLIB
-
-#define USES_FORTRAN

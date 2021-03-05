@@ -1,6 +1,0 @@
-process help=* 
-PARM LINE INTEGER
-PARM COL INTEGER
-PARM LFCR INTEGER
-end-proc
-

@@ -1,6 +1,0 @@
-/* Imake file for VICAR subroutine  GETGEOM  */
-
-#define SUBROUTINE  getgeom
-#define MODULE_LIST  getgeom.f  
-#define P2_SUBLIB
-#define USES_FORTRAN

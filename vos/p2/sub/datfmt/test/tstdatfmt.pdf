@@ -1,8 +1,0 @@
-procedure
-refgbl $echo
-body
-let _onfail="continue"
-let $echo="yes"
-write "Results may differ from day to day because current date is printed"
-tdatfmt
-end-proc

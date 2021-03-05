@@ -1,8 +1,0 @@
-/* Imake file for VICAR subroutine ABLE86   */
-
-#define SUBROUTINE  able86
-#define MODULE_LIST  able86.f  zable86.c
-#define P2_SUBLIB
-#define USES_FORTRAN
-#define USES_C
-#define FTNINC_LIST  fortport

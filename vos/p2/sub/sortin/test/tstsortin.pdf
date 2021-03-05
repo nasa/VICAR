@@ -1,8 +1,0 @@
-! Test of subroutines SORTIN, I2SORT
-procedure
-refgbl $echo
-body
-let _onfail="continue"
-let $echo="yes"
-tsortin
-end-proc

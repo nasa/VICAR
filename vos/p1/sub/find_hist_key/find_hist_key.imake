@@ -1,6 +1,0 @@
-#define SUBROUTINE find_hist_key
-#define MODULE_LIST find_hist_key.c
-
-#define P1_SUBLIB
-#define USES_C
-

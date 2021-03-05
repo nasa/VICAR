@@ -1,4 +1,0 @@
-# @(#)javax.imageio.spi.ImageTranscoderSpi	1.3 00/10/25
-jpl.mipl.io.plugins.VicarToPDSImageTranscoderSpi
-jpl.mipl.io.plugins.PDSToVicarImageTranscoderSpi
-jpl.mipl.io.plugins.PDSToPDSImageTranscoderSpi

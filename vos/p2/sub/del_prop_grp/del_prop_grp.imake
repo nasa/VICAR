@@ -1,9 +1,0 @@
-/* Imake file for VICAR subroutine  */
-
-#define SUBROUTINE del_prop_grp
-
-#define MODULE_LIST del_prop_grp.c
-
-#define P2_SUBLIB
-
-#define USES_C

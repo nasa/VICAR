@@ -1,9 +1,0 @@
-#define SUBROUTINE picscale
-
-#define MODULE_LIST picscale.c rpicscale.c lighting.f zlighting.c spice2convev.f zspice2convev.c 
-
-#define USES_ANSI_C
-#define MAIN_LANGUAGE_C
-#define USES_FORTRAN
-#define FTN_STRING 
-#define P2_SUBLIB 		/* Enable during delivery */

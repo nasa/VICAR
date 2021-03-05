@@ -1,9 +1,0 @@
-/* Imake file for VICAR subroutine ELLIPSE_PROJ */
-
-#define SUBROUTINE ellipse_proj
-#define MODULE_LIST ellipse_proj.f ellipse_inv.f azimuth.f ellipse_radius.f \
-	zellipse_proj.c zellipse_inv.c zazimuth.c zellipse_radius.c
-#define P2_SUBLIB
-#define USES_FORTRAN
-#define USES_C
-#define FTN_STRING

@@ -1,8 +1,0 @@
-!Test script for subroutine package ELLIPSE_PROJ
-procedure help=*
-refgbl $echo
-body
-let _onfail="continue"
-let $echo="yes"
-tellipse_proj
-end-proc

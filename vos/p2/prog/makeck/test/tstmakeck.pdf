@@ -1,9 +1,0 @@
-procedure
-refgbl $echo
-refgbl $syschar
-body
-let _onfail="continue"
-let $echo="yes"
-!Test of program MAKECK
-makeck  out=dummy_ck
-end-proc

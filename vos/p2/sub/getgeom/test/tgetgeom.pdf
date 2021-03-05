@@ -1,5 +1,0 @@
-Process
-Parm  INP      STRING  COUNT=0:1 default=--
-Parm  PROJECT  STRING  VALID=("GLL  ","VGR-1","VGR-2","VIKOR","MAR10","MAR-9")
-Parm  CAMERA   INTEGER VALID=(0:8)
-End-Proc

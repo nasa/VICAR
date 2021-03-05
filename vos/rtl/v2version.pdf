@@ -1,5 +1,0 @@
-procedure
-body
-write "                Version 5C/16C"
-write ""
-end-proc

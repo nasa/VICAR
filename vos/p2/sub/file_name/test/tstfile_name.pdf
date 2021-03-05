@@ -1,8 +1,0 @@
-process help=*
-end-proc
-.title
-TEST Program TSTFILE_NAME
-.help
-This is a test program for the subroutines in the module FILE_NAME.  It
-requires no parameters and can be run outside of VICAR.
-.end
