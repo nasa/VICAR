@@ -3,9 +3,5 @@ VICAR, which stands for Video Image Communication And Retrieval, is a general pu
 
 We are pleased to announce that the VICAR Open Source Core version 4.0 is now available. As of 3/4/21, we have transitioned the repo to  https://github.com/NASA-AMMOS/VICAR and will be removing this site on 3/15/21. 
 
-Please visit the VICAR Open Source release homepage:
-
-[http://www-mipl.jpl.nasa.gov/vicar_open.html](http://www-mipl.jpl.nasa.gov/vicar_open.html).
-
 
 Questions:  vicar_help@jpl.nasa.gov
